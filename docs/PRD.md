@@ -180,11 +180,15 @@ GetNewReleases(date) → Issue[]
 **Goal:** A working comic *arr app. Add a series, search for issues, download them, organize the library.
 
 **Domain Model:**
-- [ ] Remap Readarr entities: Author → Series, Book → Issue, Edition → Format
+- [ ] Remap Readarr entities: Author → Series, Book → Issue, BookFile → ComicFile (Edition/Format entity removed — flattened model)
 - [ ] Add Publisher entity
 - [ ] Add SeriesGroup as optional soft-tag
-- [ ] Add `type` enum to Series (Single | TPB | GN | HC | Omnibus | OneShot | Annual | Limited) — only `Single` workflows active
-- [ ] Implement comic-specific file naming: `{Root}/{Publisher}/{Series} ({Year})/{Series} ({Year}) #{IssueNumber:000}.{ext}`
+- [ ] Add `IssueType` enum (Standard | Annual | Special | OneShot | TPB | Hardcover | Omnibus) — TPB/HC/Omnibus types allow collected editions within the same Series
+- [ ] Implement comic-specific file naming with per-IssueType templates:
+  - Standard: `{Series} ({Year}) #{IssueNumber:000}.{ext}`
+  - Annual: `{Series} ({Year}) Annual #{IssueNumber:000}.{ext}`
+  - TPB: `{Series} ({Year}) Vol {IssueNumber:00} TPB.{ext}`
+- [ ] Add `{Issue Type}` folder token for optional subfolder separation
 
 **Metadata Provider:**
 - [ ] Define `IMetadataProvider` interface
@@ -213,6 +217,11 @@ GetNewReleases(date) → Issue[]
 - [ ] Activity queue (current downloads, history)
 - [ ] Settings pages (indexers, download clients, naming, metadata provider, general)
 - [ ] System pages (status, logs, updates)
+
+**ComicInfo.xml Metadata:**
+- [ ] Generate ComicInfo.xml from Issue + Series metadata on import
+- [ ] Embed ComicInfo.xml inside CBZ files (series title, issue number, year, publisher, page count, issue type)
+- [ ] Enables Kavita/Komga to display proper metadata without manual tagging
 
 **Infrastructure (inherited, verify working):**
 - [ ] SQLite default, PostgreSQL optional
@@ -278,13 +287,21 @@ GetNewReleases(date) → Issue[]
 **Reader Integration:**
 - [ ] Kavita integration (API-based library refresh trigger)
 - [ ] Komga integration (API-based library refresh trigger)
-- [ ] ComicInfo.xml / MetronInfo.xml generation inside CBZ files
+- [ ] MetronInfo.xml support (in addition to ComicInfo.xml from Phase 1)
 
 **Packaging:**
 - [ ] Production Docker image (multi-arch: amd64, arm64)
 - [ ] docker-compose example with common stack (Prowlarr, SABnzbd, Panelarr)
 - [ ] Helm chart (stretch goal)
 - [ ] Unraid Community Apps template (stretch goal)
+
+### Future — Story Arcs (Post-Phase 3)
+
+- [ ] Story arc entity: a named collection of issues across multiple Series with reading order positions
+- [ ] "Add story arc" flow: monitor and download all issues in an arc across Series
+- [ ] Story arc metadata sourced from Metron
+- [ ] Embed story arc info in ComicInfo.xml so Kavita/Komga can build reading lists
+- [ ] Import/export reading lists
 
 ---
 
@@ -342,6 +359,8 @@ Lessons learned from studying Mylar3 and Kapowarr:
 - Manual and automatic search finds releases via configured indexers
 - Grabs are sent to a download client
 - Completed downloads are renamed and moved to the library with correct folder/file naming
+- Per-IssueType naming templates work correctly (Standard, Annual, TPB each use their own template)
+- ComicInfo.xml is embedded in CBZ files on import (readable by Kavita/Komga)
 - Web UI provides series list, series detail, activity queue, and settings
 - Docker image is published and functional
 
@@ -355,7 +374,7 @@ Lessons learned from studying Mylar3 and Kapowarr:
 - Full automation runs unattended (RSS sync, scheduled search, notifications)
 - REST API is fully documented with OpenAPI/Swagger
 - Reader integration triggers library refreshes in Kavita/Komga
-- ComicInfo.xml metadata is written to CBZ files
+- MetronInfo.xml support added alongside ComicInfo.xml
 - Production-grade Docker images are published for amd64 and arm64
 
 ---
