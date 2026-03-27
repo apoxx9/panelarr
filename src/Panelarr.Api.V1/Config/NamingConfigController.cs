@@ -29,7 +29,7 @@ namespace Panelarr.Api.V1.Config
             _filenameValidationService = filenameValidationService;
             _filenameBuilder = filenameBuilder;
 
-            SharedValidator.RuleFor(c => c.StandardBookFormat).ValidBookFormat();
+            SharedValidator.RuleFor(c => c.StandardIssueFormat).ValidBookFormat();
             SharedValidator.RuleFor(c => c.SeriesFolderFormat).ValidSeriesFolderFormat();
         }
 
@@ -44,7 +44,7 @@ namespace Panelarr.Api.V1.Config
             var nameSpec = _namingConfigService.GetConfig();
             var resource = nameSpec.ToResource();
 
-            if (resource.StandardBookFormat.IsNotNullOrWhiteSpace())
+            if (resource.StandardIssueFormat.IsNotNullOrWhiteSpace())
             {
                 var basicConfig = _filenameBuilder.GetBasicNamingConfig(nameSpec);
                 basicConfig.AddToResource(resource);

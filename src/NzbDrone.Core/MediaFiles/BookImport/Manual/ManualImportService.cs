@@ -114,7 +114,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                     NewDownload = true,
                     SingleRelease = false,
                     IncludeExisting = !replaceExistingFiles,
-                    AddNewSeriess = false,
+                    AddNewSeries = false,
                     KeepAllEditions = true
                 };
 
@@ -152,7 +152,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
             var itemInfo = new ImportDecisionMakerInfo
             {
                 DownloadClientItem = downloadClientItem,
-                ParsedBookInfo = Parser.Parser.ParseBookTitle(directoryInfo.Name)
+                ParsedIssueInfo = Parser.Parser.ParseBookTitle(directoryInfo.Name)
             };
             var config = new ImportDecisionMakerConfig
             {
@@ -160,7 +160,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                 NewDownload = true,
                 SingleRelease = false,
                 IncludeExisting = !replaceExistingFiles,
-                AddNewSeriess = false,
+                AddNewSeries = false,
                 KeepAllEditions = true
             };
 
@@ -206,7 +206,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                     NewDownload = true,
                     SingleRelease = true,
                     IncludeExisting = !replaceExistingFiles,
-                    AddNewSeriess = false
+                    AddNewSeries = false
                 };
                 var decisions = _importDecisionMaker.GetImportDecisions(files, idOverride, null, config);
 

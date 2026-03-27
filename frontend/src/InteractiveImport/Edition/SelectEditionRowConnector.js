@@ -9,7 +9,7 @@ function createMapStateToProps() {
     (state, { id }) => id,
     (state) => state.editions,
     (id, editionState) => {
-      const editions = editionState.items.filter((e) => e.bookId === id);
+      const editions = editionState.items.filter((e) => e.issueId === id);
       return { editions };
     }
   );

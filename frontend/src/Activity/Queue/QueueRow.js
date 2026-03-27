@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import ProtocolLabel from 'Activity/Queue/ProtocolLabel';
-import AuthorNameLink from 'Author/AuthorNameLink';
-import BookFormats from 'Book/BookFormats';
-import BookQuality from 'Book/BookQuality';
-import BookTitleLink from 'Book/BookTitleLink';
+import SeriesNameLink from 'Series/SeriesNameLink';
+import IssueFormats from 'Issue/IssueFormats';
+import IssueQuality from 'Issue/IssueQuality';
+import IssueTitleLink from 'Issue/IssueTitleLink';
 import Icon from 'Components/Icon';
 import IconButton from 'Components/Link/IconButton';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
@@ -89,8 +89,8 @@ class QueueRow extends Component {
       trackedDownloadState,
       statusMessages,
       errorMessage,
-      author,
-      book,
+      series,
+      issue,
       quality,
       customFormats,
       customFormatScore,
@@ -158,14 +158,14 @@ class QueueRow extends Component {
               );
             }
 
-            if (name === 'authorMetadata.sortName') {
+            if (name === 'seriesMetadata.sortName') {
               return (
                 <TableRowCell key={name}>
                   {
-                    author ?
-                      <AuthorNameLink
-                        titleSlug={author.titleSlug}
-                        authorName={author.authorName}
+                    series ?
+                      <SeriesNameLink
+                        titleSlug={series.titleSlug}
+                        seriesName={series.seriesName}
                       /> :
                       title
                   }
@@ -173,15 +173,15 @@ class QueueRow extends Component {
               );
             }
 
-            if (name === 'books.title') {
+            if (name === 'issues.title') {
               return (
                 <TableRowCell key={name}>
                   {
-                    book ?
-                      <BookTitleLink
-                        titleSlug={book.titleSlug}
-                        title={book.title}
-                        disambiguation={book.disambiguation}
+                    issue ?
+                      <IssueTitleLink
+                        titleSlug={issue.titleSlug}
+                        title={issue.title}
+                        disambiguation={issue.disambiguation}
                       /> :
                       '-'
                   }
@@ -189,12 +189,12 @@ class QueueRow extends Component {
               );
             }
 
-            if (name === 'books.releaseDate') {
-              if (book) {
+            if (name === 'issues.releaseDate') {
+              if (issue) {
                 return (
                   <RelativeDateCellConnector
                     key={name}
-                    date={book.releaseDate}
+                    date={issue.releaseDate}
                   />
                 );
               }
@@ -209,7 +209,7 @@ class QueueRow extends Component {
             if (name === 'quality') {
               return (
                 <TableRowCell key={name}>
-                  <BookQuality
+                  <IssueQuality
                     quality={quality}
                   />
                 </TableRowCell>
@@ -219,7 +219,7 @@ class QueueRow extends Component {
             if (name === 'customFormats') {
               return (
                 <TableRowCell key={name}>
-                  <BookFormats
+                  <IssueFormats
                     formats={customFormats}
                   />
                 </TableRowCell>
@@ -237,7 +237,7 @@ class QueueRow extends Component {
                       customFormatScore,
                       customFormats.length
                     )}
-                    tooltip={<BookFormats formats={customFormats} />}
+                    tooltip={<IssueFormats formats={customFormats} />}
                     position={tooltipPositions.BOTTOM}
                   />
                 </TableRowCell>
@@ -391,7 +391,7 @@ class QueueRow extends Component {
           isOpen={isRemoveQueueItemModalOpen}
           sourceTitle={title}
           canChangeCategory={!!downloadClientHasPostImportCategory}
-          canIgnore={!!author}
+          canIgnore={!!series}
           isPending={isPending}
           onRemovePress={this.onRemoveQueueItemModalConfirmed}
           onModalClose={this.onRemoveQueueItemModalClose}
@@ -411,8 +411,8 @@ QueueRow.propTypes = {
   trackedDownloadState: PropTypes.string,
   statusMessages: PropTypes.arrayOf(PropTypes.object),
   errorMessage: PropTypes.string,
-  author: PropTypes.object,
-  book: PropTypes.object,
+  series: PropTypes.object,
+  issue: PropTypes.object,
   quality: PropTypes.object.isRequired,
   customFormats: PropTypes.arrayOf(PropTypes.object),
   customFormatScore: PropTypes.number.isRequired,

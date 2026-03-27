@@ -22,8 +22,8 @@ namespace Panelarr.Api.V1.SeriesGroup
                 Id = model.Id,
                 Position = model.Position,
                 SeriesPosition = model.SeriesPosition,
-                SeriesId = model.SeriesId,
-                IssueId = model.IssueId
+                SeriesId = model.SeriesGroupId,
+                IssueId = model.SeriesMetadataId
             };
         }
 

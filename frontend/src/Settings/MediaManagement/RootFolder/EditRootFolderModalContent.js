@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import AuthorMetadataProfilePopoverContent from 'AddAuthor/AuthorMetadataProfilePopoverContent';
-import AuthorMonitoringOptionsPopoverContent from 'AddAuthor/AuthorMonitoringOptionsPopoverContent';
-import AuthorMonitorNewItemsOptionsPopoverContent from 'AddAuthor/AuthorMonitorNewItemsOptionsPopoverContent';
+import SeriesMetadataProfilePopoverContent from 'AddSeries/SeriesMetadataProfilePopoverContent';
+import SeriesMonitoringOptionsPopoverContent from 'AddSeries/SeriesMonitoringOptionsPopoverContent';
+import SeriesMonitorNewItemsOptionsPopoverContent from 'AddSeries/SeriesMonitorNewItemsOptionsPopoverContent';
 import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
 import Form from 'Components/Form/Form';
@@ -115,7 +115,7 @@ function EditRootFolderModalContent(props) {
                 </FormGroup>
               </FieldSet>
 
-              <FieldSet legend={translate('AddedAuthorSettings')} >
+              <FieldSet legend={translate('AddedSeriesSettings')} >
                 <FormGroup>
                   <FormLabel>
                     {translate('Monitor')}
@@ -128,13 +128,13 @@ function EditRootFolderModalContent(props) {
                         />
                       }
                       title={translate('MonitoringOptions')}
-                      body={<AuthorMonitoringOptionsPopoverContent />}
+                      body={<SeriesMonitoringOptionsPopoverContent />}
                       position={tooltipPositions.RIGHT}
                     />
                   </FormLabel>
 
                   <FormInputGroup
-                    type={inputTypes.MONITOR_BOOKS_SELECT}
+                    type={inputTypes.MONITOR_ISSUES_LIST_SELECT}
                     name="defaultMonitorOption"
                     onChange={onInputChange}
                     {...defaultMonitorOption}
@@ -154,7 +154,7 @@ function EditRootFolderModalContent(props) {
                         />
                       }
                       title={translate('MonitorNewItems')}
-                      body={<AuthorMonitorNewItemsOptionsPopoverContent />}
+                      body={<SeriesMonitorNewItemsOptionsPopoverContent />}
                       position={tooltipPositions.RIGHT}
                     />
                   </FormLabel>
@@ -193,7 +193,7 @@ function EditRootFolderModalContent(props) {
                         />
                       }
                       title={translate('MetadataProfile')}
-                      body={<AuthorMetadataProfilePopoverContent />}
+                      body={<SeriesMetadataProfilePopoverContent />}
                       position={tooltipPositions.RIGHT}
                     />
                   </FormLabel>
@@ -250,7 +250,7 @@ function EditRootFolderModalContent(props) {
                     helpText={translate('IsCalibreLibraryHelpText')}
                     {...isCalibreLibrary}
                     onChange={onInputChange}
-                    helpLink={'https://manual.calibre-ebook.com/server.html'}
+                    helpLink={'https://manual.calibre-eissue.com/server.html'}
                   />
                 </FormGroup>
 

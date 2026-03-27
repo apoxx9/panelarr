@@ -28,7 +28,7 @@ const paged = `${section}.paged`;
 
 export const defaultState = {
   options: {
-    includeUnknownAuthorItems: true
+    includeUnknownSeriesItems: true
   },
 
   status: {
@@ -66,19 +66,19 @@ export const defaultState = {
         isModifiable: false
       },
       {
-        name: 'authorMetadata.sortName',
+        name: 'seriesMetadata.sortName',
         label: () => translate('Series'),
         isSortable: true,
         isVisible: true
       },
       {
-        name: 'books.title',
-        label: () => translate('BookTitle'),
+        name: 'issues.title',
+        label: () => translate('IssueTitle'),
         isSortable: true,
         isVisible: true
       },
       {
-        name: 'books.releaseDate',
+        name: 'issues.releaseDate',
         label: () => translate('ReleaseDate'),
         isSortable: true,
         isVisible: false
@@ -174,7 +174,7 @@ export const persistState = [
 // Helpers
 
 function fetchDataAugmenter(getState, payload, data) {
-  data.includeUnknownAuthorItems = getState().queue.options.includeUnknownAuthorItems;
+  data.includeUnknownSeriesItems = getState().queue.options.includeUnknownSeriesItems;
 }
 
 //

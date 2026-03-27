@@ -17,10 +17,10 @@ namespace Panelarr.Api.V1.Config
             {
                 Id = model.Id,
 
-                RenameBooks = model.RenameBooks,
+                RenameComics = model.RenameComics,
                 ReplaceIllegalCharacters = model.ReplaceIllegalCharacters,
                 ColonReplacementFormat = (int)model.ColonReplacementFormat,
-                StandardBookFormat = model.StandardBookFormat,
+                StandardIssueFormat = model.StandardIssueFormat,
                 AnnualIssueFormat = model.AnnualIssueFormat,
                 TPBFormat = model.TPBFormat,
                 SeriesFolderFormat = model.SeriesFolderFormat
@@ -43,10 +43,10 @@ namespace Panelarr.Api.V1.Config
             {
                 Id = resource.Id,
 
-                RenameBooks = resource.RenameBooks,
+                RenameComics = resource.RenameComics,
                 ReplaceIllegalCharacters = resource.ReplaceIllegalCharacters,
                 ColonReplacementFormat = (ColonReplacementFormat)resource.ColonReplacementFormat,
-                StandardBookFormat = resource.StandardBookFormat,
+                StandardIssueFormat = resource.StandardIssueFormat,
                 AnnualIssueFormat = resource.AnnualIssueFormat,
                 TPBFormat = resource.TPBFormat,
                 SeriesFolderFormat = resource.SeriesFolderFormat,

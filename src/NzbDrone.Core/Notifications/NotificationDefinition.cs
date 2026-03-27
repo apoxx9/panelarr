@@ -10,13 +10,13 @@ namespace NzbDrone.Core.Notifications
         public bool OnRename { get; set; }
         public bool OnSeriesAdded { get; set; }
         public bool OnSeriesDelete { get; set; }
-        public bool OnBookDelete { get; set; }
-        public bool OnBookFileDelete { get; set; }
-        public bool OnBookFileDeleteForUpgrade { get; set; }
+        public bool OnIssueDelete { get; set; }
+        public bool OnComicFileDelete { get; set; }
+        public bool OnComicFileDeleteForUpgrade { get; set; }
         public bool OnHealthIssue { get; set; }
         public bool OnDownloadFailure { get; set; }
         public bool OnImportFailure { get; set; }
-        public bool OnBookRetag { get; set; }
+        public bool OnIssueRetag { get; set; }
         public bool OnApplicationUpdate { get; set; }
         public bool SupportsOnGrab { get; set; }
         public bool SupportsOnReleaseImport { get; set; }
@@ -24,16 +24,16 @@ namespace NzbDrone.Core.Notifications
         public bool SupportsOnRename { get; set; }
         public bool SupportsOnSeriesAdded { get; set; }
         public bool SupportsOnSeriesDelete { get; set; }
-        public bool SupportsOnBookDelete { get; set; }
-        public bool SupportsOnBookFileDelete { get; set; }
-        public bool SupportsOnBookFileDeleteForUpgrade { get; set; }
+        public bool SupportsOnIssueDelete { get; set; }
+        public bool SupportsOnComicFileDelete { get; set; }
+        public bool SupportsOnComicFileDeleteForUpgrade { get; set; }
         public bool SupportsOnHealthIssue { get; set; }
         public bool IncludeHealthWarnings { get; set; }
         public bool SupportsOnDownloadFailure { get; set; }
         public bool SupportsOnImportFailure { get; set; }
-        public bool SupportsOnBookRetag { get; set; }
+        public bool SupportsOnIssueRetag { get; set; }
         public bool SupportsOnApplicationUpdate { get; set; }
 
-        public override bool Enable => OnGrab || OnReleaseImport || (OnReleaseImport && OnUpgrade) || OnRename || OnSeriesAdded || OnSeriesDelete || OnBookDelete || OnBookFileDelete || OnBookFileDeleteForUpgrade || OnHealthIssue || OnDownloadFailure || OnImportFailure || OnBookRetag || OnApplicationUpdate;
+        public override bool Enable => OnGrab || OnReleaseImport || (OnReleaseImport && OnUpgrade) || OnRename || OnSeriesAdded || OnSeriesDelete || OnIssueDelete || OnComicFileDelete || OnComicFileDeleteForUpgrade || OnHealthIssue || OnDownloadFailure || OnImportFailure || OnIssueRetag || OnApplicationUpdate;
     }
 }

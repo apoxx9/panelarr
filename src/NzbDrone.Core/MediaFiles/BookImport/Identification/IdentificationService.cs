@@ -142,7 +142,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             {
                 _logger.Debug("No local candidates found, trying remote");
                 candidateReleases = _candidateService.GetRemoteCandidates(localBookRelease, idOverrides);
-                if (!config.AddNewSeriess)
+                if (!config.AddNewSeries)
                 {
                     candidateReleases = candidateReleases.Where(x => x.Issue.Id > 0 && x.Issue.SeriesId > 0);
                 }
@@ -172,7 +172,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 _logger.Debug("Match not good enough, trying remote candidates");
                 candidateReleases = _candidateService.GetRemoteCandidates(localBookRelease, idOverrides);
 
-                if (!config.AddNewSeriess)
+                if (!config.AddNewSeries)
                 {
                     candidateReleases = candidateReleases.Where(x => x.Issue.Id > 0);
                 }

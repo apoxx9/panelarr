@@ -176,13 +176,13 @@ namespace NzbDrone.Core.MediaFiles
 
         public void Execute(RenameSeriesCommand message)
         {
-            _logger.Debug("Renaming all files for selected author");
+            _logger.Debug("Renaming all files for selected series");
             var authorToRename = _authorService.GetSeriess(message.SeriesIds);
 
             foreach (var author in authorToRename)
             {
                 var comicFiles = _mediaFileService.GetFilesBySeries(author.Id);
-                _logger.ProgressInfo("Renaming all files in author: {0}", author.Name);
+                _logger.ProgressInfo("Renaming all files in series: {0}", author.Name);
                 RenameFiles(comicFiles, author);
                 _logger.ProgressInfo("All issue files renamed for {0}", author.Name);
             }

@@ -97,8 +97,8 @@ class Blocklist extends Component {
     const {
       isFetching,
       isPopulated,
-      isAuthorFetching,
-      isAuthorPopulated,
+      isSeriesFetching,
+      isSeriesPopulated,
       error,
       items,
       columns,
@@ -109,8 +109,8 @@ class Blocklist extends Component {
       ...otherProps
     } = this.props;
 
-    const isAllPopulated = isPopulated && isAuthorPopulated;
-    const isAnyFetching = isFetching || isAuthorFetching;
+    const isAllPopulated = isPopulated && isSeriesPopulated;
+    const isAnyFetching = isFetching || isSeriesFetching;
 
     const {
       allSelected,
@@ -226,8 +226,8 @@ class Blocklist extends Component {
 }
 
 Blocklist.propTypes = {
-  isAuthorFetching: PropTypes.bool.isRequired,
-  isAuthorPopulated: PropTypes.bool.isRequired,
+  isSeriesFetching: PropTypes.bool.isRequired,
+  isSeriesPopulated: PropTypes.bool.isRequired,
   isFetching: PropTypes.bool.isRequired,
   isPopulated: PropTypes.bool.isRequired,
   error: PropTypes.object,

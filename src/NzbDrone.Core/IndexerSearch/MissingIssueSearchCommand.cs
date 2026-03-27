@@ -2,19 +2,19 @@ using NzbDrone.Core.Messaging.Commands;
 
 namespace NzbDrone.Core.IndexerSearch
 {
-    public class MissingBookSearchCommand : Command
+    public class MissingIssueSearchCommand : Command
     {
         public int? SeriesId { get; set; }
 
         public override bool SendUpdatesToClient => true;
 
-        public MissingBookSearchCommand()
+        public MissingIssueSearchCommand()
         {
         }
 
-        public MissingBookSearchCommand(int authorId)
+        public MissingIssueSearchCommand(int seriesId)
         {
-            SeriesId = authorId;
+            SeriesId = seriesId;
         }
     }
 }

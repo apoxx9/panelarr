@@ -42,6 +42,7 @@ namespace Panelarr.Api.V1.Series
         private readonly IMapCoversToLocal _coverMapper;
         private readonly IManageCommandQueue _commandQueueManager;
         private readonly IRootFolderService _rootFolderService;
+        private readonly ISeriesGroupService _seriesGroupService;
 
         public SeriesController(IBroadcastSignalRMessage signalRBroadcaster,
                             ISeriesService authorService,
@@ -51,6 +52,7 @@ namespace Panelarr.Api.V1.Series
                             IMapCoversToLocal coverMapper,
                             IManageCommandQueue commandQueueManager,
                             IRootFolderService rootFolderService,
+                            ISeriesGroupService seriesGroupService,
                             RecycleBinValidator recycleBinValidator,
                             RootFolderValidator rootFolderValidator,
                             MappedNetworkDriveValidator mappedNetworkDriveValidator,
@@ -71,6 +73,7 @@ namespace Panelarr.Api.V1.Series
             _coverMapper = coverMapper;
             _commandQueueManager = commandQueueManager;
             _rootFolderService = rootFolderService;
+            _seriesGroupService = seriesGroupService;
 
             Http.Validation.RuleBuilderExtensions.ValidId(SharedValidator.RuleFor(s => s.QualityProfileId));
 
@@ -100,18 +103,18 @@ namespace Panelarr.Api.V1.Series
 
         protected override SeriesResource GetResourceById(int id)
         {
-            var author = _authorService.GetSeries(id);
-            return GetSeriesResource(author);
+            var series = _authorService.GetSeries(id);
+            return GetSeriesResource(series);
         }
 
-        private SeriesResource GetSeriesResource(NzbDrone.Core.Books.Series author)
+        private SeriesResource GetSeriesResource(NzbDrone.Core.Books.Series series)
         {
-            if (author == null)
+            if (series == null)
             {
                 return null;
             }
 
-            var resource = author.ToResource();
+            var resource = series.ToResource();
             MapCoversToLocal(resource);
             FetchAndLinkSeriesStatistics(resource);
             LinkNextPreviousBooks(resource);
@@ -122,53 +125,72 @@ namespace Panelarr.Api.V1.Series
         }
 
         [HttpGet]
-        public List<SeriesResource> AllSeriess()
+        public List<SeriesResource> AllSeriess(int? seriesGroupId = null)
         {
-            var authorStats = _authorStatisticsService.SeriesStatistics();
-            var authorResources = _authorService.GetAllSeries().ToResource();
+            var seriesStats = _authorStatisticsService.SeriesStatistics();
+            var allSeries = _authorService.GetAllSeries();
 
-            MapCoversToLocal(authorResources.ToArray());
-            LinkNextPreviousBooks(authorResources.ToArray());
-            LinkSeriesStatistics(authorResources, authorStats.ToDictionary(x => x.SeriesId));
-            LinkRootFolderPath(authorResources.ToArray());
+            if (seriesGroupId.HasValue)
+            {
+                // Filter to series whose issues belong to this SeriesGroup
+                var seriesGroup = _seriesGroupService.GetSeriesGroup(seriesGroupId.Value);
+                if (seriesGroup != null)
+                {
+                    var seriesInGroup = _seriesGroupService.GetBySeriesId(seriesGroupId.Value)
+                        .Select(sg => sg.Id)
+                        .ToHashSet();
+                    allSeries = allSeries.Where(s => seriesInGroup.Contains(s.SeriesMetadataId)).ToList();
+                }
+                else
+                {
+                    allSeries = new List<global::NzbDrone.Core.Books.Series>();
+                }
+            }
 
-            return authorResources;
+            var seriesResources = allSeries.ToResource();
+
+            MapCoversToLocal(seriesResources.ToArray());
+            LinkNextPreviousBooks(seriesResources.ToArray());
+            LinkSeriesStatistics(seriesResources, seriesStats.ToDictionary(x => x.SeriesId));
+            LinkRootFolderPath(seriesResources.ToArray());
+
+            return seriesResources;
         }
 
         [RestPostById]
-        public ActionResult<SeriesResource> AddSeries(SeriesResource authorResource)
+        public ActionResult<SeriesResource> AddSeries(SeriesResource seriesResource)
         {
-            var author = _addSeriesService.AddSeries(authorResource.ToModel());
+            var series = _addSeriesService.AddSeries(seriesResource.ToModel());
 
-            return Created(author.Id);
+            return Created(series.Id);
         }
 
         [RestPutById]
-        public ActionResult<SeriesResource> UpdateSeries(SeriesResource authorResource, bool moveFiles = false)
+        public ActionResult<SeriesResource> UpdateSeries(SeriesResource seriesResource, bool moveFiles = false)
         {
-            var author = _authorService.GetSeries(authorResource.Id);
+            var series = _authorService.GetSeries(seriesResource.Id);
 
             if (moveFiles)
             {
-                var sourcePath = author.Path;
-                var destinationPath = authorResource.Path;
+                var sourcePath = series.Path;
+                var destinationPath = seriesResource.Path;
 
                 _commandQueueManager.Push(new MoveSeriesCommand
                 {
-                    SeriesId = author.Id,
+                    SeriesId = series.Id,
                     SourcePath = sourcePath,
                     DestinationPath = destinationPath,
                     Trigger = CommandTrigger.Manual
                 });
             }
 
-            var model = authorResource.ToModel(author);
+            var model = seriesResource.ToModel(series);
 
             _authorService.UpdateSeries(model);
 
-            BroadcastResourceChange(ModelAction.Updated, authorResource);
+            BroadcastResourceChange(ModelAction.Updated, seriesResource);
 
-            return Accepted(authorResource.Id);
+            return Accepted(seriesResource.Id);
         }
 
         [RestDeleteById]
@@ -177,23 +199,23 @@ namespace Panelarr.Api.V1.Series
             _authorService.DeleteSeries(id, deleteFiles, addImportListExclusion);
         }
 
-        private void MapCoversToLocal(params SeriesResource[] authors)
+        private void MapCoversToLocal(params SeriesResource[] seriesList)
         {
-            foreach (var authorResource in authors)
+            foreach (var seriesResource in seriesList)
             {
-                _coverMapper.ConvertToLocalUrls(authorResource.Id, MediaCoverEntity.Series, authorResource.Images);
+                _coverMapper.ConvertToLocalUrls(seriesResource.Id, MediaCoverEntity.Series, seriesResource.Images);
             }
         }
 
-        private void LinkNextPreviousBooks(params SeriesResource[] authors)
+        private void LinkNextPreviousBooks(params SeriesResource[] seriesList)
         {
-            var nextBooks = _bookService.GetNextBooksBySeriesMetadataId(authors.Select(x => x.SeriesMetadataId));
-            var lastBooks = _bookService.GetLastBooksBySeriesMetadataId(authors.Select(x => x.SeriesMetadataId));
+            var nextBooks = _bookService.GetNextBooksBySeriesMetadataId(seriesList.Select(x => x.SeriesMetadataId));
+            var lastBooks = _bookService.GetLastBooksBySeriesMetadataId(seriesList.Select(x => x.SeriesMetadataId));
 
-            foreach (var authorResource in authors)
+            foreach (var seriesResource in seriesList)
             {
-                authorResource.NextBook = nextBooks.FirstOrDefault(x => x.SeriesMetadataId == authorResource.SeriesMetadataId);
-                authorResource.LastBook = lastBooks.FirstOrDefault(x => x.SeriesMetadataId == authorResource.SeriesMetadataId);
+                seriesResource.NextBook = nextBooks.FirstOrDefault(x => x.SeriesMetadataId == seriesResource.SeriesMetadataId);
+                seriesResource.LastBook = lastBooks.FirstOrDefault(x => x.SeriesMetadataId == seriesResource.SeriesMetadataId);
             }
         }
 
@@ -202,29 +224,29 @@ namespace Panelarr.Api.V1.Series
             LinkSeriesStatistics(resource, _authorStatisticsService.SeriesStatistics(resource.Id));
         }
 
-        private void LinkSeriesStatistics(List<SeriesResource> resources, Dictionary<int, SeriesStatistics> authorStatistics)
+        private void LinkSeriesStatistics(List<SeriesResource> resources, Dictionary<int, SeriesStatistics> seriesStatistics)
         {
-            foreach (var author in resources)
+            foreach (var series in resources)
             {
-                if (authorStatistics.TryGetValue(author.Id, out var stats))
+                if (seriesStatistics.TryGetValue(series.Id, out var stats))
                 {
-                    LinkSeriesStatistics(author, stats);
+                    LinkSeriesStatistics(series, stats);
                 }
             }
         }
 
-        private void LinkSeriesStatistics(SeriesResource resource, SeriesStatistics authorStatistics)
+        private void LinkSeriesStatistics(SeriesResource resource, SeriesStatistics seriesStatistics)
         {
-            resource.Statistics = authorStatistics.ToResource();
+            resource.Statistics = seriesStatistics.ToResource();
         }
 
-        private void LinkRootFolderPath(params SeriesResource[] authors)
+        private void LinkRootFolderPath(params SeriesResource[] seriesList)
         {
             var rootFolders = _rootFolderService.All();
 
-            foreach (var author in authors)
+            foreach (var series in seriesList)
             {
-                author.RootFolderPath = _rootFolderService.GetBestRootFolderPath(author.Path, rootFolders);
+                series.RootFolderPath = _rootFolderService.GetBestRootFolderPath(series.Path, rootFolders);
             }
         }
 

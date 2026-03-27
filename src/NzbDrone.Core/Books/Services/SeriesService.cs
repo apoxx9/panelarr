@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Books
         Series GetSeriesByMetadataId(int authorMetadataId);
         List<Series> GetSeriess(IEnumerable<int> authorIds);
         Series AddSeries(Series newSeries, bool doRefresh);
-        List<Series> AddSeries(List<Series> newSeriess, bool doRefresh);
+        List<Series> AddSeries(List<Series> newSeriesList, bool doRefresh);
         Series FindById(string foreignSeriesId);
         Series FindByName(string title);
         Series FindByNameInexact(string title);
@@ -63,13 +63,13 @@ namespace NzbDrone.Core.Books
             return newSeries;
         }
 
-        public List<Series> AddSeries(List<Series> newSeriess, bool doRefresh)
+        public List<Series> AddSeries(List<Series> newSeriesList, bool doRefresh)
         {
             _cache.Clear();
-            _authorRepository.InsertMany(newSeriess);
-            _eventAggregator.PublishEvent(new SeriesImportedEvent(newSeriess.Select(s => s.Id).ToList(), doRefresh));
+            _authorRepository.InsertMany(newSeriesList);
+            _eventAggregator.PublishEvent(new SeriesImportedEvent(newSeriesList.Select(s => s.Id).ToList(), doRefresh));
 
-            return newSeriess;
+            return newSeriesList;
         }
 
         public bool SeriesPathExists(string folder)
@@ -164,7 +164,7 @@ namespace NzbDrone.Core.Books
             const double fuzzThreshold = 0.8;
             const double fuzzGap = 0.2;
 
-            var sortedSeriess = authors.Select(s => new
+            var sortedSeries = authors.Select(s => new
             {
                 MatchProb = scoreFunction(s, title),
                 Series = s
@@ -173,8 +173,8 @@ namespace NzbDrone.Core.Books
                 .OrderByDescending(s => s.MatchProb)
                 .ToList();
 
-            return sortedSeriess.TakeWhile((x, i) => i == 0 || sortedSeriess[i - 1].MatchProb - x.MatchProb < fuzzGap)
-                .TakeWhile((x, i) => x.MatchProb > fuzzThreshold || (i > 0 && sortedSeriess[i - 1].MatchProb > fuzzThreshold))
+            return sortedSeries.TakeWhile((x, i) => i == 0 || sortedSeries[i - 1].MatchProb - x.MatchProb < fuzzGap)
+                .TakeWhile((x, i) => x.MatchProb > fuzzThreshold || (i > 0 && sortedSeries[i - 1].MatchProb > fuzzThreshold))
                 .Select(x => x.Series)
                 .ToList();
         }
@@ -238,7 +238,7 @@ namespace NzbDrone.Core.Books
         public List<Series> UpdateSeriess(List<Series> author, bool useExistingRelativeFolder)
         {
             _cache.Clear();
-            _logger.Debug("Updating {0} author", author.Count);
+            _logger.Debug("Updating {0} series", author.Count);
 
             foreach (var s in author)
             {
@@ -257,7 +257,7 @@ namespace NzbDrone.Core.Books
             }
 
             _authorRepository.UpdateMany(author);
-            _logger.Debug("{0} authors updated", author.Count);
+            _logger.Debug("{0} series updated", author.Count);
 
             return author;
         }

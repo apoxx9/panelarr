@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Download
                 return null;
             }
 
-            ParsedBookInfo parsedBookInfo = null;
+            ParsedIssueInfo parsedBookInfo = null;
             if (historyItem.Release != null)
             {
                 parsedBookInfo = Parser.Parser.ParseBookTitle(historyItem.Release.Title);

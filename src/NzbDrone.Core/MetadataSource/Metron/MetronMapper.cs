@@ -27,6 +27,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
             var metadata = new SeriesMetadata
             {
                 ForeignSeriesId = providerSeries.ForeignSeriesId,
+                TitleSlug = providerSeries.ForeignSeriesId,
                 Name = providerSeries.Name,
                 SortName = providerSeries.SortName ?? providerSeries.Name,
                 Overview = providerSeries.Overview,
@@ -43,6 +44,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
                     new NzbDrone.Core.MediaCover.MediaCover
                     {
                         CoverType = NzbDrone.Core.MediaCover.MediaCoverTypes.Poster,
+                        Url = providerSeries.ImageUrl,
                         RemoteUrl = providerSeries.ImageUrl
                     }
                 };
@@ -68,6 +70,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
             return new Issue
             {
                 ForeignIssueId = providerIssue.ForeignIssueId,
+                TitleSlug = providerIssue.ForeignIssueId,
                 Title = providerIssue.Title ?? string.Empty,
                 ReleaseDate = providerIssue.ReleaseDate,
                 SeriesMetadataId = seriesMetadataId,

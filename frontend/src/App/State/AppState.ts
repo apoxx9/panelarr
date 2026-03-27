@@ -1,4 +1,4 @@
-import AuthorsAppState from './AuthorsAppState';
+import SeriessAppState from './SeriessAppState';
 import CommandAppState from './CommandAppState';
 import SettingsAppState from './SettingsAppState';
 import SystemAppState from './SystemAppState';
@@ -50,7 +50,7 @@ export interface AppSectionState {
 
 interface AppState {
   app: AppSectionState;
-  authors: AuthorsAppState;
+  seriess: SeriessAppState;
   commands: CommandAppState;
   settings: SettingsAppState;
   system: SystemAppState;

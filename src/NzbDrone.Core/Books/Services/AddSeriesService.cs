@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Books
     public interface IAddSeriesService
     {
         Series AddSeries(Series newSeries, bool doRefresh = true);
-        List<Series> AddSeries(List<Series> newSeriess, bool doRefresh = true);
+        List<Series> AddSeries(List<Series> newSeriesList, bool doRefresh = true);
     }
 
     public class AddSeriesService : IAddSeriesService
@@ -61,12 +61,12 @@ namespace NzbDrone.Core.Books
             return _authorService.AddSeries(newSeries, doRefresh);
         }
 
-        public List<Series> AddSeries(List<Series> newSeriess, bool doRefresh = true)
+        public List<Series> AddSeries(List<Series> newSeriesList, bool doRefresh = true)
         {
             var added = DateTime.UtcNow;
             var authorsToAdd = new List<Series>();
 
-            foreach (var s in newSeriess)
+            foreach (var s in newSeriesList)
             {
                 try
                 {

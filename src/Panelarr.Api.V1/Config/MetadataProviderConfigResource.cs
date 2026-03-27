@@ -7,9 +7,14 @@ namespace Panelarr.Api.V1.Config
     {
         public WriteAudioTagsType WriteAudioTags { get; set; }
         public bool ScrubAudioTags { get; set; }
-        public WriteBookTagsType WriteBookTags { get; set; }
+        public WriteIssueTagsType WriteIssueTags { get; set; }
         public bool UpdateCovers { get; set; }
         public bool EmbedMetadata { get; set; }
+
+        // Metadata provider credentials
+        public string MetronUsername { get; set; }
+        public string MetronPassword { get; set; }
+        public string ComicVineApiKey { get; set; }
     }
 
     public static class MetadataProviderConfigResourceMapper
@@ -20,9 +25,12 @@ namespace Panelarr.Api.V1.Config
             {
                 WriteAudioTags = model.WriteAudioTags,
                 ScrubAudioTags = model.ScrubAudioTags,
-                WriteBookTags = model.WriteBookTags,
+                WriteIssueTags = model.WriteIssueTags,
                 UpdateCovers = model.UpdateCovers,
-                EmbedMetadata = model.EmbedMetadata
+                EmbedMetadata = model.EmbedMetadata,
+                MetronUsername = model.MetronUsername,
+                MetronPassword = model.MetronPassword,
+                ComicVineApiKey = model.ComicVineApiKey
             };
         }
     }

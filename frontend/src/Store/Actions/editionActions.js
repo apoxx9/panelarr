@@ -49,7 +49,7 @@ export const actionHandlers = handleThunks({
       ...otherPayload
     } = payload;
 
-    const saveData = getProviderState({ id, ...otherPayload }, getState, 'books');
+    const saveData = getProviderState({ id, ...otherPayload }, getState, 'issues');
 
     dispatch(batchActions([
       ...saveData.editions.map((edition) => {

@@ -36,7 +36,7 @@ const downloadPropersAndRepacksOptions = [
 
 const fileDateOptions = [
   { key: 'none', value: 'None' },
-  { key: 'bookReleaseDate', value: 'Book Release Date' }
+  { key: 'issueReleaseDate', value: 'Issue Release Date' }
 ];
 
 class MediaManagement extends Component {
@@ -101,15 +101,15 @@ class MediaManagement extends Component {
                         size={sizes.MEDIUM}
                       >
                         <FormLabel>
-                          {translate('CreateEmptyAuthorFolders')}
+                          {translate('CreateEmptySeriesFolders')}
                         </FormLabel>
 
                         <FormInputGroup
                           type={inputTypes.CHECK}
-                          name="createEmptyAuthorFolders"
-                          helpText={translate('CreateEmptyAuthorFoldersHelpText')}
+                          name="createEmptySeriesFolders"
+                          helpText={translate('CreateEmptySeriesFoldersHelpText')}
                           onChange={onInputChange}
-                          {...settings.createEmptyAuthorFolders}
+                          {...settings.createEmptySeriesFolders}
                         />
                       </FormGroup>
 
@@ -239,15 +239,15 @@ class MediaManagement extends Component {
                 >
                   <FormGroup size={sizes.MEDIUM}>
                     <FormLabel>
-                      {translate('IgnoreDeletedBooks')}
+                      {translate('IgnoreDeletedIssues')}
                     </FormLabel>
 
                     <FormInputGroup
                       type={inputTypes.CHECK}
-                      name="autoUnmonitorPreviouslyDownloadedBooks"
-                      helpText={translate('AutoUnmonitorPreviouslyDownloadedBooksHelpText')}
+                      name="autoUnmonitorPreviouslyDownloadedIssues"
+                      helpText={translate('AutoUnmonitorPreviouslyDownloadedIssuesHelpText')}
                       onChange={onInputChange}
-                      {...settings.autoUnmonitorPreviouslyDownloadedBooks}
+                      {...settings.autoUnmonitorPreviouslyDownloadedIssues}
                     />
                   </FormGroup>
 
@@ -301,7 +301,7 @@ class MediaManagement extends Component {
                     isAdvanced={true}
                   >
                     <FormLabel>
-                      {translate('RescanAuthorFolderAfterRefresh')}
+                      {translate('RescanSeriesFolderAfterRefresh')}
                     </FormLabel>
 
                     <FormInputGroup

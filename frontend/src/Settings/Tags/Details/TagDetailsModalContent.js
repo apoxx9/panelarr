@@ -16,7 +16,7 @@ function TagDetailsModalContent(props) {
   const {
     label,
     isTagUsed,
-    author,
+    series,
     delayProfiles,
     importLists,
     notifications,
@@ -42,13 +42,13 @@ function TagDetailsModalContent(props) {
         }
 
         {
-          author.length ?
+          series.length ?
             <FieldSet legend={translate('Series')}>
               {
-                author.map((item) => {
+                series.map((item) => {
                   return (
                     <div key={item.id}>
-                      {item.authorName}
+                      {item.seriesName}
                     </div>
                   );
                 })
@@ -225,7 +225,7 @@ function TagDetailsModalContent(props) {
 TagDetailsModalContent.propTypes = {
   label: PropTypes.string.isRequired,
   isTagUsed: PropTypes.bool.isRequired,
-  author: PropTypes.arrayOf(PropTypes.object).isRequired,
+  series: PropTypes.arrayOf(PropTypes.object).isRequired,
   delayProfiles: PropTypes.arrayOf(PropTypes.object).isRequired,
   importLists: PropTypes.arrayOf(PropTypes.object).isRequired,
   notifications: PropTypes.arrayOf(PropTypes.object).isRequired,

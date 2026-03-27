@@ -86,10 +86,10 @@ class CutoffUnmet extends Component {
   };
 
   onToggleSelectedPress = () => {
-    const bookIds = this.getSelectedIds();
+    const issueIds = this.getSelectedIds();
 
-    this.props.batchToggleCutoffUnmetBooks({
-      bookIds,
+    this.props.batchToggleCutoffUnmetIssues({
+      issueIds,
       monitored: !getMonitoredValue(this.props)
     });
   };
@@ -116,13 +116,13 @@ class CutoffUnmet extends Component {
       isPopulated,
       error,
       items,
-      isAuthorFetching,
-      isAuthorPopulated,
+      isSeriesFetching,
+      isSeriesPopulated,
       selectedFilterKey,
       filters,
       columns,
       totalRecords,
-      isSearchingForCutoffUnmetBooks,
+      isSearchingForCutoffUnmetIssues,
       isSaving,
       onFilterSelect,
       ...otherProps
@@ -135,8 +135,8 @@ class CutoffUnmet extends Component {
       isConfirmSearchAllCutoffUnmetModalOpen
     } = this.state;
 
-    const isAllPopulated = isPopulated && isAuthorPopulated;
-    const isAnyFetching = isFetching || isAuthorFetching;
+    const isAllPopulated = isPopulated && isSeriesPopulated;
+    const isAnyFetching = isFetching || isSeriesFetching;
 
     const itemsSelected = !!this.getSelectedIds().length;
     const isShowingMonitored = getMonitoredValue(this.props);
@@ -148,7 +148,7 @@ class CutoffUnmet extends Component {
             <PageToolbarButton
               label={translate('SearchSelected')}
               iconName={icons.SEARCH}
-              isDisabled={!itemsSelected || isSearchingForCutoffUnmetBooks}
+              isDisabled={!itemsSelected || isSearchingForCutoffUnmetIssues}
               onPress={this.onSearchSelectedPress}
             />
 
@@ -166,7 +166,7 @@ class CutoffUnmet extends Component {
               label={translate('SearchAll')}
               iconName={icons.SEARCH}
               isDisabled={!items.length}
-              isSpinning={isSearchingForCutoffUnmetBooks}
+              isSpinning={isSearchingForCutoffUnmetIssues}
               onPress={this.onSearchAllCutoffUnmetPress}
             />
 
@@ -251,11 +251,11 @@ class CutoffUnmet extends Component {
                 <ConfirmModal
                   isOpen={isConfirmSearchAllCutoffUnmetModalOpen}
                   kind={kinds.DANGER}
-                  title={translate('SearchForAllCutoffUnmetBooks')}
+                  title={translate('SearchForAllCutoffUnmetIssues')}
                   message={
                     <div>
                       <div>
-                        Are you sure you want to search for all {totalRecords} Cutoff Unmet books?
+                        Are you sure you want to search for all {totalRecords} Cutoff Unmet issues?
                       </div>
                       <div>
                         This cannot be cancelled once started without restarting Panelarr.
@@ -279,17 +279,17 @@ CutoffUnmet.propTypes = {
   isPopulated: PropTypes.bool.isRequired,
   error: PropTypes.object,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
-  isAuthorFetching: PropTypes.bool.isRequired,
-  isAuthorPopulated: PropTypes.bool.isRequired,
+  isSeriesFetching: PropTypes.bool.isRequired,
+  isSeriesPopulated: PropTypes.bool.isRequired,
   selectedFilterKey: PropTypes.string.isRequired,
   filters: PropTypes.arrayOf(PropTypes.object).isRequired,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   totalRecords: PropTypes.number,
-  isSearchingForCutoffUnmetBooks: PropTypes.bool.isRequired,
+  isSearchingForCutoffUnmetIssues: PropTypes.bool.isRequired,
   isSaving: PropTypes.bool.isRequired,
   onFilterSelect: PropTypes.func.isRequired,
   onSearchSelectedPress: PropTypes.func.isRequired,
-  batchToggleCutoffUnmetBooks: PropTypes.func.isRequired,
+  batchToggleCutoffUnmetIssues: PropTypes.func.isRequired,
   onSearchAllCutoffUnmetPress: PropTypes.func.isRequired
 };
 

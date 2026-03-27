@@ -59,7 +59,7 @@ class QualityDefinitions extends Component {
 
           <div className={styles.sizeLimitHelpTextContainer}>
             <div className={styles.sizeLimitHelpText}>
-              Limits are automatically adjusted for the book duration.
+              Limits are automatically adjusted for the issue duration.
             </div>
           </div>
         </PageSectionContent>

@@ -87,10 +87,10 @@ class Missing extends Component {
   };
 
   onToggleSelectedPress = () => {
-    const bookIds = this.getSelectedIds();
+    const issueIds = this.getSelectedIds();
 
-    this.props.batchToggleMissingBooks({
-      bookIds,
+    this.props.batchToggleMissingIssues({
+      issueIds,
       monitored: !getMonitoredValue(this.props)
     });
   };
@@ -125,13 +125,13 @@ class Missing extends Component {
       isPopulated,
       error,
       items,
-      isAuthorFetching,
-      isAuthorPopulated,
+      isSeriesFetching,
+      isSeriesPopulated,
       selectedFilterKey,
       filters,
       columns,
       totalRecords,
-      isSearchingForMissingBooks,
+      isSearchingForMissingIssues,
       isSaving,
       onFilterSelect,
       ...otherProps
@@ -145,8 +145,8 @@ class Missing extends Component {
       isInteractiveImportModalOpen
     } = this.state;
 
-    const isAllPopulated = isPopulated && isAuthorPopulated;
-    const isAnyFetching = isFetching || isAuthorFetching;
+    const isAllPopulated = isPopulated && isSeriesPopulated;
+    const isAnyFetching = isFetching || isSeriesFetching;
 
     const itemsSelected = !!this.getSelectedIds().length;
     const isShowingMonitored = getMonitoredValue(this.props);
@@ -158,7 +158,7 @@ class Missing extends Component {
             <PageToolbarButton
               label={translate('SearchSelected')}
               iconName={icons.SEARCH}
-              isDisabled={!itemsSelected || isSearchingForMissingBooks}
+              isDisabled={!itemsSelected || isSearchingForMissingIssues}
               onPress={this.onSearchSelectedPress}
             />
 
@@ -176,7 +176,7 @@ class Missing extends Component {
               label={translate('SearchAll')}
               iconName={icons.SEARCH}
               isDisabled={!items.length}
-              isSpinning={isSearchingForMissingBooks}
+              isSpinning={isSearchingForMissingIssues}
               onPress={this.onSearchAllMissingPress}
             />
 
@@ -268,11 +268,11 @@ class Missing extends Component {
                 <ConfirmModal
                   isOpen={isConfirmSearchAllMissingModalOpen}
                   kind={kinds.DANGER}
-                  title={translate('SearchForAllMissingBooks')}
+                  title={translate('SearchForAllMissingIssues')}
                   message={
                     <div>
                       <div>
-                        Are you sure you want to search for all {totalRecords} missing books?
+                        Are you sure you want to search for all {totalRecords} missing issues?
                       </div>
                       <div>
                         This cannot be cancelled once started without restarting Panelarr.
@@ -302,17 +302,17 @@ Missing.propTypes = {
   isPopulated: PropTypes.bool.isRequired,
   error: PropTypes.object,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
-  isAuthorFetching: PropTypes.bool.isRequired,
-  isAuthorPopulated: PropTypes.bool.isRequired,
+  isSeriesFetching: PropTypes.bool.isRequired,
+  isSeriesPopulated: PropTypes.bool.isRequired,
   selectedFilterKey: PropTypes.string.isRequired,
   filters: PropTypes.arrayOf(PropTypes.object).isRequired,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   totalRecords: PropTypes.number,
-  isSearchingForMissingBooks: PropTypes.bool.isRequired,
+  isSearchingForMissingIssues: PropTypes.bool.isRequired,
   isSaving: PropTypes.bool.isRequired,
   onFilterSelect: PropTypes.func.isRequired,
   onSearchSelectedPress: PropTypes.func.isRequired,
-  batchToggleMissingBooks: PropTypes.func.isRequired,
+  batchToggleMissingIssues: PropTypes.func.isRequired,
   onSearchAllMissingPress: PropTypes.func.isRequired
 };
 

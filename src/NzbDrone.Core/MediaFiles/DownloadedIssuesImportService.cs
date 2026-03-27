@@ -214,7 +214,7 @@ namespace NzbDrone.Core.MediaFiles
             var idInfo = new ImportDecisionMakerInfo
             {
                 DownloadClientItem = downloadClientItem,
-                ParsedBookInfo = folderInfo
+                ParsedIssueInfo = folderInfo
             };
             var idConfig = new ImportDecisionMakerConfig
             {
@@ -222,7 +222,7 @@ namespace NzbDrone.Core.MediaFiles
                 NewDownload = true,
                 SingleRelease = false,
                 IncludeExisting = false,
-                AddNewSeriess = false
+                AddNewSeries = false
             };
 
             var decisions = _importDecisionMaker.GetImportDecisions(audioFiles, idOverrides, idInfo, idConfig);
@@ -306,7 +306,7 @@ namespace NzbDrone.Core.MediaFiles
                 NewDownload = true,
                 SingleRelease = false,
                 IncludeExisting = false,
-                AddNewSeriess = false
+                AddNewSeries = false
             };
 
             var decisions = _importDecisionMaker.GetImportDecisions(new List<IFileInfo>() { fileInfo }, idOverrides, idInfo, idConfig);

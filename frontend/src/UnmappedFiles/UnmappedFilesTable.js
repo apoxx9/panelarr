@@ -178,7 +178,7 @@ class UnmappedFilesTable extends Component {
       onTableOptionChange,
       onSortPress,
       isScanningFolders,
-      onAddMissingAuthorsPress,
+      onAddMissingSeriessPress,
       deleteUnmappedFiles,
       ...otherProps
     } = this.props;
@@ -198,10 +198,10 @@ class UnmappedFilesTable extends Component {
           <PageToolbarSection>
             <PageToolbarButton
               label={translate('AddMissing')}
-              iconName={icons.ADD_MISSING_AUTHORS}
+              iconName={icons.ADD_MISSING_SERIES_LIST}
               isDisabled={isPopulated && !error && !items.length}
               isSpinning={isScanningFolders}
-              onPress={onAddMissingAuthorsPress}
+              onPress={onAddMissingSeriessPress}
             />
             <PageToolbarButton
               label={translate('DeleteSelected')}
@@ -238,7 +238,7 @@ class UnmappedFilesTable extends Component {
           {
             isPopulated && !error && !items.length &&
               <Alert kind={kinds.INFO}>
-                Success! My work is done, all files on disk are matched to known books.
+                Success! My work is done, all files on disk are matched to known issues.
               </Alert>
           }
 
@@ -289,7 +289,7 @@ UnmappedFilesTable.propTypes = {
   deleteUnmappedFile: PropTypes.func.isRequired,
   deleteUnmappedFiles: PropTypes.func.isRequired,
   isScanningFolders: PropTypes.bool.isRequired,
-  onAddMissingAuthorsPress: PropTypes.func.isRequired
+  onAddMissingSeriessPress: PropTypes.func.isRequired
 };
 
 export default UnmappedFilesTable;

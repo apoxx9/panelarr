@@ -41,14 +41,14 @@ namespace NzbDrone.Core.Notifications.Notifiarr
             _proxy.SendNotification(BuildOnSeriesDelete(deleteMessage), Settings);
         }
 
-        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+        public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(BuildOnBookDelete(deleteMessage), Settings);
+            _proxy.SendNotification(BuildOnIssueDelete(deleteMessage), Settings);
         }
 
-        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
+        public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(BuildOnBookFileDelete(deleteMessage), Settings);
+            _proxy.SendNotification(BuildOnComicFileDelete(deleteMessage), Settings);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)

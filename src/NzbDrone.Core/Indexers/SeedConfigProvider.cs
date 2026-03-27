@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Indexers
                 return null;
             }
 
-            return GetSeedConfiguration(remoteBook.Release.IndexerId, remoteBook.ParsedBookInfo.Discography);
+            return GetSeedConfiguration(remoteBook.Release.IndexerId, remoteBook.ParsedIssueInfo.Discography);
         }
 
         public TorrentSeedConfiguration GetSeedConfiguration(int indexerId, bool fullSeason)

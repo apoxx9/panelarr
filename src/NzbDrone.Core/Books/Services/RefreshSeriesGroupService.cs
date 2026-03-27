@@ -72,7 +72,7 @@ namespace NzbDrone.Core.Books
 
         protected override void DeleteEntity(SeriesGroup local, bool deleteFiles)
         {
-            _logger.Trace($"Removing links for series {local} author {local.ForeignSeriesId}");
+            _logger.Trace($"Removing links for series group {local} id {local.ForeignSeriesId}");
             var children = GetLocalChildren(local, null);
             _linkService.DeleteMany(children);
 
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Books
 
         protected override Tuple<SeriesGroupLink, List<SeriesGroupLink>> GetMatchingExistingChildren(List<SeriesGroupLink> existingChildren, SeriesGroupLink remote)
         {
-            var existingChild = existingChildren.SingleOrDefault(x => x.IssueId == remote.Issue.Value.Id);
+            var existingChild = existingChildren.SingleOrDefault(x => x.SeriesMetadataId == remote.Issue.Value.SeriesMetadataId);
             var mergeChildren = new List<SeriesGroupLink>();
             return Tuple.Create(existingChild, mergeChildren);
         }
@@ -103,18 +103,18 @@ namespace NzbDrone.Core.Books
         protected override void PrepareNewChild(SeriesGroupLink child, SeriesGroup entity)
         {
             child.SeriesGroup = entity;
-            child.SeriesId = entity.Id;
-            child.IssueId = child.Issue.Value.Id;
+            child.SeriesGroupId = entity.Id;
+            child.SeriesMetadataId = child.Issue.Value.SeriesMetadataId;
         }
 
         protected override void PrepareExistingChild(SeriesGroupLink local, SeriesGroupLink remote, SeriesGroup entity)
         {
             local.SeriesGroup = entity;
-            local.SeriesId = entity.Id;
+            local.SeriesGroupId = entity.Id;
 
             remote.Id = local.Id;
-            remote.IssueId = local.IssueId;
-            remote.SeriesId = entity.Id;
+            remote.SeriesMetadataId = local.SeriesMetadataId;
+            remote.SeriesGroupId = entity.Id;
         }
 
         protected override void AddChildren(List<SeriesGroupLink> children)

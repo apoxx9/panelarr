@@ -2,7 +2,7 @@
 // Regular
 
 import {
-  faBookmark as farBookmark,
+  faBookmark as farIssuemark,
   faCalendar as farCalendar,
   faCircle as farCircle,
   faClock as farClock,
@@ -27,9 +27,9 @@ import {
   faBan as fasBan,
   faBars as fasBars,
   faBolt as fasBolt,
-  faBook as fasBook,
-  faBookmark as fasBookmark,
-  faBookReader as fasBookReader,
+  faBook as fasIssue,
+  faBookmark as fasIssuemark,
+  faBookReader as fasIssueReader,
   faBroadcastTower as fasBroadcastTower,
   faBug as fasBug,
   faCalendarAlt as fasCalendarAlt,
@@ -114,7 +114,7 @@ import {
 export const ACTIONS = fasBolt;
 export const ACTIVITY = farClock;
 export const ADD = fasPlus;
-export const ADD_MISSING_AUTHORS = fasSearchPlus;
+export const ADD_MISSING_SERIES_LIST = fasSearchPlus;
 export const ALTERNATE_TITLES = farClone;
 export const ADVANCED_SETTINGS = fasCog;
 export const ARROW_LEFT = fasArrowCircleLeft;
@@ -123,7 +123,7 @@ export const ARROW_RIGHT_NO_CIRCLE = fasLongArrowAltRight;
 export const ARROW_UP = fasArrowCircleUp;
 export const BACKUP = farFileArchive;
 export const BAN = fasBan;
-export const BOOK = fasBook;
+export const ISSUE = fasIssue;
 export const BUG = fasBug;
 export const CALENDAR = fasCalendarAlt;
 export const CALENDAR_O = farCalendar;
@@ -172,7 +172,7 @@ export const LOGOUT = fasSignOutAlt;
 export const MANAGE = fasListCheck;
 export const MEDIA_INFO = farFileInvoice;
 export const MISSING = fasExclamationTriangle;
-export const MONITORED = fasBookmark;
+export const MONITORED = fasIssuemark;
 export const NETWORK = fasBroadcastTower;
 export const NAVBAR_COLLAPSE = fasBars;
 export const NOT_AIRED = farClock;
@@ -202,8 +202,8 @@ export const SAVE = fasSave;
 export const SCHEDULED = farClock;
 export const SCORE = fasUserPlus;
 export const SEARCH = fasSearch;
-export const AUTHOR_CONTINUING = fasPlay;
-export const AUTHOR_ENDED = fasStop;
+export const SERIES_CONTINUING = fasPlay;
+export const SERIES_ENDED = fasStop;
 export const SETTINGS = fasCogs;
 export const SHUTDOWN = fasPowerOff;
 export const SORT = fasSort;
@@ -219,9 +219,9 @@ export const TBA = fasQuestionCircle;
 export const TEST = fasVial;
 export const UNGROUP = farObjectUngroup;
 export const UNKNOWN = fasQuestion;
-export const UNMONITORED = farBookmark;
+export const UNMONITORED = farIssuemark;
 export const UPDATE = fasRetweet;
 export const UNSAVED_SETTING = farDotCircle;
 export const VIEW = fasEye;
 export const WARNING = fasExclamationTriangle;
-export const WIKI = fasBookReader;
+export const WIKI = fasIssueReader;

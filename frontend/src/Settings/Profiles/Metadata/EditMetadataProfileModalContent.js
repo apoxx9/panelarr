@@ -111,7 +111,7 @@ function EditMetadataProfileModalContent(props) {
 
               <FormGroup>
                 <FormLabel>
-                  {translate('SkipBooksWithMissingReleaseDate')}
+                  {translate('SkipIssuesWithMissingReleaseDate')}
                 </FormLabel>
 
                 <FormInputGroup
@@ -124,7 +124,7 @@ function EditMetadataProfileModalContent(props) {
 
               <FormGroup>
                 <FormLabel>
-                  {translate('SkipBooksWithNoISBNOrASIN')}
+                  {translate('SkipIssuesWithNoISBNOrASIN')}
                 </FormLabel>
 
                 <FormInputGroup
@@ -137,7 +137,7 @@ function EditMetadataProfileModalContent(props) {
 
               <FormGroup>
                 <FormLabel>
-                  {translate('SkipPartBooksAndSets')}
+                  {translate('SkipPartIssuesAndSets')}
                 </FormLabel>
 
                 <FormInputGroup
@@ -150,7 +150,7 @@ function EditMetadataProfileModalContent(props) {
 
               <FormGroup>
                 <FormLabel>
-                  {translate('SkipSecondarySeriesBooks')}
+                  {translate('SkipSecondarySeriesIssues')}
                 </FormLabel>
 
                 <FormInputGroup
@@ -200,7 +200,7 @@ function EditMetadataProfileModalContent(props) {
           id &&
             <div
               className={styles.deleteButtonContainer}
-              title={isInUse ? translate('IsInUseCantDeleteAMetadataProfileThatIsAttachedToAnAuthorOrImportList') : undefined}
+              title={isInUse ? translate('IsInUseCantDeleteAMetadataProfileThatIsAttachedToAnSeriesOrImportList') : undefined}
             >
               <Button
                 kind={kinds.DANGER}

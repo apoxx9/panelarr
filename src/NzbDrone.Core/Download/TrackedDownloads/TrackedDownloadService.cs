@@ -253,7 +253,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
                     downloadItem.Status,
                     downloadItem.CanBeRemoved ? "" : downloadItem.CanMoveFiles ? " (busy)" : " (readonly)",
                     trackedDownload.State,
-                    trackedDownload.RemoteBook?.ParsedBookInfo,
+                    trackedDownload.RemoteBook?.ParsedIssueInfo,
                     downloadItem.OutputPath);
             }
         }

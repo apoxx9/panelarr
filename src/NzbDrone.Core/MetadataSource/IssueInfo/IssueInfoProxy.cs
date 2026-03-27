@@ -18,11 +18,13 @@ using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Http;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource.Goodreads;
+using NzbDrone.Core.MetadataSource.Metron;
+using NzbDrone.Core.MetadataSource.Provider;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace NzbDrone.Core.MetadataSource.BookInfo
 {
-    public class BookInfoProxy : IProvideSeriesInfo, IProvideBookInfo, ISearchForNewBook, ISearchForNewSeries, ISearchForNewEntity
+    public class BookInfoProxy : IProvideSeriesInfo, IProvideBookInfo, ISearchForNewBook
     {
         private static readonly JsonSerializerOptions SerializerSettings = new JsonSerializerOptions
         {
@@ -39,6 +41,8 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
         private readonly IMetadataRequestBuilder _requestBuilder;
         private readonly ICached<HashSet<string>> _cache;
         private readonly CachingService _authorCache;
+        private readonly IMetadataProvider _metadataProvider;
+        private readonly IMetronMapper _metronMapper;
 
         public BookInfoProxy(IHttpClient httpClient,
                              ICachedHttpResponseService cachedHttpClient,
@@ -46,6 +50,8 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
                              ISeriesService authorService,
                              IBookService bookService,
                              IMetadataRequestBuilder requestBuilder,
+                             IMetadataProvider metadataProvider,
+                             IMetronMapper metronMapper,
                              Logger logger,
                              ICacheManager cacheManager)
         {
@@ -55,6 +61,8 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
             _authorService = authorService;
             _bookService = bookService;
             _requestBuilder = requestBuilder;
+            _metadataProvider = metadataProvider;
+            _metronMapper = metronMapper;
             _cache = cacheManager.GetCache<HashSet<string>>(GetType());
             _logger = logger;
 
@@ -67,41 +75,87 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
 
         public HashSet<string> GetChangedSeries(DateTime startTime)
         {
-            var httpRequest = _requestBuilder.GetRequestBuilder().Create()
-                .SetSegment("route", "author/changed")
-                .AddQueryParam("since", startTime.ToString("o"))
-                .Build();
-
-            httpRequest.SuppressHttpError = true;
-
-            var httpResponse = _httpClient.Get<RecentUpdatesResource>(httpRequest);
-
-            if (httpResponse.Resource == null || httpResponse.Resource.Limited)
-            {
-                return null;
-            }
-
-            return new HashSet<string>(httpResponse.Resource.Ids.Select(x => x.ToString()));
+            // The new metadata providers (Metron/ComicVine) don't support a changed-since endpoint.
+            // Return null to trigger a full refresh.
+            return null;
         }
 
         public Series GetSeriesInfo(string foreignSeriesId, bool useCache = true)
         {
-            _logger.Debug("Getting Series details GoodreadsId of {0}", foreignSeriesId);
+            _logger.Debug("Getting Series details for {0}", foreignSeriesId);
 
             try
             {
                 if (useCache)
                 {
-                    return PollSeries(foreignSeriesId);
+                    return _authorCache.GetOrAdd(foreignSeriesId,
+                        () => GetSeriesInfoFromProvider(foreignSeriesId),
+                        new LazyCacheEntryOptions
+                        {
+                            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10),
+                            ImmediateAbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10),
+                            Size = 1,
+                            SlidingExpiration = TimeSpan.FromMinutes(1),
+                            ExpirationMode = ExpirationMode.ImmediateEviction
+                        });
                 }
 
-                return PollSeriesUncached(foreignSeriesId);
+                return GetSeriesInfoFromProvider(foreignSeriesId);
             }
-            catch (BookInfoException e)
+            catch (BookInfoException)
             {
-                _logger.Warn(e, "Unexpected error getting author info: {foreignSeriesId}", foreignSeriesId);
                 throw;
             }
+            catch (Exception e)
+            {
+                _logger.Warn(e, "Unexpected error getting series info: {0}", foreignSeriesId);
+                throw new BookInfoException("Failed to get series info for {0}", e, foreignSeriesId);
+            }
+        }
+
+        private Series GetSeriesInfoFromProvider(string foreignSeriesId)
+        {
+            _logger.Debug("Fetching series info from provider for {0}", foreignSeriesId);
+
+            var providerSeries = _metadataProvider.GetSeriesInfo(foreignSeriesId);
+
+            if (providerSeries == null)
+            {
+                throw new SeriesNotFoundException(foreignSeriesId);
+            }
+
+            var (metadata, series) = _metronMapper.MapSeries(providerSeries);
+
+            // Map issues from the provider
+            var issues = new List<Issue>();
+            if (providerSeries.Issues != null)
+            {
+                foreach (var providerIssue in providerSeries.Issues)
+                {
+                    var issue = _metronMapper.MapIssue(providerIssue, 0);
+                    if (issue != null)
+                    {
+                        issue.SeriesMetadata = metadata;
+
+                        // Ensure TitleSlug is never null (required by DB constraint)
+                        if (issue.TitleSlug == null)
+                        {
+                            issue.TitleSlug = issue.ForeignIssueId ?? providerIssue.ForeignIssueId ?? "unknown";
+                        }
+
+                        issues.Add(issue);
+                    }
+                }
+            }
+
+            series.Books = issues;
+            series.SeriesGroups = new List<SeriesGroup>();
+
+            // Enrich with DB IDs if the series already exists
+            var existingSeries = _authorService.GetAllSeries();
+            _metronMapper.EnrichWithDbIds(series, metadata, existingSeries);
+
+            return series;
         }
 
         public HashSet<string> GetChangedBooks(DateTime startTime)
@@ -118,12 +172,49 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
         {
             try
             {
-                return PollBook(foreignBookId);
+                _logger.Debug("Fetching issue info from provider for {0}", foreignBookId);
+
+                var providerIssue = _metadataProvider.GetIssueInfo(foreignBookId);
+
+                if (providerIssue == null)
+                {
+                    throw new IssueNotFoundException(foreignBookId);
+                }
+
+                var issue = _metronMapper.MapIssue(providerIssue, 0);
+
+                // We need to find the series this issue belongs to
+                // The foreignBookId might be just the issue, so we need the series info
+                var dbBook = _bookService.FindById(foreignBookId);
+                string seriesId;
+                SeriesMetadata seriesMetadata;
+
+                if (dbBook != null)
+                {
+                    var author = _authorService.GetSeriesByMetadataId(dbBook.SeriesMetadataId);
+                    seriesId = author?.ForeignSeriesId ?? foreignBookId;
+                    seriesMetadata = author?.Metadata.Value ?? new SeriesMetadata { ForeignSeriesId = foreignBookId };
+                }
+                else
+                {
+                    // Cannot determine the series from the issue alone with the new providers
+                    // Return minimal metadata
+                    seriesId = foreignBookId;
+                    seriesMetadata = new SeriesMetadata { ForeignSeriesId = foreignBookId, Name = issue.Title };
+                }
+
+                issue.SeriesMetadata = seriesMetadata;
+
+                return Tuple.Create(seriesId, issue, new List<SeriesMetadata> { seriesMetadata });
             }
-            catch (BookInfoException e)
+            catch (BookInfoException)
             {
-                _logger.Warn(e, "Unexpected error getting issue info: {foreignBookId}", foreignBookId);
                 throw;
+            }
+            catch (Exception e)
+            {
+                _logger.Warn(e, "Unexpected error getting issue info: {0}", foreignBookId);
+                throw new BookInfoException("Failed to get issue info for {0}", e, foreignBookId);
             }
         }
 
@@ -327,7 +418,7 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
             }
             catch (BookInfoException e)
             {
-                _logger.Warn(e, "Error searching by author id");
+                _logger.Warn(e, "Error searching by series id");
                 return new List<Issue>();
             }
         }
@@ -367,10 +458,6 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
             {
                 return new List<Issue>();
             }
-            catch (EditionNotFoundException)
-            {
-                return new List<Issue>();
-            }
             catch (BookInfoException e)
             {
                 _logger.Warn(e, "Error searching by issue id");
@@ -406,7 +493,7 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
 
             if (httpResponse.StatusCode == HttpStatusCode.NotFound)
             {
-                throw new EditionNotFoundException(id.ToString());
+                throw new IssueNotFoundException(id.ToString());
             }
 
             if (!httpResponse.HasHttpRedirect)
@@ -443,7 +530,7 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
 
             if (issue == null)
             {
-                throw new EditionNotFoundException(id.ToString());
+                throw new IssueNotFoundException(id.ToString());
             }
 
             var authorDict = authors.ToDictionary(x => x.ForeignSeriesId);

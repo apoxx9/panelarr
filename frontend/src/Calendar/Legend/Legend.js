@@ -29,13 +29,13 @@ function Legend(props) {
       <div>
         <LegendItem
           status="downloading"
-          tooltip="Book is currently downloading"
+          tooltip="Issue is currently downloading"
           colorImpairedMode={colorImpairedMode}
         />
 
         <LegendItem
           status="downloaded"
-          tooltip="Book was downloaded and sorted"
+          tooltip="Issue was downloaded and sorted"
           colorImpairedMode={colorImpairedMode}
         />
       </div>
@@ -43,13 +43,13 @@ function Legend(props) {
       <div>
         <LegendItem
           status="unreleased"
-          tooltip="Book hasn't released yet"
+          tooltip="Issue hasn't released yet"
           colorImpairedMode={colorImpairedMode}
         />
 
         <LegendItem
           status="partial"
-          tooltip="Book was partially downloaded"
+          tooltip="Issue was partially downloaded"
           colorImpairedMode={colorImpairedMode}
         />
       </div>
@@ -57,13 +57,13 @@ function Legend(props) {
       <div>
         <LegendItem
           status="unmonitored"
-          tooltip="Book is unmonitored"
+          tooltip="Issue is unmonitored"
           colorImpairedMode={colorImpairedMode}
         />
 
         <LegendItem
           status="missing"
-          tooltip="Book file has not been found"
+          tooltip="Issue file has not been found"
           colorImpairedMode={colorImpairedMode}
         />
       </div>

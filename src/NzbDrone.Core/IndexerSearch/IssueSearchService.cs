@@ -14,7 +14,7 @@ using NzbDrone.Core.Queue;
 namespace NzbDrone.Core.IndexerSearch
 {
     internal class IssueSearchService : IExecute<IssueSearchCommand>,
-                               IExecute<MissingBookSearchCommand>,
+                               IExecute<MissingIssueSearchCommand>,
                                IExecute<CutoffUnmetBookSearchCommand>
     {
         private readonly ISearchForReleases _releaseSearchService;
@@ -77,7 +77,7 @@ namespace NzbDrone.Core.IndexerSearch
             }
         }
 
-        public void Execute(MissingBookSearchCommand message)
+        public void Execute(MissingIssueSearchCommand message)
         {
             List<Issue> issues;
 

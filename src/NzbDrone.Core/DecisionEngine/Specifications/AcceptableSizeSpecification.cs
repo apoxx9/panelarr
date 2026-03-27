@@ -27,7 +27,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             /*
             _logger.Debug("Beginning size check for: {0}", subject);
 
-            var quality = subject.ParsedBookInfo.Quality.Quality;
+            var quality = subject.ParsedIssueInfo.Quality.Quality;
 
             if (subject.Release.Size == 0)
             {

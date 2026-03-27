@@ -16,14 +16,14 @@ import Missing from './Missing';
 function createMapStateToProps() {
   return createSelector(
     (state) => state.wanted.missing,
-    (state) => state.authors,
-    createCommandExecutingSelector(commandNames.MISSING_BOOK_SEARCH),
-    (missing, authors, isSearchingForMissingBooks) => {
+    (state) => state.seriess,
+    createCommandExecutingSelector(commandNames.MISSING_ISSUE_SEARCH),
+    (missing, seriess, isSearchingForMissingIssues) => {
 
       return {
-        isAuthorFetching: authors.isFetching,
-        isAuthorPopulated: authors.isPopulated,
-        isSearchingForMissingBooks,
+        isSeriesFetching: seriess.isFetching,
+        isSeriesPopulated: seriess.isPopulated,
+        isSearchingForMissingIssues,
         isSaving: missing.items.filter((m) => m.isSaving).length > 1,
         ...missing
       };
@@ -50,7 +50,7 @@ class MissingConnector extends Component {
       gotoMissingFirstPage
     } = this.props;
 
-    registerPagePopulator(this.repopulate, ['bookFileUpdated', 'bookFileDeleted']);
+    registerPagePopulator(this.repopulate, ['issueFileUpdated', 'issueFileDeleted']);
 
     if (useCurrentPage) {
       fetchMissing();
@@ -61,8 +61,8 @@ class MissingConnector extends Component {
 
   componentDidUpdate(prevProps) {
     if (hasDifferentItems(prevProps.items, this.props.items)) {
-      const bookIds = selectUniqueIds(this.props.items, 'id');
-      this.props.fetchQueueDetails({ bookIds });
+      const issueIds = selectUniqueIds(this.props.items, 'id');
+      this.props.fetchQueueDetails({ issueIds });
     }
   }
 
@@ -120,15 +120,15 @@ class MissingConnector extends Component {
 
   onSearchSelectedPress = (selected) => {
     this.props.executeCommand({
-      name: commandNames.BOOK_SEARCH,
-      bookIds: selected,
+      name: commandNames.ISSUE_SEARCH,
+      issueIds: selected,
       commandFinished: this.repopulate
     });
   };
 
   onSearchAllMissingPress = () => {
     this.props.executeCommand({
-      name: commandNames.MISSING_BOOK_SEARCH,
+      name: commandNames.MISSING_ISSUE_SEARCH,
       commandFinished: this.repopulate
     });
   };

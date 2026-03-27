@@ -314,18 +314,18 @@ Stories are ordered by dependency (must be completed top-to-bottom within each p
 | P1-17 | Done | P1-16 |
 | P1-18 | Done | P1-12, P1-13, P1-15, P1-17 |
 | P1-19 | Done | P1-18 |
-| P2-01 | Ready | Phase 1 complete |
-| P2-02 | Ready | P2-01 |
-| P2-03 | Ready | P2-02 |
-| P2-04 | Ready | Phase 1 complete |
-| P2-05 | Ready | Phase 1 complete |
-| P2-06 | Ready | Phase 1 complete |
-| P2-07 | Ready | Phase 1 complete |
-| P2-08 | Ready | P2-02 |
-| P3-01 | Ready | Phase 2 complete |
-| P3-02 | Ready | Phase 2 complete |
-| P3-03 | Ready | Phase 2 complete |
-| P3-04 | Ready | Phase 2 complete |
-| P3-05 | Ready | P1-14, Phase 2 complete |
-| P3-06 | Ready | Phase 3 features complete |
+| P2-01 | Done | Phase 1 complete |
+| P2-02 | Done | P2-01 |
+| P2-03 | Done | P2-02 |
+| P2-04 | Done | Phase 1 complete |
+| P2-05 | Done | Phase 1 complete |
+| P2-06 | Done | Phase 1 complete |
+| P2-07 | Done | Phase 1 complete |
+| P2-08 | Done | P2-02 |
+| P3-01 | Done | Phase 2 complete |
+| P3-02 | Done | Phase 2 complete |
+| P3-03 | Done | Phase 2 complete |
+| P3-04 | Done | Phase 2 complete |
+| P3-05 | Done | P1-14, Phase 2 complete |
+| P3-06 | Done | Phase 3 features complete |
 | F-01 | Ready | Phase 3 complete |

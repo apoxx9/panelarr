@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Common.Extensions;
@@ -30,6 +31,10 @@ namespace NzbDrone.Core.Books
         public List<string> Genres { get; set; }
         public Ratings Ratings { get; set; }
 
+        // Override tracking
+        public bool IsOverridden { get; set; }
+        public string OverriddenFields { get; set; }
+
         public override string ToString()
         {
             return string.Format("[{0}][{1}]", ForeignSeriesId, Name.NullSafe());
@@ -37,21 +42,89 @@ namespace NzbDrone.Core.Books
 
         public override void UseMetadataFrom(SeriesMetadata other)
         {
-            ForeignSeriesId = other.ForeignSeriesId;
-            TitleSlug = other.TitleSlug;
-            Name = other.Name;
-            SortName = other.SortName;
-            Overview = other.Overview.IsNullOrWhiteSpace() ? Overview : other.Overview;
-            Disambiguation = other.Disambiguation;
-            Status = other.Status;
-            SeriesType = other.SeriesType;
-            Year = other.Year;
-            VolumeNumber = other.VolumeNumber;
-            PublisherId = other.PublisherId;
-            Images = other.Images.Any() ? other.Images : Images;
-            Links = other.Links;
-            Genres = other.Genres;
-            Ratings = other.Ratings.Votes > 0 ? other.Ratings : Ratings;
+            var overridden = IsOverridden
+                ? (OverriddenFields ?? string.Empty).Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                : Array.Empty<string>();
+
+            if (!IsProtectedField(overridden, "ForeignSeriesId"))
+            {
+                ForeignSeriesId = other.ForeignSeriesId;
+            }
+
+            if (!IsProtectedField(overridden, "TitleSlug"))
+            {
+                TitleSlug = other.TitleSlug;
+            }
+
+            if (!IsProtectedField(overridden, "Name"))
+            {
+                Name = other.Name;
+            }
+
+            if (!IsProtectedField(overridden, "SortName"))
+            {
+                SortName = other.SortName;
+            }
+
+            if (!IsProtectedField(overridden, "Overview"))
+            {
+                Overview = other.Overview.IsNullOrWhiteSpace() ? Overview : other.Overview;
+            }
+
+            if (!IsProtectedField(overridden, "Disambiguation"))
+            {
+                Disambiguation = other.Disambiguation;
+            }
+
+            if (!IsProtectedField(overridden, "Status"))
+            {
+                Status = other.Status;
+            }
+
+            if (!IsProtectedField(overridden, "SeriesType"))
+            {
+                SeriesType = other.SeriesType;
+            }
+
+            if (!IsProtectedField(overridden, "Year"))
+            {
+                Year = other.Year;
+            }
+
+            if (!IsProtectedField(overridden, "VolumeNumber"))
+            {
+                VolumeNumber = other.VolumeNumber;
+            }
+
+            if (!IsProtectedField(overridden, "PublisherId"))
+            {
+                PublisherId = other.PublisherId;
+            }
+
+            if (!IsProtectedField(overridden, "Images"))
+            {
+                Images = other.Images.Any() ? other.Images : Images;
+            }
+
+            if (!IsProtectedField(overridden, "Links"))
+            {
+                Links = other.Links;
+            }
+
+            if (!IsProtectedField(overridden, "Genres"))
+            {
+                Genres = other.Genres;
+            }
+
+            if (!IsProtectedField(overridden, "Ratings"))
+            {
+                Ratings = other.Ratings.Votes > 0 ? other.Ratings : Ratings;
+            }
+        }
+
+        private bool IsProtectedField(string[] overridden, string field)
+        {
+            return IsOverridden && Array.IndexOf(overridden, field) >= 0;
         }
     }
 }

@@ -9,7 +9,7 @@ function RootFolderSelectInputSelectedValue(props) {
     name,
     value,
     freeSpace,
-    authorFolder,
+    seriesFolder,
     includeFreeSpace,
     isWindows,
     ...otherProps
@@ -30,10 +30,10 @@ function RootFolderSelectInputSelectedValue(props) {
         </div>
 
         {
-          authorFolder ?
-            <div className={styles.authorFolder}>
+          seriesFolder ?
+            <div className={styles.seriesFolder}>
               {slashCharacter}
-              {authorFolder}
+              {seriesFolder}
             </div> :
             null
         }
@@ -53,7 +53,7 @@ RootFolderSelectInputSelectedValue.propTypes = {
   name: PropTypes.string,
   value: PropTypes.string,
   freeSpace: PropTypes.number,
-  authorFolder: PropTypes.string,
+  seriesFolder: PropTypes.string,
   isWindows: PropTypes.bool,
   includeFreeSpace: PropTypes.bool.isRequired
 };

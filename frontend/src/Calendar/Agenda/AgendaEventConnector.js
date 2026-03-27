@@ -1,18 +1,18 @@
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import createAuthorSelector from 'Store/Selectors/createAuthorSelector';
+import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createQueueItemSelector from 'Store/Selectors/createQueueItemSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import AgendaEvent from './AgendaEvent';
 
 function createMapStateToProps() {
   return createSelector(
-    createAuthorSelector(),
+    createSeriesSelector(),
     createQueueItemSelector(),
     createUISettingsSelector(),
-    (author, queueItem, uiSettings) => {
+    (series, queueItem, uiSettings) => {
       return {
-        author,
+        series,
         queueItem,
         timeFormat: uiSettings.timeFormat,
         longDateFormat: uiSettings.longDateFormat,

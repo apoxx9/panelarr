@@ -19,29 +19,29 @@ function NotificationEventItems(props) {
     onReleaseImport,
     onUpgrade,
     onRename,
-    onAuthorAdded,
-    onAuthorDelete,
-    onBookDelete,
-    onBookFileDelete,
-    onBookFileDeleteForUpgrade,
+    onSeriesAdded,
+    onSeriesDelete,
+    onIssueDelete,
+    onIssueFileDelete,
+    onIssueFileDeleteForUpgrade,
     onHealthIssue,
     onDownloadFailure,
     onImportFailure,
-    onBookRetag,
+    onIssueRetag,
     onApplicationUpdate,
     supportsOnGrab,
     supportsOnReleaseImport,
     supportsOnUpgrade,
     supportsOnRename,
-    supportsOnAuthorAdded,
-    supportsOnAuthorDelete,
-    supportsOnBookDelete,
-    supportsOnBookFileDelete,
+    supportsOnSeriesAdded,
+    supportsOnSeriesDelete,
+    supportsOnIssueDelete,
+    supportsOnIssueFileDelete,
     supportsOnHealthIssue,
     includeHealthWarnings,
     supportsOnDownloadFailure,
     supportsOnImportFailure,
-    supportsOnBookRetag,
+    supportsOnIssueRetag,
     supportsOnApplicationUpdate
   } = item;
 
@@ -128,10 +128,10 @@ function NotificationEventItems(props) {
           <div>
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="onAuthorAdded"
-              helpText={translate('OnAuthorAddedHelpText')}
-              isDisabled={!supportsOnAuthorAdded.value}
-              {...onAuthorAdded}
+              name="onSeriesAdded"
+              helpText={translate('OnSeriesAddedHelpText')}
+              isDisabled={!supportsOnSeriesAdded.value}
+              {...onSeriesAdded}
               onChange={onInputChange}
             />
           </div>
@@ -139,10 +139,10 @@ function NotificationEventItems(props) {
           <div>
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="onAuthorDelete"
-              helpText={translate('OnAuthorDeleteHelpText')}
-              isDisabled={!supportsOnAuthorDelete.value}
-              {...onAuthorDelete}
+              name="onSeriesDelete"
+              helpText={translate('OnSeriesDeleteHelpText')}
+              isDisabled={!supportsOnSeriesDelete.value}
+              {...onSeriesDelete}
               onChange={onInputChange}
             />
           </div>
@@ -150,10 +150,10 @@ function NotificationEventItems(props) {
           <div>
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="onBookDelete"
-              helpText={translate('OnBookDeleteHelpText')}
-              isDisabled={!supportsOnBookDelete.value}
-              {...onBookDelete}
+              name="onIssueDelete"
+              helpText={translate('OnIssueDeleteHelpText')}
+              isDisabled={!supportsOnIssueDelete.value}
+              {...onIssueDelete}
               onChange={onInputChange}
             />
           </div>
@@ -161,10 +161,10 @@ function NotificationEventItems(props) {
           <div>
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="onBookFileDelete"
-              helpText={translate('OnBookFileDeleteHelpText')}
-              isDisabled={!supportsOnBookFileDelete.value}
-              {...onBookFileDelete}
+              name="onIssueFileDelete"
+              helpText={translate('OnIssueFileDeleteHelpText')}
+              isDisabled={!supportsOnIssueFileDelete.value}
+              {...onIssueFileDelete}
               onChange={onInputChange}
             />
           </div>
@@ -172,10 +172,10 @@ function NotificationEventItems(props) {
           <div>
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="onBookFileDeleteForUpgrade"
-              helpText={translate('OnBookFileDeleteForUpgradeHelpText')}
-              isDisabled={!supportsOnBookFileDelete.value}
-              {...onBookFileDeleteForUpgrade}
+              name="onIssueFileDeleteForUpgrade"
+              helpText={translate('OnIssueFileDeleteForUpgradeHelpText')}
+              isDisabled={!supportsOnIssueFileDelete.value}
+              {...onIssueFileDeleteForUpgrade}
               onChange={onInputChange}
             />
           </div>
@@ -183,10 +183,10 @@ function NotificationEventItems(props) {
           <div>
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="onBookRetag"
-              helpText={translate('OnBookRetagHelpText')}
-              isDisabled={!supportsOnBookRetag.value}
-              {...onBookRetag}
+              name="onIssueRetag"
+              helpText={translate('OnIssueRetagHelpText')}
+              isDisabled={!supportsOnIssueRetag.value}
+              {...onIssueRetag}
               onChange={onInputChange}
             />
           </div>

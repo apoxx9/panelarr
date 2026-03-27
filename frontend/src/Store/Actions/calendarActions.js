@@ -41,7 +41,7 @@ export const defaultState = {
   searchMissingCommandId: null,
 
   options: {
-    collapseMultipleBooks: false,
+    collapseMultipleIssues: false,
     showCutoffUnmetIcon: false
   },
 
@@ -345,11 +345,11 @@ export const actionHandlers = handleThunks({
   },
 
   [SEARCH_MISSING]: function(getState, payload, dispatch) {
-    const { bookIds } = payload;
+    const { issueIds } = payload;
 
     const commandPayload = {
-      name: commandNames.BOOK_SEARCH,
-      bookIds
+      name: commandNames.ISSUE_SEARCH,
+      issueIds
     };
 
     executeCommandHelper(commandPayload, dispatch).then((data) => {

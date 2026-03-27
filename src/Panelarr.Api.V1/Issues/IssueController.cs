@@ -33,13 +33,11 @@ namespace Panelarr.Api.V1.Books
         IHandle<ComicFileDeletedEvent>
     {
         protected readonly ISeriesService _authorService;
-        protected readonly IEditionService _editionService;
         protected readonly IAddBookService _addBookService;
 
         public IssueController(ISeriesService authorService,
                           IBookService bookService,
                           IAddBookService addBookService,
-                          IEditionService editionService,
                           ISeriesBookLinkService seriesBookLinkService,
                           ISeriesStatisticsService authorStatisticsService,
                           IMapCoversToLocal coverMapper,
@@ -51,7 +49,6 @@ namespace Panelarr.Api.V1.Books
         : base(bookService, seriesBookLinkService, authorStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
         {
             _authorService = authorService;
-            _editionService = editionService;
             _addBookService = addBookService;
 
             PostValidator.RuleFor(s => s.ForeignIssueId).NotEmpty();
@@ -61,35 +58,35 @@ namespace Panelarr.Api.V1.Books
         }
 
         [HttpGet]
-        public List<IssueResource> GetBooks([FromQuery]int? authorId,
-            [FromQuery]List<int> bookIds,
+        public List<IssueResource> GetBooks([FromQuery]int? seriesId,
+            [FromQuery]List<int> issueIds,
             [FromQuery]string titleSlug,
             [FromQuery]bool includeAllSeriesBooks = false)
         {
-            if (!authorId.HasValue && !bookIds.Any() && titleSlug.IsNullOrWhiteSpace())
+            if (!seriesId.HasValue && !issueIds.Any() && titleSlug.IsNullOrWhiteSpace())
             {
                 var metadataTask = Task.Run(() => _authorService.GetAllSeries());
                 var issues = _bookService.GetAllBooks();
 
-                var authors = metadataTask.GetAwaiter().GetResult().ToDictionary(x => x.SeriesMetadataId);
+                var seriesDict = metadataTask.GetAwaiter().GetResult().ToDictionary(x => x.SeriesMetadataId);
 
                 foreach (var issue in issues)
                 {
-                    issue.Series = authors[issue.SeriesMetadataId];
+                    issue.Series = seriesDict[issue.SeriesMetadataId];
                 }
 
                 return MapToResource(issues, false);
             }
 
-            if (authorId.HasValue)
+            if (seriesId.HasValue)
             {
-                var issues = _bookService.GetBooksBySeries(authorId.Value);
+                var issues = _bookService.GetBooksBySeries(seriesId.Value);
 
-                var author = _authorService.GetSeries(authorId.Value);
+                var series = _authorService.GetSeries(seriesId.Value);
 
                 foreach (var issue in issues)
                 {
-                    issue.Series = author;
+                    issue.Series = series;
                 }
 
                 return MapToResource(issues, false);
@@ -114,17 +111,17 @@ namespace Panelarr.Api.V1.Books
                 }
             }
 
-            return MapToResource(_bookService.GetBooks(bookIds), false);
+            return MapToResource(_bookService.GetBooks(issueIds), false);
         }
 
         [HttpGet("{id:int}/overview")]
         public object Overview(int id)
         {
-            var overview = _editionService.GetEditionsByBook(id).Single(x => x.Monitored).Overview;
+            var issue = _bookService.GetBook(id);
             return new
             {
                 id,
-                overview
+                overview = issue.Title
             };
         }
 
@@ -154,23 +151,6 @@ namespace Panelarr.Api.V1.Books
         public void DeleteBook(int id, bool deleteFiles = false, bool addImportListExclusion = false)
         {
             _bookService.DeleteBook(id, deleteFiles, addImportListExclusion);
-        }
-
-        [HttpPut("monitor")]
-        public IActionResult SetBooksMonitored([FromBody]IssuesMonitoredResource resource)
-        {
-            _bookService.SetMonitored(resource.IssueIds, resource.Monitored);
-
-            if (resource.IssueIds.Count == 1)
-            {
-                _bookService.SetBookMonitored(resource.IssueIds.First(), resource.Monitored);
-            }
-            else
-            {
-                _bookService.SetMonitored(resource.IssueIds, resource.Monitored);
-            }
-
-            return Accepted(MapToResource(_bookService.GetBooks(resource.IssueIds), false));
         }
 
         [NonAction]

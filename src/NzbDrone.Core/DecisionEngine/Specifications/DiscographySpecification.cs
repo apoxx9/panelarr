@@ -21,7 +21,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
         {
-            if (subject.ParsedBookInfo.Discography)
+            if (subject.ParsedIssueInfo.Discography)
             {
                 _logger.Debug("Checking if all issues in discography release have released. {0}", subject.Release.Title);
 

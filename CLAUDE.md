@@ -31,7 +31,7 @@ Activate the correct persona when prompted with its tag:
 ## Current Phase
 > ⚠️ Update this line manually as the project progresses
 
-Phase 0 — Analyst: resolving fork vs. build question, drafting PRD
+All phases complete (P1 through P3). Runtime testing/bugfixing underway. Next: F-01 (Story Arcs).
 ```
 
 ---

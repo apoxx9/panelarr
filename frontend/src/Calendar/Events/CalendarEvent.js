@@ -44,7 +44,7 @@ class CalendarEvent extends Component {
   render() {
     const {
       id,
-      author,
+      series,
       title,
       titleSlug,
       releaseDate,
@@ -56,15 +56,15 @@ class CalendarEvent extends Component {
       colorImpairedMode
     } = this.props;
 
-    if (!author) {
+    if (!series) {
       return null;
     }
 
     const startTime = moment(releaseDate);
-    // const endTime = startTime.add(author.runtime, 'minutes');
+    // const endTime = startTime.add(series.runtime, 'minutes');
     const downloading = !!(queueItem || grabbed);
-    const isMonitored = author.monitored && monitored;
-    const statusStyle = getStatusStyle(id, downloading, startTime, isMonitored, statistics.percentOfBooks);
+    const isMonitored = series.monitored && monitored;
+    const statusStyle = getStatusStyle(id, downloading, startTime, isMonitored, statistics.percentOfIssues);
 
     return (
       <div>
@@ -78,9 +78,9 @@ class CalendarEvent extends Component {
           onPress={this.onPress}
         >
           <div className={styles.info}>
-            <div className={styles.authorName}>
-              <Link to={`/author/${author.titleSlug}`}>
-                {author.authorName}
+            <div className={styles.seriesName}>
+              <Link to={`/series/${series.titleSlug}`}>
+                {series.seriesName}
               </Link>
             </div>
 
@@ -98,14 +98,14 @@ class CalendarEvent extends Component {
                 <Icon
                   className={styles.statusIcon}
                   name={icons.DOWNLOADING}
-                  title={translate('BookIsDownloading')}
+                  title={translate('IssueIsDownloading')}
                 />
             }
           </div>
 
-          <div className={styles.bookInfo}>
-            <div className={styles.bookTitle}>
-              <Link to={`/book/${titleSlug}`}>
+          <div className={styles.issueInfo}>
+            <div className={styles.issueTitle}>
+              <Link to={`/issue/${titleSlug}`}>
                 {title}
               </Link>
             </div>
@@ -118,7 +118,7 @@ class CalendarEvent extends Component {
 
 CalendarEvent.propTypes = {
   id: PropTypes.number.isRequired,
-  author: PropTypes.object.isRequired,
+  series: PropTypes.object.isRequired,
   title: PropTypes.string.isRequired,
   titleSlug: PropTypes.string.isRequired,
   statistics: PropTypes.object.isRequired,
@@ -133,7 +133,7 @@ CalendarEvent.propTypes = {
 
 CalendarEvent.defaultProps = {
   statistics: {
-    percentOfBooks: 0
+    percentOfIssues: 0
   }
 };
 

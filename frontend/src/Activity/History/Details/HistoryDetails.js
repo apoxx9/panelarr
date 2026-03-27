@@ -198,7 +198,7 @@ function HistoryDetails(props) {
     );
   }
 
-  if (eventType === 'bookFileImported') {
+  if (eventType === 'issueFileImported') {
     const {
       customFormatScore,
       droppedPath,
@@ -244,7 +244,7 @@ function HistoryDetails(props) {
     );
   }
 
-  if (eventType === 'bookFileDeleted') {
+  if (eventType === 'issueFileDeleted') {
     const {
       reason,
       customFormatScore
@@ -290,7 +290,7 @@ function HistoryDetails(props) {
     );
   }
 
-  if (eventType === 'bookFileRenamed') {
+  if (eventType === 'issueFileRenamed') {
     const {
       sourcePath,
       path
@@ -311,7 +311,7 @@ function HistoryDetails(props) {
     );
   }
 
-  if (eventType === 'bookFileRetagged') {
+  if (eventType === 'issueFileRetagged') {
     const {
       diff,
       tagsScrubbed
@@ -342,7 +342,7 @@ function HistoryDetails(props) {
     );
   }
 
-  if (eventType === 'bookImportIncomplete') {
+  if (eventType === 'issueImportIncomplete') {
     const {
       statusMessages
     } = data;

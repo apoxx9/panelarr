@@ -40,7 +40,7 @@ class AgendaEvent extends Component {
   render() {
     const {
       id,
-      author,
+      series,
       title,
       titleSlug,
       releaseDate,
@@ -55,10 +55,10 @@ class AgendaEvent extends Component {
     } = this.props;
 
     const startTime = moment(releaseDate);
-    // const endTime = startTime.add(author.runtime, 'minutes');
+    // const endTime = startTime.add(series.runtime, 'minutes');
     const downloading = !!(queueItem || grabbed);
-    const isMonitored = author.monitored && monitored;
-    const statusStyle = getStatusStyle(id, downloading, startTime, isMonitored, statistics.percentOfBooks);
+    const isMonitored = series.monitored && monitored;
+    const statusStyle = getStatusStyle(id, downloading, startTime, isMonitored, statistics.percentOfIssues);
 
     return (
       <div>
@@ -86,16 +86,16 @@ class AgendaEvent extends Component {
             {formatTime(releaseDate, timeFormat)}
           </div>
 
-          <div className={styles.authorName}>
-            <Link to={`/author/${author.titleSlug}`}>
-              {author.authorName}
+          <div className={styles.seriesName}>
+            <Link to={`/series/${series.titleSlug}`}>
+              {series.seriesName}
             </Link>
           </div>
 
-          <div className={styles.bookSeparator}> - </div>
+          <div className={styles.issueSeparator}> - </div>
 
-          <div className={styles.bookTitle}>
-            <Link to={`/book/${titleSlug}`}>
+          <div className={styles.issueTitle}>
+            <Link to={`/issue/${titleSlug}`}>
               {title}
             </Link>
           </div>
@@ -111,7 +111,7 @@ class AgendaEvent extends Component {
             !queueItem && grabbed &&
               <Icon
                 name={icons.DOWNLOADING}
-                title={translate('BookIsDownloading')}
+                title={translate('IssueIsDownloading')}
               />
           }
         </Link>
@@ -122,10 +122,10 @@ class AgendaEvent extends Component {
 
 AgendaEvent.propTypes = {
   id: PropTypes.number.isRequired,
-  author: PropTypes.object.isRequired,
+  series: PropTypes.object.isRequired,
   title: PropTypes.string.isRequired,
   titleSlug: PropTypes.string.isRequired,
-  bookType: PropTypes.string.isRequired,
+  issueType: PropTypes.string.isRequired,
   releaseDate: PropTypes.string.isRequired,
   monitored: PropTypes.bool.isRequired,
   statistics: PropTypes.object.isRequired,
@@ -139,7 +139,7 @@ AgendaEvent.propTypes = {
 
 AgendaEvent.defaultProps = {
   statistics: {
-    percentOfBooks: 0
+    percentOfIssues: 0
   }
 };
 

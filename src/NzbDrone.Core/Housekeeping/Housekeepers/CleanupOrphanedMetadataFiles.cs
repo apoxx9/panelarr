@@ -38,10 +38,10 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
             mapper.Execute(@"DELETE FROM ""MetadataFiles""
                              WHERE ""Id"" IN (
                              SELECT ""MetadataFiles"".""Id"" FROM ""MetadataFiles""
-                             LEFT OUTER JOIN ""Books""
-                             ON ""MetadataFiles"".""IssueId"" = ""Books"".""Id""
+                             LEFT OUTER JOIN ""Issues""
+                             ON ""MetadataFiles"".""IssueId"" = ""Issues"".""Id""
                              WHERE ""MetadataFiles"".""IssueId"" > 0
-                             AND ""Books"".""Id"" IS NULL)");
+                             AND ""Issues"".""Id"" IS NULL)");
         }
 
         private void DeleteOrphanedByTrackFile()

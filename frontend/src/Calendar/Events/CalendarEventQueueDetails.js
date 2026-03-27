@@ -25,7 +25,7 @@ function CalendarEventQueueDetails(props) {
       status={status}
       errorMessage={errorMessage}
       progressBar={
-        <div title={translate('BookIsDownloadingInterp', [progress.toFixed(1), title])}>
+        <div title={translate('IssueIsDownloadingInterp', [progress.toFixed(1), title])}>
           <CircularProgressBar
             progress={progress}
             size={20}

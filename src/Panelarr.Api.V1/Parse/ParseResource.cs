@@ -9,7 +9,7 @@ namespace Panelarr.Api.V1.Parse
     public class ParseResource : RestResource
     {
         public string Title { get; set; }
-        public ParsedBookInfo ParsedBookInfo { get; set; }
+        public ParsedIssueInfo ParsedIssueInfo { get; set; }
         public SeriesResource Series { get; set; }
         public List<IssueResource> Books { get; set; }
     }

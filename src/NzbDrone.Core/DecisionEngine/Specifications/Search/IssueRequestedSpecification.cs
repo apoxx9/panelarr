@@ -29,7 +29,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.Search
 
             if (!criteriaBook.Intersect(remoteBooks).Any())
             {
-                _logger.Debug("Release rejected since the issue wasn't requested: {0}", remoteBook.ParsedBookInfo);
+                _logger.Debug("Release rejected since the issue wasn't requested: {0}", remoteBook.ParsedIssueInfo);
                 return Decision.Reject("Issue wasn't requested");
             }
 

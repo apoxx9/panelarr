@@ -27,7 +27,6 @@ namespace NzbDrone.Core.ImportLists
         private readonly IProvideBookInfo _bookInfoProxy;
         private readonly ISeriesService _authorService;
         private readonly IBookService _bookService;
-        private readonly IEditionService _editionService;
         private readonly IAddSeriesService _addSeriesService;
         private readonly IAddBookService _addBookService;
         private readonly IEventAggregator _eventAggregator;
@@ -42,7 +41,6 @@ namespace NzbDrone.Core.ImportLists
                                      IProvideBookInfo bookInfoProxy,
                                      ISeriesService authorService,
                                      IBookService bookService,
-                                     IEditionService editionService,
                                      IAddSeriesService addSeriesService,
                                      IAddBookService addBookService,
                                      IEventAggregator eventAggregator,
@@ -57,7 +55,6 @@ namespace NzbDrone.Core.ImportLists
             _bookInfoProxy = bookInfoProxy;
             _authorService = authorService;
             _bookService = bookService;
-            _editionService = editionService;
             _addSeriesService = addSeriesService;
             _addBookService = addBookService;
             _eventAggregator = eventAggregator;
@@ -137,14 +134,14 @@ namespace NzbDrone.Core.ImportLists
                 }
             }
 
-            var addedSeriess = _addSeriesService.AddSeries(authorsToAdd, false);
+            var addedSeries = _addSeriesService.AddSeries(authorsToAdd, false);
             var addedBooks = _addBookService.AddBooks(booksToAdd, false);
 
-            var message = string.Format($"Import List Sync Completed. Items found: {items.Count}, Seriess added: {authorsToAdd.Count}, Books added: {booksToAdd.Count}");
+            var message = string.Format($"Import List Sync Completed. Items found: {items.Count}, Series added: {authorsToAdd.Count}, Books added: {booksToAdd.Count}");
 
             _logger.ProgressInfo(message);
 
-            var toRefresh = addedSeriess.Select(x => x.Id).Concat(addedBooks.Select(x => x.Series.Value.Id)).Distinct().ToList();
+            var toRefresh = addedSeries.Select(x => x.Id).Concat(addedBooks.Select(x => x.Series.Value.Id)).Distinct().ToList();
             if (toRefresh.Any())
             {
                 _commandQueueManager.Push(new BulkRefreshSeriesCommand(toRefresh, true));
@@ -162,19 +159,6 @@ namespace NzbDrone.Core.ImportLists
 
             if (report.EditionGoodreadsId.IsNotNullOrWhiteSpace() && int.TryParse(report.EditionGoodreadsId, out var goodreadsId))
             {
-                // check the local DB
-                var edition = _editionService.GetEditionByForeignEditionId(report.EditionGoodreadsId);
-
-                if (edition != null)
-                {
-                    var issue = edition.Issue.Value;
-                    report.IssueGoodreadsId = issue.ForeignIssueId;
-                    report.Issue = edition.Title;
-                    report.Series ??= issue.SeriesMetadata.Value.Name;
-                    report.SeriesGoodreadsId ??= issue.SeriesMetadata.Value.ForeignSeriesId;
-                    return;
-                }
-
                 try
                 {
                     var remoteBook = _goodreadsProxy.GetBookInfo(report.EditionGoodreadsId);
@@ -280,7 +264,7 @@ namespace NzbDrone.Core.ImportLists
 
                     if (doSearch)
                     {
-                        _commandQueueManager.Push(new MissingBookSearchCommand(existingSeries.Id));
+                        _commandQueueManager.Push(new MissingIssueSearchCommand(existingSeries.Id));
                     }
                 }
 
@@ -317,7 +301,7 @@ namespace NzbDrone.Core.ImportLists
                     ForeignIssueId = report.IssueGoodreadsId,
                     Monitored = monitored,
                     Series = toAddSeries,
-                    AddOptions = new AddBookOptions
+                    AddOptions = new AddIssueOptions
                     {
                         // Only search for new issue for existing authors
                         // New author searches are triggered by SearchForMissingBooks

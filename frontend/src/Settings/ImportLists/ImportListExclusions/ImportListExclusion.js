@@ -55,7 +55,7 @@ class ImportListExclusion extends Component {
   render() {
     const {
       id,
-      authorName,
+      seriesName,
       foreignId
     } = this.props;
 
@@ -66,7 +66,7 @@ class ImportListExclusion extends Component {
         )}
       >
         <div className={styles.foreignId}>{foreignId}</div>
-        <div className={styles.name}>{authorName}</div>
+        <div className={styles.name}>{seriesName}</div>
 
         <div className={styles.actions}>
           <Link
@@ -99,7 +99,7 @@ class ImportListExclusion extends Component {
 
 ImportListExclusion.propTypes = {
   id: PropTypes.number.isRequired,
-  authorName: PropTypes.string.isRequired,
+  seriesName: PropTypes.string.isRequired,
   foreignId: PropTypes.string.isRequired,
   onConfirmDeleteImportListExclusion: PropTypes.func.isRequired
 };

@@ -70,7 +70,7 @@ namespace Panelarr.Api.V1.Indexers
         public static ReleaseResource ToResource(this DownloadDecision model)
         {
             var releaseInfo = model.RemoteBook.Release;
-            var parsedBookInfo = model.RemoteBook.ParsedBookInfo;
+            var parsedBookInfo = model.RemoteBook.ParsedIssueInfo;
             var remoteBook = model.RemoteBook;
             var torrentInfo = (model.RemoteBook.Release as TorrentInfo) ?? new TorrentInfo();
             var indexerFlags = torrentInfo.IndexerFlags;

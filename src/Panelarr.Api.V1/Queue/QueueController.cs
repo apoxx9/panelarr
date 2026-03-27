@@ -215,9 +215,9 @@ namespace Panelarr.Api.V1.Queue
             {
                 case "status":
                     return q => q.Status;
-                case "authors.sortName":
+                case "series.sortName":
                     return q => q.Series?.Metadata.Value.SortName ?? q.Title;
-                case "authors.sortNameLastFirst":
+                case "series.sortNameLastFirst":
                     return q => q.Series?.Metadata.Value.SortName ?? string.Empty;
                 case "title":
                     return q => q.Title;

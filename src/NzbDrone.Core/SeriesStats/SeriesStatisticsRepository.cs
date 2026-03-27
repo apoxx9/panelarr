@@ -16,7 +16,7 @@ namespace NzbDrone.Core.SeriesStats
 
     public class SeriesStatisticsRepository : ISeriesStatisticsRepository
     {
-        private const string _selectTemplate = "SELECT /**select**/ FROM \"Books\" /**join**/ /**innerjoin**/ /**leftjoin**/ /**where**/ /**groupby**/ /**having**/ /**orderby**/";
+        private const string _selectTemplate = "SELECT /**select**/ FROM \"Issues\" /**join**/ /**innerjoin**/ /**leftjoin**/ /**where**/ /**groupby**/ /**having**/ /**orderby**/";
 
         private readonly IMainDatabase _database;
 
@@ -51,11 +51,11 @@ namespace NzbDrone.Core.SeriesStats
 
             return new SqlBuilder(_database.DatabaseType)
             .Select($@"""Series"".""Id"" AS ""SeriesId"",
-                     ""Books"".""Id"" AS ""IssueId"",
+                     ""Issues"".""Id"" AS ""IssueId"",
                      SUM(COALESCE(""ComicFiles"".""Size"", 0)) AS ""SizeOnDisk"",
                      1 AS ""TotalBookCount"",
                      CASE WHEN MIN(""ComicFiles"".""Id"") IS NULL THEN 0 ELSE 1 END AS ""AvailableBookCount"",
-                     CASE WHEN (""Books"".""Monitored"" = {trueIndicator} AND (""Books"".""ReleaseDate"" < @currentDate) OR ""Books"".""ReleaseDate"" IS NULL) OR MIN(""ComicFiles"".""Id"") IS NOT NULL THEN 1 ELSE 0 END AS ""IssueCount"",
+                     CASE WHEN (""Issues"".""Monitored"" = {trueIndicator} AND (""Issues"".""ReleaseDate"" < @currentDate) OR ""Issues"".""ReleaseDate"" IS NULL) OR MIN(""ComicFiles"".""Id"") IS NOT NULL THEN 1 ELSE 0 END AS ""IssueCount"",
                      CASE WHEN MIN(""ComicFiles"".""Id"") IS NULL THEN 0 ELSE COUNT(""ComicFiles"".""Id"") END AS ""ComicFileCount""")
             .Join<Issue, Series>((issue, author) => issue.SeriesMetadataId == author.SeriesMetadataId)
             .LeftJoin<Issue, ComicFile>((b, f) => b.Id == f.IssueId)

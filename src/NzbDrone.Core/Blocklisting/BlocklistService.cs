@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Blocklisting
                                 SeriesId = remoteEpisode.Series.Id,
                                 IssueIds = remoteEpisode.Books.Select(e => e.Id).ToList(),
                                 SourceTitle =  remoteEpisode.Release.Title,
-                                Quality = remoteEpisode.ParsedBookInfo.Quality,
+                                Quality = remoteEpisode.ParsedIssueInfo.Quality,
                                 Date = DateTime.UtcNow,
                                 PublishedDate = remoteEpisode.Release.PublishDate,
                                 Size = remoteEpisode.Release.Size,

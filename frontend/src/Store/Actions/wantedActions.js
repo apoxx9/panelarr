@@ -2,7 +2,7 @@ import { createAction } from 'redux-actions';
 import { filterTypes, sortDirections } from 'Helpers/Props';
 import { createThunk, handleThunks } from 'Store/thunks';
 import serverSideCollectionHandlers from 'Utilities/serverSideCollectionHandlers';
-import createBatchToggleBookMonitoredHandler from './Creators/createBatchToggleBookMonitoredHandler';
+import createBatchToggleIssueMonitoredHandler from './Creators/createBatchToggleIssueMonitoredHandler';
 import createHandleActions from './Creators/createHandleActions';
 import createServerSideCollectionHandlers from './Creators/createServerSideCollectionHandlers';
 import createClearReducer from './Creators/Reducers/createClearReducer';
@@ -28,13 +28,13 @@ export const defaultState = {
 
     columns: [
       {
-        name: 'authorMetadata.sortName',
+        name: 'seriesMetadata.sortName',
         label: 'Series',
         isSortable: true,
         isVisible: true
       },
       {
-        name: 'books.title',
+        name: 'issues.title',
         label: 'Issue',
         isSortable: true,
         isVisible: true
@@ -46,7 +46,7 @@ export const defaultState = {
         isVisible: true
       },
       {
-        name: 'books.lastSearchTime',
+        name: 'issues.lastSearchTime',
         label: 'Last Searched',
         isSortable: true,
         isVisible: false
@@ -97,13 +97,13 @@ export const defaultState = {
 
     columns: [
       {
-        name: 'authorMetadata.sortName',
+        name: 'seriesMetadata.sortName',
         label: 'Series',
         isSortable: true,
         isVisible: true
       },
       {
-        name: 'books.title',
+        name: 'issues.title',
         label: 'Issue',
         isSortable: true,
         isVisible: true
@@ -115,7 +115,7 @@ export const defaultState = {
         isVisible: true
       },
       {
-        name: 'books.lastSearchTime',
+        name: 'issues.lastSearchTime',
         label: 'Last Searched',
         isSortable: true,
         isVisible: false
@@ -184,7 +184,7 @@ export const SET_MISSING_FILTER = 'wanted/missing/setMissingFilter';
 export const SET_MISSING_TABLE_OPTION = 'wanted/missing/setMissingTableOption';
 export const CLEAR_MISSING = 'wanted/missing/clearMissing';
 
-export const BATCH_TOGGLE_MISSING_BOOKS = 'wanted/missing/batchToggleMissingBooks';
+export const BATCH_TOGGLE_MISSING_ISSUES_LIST = 'wanted/missing/batchToggleMissingIssues';
 
 export const FETCH_CUTOFF_UNMET = 'wanted/cutoffUnmet/fetchCutoffUnmet';
 export const GOTO_FIRST_CUTOFF_UNMET_PAGE = 'wanted/cutoffUnmet/gotoCutoffUnmetFirstPage';
@@ -197,7 +197,7 @@ export const SET_CUTOFF_UNMET_FILTER = 'wanted/cutoffUnmet/setCutoffUnmetFilter'
 export const SET_CUTOFF_UNMET_TABLE_OPTION = 'wanted/cutoffUnmet/setCutoffUnmetTableOption';
 export const CLEAR_CUTOFF_UNMET = 'wanted/cutoffUnmet/clearCutoffUnmet';
 
-export const BATCH_TOGGLE_CUTOFF_UNMET_BOOKS = 'wanted/cutoffUnmet/batchToggleCutoffUnmetBooks';
+export const BATCH_TOGGLE_CUTOFF_UNMET_ISSUES_LIST = 'wanted/cutoffUnmet/batchToggleCutoffUnmetIssues';
 
 //
 // Action Creators
@@ -213,7 +213,7 @@ export const setMissingFilter = createThunk(SET_MISSING_FILTER);
 export const setMissingTableOption = createAction(SET_MISSING_TABLE_OPTION);
 export const clearMissing = createAction(CLEAR_MISSING);
 
-export const batchToggleMissingBooks = createThunk(BATCH_TOGGLE_MISSING_BOOKS);
+export const batchToggleMissingIssues = createThunk(BATCH_TOGGLE_MISSING_ISSUES_LIST);
 
 export const fetchCutoffUnmet = createThunk(FETCH_CUTOFF_UNMET);
 export const gotoCutoffUnmetFirstPage = createThunk(GOTO_FIRST_CUTOFF_UNMET_PAGE);
@@ -226,7 +226,7 @@ export const setCutoffUnmetFilter = createThunk(SET_CUTOFF_UNMET_FILTER);
 export const setCutoffUnmetTableOption = createAction(SET_CUTOFF_UNMET_TABLE_OPTION);
 export const clearCutoffUnmet = createAction(CLEAR_CUTOFF_UNMET);
 
-export const batchToggleCutoffUnmetBooks = createThunk(BATCH_TOGGLE_CUTOFF_UNMET_BOOKS);
+export const batchToggleCutoffUnmetIssues = createThunk(BATCH_TOGGLE_CUTOFF_UNMET_ISSUES_LIST);
 
 //
 // Action Handlers
@@ -249,7 +249,7 @@ export const actionHandlers = handleThunks({
     }
   ),
 
-  [BATCH_TOGGLE_MISSING_BOOKS]: createBatchToggleBookMonitoredHandler('wanted.missing', fetchMissing),
+  [BATCH_TOGGLE_MISSING_ISSUES_LIST]: createBatchToggleIssueMonitoredHandler('wanted.missing', fetchMissing),
 
   ...createServerSideCollectionHandlers(
     'wanted.cutoffUnmet',
@@ -267,7 +267,7 @@ export const actionHandlers = handleThunks({
     }
   ),
 
-  [BATCH_TOGGLE_CUTOFF_UNMET_BOOKS]: createBatchToggleBookMonitoredHandler('wanted.cutoffUnmet', fetchCutoffUnmet)
+  [BATCH_TOGGLE_CUTOFF_UNMET_ISSUES_LIST]: createBatchToggleIssueMonitoredHandler('wanted.cutoffUnmet', fetchCutoffUnmet)
 
 });
 

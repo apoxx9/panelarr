@@ -13,19 +13,19 @@ function getIconName(name) {
       return icons.BACKUP;
     case 'CheckHealth':
       return icons.HEALTH;
-    case 'BookSearch':
+    case 'IssueSearch':
       return icons.SEARCH;
     case 'Housekeeping':
       return icons.HOUSEKEEPING;
     case 'RescanFolders':
       return icons.RESCAN;
-    case 'RefreshAuthor':
+    case 'RefreshSeries':
       return icons.REFRESH;
     case 'RssSync':
       return icons.RSS;
     case 'SeasonSearch':
       return icons.SEARCH;
-    case 'AuthorSearch':
+    case 'SeriesSearch':
       return icons.SEARCH;
     case 'UpdateSceneMapping':
       return icons.REFRESH;

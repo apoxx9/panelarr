@@ -31,32 +31,32 @@ class SelectEditionRow extends Component {
 
     const extendedTitle = disambiguation ? `${title} (${disambiguation})` : title;
 
-    const values = _.map(editions, (bookEdition) => {
+    const values = _.map(editions, (issueEdition) => {
 
-      let value = `${bookEdition.title}`;
+      let value = `${issueEdition.title}`;
 
-      if (bookEdition.disambiguation) {
-        value = `${value} (${titleCase(bookEdition.disambiguation)})`;
+      if (issueEdition.disambiguation) {
+        value = `${value} (${titleCase(issueEdition.disambiguation)})`;
       }
 
       const extras = [];
-      if (bookEdition.language) {
-        extras.push(bookEdition.language);
+      if (issueEdition.language) {
+        extras.push(issueEdition.language);
       }
-      if (bookEdition.publisher) {
-        extras.push(bookEdition.publisher);
+      if (issueEdition.publisher) {
+        extras.push(issueEdition.publisher);
       }
-      if (bookEdition.isbn13) {
-        extras.push(bookEdition.isbn13);
+      if (issueEdition.isbn13) {
+        extras.push(issueEdition.isbn13);
       }
-      if (bookEdition.asin) {
-        extras.push(bookEdition.asin);
+      if (issueEdition.asin) {
+        extras.push(issueEdition.asin);
       }
-      if (bookEdition.format) {
-        extras.push(bookEdition.format);
+      if (issueEdition.format) {
+        extras.push(issueEdition.format);
       }
-      if (bookEdition.pageCount > 0) {
-        extras.push(`${bookEdition.pageCount}p`);
+      if (issueEdition.pageCount > 0) {
+        extras.push(`${issueEdition.pageCount}p`);
       }
 
       if (extras) {
@@ -64,7 +64,7 @@ class SelectEditionRow extends Component {
       }
 
       return {
-        key: bookEdition.foreignEditionId,
+        key: issueEdition.foreignEditionId,
         value
       };
     });
@@ -84,7 +84,7 @@ class SelectEditionRow extends Component {
               return null;
             }
 
-            if (name === 'book') {
+            if (name === 'issue') {
               return (
                 <TableRowCell key={name}>
                   {extendedTitle}

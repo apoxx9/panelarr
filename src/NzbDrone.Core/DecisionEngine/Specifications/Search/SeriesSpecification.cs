@@ -23,12 +23,12 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.Search
                 return Decision.Accept();
             }
 
-            _logger.Debug("Checking if author matches searched author");
+            _logger.Debug("Checking if series matches searched series");
 
             if (remoteBook.Series.Id != searchCriteria.Series.Id)
             {
                 _logger.Debug("Series {0} does not match {1}", remoteBook.Series, searchCriteria.Series);
-                return Decision.Reject("Wrong author");
+                return Decision.Reject("Wrong series");
             }
 
             return Decision.Accept();

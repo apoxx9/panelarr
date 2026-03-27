@@ -114,9 +114,9 @@ namespace NzbDrone.Core.DecisionEngine
                         remoteBook.Release = report;
 
                         // parse quality again with title and category if unknown
-                        if (remoteBook.ParsedBookInfo.Quality.Quality == Quality.Unknown)
+                        if (remoteBook.ParsedIssueInfo.Quality.Quality == Quality.Unknown)
                         {
-                            remoteBook.ParsedBookInfo.Quality = QualityParser.ParseQuality(report.Title, null, report.Categories);
+                            remoteBook.ParsedIssueInfo.Quality = QualityParser.ParseQuality(report.Title, null, report.Categories);
                         }
 
                         if (remoteBook.Series == null)
@@ -154,7 +154,7 @@ namespace NzbDrone.Core.DecisionEngine
                     {
                         if (parsedBookInfo == null)
                         {
-                            parsedBookInfo = new ParsedBookInfo
+                            parsedBookInfo = new ParsedIssueInfo
                             {
                                 Quality = QualityParser.ParseQuality(report.Title, null, report.Categories)
                             };
@@ -165,7 +165,7 @@ namespace NzbDrone.Core.DecisionEngine
                             var remoteBook = new RemoteBook
                             {
                                 Release = report,
-                                ParsedBookInfo = parsedBookInfo
+                                ParsedIssueInfo = parsedBookInfo
                             };
 
                             decision = new DownloadDecision(remoteBook, new Rejection("Unable to parse release"));
@@ -176,7 +176,7 @@ namespace NzbDrone.Core.DecisionEngine
                     {
                         if (parsedBookInfo == null)
                         {
-                            parsedBookInfo = new ParsedBookInfo
+                            parsedBookInfo = new ParsedIssueInfo
                             {
                                 Quality = QualityParser.ParseQuality(report.Title, null, report.Categories)
                             };
@@ -187,7 +187,7 @@ namespace NzbDrone.Core.DecisionEngine
                             var remoteBook = new RemoteBook
                             {
                                 Release = report,
-                                ParsedBookInfo = parsedBookInfo
+                                ParsedIssueInfo = parsedBookInfo
                             };
 
                             decision = new DownloadDecision(remoteBook, new Rejection("Unable to parse release"));
@@ -277,7 +277,7 @@ namespace NzbDrone.Core.DecisionEngine
             catch (Exception e)
             {
                 e.Data.Add("report", remoteBook.Release.ToJson());
-                e.Data.Add("parsed", remoteBook.ParsedBookInfo.ToJson());
+                e.Data.Add("parsed", remoteBook.ParsedIssueInfo.ToJson());
                 _logger.Error(e, "Couldn't evaluate decision on {0}", remoteBook.Release.Title);
                 return new Rejection($"{spec.GetType().Name}: {e.Message}");
             }

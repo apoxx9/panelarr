@@ -47,7 +47,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
 
                 foreach (var file in comicFiles)
                 {
-                    if (_qualityUpgradableSpecification.IsRevisionUpgrade(file.Quality, subject.ParsedBookInfo.Quality))
+                    if (_qualityUpgradableSpecification.IsRevisionUpgrade(file.Quality, subject.ParsedIssueInfo.Quality))
                     {
                         if (downloadPropersAndRepacks == ProperDownloadTypes.DoNotUpgrade)
                         {

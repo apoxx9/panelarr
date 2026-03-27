@@ -17,12 +17,12 @@ namespace NzbDrone.Core.Notifications
         List<INotification> OnHealthIssueEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnSeriesAddedEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnSeriesDeleteEnabled(bool filterBlockedNotifications = true);
-        List<INotification> OnBookDeleteEnabled(bool filterBlockedNotifications = true);
-        List<INotification> OnBookFileDeleteEnabled(bool filterBlockedNotifications = true);
-        List<INotification> OnBookFileDeleteForUpgradeEnabled(bool filterBlockedNotifications = true);
+        List<INotification> OnIssueDeleteEnabled(bool filterBlockedNotifications = true);
+        List<INotification> OnComicFileDeleteEnabled(bool filterBlockedNotifications = true);
+        List<INotification> OnComicFileDeleteForUpgradeEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnDownloadFailureEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnImportFailureEnabled(bool filterBlockedNotifications = true);
-        List<INotification> OnBookRetagEnabled(bool filterBlockedNotifications = true);
+        List<INotification> OnIssueRetagEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnApplicationUpdateEnabled(bool filterBlockedNotifications = true);
     }
 
@@ -103,34 +103,34 @@ namespace NzbDrone.Core.Notifications
             return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnSeriesDelete).ToList();
         }
 
-        public List<INotification> OnBookDeleteEnabled(bool filterBlockedNotifications = true)
+        public List<INotification> OnIssueDeleteEnabled(bool filterBlockedNotifications = true)
         {
             if (filterBlockedNotifications)
             {
-                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnBookDelete)).ToList();
+                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnIssueDelete)).ToList();
             }
 
-            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnBookDelete).ToList();
+            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnIssueDelete).ToList();
         }
 
-        public List<INotification> OnBookFileDeleteEnabled(bool filterBlockedNotifications = true)
+        public List<INotification> OnComicFileDeleteEnabled(bool filterBlockedNotifications = true)
         {
             if (filterBlockedNotifications)
             {
-                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnBookFileDelete)).ToList();
+                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnComicFileDelete)).ToList();
             }
 
-            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnBookFileDelete).ToList();
+            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnComicFileDelete).ToList();
         }
 
-        public List<INotification> OnBookFileDeleteForUpgradeEnabled(bool filterBlockedNotifications = true)
+        public List<INotification> OnComicFileDeleteForUpgradeEnabled(bool filterBlockedNotifications = true)
         {
             if (filterBlockedNotifications)
             {
-                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnBookFileDeleteForUpgrade)).ToList();
+                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnComicFileDeleteForUpgrade)).ToList();
             }
 
-            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnBookFileDeleteForUpgrade).ToList();
+            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnComicFileDeleteForUpgrade).ToList();
         }
 
         public List<INotification> OnHealthIssueEnabled(bool filterBlockedNotifications = true)
@@ -163,14 +163,14 @@ namespace NzbDrone.Core.Notifications
             return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnImportFailure).ToList();
         }
 
-        public List<INotification> OnBookRetagEnabled(bool filterBlockedNotifications = true)
+        public List<INotification> OnIssueRetagEnabled(bool filterBlockedNotifications = true)
         {
             if (filterBlockedNotifications)
             {
-                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnBookRetag)).ToList();
+                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnIssueRetag)).ToList();
             }
 
-            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnBookRetag).ToList();
+            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnIssueRetag).ToList();
         }
 
         public List<INotification> OnApplicationUpdateEnabled(bool filterBlockedNotifications = true)
@@ -209,13 +209,13 @@ namespace NzbDrone.Core.Notifications
             definition.SupportsOnRename = provider.SupportsOnRename;
             definition.SupportsOnSeriesAdded = provider.SupportsOnSeriesAdded;
             definition.SupportsOnSeriesDelete = provider.SupportsOnSeriesDelete;
-            definition.SupportsOnBookDelete = provider.SupportsOnBookDelete;
-            definition.SupportsOnBookFileDelete = provider.SupportsOnBookFileDelete;
-            definition.SupportsOnBookFileDeleteForUpgrade = provider.SupportsOnBookFileDeleteForUpgrade;
+            definition.SupportsOnIssueDelete = provider.SupportsOnIssueDelete;
+            definition.SupportsOnComicFileDelete = provider.SupportsOnComicFileDelete;
+            definition.SupportsOnComicFileDeleteForUpgrade = provider.SupportsOnComicFileDeleteForUpgrade;
             definition.SupportsOnHealthIssue = provider.SupportsOnHealthIssue;
             definition.SupportsOnDownloadFailure = provider.SupportsOnDownloadFailure;
             definition.SupportsOnImportFailure = provider.SupportsOnImportFailure;
-            definition.SupportsOnBookRetag = provider.SupportsOnBookRetag;
+            definition.SupportsOnIssueRetag = provider.SupportsOnIssueRetag;
             definition.SupportsOnApplicationUpdate = provider.SupportsOnApplicationUpdate;
         }
 

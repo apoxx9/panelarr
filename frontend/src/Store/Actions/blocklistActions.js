@@ -31,8 +31,8 @@ export const defaultState = {
 
   columns: [
     {
-      name: 'authorMetadata.sortName',
-      label: 'Author Name',
+      name: 'seriesMetadata.sortName',
+      label: 'Series Name',
       isSortable: true,
       isVisible: true
     },

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import BookQuality from 'Book/BookQuality';
-import FileDetailsModal from 'BookFile/FileDetailsModal';
+import IssueQuality from 'Issue/IssueQuality';
+import FileDetailsModal from 'IssueFile/FileDetailsModal';
 import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import RelativeDateCellConnector from 'Components/Table/Cells/RelativeDateCellConnector';
@@ -148,7 +148,7 @@ class UnmappedFilesTableRow extends Component {
                   key={name}
                   className={styles[name]}
                 >
-                  <BookQuality
+                  <IssueQuality
                     quality={quality}
                   />
                 </VirtualTableRowCell>
@@ -204,8 +204,8 @@ class UnmappedFilesTableRow extends Component {
         <ConfirmModal
           isOpen={isConfirmDeleteModalOpen}
           kind={kinds.DANGER}
-          title={translate('DeleteBookFile')}
-          message={translate('DeleteBookFileMessageText', [path])}
+          title={translate('DeleteIssueFile')}
+          message={translate('DeleteIssueFileMessageText', [path])}
           confirmLabel={translate('Delete')}
           onConfirm={this.onConfirmDelete}
           onCancel={this.onConfirmDeleteModalClose}

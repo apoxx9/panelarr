@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import AuthorNameLink from 'Author/AuthorNameLink';
-import BookFormats from 'Book/BookFormats';
-import BookQuality from 'Book/BookQuality';
-import BookTitleLink from 'Book/BookTitleLink';
+import SeriesNameLink from 'Series/SeriesNameLink';
+import IssueFormats from 'Issue/IssueFormats';
+import IssueQuality from 'Issue/IssueQuality';
+import IssueTitleLink from 'Issue/IssueTitleLink';
 import IconButton from 'Components/Link/IconButton';
 import RelativeDateCellConnector from 'Components/Table/Cells/RelativeDateCellConnector';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
@@ -54,8 +54,8 @@ class HistoryRow extends Component {
 
   render() {
     const {
-      author,
-      book,
+      series,
+      issue,
       quality,
       customFormats,
       customFormatScore,
@@ -71,7 +71,7 @@ class HistoryRow extends Component {
       onMarkAsFailedPress
     } = this.props;
 
-    if (!author || !book) {
+    if (!series || !issue) {
       return null;
     }
 
@@ -98,24 +98,24 @@ class HistoryRow extends Component {
               );
             }
 
-            if (name === 'authorMetadata.sortName') {
+            if (name === 'seriesMetadata.sortName') {
               return (
                 <TableRowCell key={name}>
-                  <AuthorNameLink
-                    titleSlug={author.titleSlug}
-                    authorName={author.authorName}
+                  <SeriesNameLink
+                    titleSlug={series.titleSlug}
+                    seriesName={series.seriesName}
                   />
                 </TableRowCell>
               );
             }
 
-            if (name === 'books.title') {
+            if (name === 'issues.title') {
               return (
                 <TableRowCell key={name}>
-                  <BookTitleLink
-                    titleSlug={book.titleSlug}
-                    title={book.title}
-                    disambiguation={book.disambiguation}
+                  <IssueTitleLink
+                    titleSlug={issue.titleSlug}
+                    title={issue.title}
+                    disambiguation={issue.disambiguation}
                   />
                 </TableRowCell>
               );
@@ -124,7 +124,7 @@ class HistoryRow extends Component {
             if (name === 'quality') {
               return (
                 <TableRowCell key={name}>
-                  <BookQuality
+                  <IssueQuality
                     quality={quality}
                     isCutoffMet={qualityCutoffNotMet}
                   />
@@ -135,7 +135,7 @@ class HistoryRow extends Component {
             if (name === 'customFormats') {
               return (
                 <TableRowCell key={name}>
-                  <BookFormats
+                  <IssueFormats
                     formats={customFormats}
                   />
                 </TableRowCell>
@@ -184,7 +184,7 @@ class HistoryRow extends Component {
                       customFormatScore,
                       customFormats.length
                     )}
-                    tooltip={<BookFormats formats={customFormats} />}
+                    tooltip={<IssueFormats formats={customFormats} />}
                     position={tooltipPositions.BOTTOM}
                   />
                 </TableRowCell>
@@ -250,9 +250,9 @@ class HistoryRow extends Component {
 }
 
 HistoryRow.propTypes = {
-  bookId: PropTypes.number,
-  author: PropTypes.object.isRequired,
-  book: PropTypes.object,
+  issueId: PropTypes.number,
+  series: PropTypes.object.isRequired,
+  issue: PropTypes.object,
   quality: PropTypes.object.isRequired,
   customFormats: PropTypes.arrayOf(PropTypes.object),
   customFormatScore: PropTypes.number.isRequired,

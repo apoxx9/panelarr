@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using NLog;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Organizer;
@@ -17,12 +18,14 @@ namespace Panelarr.Api.V1.Search
         private readonly ISearchForNewEntity _searchProxy;
         private readonly IBuildFileNames _fileNameBuilder;
         private readonly IMapCoversToLocal _coverMapper;
+        private readonly Logger _logger;
 
-        public SearchController(ISearchForNewEntity searchProxy, IBuildFileNames fileNameBuilder, IMapCoversToLocal coverMapper)
+        public SearchController(ISearchForNewEntity searchProxy, IBuildFileNames fileNameBuilder, IMapCoversToLocal coverMapper, Logger logger)
         {
             _searchProxy = searchProxy;
             _fileNameBuilder = fileNameBuilder;
             _coverMapper = coverMapper;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -40,38 +43,63 @@ namespace Panelarr.Api.V1.Search
                 var resource = new SearchResource();
                 resource.Id = id++;
 
-                if (result is NzbDrone.Core.Books.Series author)
+                if (result is NzbDrone.Core.Books.Series series)
                 {
-                    resource.Series = author.ToResource();
-                    resource.ForeignId = author.ForeignSeriesId;
+                    resource.Series = series.ToResource();
+                    resource.ForeignId = series.ForeignSeriesId;
 
-                    _coverMapper.ConvertToLocalUrls(resource.Series.Id, MediaCoverEntity.Series, resource.Series.Images);
-
-                    var poster = resource.Series.Images.FirstOrDefault(c => c.CoverType == MediaCoverTypes.Poster);
-
-                    if (poster != null)
+                    if (resource.Series.Images != null)
                     {
-                        resource.Series.RemotePoster = poster.RemoteUrl;
+                        _coverMapper.ConvertToLocalUrls(resource.Series.Id, MediaCoverEntity.Series, resource.Series.Images);
+
+                        var poster = resource.Series.Images.FirstOrDefault(c => c.CoverType == MediaCoverTypes.Poster);
+
+                        if (poster != null)
+                        {
+                            resource.Series.RemotePoster = poster.RemoteUrl;
+                        }
                     }
 
-                    resource.Series.Folder = _fileNameBuilder.GetSeriesFolder(author);
+                    try
+                    {
+                        resource.Series.Folder = _fileNameBuilder.GetSeriesFolder(series);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Debug(ex, "Failed to build folder name for search result {0}", series.Name);
+                        resource.Series.Folder = series.Name;
+                    }
                 }
                 else if (result is NzbDrone.Core.Books.Issue issue)
                 {
                     resource.Issue = issue.ToResource();
-                    resource.Issue.Series = issue.Series.Value.ToResource();
                     resource.ForeignId = issue.ForeignIssueId;
 
-                    _coverMapper.ConvertToLocalUrls(resource.Issue.Id, MediaCoverEntity.Issue, resource.Issue.Images);
-
-                    var cover = resource.Issue.Images.FirstOrDefault(c => c.CoverType == MediaCoverTypes.Cover);
-
-                    if (cover != null)
+                    if (issue.Series?.Value != null)
                     {
-                        resource.Issue.RemoteCover = cover.RemoteUrl;
+                        resource.Issue.Series = issue.Series.Value.ToResource();
+
+                        try
+                        {
+                            resource.Issue.Series.Folder = _fileNameBuilder.GetSeriesFolder(issue.Series);
+                        }
+                        catch (Exception)
+                        {
+                            resource.Issue.Series.Folder = issue.Series.Value?.Name;
+                        }
                     }
 
-                    resource.Issue.Series.Folder = _fileNameBuilder.GetSeriesFolder(issue.Series);
+                    if (resource.Issue.Images != null)
+                    {
+                        _coverMapper.ConvertToLocalUrls(resource.Issue.Id, MediaCoverEntity.Issue, resource.Issue.Images);
+
+                        var cover = resource.Issue.Images.FirstOrDefault(c => c.CoverType == MediaCoverTypes.Cover);
+
+                        if (cover != null)
+                        {
+                            resource.Issue.RemoteCover = cover.RemoteUrl;
+                        }
+                    }
                 }
                 else
                 {

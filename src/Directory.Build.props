@@ -36,7 +36,7 @@
     <!--
         CS1591: Missing XML comment for publicly visible type or member 'Type_or_Member'
     -->
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <NoWarn>$(NoWarn);CS1591;SA1200</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -213,7 +213,7 @@
   <PropertyGroup Condition="'$(IsOSX)' == 'true' and
                             '$(RuntimeIdentifier)' == ''">
     <_UsingDefaultRuntimeIdentifier>true</_UsingDefaultRuntimeIdentifier>
-    <RuntimeIdentifier>osx-x64</RuntimeIdentifier>
+    <RuntimeIdentifier>osx-$(Architecture)</RuntimeIdentifier>
   </PropertyGroup>
 
 </Project>

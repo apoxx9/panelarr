@@ -11,7 +11,7 @@ namespace Panelarr.Api.V1.Books
         public string NewValue { get; set; }
     }
 
-    public class RetagBookResource : RestResource
+    public class RetagIssueResource : RestResource
     {
         public int SeriesId { get; set; }
         public int IssueId { get; set; }
@@ -23,14 +23,14 @@ namespace Panelarr.Api.V1.Books
 
     public static class RetagTrackResourceMapper
     {
-        public static RetagBookResource ToResource(this NzbDrone.Core.MediaFiles.RetagComicFilePreview model)
+        public static RetagIssueResource ToResource(this NzbDrone.Core.MediaFiles.RetagComicFilePreview model)
         {
             if (model == null)
             {
                 return null;
             }
 
-            return new RetagBookResource
+            return new RetagIssueResource
             {
                 SeriesId = model.SeriesId,
                 IssueId = model.IssueId,
@@ -46,7 +46,7 @@ namespace Panelarr.Api.V1.Books
             };
         }
 
-        public static List<RetagBookResource> ToResource(this IEnumerable<NzbDrone.Core.MediaFiles.RetagComicFilePreview> models)
+        public static List<RetagIssueResource> ToResource(this IEnumerable<NzbDrone.Core.MediaFiles.RetagComicFilePreview> models)
         {
             return models.Select(ToResource).ToList();
         }

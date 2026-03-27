@@ -68,11 +68,11 @@ namespace Panelarr.Api.V1.ComicFiles
         }
 
         [HttpGet]
-        public List<ComicFileResource> GetBookFiles(int? authorId, [FromQuery]List<int> bookFileIds, [FromQuery(Name="bookId")]List<int> bookIds, bool? unmapped)
+        public List<ComicFileResource> GetBookFiles(int? seriesId, [FromQuery]List<int> issueFileIds, [FromQuery(Name="issueId")]List<int> issueIds, bool? unmapped)
         {
-            if (!authorId.HasValue && !bookFileIds.Any() && !bookIds.Any() && !unmapped.HasValue)
+            if (!seriesId.HasValue && !issueFileIds.Any() && !issueIds.Any() && !unmapped.HasValue)
             {
-                throw new BadRequestException("authorId, bookId, bookFileIds or unmapped must be provided");
+                throw new BadRequestException("seriesId, issueId, issueFileIds or unmapped must be provided");
             }
 
             if (unmapped.HasValue && unmapped.Value)
@@ -81,19 +81,19 @@ namespace Panelarr.Api.V1.ComicFiles
                 return files.ConvertAll(f => MapToResource(f));
             }
 
-            if (authorId.HasValue && !bookIds.Any())
+            if (seriesId.HasValue && !issueIds.Any())
             {
-                var author = _authorService.GetSeries(authorId.Value);
+                var author = _authorService.GetSeries(seriesId.Value);
 
-                return _mediaFileService.GetFilesBySeries(authorId.Value).ConvertAll(f => f.ToResource(author, _upgradableSpecification));
+                return _mediaFileService.GetFilesBySeries(seriesId.Value).ConvertAll(f => f.ToResource(author, _upgradableSpecification));
             }
 
-            if (bookIds.Any())
+            if (issueIds.Any())
             {
                 var result = new List<ComicFileResource>();
-                foreach (var bookId in bookIds)
+                foreach (var issueId in issueIds)
                 {
-                    var issue = _bookService.GetBook(bookId);
+                    var issue = _bookService.GetBook(issueId);
                     var bookSeries = _authorService.GetSeries(issue.SeriesId);
                     result.AddRange(_mediaFileService.GetFilesByBook(issue.Id).ConvertAll(f => f.ToResource(bookSeries, _upgradableSpecification)));
                 }
@@ -103,7 +103,7 @@ namespace Panelarr.Api.V1.ComicFiles
             else
             {
                 // trackfiles will come back with the author already populated
-                var comicFiles = _mediaFileService.Get(bookFileIds);
+                var comicFiles = _mediaFileService.Get(issueFileIds);
                 return comicFiles.ConvertAll(e => MapToResource(e));
             }
         }

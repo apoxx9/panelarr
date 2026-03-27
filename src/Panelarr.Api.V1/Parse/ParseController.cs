@@ -42,7 +42,7 @@ namespace Panelarr.Api.V1.Parse
                 return new ParseResource
                 {
                     Title = title,
-                    ParsedBookInfo = remoteBook.ParsedBookInfo,
+                    ParsedIssueInfo = remoteBook.ParsedIssueInfo,
                     Series = remoteBook.Series.ToResource(),
                     Books = remoteBook.Books.ToResource()
                 };
@@ -52,7 +52,7 @@ namespace Panelarr.Api.V1.Parse
                 return new ParseResource
                 {
                     Title = title,
-                    ParsedBookInfo = parsedBookInfo
+                    ParsedIssueInfo = parsedBookInfo
                 };
             }
         }

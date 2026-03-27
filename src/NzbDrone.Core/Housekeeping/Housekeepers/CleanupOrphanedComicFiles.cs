@@ -21,9 +21,9 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                              SET ""EditionId"" = 0
                              WHERE ""Id"" IN (
                              SELECT ""ComicFiles"".""Id"" FROM ""ComicFiles""
-                             LEFT OUTER JOIN ""Editions""
-                             ON ""ComicFiles"".""EditionId"" = ""Editions"".""Id""
-                             WHERE ""Editions"".""Id"" IS NULL)");
+                             LEFT OUTER JOIN ""Issues""
+                             ON ""ComicFiles"".""EditionId"" = ""Issues"".""Id""
+                             WHERE ""Issues"".""Id"" IS NULL)");
         }
     }
 }

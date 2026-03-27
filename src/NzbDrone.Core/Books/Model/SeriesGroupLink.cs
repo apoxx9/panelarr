@@ -7,8 +7,8 @@ namespace NzbDrone.Core.Books
     {
         public string Position { get; set; }
         public int SeriesPosition { get; set; }
-        public int SeriesId { get; set; }
-        public int IssueId { get; set; }
+        public int SeriesGroupId { get; set; }
+        public int SeriesMetadataId { get; set; }
         public bool IsPrimary { get; set; }
 
         [MemberwiseEqualityIgnore]
@@ -26,8 +26,8 @@ namespace NzbDrone.Core.Books
         public override void UseDbFieldsFrom(SeriesGroupLink other)
         {
             Id = other.Id;
-            SeriesId = other.SeriesId;
-            IssueId = other.IssueId;
+            SeriesGroupId = other.SeriesGroupId;
+            SeriesMetadataId = other.SeriesMetadataId;
         }
     }
 }

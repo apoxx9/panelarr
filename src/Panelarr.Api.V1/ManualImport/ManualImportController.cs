@@ -15,19 +15,16 @@ namespace Panelarr.Api.V1.ManualImport
     {
         private readonly ISeriesService _authorService;
         private readonly IBookService _bookService;
-        private readonly IEditionService _editionService;
         private readonly IManualImportService _manualImportService;
         private readonly Logger _logger;
 
         public ManualImportController(IManualImportService manualImportService,
                                   ISeriesService authorService,
-                                  IEditionService editionService,
                                   IBookService bookService,
                                   Logger logger)
         {
             _authorService = authorService;
             _bookService = bookService;
-            _editionService = editionService;
             _manualImportService = manualImportService;
             _logger = logger;
         }
@@ -39,13 +36,13 @@ namespace Panelarr.Api.V1.ManualImport
         }
 
         [HttpGet]
-        public List<ManualImportResource> GetMediaFiles(string folder, string downloadId, int? authorId, bool filterExistingFiles = true, bool replaceExistingFiles = true)
+        public List<ManualImportResource> GetMediaFiles(string folder, string downloadId, int? seriesId, bool filterExistingFiles = true, bool replaceExistingFiles = true)
         {
             NzbDrone.Core.Books.Series author = null;
 
-            if (authorId > 0)
+            if (seriesId > 0)
             {
-                author = _authorService.GetSeries(authorId.Value);
+                author = _authorService.GetSeries(seriesId.Value);
             }
 
             var filter = filterExistingFiles ? FilterFilesType.Matched : FilterFilesType.None;

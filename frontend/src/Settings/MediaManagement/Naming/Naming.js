@@ -34,18 +34,18 @@ class Naming extends Component {
     this.setState({
       isNamingModalOpen: true,
       namingModalOptions: {
-        name: 'standardBookFormat',
-        book: true,
+        name: 'standardIssueFormat',
+        issue: true,
         additional: true
       }
     });
   };
 
-  onAuthorFolderNamingModalOpenClick = () => {
+  onSeriesFolderNamingModalOpenClick = () => {
     this.setState({
       isNamingModalOpen: true,
       namingModalOptions: {
-        name: 'authorFolderFormat'
+        name: 'seriesFolderFormat'
       }
     });
   };
@@ -74,7 +74,7 @@ class Naming extends Component {
       namingModalOptions
     } = this.state;
 
-    const renameBooks = hasSettings && settings.renameBooks.value;
+    const renameIssues = hasSettings && settings.renameIssues.value;
     const replaceIllegalCharacters = hasSettings && settings.replaceIllegalCharacters.value;
 
     const colonReplacementOptions = [
@@ -85,33 +85,33 @@ class Naming extends Component {
       { key: 4, value: translate('SmartReplace'), hint: translate('DashOrSpaceDashDependingOnName') }
     ];
 
-    const standardBookFormatHelpTexts = [];
-    const standardBookFormatErrors = [];
-    const authorFolderFormatHelpTexts = [];
-    const authorFolderFormatErrors = [];
+    const standardIssueFormatHelpTexts = [];
+    const standardIssueFormatErrors = [];
+    const seriesFolderFormatHelpTexts = [];
+    const seriesFolderFormatErrors = [];
 
     if (examplesPopulated) {
-      if (examples.singleBookExample) {
-        standardBookFormatHelpTexts.push(`Single Book: ${examples.singleBookExample}`);
+      if (examples.singleIssueExample) {
+        standardIssueFormatHelpTexts.push(`Single Issue: ${examples.singleIssueExample}`);
       } else {
-        standardBookFormatErrors.push({ message: 'Single Book: Invalid Format' });
+        standardIssueFormatErrors.push({ message: 'Single Issue: Invalid Format' });
       }
 
-      if (examples.multiPartBookExample) {
-        standardBookFormatHelpTexts.push(`Multi-part Book: ${examples.multiPartBookExample}`);
+      if (examples.multiPartIssueExample) {
+        standardIssueFormatHelpTexts.push(`Multi-part Issue: ${examples.multiPartIssueExample}`);
       } else {
-        standardBookFormatErrors.push({ message: 'Multi-part Book: Invalid Format' });
+        standardIssueFormatErrors.push({ message: 'Multi-part Issue: Invalid Format' });
       }
 
-      if (examples.authorFolderExample) {
-        authorFolderFormatHelpTexts.push(`Example: ${examples.authorFolderExample}`);
+      if (examples.seriesFolderExample) {
+        seriesFolderFormatHelpTexts.push(`Example: ${examples.seriesFolderExample}`);
       } else {
-        authorFolderFormatErrors.push({ message: 'Invalid Format' });
+        seriesFolderFormatErrors.push({ message: 'Invalid Format' });
       }
     }
 
     return (
-      <FieldSet legend={translate('BookNaming')}>
+      <FieldSet legend={translate('IssueNaming')}>
         {
           isFetching &&
             <LoadingIndicator />
@@ -129,15 +129,15 @@ class Naming extends Component {
             <Form>
               <FormGroup size={sizes.MEDIUM}>
                 <FormLabel>
-                  {translate('RenameBooks')}
+                  {translate('RenameIssues')}
                 </FormLabel>
 
                 <FormInputGroup
                   type={inputTypes.CHECK}
-                  name="renameBooks"
-                  helpText={translate('RenameBooksHelpText')}
+                  name="renameIssues"
+                  helpText={translate('RenameIssuesHelpText')}
                   onChange={onInputChange}
-                  {...settings.renameBooks}
+                  {...settings.renameIssues}
                 />
               </FormGroup>
 
@@ -174,22 +174,22 @@ class Naming extends Component {
               }
 
               {
-                renameBooks &&
+                renameIssues &&
                   <div>
                     <FormGroup size={sizes.LARGE}>
                       <FormLabel>
-                        {translate('StandardBookFormat')}
+                        {translate('StandardIssueFormat')}
                       </FormLabel>
 
                       <FormInputGroup
                         inputClassName={styles.namingInput}
                         type={inputTypes.TEXT}
-                        name="standardBookFormat"
+                        name="standardIssueFormat"
                         buttons={<FormInputButton onPress={this.onStandardNamingModalOpenClick}>?</FormInputButton>}
                         onChange={onInputChange}
-                        {...settings.standardBookFormat}
-                        helpTexts={standardBookFormatHelpTexts}
-                        errors={[...standardBookFormatErrors, ...settings.standardBookFormat.errors]}
+                        {...settings.standardIssueFormat}
+                        helpTexts={standardIssueFormatHelpTexts}
+                        errors={[...standardIssueFormatErrors, ...settings.standardIssueFormat.errors]}
                       />
                     </FormGroup>
                   </div>
@@ -200,18 +200,18 @@ class Naming extends Component {
                 isAdvanced={true}
               >
                 <FormLabel>
-                  {translate('AuthorFolderFormat')}
+                  {translate('SeriesFolderFormat')}
                 </FormLabel>
 
                 <FormInputGroup
                   inputClassName={styles.namingInput}
                   type={inputTypes.TEXT}
-                  name="authorFolderFormat"
-                  buttons={<FormInputButton onPress={this.onAuthorFolderNamingModalOpenClick}>?</FormInputButton>}
+                  name="seriesFolderFormat"
+                  buttons={<FormInputButton onPress={this.onSeriesFolderNamingModalOpenClick}>?</FormInputButton>}
                   onChange={onInputChange}
-                  {...settings.authorFolderFormat}
-                  helpTexts={['Used when adding a new author or moving an author via the author editor', ...authorFolderFormatHelpTexts]}
-                  errors={[...authorFolderFormatErrors, ...settings.authorFolderFormat.errors]}
+                  {...settings.seriesFolderFormat}
+                  helpTexts={['Used when adding a new series or moving an series via the series editor', ...seriesFolderFormatHelpTexts]}
+                  errors={[...seriesFolderFormatErrors, ...settings.seriesFolderFormat.errors]}
                 />
               </FormGroup>
 

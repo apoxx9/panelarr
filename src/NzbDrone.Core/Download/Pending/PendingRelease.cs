@@ -9,7 +9,7 @@ namespace NzbDrone.Core.Download.Pending
         public int SeriesId { get; set; }
         public string Title { get; set; }
         public DateTime Added { get; set; }
-        public ParsedBookInfo ParsedBookInfo { get; set; }
+        public ParsedIssueInfo ParsedIssueInfo { get; set; }
         public ReleaseInfo Release { get; set; }
         public PendingReleaseReason Reason { get; set; }
         public PendingReleaseAdditionalInfo AdditionalInfo { get; set; }

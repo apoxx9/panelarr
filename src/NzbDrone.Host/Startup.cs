@@ -253,6 +253,19 @@ namespace NzbDrone.Host
 
             app.UseRouting();
             app.UseCors();
+
+            // Swagger must be before auth so /docs is accessible without API key
+            app.UseSwagger(c =>
+            {
+                c.RouteTemplate = "docs/{documentName}/openapi.json";
+            });
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/docs/v1/openapi.json", "Panelarr API v1");
+                c.RoutePrefix = "docs";
+            });
+
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseResponseCompression();
@@ -266,15 +279,6 @@ namespace NzbDrone.Host
             app.UseMiddleware<BufferingMiddleware>(new List<string> { "/api/v1/command" });
 
             app.UseWebSockets();
-
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            if (BuildInfo.IsDebug)
-            {
-                app.UseSwagger(c =>
-                {
-                    c.RouteTemplate = "docs/{documentName}/openapi.json";
-                });
-            }
 
             app.UseEndpoints(x =>
             {

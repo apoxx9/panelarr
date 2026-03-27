@@ -218,7 +218,7 @@ namespace NzbDrone.Core.Download.Pending
                         Id = GetQueueId(pendingRelease, issue),
                         Series = pendingRelease.RemoteBook.Series,
                         Issue = issue,
-                        Quality = pendingRelease.RemoteBook.ParsedBookInfo.Quality,
+                        Quality = pendingRelease.RemoteBook.ParsedIssueInfo.Quality,
                         Title = pendingRelease.Title,
                         Size = pendingRelease.RemoteBook.Release.Size,
                         Sizeleft = pendingRelease.RemoteBook.Release.Size,
@@ -259,7 +259,7 @@ namespace NzbDrone.Core.Download.Pending
             var authorReleases = _repository.AllBySeriesId(targetItem.SeriesId);
 
             var releasesToRemove = authorReleases.Where(
-                c => c.ParsedBookInfo.IssueTitle == targetItem.ParsedBookInfo.IssueTitle);
+                c => c.ParsedIssueInfo.IssueTitle == targetItem.ParsedIssueInfo.IssueTitle);
 
             _repository.DeleteMany(releasesToRemove.Select(c => c.Id));
         }
@@ -337,7 +337,7 @@ namespace NzbDrone.Core.Download.Pending
                 }
                 else
                 {
-                    issues = _parsingService.GetBooks(release.ParsedBookInfo, author);
+                    issues = _parsingService.GetBooks(release.ParsedIssueInfo, author);
                 }
 
                 release.RemoteBook = new RemoteBook
@@ -345,7 +345,7 @@ namespace NzbDrone.Core.Download.Pending
                     Series = author,
                     Books = issues,
                     ReleaseSource = release.AdditionalInfo?.ReleaseSource ?? ReleaseSourceType.Unknown,
-                    ParsedBookInfo = release.ParsedBookInfo,
+                    ParsedIssueInfo = release.ParsedIssueInfo,
                     Release = release.Release
                 };
 
@@ -363,7 +363,7 @@ namespace NzbDrone.Core.Download.Pending
             _repository.Insert(new PendingRelease
             {
                 SeriesId = decision.RemoteBook.Series.Id,
-                ParsedBookInfo = decision.RemoteBook.ParsedBookInfo,
+                ParsedIssueInfo = decision.RemoteBook.ParsedIssueInfo,
                 Release = decision.RemoteBook.Release,
                 Title = decision.RemoteBook.Release.Title,
                 Added = DateTime.UtcNow,
@@ -411,8 +411,8 @@ namespace NzbDrone.Core.Download.Pending
 
             foreach (var existingReport in existingReports)
             {
-                var compare = new QualityModelComparer(profile).Compare(remoteBook.ParsedBookInfo.Quality,
-                                                                        existingReport.RemoteBook.ParsedBookInfo.Quality);
+                var compare = new QualityModelComparer(profile).Compare(remoteBook.ParsedIssueInfo.Quality,
+                                                                        existingReport.RemoteBook.ParsedIssueInfo.Quality);
 
                 //Only remove lower/equal quality pending releases
                 //It is safer to retry these releases on the next round than remove it and try to re-add it (if its still in the feed)

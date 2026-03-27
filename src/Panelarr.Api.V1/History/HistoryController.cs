@@ -62,7 +62,7 @@ namespace Panelarr.Api.V1.History
 
         [HttpGet]
         [Produces("application/json")]
-        public PagingResource<HistoryResource> GetHistory([FromQuery] PagingRequestResource paging, bool includeSeries, bool includeBook, [FromQuery(Name = "eventType")] int[] eventTypes, int? bookId, string downloadId)
+        public PagingResource<HistoryResource> GetHistory([FromQuery] PagingRequestResource paging, bool includeSeries, bool includeBook, [FromQuery(Name = "eventType")] int[] eventTypes, int? issueId, string downloadId)
         {
             var pagingResource = new PagingResource<HistoryResource>(paging);
             var pagingSpec = pagingResource.MapToPagingSpec<HistoryResource, EntityHistory>("date", SortDirection.Descending);
@@ -72,9 +72,9 @@ namespace Panelarr.Api.V1.History
                 pagingSpec.FilterExpressions.Add(v => eventTypes.Contains((int)v.EventType));
             }
 
-            if (bookId.HasValue)
+            if (issueId.HasValue)
             {
-                pagingSpec.FilterExpressions.Add(h => h.IssueId == bookId);
+                pagingSpec.FilterExpressions.Add(h => h.IssueId == issueId);
             }
 
             if (downloadId.IsNotNullOrWhiteSpace())
@@ -91,14 +91,14 @@ namespace Panelarr.Api.V1.History
             return _historyService.Since(date, eventType).Select(h => MapToResource(h, includeSeries, includeBook)).ToList();
         }
 
-        [HttpGet("author")]
-        public List<HistoryResource> GetSeriesHistory(int authorId, int? bookId = null, EntityHistoryEventType? eventType = null, bool includeSeries = false, bool includeBook = false)
+        [HttpGet("series")]
+        public List<HistoryResource> GetSeriesHistory(int seriesId, int? issueId = null, EntityHistoryEventType? eventType = null, bool includeSeries = false, bool includeBook = false)
         {
-            var author = _authorService.GetSeries(authorId);
+            var author = _authorService.GetSeries(seriesId);
 
-            if (bookId.HasValue)
+            if (issueId.HasValue)
             {
-                return _historyService.GetByBook(bookId.Value, eventType).Select(h =>
+                return _historyService.GetByBook(issueId.Value, eventType).Select(h =>
                 {
                     h.Series = author;
 
@@ -106,7 +106,7 @@ namespace Panelarr.Api.V1.History
                 }).ToList();
             }
 
-            return _historyService.GetBySeries(authorId, eventType).Select(h =>
+            return _historyService.GetBySeries(seriesId, eventType).Select(h =>
             {
                 h.Series = author;
 

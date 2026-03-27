@@ -169,8 +169,8 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 {
                     if (authorTag.IsNotNullOrWhiteSpace())
                     {
-                        var possibleSeriess = _authorService.GetCandidates(authorTag);
-                        foreach (var author in possibleSeriess)
+                        var possibleSeries = _authorService.GetCandidates(authorTag);
+                        foreach (var author in possibleSeries)
                         {
                             candidateReleases.AddRange(GetDbCandidatesBySeries(localEdition, author, includeExisting));
                         }

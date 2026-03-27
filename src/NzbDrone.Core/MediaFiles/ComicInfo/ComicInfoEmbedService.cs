@@ -12,19 +12,23 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
         IHandle<ComicFileRenamedEvent>
     {
         private const string ComicInfoFileName = "ComicInfo.xml";
+        private const string MetronInfoFileName = "MetronInfo.xml";
 
         private readonly IComicInfoGenerator _generator;
+        private readonly IMetronInfoGenerator _metronInfoGenerator;
         private readonly IBookService _bookService;
         private readonly IPublisherService _publisherService;
         private readonly Logger _logger;
 
         public ComicInfoEmbedService(
             IComicInfoGenerator generator,
+            IMetronInfoGenerator metronInfoGenerator,
             IBookService bookService,
             IPublisherService publisherService,
             Logger logger)
         {
             _generator = generator;
+            _metronInfoGenerator = metronInfoGenerator;
             _bookService = bookService;
             _publisherService = publisherService;
             _logger = logger;
@@ -70,24 +74,41 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
             }
 
             var xmlContent = _generator.Generate(issue, seriesMetadata, publisher);
+            var metronXmlContent = _metronInfoGenerator.Generate(issue, seriesMetadata, publisher);
 
             try
             {
                 using var archive = ZipFile.Open(comicFile.Path, ZipArchiveMode.Update);
 
-                var existing = archive.GetEntry(ComicInfoFileName);
-                existing?.Delete();
+                // Embed ComicInfo.xml
+                var existingComicInfo = archive.GetEntry(ComicInfoFileName);
+                existingComicInfo?.Delete();
 
-                var entry = archive.CreateEntry(ComicInfoFileName, CompressionLevel.Fastest);
-                using var entryStream = entry.Open();
-                using var writer = new StreamWriter(entryStream);
-                writer.Write(xmlContent);
+                var comicInfoEntry = archive.CreateEntry(ComicInfoFileName, CompressionLevel.Fastest);
+                using (var entryStream = comicInfoEntry.Open())
+                using (var writer = new StreamWriter(entryStream))
+                {
+                    writer.Write(xmlContent);
+                }
 
                 _logger.Debug("Embedded ComicInfo.xml into {0}", comicFile.Path);
+
+                // Embed MetronInfo.xml
+                var existingMetronInfo = archive.GetEntry(MetronInfoFileName);
+                existingMetronInfo?.Delete();
+
+                var metronInfoEntry = archive.CreateEntry(MetronInfoFileName, CompressionLevel.Fastest);
+                using (var metronStream = metronInfoEntry.Open())
+                using (var metronWriter = new StreamWriter(metronStream))
+                {
+                    metronWriter.Write(metronXmlContent);
+                }
+
+                _logger.Debug("Embedded MetronInfo.xml into {0}", comicFile.Path);
             }
             catch (System.Exception ex)
             {
-                _logger.Error(ex, "Failed to embed ComicInfo.xml into {0}", comicFile.Path);
+                _logger.Error(ex, "Failed to embed metadata into {0}", comicFile.Path);
             }
         }
     }

@@ -8,7 +8,7 @@ import selectSettings from 'Store/Selectors/selectSettings';
 import EditImportListExclusionModalContent from './EditImportListExclusionModalContent';
 
 const newImportListExclusion = {
-  authorName: '',
+  seriesName: '',
   foreignId: ''
 };
 

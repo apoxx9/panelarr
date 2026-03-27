@@ -1,14 +1,14 @@
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import createAuthorSelector from 'Store/Selectors/createAuthorSelector';
+import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import MissingRow from './MissingRow';
 
 function createMapStateToProps() {
   return createSelector(
-    createAuthorSelector(),
-    (author) => {
+    createSeriesSelector(),
+    (series) => {
       return {
-        author
+        series
       };
     }
   );

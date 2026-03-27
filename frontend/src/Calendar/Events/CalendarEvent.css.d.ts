@@ -2,14 +2,14 @@
 // Please do not change this file!
 interface CssExports {
   'absoluteEpisodeNumber': string;
-  'authorName': string;
-  'bookInfo': string;
-  'bookTitle': string;
   'downloaded': string;
   'downloading': string;
   'event': string;
   'info': string;
+  'issueInfo': string;
+  'issueTitle': string;
   'missing': string;
+  'seriesName': string;
   'statusIcon': string;
   'unmonitored': string;
   'unreleased': string;

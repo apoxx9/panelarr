@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Organizer
 
     public class ValidStandardTrackFormatValidator : PropertyValidator
     {
-        protected override string GetDefaultMessageTemplate() => "Must contain Issue Title AND PartNumber, OR Original Title";
+        protected override string GetDefaultMessageTemplate() => "Must contain Issue Title/Number, OR Original Title";
 
         protected override bool IsValid(PropertyValidatorContext context)
         {
@@ -40,7 +40,9 @@ namespace NzbDrone.Core.Organizer
                 return false;
             }
 
-            return (FileNameBuilder.IssueTitleRegex.IsMatch(value) && FileNameBuilder.PartRegex.IsMatch(value)) ||
+            // Accept formats that have Issue Title/Number (with or without PartNumber),
+            // or Original Title token
+            return FileNameBuilder.IssueTitleRegex.IsMatch(value) ||
                    FileNameValidation.OriginalTokenRegex.IsMatch(value);
         }
     }

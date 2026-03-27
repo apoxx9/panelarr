@@ -12,8 +12,8 @@ export interface CommandBody {
   lastStartTime: string;
   trigger: string;
   suppressMessages: boolean;
-  authorId?: number;
-  authorIds?: number[];
+  seriesId?: number;
+  seriesIds?: number[];
 }
 
 interface Command extends ModelBase {

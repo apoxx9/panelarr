@@ -31,19 +31,19 @@ class History extends Component {
       selectedFilterKey,
       filters,
       totalRecords,
-      isAuthorFetching,
-      isAuthorPopulated,
-      isBooksFetching,
-      isBooksPopulated,
-      booksError,
+      isSeriesFetching,
+      isSeriesPopulated,
+      isIssuesFetching,
+      isIssuesPopulated,
+      issuesError,
       onFilterSelect,
       onFirstPagePress,
       ...otherProps
     } = this.props;
 
-    const isFetchingAny = isFetching || isAuthorFetching || isBooksFetching;
-    const isAllPopulated = isPopulated && ((isAuthorPopulated && isBooksPopulated) || !items.length);
-    const hasError = error || booksError;
+    const isFetchingAny = isFetching || isSeriesFetching || isIssuesFetching;
+    const isAllPopulated = isPopulated && ((isSeriesPopulated && isIssuesPopulated) || !items.length);
+    const hasError = error || issuesError;
 
     return (
       <PageContent title={translate('History')}>
@@ -93,7 +93,7 @@ class History extends Component {
 
           {
             // If history isPopulated and it's empty show no history found and don't
-            // wait for the books to populate because they are never coming.
+            // wait for the issues to populate because they are never coming.
 
             isPopulated && !hasError && !items.length &&
               <Alert kind={kinds.INFO}>
@@ -146,11 +146,11 @@ History.propTypes = {
   selectedFilterKey: PropTypes.string.isRequired,
   filters: PropTypes.arrayOf(PropTypes.object).isRequired,
   totalRecords: PropTypes.number,
-  isAuthorFetching: PropTypes.bool.isRequired,
-  isAuthorPopulated: PropTypes.bool.isRequired,
-  isBooksFetching: PropTypes.bool.isRequired,
-  isBooksPopulated: PropTypes.bool.isRequired,
-  booksError: PropTypes.object,
+  isSeriesFetching: PropTypes.bool.isRequired,
+  isSeriesPopulated: PropTypes.bool.isRequired,
+  isIssuesFetching: PropTypes.bool.isRequired,
+  isIssuesPopulated: PropTypes.bool.isRequired,
+  issuesError: PropTypes.object,
   onFilterSelect: PropTypes.func.isRequired,
   onFirstPagePress: PropTypes.func.isRequired
 };

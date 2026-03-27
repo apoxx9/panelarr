@@ -45,19 +45,19 @@ namespace NzbDrone.Core.Notifications.Webhook
             _proxy.SendWebhook(BuildOnSeriesDelete(deleteMessage), Settings);
         }
 
-        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+        public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
-            _proxy.SendWebhook(BuildOnBookDelete(deleteMessage), Settings);
+            _proxy.SendWebhook(BuildOnIssueDelete(deleteMessage), Settings);
         }
 
-        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
+        public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
-            _proxy.SendWebhook(BuildOnBookFileDelete(deleteMessage), Settings);
+            _proxy.SendWebhook(BuildOnComicFileDelete(deleteMessage), Settings);
         }
 
-        public override void OnBookRetag(IssueRetagMessage message)
+        public override void OnIssueRetag(IssueRetagMessage message)
         {
-            _proxy.SendWebhook(BuildOnBookRetagPayload(message), Settings);
+            _proxy.SendWebhook(BuildOnIssueRetagPayload(message), Settings);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)

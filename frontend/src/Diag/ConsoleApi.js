@@ -81,7 +81,7 @@ class ResourceApi {
 
 class ConsoleApi {
   constructor() {
-    this.author = new ResourceApi(this, '/author');
+    this.series = new ResourceApi(this, '/series');
   }
 
   resource(url) {

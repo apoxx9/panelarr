@@ -79,7 +79,7 @@ namespace NzbDrone.Core.MediaFiles
         {
             if (!force)
             {
-                if (_configService.WriteBookTags == WriteBookTagsType.NewFiles && !newDownload)
+                if (_configService.WriteIssueTags == WriteIssueTagsType.NewFiles && !newDownload)
                 {
                     return;
                 }
@@ -92,7 +92,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public void SyncTags(List<Issue> issues)
         {
-            if (_configService.WriteBookTags != WriteBookTagsType.Sync)
+            if (_configService.WriteIssueTags != WriteIssueTagsType.Sync)
             {
                 return;
             }

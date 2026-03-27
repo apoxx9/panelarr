@@ -56,41 +56,41 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                     continue;
                 }
 
-                _logger.Debug("Checking if existing release in queue meets cutoff. Queued quality is: {0}", remoteBook.ParsedBookInfo.Quality);
+                _logger.Debug("Checking if existing release in queue meets cutoff. Queued quality is: {0}", remoteBook.ParsedIssueInfo.Quality);
 
                 var queuedItemCustomFormats = _formatService.ParseCustomFormat(remoteBook, (long)queueItem.Size);
 
                 if (!_upgradableSpecification.CutoffNotMet(qualityProfile,
-                                                           new List<QualityModel> { remoteBook.ParsedBookInfo.Quality },
+                                                           new List<QualityModel> { remoteBook.ParsedIssueInfo.Quality },
                                                            queuedItemCustomFormats,
-                                                           subject.ParsedBookInfo.Quality))
+                                                           subject.ParsedIssueInfo.Quality))
                 {
-                    return Decision.Reject("Release in queue already meets cutoff: {0}", remoteBook.ParsedBookInfo.Quality);
+                    return Decision.Reject("Release in queue already meets cutoff: {0}", remoteBook.ParsedIssueInfo.Quality);
                 }
 
-                _logger.Debug("Checking if release is higher quality than queued release. Queued: {0}", remoteBook.ParsedBookInfo.Quality);
+                _logger.Debug("Checking if release is higher quality than queued release. Queued: {0}", remoteBook.ParsedIssueInfo.Quality);
 
                 if (!_upgradableSpecification.IsUpgradable(qualityProfile,
-                                                           remoteBook.ParsedBookInfo.Quality,
+                                                           remoteBook.ParsedIssueInfo.Quality,
                                                            queuedItemCustomFormats,
-                                                           subject.ParsedBookInfo.Quality,
+                                                           subject.ParsedIssueInfo.Quality,
                                                            subject.CustomFormats))
                 {
-                    return Decision.Reject("Release in queue is of equal or higher preference: {0}", remoteBook.ParsedBookInfo.Quality);
+                    return Decision.Reject("Release in queue is of equal or higher preference: {0}", remoteBook.ParsedIssueInfo.Quality);
                 }
 
-                _logger.Debug("Checking if profiles allow upgrading. Queued: {0}", remoteBook.ParsedBookInfo.Quality);
+                _logger.Debug("Checking if profiles allow upgrading. Queued: {0}", remoteBook.ParsedIssueInfo.Quality);
 
                 if (!_upgradableSpecification.IsUpgradeAllowed(qualityProfile,
-                                                               remoteBook.ParsedBookInfo.Quality,
+                                                               remoteBook.ParsedIssueInfo.Quality,
                                                                queuedItemCustomFormats,
-                                                               subject.ParsedBookInfo.Quality,
+                                                               subject.ParsedIssueInfo.Quality,
                                                                subject.CustomFormats))
                 {
                     return Decision.Reject("Another release is queued and the Quality profile does not allow upgrades");
                 }
 
-                if (_upgradableSpecification.IsRevisionUpgrade(remoteBook.ParsedBookInfo.Quality, subject.ParsedBookInfo.Quality))
+                if (_upgradableSpecification.IsRevisionUpgrade(remoteBook.ParsedIssueInfo.Quality, subject.ParsedIssueInfo.Quality))
                 {
                     if (_configService.DownloadPropersAndRepacks == ProperDownloadTypes.DoNotUpgrade)
                     {

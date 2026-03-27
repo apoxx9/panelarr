@@ -32,7 +32,7 @@ function EditImportListExclusionModalContent(props) {
   } = props;
 
   const {
-    authorName,
+    seriesName,
     foreignId
   } = item;
 
@@ -67,9 +67,9 @@ function EditImportListExclusionModalContent(props) {
 
                 <FormInputGroup
                   type={inputTypes.TEXT}
-                  name="authorName"
-                  helpText={translate('AuthorNameHelpText')}
-                  {...authorName}
+                  name="seriesName"
+                  helpText={translate('SeriesNameHelpText')}
+                  {...seriesName}
                   onChange={onInputChange}
                 />
               </FormGroup>
@@ -122,7 +122,7 @@ function EditImportListExclusionModalContent(props) {
 }
 
 const ImportListExclusionShape = {
-  authorName: PropTypes.shape(stringSettingShape).isRequired,
+  seriesName: PropTypes.shape(stringSettingShape).isRequired,
   foreignId: PropTypes.shape(stringSettingShape).isRequired
 };
 

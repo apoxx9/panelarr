@@ -23,23 +23,23 @@
   margin: 0;
 }
 
-.searchForNewBookLabelContainer {
+.searchForNewIssueLabelContainer {
   display: flex;
   margin-top: 2px;
 }
 
-.searchForNewBookLabel {
+.searchForNewIssueLabel {
   margin-right: 8px;
   font-weight: normal;
 }
 
-.searchForNewBookContainer {
+.searchForNewIssueContainer {
   composes: container from '~Components/Form/CheckInput.css';
 
   flex: 0 1 0;
 }
 
-.searchForNewBookInput {
+.searchForNewIssueInput {
   composes: input from '~Components/Form/CheckInput.css';
 
   margin-top: 0;

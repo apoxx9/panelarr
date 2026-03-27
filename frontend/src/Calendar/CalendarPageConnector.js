@@ -3,31 +3,31 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import withCurrentPage from 'Components/withCurrentPage';
 import { searchMissing, setCalendarDaysCount, setCalendarFilter } from 'Store/Actions/calendarActions';
-import createAuthorCountSelector from 'Store/Selectors/createAuthorCountSelector';
+import createSeriesCountSelector from 'Store/Selectors/createSeriesCountSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import { isCommandExecuting } from 'Utilities/Command';
 import isBefore from 'Utilities/Date/isBefore';
 import CalendarPage from './CalendarPage';
 
-function createMissingBookIdsSelector() {
+function createMissingIssueIdsSelector() {
   return createSelector(
     (state) => state.calendar.start,
     (state) => state.calendar.end,
     (state) => state.calendar.items,
     (state) => state.queue.details.items,
-    (start, end, books, queueDetails) => {
-      return books.reduce((acc, book) => {
-        const releaseDate = book.releaseDate;
+    (start, end, issues, queueDetails) => {
+      return issues.reduce((acc, issue) => {
+        const releaseDate = issue.releaseDate;
 
         if (
-          book.percentOfBooks < 100 &&
+          issue.percentOfIssues < 100 &&
           moment(releaseDate).isAfter(start) &&
           moment(releaseDate).isBefore(end) &&
-          isBefore(book.releaseDate) &&
-          !queueDetails.some((details) => !!details.book && details.book.id === book.id)
+          isBefore(issue.releaseDate) &&
+          !queueDetails.some((details) => !!details.issue && details.issue.id === issue.id)
         ) {
-          acc.push(book.id);
+          acc.push(issue.id);
         }
 
         return acc;
@@ -56,27 +56,27 @@ function createMapStateToProps() {
   return createSelector(
     (state) => state.calendar.selectedFilterKey,
     (state) => state.calendar.filters,
-    createAuthorCountSelector(),
+    createSeriesCountSelector(),
     createUISettingsSelector(),
-    createMissingBookIdsSelector(),
+    createMissingIssueIdsSelector(),
     createIsSearchingSelector(),
     (
       selectedFilterKey,
       filters,
-      authorCount,
+      seriesCount,
       uiSettings,
-      missingBookIds,
+      missingIssueIds,
       isSearchingForMissing
     ) => {
       return {
         selectedFilterKey,
         filters,
         colorImpairedMode: uiSettings.enableColorImpairedMode,
-        hasAuthor: !!authorCount.count,
-        authorError: authorCount.error,
-        authorIsFetching: authorCount.isFetching,
-        authorIsPopulated: authorCount.isPopulated,
-        missingBookIds,
+        hasSeries: !!seriesCount.count,
+        seriesError: seriesCount.error,
+        seriesIsFetching: seriesCount.isFetching,
+        seriesIsPopulated: seriesCount.isPopulated,
+        missingIssueIds,
         isSearchingForMissing
       };
     }
@@ -85,8 +85,8 @@ function createMapStateToProps() {
 
 function createMapDispatchToProps(dispatch, props) {
   return {
-    onSearchMissingPress(bookIds) {
-      dispatch(searchMissing({ bookIds }));
+    onSearchMissingPress(issueIds) {
+      dispatch(searchMissing({ issueIds }));
     },
     onDaysCountChange(dayCount) {
       dispatch(setCalendarDaysCount({ dayCount }));

@@ -55,10 +55,10 @@ namespace NzbDrone.Core.Download.Clients.Flood
                             result.Add(remoteBook.Series.Name);
                             break;
                         case (int)AdditionalTags.Format:
-                            result.Add(remoteBook.ParsedBookInfo.Quality.Quality.ToString());
+                            result.Add(remoteBook.ParsedIssueInfo.Quality.Quality.ToString());
                             break;
                         case (int)AdditionalTags.ReleaseGroup:
-                            result.Add(remoteBook.ParsedBookInfo.ReleaseGroup);
+                            result.Add(remoteBook.ParsedIssueInfo.ReleaseGroup);
                             break;
                         case (int)AdditionalTags.Year:
                             result.UnionWith(remoteBook.Books.ConvertAll(issue => issue.ReleaseDate.Value.Year.ToString()));

@@ -29,7 +29,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
         {
-            if (!subject.ParsedBookInfo.Quality.Revision.IsRepack)
+            if (!subject.ParsedIssueInfo.Quality.Revision.IsRepack)
             {
                 return Decision.Accept();
             }
@@ -44,12 +44,12 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
             foreach (var issue in subject.Books)
             {
-                var releaseGroup = subject.ParsedBookInfo.ReleaseGroup;
+                var releaseGroup = subject.ParsedIssueInfo.ReleaseGroup;
                 var comicFiles = _mediaFileService.GetFilesByBook(issue.Id);
 
                 foreach (var file in comicFiles)
                 {
-                    if (_upgradableSpecification.IsRevisionUpgrade(file.Quality, subject.ParsedBookInfo.Quality))
+                    if (_upgradableSpecification.IsRevisionUpgrade(file.Quality, subject.ParsedIssueInfo.Quality))
                     {
                         if (downloadPropersAndRepacks == ProperDownloadTypes.DoNotUpgrade)
                         {

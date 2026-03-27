@@ -1,9 +1,9 @@
-import migrateAddAuthorDefaults from './migrateAddAuthorDefaults';
-import migrateAuthorSortKey from './migrateAuthorSortKey';
+import migrateAddSeriesDefaults from './migrateAddSeriesDefaults';
+import migrateSeriesSortKey from './migrateSeriesSortKey';
 import migrateBlacklistToBlocklist from './migrateBlacklistToBlocklist';
 
 export default function migrate(persistedState) {
-  migrateAddAuthorDefaults(persistedState);
-  migrateAuthorSortKey(persistedState);
+  migrateAddSeriesDefaults(persistedState);
+  migrateSeriesSortKey(persistedState);
   migrateBlacklistToBlocklist(persistedState);
 }

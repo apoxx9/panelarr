@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import BookFormats from 'Book/BookFormats';
-import BookQuality from 'Book/BookQuality';
-import IndexerFlags from 'Book/IndexerFlags';
-import FileDetails from 'BookFile/FileDetails';
+import IssueFormats from 'Issue/IssueFormats';
+import IssueQuality from 'Issue/IssueQuality';
+import IndexerFlags from 'Issue/IndexerFlags';
+import FileDetails from 'IssueFile/FileDetails';
 import Icon from 'Components/Icon';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
@@ -13,8 +13,8 @@ import TableRow from 'Components/Table/TableRow';
 import Popover from 'Components/Tooltip/Popover';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import { icons, kinds, sizes, tooltipPositions } from 'Helpers/Props';
-import SelectAuthorModal from 'InteractiveImport/Author/SelectAuthorModal';
-import SelectBookModal from 'InteractiveImport/Book/SelectBookModal';
+import SelectSeriesModal from 'InteractiveImport/Series/SelectSeriesModal';
+import SelectIssueModal from 'InteractiveImport/Issue/SelectIssueModal';
 import SelectIndexerFlagsModal from 'InteractiveImport/IndexerFlags/SelectIndexerFlagsModal';
 import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
 import SelectReleaseGroupModal from 'InteractiveImport/ReleaseGroup/SelectReleaseGroupModal';
@@ -33,8 +33,8 @@ class InteractiveImportRow extends Component {
 
     this.state = {
       isDetailsModalOpen: false,
-      isSelectAuthorModalOpen: false,
-      isSelectBookModalOpen: false,
+      isSelectSeriesModalOpen: false,
+      isSelectIssueModalOpen: false,
       isSelectReleaseGroupModalOpen: false,
       isSelectQualityModalOpen: false,
       isSelectIndexerFlagsModalOpen: false
@@ -44,16 +44,16 @@ class InteractiveImportRow extends Component {
   componentDidMount() {
     const {
       id,
-      author,
-      book,
+      series,
+      issue,
       foreignEditionId,
       quality,
       size
     } = this.props;
 
     if (
-      author &&
-      book != null &&
+      series &&
+      issue != null &&
       foreignEditionId &&
       quality &&
       size > 0
@@ -65,8 +65,8 @@ class InteractiveImportRow extends Component {
   componentDidUpdate(prevProps) {
     const {
       id,
-      author,
-      book,
+      series,
+      issue,
       foreignEditionId,
       quality,
       isSelected,
@@ -74,8 +74,8 @@ class InteractiveImportRow extends Component {
     } = this.props;
 
     if (
-      prevProps.author === author &&
-      prevProps.book === book &&
+      prevProps.series === series &&
+      prevProps.issue === issue &&
       prevProps.foreignEditionId === foreignEditionId &&
       prevProps.quality === quality &&
       prevProps.isSelected === isSelected
@@ -84,8 +84,8 @@ class InteractiveImportRow extends Component {
     }
 
     const isValid = !!(
-      author &&
-      book &&
+      series &&
+      issue &&
       foreignEditionId &&
       quality
     );
@@ -122,12 +122,12 @@ class InteractiveImportRow extends Component {
     this.setState({ isDetailsModalOpen: false });
   };
 
-  onSelectAuthorPress = () => {
-    this.setState({ isSelectAuthorModalOpen: true });
+  onSelectSeriesPress = () => {
+    this.setState({ isSelectSeriesModalOpen: true });
   };
 
-  onSelectBookPress = () => {
-    this.setState({ isSelectBookModalOpen: true });
+  onSelectIssuePress = () => {
+    this.setState({ isSelectIssueModalOpen: true });
   };
 
   onSelectReleaseGroupPress = () => {
@@ -142,13 +142,13 @@ class InteractiveImportRow extends Component {
     this.setState({ isSelectIndexerFlagsModalOpen: true });
   };
 
-  onSelectAuthorModalClose = (changed) => {
-    this.setState({ isSelectAuthorModalOpen: false });
+  onSelectSeriesModalClose = (changed) => {
+    this.setState({ isSelectSeriesModalOpen: false });
     this.selectRowAfterChange(changed);
   };
 
-  onSelectBookModalClose = (changed) => {
-    this.setState({ isSelectBookModalOpen: false });
+  onSelectIssueModalClose = (changed) => {
+    this.setState({ isSelectIssueModalOpen: false });
     this.selectRowAfterChange(changed);
   };
 
@@ -173,10 +173,10 @@ class InteractiveImportRow extends Component {
   render() {
     const {
       id,
-      allowAuthorChange,
+      allowSeriesChange,
       path,
-      author,
-      book,
+      series,
+      issue,
       quality,
       releaseGroup,
       size,
@@ -193,21 +193,21 @@ class InteractiveImportRow extends Component {
 
     const {
       isDetailsModalOpen,
-      isSelectAuthorModalOpen,
-      isSelectBookModalOpen,
+      isSelectSeriesModalOpen,
+      isSelectIssueModalOpen,
       isSelectReleaseGroupModalOpen,
       isSelectQualityModalOpen,
       isSelectIndexerFlagsModalOpen
     } = this.state;
 
-    const authorName = author ? author.authorName : '';
-    let bookTitle = '';
-    if (book) {
-      bookTitle = book.disambiguation ? `${book.title} (${book.disambiguation})` : book.title;
+    const seriesName = series ? series.seriesName : '';
+    let issueTitle = '';
+    if (issue) {
+      issueTitle = issue.disambiguation ? `${issue.title} (${issue.disambiguation})` : issue.title;
     }
 
-    const showAuthorPlaceholder = isSelected && !author;
-    const showBookNumberPlaceholder = !isReprocessing && isSelected && !!author && !book;
+    const showSeriesPlaceholder = isSelected && !series;
+    const showIssueNumberPlaceholder = !isReprocessing && isSelected && !!series && !issue;
     const showReleaseGroupPlaceholder = isSelected && !releaseGroup;
     const showQualityPlaceholder = isSelected && !quality;
     const showIndexerFlagsPlaceholder = isSelected && !indexerFlags;
@@ -253,22 +253,22 @@ class InteractiveImportRow extends Component {
         </TableRowCell>
 
         <TableRowCellButton
-          isDisabled={!allowAuthorChange}
-          title={allowAuthorChange ? translate('AllowAuthorChangeClickToChangeAuthor') : undefined}
-          onPress={this.onSelectAuthorPress}
+          isDisabled={!allowSeriesChange}
+          title={allowSeriesChange ? translate('AllowSeriesChangeClickToChangeSeries') : undefined}
+          onPress={this.onSelectSeriesPress}
         >
           {
-            showAuthorPlaceholder ? <InteractiveImportRowCellPlaceholder /> : authorName
+            showSeriesPlaceholder ? <InteractiveImportRowCellPlaceholder /> : seriesName
           }
         </TableRowCellButton>
 
         <TableRowCellButton
-          isDisabled={!author}
-          title={author ? translate('AuthorClickToChangeBook') : undefined}
-          onPress={this.onSelectBookPress}
+          isDisabled={!series}
+          title={series ? translate('SeriesClickToChangeIssue') : undefined}
+          onPress={this.onSelectIssuePress}
         >
           {
-            showBookNumberPlaceholder ? <InteractiveImportRowCellPlaceholder /> : bookTitle
+            showIssueNumberPlaceholder ? <InteractiveImportRowCellPlaceholder /> : issueTitle
           }
         </TableRowCellButton>
 
@@ -297,7 +297,7 @@ class InteractiveImportRow extends Component {
 
           {
             !showQualityPlaceholder && !!quality &&
-              <BookQuality
+              <IssueQuality
                 className={styles.label}
                 quality={quality}
               />
@@ -318,7 +318,7 @@ class InteractiveImportRow extends Component {
                 title={translate('Formats')}
                 body={
                   <div className={styles.customFormatTooltip}>
-                    <BookFormats formats={customFormats} />
+                    <IssueFormats formats={customFormats} />
                   </div>
                 }
                 position={tooltipPositions.LEFT}
@@ -392,17 +392,17 @@ class InteractiveImportRow extends Component {
           onCancel={this.onDetailsModalClose}
         />
 
-        <SelectAuthorModal
-          isOpen={isSelectAuthorModalOpen}
+        <SelectSeriesModal
+          isOpen={isSelectSeriesModalOpen}
           ids={[id]}
-          onModalClose={this.onSelectAuthorModalClose}
+          onModalClose={this.onSelectSeriesModalClose}
         />
 
-        <SelectBookModal
-          isOpen={isSelectBookModalOpen}
+        <SelectIssueModal
+          isOpen={isSelectIssueModalOpen}
           ids={[id]}
-          authorId={author && author.id}
-          onModalClose={this.onSelectBookModalClose}
+          seriesId={series && series.id}
+          onModalClose={this.onSelectIssueModalClose}
         />
 
         <SelectReleaseGroupModal
@@ -435,10 +435,10 @@ class InteractiveImportRow extends Component {
 
 InteractiveImportRow.propTypes = {
   id: PropTypes.number.isRequired,
-  allowAuthorChange: PropTypes.bool.isRequired,
+  allowSeriesChange: PropTypes.bool.isRequired,
   path: PropTypes.string.isRequired,
-  author: PropTypes.object,
-  book: PropTypes.object,
+  series: PropTypes.object,
+  issue: PropTypes.object,
   foreignEditionId: PropTypes.string,
   releaseGroup: PropTypes.string,
   quality: PropTypes.object,

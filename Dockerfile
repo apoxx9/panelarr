@@ -1,16 +1,43 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+# Multi-arch Dockerfile for Panelarr
+# Supports: linux/amd64, linux/arm64, linux/arm/v7
+
+ARG BUILDPLATFORM
+ARG TARGETPLATFORM
+ARG TARGETARCH
+
+# ── Build stage ─────────────────────────────────────────────────────────────────
+FROM --platform=${BUILDPLATFORM:-linux/amd64} mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+ARG TARGETARCH
+
 WORKDIR /app
 
 COPY src/ ./src/
-RUN dotnet build ./src/Panelarr.sln -c Release --no-restore -o /build 2>/dev/null || \
-    dotnet restore ./src/Panelarr.sln && \
-    dotnet build ./src/Panelarr.sln -c Release -o /build
 
-# ── Runtime image ──────────────────────────────────────────────────────────────
+# Restore and publish for the target architecture
+RUN dotnet restore ./src/Panelarr.sln && \
+    dotnet publish ./src/NzbDrone.Console/Panelarr.Console.csproj \
+        -c Release \
+        -r linux-${TARGETARCH:-x64} \
+        --self-contained false \
+        -o /build \
+        --no-restore 2>/dev/null || \
+    dotnet publish ./src/NzbDrone.Console/Panelarr.Console.csproj \
+        -c Release \
+        -o /build \
+        --no-restore
+
+# ── Runtime image ────────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
 
 ARG PUID=1000
 ARG PGID=1000
+
+LABEL maintainer="Panelarr Team" \
+      org.opencontainers.image.title="Panelarr" \
+      org.opencontainers.image.description="Comic book management application" \
+      org.opencontainers.image.url="https://github.com/Panelarr/Panelarr" \
+      org.opencontainers.image.source="https://github.com/Panelarr/Panelarr"
 
 RUN groupadd -g "${PGID}" panelarr && \
     useradd -u "${PUID}" -g panelarr -m panelarr
@@ -37,6 +64,9 @@ ENV PANELARR_CONFIG_DIR=/config \
 EXPOSE 8787
 
 VOLUME ["/config", "/comics"]
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8787/api/v1/system/status || exit 1
 
 ENTRYPOINT ["dotnet", "Panelarr.dll"]
 CMD ["--nobrowser", "--data=/config"]

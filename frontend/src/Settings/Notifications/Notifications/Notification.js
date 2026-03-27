@@ -60,29 +60,29 @@ class Notification extends Component {
       onReleaseImport,
       onUpgrade,
       onRename,
-      onAuthorAdded,
-      onAuthorDelete,
-      onBookDelete,
-      onBookFileDelete,
-      onBookFileDeleteForUpgrade,
+      onSeriesAdded,
+      onSeriesDelete,
+      onIssueDelete,
+      onIssueFileDelete,
+      onIssueFileDeleteForUpgrade,
       onHealthIssue,
       onDownloadFailure,
       onImportFailure,
-      onBookRetag,
+      onIssueRetag,
       onApplicationUpdate,
       supportsOnGrab,
       supportsOnReleaseImport,
       supportsOnUpgrade,
       supportsOnRename,
-      supportsOnAuthorAdded,
-      supportsOnAuthorDelete,
-      supportsOnBookDelete,
-      supportsOnBookFileDelete,
-      supportsOnBookFileDeleteForUpgrade,
+      supportsOnSeriesAdded,
+      supportsOnSeriesDelete,
+      supportsOnIssueDelete,
+      supportsOnIssueFileDelete,
+      supportsOnIssueFileDeleteForUpgrade,
       supportsOnHealthIssue,
       supportsOnDownloadFailure,
       supportsOnImportFailure,
-      supportsOnBookRetag,
+      supportsOnIssueRetag,
       supportsOnApplicationUpdate,
       tags,
       tagList
@@ -131,49 +131,49 @@ class Notification extends Component {
         }
 
         {
-          supportsOnBookRetag && onBookRetag ?
+          supportsOnIssueRetag && onIssueRetag ?
             <Label kind={kinds.SUCCESS}>
-              {translate('OnBookTagUpdate')}
+              {translate('OnIssueTagUpdate')}
             </Label> :
             null
         }
 
         {
-          supportsOnAuthorAdded && onAuthorAdded ?
+          supportsOnSeriesAdded && onSeriesAdded ?
             <Label kind={kinds.SUCCESS}>
-              {translate('OnAuthorAdded')}
+              {translate('OnSeriesAdded')}
             </Label> :
             null
         }
 
         {
-          supportsOnAuthorDelete && onAuthorDelete ?
+          supportsOnSeriesDelete && onSeriesDelete ?
             <Label kind={kinds.SUCCESS}>
-              {translate('OnAuthorDelete')}
+              {translate('OnSeriesDelete')}
             </Label> :
             null
         }
 
         {
-          supportsOnBookDelete && onBookDelete ?
+          supportsOnIssueDelete && onIssueDelete ?
             <Label kind={kinds.SUCCESS}>
-              {translate('OnBookDelete')}
+              {translate('OnIssueDelete')}
             </Label> :
             null
         }
 
         {
-          supportsOnBookFileDelete && onBookFileDelete ?
+          supportsOnIssueFileDelete && onIssueFileDelete ?
             <Label kind={kinds.SUCCESS}>
-              {translate('OnBookFileDelete')}
+              {translate('OnIssueFileDelete')}
             </Label> :
             null
         }
 
         {
-          supportsOnBookFileDeleteForUpgrade && onBookFileDelete && onBookFileDeleteForUpgrade ?
+          supportsOnIssueFileDeleteForUpgrade && onIssueFileDelete && onIssueFileDeleteForUpgrade ?
             <Label kind={kinds.SUCCESS}>
-              {translate('OnBookFileDeleteForUpgrade')}
+              {translate('OnIssueFileDeleteForUpgrade')}
             </Label> :
             null
         }
@@ -211,7 +211,7 @@ class Notification extends Component {
         }
 
         {
-          !onGrab && !onReleaseImport && !onRename && !onBookRetag && !onHealthIssue && !onDownloadFailure && !onImportFailure ?
+          !onGrab && !onReleaseImport && !onRename && !onIssueRetag && !onHealthIssue && !onDownloadFailure && !onImportFailure ?
             <Label
               kind={kinds.DISABLED}
               outline={true}
@@ -254,29 +254,29 @@ Notification.propTypes = {
   onReleaseImport: PropTypes.bool.isRequired,
   onUpgrade: PropTypes.bool.isRequired,
   onRename: PropTypes.bool.isRequired,
-  onAuthorAdded: PropTypes.bool.isRequired,
-  onAuthorDelete: PropTypes.bool.isRequired,
-  onBookDelete: PropTypes.bool.isRequired,
-  onBookFileDelete: PropTypes.bool.isRequired,
-  onBookFileDeleteForUpgrade: PropTypes.bool.isRequired,
+  onSeriesAdded: PropTypes.bool.isRequired,
+  onSeriesDelete: PropTypes.bool.isRequired,
+  onIssueDelete: PropTypes.bool.isRequired,
+  onIssueFileDelete: PropTypes.bool.isRequired,
+  onIssueFileDeleteForUpgrade: PropTypes.bool.isRequired,
   onHealthIssue: PropTypes.bool.isRequired,
   onDownloadFailure: PropTypes.bool.isRequired,
   onImportFailure: PropTypes.bool.isRequired,
-  onBookRetag: PropTypes.bool.isRequired,
+  onIssueRetag: PropTypes.bool.isRequired,
   onApplicationUpdate: PropTypes.bool.isRequired,
   supportsOnGrab: PropTypes.bool.isRequired,
   supportsOnReleaseImport: PropTypes.bool.isRequired,
   supportsOnUpgrade: PropTypes.bool.isRequired,
   supportsOnRename: PropTypes.bool.isRequired,
-  supportsOnAuthorAdded: PropTypes.bool.isRequired,
-  supportsOnAuthorDelete: PropTypes.bool.isRequired,
-  supportsOnBookDelete: PropTypes.bool.isRequired,
-  supportsOnBookFileDelete: PropTypes.bool.isRequired,
-  supportsOnBookFileDeleteForUpgrade: PropTypes.bool.isRequired,
+  supportsOnSeriesAdded: PropTypes.bool.isRequired,
+  supportsOnSeriesDelete: PropTypes.bool.isRequired,
+  supportsOnIssueDelete: PropTypes.bool.isRequired,
+  supportsOnIssueFileDelete: PropTypes.bool.isRequired,
+  supportsOnIssueFileDeleteForUpgrade: PropTypes.bool.isRequired,
   supportsOnHealthIssue: PropTypes.bool.isRequired,
   supportsOnDownloadFailure: PropTypes.bool.isRequired,
   supportsOnImportFailure: PropTypes.bool.isRequired,
-  supportsOnBookRetag: PropTypes.bool.isRequired,
+  supportsOnIssueRetag: PropTypes.bool.isRequired,
   supportsOnApplicationUpdate: PropTypes.bool.isRequired,
   tags: PropTypes.arrayOf(PropTypes.number).isRequired,
   tagList: PropTypes.arrayOf(PropTypes.object).isRequired,

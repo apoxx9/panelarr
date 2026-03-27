@@ -9,19 +9,19 @@ function getIconName(eventType) {
   switch (eventType) {
     case 'grabbed':
       return icons.DOWNLOADING;
-    case 'authorFolderImported':
+    case 'seriesFolderImported':
       return icons.DRIVE;
-    case 'bookFileImported':
+    case 'issueFileImported':
       return icons.DOWNLOADED;
     case 'downloadFailed':
       return icons.DOWNLOADING;
-    case 'bookFileDeleted':
+    case 'issueFileDeleted':
       return icons.DELETE;
-    case 'bookFileRenamed':
+    case 'issueFileRenamed':
       return icons.ORGANIZE;
-    case 'bookFileRetagged':
+    case 'issueFileRetagged':
       return icons.RETAG;
-    case 'bookImportIncomplete':
+    case 'issueImportIncomplete':
       return icons.DOWNLOADED;
     case 'downloadIgnored':
       return icons.IGNORE;
@@ -34,7 +34,7 @@ function getIconKind(eventType) {
   switch (eventType) {
     case 'downloadFailed':
       return kinds.DANGER;
-    case 'bookImportIncomplete':
+    case 'issueImportIncomplete':
       return kinds.WARNING;
     default:
       return kinds.DEFAULT;
@@ -44,23 +44,23 @@ function getIconKind(eventType) {
 function getTooltip(eventType, data) {
   switch (eventType) {
     case 'grabbed':
-      return `Book grabbed from ${data.indexer} and sent to ${data.downloadClient}`;
-    case 'authorFolderImported':
-      return 'Book imported from author folder';
-    case 'bookFileImported':
-      return 'Book downloaded successfully and picked up from download client';
+      return `Issue grabbed from ${data.indexer} and sent to ${data.downloadClient}`;
+    case 'seriesFolderImported':
+      return 'Issue imported from series folder';
+    case 'issueFileImported':
+      return 'Issue downloaded successfully and picked up from download client';
     case 'downloadFailed':
-      return 'Book download failed';
-    case 'bookFileDeleted':
-      return 'Book file deleted';
-    case 'bookFileRenamed':
-      return 'Book file renamed';
-    case 'bookFileRetagged':
-      return 'Book file tags updated';
-    case 'bookImportIncomplete':
+      return 'Issue download failed';
+    case 'issueFileDeleted':
+      return 'Issue file deleted';
+    case 'issueFileRenamed':
+      return 'Issue file renamed';
+    case 'issueFileRetagged':
+      return 'Issue file tags updated';
+    case 'issueImportIncomplete':
       return 'Files downloaded but not all could be imported';
     case 'downloadIgnored':
-      return 'Book Download Ignored';
+      return 'Issue Download Ignored';
     default:
       return 'Unknown event';
   }

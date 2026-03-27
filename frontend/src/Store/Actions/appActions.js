@@ -117,7 +117,7 @@ function pingServerAfterTimeout(getState, dispatch) {
       abortPingServer = null;
       pingTimeout = null;
 
-      // Unauthorized, but back online
+      // Unseriesized, but back online
       if (xhr.status === 401) {
         dispatch(setAppValue({
           isRestarting: false

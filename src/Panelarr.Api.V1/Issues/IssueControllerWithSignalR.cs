@@ -53,9 +53,9 @@ namespace Panelarr.Api.V1.Books
 
             if (includeSeries)
             {
-                var author = issue.Series.Value;
+                var series = issue.Series.Value;
 
-                resource.Series = author.ToResource();
+                resource.Series = series.ToResource();
             }
 
             FetchAndLinkBookStatistics(resource);
@@ -66,13 +66,13 @@ namespace Panelarr.Api.V1.Books
 
         protected List<IssueResource> MapToResource(List<Issue> issues, bool includeSeries)
         {
-            var seriesLinks = _seriesBookLinkService.GetLinksByBook(issues.Select(x => x.Id).ToList())
-                .GroupBy(x => x.IssueId)
+            var seriesLinks = _seriesBookLinkService.GetLinksByBook(issues.Select(x => x.SeriesMetadataId).Distinct().ToList())
+                .GroupBy(x => x.SeriesMetadataId)
                 .ToDictionary(x => x.Key, y => y.ToList());
 
             foreach (var issue in issues)
             {
-                if (seriesLinks.TryGetValue(issue.Id, out var links))
+                if (seriesLinks.TryGetValue(issue.SeriesMetadataId, out var links))
                 {
                     issue.SeriesLinks = links;
                 }
@@ -86,20 +86,20 @@ namespace Panelarr.Api.V1.Books
 
             if (includeSeries)
             {
-                var authorDict = new Dictionary<int, NzbDrone.Core.Books.Series>();
+                var seriesDict = new Dictionary<int, NzbDrone.Core.Books.Series>();
                 for (var i = 0; i < issues.Count; i++)
                 {
                     var issue = issues[i];
                     var resource = result[i];
-                    var author = authorDict.GetValueOrDefault(issues[i].SeriesMetadataId) ?? issue.Series?.Value;
-                    authorDict[author.SeriesMetadataId] = author;
+                    var series = seriesDict.GetValueOrDefault(issues[i].SeriesMetadataId) ?? issue.Series?.Value;
+                    seriesDict[series.SeriesMetadataId] = series;
 
-                    resource.Series = author.ToResource();
+                    resource.Series = series.ToResource();
                 }
             }
 
-            var authorStats = _authorStatisticsService.SeriesStatistics();
-            LinkSeriesStatistics(result, authorStats);
+            var seriesStats = _authorStatisticsService.SeriesStatistics();
+            LinkSeriesStatistics(result, seriesStats);
             MapCoversToLocal(result.ToArray());
 
             return result;
@@ -110,9 +110,9 @@ namespace Panelarr.Api.V1.Books
             LinkSeriesStatistics(resource, _authorStatisticsService.SeriesStatistics(resource.SeriesId));
         }
 
-        private void LinkSeriesStatistics(List<IssueResource> resources, List<SeriesStatistics> authorStatistics)
+        private void LinkSeriesStatistics(List<IssueResource> resources, List<SeriesStatistics> seriesStatistics)
         {
-            var bookStatsDict = authorStatistics.SelectMany(x => x.IssueStatistics).ToDictionary(x => x.IssueId);
+            var bookStatsDict = seriesStatistics.SelectMany(x => x.IssueStatistics).ToDictionary(x => x.IssueId);
 
             foreach (var issue in resources)
             {
@@ -123,11 +123,11 @@ namespace Panelarr.Api.V1.Books
             }
         }
 
-        private void LinkSeriesStatistics(IssueResource resource, SeriesStatistics authorStatistics)
+        private void LinkSeriesStatistics(IssueResource resource, SeriesStatistics seriesStatistics)
         {
-            if (authorStatistics?.IssueStatistics != null)
+            if (seriesStatistics?.IssueStatistics != null)
             {
-                var dictBookStats = authorStatistics.IssueStatistics.ToDictionary(v => v.IssueId);
+                var dictBookStats = seriesStatistics.IssueStatistics.ToDictionary(v => v.IssueId);
 
                 resource.Statistics = dictBookStats.GetValueOrDefault(resource.Id).ToResource();
             }

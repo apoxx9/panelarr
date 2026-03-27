@@ -69,11 +69,11 @@ namespace NzbDrone.Core.DecisionEngine
         {
             if (_configService.DownloadPropersAndRepacks == ProperDownloadTypes.DoNotPrefer)
             {
-                return CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Series.QualityProfile.Value.GetIndex(remoteBook.ParsedBookInfo.Quality.Quality));
+                return CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Series.QualityProfile.Value.GetIndex(remoteBook.ParsedIssueInfo.Quality.Quality));
             }
 
-            return CompareAll(CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Series.QualityProfile.Value.GetIndex(remoteBook.ParsedBookInfo.Quality.Quality)),
-                           CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.ParsedBookInfo.Quality.Revision));
+            return CompareAll(CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Series.QualityProfile.Value.GetIndex(remoteBook.ParsedIssueInfo.Quality.Quality)),
+                           CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.ParsedIssueInfo.Quality.Revision));
         }
 
         private int CompareCustomFormatScore(DownloadDecision x, DownloadDecision y)
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.DecisionEngine
         {
             var discographyCompare = CompareBy(x.RemoteBook,
                 y.RemoteBook,
-                remoteBook => remoteBook.ParsedBookInfo.Discography);
+                remoteBook => remoteBook.ParsedIssueInfo.Discography);
 
             if (discographyCompare != 0)
             {

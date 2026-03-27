@@ -46,8 +46,8 @@ module.exports = {
   // Modal
   modalBodyPadding: '30px',
 
-  // Author
-  authorIndexColumnPadding: '10px',
-  authorIndexColumnPaddingSmallScreen: '5px',
-  authorIndexOverviewInfoRowHeight: '21px'
+  // Series
+  seriesIndexColumnPadding: '10px',
+  seriesIndexColumnPaddingSmallScreen: '5px',
+  seriesIndexOverviewInfoRowHeight: '21px'
 };

@@ -141,7 +141,7 @@ namespace NzbDrone.Core.History
                 {
                     EventType = EntityHistoryEventType.Grabbed,
                     Date = DateTime.UtcNow,
-                    Quality = message.Issue.ParsedBookInfo.Quality,
+                    Quality = message.Issue.ParsedIssueInfo.Quality,
                     SourceTitle = message.Issue.Release.Title,
                     SeriesId = issue.SeriesId,
                     IssueId = issue.Id,
@@ -150,7 +150,7 @@ namespace NzbDrone.Core.History
 
                 history.Data.Add("Indexer", message.Issue.Release.Indexer);
                 history.Data.Add("NzbInfoUrl", message.Issue.Release.InfoUrl);
-                history.Data.Add("ReleaseGroup", message.Issue.ParsedBookInfo.ReleaseGroup);
+                history.Data.Add("ReleaseGroup", message.Issue.ParsedIssueInfo.ReleaseGroup);
                 history.Data.Add("Age", message.Issue.Release.Age.ToString());
                 history.Data.Add("AgeHours", message.Issue.Release.AgeHours.ToString());
                 history.Data.Add("AgeMinutes", message.Issue.Release.AgeMinutes.ToString());
@@ -166,9 +166,9 @@ namespace NzbDrone.Core.History
                 history.Data.Add("ReleaseSource", message.Issue.ReleaseSource.ToString());
                 history.Data.Add("IndexerFlags", message.Issue.Release.IndexerFlags.ToString());
 
-                if (!message.Issue.ParsedBookInfo.ReleaseHash.IsNullOrWhiteSpace())
+                if (!message.Issue.ParsedIssueInfo.ReleaseHash.IsNullOrWhiteSpace())
                 {
-                    history.Data.Add("ReleaseHash", message.Issue.ParsedBookInfo.ReleaseHash);
+                    history.Data.Add("ReleaseHash", message.Issue.ParsedIssueInfo.ReleaseHash);
                 }
 
                 if (message.Issue.Release is TorrentInfo torrentRelease)
@@ -193,7 +193,7 @@ namespace NzbDrone.Core.History
                 {
                     EventType = EntityHistoryEventType.IssueImportIncomplete,
                     Date = DateTime.UtcNow,
-                    Quality = message.TrackedDownload.RemoteBook.ParsedBookInfo?.Quality ?? new QualityModel(),
+                    Quality = message.TrackedDownload.RemoteBook.ParsedIssueInfo?.Quality ?? new QualityModel(),
                     SourceTitle = message.TrackedDownload.DownloadItem.Title,
                     SeriesId = issue.SeriesId,
                     IssueId = issue.Id,
@@ -201,7 +201,7 @@ namespace NzbDrone.Core.History
                 };
 
                 history.Data.Add("StatusMessages", message.TrackedDownload.StatusMessages.ToJson());
-                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteBook?.ParsedBookInfo?.ReleaseGroup);
+                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteBook?.ParsedIssueInfo?.ReleaseGroup);
                 history.Data.Add("IndexerFlags", message.TrackedDownload?.RemoteBook?.Release?.IndexerFlags.ToString());
 
                 _historyRepository.Insert(history);
@@ -263,7 +263,7 @@ namespace NzbDrone.Core.History
                 history.Data.Add("DownloadClient", message.DownloadClient);
                 history.Data.Add("DownloadClientName", message.TrackedDownload?.DownloadItem.DownloadClientInfo.Name);
                 history.Data.Add("Message", message.Message);
-                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteBook?.ParsedBookInfo?.ReleaseGroup ?? message.Data.GetValueOrDefault(EntityHistory.RELEASE_GROUP));
+                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteBook?.ParsedIssueInfo?.ReleaseGroup ?? message.Data.GetValueOrDefault(EntityHistory.RELEASE_GROUP));
                 history.Data.Add("Size", message.TrackedDownload?.DownloadItem.TotalSize.ToString() ?? message.Data.GetValueOrDefault(EntityHistory.SIZE));
                 history.Data.Add("Indexer", message.TrackedDownload?.RemoteBook?.Release?.Indexer ?? message.Data.GetValueOrDefault(EntityHistory.INDEXER));
 
@@ -373,7 +373,7 @@ namespace NzbDrone.Core.History
 
                 history.Data.Add("DownloadClient", message.DownloadClientInfo.Name);
                 history.Data.Add("Message", message.Message);
-                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteBook?.ParsedBookInfo?.ReleaseGroup);
+                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteBook?.ParsedIssueInfo?.ReleaseGroup);
                 history.Data.Add("Size", message.TrackedDownload?.DownloadItem.TotalSize.ToString());
                 history.Data.Add("Indexer", message.TrackedDownload?.RemoteBook?.Release?.Indexer);
 

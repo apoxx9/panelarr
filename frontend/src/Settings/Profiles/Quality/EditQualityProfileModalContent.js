@@ -269,7 +269,7 @@ class EditQualityProfileModalContent extends Component {
               id ?
                 <div
                   className={styles.deleteButtonContainer}
-                  title={isInUse ? translate('IsInUseCantDeleteAQualityProfileThatIsAttachedToAnAuthorOrImportList') : undefined}
+                  title={isInUse ? translate('IsInUseCantDeleteAQualityProfileThatIsAttachedToAnSeriesOrImportList') : undefined}
                 >
                   <Button
                     kind={kinds.DANGER}

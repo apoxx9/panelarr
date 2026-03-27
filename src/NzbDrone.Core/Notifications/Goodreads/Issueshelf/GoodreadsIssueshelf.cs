@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Notifications.Goodreads
             }
         }
 
-        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+        public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
             if (deleteMessage.DeletedFiles)
             {
@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Notifications.Goodreads
             }
         }
 
-        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
+        public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             foreach (var shelf in Settings.RemoveIds)
             {

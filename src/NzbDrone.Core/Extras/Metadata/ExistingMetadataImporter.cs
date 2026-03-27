@@ -59,7 +59,7 @@ namespace NzbDrone.Core.Extras.Metadata
 
                         if (localBook == null)
                         {
-                            _logger.Debug("Extra file folder has multiple Books: {0}", possibleMetadataFile);
+                            _logger.Debug("Extra file folder has multiple issues: {0}", possibleMetadataFile);
                             continue;
                         }
 

@@ -1,14 +1,15 @@
 import * as app from './appActions';
-import * as author from './authorActions';
-import * as authorDetails from './authorDetailsActions';
-import * as authorHistory from './authorHistoryActions';
-import * as authorIndex from './authorIndexActions';
+import * as series from './seriesActions';
+import * as seriesCollection from './seriesCollectionActions';
+import * as seriesDetails from './seriesDetailsActions';
+import * as seriesHistory from './seriesHistoryActions';
+import * as seriesIndex from './seriesIndexActions';
 import * as blocklist from './blocklistActions';
-import * as books from './bookActions';
-import * as bookFiles from './bookFileActions';
-import * as bookHistory from './bookHistoryActions';
-import * as bookIndex from './bookIndexActions';
-import * as bookStudio from './bookshelfActions';
+import * as issues from './issueActions';
+import * as issueFiles from './issueFileActions';
+import * as issueHistory from './issueHistoryActions';
+import * as issueIndex from './issueIndexActions';
+import * as issueStudio from './issueshelfActions';
 import * as calendar from './calendarActions';
 import * as captcha from './captchaActions';
 import * as commands from './commandActions';
@@ -24,7 +25,6 @@ import * as queue from './queueActions';
 import * as releases from './releaseActions';
 import * as retagPreview from './retagPreviewActions';
 import * as search from './searchActions';
-import * as series from './seriesActions';
 import * as settings from './settingsActions';
 import * as system from './systemActions';
 import * as tags from './tagActions';
@@ -32,16 +32,17 @@ import * as wanted from './wantedActions';
 
 export default [
   app,
-  author,
-  authorDetails,
-  authorHistory,
-  authorIndex,
+  series,
+  seriesCollection,
+  seriesDetails,
+  seriesHistory,
+  seriesIndex,
   blocklist,
-  bookFiles,
-  bookHistory,
-  bookIndex,
-  books,
-  bookStudio,
+  issueFiles,
+  issueHistory,
+  issueIndex,
+  issues,
+  issueStudio,
   calendar,
   captcha,
   commands,
@@ -57,7 +58,6 @@ export default [
   releases,
   retagPreview,
   search,
-  series,
   settings,
   system,
   tags,

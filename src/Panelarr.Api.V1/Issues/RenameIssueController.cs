@@ -16,14 +16,14 @@ namespace Panelarr.Api.V1.Books
         }
 
         [HttpGet]
-        public List<RenameBookResource> GetBookFiles(int authorId, int? bookId)
+        public List<RenameIssueResource> GetBookFiles(int seriesId, int? issueId)
         {
-            if (bookId.HasValue)
+            if (issueId.HasValue)
             {
-                return _renameBookFileService.GetRenamePreviews(authorId, bookId.Value).ToResource();
+                return _renameBookFileService.GetRenamePreviews(seriesId, issueId.Value).ToResource();
             }
 
-            return _renameBookFileService.GetRenamePreviews(authorId).ToResource();
+            return _renameBookFileService.GetRenamePreviews(seriesId).ToResource();
         }
     }
 }

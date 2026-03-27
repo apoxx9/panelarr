@@ -30,7 +30,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.Search
                 return Decision.Accept();
             }
 
-            if (!remoteBook.ParsedBookInfo.IssueTitle.Any())
+            if (!remoteBook.ParsedIssueInfo.IssueTitle.Any())
             {
                 _logger.Debug("Full discography result during single issue search, skipping.");
                 return Decision.Reject("Full author pack");

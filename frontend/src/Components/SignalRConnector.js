@@ -4,9 +4,9 @@ import { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { setAppValue, setVersion } from 'Store/Actions/appActions';
-import { fetchAuthor } from 'Store/Actions/authorActions';
+import { fetchSeries } from 'Store/Actions/seriesActions';
 import { removeItem, update, updateItem } from 'Store/Actions/baseActions';
-import { deleteAuthorBooks } from 'Store/Actions/bookActions';
+import { deleteSeriesIssues } from 'Store/Actions/issueActions';
 import { fetchCommands, finishCommand, updateCommand } from 'Store/Actions/commandActions';
 import { fetchQueue, fetchQueueDetails } from 'Store/Actions/queueActions';
 import { fetchQualityDefinitions, fetchRootFolders } from 'Store/Actions/settingsActions';
@@ -46,8 +46,8 @@ const mapDispatchToProps = {
   dispatchUpdate: update,
   dispatchUpdateItem: updateItem,
   dispatchRemoveItem: removeItem,
-  dispatchDeleteAuthorBooks: deleteAuthorBooks,
-  dispatchFetchAuthor: fetchAuthor,
+  dispatchDeleteSeriesIssues: deleteSeriesIssues,
+  dispatchFetchSeries: fetchSeries,
   dispatchFetchHealth: fetchHealth,
   dispatchFetchQualityDefinitions: fetchQualityDefinitions,
   dispatchFetchQueue: fetchQueue,
@@ -178,9 +178,9 @@ class SignalRConnector extends Component {
     }
   };
 
-  handleBook = (body) => {
+  handleIssue = (body) => {
     const action = body.action;
-    const section = 'books';
+    const section = 'issues';
 
     if (action === 'updated') {
       this.props.dispatchUpdateItem({
@@ -195,34 +195,34 @@ class SignalRConnector extends Component {
     }
   };
 
-  handleBookfile = (body) => {
-    const section = 'bookFiles';
+  handleComicfile = (body) => {
+    const section = 'issueFiles';
 
     if (body.action === 'updated') {
       this.props.dispatchUpdateItem({ section, ...body.resource });
     } else if (body.action === 'deleted') {
       this.props.dispatchRemoveItem({ section, id: body.resource.id });
 
-      repopulatePage('bookFileDeleted');
+      repopulatePage('issueFileDeleted');
     }
 
     // Repopulate the page to handle recently imported file
-    repopulatePage('bookFileUpdated');
+    repopulatePage('issueFileUpdated');
   };
 
   handleHealth = () => {
     this.props.dispatchFetchHealth();
   };
 
-  handleAuthor = (body) => {
+  handleSeries = (body) => {
     const action = body.action;
-    const section = 'authors';
+    const section = 'seriess';
 
     if (action === 'updated') {
       this.props.dispatchUpdateItem({ section, ...body.resource });
     } else if (action === 'deleted') {
       this.props.dispatchRemoveItem({ section, id: body.resource.id });
-      this.props.dispatchDeleteAuthorBooks({ authorId: body.resource.id });
+      this.props.dispatchDeleteSeriesIssues({ seriesId: body.resource.id });
     }
   };
 
@@ -326,7 +326,7 @@ class SignalRConnector extends Component {
 
     const {
       dispatchFetchCommands,
-      dispatchFetchAuthor,
+      dispatchFetchSeries,
       dispatchSetAppValue
     } = this.props;
 
@@ -339,7 +339,7 @@ class SignalRConnector extends Component {
 
     // Repopulate the page (if a repopulator is set) to ensure things
     // are in sync after reconnecting.
-    dispatchFetchAuthor();
+    dispatchFetchSeries();
     dispatchFetchCommands();
     repopulatePage();
   };
@@ -374,8 +374,8 @@ SignalRConnector.propTypes = {
   dispatchUpdate: PropTypes.func.isRequired,
   dispatchUpdateItem: PropTypes.func.isRequired,
   dispatchRemoveItem: PropTypes.func.isRequired,
-  dispatchDeleteAuthorBooks: PropTypes.func.isRequired,
-  dispatchFetchAuthor: PropTypes.func.isRequired,
+  dispatchDeleteSeriesIssues: PropTypes.func.isRequired,
+  dispatchFetchSeries: PropTypes.func.isRequired,
   dispatchFetchHealth: PropTypes.func.isRequired,
   dispatchFetchQualityDefinitions: PropTypes.func.isRequired,
   dispatchFetchQueue: PropTypes.func.isRequired,

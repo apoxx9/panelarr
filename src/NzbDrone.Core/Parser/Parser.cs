@@ -330,7 +330,7 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        public static ParsedBookInfo ParseBookTitleWithSearchCriteria(string title, Series author, List<Issue> issues)
+        public static ParsedIssueInfo ParseBookTitleWithSearchCriteria(string title, Series author, List<Issue> issues)
         {
             try
             {
@@ -380,7 +380,7 @@ namespace NzbDrone.Core.Parser
                     return null;
                 }
 
-                var result = new ParsedBookInfo
+                var result = new ParsedIssueInfo
                 {
                     SeriesName = foundSeries,
                     SeriesTitleInfo = GetSeriesTitleInfo(foundSeries),
@@ -439,7 +439,7 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        public static ParsedBookInfo ParseBookTitle(string title)
+        public static ParsedIssueInfo ParseBookTitle(string title)
         {
             try
             {
@@ -780,7 +780,7 @@ namespace NzbDrone.Core.Parser
             return parseResult.SeriesName;
         }
 
-        private static ParsedBookInfo ParseBookMatchCollection(MatchCollection matchCollection, string releaseTitle)
+        private static ParsedIssueInfo ParseBookMatchCollection(MatchCollection matchCollection, string releaseTitle)
         {
             var authorName = matchCollection[0].Groups["author"].Value.Replace('.', ' ').Replace('_', ' ');
             var bookTitle = matchCollection[0].Groups["issue"].Value.Replace('.', ' ').Replace('_', ' ');
@@ -791,9 +791,9 @@ namespace NzbDrone.Core.Parser
 
             int.TryParse(matchCollection[0].Groups["releaseyear"].Value, out var releaseYear);
 
-            ParsedBookInfo result;
+            ParsedIssueInfo result;
 
-            result = new ParsedBookInfo
+            result = new ParsedIssueInfo
             {
                 ReleaseTitle = releaseTitle
             };

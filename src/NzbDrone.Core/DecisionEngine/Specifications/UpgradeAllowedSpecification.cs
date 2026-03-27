@@ -42,7 +42,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 if (!_upgradableSpecification.IsUpgradeAllowed(qualityProfile,
                                                                file.Quality,
                                                                fileCustomFormats,
-                                                               subject.ParsedBookInfo.Quality,
+                                                               subject.ParsedIssueInfo.Quality,
                                                                subject.CustomFormats))
                 {
                     _logger.Debug("Upgrading is not allowed by the quality profile");

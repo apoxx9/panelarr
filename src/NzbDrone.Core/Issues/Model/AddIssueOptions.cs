@@ -2,9 +2,9 @@ using NzbDrone.Core.Datastore;
 
 namespace NzbDrone.Core.Books
 {
-    public class AddBookOptions : IEmbeddedDocument
+    public class AddIssueOptions : IEmbeddedDocument
     {
-        public AddBookOptions()
+        public AddIssueOptions()
         {
             // default in case not set in db
             AddType = IssueAddType.Automatic;

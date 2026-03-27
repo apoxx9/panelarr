@@ -4,7 +4,7 @@ using Panelarr.Http.REST;
 
 namespace Panelarr.Api.V1.Books
 {
-    public class RenameBookResource : RestResource
+    public class RenameIssueResource : RestResource
     {
         public int SeriesId { get; set; }
         public int IssueId { get; set; }
@@ -13,16 +13,16 @@ namespace Panelarr.Api.V1.Books
         public string NewPath { get; set; }
     }
 
-    public static class RenameBookResourceMapper
+    public static class RenameIssueResourceMapper
     {
-        public static RenameBookResource ToResource(this NzbDrone.Core.MediaFiles.RenameComicFilePreview model)
+        public static RenameIssueResource ToResource(this NzbDrone.Core.MediaFiles.RenameComicFilePreview model)
         {
             if (model == null)
             {
                 return null;
             }
 
-            return new RenameBookResource
+            return new RenameIssueResource
             {
                 SeriesId = model.SeriesId,
                 IssueId = model.IssueId,
@@ -32,7 +32,7 @@ namespace Panelarr.Api.V1.Books
             };
         }
 
-        public static List<RenameBookResource> ToResource(this IEnumerable<NzbDrone.Core.MediaFiles.RenameComicFilePreview> models)
+        public static List<RenameIssueResource> ToResource(this IEnumerable<NzbDrone.Core.MediaFiles.RenameComicFilePreview> models)
         {
             return models.Select(ToResource).ToList();
         }

@@ -7,7 +7,7 @@ import styles from './MonitorToggleButton.css';
 
 function getTooltip(monitored, isDisabled) {
   if (isDisabled) {
-    return 'Cannot toggle monitored state when author is unmonitored';
+    return 'Cannot toggle monitored state when series is unmonitored';
   }
 
   if (monitored) {

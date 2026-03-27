@@ -11,8 +11,8 @@ import PageContentBody from 'Components/Page/PageContentBody';
 import { icons, kinds } from 'Helpers/Props';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
-import AddNewAuthorSearchResultConnector from './Author/AddNewAuthorSearchResultConnector';
-import AddNewBookSearchResultConnector from './Book/AddNewBookSearchResultConnector';
+import AddNewSeriesSearchResultConnector from './Series/AddNewSeriesSearchResultConnector';
+import AddNewIssueSearchResultConnector from './Issue/AddNewIssueSearchResultConnector';
 import styles from './AddNewItem.css';
 
 class AddNewItem extends Component {
@@ -83,7 +83,7 @@ class AddNewItem extends Component {
     const {
       error,
       items,
-      hasExistingAuthors
+      hasExistingSeriess
     } = this.props;
 
     const term = this.state.term;
@@ -147,22 +147,22 @@ class AddNewItem extends Component {
               <div className={styles.searchResults}>
                 {
                   items.map((item) => {
-                    if (item.author) {
-                      const author = item.author;
+                    if (item.series) {
+                      const series = item.series;
                       return (
-                        <AddNewAuthorSearchResultConnector
+                        <AddNewSeriesSearchResultConnector
                           key={item.id}
-                          {...author}
+                          {...series}
                         />
                       );
-                    } else if (item.book) {
-                      const book = item.book;
+                    } else if (item.issue) {
+                      const issue = item.issue;
                       return (
-                        <AddNewBookSearchResultConnector
+                        <AddNewIssueSearchResultConnector
                           key={item.id}
-                          isExistingBook={'id' in book && book.id !== 0}
-                          isExistingAuthor={'id' in book.author && book.author.id !== 0}
-                          {...book}
+                          isExistingIssue={'id' in issue && issue.id !== 0}
+                          isExistingSeries={'id' in issue.series && issue.series.id !== 0}
+                          {...issue}
                         />
                       );
                     }
@@ -179,9 +179,7 @@ class AddNewItem extends Component {
                   {translate('CouldntFindAnyResultsForTerm', [term])}
                 </div>
                 <div>
-                  You can also search using the
-                  <Link to="https://goodreads.com"> Goodreads ID </Link>
-                  of a book (e.g. edition:656), work (e.g. work:4912783) or author (e.g. author:128382), the isbn (e.g. isbn:067003469X) or the asin (e.g. asin:B00JCDK5ME)
+                  You can also search by Metron ID for a series (e.g. series:128382) or issue (e.g. issue:656)
                 </div>
               </div>
           }
@@ -191,21 +189,19 @@ class AddNewItem extends Component {
               null :
               <div className={styles.message}>
                 <div className={styles.helpText}>
-                  {translate('ItsEasyToAddANewAuthorOrBookJustStartTypingTheNameOfTheItemYouWantToAdd')}
+                  {translate('ItsEasyToAddANewSeriesOrIssueJustStartTypingTheNameOfTheItemYouWantToAdd')}
                 </div>
                 <div>
-                  You can also search using the
-                  <Link to="https://goodreads.com"> Goodreads ID </Link>
-                  of a book (e.g. edition:656), work (e.g. work:4912783) or author (e.g. author:128382), the isbn (e.g. isbn:067003469X) or the asin (e.g. asin:B00JCDK5ME)
+                  You can also search by Metron ID for a series (e.g. series:128382) or issue (e.g. issue:656)
                 </div>
               </div>
           }
 
           {
-            !term && !hasExistingAuthors ?
+            !term && !hasExistingSeriess ?
               <div className={styles.message}>
-                <div className={styles.noAuthorsText}>
-                  You haven't added any authors yet, do you want to add an existing library location (Root Folder) and update?
+                <div className={styles.helpText}>
+                  You haven't added any series yet, do you want to add an existing library location (Root Folder) and update?
                 </div>
                 <div>
                   <Button
@@ -233,7 +229,7 @@ AddNewItem.propTypes = {
   isAdding: PropTypes.bool.isRequired,
   addError: PropTypes.object,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
-  hasExistingAuthors: PropTypes.bool.isRequired,
+  hasExistingSeriess: PropTypes.bool.isRequired,
   onSearchChange: PropTypes.func.isRequired,
   onClearSearch: PropTypes.func.isRequired
 };

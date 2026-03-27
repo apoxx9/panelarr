@@ -29,63 +29,63 @@ const caseOptions = [
 
 const fileNameTokens = [
   {
-    token: '{Author Name} - {Book Title} - {Quality Full}',
-    example: 'Author Name - Book Title - MP3 Proper'
+    token: '{Series Name} - {Issue Title} - {Quality Full}',
+    example: 'Series Name - Issue Title - MP3 Proper'
   },
   {
-    token: '{Author.Name}.{Book.Title}.{Quality.Full}',
-    example: 'Author.Name.Book.Title.MP3'
+    token: '{Series.Name}.{Issue.Title}.{Quality.Full}',
+    example: 'Series.Name.Issue.Title.MP3'
   },
   {
-    token: '{Author Name} - {Book Title}{ (PartNumber)}',
-    example: 'Author Name - Book Title (2)'
+    token: '{Series Name} - {Issue Title}{ (PartNumber)}',
+    example: 'Series Name - Issue Title (2)'
   },
   {
-    token: '{Author Name} - {Book Title}{ (PartNumber/PartCount)}',
-    example: 'Author Name - Book Title (2/10)'
+    token: '{Series Name} - {Issue Title}{ (PartNumber/PartCount)}',
+    example: 'Series Name - Issue Title (2/10)'
   }
 ];
 
-const authorTokens = [
-  { token: '{Author Name}', example: 'Author\'s Name' },
+const seriesTokens = [
+  { token: '{Series Name}', example: 'Series\'s Name' },
 
-  { token: '{Author NameThe}', example: 'Author\'s Name, The' },
+  { token: '{Series NameThe}', example: 'Series\'s Name, The' },
 
-  { token: '{Author NameFirstCharacter}', example: 'A' },
+  { token: '{Series NameFirstCharacter}', example: 'A' },
 
-  { token: '{Author CleanName}', example: 'Authors Name' },
+  { token: '{Series CleanName}', example: 'Series Name' },
 
-  { token: '{Author SortName}', example: 'Name, Author' },
+  { token: '{Series SortName}', example: 'Name, Series' },
 
-  { token: '{Author Disambiguation}', example: 'Disambiguation' }
+  { token: '{Series Disambiguation}', example: 'Disambiguation' }
 ];
 
-const bookTokens = [
-  { token: '{Book Title}', example: 'The Book\'s Title!: Subtitle!' },
+const issueTokens = [
+  { token: '{Issue Title}', example: 'The Issue\'s Title!: Subtitle!' },
 
-  { token: '{Book TitleThe}', example: 'Book\'s Title!, The: Subtitle!' },
+  { token: '{Issue TitleThe}', example: 'Issue\'s Title!, The: Subtitle!' },
 
-  { token: '{Book CleanTitle}', example: 'The Books Title!: Subtitle' },
+  { token: '{Issue CleanTitle}', example: 'The Issues Title!: Subtitle' },
 
-  { token: '{Book TitleNoSub}', example: 'The Book\'s Title!' },
+  { token: '{Issue TitleNoSub}', example: 'The Issue\'s Title!' },
 
-  { token: '{Book TitleTheNoSub}', example: 'Book\'s Title!, The' },
+  { token: '{Issue TitleTheNoSub}', example: 'Issue\'s Title!, The' },
 
-  { token: '{Book CleanTitleNoSub}', example: 'The Books Title!' },
+  { token: '{Issue CleanTitleNoSub}', example: 'The Issues Title!' },
 
-  { token: '{Book Subtitle}', example: 'Subtitle!' },
+  { token: '{Issue Subtitle}', example: 'Subtitle!' },
 
-  { token: '{Book SubtitleThe}', example: 'Subtitle!, The' },
+  { token: '{Issue SubtitleThe}', example: 'Subtitle!, The' },
 
-  { token: '{Book CleanSubtitle}', example: 'Subtitle' },
+  { token: '{Issue CleanSubtitle}', example: 'Subtitle' },
 
-  { token: '{Book Disambiguation}', example: 'Disambiguation' },
+  { token: '{Issue Disambiguation}', example: 'Disambiguation' },
 
-  { token: '{Book Series}', example: 'Series Title' },
+  { token: '{Issue Series}', example: 'Series Title' },
 
-  { token: '{Book SeriesPosition}', example: '1' },
+  { token: '{Issue SeriesPosition}', example: '1' },
 
-  { token: '{Book SeriesTitle}', example: 'Series Title #1' },
+  { token: '{Issue SeriesTitle}', example: 'Series Title #1' },
 
   { token: '{PartNumber:0}', example: '2' },
   { token: '{PartNumber:00}', example: '02' },
@@ -118,8 +118,8 @@ const otherTokens = [
 ];
 
 const originalTokens = [
-  { token: '{Original Title}', example: 'Author.Name.Book.Name.2018.AZW3-EVOLVE' },
-  { token: '{Original Filename}', example: '01 - book name' }
+  { token: '{Original Title}', example: 'Series.Name.Issue.Name.2018.AZW3-EVOLVE' },
+  { token: '{Original Filename}', example: '01 - issue name' }
 ];
 
 class NamingModal extends Component {
@@ -192,7 +192,7 @@ class NamingModal extends Component {
       value,
       isOpen,
       advancedSettings,
-      book,
+      issue,
       additional,
       onInputChange,
       onModalClose
@@ -262,7 +262,7 @@ class NamingModal extends Component {
             <FieldSet legend={translate('Series')}>
               <div className={styles.groups}>
                 {
-                  authorTokens.map(({ token, example }) => {
+                  seriesTokens.map(({ token, example }) => {
                     return (
                       <NamingOption
                         key={token}
@@ -282,12 +282,12 @@ class NamingModal extends Component {
             </FieldSet>
 
             {
-              book &&
+              issue &&
                 <div>
                   <FieldSet legend={translate('Issue')}>
                     <div className={styles.groups}>
                       {
-                        bookTokens.map(({ token, example }) => {
+                        issueTokens.map(({ token, example }) => {
                           return (
                             <NamingOption
                               key={token}
@@ -447,14 +447,14 @@ NamingModal.propTypes = {
   value: PropTypes.string.isRequired,
   isOpen: PropTypes.bool.isRequired,
   advancedSettings: PropTypes.bool.isRequired,
-  book: PropTypes.bool.isRequired,
+  issue: PropTypes.bool.isRequired,
   additional: PropTypes.bool.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onModalClose: PropTypes.func.isRequired
 };
 
 NamingModal.defaultProps = {
-  book: false,
+  issue: false,
   additional: false
 };
 

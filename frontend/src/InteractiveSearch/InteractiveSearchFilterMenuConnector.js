@@ -19,9 +19,9 @@ function createMapStateToProps(appState, { type }) {
 function createMapDispatchToProps(dispatch, props) {
   return {
     onFilterSelect(selectedFilterKey) {
-      const action = props.type === 'book' ?
-        releaseActions.setBookReleasesFilter :
-        releaseActions.setAuthorReleasesFilter;
+      const action = props.type === 'issue' ?
+        releaseActions.setIssueReleasesFilter :
+        releaseActions.setSeriesReleasesFilter;
       dispatch(action({ selectedFilterKey }));
     }
   };

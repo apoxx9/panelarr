@@ -37,12 +37,12 @@ namespace NzbDrone.Core.Notifications.Prowl
             _prowlProxy.SendNotification(AUTHOR_DELETED_TITLE, deleteMessage.Message, Settings);
         }
 
-        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+        public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
             _prowlProxy.SendNotification(BOOK_DELETED_TITLE, deleteMessage.Message, Settings);
         }
 
-        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
+        public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             _prowlProxy.SendNotification(BOOK_FILE_DELETED_TITLE, deleteMessage.Message, Settings);
         }

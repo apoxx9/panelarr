@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Books
 
                 if (author.AddOptions.SearchForMissingBooks)
                 {
-                    _commandQueueManager.Push(new MissingBookSearchCommand(author.Id));
+                    _commandQueueManager.Push(new MissingIssueSearchCommand(author.Id));
                 }
 
                 author.AddOptions = null;

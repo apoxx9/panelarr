@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
 import withCurrentPage from 'Components/withCurrentPage';
-import { clearBookFiles, fetchBookFiles } from 'Store/Actions/bookFileActions';
+import { clearIssueFiles, fetchIssueFiles } from 'Store/Actions/issueFileActions';
 import { executeCommand } from 'Store/Actions/commandActions';
 import { clearQueueDetails, fetchQueueDetails } from 'Store/Actions/queueActions';
 import * as wantedActions from 'Store/Actions/wantedActions';
@@ -17,14 +17,14 @@ import CutoffUnmet from './CutoffUnmet';
 function createMapStateToProps() {
   return createSelector(
     (state) => state.wanted.cutoffUnmet,
-    (state) => state.authors,
-    createCommandExecutingSelector(commandNames.CUTOFF_UNMET_BOOK_SEARCH),
-    (cutoffUnmet, authors, isSearchingForCutoffUnmetBooks) => {
+    (state) => state.seriess,
+    createCommandExecutingSelector(commandNames.CUTOFF_UNMET_ISSUE_SEARCH),
+    (cutoffUnmet, seriess, isSearchingForCutoffUnmetIssues) => {
 
       return {
-        isAuthorFetching: authors.isFetching,
-        isAuthorPopulated: authors.isPopulated,
-        isSearchingForCutoffUnmetBooks,
+        isSeriesFetching: seriess.isFetching,
+        isSeriesPopulated: seriess.isPopulated,
+        isSearchingForCutoffUnmetIssues,
         isSaving: cutoffUnmet.items.filter((m) => m.isSaving).length > 1,
         ...cutoffUnmet
       };
@@ -37,8 +37,8 @@ const mapDispatchToProps = {
   executeCommand,
   fetchQueueDetails,
   clearQueueDetails,
-  fetchBookFiles,
-  clearBookFiles
+  fetchIssueFiles,
+  clearIssueFiles
 };
 
 class CutoffUnmetConnector extends Component {
@@ -53,7 +53,7 @@ class CutoffUnmetConnector extends Component {
       gotoCutoffUnmetFirstPage
     } = this.props;
 
-    registerPagePopulator(this.repopulate, ['bookFileUpdated', 'bookFileDeleted']);
+    registerPagePopulator(this.repopulate, ['issueFileUpdated', 'issueFileDeleted']);
 
     if (useCurrentPage) {
       fetchCutoffUnmet();
@@ -64,13 +64,13 @@ class CutoffUnmetConnector extends Component {
 
   componentDidUpdate(prevProps) {
     if (hasDifferentItems(prevProps.items, this.props.items)) {
-      const bookIds = selectUniqueIds(this.props.items, 'id');
-      const bookFileIds = selectUniqueIds(this.props.items, 'bookFileId');
+      const issueIds = selectUniqueIds(this.props.items, 'id');
+      const issueFileIds = selectUniqueIds(this.props.items, 'issueFileId');
 
-      this.props.fetchQueueDetails({ bookIds });
+      this.props.fetchQueueDetails({ issueIds });
 
-      if (bookFileIds.length) {
-        this.props.fetchBookFiles({ bookFileIds });
+      if (issueFileIds.length) {
+        this.props.fetchIssueFiles({ issueFileIds });
       }
     }
   }
@@ -79,7 +79,7 @@ class CutoffUnmetConnector extends Component {
     unregisterPagePopulator(this.repopulate);
     this.props.clearCutoffUnmet();
     this.props.clearQueueDetails();
-    this.props.clearBookFiles();
+    this.props.clearIssueFiles();
   }
 
   //
@@ -130,15 +130,15 @@ class CutoffUnmetConnector extends Component {
 
   onSearchSelectedPress = (selected) => {
     this.props.executeCommand({
-      name: commandNames.BOOK_SEARCH,
-      bookIds: selected,
+      name: commandNames.ISSUE_SEARCH,
+      issueIds: selected,
       commandFinished: this.repopulate
     });
   };
 
   onSearchAllCutoffUnmetPress = () => {
     this.props.executeCommand({
-      name: commandNames.CUTOFF_UNMET_BOOK_SEARCH,
+      name: commandNames.CUTOFF_UNMET_ISSUE_SEARCH,
       commandFinished: this.repopulate
     });
   };
@@ -182,8 +182,8 @@ CutoffUnmetConnector.propTypes = {
   executeCommand: PropTypes.func.isRequired,
   fetchQueueDetails: PropTypes.func.isRequired,
   clearQueueDetails: PropTypes.func.isRequired,
-  fetchBookFiles: PropTypes.func.isRequired,
-  clearBookFiles: PropTypes.func.isRequired
+  fetchIssueFiles: PropTypes.func.isRequired,
+  clearIssueFiles: PropTypes.func.isRequired
 };
 
 export default withCurrentPage(

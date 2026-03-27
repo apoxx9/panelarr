@@ -36,9 +36,9 @@ namespace NzbDrone.Core.ImportLists.Panelarr
             try
             {
                 var remoteBooks = _panelarrV1Proxy.GetBooks(Settings);
-                var remoteSeriess = _panelarrV1Proxy.GetSeriess(Settings);
+                var remoteSeriesList = _panelarrV1Proxy.GetSeriess(Settings);
 
-                var authorDict = remoteSeriess.ToDictionary(x => x.Id);
+                var authorDict = remoteSeriesList.ToDictionary(x => x.Id);
 
                 foreach (var remoteBook in remoteBooks)
                 {

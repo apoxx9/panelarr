@@ -37,7 +37,7 @@ namespace NzbDrone.Core.SeriesStats
 
         public List<SeriesStatistics> SeriesStatistics()
         {
-            var bookStatistics = _cache.Get("AllSeriess", () => _authorStatisticsRepository.SeriesStatistics());
+            var bookStatistics = _cache.Get("AllSeries", () => _authorStatisticsRepository.SeriesStatistics());
 
             return bookStatistics.GroupBy(s => s.SeriesId).Select(s => MapSeriesStatistics(s.ToList())).ToList();
         }
@@ -73,63 +73,63 @@ namespace NzbDrone.Core.SeriesStats
         [EventHandleOrder(EventHandleOrder.First)]
         public void Handle(SeriesAddedEvent message)
         {
-            _cache.Remove("AllSeriess");
+            _cache.Remove("AllSeries");
             _cache.Remove(message.Series.Id.ToString());
         }
 
         [EventHandleOrder(EventHandleOrder.First)]
         public void Handle(SeriesUpdatedEvent message)
         {
-            _cache.Remove("AllSeriess");
+            _cache.Remove("AllSeries");
             _cache.Remove(message.Series.Id.ToString());
         }
 
         [EventHandleOrder(EventHandleOrder.First)]
         public void Handle(SeriesDeletedEvent message)
         {
-            _cache.Remove("AllSeriess");
+            _cache.Remove("AllSeries");
             _cache.Remove(message.Series.Id.ToString());
         }
 
         [EventHandleOrder(EventHandleOrder.First)]
         public void Handle(IssueAddedEvent message)
         {
-            _cache.Remove("AllSeriess");
+            _cache.Remove("AllSeries");
             _cache.Remove(message.Issue.SeriesId.ToString());
         }
 
         [EventHandleOrder(EventHandleOrder.First)]
         public void Handle(IssueDeletedEvent message)
         {
-            _cache.Remove("AllSeriess");
+            _cache.Remove("AllSeries");
             _cache.Remove(message.Issue.SeriesId.ToString());
         }
 
         [EventHandleOrder(EventHandleOrder.First)]
         public void Handle(IssueImportedEvent message)
         {
-            _cache.Remove("AllSeriess");
+            _cache.Remove("AllSeries");
             _cache.Remove(message.Series.Id.ToString());
         }
 
         [EventHandleOrder(EventHandleOrder.First)]
         public void Handle(IssueEditedEvent message)
         {
-            _cache.Remove("AllSeriess");
+            _cache.Remove("AllSeries");
             _cache.Remove(message.Issue.SeriesId.ToString());
         }
 
         [EventHandleOrder(EventHandleOrder.First)]
         public void Handle(IssueUpdatedEvent message)
         {
-            _cache.Remove("AllSeriess");
+            _cache.Remove("AllSeries");
             _cache.Remove(message.Issue.SeriesId.ToString());
         }
 
         [EventHandleOrder(EventHandleOrder.First)]
         public void Handle(ComicFileDeletedEvent message)
         {
-            _cache.Remove("AllSeriess");
+            _cache.Remove("AllSeries");
 
             var authorId = message.ComicFile.Series?.Value?.Id.ToString();
             if (authorId != null)

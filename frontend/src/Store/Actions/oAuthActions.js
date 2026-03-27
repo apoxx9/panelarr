@@ -19,7 +19,7 @@ const callbackUrl = `${window.location.origin}${window.Panelarr.urlBase}/oauth.h
 // State
 
 export const defaultState = {
-  authorizing: false,
+  seriesizing: false,
   result: null,
   error: null
 };
@@ -120,7 +120,7 @@ export const actionHandlers = handleThunks({
     };
 
     dispatch(setOAuthValue({
-      authorizing: true
+      seriesizing: true
     }));
 
     let startResponse = {};
@@ -151,7 +151,7 @@ export const actionHandlers = handleThunks({
       })
       .then((response) => {
         dispatch(setOAuthValue({
-          authorizing: false,
+          seriesizing: false,
           result: response,
           error: null
         }));
@@ -168,7 +168,7 @@ export const actionHandlers = handleThunks({
     promise.fail((xhr) => {
       const actions = [
         setOAuthValue({
-          authorizing: false,
+          seriesizing: false,
           result: null,
           error: xhr
         })

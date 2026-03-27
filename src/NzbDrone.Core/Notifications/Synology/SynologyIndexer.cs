@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Notifications.Synology
             }
         }
 
-        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+        public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
             if (Settings.UpdateLibrary && deleteMessage.DeletedFiles)
             {
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.Notifications.Synology
             }
         }
 
-        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
+        public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             if (Settings.UpdateLibrary)
             {
@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Notifications.Synology
             }
         }
 
-        public override void OnBookRetag(IssueRetagMessage message)
+        public override void OnIssueRetag(IssueRetagMessage message)
         {
             if (Settings.UpdateLibrary)
             {

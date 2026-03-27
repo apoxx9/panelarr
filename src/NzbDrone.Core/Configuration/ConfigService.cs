@@ -269,6 +269,27 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("MetadataSource", value); }
         }
 
+        public string MetronUsername
+        {
+            get { return GetValue("MetronUsername", ""); }
+
+            set { SetValue("MetronUsername", value); }
+        }
+
+        public string MetronPassword
+        {
+            get { return GetValue("MetronPassword", ""); }
+
+            set { SetValue("MetronPassword", value); }
+        }
+
+        public string ComicVineApiKey
+        {
+            get { return GetValue("ComicVineApiKey", ""); }
+
+            set { SetValue("ComicVineApiKey", value); }
+        }
+
         public WriteAudioTagsType WriteAudioTags
         {
             get { return GetValueEnum("WriteAudioTags", WriteAudioTagsType.No); }
@@ -283,11 +304,11 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("ScrubAudioTags", value); }
         }
 
-        public WriteBookTagsType WriteBookTags
+        public WriteIssueTagsType WriteIssueTags
         {
-            get { return GetValueEnum("WriteBookTags", WriteBookTagsType.NewFiles); }
+            get { return GetValueEnum("WriteIssueTags", WriteIssueTagsType.NewFiles); }
 
-            set { SetValue("WriteBookTags", value); }
+            set { SetValue("WriteIssueTags", value); }
         }
 
         public bool UpdateCovers

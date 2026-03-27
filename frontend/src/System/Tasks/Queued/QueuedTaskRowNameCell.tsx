@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { CommandBody } from 'Commands/Command';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
-import createMultiAuthorsSelector from 'Store/Selectors/createMultiAuthorsSelector';
+import createMultiSeriessSelector from 'Store/Selectors/createMultiSeriessSelector';
 import translate from 'Utilities/String/translate';
 import styles from './QueuedTaskRowNameCell.css';
 
@@ -32,14 +32,14 @@ export default function QueuedTaskRowNameCell(
   props: QueuedTaskRowNameCellProps
 ) {
   const { commandName, body, clientUserAgent } = props;
-  const movieIds = [...(body.authorIds ?? [])];
+  const movieIds = [...(body.seriesIds ?? [])];
 
-  if (body.authorId) {
-    movieIds.push(body.authorId);
+  if (body.seriesId) {
+    movieIds.push(body.seriesId);
   }
 
-  const authors = useSelector(createMultiAuthorsSelector(movieIds));
-  const sortedAuthors = authors.sort((a, b) =>
+  const seriess = useSelector(createMultiSeriessSelector(movieIds));
+  const sortedSeriess = seriess.sort((a, b) =>
     a.sortName.localeCompare(b.sortName)
   );
 
@@ -47,8 +47,8 @@ export default function QueuedTaskRowNameCell(
     <TableRowCell>
       <span className={styles.commandName}>
         {commandName}
-        {sortedAuthors.length ? (
-          <span> - {formatTitles(sortedAuthors.map((a) => a.authorName))}</span>
+        {sortedSeriess.length ? (
+          <span> - {formatTitles(sortedSeriess.map((a) => a.seriesName))}</span>
         ) : null}
       </span>
 

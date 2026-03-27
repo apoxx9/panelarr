@@ -29,7 +29,7 @@ namespace Panelarr.Api.V1.Books
         public List<Links> Links { get; set; }
         public IssueStatisticsResource Statistics { get; set; }
         public DateTime? Added { get; set; }
-        public AddBookOptions AddOptions { get; set; }
+        public AddIssueOptions AddOptions { get; set; }
         public string RemoteCover { get; set; }
         public DateTime? LastSearchTime { get; set; }
 

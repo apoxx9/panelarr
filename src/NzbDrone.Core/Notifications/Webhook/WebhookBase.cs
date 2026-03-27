@@ -72,7 +72,7 @@ namespace NzbDrone.Core.Notifications.Webhook
             };
         }
 
-        public WebhookRetagPayload BuildOnBookRetagPayload(IssueRetagMessage message)
+        public WebhookRetagPayload BuildOnIssueRetagPayload(IssueRetagMessage message)
         {
             return new WebhookRetagPayload
             {
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Notifications.Webhook
             };
         }
 
-        public WebhookBookDeletePayload BuildOnBookDelete(IssueDeleteMessage deleteMessage)
+        public WebhookBookDeletePayload BuildOnIssueDelete(IssueDeleteMessage deleteMessage)
         {
             return new WebhookBookDeletePayload
             {
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Notifications.Webhook
             };
         }
 
-        public WebhookBookFileDeletePayload BuildOnBookFileDelete(ComicFileDeleteMessage deleteMessage)
+        public WebhookBookFileDeletePayload BuildOnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             return new WebhookBookFileDeletePayload
             {

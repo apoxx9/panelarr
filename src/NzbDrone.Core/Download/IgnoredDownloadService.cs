@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Download
             {
                 SeriesId = author.Id,
                 IssueIds = issues.Select(e => e.Id).ToList(),
-                Quality = trackedDownload.RemoteBook.ParsedBookInfo.Quality,
+                Quality = trackedDownload.RemoteBook.ParsedIssueInfo.Quality,
                 SourceTitle = trackedDownload.DownloadItem.Title,
                 DownloadClientInfo = trackedDownload.DownloadItem.DownloadClientInfo,
                 DownloadId = trackedDownload.DownloadItem.DownloadId,

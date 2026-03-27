@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Books
             Genres = new List<string>();
             Ratings = new Ratings();
             Series = new Series();
-            AddOptions = new AddBookOptions();
+            AddOptions = new AddIssueOptions();
         }
 
         // These correspond to columns in the Issues table
@@ -42,10 +42,12 @@ namespace NzbDrone.Core.Books
         // These are Panelarr generated/config
         public string CleanTitle { get; set; }
         public bool Monitored { get; set; }
+        public bool IsOverridden { get; set; }
+        public string OverriddenFields { get; set; }
         public DateTime? LastInfoSync { get; set; }
         public DateTime Added { get; set; }
         [MemberwiseEqualityIgnore]
-        public AddBookOptions AddOptions { get; set; }
+        public AddIssueOptions AddOptions { get; set; }
 
         // These are dynamically queried from other tables
         [MemberwiseEqualityIgnore]
@@ -62,7 +64,8 @@ namespace NzbDrone.Core.Books
         [JsonIgnore]
         public int SeriesId
         {
-            get { return Series?.Value?.Id ?? 0; } set { Series.Value.Id = value; }
+            get { return Series?.Value?.Id ?? 0; }
+            set { Series.Value.Id = value; }
         }
 
         public override string ToString()
@@ -72,18 +75,69 @@ namespace NzbDrone.Core.Books
 
         public override void UseMetadataFrom(Issue other)
         {
-            ForeignIssueId = other.ForeignIssueId;
-            TitleSlug = other.TitleSlug;
-            Title = other.Title;
-            ReleaseDate = other.ReleaseDate;
-            Links = other.Links;
-            Genres = other.Genres;
-            Ratings = other.Ratings;
-            CleanTitle = other.CleanTitle;
-            IssueNumber = other.IssueNumber;
-            IssueType = other.IssueType;
-            CoverArtUrl = other.CoverArtUrl;
-            PageCount = other.PageCount;
+            var overridden = IsOverridden
+                ? (OverriddenFields ?? string.Empty).Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                : Array.Empty<string>();
+
+            if (!IsProtectedField(overridden, "ForeignIssueId"))
+            {
+                ForeignIssueId = other.ForeignIssueId;
+            }
+
+            if (!IsProtectedField(overridden, "TitleSlug"))
+            {
+                TitleSlug = other.TitleSlug;
+            }
+
+            if (!IsProtectedField(overridden, "Title"))
+            {
+                Title = other.Title;
+            }
+
+            if (!IsProtectedField(overridden, "ReleaseDate"))
+            {
+                ReleaseDate = other.ReleaseDate;
+            }
+
+            if (!IsProtectedField(overridden, "Links"))
+            {
+                Links = other.Links;
+            }
+
+            if (!IsProtectedField(overridden, "Genres"))
+            {
+                Genres = other.Genres;
+            }
+
+            if (!IsProtectedField(overridden, "Ratings"))
+            {
+                Ratings = other.Ratings;
+            }
+
+            if (!IsProtectedField(overridden, "CleanTitle"))
+            {
+                CleanTitle = other.CleanTitle;
+            }
+
+            if (!IsProtectedField(overridden, "IssueNumber"))
+            {
+                IssueNumber = other.IssueNumber;
+            }
+
+            if (!IsProtectedField(overridden, "IssueType"))
+            {
+                IssueType = other.IssueType;
+            }
+
+            if (!IsProtectedField(overridden, "CoverArtUrl"))
+            {
+                CoverArtUrl = other.CoverArtUrl;
+            }
+
+            if (!IsProtectedField(overridden, "PageCount"))
+            {
+                PageCount = other.PageCount;
+            }
         }
 
         public override void UseDbFieldsFrom(Issue other)
@@ -91,6 +145,8 @@ namespace NzbDrone.Core.Books
             Id = other.Id;
             SeriesMetadataId = other.SeriesMetadataId;
             Monitored = other.Monitored;
+            IsOverridden = other.IsOverridden;
+            OverriddenFields = other.OverriddenFields;
             LastInfoSync = other.LastInfoSync;
             LastSearchTime = other.LastSearchTime;
             Added = other.Added;
@@ -102,6 +158,11 @@ namespace NzbDrone.Core.Books
             ForeignIssueId = other.ForeignIssueId;
             AddOptions = other.AddOptions;
             Monitored = other.Monitored;
+        }
+
+        private bool IsProtectedField(string[] overridden, string field)
+        {
+            return IsOverridden && Array.IndexOf(overridden, field) >= 0;
         }
     }
 }

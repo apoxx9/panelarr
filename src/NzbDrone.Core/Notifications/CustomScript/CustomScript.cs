@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
         {
             var author = message.Series;
             var remoteBook = message.RemoteBook;
-            var releaseGroup = remoteBook.ParsedBookInfo.ReleaseGroup;
+            var releaseGroup = remoteBook.ParsedIssueInfo.ReleaseGroup;
             var environmentVariables = new StringDictionary();
 
             environmentVariables.Add("Panelarr_EventType", "Grab");
@@ -54,8 +54,8 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Panelarr_Release_Title", remoteBook.Release.Title);
             environmentVariables.Add("Panelarr_Release_Indexer", remoteBook.Release.Indexer ?? string.Empty);
             environmentVariables.Add("Panelarr_Release_Size", remoteBook.Release.Size.ToString());
-            environmentVariables.Add("Panelarr_Release_Quality", remoteBook.ParsedBookInfo.Quality.Quality.Name);
-            environmentVariables.Add("Panelarr_Release_QualityVersion", remoteBook.ParsedBookInfo.Quality.Revision.Version.ToString());
+            environmentVariables.Add("Panelarr_Release_Quality", remoteBook.ParsedIssueInfo.Quality.Quality.Name);
+            environmentVariables.Add("Panelarr_Release_QualityVersion", remoteBook.ParsedIssueInfo.Quality.Revision.Version.ToString());
             environmentVariables.Add("Panelarr_Release_ReleaseGroup", releaseGroup ?? string.Empty);
             environmentVariables.Add("Panelarr_Release_IndexerFlags", remoteBook.Release.IndexerFlags.ToString());
             environmentVariables.Add("Panelarr_Download_Client", message.DownloadClientName ?? string.Empty);
@@ -139,7 +139,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             ExecuteScript(environmentVariables);
         }
 
-        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+        public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
             var author = deleteMessage.Issue.Series.Value;
             var issue = deleteMessage.Issue;
@@ -159,7 +159,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             ExecuteScript(environmentVariables);
         }
 
-        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
+        public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             var author = deleteMessage.Issue.Series.Value;
             var issue = deleteMessage.Issue;
@@ -185,7 +185,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             ExecuteScript(environmentVariables);
         }
 
-        public override void OnBookRetag(IssueRetagMessage message)
+        public override void OnIssueRetag(IssueRetagMessage message)
         {
             var author = message.Series;
             var issue = message.Issue;

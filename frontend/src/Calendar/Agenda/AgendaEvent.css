@@ -30,15 +30,15 @@
   border: none !important;
 }
 
-.authorName,
-.bookTitle {
+.seriesName,
+.issueTitle {
   @add-mixin truncate;
 
   flex: 0 1 300px;
   margin-right: 10px;
 }
 
-.bookTitle {
+.issueTitle {
   flex: 1 1 1px;
 }
 
@@ -46,7 +46,7 @@
   flex: 0 0 100px;
 }
 
-.bookSeparator {
+.issueSeparator {
   display: none;
 }
 
@@ -98,7 +98,7 @@
 
   .date,
   .time,
-  .authorName {
+  .seriesName {
     flex: 0 0 100%;
   }
 
@@ -106,7 +106,7 @@
     flex: 0 0 auto;
   }
 
-  .bookSeparator {
+  .issueSeparator {
     display: inline-block;
     margin: 0 5px;
   }

@@ -109,7 +109,7 @@ namespace NzbDrone.Core.Notifications.Discord
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+        public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
             var attachments = new List<Embed>
             {
@@ -125,7 +125,7 @@ namespace NzbDrone.Core.Notifications.Discord
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
+        public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             var attachments = new List<Embed>
             {
@@ -158,7 +158,7 @@ namespace NzbDrone.Core.Notifications.Discord
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnBookRetag(IssueRetagMessage message)
+        public override void OnIssueRetag(IssueRetagMessage message)
         {
             var attachments = new List<Embed>
             {

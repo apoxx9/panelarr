@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Queue
             {
                 Series = trackedDownload.RemoteBook?.Series,
                 Issue = issue,
-                Quality = trackedDownload.RemoteBook?.ParsedBookInfo.Quality ?? new QualityModel(Quality.Unknown),
+                Quality = trackedDownload.RemoteBook?.ParsedIssueInfo.Quality ?? new QualityModel(Quality.Unknown),
                 Title = Parser.Parser.RemoveFileExtension(trackedDownload.DownloadItem.Title),
                 Size = trackedDownload.DownloadItem.TotalSize,
                 Sizeleft = trackedDownload.DownloadItem.RemainingSize,

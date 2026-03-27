@@ -28,19 +28,19 @@ public class Kavita : NotificationBase<KavitaSettings>
         Notify(Settings, BOOK_DOWNLOADED_TITLE_BRANDED, path);
     }
 
-    public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+    public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
     {
         var allPaths = deleteMessage.Issue.ComicFiles.Value.Select(v => v.Path).Distinct();
         var path = Directory.GetParent(allPaths.First())?.FullName;
         Notify(Settings, BOOK_FILE_DELETED_TITLE_BRANDED, path);
     }
 
-    public override void OnBookFileDelete(ComicFileDeleteMessage message)
+    public override void OnComicFileDelete(ComicFileDeleteMessage message)
     {
         Notify(Settings, BOOK_FILE_DELETED_TITLE_BRANDED, Directory.GetParent(message.ComicFile.Path)?.FullName);
     }
 
-    public override void OnBookRetag(IssueRetagMessage message)
+    public override void OnIssueRetag(IssueRetagMessage message)
     {
         Notify(Settings, BOOK_RETAGGED_TITLE_BRANDED, Directory.GetParent(message.ComicFile.Path)?.FullName);
     }

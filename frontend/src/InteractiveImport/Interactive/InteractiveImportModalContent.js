@@ -16,8 +16,8 @@ import ModalHeader from 'Components/Modal/ModalHeader';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import { align, icons, kinds, scrollDirections } from 'Helpers/Props';
-import SelectAuthorModal from 'InteractiveImport/Author/SelectAuthorModal';
-import SelectBookModal from 'InteractiveImport/Book/SelectBookModal';
+import SelectSeriesModal from 'InteractiveImport/Series/SelectSeriesModal';
+import SelectIssueModal from 'InteractiveImport/Issue/SelectIssueModal';
 import ConfirmImportModal from 'InteractiveImport/Confirmation/ConfirmImportModal';
 import SelectEditionModal from 'InteractiveImport/Edition/SelectEditionModal';
 import SelectIndexerFlagsModal from 'InteractiveImport/IndexerFlags/SelectIndexerFlagsModal';
@@ -39,13 +39,13 @@ const COLUMNS = [
     isVisible: true
   },
   {
-    name: 'author',
+    name: 'series',
     label: 'Series',
     isSortable: true,
     isVisible: true
   },
   {
-    name: 'book',
+    name: 'issue',
     label: 'Issue',
     isVisible: true
   },
@@ -108,8 +108,8 @@ const importModeOptions = [
 ];
 
 const SELECT = 'select';
-const AUTHOR = 'author';
-const BOOK = 'book';
+const SERIES = 'series';
+const ISSUE = 'issue';
 const EDITION = 'edition';
 const RELEASE_GROUP = 'releaseGroup';
 const QUALITY = 'quality';
@@ -135,9 +135,9 @@ class InteractiveImportModalContent extends Component {
       selectedState: {},
       invalidRowsSelected: [],
       selectModalOpen: null,
-      booksImported: [],
+      issuesImported: [],
       isConfirmImportModalOpen: false,
-      inconsistentBookReleases: false
+      inconsistentIssueReleases: false
     };
   }
 
@@ -146,14 +146,14 @@ class InteractiveImportModalContent extends Component {
     const selectedItems = _.filter(this.props.items, (x) => _.includes(selectedIds, x.id));
 
     const inconsistent = _(selectedItems)
-      .map((x) => ({ bookId: x.book ? x.book.id : 0, foreignEditionId: x.ForeignEditionId }))
-      .groupBy('bookId')
-      .mapValues((book) => _(book).groupBy((x) => x.foreignEditionId).values().value().length)
+      .map((x) => ({ issueId: x.issue ? x.issue.id : 0, foreignEditionId: x.ForeignEditionId }))
+      .groupBy('issueId')
+      .mapValues((issue) => _(issue).groupBy((x) => x.foreignEditionId).values().value().length)
       .values()
       .some((x) => x !== undefined && x > 1);
 
-    if (inconsistent !== this.state.inconsistentBookReleases) {
-      this.setState({ inconsistentBookReleases: inconsistent });
+    if (inconsistent !== this.state.inconsistentIssueReleases) {
+      this.setState({ inconsistentIssueReleases: inconsistent });
     }
   }
 
@@ -195,16 +195,16 @@ class InteractiveImportModalContent extends Component {
 
     // potentially deleting files
     const selectedIds = this.getSelectedIds();
-    const booksImported = _(this.props.items)
+    const issuesImported = _(this.props.items)
       .filter((x) => _.includes(selectedIds, x.id))
-      .keyBy((x) => x.book.id)
-      .map((x) => x.book)
+      .keyBy((x) => x.issue.id)
+      .map((x) => x.issue)
       .value();
 
-    console.log(booksImported);
+    console.log(issuesImported);
 
     this.setState({
-      booksImported,
+      issuesImported,
       isConfirmImportModalOpen: true
     });
   };
@@ -239,7 +239,7 @@ class InteractiveImportModalContent extends Component {
     this.setState({ selectModalOpen: value });
   };
 
-  onClearBookMappingPress = () => {
+  onClearIssueMappingPress = () => {
     const selectedIds = this.getSelectedIds();
 
     selectedIds.forEach((id) => {
@@ -250,7 +250,7 @@ class InteractiveImportModalContent extends Component {
     });
   };
 
-  onGetBookMappingPress = () => {
+  onGetIssueMappingPress = () => {
     this.props.saveInteractiveImportItem({ id: this.getSelectedIds() });
   };
 
@@ -268,7 +268,7 @@ class InteractiveImportModalContent extends Component {
   render() {
     const {
       downloadId,
-      allowAuthorChange,
+      allowSeriesChange,
       showFilterExistingFiles,
       showReplaceExistingFiles,
       showImportMode,
@@ -295,9 +295,9 @@ class InteractiveImportModalContent extends Component {
       selectedState,
       invalidRowsSelected,
       selectModalOpen,
-      booksImported,
+      issuesImported,
       isConfirmImportModalOpen,
-      inconsistentBookReleases
+      inconsistentIssueReleases
     } = this.state;
 
     const allColumns = _.cloneDeep(COLUMNS);
@@ -317,23 +317,23 @@ class InteractiveImportModalContent extends Component {
 
     const selectedIds = this.getSelectedIds();
     const selectedItem = selectedIds.length ? _.find(items, { id: selectedIds[0] }) : null;
-    const importIdsByBook = _.chain(items).filter((x) => x.book).groupBy((x) => x.book.id).mapValues((x) => x.map((y) => y.id)).value();
-    const editions = _.chain(items).filter((x) => x.book).keyBy((x) => x.book.id).mapValues((x) => ({ matchedEditionId: x.foreignEditionId, book: x.book })).values().value();
+    const importIdsByIssue = _.chain(items).filter((x) => x.issue).groupBy((x) => x.issue.id).mapValues((x) => x.map((y) => y.id)).value();
+    const editions = _.chain(items).filter((x) => x.issue).keyBy((x) => x.issue.id).mapValues((x) => ({ matchedEditionId: x.foreignEditionId, issue: x.issue })).values().value();
     const errorMessage = getErrorMessage(error, 'Unable to load manual import items');
 
     const bulkSelectOptions = [
       { key: SELECT, value: translate('SelectDropdown'), disabled: true },
-      { key: BOOK, value: translate('SelectBook') },
+      { key: ISSUE, value: translate('SelectIssue') },
       { key: EDITION, value: translate('SelectEdition') },
       { key: QUALITY, value: translate('SelectQuality') },
       { key: RELEASE_GROUP, value: translate('SelectReleaseGroup') },
       { key: INDEXER_FLAGS, value: translate('SelectIndexerFlags') }
     ];
 
-    if (allowAuthorChange) {
+    if (allowSeriesChange) {
       bulkSelectOptions.splice(1, 0, {
-        key: AUTHOR,
-        value: 'Select Author'
+        key: SERIES,
+        value: 'Select Series'
       });
     }
 
@@ -449,7 +449,7 @@ class InteractiveImportModalContent extends Component {
                           isSelected={selectedState[item.id]}
                           isSaving={isSaving}
                           {...item}
-                          allowAuthorChange={allowAuthorChange}
+                          allowSeriesChange={allowSeriesChange}
                           columns={columns}
                           onSelectedChange={this.onSelectedChange}
                           onValidRowChange={this.onValidRowChange}
@@ -463,7 +463,7 @@ class InteractiveImportModalContent extends Component {
 
           {
             isPopulated && !items.length && !isFetching &&
-              'No book files were found in the selected folder'
+              'No issue files were found in the selected folder'
           }
         </ModalBody>
 
@@ -503,7 +503,7 @@ class InteractiveImportModalContent extends Component {
 
             <Button
               kind={kinds.SUCCESS}
-              isDisabled={isSaving || !selectedIds.length || !!invalidRowsSelected.length || inconsistentBookReleases}
+              isDisabled={isSaving || !selectedIds.length || !!invalidRowsSelected.length || inconsistentIssueReleases}
               onPress={this.onImportSelectedPress}
             >
               Import
@@ -511,23 +511,23 @@ class InteractiveImportModalContent extends Component {
           </div>
         </ModalFooter>
 
-        <SelectAuthorModal
-          isOpen={selectModalOpen === AUTHOR}
+        <SelectSeriesModal
+          isOpen={selectModalOpen === SERIES}
           ids={selectedIds}
           onModalClose={this.onSelectModalClose}
         />
 
-        <SelectBookModal
-          isOpen={selectModalOpen === BOOK}
+        <SelectIssueModal
+          isOpen={selectModalOpen === ISSUE}
           ids={selectedIds}
-          authorId={selectedItem && selectedItem.author && selectedItem.author.id}
+          seriesId={selectedItem && selectedItem.series && selectedItem.series.id}
           onModalClose={this.onSelectModalClose}
         />
 
         <SelectEditionModal
           isOpen={selectModalOpen === EDITION}
-          importIdsByBook={importIdsByBook}
-          books={editions}
+          importIdsByIssue={importIdsByIssue}
+          issues={editions}
           onModalClose={this.onSelectModalClose}
         />
 
@@ -556,7 +556,7 @@ class InteractiveImportModalContent extends Component {
 
         <ConfirmImportModal
           isOpen={isConfirmImportModalOpen}
-          books={booksImported}
+          issues={issuesImported}
           onModalClose={this.onConfirmImportModalClose}
           onConfirmImportPress={this.onConfirmImportPress}
         />
@@ -568,7 +568,7 @@ class InteractiveImportModalContent extends Component {
 
 InteractiveImportModalContent.propTypes = {
   downloadId: PropTypes.string,
-  allowAuthorChange: PropTypes.bool.isRequired,
+  allowSeriesChange: PropTypes.bool.isRequired,
   showImportMode: PropTypes.bool.isRequired,
   showFilterExistingFiles: PropTypes.bool.isRequired,
   showReplaceExistingFiles: PropTypes.bool.isRequired,
@@ -596,7 +596,7 @@ InteractiveImportModalContent.propTypes = {
 };
 
 InteractiveImportModalContent.defaultProps = {
-  allowAuthorChange: true,
+  allowSeriesChange: true,
   showFilterExistingFiles: false,
   showReplaceExistingFiles: false,
   showImportMode: true,

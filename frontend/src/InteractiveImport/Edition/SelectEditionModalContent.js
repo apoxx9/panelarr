@@ -16,7 +16,7 @@ import styles from './SelectEditionModalContent.css';
 
 const columns = [
   {
-    name: 'book',
+    name: 'issue',
     label: 'Issue',
     isVisible: true
   },
@@ -34,7 +34,7 @@ class SelectEditionModalContent extends Component {
 
   render() {
     const {
-      books,
+      issues,
       isPopulated,
       isFetching,
       error,
@@ -66,7 +66,7 @@ class SelectEditionModalContent extends Component {
           scrollDirection={scrollDirections.VERTICAL}
         >
           <Alert>
-            Overrriding an edition here will <b>disable automatic edition selection</b> for that book in future.
+            Overrriding an edition here will <b>disable automatic edition selection</b> for that issue in future.
           </Alert>
 
           <Table
@@ -75,14 +75,14 @@ class SelectEditionModalContent extends Component {
           >
             <TableBody>
               {
-                books.map((item) => {
+                issues.map((item) => {
                   return (
                     <SelectEditionRowConnector
-                      key={item.book.id}
+                      key={item.issue.id}
                       matchedEditionId={item.matchedEditionId}
                       columns={columns}
                       onEditionSelect={onEditionSelect}
-                      {...item.book}
+                      {...item.issue}
                     />
                   );
                 })
@@ -102,7 +102,7 @@ class SelectEditionModalContent extends Component {
 }
 
 SelectEditionModalContent.propTypes = {
-  books: PropTypes.arrayOf(PropTypes.object).isRequired,
+  issues: PropTypes.arrayOf(PropTypes.object).isRequired,
   isFetching: PropTypes.bool,
   isPopulated: PropTypes.bool,
   error: PropTypes.object,

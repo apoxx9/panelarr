@@ -83,7 +83,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             var importResults = new List<ImportResult>();
             var allImportedTrackFiles = new List<ComicFile>();
             var allOldTrackFiles = new List<ComicFile>();
-            var addedSeriess = new List<Series>();
+            var addedSeries = new List<Series>();
             var addedBooks = new List<Issue>();
 
             var bookDecisions = decisions.Where(e => e.Item.Issue != null && e.Approved)
@@ -96,11 +96,11 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
 
                 var decisionList = bookDecision.ToList();
 
-                var author = EnsureSeriesAdded(decisionList, addedSeriess);
+                var series = EnsureSeriesAdded(decisionList, addedSeries);
 
-                if (author == null)
+                if (series == null)
                 {
-                    // failed to add the author, carry on with next issue
+                    // failed to add the series, carry on with next issue
                     continue;
                 }
 
@@ -159,7 +159,8 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                         MediaInfo = localTrack.FileTrackInfo.MediaInfo,
                         IssueId = localTrack.Issue.Id,
                         Series = localTrack.Series,
-                        Issue = localTrack.Issue
+                        Issue = localTrack.Issue,
+                        ComicFormat = GetComicFormatFromPath(localTrack.Path)
                     };
 
                     if (downloadClientItem?.DownloadId.IsNotNullOrWhiteSpace() == true)
@@ -278,12 +279,12 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             foreach (var bookImport in bookImports)
             {
                 var issue = bookImport.First().ImportDecision.Item.Issue;
-                var author = bookImport.First().ImportDecision.Item.Series;
+                var series = bookImport.First().ImportDecision.Item.Series;
 
-                if (bookImport.Where(e => e.Errors.Count == 0).ToList().Count > 0 && author != null && issue != null)
+                if (bookImport.Where(e => e.Errors.Count == 0).ToList().Count > 0 && series != null && issue != null)
                 {
                     _eventAggregator.PublishEvent(new IssueImportedEvent(
-                        author,
+                        series,
                         issue,
                         allImportedTrackFiles.Where(s => s.IssueId == issue.Id).ToList(),
                         allOldTrackFiles.Where(s => s.IssueId == issue.Id).ToList(),
@@ -297,12 +298,12 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                                             .Select(d => new ImportResult(d, d.Rejections.Select(r => r.Reason).ToArray())));
 
             // Refresh any authors we added
-            if (addedSeriess.Any())
+            if (addedSeries.Any())
             {
-                _commandQueueManager.Push(new BulkRefreshSeriesCommand(addedSeriess.Select(x => x.Id).ToList(), true));
+                _commandQueueManager.Push(new BulkRefreshSeriesCommand(addedSeries.Select(x => x.Id).ToList(), true));
             }
 
-            var addedSeriesMetadataIds = addedSeriess.Select(x => x.SeriesMetadataId).ToHashSet();
+            var addedSeriesMetadataIds = addedSeries.Select(x => x.SeriesMetadataId).ToHashSet();
             var booksToRefresh = addedBooks.Where(x => !addedSeriesMetadataIds.Contains(x.SeriesMetadataId)).ToList();
 
             if (booksToRefresh.Any())
@@ -314,60 +315,60 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             return importResults;
         }
 
-        private Series EnsureSeriesAdded(List<ImportDecision<LocalBook>> decisions, List<Series> addedSeriess)
+        private Series EnsureSeriesAdded(List<ImportDecision<LocalBook>> decisions, List<Series> addedSeries)
         {
-            var author = decisions.First().Item.Series;
+            var series = decisions.First().Item.Series;
 
-            if (author.Id == 0)
+            if (series.Id == 0)
             {
-                var dbSeries = _authorService.FindById(author.ForeignSeriesId);
+                var dbSeries = _authorService.FindById(series.ForeignSeriesId);
 
                 if (dbSeries == null)
                 {
-                    _logger.Debug("Adding remote author {0}", author);
+                    _logger.Debug("Adding remote series {0}", series);
 
                     var path = decisions.First().Item.Path;
                     var rootFolder = _rootFolderService.GetBestRootFolder(path);
 
-                    author.RootFolderPath = rootFolder.Path;
-                    author.QualityProfileId = rootFolder.DefaultQualityProfileId;
-                    author.Monitored = rootFolder.DefaultMonitorOption != MonitorTypes.None;
-                    author.MonitorNewItems = rootFolder.DefaultNewItemMonitorOption;
-                    author.Tags = rootFolder.DefaultTags;
-                    author.AddOptions = new AddSeriesOptions
+                    series.RootFolderPath = rootFolder.Path;
+                    series.QualityProfileId = rootFolder.DefaultQualityProfileId;
+                    series.Monitored = rootFolder.DefaultMonitorOption != MonitorTypes.None;
+                    series.MonitorNewItems = rootFolder.DefaultNewItemMonitorOption;
+                    series.Tags = rootFolder.DefaultTags;
+                    series.AddOptions = new AddSeriesOptions
                     {
                         SearchForMissingBooks = false,
-                        Monitored = author.Monitored,
+                        Monitored = series.Monitored,
                         Monitor = rootFolder.DefaultMonitorOption
                     };
 
                     if (rootFolder.IsCalibreLibrary)
                     {
-                        // calibre has author / issue / files
-                        author.Path = path.GetParentPath().GetParentPath();
+                        // calibre has series / issue / files
+                        series.Path = path.GetParentPath().GetParentPath();
                     }
 
                     try
                     {
-                        dbSeries = _addSeriesService.AddSeries(author, false);
+                        dbSeries = _addSeriesService.AddSeries(series, false);
 
                         // this looks redundant but is necessary to get the LazyLoads populated
                         dbSeries = _authorService.GetSeries(dbSeries.Id);
-                        addedSeriess.Add(dbSeries);
+                        addedSeries.Add(dbSeries);
                     }
                     catch (Exception e)
                     {
-                        _logger.Error(e, "Failed to add author {0}", author);
+                        _logger.Error(e, "Failed to add series {0}", series);
                         foreach (var decision in decisions)
                         {
-                            decision.Reject(new Rejection("Failed to add missing author", RejectionType.Temporary));
+                            decision.Reject(new Rejection("Failed to add missing series", RejectionType.Temporary));
                         }
 
                         return null;
                     }
                 }
 
-                // Put in the newly loaded author
+                // Put in the newly loaded series
                 foreach (var decision in decisions)
                 {
                     decision.Item.Series = dbSeries;
@@ -375,10 +376,10 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                     decision.Item.Issue.SeriesMetadataId = dbSeries.SeriesMetadataId;
                 }
 
-                author = dbSeries;
+                series = dbSeries;
             }
 
-            return author;
+            return series;
         }
 
         private Issue EnsureBookAdded(List<ImportDecision<LocalBook>> decisions, List<Issue> addedBooks)
@@ -436,9 +437,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             }
         }
 
-        private void RemoveExistingTrackFiles(Series author, Issue issue)
+        private void RemoveExistingTrackFiles(Series series, Issue issue)
         {
-            var rootFolder = _diskProvider.GetParentFolder(author.Path);
+            var rootFolder = _diskProvider.GetParentFolder(series.Path);
             var previousFiles = _mediaFileService.GetFilesByBook(issue.Id);
 
             _logger.Debug("Deleting {0} existing files for {1}", previousFiles.Count, issue);
@@ -471,6 +472,20 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             }
 
             return null;
+        }
+
+        private static ComicFormat GetComicFormatFromPath(string path)
+        {
+            var ext = System.IO.Path.GetExtension(path)?.TrimStart('.').ToLowerInvariant();
+            return ext switch
+            {
+                "cbz" => ComicFormat.CBZ,
+                "cbr" => ComicFormat.CBR,
+                "cb7" => ComicFormat.CB7,
+                "pdf" => ComicFormat.PDF,
+                "epub" or "kepub" => ComicFormat.EPUB,
+                _ => ComicFormat.Unknown
+            };
         }
     }
 }

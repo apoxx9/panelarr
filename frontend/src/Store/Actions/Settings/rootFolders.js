@@ -4,8 +4,8 @@ import createRemoveItemHandler from 'Store/Actions/Creators/createRemoveItemHand
 import createSaveProviderHandler, { createCancelSaveProviderHandler } from 'Store/Actions/Creators/createSaveProviderHandler';
 import createSetSettingValueReducer from 'Store/Actions/Creators/Reducers/createSetSettingValueReducer';
 import { createThunk } from 'Store/thunks';
-import monitorNewItemsOptions from 'Utilities/Author/monitorNewItemsOptions';
-import monitorOptions from 'Utilities/Author/monitorOptions';
+import monitorNewItemsOptions from 'Utilities/Series/monitorNewItemsOptions';
+import monitorOptions from 'Utilities/Series/monitorOptions';
 
 //
 // Variables

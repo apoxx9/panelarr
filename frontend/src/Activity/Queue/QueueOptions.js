@@ -15,18 +15,18 @@ class QueueOptions extends Component {
     super(props, context);
 
     this.state = {
-      includeUnknownAuthorItems: props.includeUnknownAuthorItems
+      includeUnknownSeriesItems: props.includeUnknownSeriesItems
     };
   }
 
   componentDidUpdate(prevProps) {
     const {
-      includeUnknownAuthorItems
+      includeUnknownSeriesItems
     } = this.props;
 
-    if (includeUnknownAuthorItems !== prevProps.includeUnknownAuthorItems) {
+    if (includeUnknownSeriesItems !== prevProps.includeUnknownSeriesItems) {
       this.setState({
-        includeUnknownAuthorItems
+        includeUnknownSeriesItems
       });
     }
   }
@@ -49,21 +49,21 @@ class QueueOptions extends Component {
 
   render() {
     const {
-      includeUnknownAuthorItems
+      includeUnknownSeriesItems
     } = this.state;
 
     return (
       <Fragment>
         <FormGroup>
           <FormLabel>
-            {translate('ShowUnknownAuthorItems')}
+            {translate('ShowUnknownSeriesItems')}
           </FormLabel>
 
           <FormInputGroup
             type={inputTypes.CHECK}
-            name="includeUnknownAuthorItems"
-            value={includeUnknownAuthorItems}
-            helpText={translate('IncludeUnknownAuthorItemsHelpText')}
+            name="includeUnknownSeriesItems"
+            value={includeUnknownSeriesItems}
+            helpText={translate('IncludeUnknownSeriesItemsHelpText')}
             onChange={this.onOptionChange}
           />
         </FormGroup>
@@ -73,7 +73,7 @@ class QueueOptions extends Component {
 }
 
 QueueOptions.propTypes = {
-  includeUnknownAuthorItems: PropTypes.bool.isRequired,
+  includeUnknownSeriesItems: PropTypes.bool.isRequired,
   onOptionChange: PropTypes.func.isRequired
 };
 

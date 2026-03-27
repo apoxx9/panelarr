@@ -87,13 +87,13 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(i => i.SupportsOnRename)
                   .Ignore(i => i.SupportsOnSeriesAdded)
                   .Ignore(i => i.SupportsOnSeriesDelete)
-                  .Ignore(i => i.SupportsOnBookDelete)
-                  .Ignore(i => i.SupportsOnBookFileDelete)
-                  .Ignore(i => i.SupportsOnBookFileDeleteForUpgrade)
+                  .Ignore(i => i.SupportsOnIssueDelete)
+                  .Ignore(i => i.SupportsOnComicFileDelete)
+                  .Ignore(i => i.SupportsOnComicFileDeleteForUpgrade)
                   .Ignore(i => i.SupportsOnHealthIssue)
                   .Ignore(i => i.SupportsOnDownloadFailure)
                   .Ignore(i => i.SupportsOnImportFailure)
-                  .Ignore(i => i.SupportsOnBookRetag)
+                  .Ignore(i => i.SupportsOnIssueRetag)
                   .Ignore(i => i.SupportsOnApplicationUpdate);
 
             Mapper.Entity<MetadataDefinition>("Metadata").RegisterModel()
@@ -121,22 +121,22 @@ namespace NzbDrone.Core.Datastore
                 .Ignore(s => s.PrimaryWorkCount)
                 .Ignore(s => s.Works)
                 .LazyLoad(s => s.LinkItems,
-                          (db, series) => db.Query<SeriesGroupLink>(new SqlBuilder(db.DatabaseType).Where<SeriesGroupLink>(s => s.SeriesId == series.Id)).ToList(),
+                          (db, series) => db.Query<SeriesGroupLink>(new SqlBuilder(db.DatabaseType).Where<SeriesGroupLink>(s => s.SeriesGroupId == series.Id)).ToList(),
                           s => s.Id > 0)
                 .LazyLoad(s => s.Books,
                           (db, series) => db.Query<Issue>(new SqlBuilder(db.DatabaseType)
-                                                         .Join<Issue, SeriesGroupLink>((l, r) => l.Id == r.IssueId)
-                                                         .Join<SeriesGroupLink, SeriesGroup>((l, r) => l.SeriesId == r.Id)
+                                                         .Join<Issue, SeriesGroupLink>((l, r) => l.SeriesMetadataId == r.SeriesMetadataId)
+                                                         .Join<SeriesGroupLink, SeriesGroup>((l, r) => l.SeriesGroupId == r.Id)
                                                          .Where<SeriesGroup>(s => s.Id == series.Id)).ToList(),
                           s => s.Id > 0);
 
             Mapper.Entity<SeriesGroupLink>("SeriesGroupLink").RegisterModel()
-                  .HasOne(l => l.Issue, l => l.IssueId)
-                  .HasOne(l => l.SeriesGroup, l => l.SeriesId);
+                  .HasOne(l => l.Issue, l => l.SeriesMetadataId)
+                  .HasOne(l => l.SeriesGroup, l => l.SeriesGroupId);
 
             Mapper.Entity<SeriesMetadata>("SeriesMetadata").RegisterModel();
 
-            Mapper.Entity<Issue>("Books").RegisterModel()
+            Mapper.Entity<Issue>("Issues").RegisterModel()
                 .Ignore(x => x.SeriesId)
                 .HasOne(r => r.SeriesMetadata, r => r.SeriesMetadataId)
                 .LazyLoad(x => x.ComicFiles,
@@ -150,7 +150,7 @@ namespace NzbDrone.Core.Datastore
                                                                 .Where<Series>(a => a.SeriesMetadataId == issue.SeriesMetadataId)).SingleOrDefault(),
                           a => a.SeriesMetadataId > 0)
                 .LazyLoad(b => b.SeriesLinks,
-                          (db, issue) => db.Query<SeriesGroupLink>(new SqlBuilder(db.DatabaseType).Where<SeriesGroupLink>(s => s.IssueId == issue.Id)).ToList(),
+                          (db, issue) => db.Query<SeriesGroupLink>(new SqlBuilder(db.DatabaseType).Where<SeriesGroupLink>(s => s.SeriesMetadataId == issue.SeriesMetadataId)).ToList(),
                           b => b.Id > 0);
 
             Mapper.Entity<ComicFile>("ComicFiles").RegisterModel()
@@ -226,7 +226,7 @@ namespace NzbDrone.Core.Datastore
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<List<KeyValuePair<string, int>>>());
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<KeyValuePair<string, int>>());
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<List<string>>());
-            SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<ParsedBookInfo>());
+            SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<ParsedIssueInfo>());
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<ParsedTrackInfo>());
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<ReleaseInfo>());
             SqlMapper.AddTypeHandler(new EmbeddedDocumentConverter<HashSet<int>>());

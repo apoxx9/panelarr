@@ -10,7 +10,7 @@ namespace NzbDrone.Core.Parser.Model
     public class RemoteBook
     {
         public ReleaseInfo Release { get; set; }
-        public ParsedBookInfo ParsedBookInfo { get; set; }
+        public ParsedIssueInfo ParsedIssueInfo { get; set; }
         public Series Series { get; set; }
         public List<Issue> Books { get; set; }
         public bool DownloadAllowed { get; set; }

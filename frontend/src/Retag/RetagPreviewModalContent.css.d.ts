@@ -3,10 +3,10 @@
 interface CssExports {
   'path': string;
   'previews': string;
-  'searchForNewBookContainer': string;
-  'searchForNewBookInput': string;
-  'searchForNewBookLabel': string;
-  'searchForNewBookLabelContainer': string;
+  'searchForNewIssueContainer': string;
+  'searchForNewIssueInput': string;
+  'searchForNewIssueLabel': string;
+  'searchForNewIssueLabelContainer': string;
   'selectAllInput': string;
   'selectAllInputContainer': string;
   'trackFormat': string;

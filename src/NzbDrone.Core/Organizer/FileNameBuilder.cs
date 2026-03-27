@@ -43,10 +43,10 @@ namespace NzbDrone.Core.Organizer
         public static readonly Regex SeasonEpisodePatternRegex = new Regex(@"(?<separator>(?<=})[- ._]+?)?(?<seasonEpisode>s?{season(?:\:0+)?}(?<episodeSeparator>[- ._]?[ex])(?<episode>{episode(?:\:0+)?}))(?<separator>[- ._]+?(?={))?",
                                                                             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public static readonly Regex SeriesNameRegex = new Regex(@"(?<token>\{(?:Series)(?<separator>[- ._])(Clean)?(Sort)?Name(The)?\})",
+        public static readonly Regex SeriesNameRegex = new Regex(@"(?<token>\{(?:Series)(?<separator>[- ._])(Clean)?(Sort)?(?:Name|Title)(The)?\})",
                                                                             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public static readonly Regex IssueTitleRegex = new Regex(@"(?<token>\{(?:Issue)(?<separator>[- ._])(Clean)?Title(The)?(NoSub)?\})",
+        public static readonly Regex IssueTitleRegex = new Regex(@"(?<token>\{(?:Issue)(?<separator>[- ._])(Clean)?(?:Title|Number)(The)?(NoSub)?(?::(?<customFormat>[a-z0-9.#]+))?\})",
                                                                             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex FileNameCleanupRegex = new Regex(@"([- ._])(\1)+", RegexOptions.Compiled);
@@ -79,12 +79,12 @@ namespace NzbDrone.Core.Organizer
                 namingConfig = _namingConfigService.GetConfig();
             }
 
-            if (!namingConfig.RenameBooks)
+            if (!namingConfig.RenameComics)
             {
                 return GetOriginalFileName(comicFile);
             }
 
-            if (namingConfig.StandardBookFormat.IsNullOrWhiteSpace())
+            if (namingConfig.StandardIssueFormat.IsNullOrWhiteSpace())
             {
                 throw new NamingFormatException("File name format cannot be empty");
             }
@@ -92,12 +92,12 @@ namespace NzbDrone.Core.Organizer
             var pattern = issue.IssueType switch
             {
                 IssueType.Annual => namingConfig.AnnualIssueFormat.IsNullOrWhiteSpace()
-                    ? namingConfig.StandardBookFormat
+                    ? namingConfig.StandardIssueFormat
                     : namingConfig.AnnualIssueFormat,
                 IssueType.TPB or IssueType.Hardcover or IssueType.Omnibus => namingConfig.TPBFormat.IsNullOrWhiteSpace()
-                    ? namingConfig.StandardBookFormat
+                    ? namingConfig.StandardIssueFormat
                     : namingConfig.TPBFormat,
-                _ => namingConfig.StandardBookFormat
+                _ => namingConfig.StandardIssueFormat
             };
 
             var tokenHandlers = new Dictionary<string, Func<TokenMatch, string>>(FileNameBuilderTokenEqualityComparer.Instance);
@@ -147,7 +147,7 @@ namespace NzbDrone.Core.Organizer
 
         public BasicNamingConfig GetBasicNamingConfig(NamingConfig nameSpec)
         {
-            var trackFormat = GetTrackFormat(nameSpec.StandardBookFormat).LastOrDefault();
+            var trackFormat = GetTrackFormat(nameSpec.StandardIssueFormat).LastOrDefault();
 
             if (trackFormat == null)
             {
@@ -159,7 +159,7 @@ namespace NzbDrone.Core.Organizer
                 Separator = trackFormat.Separator
             };
 
-            var titleTokens = TitleRegex.Matches(nameSpec.StandardBookFormat);
+            var titleTokens = TitleRegex.Matches(nameSpec.StandardIssueFormat);
 
             foreach (Match match in titleTokens)
             {

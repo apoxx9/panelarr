@@ -18,19 +18,19 @@ namespace Panelarr.Api.V1.Books
         }
 
         [HttpGet]
-        public List<RetagBookResource> GetBooks(int? authorId, int? bookId)
+        public List<RetagIssueResource> GetBooks(int? seriesId, int? issueId)
         {
-            if (bookId.HasValue)
+            if (issueId.HasValue)
             {
-                return _metadataTagService.GetRetagPreviewsByBook(bookId.Value).Where(x => x.Changes.Any()).ToResource();
+                return _metadataTagService.GetRetagPreviewsByBook(issueId.Value).Where(x => x.Changes.Any()).ToResource();
             }
-            else if (authorId.HasValue)
+            else if (seriesId.HasValue)
             {
-                return _metadataTagService.GetRetagPreviewsBySeries(authorId.Value).Where(x => x.Changes.Any()).ToResource();
+                return _metadataTagService.GetRetagPreviewsBySeries(seriesId.Value).Where(x => x.Changes.Any()).ToResource();
             }
             else
             {
-                throw new BadRequestException("One of authorId or bookId must be specified");
+                throw new BadRequestException("One of seriesId or issueId must be specified");
             }
         }
     }

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { clearBookFiles, fetchBookFiles } from 'Store/Actions/bookFileActions';
+import { clearIssueFiles, fetchIssueFiles } from 'Store/Actions/issueFileActions';
 import * as calendarActions from 'Store/Actions/calendarActions';
 import { clearQueueDetails, fetchQueueDetails } from 'Store/Actions/queueActions';
 import hasDifferentItems from 'Utilities/Object/hasDifferentItems';
@@ -23,8 +23,8 @@ function createMapStateToProps() {
 
 const mapDispatchToProps = {
   ...calendarActions,
-  fetchBookFiles,
-  clearBookFiles,
+  fetchIssueFiles,
+  clearIssueFiles,
   fetchQueueDetails,
   clearQueueDetails
 };
@@ -47,7 +47,7 @@ class CalendarConnector extends Component {
       gotoCalendarToday
     } = this.props;
 
-    registerPagePopulator(this.repopulate, ['bookFileUpdated', 'bookFileDeleted']);
+    registerPagePopulator(this.repopulate, ['issueFileUpdated', 'issueFileDeleted']);
 
     if (useCurrentPage) {
       fetchCalendar();
@@ -65,15 +65,15 @@ class CalendarConnector extends Component {
     } = this.props;
 
     if (hasDifferentItems(prevProps.items, items)) {
-      const bookIds = selectUniqueIds(items, 'id');
-      // const bookFileIds = selectUniqueIds(items, 'bookFileId');
+      const issueIds = selectUniqueIds(items, 'id');
+      // const issueFileIds = selectUniqueIds(items, 'issueFileId');
 
       if (items.length) {
-        this.props.fetchQueueDetails({ bookIds });
+        this.props.fetchQueueDetails({ issueIds });
       }
 
-      // if (bookFileIds.length) {
-      //   this.props.fetchBookFiles({ bookFileIds });
+      // if (issueFileIds.length) {
+      //   this.props.fetchIssueFiles({ issueFileIds });
       // }
     }
 
@@ -86,7 +86,7 @@ class CalendarConnector extends Component {
     unregisterPagePopulator(this.repopulate);
     this.props.clearCalendar();
     this.props.clearQueueDetails();
-    this.props.clearBookFiles();
+    this.props.clearIssueFiles();
     this.clearUpdateTimeout();
   }
 
@@ -165,8 +165,8 @@ CalendarConnector.propTypes = {
   gotoCalendarNextRange: PropTypes.func.isRequired,
   clearCalendar: PropTypes.func.isRequired,
   fetchCalendar: PropTypes.func.isRequired,
-  fetchBookFiles: PropTypes.func.isRequired,
-  clearBookFiles: PropTypes.func.isRequired,
+  fetchIssueFiles: PropTypes.func.isRequired,
+  clearIssueFiles: PropTypes.func.isRequired,
   fetchQueueDetails: PropTypes.func.isRequired,
   clearQueueDetails: PropTypes.func.isRequired
 };

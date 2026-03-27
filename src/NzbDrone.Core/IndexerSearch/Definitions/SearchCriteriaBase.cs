@@ -24,7 +24,7 @@ namespace NzbDrone.Core.IndexerSearch.Definitions
         {
             Ensure.That(title, () => title).IsNotNullOrWhiteSpace();
 
-            // Most VA issues are listed as VA, not Various Seriess
+            // Most VA issues are listed as VA, not Various Series
             // TODO: Needed in Panelarr??
             if (title == "Various Seriess")
             {

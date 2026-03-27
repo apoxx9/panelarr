@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import createAllAuthorSelector from 'Store/Selectors/createAllAuthorsSelector';
+import createAllSeriesSelector from 'Store/Selectors/createAllSeriessSelector';
 import TagDetailsModalContent from './TagDetailsModalContent';
 
 function findMatchingItems(ids, items) {
@@ -9,21 +9,21 @@ function findMatchingItems(ids, items) {
   });
 }
 
-function createUnorderedMatchingAuthorSelector() {
+function createUnorderedMatchingSeriesSelector() {
   return createSelector(
-    (state, { authorIds }) => authorIds,
-    createAllAuthorSelector(),
+    (state, { seriesIds }) => seriesIds,
+    createAllSeriesSelector(),
     findMatchingItems
   );
 }
 
-function createMatchingAuthorSelector() {
+function createMatchingSeriesSelector() {
   return createSelector(
-    createUnorderedMatchingAuthorSelector(),
-    (authors) => {
-      return authors.sort((authorA, authorB) => {
-        const sortNameA = authorA.sortName;
-        const sortNameB = authorB.sortName;
+    createUnorderedMatchingSeriesSelector(),
+    (seriess) => {
+      return seriess.sort((seriesA, seriesB) => {
+        const sortNameA = seriesA.sortName;
+        const sortNameB = seriesB.sortName;
 
         if (sortNameA > sortNameB) {
           return 1;
@@ -87,16 +87,16 @@ function createMatchingDownloadClientsSelector() {
 
 function createMapStateToProps() {
   return createSelector(
-    createMatchingAuthorSelector(),
+    createMatchingSeriesSelector(),
     createMatchingDelayProfilesSelector(),
     createMatchingImportListsSelector(),
     createMatchingNotificationsSelector(),
     createMatchingReleaseProfilesSelector(),
     createMatchingIndexersSelector(),
     createMatchingDownloadClientsSelector(),
-    (author, delayProfiles, importLists, notifications, releaseProfiles, indexers, downloadClients) => {
+    (series, delayProfiles, importLists, notifications, releaseProfiles, indexers, downloadClients) => {
       return {
-        author,
+        series,
         delayProfiles,
         importLists,
         notifications,

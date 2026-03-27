@@ -37,7 +37,7 @@ namespace NzbDrone.Core.CustomFormats
         {
             var input = new CustomFormatInput
             {
-                BookInfo = remoteBook.ParsedBookInfo,
+                BookInfo = remoteBook.ParsedIssueInfo,
                 Series = remoteBook.Series,
                 Size = size,
                 IndexerFlags = remoteBook.Release?.IndexerFlags ?? 0
@@ -60,7 +60,7 @@ namespace NzbDrone.Core.CustomFormats
         {
             var parsed = Parser.Parser.ParseBookTitle(blocklist.SourceTitle);
 
-            var bookInfo = new ParsedBookInfo
+            var bookInfo = new ParsedIssueInfo
             {
                 SeriesName = author.Name,
                 ReleaseTitle = parsed?.ReleaseTitle ?? blocklist.SourceTitle,
@@ -86,7 +86,7 @@ namespace NzbDrone.Core.CustomFormats
             long.TryParse(history.Data.GetValueOrDefault("size"), out var size);
             Enum.TryParse(history.Data.GetValueOrDefault("indexerFlags"), true, out IndexerFlags indexerFlags);
 
-            var bookInfo = new ParsedBookInfo
+            var bookInfo = new ParsedIssueInfo
             {
                 SeriesName = author.Name,
                 ReleaseTitle = parsed?.ReleaseTitle ?? history.SourceTitle,
@@ -107,7 +107,7 @@ namespace NzbDrone.Core.CustomFormats
 
         public List<CustomFormat> ParseCustomFormat(LocalBook localBook)
         {
-            var bookInfo = new ParsedBookInfo
+            var bookInfo = new ParsedIssueInfo
             {
                 SeriesName = localBook.Series.Name,
                 ReleaseTitle = localBook.SceneName,
@@ -174,7 +174,7 @@ namespace NzbDrone.Core.CustomFormats
                 releaseTitle = Path.GetFileName(comicFile.Path);
             }
 
-            var bookInfo = new ParsedBookInfo
+            var bookInfo = new ParsedIssueInfo
             {
                 SeriesName = author.Name,
                 ReleaseTitle = releaseTitle,

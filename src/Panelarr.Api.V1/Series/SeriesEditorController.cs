@@ -9,7 +9,7 @@ using Panelarr.Http;
 
 namespace Panelarr.Api.V1.Series
 {
-    [V1ApiController("author/editor")]
+    [V1ApiController("series/editor")]
     public class SeriesEditorController : Controller
     {
         private readonly ISeriesService _authorService;

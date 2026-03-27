@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Genres").AsString().Nullable()
                 .WithColumn("Ratings").AsString().Nullable();
 
-            Create.TableForModel("SeriesGroup")
+            Create.TableForModel("Series")
                 .WithColumn("SeriesMetadataId").AsInt32().NotNullable().Unique()
                 .WithColumn("CleanName").AsString().NotNullable().Indexed()
                 .WithColumn("Path").AsString().Nullable().Indexed()
@@ -46,7 +46,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Added").AsDateTimeOffset().Nullable()
                 .WithColumn("AddOptions").AsString().Nullable();
 
-            Create.Index().OnTable("SeriesGroup").OnColumn("Monitored").Ascending();
+            Create.Index().OnTable("Series").OnColumn("Monitored").Ascending();
 
             Create.TableForModel("Issues")
                 .WithColumn("SeriesMetadataId").AsInt32().NotNullable()
@@ -72,15 +72,15 @@ namespace NzbDrone.Core.Datastore.Migration
             Create.Index().OnTable("Issues").OnColumn("SeriesMetadataId").Ascending()
                 .OnColumn("ReleaseDate").Ascending();
 
-            Create.TableForModel("SeriesGroups")
+            Create.TableForModel("SeriesGroup")
                 .WithColumn("ForeignSeriesGroupId").AsString().Nullable().Unique()
                 .WithColumn("Title").AsString().NotNullable()
                 .WithColumn("Description").AsString().Nullable()
                 .WithColumn("SortTitle").AsString().Nullable();
 
-            Create.TableForModel("SeriesGroupLinks")
+            Create.TableForModel("SeriesGroupLink")
                 .WithColumn("SeriesGroupId").AsInt32().NotNullable().Indexed()
-                    .ForeignKey("SeriesGroups", "Id").OnDelete(Rule.Cascade)
+                    .ForeignKey("SeriesGroup", "Id").OnDelete(Rule.Cascade)
                 .WithColumn("SeriesMetadataId").AsInt32().NotNullable().Indexed()
                 .WithColumn("Position").AsString().Nullable()
                 .WithColumn("SeriesPosition").AsInt32().NotNullable().WithDefaultValue(0)

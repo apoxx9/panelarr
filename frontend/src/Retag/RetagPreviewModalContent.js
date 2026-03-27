@@ -125,11 +125,11 @@ class RetagPreviewModalContent extends Component {
                     items.map((item) => {
                       return (
                         <RetagPreviewRow
-                          key={item.bookFileId}
-                          id={item.bookFileId}
+                          key={item.issueFileId}
+                          id={item.issueFileId}
                           path={item.path}
                           changes={item.changes}
-                          isSelected={selectedState[item.bookFileId]}
+                          isSelected={selectedState[item.issueFileId]}
                           onSelectedChange={this.onSelectedChange}
                         />
                       );
@@ -152,28 +152,28 @@ class RetagPreviewModalContent extends Component {
               />
           }
 
-          <label className={styles.searchForNewBookLabelContainer}>
-            <span className={styles.searchForNewBookLabel}>
+          <label className={styles.searchForNewIssueLabelContainer}>
+            <span className={styles.searchForNewIssueLabel}>
               Update Covers
             </span>
 
             <CheckInput
-              containerClassName={styles.searchForNewBookContainer}
-              className={styles.searchForNewBookInput}
+              containerClassName={styles.searchForNewIssueContainer}
+              className={styles.searchForNewIssueInput}
               name="updateCovers"
               value={this.state.updateCovers}
               onChange={this.onCheckInputChange}
             />
           </label>
 
-          <label className={styles.searchForNewBookLabelContainer}>
-            <span className={styles.searchForNewBookLabel}>
+          <label className={styles.searchForNewIssueLabelContainer}>
+            <span className={styles.searchForNewIssueLabel}>
               Embed Metadata
             </span>
 
             <CheckInput
-              containerClassName={styles.searchForNewBookContainer}
-              className={styles.searchForNewBookInput}
+              containerClassName={styles.searchForNewIssueContainer}
+              className={styles.searchForNewIssueInput}
               name="embedMetadata"
               value={this.state.embedMetadata}
               onChange={this.onCheckInputChange}

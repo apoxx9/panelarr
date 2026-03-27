@@ -25,10 +25,10 @@ namespace Panelarr.Api.V1.MediaCovers
             _mimeTypeProvider = new FileExtensionContentTypeProvider();
         }
 
-        [HttpGet(@"author/{authorId:int}/{filename:regex((.+)\.(jpg|png|gif))}")]
-        public IActionResult GetSeriesMediaCover(int authorId, string filename)
+        [HttpGet(@"series/{seriesId:int}/{filename:regex((.+)\.(jpg|png|gif))}")]
+        public IActionResult GetSeriesMediaCover(int seriesId, string filename)
         {
-            var filePath = Path.Combine(_appFolderInfo.GetAppDataPath(), "MediaCover", authorId.ToString(), filename);
+            var filePath = Path.Combine(_appFolderInfo.GetAppDataPath(), "MediaCover", seriesId.ToString(), filename);
 
             if (!_diskProvider.FileExists(filePath) || _diskProvider.GetFileSize(filePath) == 0)
             {
@@ -46,10 +46,10 @@ namespace Panelarr.Api.V1.MediaCovers
             return PhysicalFile(filePath, GetContentType(filePath));
         }
 
-        [HttpGet(@"issue/{bookId:int}/{filename:regex((.+)\.(jpg|png|gif))}")]
-        public IActionResult GetBookMediaCover(int bookId, string filename)
+        [HttpGet(@"issue/{issueId:int}/{filename:regex((.+)\.(jpg|png|gif))}")]
+        public IActionResult GetBookMediaCover(int issueId, string filename)
         {
-            var filePath = Path.Combine(_appFolderInfo.GetAppDataPath(), "MediaCover", "Books", bookId.ToString(), filename);
+            var filePath = Path.Combine(_appFolderInfo.GetAppDataPath(), "MediaCover", "Books", issueId.ToString(), filename);
 
             if (!_diskProvider.FileExists(filePath) || _diskProvider.GetFileSize(filePath) == 0)
             {

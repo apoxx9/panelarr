@@ -92,7 +92,7 @@ namespace NzbDrone.Core.Books
             }
             catch (SeriesNotFoundException)
             {
-                _logger.Error($"Could not find author with id {foreignId}");
+                _logger.Error($"Could not find series with id {foreignId}");
             }
 
             return null;
@@ -147,7 +147,7 @@ namespace NzbDrone.Core.Books
             }
             catch (Exception e)
             {
-                _logger.Warn(e, "Couldn't update author path for " + local.Path);
+                _logger.Warn(e, "Couldn't update series path for " + local.Path);
             }
 
             return result;
@@ -277,6 +277,15 @@ namespace NzbDrone.Core.Books
 
         protected override void AddChildren(List<Issue> children)
         {
+            foreach (var child in children)
+            {
+                if (child.TitleSlug == null)
+                {
+                    _logger.Warn("Issue {0} ({1}) has null TitleSlug, setting from ForeignIssueId", child.ForeignIssueId, child.Title);
+                    child.TitleSlug = child.ForeignIssueId ?? child.Title ?? "unknown";
+                }
+            }
+
             _bookService.InsertMany(children);
         }
 
@@ -310,7 +319,7 @@ namespace NzbDrone.Core.Books
 
             if (isNew)
             {
-                _logger.Trace("Forcing rescan. Reason: New author added");
+                _logger.Trace("Forcing rescan. Reason: New series added");
                 shouldRescan = true;
             }
             else if (rescanAfterRefresh == RescanAfterRefreshType.Never)
@@ -339,7 +348,7 @@ namespace NzbDrone.Core.Books
             }
         }
 
-        private void RefreshSelectedSeriess(List<int> authorIds, bool isNew, CommandTrigger trigger)
+        private void RefreshSelectedSeries(List<int> authorIds, bool isNew, CommandTrigger trigger)
         {
             var updated = false;
             var authors = _authorService.GetSeriess(authorIds);
@@ -362,7 +371,7 @@ namespace NzbDrone.Core.Books
 
         public void Execute(BulkRefreshSeriesCommand message)
         {
-            RefreshSelectedSeriess(message.SeriesIds, message.AreNewSeriess, message.Trigger);
+            RefreshSelectedSeries(message.SeriesIds, message.AreNewSeries, message.Trigger);
         }
 
         public void Execute(RefreshSeriesCommand message)
@@ -372,7 +381,7 @@ namespace NzbDrone.Core.Books
 
             if (message.SeriesId.HasValue)
             {
-                RefreshSelectedSeriess(new List<int> { message.SeriesId.Value }, isNew, trigger);
+                RefreshSelectedSeries(new List<int> { message.SeriesId.Value }, isNew, trigger);
             }
             else
             {
@@ -380,19 +389,19 @@ namespace NzbDrone.Core.Books
                 var authors = _authorService.GetAllSeries().OrderBy(c => c.Name).ToList();
                 var authorIds = authors.Select(x => x.Id).ToList();
 
-                var updatedGoodreadsSeriess = new HashSet<string>();
+                var updatedGoodreadsSeries = new HashSet<string>();
 
                 if (message.LastExecutionTime.HasValue && message.LastExecutionTime.Value.AddDays(14) > DateTime.UtcNow)
                 {
-                    updatedGoodreadsSeriess = _authorInfo.GetChangedSeries(message.LastStartTime.Value);
+                    updatedGoodreadsSeries = _authorInfo.GetChangedSeries(message.LastStartTime.Value);
                 }
 
                 foreach (var author in authors)
                 {
                     var manualTrigger = message.Trigger == CommandTrigger.Manual;
 
-                    if ((updatedGoodreadsSeriess == null && _checkIfSeriesShouldBeRefreshed.ShouldRefresh(author)) ||
-                        (updatedGoodreadsSeriess != null && updatedGoodreadsSeriess.Contains(author.ForeignSeriesId)) ||
+                    if ((updatedGoodreadsSeries == null && _checkIfSeriesShouldBeRefreshed.ShouldRefresh(author)) ||
+                        (updatedGoodreadsSeries != null && updatedGoodreadsSeries.Contains(author.ForeignSeriesId)) ||
                         manualTrigger)
                     {
                         try
@@ -408,7 +417,7 @@ namespace NzbDrone.Core.Books
                     }
                     else
                     {
-                        _logger.Info("Skipping refresh of author: {0}", author.Name);
+                        _logger.Info("Skipping refresh of series: {0}", author.Name);
                     }
                 }
 

@@ -30,13 +30,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             var dist = new Distance();
 
             // the most common list of authors reported by a file
-            var fileSeriess = localTracks.Select(x => x.FileTrackInfo.Seriess.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
+            var fileSeries = localTracks.Select(x => x.FileTrackInfo.Seriess.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
                 .GroupBy(x => x.ConcatToString())
                 .OrderByDescending(x => x.Count())
                 .First()
                 .First();
 
-            var authors = GetSeriesVariants(fileSeriess);
+            var authors = GetSeriesVariants(fileSeries);
 
             dist.AddString("author", authors, issue.SeriesMetadata.Value.Name);
             Logger.Trace("author: '{0}' vs '{1}'; {2}", authors.ConcatToString("' or '"), issue.SeriesMetadata.Value.Name, dist.NormalizedDistance());
@@ -96,16 +96,16 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             return dist;
         }
 
-        public static List<string> GetSeriesVariants(List<string> fileSeriess)
+        public static List<string> GetSeriesVariants(List<string> fileSeries)
         {
-            var authors = new List<string>(fileSeriess);
+            var authors = new List<string>(fileSeries);
 
-            if (fileSeriess.Count == 1)
+            if (fileSeries.Count == 1)
             {
-                authors.AddRange(SplitSeries(fileSeriess[0]));
+                authors.AddRange(SplitSeries(fileSeries[0]));
             }
 
-            foreach (var author in fileSeriess)
+            foreach (var author in fileSeries)
             {
                 if (author.Contains(','))
                 {

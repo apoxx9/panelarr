@@ -30,19 +30,17 @@ namespace NzbDrone.Core.Books
             return Query(x => foreignSeriesId.Contains(x.ForeignSeriesId));
         }
 
-        public List<SeriesGroup> GetBySeriesMetadataId(int authorMetadataId)
+        public List<SeriesGroup> GetBySeriesMetadataId(int seriesMetadataId)
         {
-            return QueryDistinct(Builder().Join<SeriesGroup, SeriesGroupLink>((l, r) => l.Id == r.SeriesId)
-                                 .Join<SeriesGroupLink, Issue>((l, r) => l.IssueId == r.Id)
-                                 .Where<Issue>(x => x.SeriesMetadataId == authorMetadataId));
+            return QueryDistinct(Builder().Join<SeriesGroup, SeriesGroupLink>((l, r) => l.Id == r.SeriesGroupId)
+                                 .Where<SeriesGroupLink>(x => x.SeriesMetadataId == seriesMetadataId));
         }
 
-        public List<SeriesGroup> GetBySeriesId(int authorId)
+        public List<SeriesGroup> GetBySeriesId(int seriesId)
         {
-            return QueryDistinct(Builder().Join<SeriesGroup, SeriesGroupLink>((l, r) => l.Id == r.SeriesId)
-                                 .Join<SeriesGroupLink, Issue>((l, r) => l.IssueId == r.Id)
-                                 .Join<Issue, Series>((l, r) => l.SeriesMetadataId == r.SeriesMetadataId)
-                                 .Where<Series>(x => x.Id == authorId));
+            return QueryDistinct(Builder().Join<SeriesGroup, SeriesGroupLink>((l, r) => l.Id == r.SeriesGroupId)
+                                 .Join<SeriesGroupLink, Series>((l, r) => l.SeriesMetadataId == r.SeriesMetadataId)
+                                 .Where<Series>(x => x.Id == seriesId));
         }
     }
 }

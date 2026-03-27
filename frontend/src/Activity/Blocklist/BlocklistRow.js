@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import AuthorNameLink from 'Author/AuthorNameLink';
-import BookFormats from 'Book/BookFormats';
-import BookQuality from 'Book/BookQuality';
+import SeriesNameLink from 'Series/SeriesNameLink';
+import IssueFormats from 'Issue/IssueFormats';
+import IssueQuality from 'Issue/IssueQuality';
 import IconButton from 'Components/Link/IconButton';
 import RelativeDateCellConnector from 'Components/Table/Cells/RelativeDateCellConnector';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
@@ -43,7 +43,7 @@ class BlocklistRow extends Component {
   render() {
     const {
       id,
-      author,
+      series,
       sourceTitle,
       quality,
       customFormats,
@@ -57,7 +57,7 @@ class BlocklistRow extends Component {
       onRemovePress
     } = this.props;
 
-    if (!author) {
+    if (!series) {
       return null;
     }
 
@@ -80,12 +80,12 @@ class BlocklistRow extends Component {
               return null;
             }
 
-            if (name === 'authorMetadata.sortName') {
+            if (name === 'seriesMetadata.sortName') {
               return (
                 <TableRowCell key={name}>
-                  <AuthorNameLink
-                    titleSlug={author.titleSlug}
-                    authorName={author.authorName}
+                  <SeriesNameLink
+                    titleSlug={series.titleSlug}
+                    seriesName={series.seriesName}
                   />
                 </TableRowCell>
               );
@@ -105,7 +105,7 @@ class BlocklistRow extends Component {
                   key={name}
                   className={styles.quality}
                 >
-                  <BookQuality
+                  <IssueQuality
                     quality={quality}
                   />
                 </TableRowCell>
@@ -115,7 +115,7 @@ class BlocklistRow extends Component {
             if (name === 'customFormats') {
               return (
                 <TableRowCell key={name}>
-                  <BookFormats
+                  <IssueFormats
                     formats={customFormats}
                   />
                 </TableRowCell>
@@ -183,7 +183,7 @@ class BlocklistRow extends Component {
 
 BlocklistRow.propTypes = {
   id: PropTypes.number.isRequired,
-  author: PropTypes.object.isRequired,
+  series: PropTypes.object.isRequired,
   sourceTitle: PropTypes.string.isRequired,
   quality: PropTypes.object.isRequired,
   customFormats: PropTypes.arrayOf(PropTypes.object).isRequired,

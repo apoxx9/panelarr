@@ -4,11 +4,11 @@ import { Redirect, Route } from 'react-router-dom';
 import BlocklistConnector from 'Activity/Blocklist/BlocklistConnector';
 import HistoryConnector from 'Activity/History/HistoryConnector';
 import QueueConnector from 'Activity/Queue/QueueConnector';
-import AuthorDetailsPageConnector from 'Author/Details/AuthorDetailsPageConnector';
-import AuthorIndexConnector from 'Author/Index/AuthorIndexConnector';
-import BookDetailsPageConnector from 'Book/Details/BookDetailsPageConnector';
-import BookIndexConnector from 'Book/Index/BookIndexConnector';
-import BookshelfConnector from 'Bookshelf/BookshelfConnector';
+import SeriesDetailsPageConnector from 'Series/Details/SeriesDetailsPageConnector';
+import SeriesIndexConnector from 'Series/Index/SeriesIndexConnector';
+import IssueDetailsPageConnector from 'Issue/Details/IssueDetailsPageConnector';
+import IssueIndexConnector from 'Issue/Index/IssueIndexConnector';
+import IssueshelfConnector from 'Issueshelf/IssueshelfConnector';
 import CalendarPageConnector from 'Calendar/CalendarPageConnector';
 import NotFound from 'Components/NotFound';
 import Switch from 'Components/Router/Switch';
@@ -46,13 +46,13 @@ function AppRoutes(props) {
   return (
     <Switch>
       {/*
-        Author
+        Series
       */}
 
       <Route
         exact={true}
         path="/"
-        component={AuthorIndexConnector}
+        component={SeriesIndexConnector}
       />
 
       {
@@ -73,8 +73,8 @@ function AppRoutes(props) {
       }
 
       <Route
-        path="/authors"
-        component={AuthorIndexConnector}
+        path="/seriess"
+        component={SeriesIndexConnector}
       />
 
       <Route
@@ -85,13 +85,13 @@ function AppRoutes(props) {
       <Route
         exact={true}
         path="/shelf"
-        component={BookshelfConnector}
+        component={IssueshelfConnector}
       />
 
       <Route
         exact={true}
-        path="/books"
-        component={BookIndexConnector}
+        path="/issues"
+        component={IssueIndexConnector}
       />
 
       <Route
@@ -100,13 +100,13 @@ function AppRoutes(props) {
       />
 
       <Route
-        path="/author/:titleSlug"
-        component={AuthorDetailsPageConnector}
+        path="/series/:titleSlug"
+        component={SeriesDetailsPageConnector}
       />
 
       <Route
-        path="/book/:titleSlug"
-        component={BookDetailsPageConnector}
+        path="/issue/:titleSlug"
+        component={IssueDetailsPageConnector}
       />
 
       {/*

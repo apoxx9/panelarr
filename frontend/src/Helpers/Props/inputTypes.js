@@ -2,9 +2,9 @@ export const AUTO_COMPLETE = 'autoComplete';
 export const CAPTCHA = 'captcha';
 export const CHECK = 'check';
 export const DEVICE = 'device';
-export const BOOKSHELF = 'bookshelf';
+export const ISSUES_LISTHELF = 'issueshelf';
 export const KEY_VALUE_LIST = 'keyValueList';
-export const MONITOR_BOOKS_SELECT = 'monitorBooksSelect';
+export const MONITOR_ISSUES_LIST_SELECT = 'monitorIssuesSelect';
 export const MONITOR_NEW_ITEMS_SELECT = 'monitorNewItemsSelect';
 export const FLOAT = 'float';
 export const NUMBER = 'number';
@@ -13,7 +13,7 @@ export const PASSWORD = 'password';
 export const PATH = 'path';
 export const QUALITY_PROFILE_SELECT = 'qualityProfileSelect';
 export const METADATA_PROFILE_SELECT = 'metadataProfileSelect';
-export const BOOK_EDITION_SELECT = 'bookEditionSelect';
+export const ISSUE_EDITION_SELECT = 'issueEditionSelect';
 export const INDEXER_SELECT = 'indexerSelect';
 export const INDEXER_FLAGS_SELECT = 'indexerFlagsSelect';
 export const DOWNLOAD_CLIENT_SELECT = 'downloadClientSelect';
@@ -32,9 +32,9 @@ export const all = [
   CAPTCHA,
   CHECK,
   DEVICE,
-  BOOKSHELF,
+  ISSUES_LISTHELF,
   KEY_VALUE_LIST,
-  MONITOR_BOOKS_SELECT,
+  MONITOR_ISSUES_LIST_SELECT,
   MONITOR_NEW_ITEMS_SELECT,
   FLOAT,
   NUMBER,
@@ -43,7 +43,7 @@ export const all = [
   PATH,
   QUALITY_PROFILE_SELECT,
   METADATA_PROFILE_SELECT,
-  BOOK_EDITION_SELECT,
+  ISSUE_EDITION_SELECT,
   INDEXER_SELECT,
   DOWNLOAD_CLIENT_SELECT,
   ROOT_FOLDER_SELECT,

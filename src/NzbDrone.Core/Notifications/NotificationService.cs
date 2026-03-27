@@ -51,20 +51,35 @@ namespace NzbDrone.Core.Notifications
                 qualityString += " Proper";
             }
 
-            var bookTitles = string.Join(" + ", issues.Select(e => e.Title));
+            // Comic grab format: "Grabbed: {Series} #{IssueNumber} - {Title}"
+            var issueDescriptions = issues.Select(e =>
+            {
+                var issueNum = e.IssueNumber.ToString("0.##");
+                return string.IsNullOrWhiteSpace(e.Title)
+                    ? $"#{issueNum}"
+                    : $"#{issueNum} - {e.Title}";
+            });
 
-            return string.Format("{0} - {1} - [{2}]",
+            return string.Format("Grabbed: {0} {1} [{2}]",
                                     author.Name,
-                                    bookTitles,
+                                    string.Join(" + ", issueDescriptions),
                                     qualityString);
         }
 
         private string GetBookDownloadMessage(Series author, Issue issue, List<ComicFile> tracks)
         {
-            return string.Format("{0} - {1} ({2} Files Imported)",
+            // Comic import format: "Imported: {Series} #{IssueNumber} - {Title} [{Quality}]"
+            var quality = tracks.FirstOrDefault()?.Quality?.Quality?.ToString() ?? "Unknown";
+            var issueNum = issue.IssueNumber.ToString("0.##");
+            var title = string.IsNullOrWhiteSpace(issue.Title)
+                ? string.Empty
+                : $" - {issue.Title}";
+
+            return string.Format("Imported: {0} #{1}{2} [{3}]",
                 author.Name,
-                issue.Title,
-                tracks.Count);
+                issueNum,
+                title,
+                quality);
         }
 
         private string GetBookIncompleteImportMessage(string source)
@@ -96,7 +111,7 @@ namespace NzbDrone.Core.Notifications
 
             if (definition.Tags.Intersect(author.Tags).Any())
             {
-                _logger.Debug("Notification and author have one or more intersecting tags.");
+                _logger.Debug("Notification and series have one or more intersecting tags.");
                 return true;
             }
 
@@ -124,9 +139,9 @@ namespace NzbDrone.Core.Notifications
         {
             var grabMessage = new GrabMessage
             {
-                Message = GetMessage(message.Issue.Series, message.Issue.Books, message.Issue.ParsedBookInfo.Quality),
+                Message = GetMessage(message.Issue.Series, message.Issue.Books, message.Issue.ParsedIssueInfo.Quality),
                 Series = message.Issue.Series,
-                Quality = message.Issue.ParsedBookInfo.Quality,
+                Quality = message.Issue.ParsedIssueInfo.Quality,
                 RemoteBook = message.Issue,
                 DownloadClientName = message.DownloadClientName,
                 DownloadClientType = message.DownloadClient,
@@ -160,9 +175,33 @@ namespace NzbDrone.Core.Notifications
                 return;
             }
 
+            var isUpgrade = message.OldFiles != null && message.OldFiles.Count > 0;
+            string downloadMsg;
+
+            if (isUpgrade)
+            {
+                var oldQuality = message.OldFiles.First()?.Quality?.Quality?.ToString() ?? "Unknown";
+                var newQuality = message.ImportedBooks.FirstOrDefault()?.Quality?.Quality?.ToString() ?? "Unknown";
+                var issueNum = message.Issue.IssueNumber.ToString("0.##");
+                var title = string.IsNullOrWhiteSpace(message.Issue.Title)
+                    ? string.Empty
+                    : $" - {message.Issue.Title}";
+                downloadMsg = string.Format(
+                    "Upgraded: {0} #{1}{2} from {3} to {4}",
+                    message.Series.Name,
+                    issueNum,
+                    title,
+                    oldQuality,
+                    newQuality);
+            }
+            else
+            {
+                downloadMsg = GetBookDownloadMessage(message.Series, message.Issue, message.ImportedBooks);
+            }
+
             var downloadMessage = new IssueDownloadMessage
             {
-                Message = GetBookDownloadMessage(message.Series, message.Issue, message.ImportedBooks),
+                Message = downloadMsg,
                 Series = message.Series,
                 Issue = message.Issue,
                 DownloadClientInfo = message.DownloadClientInfo,
@@ -258,20 +297,20 @@ namespace NzbDrone.Core.Notifications
         {
             var deleteMessage = new IssueDeleteMessage(message.Issue, message.DeleteFiles);
 
-            foreach (var notification in _notificationFactory.OnBookDeleteEnabled())
+            foreach (var notification in _notificationFactory.OnIssueDeleteEnabled())
             {
                 try
                 {
                     if (ShouldHandleSeries(notification.Definition, deleteMessage.Issue.Series))
                     {
-                        notification.OnBookDelete(deleteMessage);
+                        notification.OnIssueDelete(deleteMessage);
                         _notificationStatusService.RecordSuccess(notification.Definition.Id);
                     }
                 }
                 catch (Exception ex)
                 {
                     _notificationStatusService.RecordFailure(notification.Definition.Id);
-                    _logger.Warn(ex, "Unable to send OnBookDelete notification to: " + notification.Definition.Name);
+                    _logger.Warn(ex, "Unable to send OnIssueDelete notification to: " + notification.Definition.Name);
                 }
             }
         }
@@ -287,15 +326,15 @@ namespace NzbDrone.Core.Notifications
             deleteMessage.Issue = message.ComicFile.Issue?.Value;
             deleteMessage.Reason = message.Reason;
 
-            foreach (var notification in _notificationFactory.OnBookFileDeleteEnabled())
+            foreach (var notification in _notificationFactory.OnComicFileDeleteEnabled())
             {
                 try
                 {
-                    if (message.Reason != MediaFiles.DeleteMediaFileReason.Upgrade || ((NotificationDefinition)notification.Definition).OnBookFileDeleteForUpgrade)
+                    if (message.Reason != MediaFiles.DeleteMediaFileReason.Upgrade || ((NotificationDefinition)notification.Definition).OnComicFileDeleteForUpgrade)
                     {
                         if (ShouldHandleSeries(notification.Definition, message.ComicFile.Series))
                         {
-                            notification.OnBookFileDelete(deleteMessage);
+                            notification.OnComicFileDelete(deleteMessage);
                             _notificationStatusService.RecordSuccess(notification.Definition.Id);
                         }
                     }
@@ -303,7 +342,7 @@ namespace NzbDrone.Core.Notifications
                 catch (Exception ex)
                 {
                     _notificationStatusService.RecordFailure(notification.Definition.Id);
-                    _logger.Warn(ex, "Unable to send OnBookFileDelete notification to: " + notification.Definition.Name);
+                    _logger.Warn(ex, "Unable to send OnComicFileDelete notification to: " + notification.Definition.Name);
                 }
             }
         }
@@ -402,20 +441,20 @@ namespace NzbDrone.Core.Notifications
                 Scrubbed = message.Scrubbed
             };
 
-            foreach (var notification in _notificationFactory.OnBookRetagEnabled())
+            foreach (var notification in _notificationFactory.OnIssueRetagEnabled())
             {
                 try
                 {
                     if (ShouldHandleSeries(notification.Definition, message.Series))
                     {
-                        notification.OnBookRetag(retagMessage);
+                        notification.OnIssueRetag(retagMessage);
                         _notificationStatusService.RecordSuccess(notification.Definition.Id);
                     }
                 }
                 catch (Exception ex)
                 {
                     _notificationStatusService.RecordFailure(notification.Definition.Id);
-                    _logger.Warn(ex, "Unable to send OnBookRetag notification to: " + notification.Definition.Name);
+                    _logger.Warn(ex, "Unable to send OnIssueRetag notification to: " + notification.Definition.Name);
                 }
             }
         }

@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import SelectInput from 'Components/Form/SelectInput';
 import IconButton from 'Components/Link/IconButton';
 import { filterBuilderTypes, filterBuilderValueTypes, icons } from 'Helpers/Props';
-import AuthorStatusFilterBuilderRowValue from './AuthorStatusFilterBuilderRowValue';
+import SeriesStatusFilterBuilderRowValue from './SeriesStatusFilterBuilderRowValue';
 import BoolFilterBuilderRowValue from './BoolFilterBuilderRowValue';
 import DateFilterBuilderRowValue from './DateFilterBuilderRowValue';
 import FilterBuilderRowValueConnector from './FilterBuilderRowValueConnector';
@@ -72,8 +72,8 @@ function getRowValueConnector(selectedFilterBuilderProp) {
     case filterBuilderValueTypes.QUALITY_PROFILE:
       return QualityProfileFilterBuilderRowValueConnector;
 
-    case filterBuilderValueTypes.AUTHOR_STATUS:
-      return AuthorStatusFilterBuilderRowValue;
+    case filterBuilderValueTypes.SERIES_STATUS:
+      return SeriesStatusFilterBuilderRowValue;
 
     case filterBuilderValueTypes.TAG:
       return TagFilterBuilderRowValueConnector;

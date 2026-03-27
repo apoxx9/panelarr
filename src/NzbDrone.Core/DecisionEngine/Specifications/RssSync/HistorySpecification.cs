@@ -68,13 +68,13 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                         subject.Series.QualityProfile,
                         new List<QualityModel> { mostRecent.Quality },
                         customFormats,
-                        subject.ParsedBookInfo.Quality);
+                        subject.ParsedIssueInfo.Quality);
 
                     var upgradeable = _upgradableSpecification.IsUpgradable(
                         subject.Series.QualityProfile,
                         mostRecent.Quality,
                         customFormats,
-                        subject.ParsedBookInfo.Quality,
+                        subject.ParsedIssueInfo.Quality,
                         subject.CustomFormats);
 
                     if (!cutoffUnmet)

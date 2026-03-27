@@ -106,15 +106,15 @@ export default {
         selectedSchema.onReleaseImport = selectedSchema.supportsOnReleaseImport;
         selectedSchema.onUpgrade = selectedSchema.supportsOnUpgrade;
         selectedSchema.onRename = selectedSchema.supportsOnRename;
-        selectedSchema.onAuthorAdded = selectedSchema.supportsOnAuthorAdded;
-        selectedSchema.onAuthorDelete = selectedSchema.supportsOnAuthorDelete;
-        selectedSchema.onBookDelete = selectedSchema.supportsOnBookDelete;
-        selectedSchema.onBookFileDelete = selectedSchema.supportsOnBookFileDelete;
-        selectedSchema.onBookFileDeleteForUpgrade = selectedSchema.supportsOnBookFileDeleteForUpgrade;
+        selectedSchema.onSeriesAdded = selectedSchema.supportsOnSeriesAdded;
+        selectedSchema.onSeriesDelete = selectedSchema.supportsOnSeriesDelete;
+        selectedSchema.onIssueDelete = selectedSchema.supportsOnIssueDelete;
+        selectedSchema.onIssueFileDelete = selectedSchema.supportsOnIssueFileDelete;
+        selectedSchema.onIssueFileDeleteForUpgrade = selectedSchema.supportsOnIssueFileDeleteForUpgrade;
         selectedSchema.onHealthIssue = selectedSchema.supportsOnHealthIssue;
         selectedSchema.onDownloadFailure = selectedSchema.supportsOnDownloadFailure;
         selectedSchema.onImportFailure = selectedSchema.supportsOnImportFailure;
-        selectedSchema.onBookRetag = selectedSchema.supportsOnBookRetag;
+        selectedSchema.onIssueRetag = selectedSchema.supportsOnIssueRetag;
         selectedSchema.onApplicationUpdate = selectedSchema.supportsOnApplicationUpdate;
 
         return selectedSchema;

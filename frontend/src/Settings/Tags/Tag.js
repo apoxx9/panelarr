@@ -59,7 +59,7 @@ class Tag extends Component {
       restrictionIds,
       indexerIds,
       downloadClientIds,
-      authorIds
+      seriesIds
     } = this.props;
 
     const {
@@ -74,7 +74,7 @@ class Tag extends Component {
       restrictionIds.length ||
       indexerIds.length ||
       downloadClientIds.length ||
-      authorIds.length
+      seriesIds.length
     );
 
     return (
@@ -91,9 +91,9 @@ class Tag extends Component {
           isTagUsed &&
             <div>
               {
-                !!authorIds.length &&
+                !!seriesIds.length &&
                   <div>
-                    {authorIds.length} authors
+                    {seriesIds.length} seriess
                   </div>
               }
 
@@ -153,7 +153,7 @@ class Tag extends Component {
         <TagDetailsModal
           label={label}
           isTagUsed={isTagUsed}
-          authorIds={authorIds}
+          seriesIds={seriesIds}
           delayProfileIds={delayProfileIds}
           importListIds={importListIds}
           notificationIds={notificationIds}
@@ -188,7 +188,7 @@ Tag.propTypes = {
   restrictionIds: PropTypes.arrayOf(PropTypes.number).isRequired,
   indexerIds: PropTypes.arrayOf(PropTypes.number).isRequired,
   downloadClientIds: PropTypes.arrayOf(PropTypes.number).isRequired,
-  authorIds: PropTypes.arrayOf(PropTypes.number).isRequired,
+  seriesIds: PropTypes.arrayOf(PropTypes.number).isRequired,
   onConfirmDeleteTag: PropTypes.func.isRequired
 };
 
@@ -199,7 +199,7 @@ Tag.defaultProps = {
   restrictionIds: [],
   indexerIds: [],
   downloadClientIds: [],
-  authorIds: []
+  seriesIds: []
 };
 
 export default Tag;

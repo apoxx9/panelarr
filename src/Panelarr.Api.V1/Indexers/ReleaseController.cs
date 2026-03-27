@@ -90,7 +90,7 @@ namespace Panelarr.Api.V1.Indexers
                     else if (release.SeriesId.HasValue)
                     {
                         var author = _authorService.GetSeries(release.SeriesId.Value);
-                        var issues = _parsingService.GetBooks(remoteBook.ParsedBookInfo, author);
+                        var issues = _parsingService.GetBooks(remoteBook.ParsedIssueInfo, author);
 
                         if (issues.Empty())
                         {
@@ -107,7 +107,7 @@ namespace Panelarr.Api.V1.Indexers
                 }
                 else if (remoteBook.Books.Empty())
                 {
-                    var issues = _parsingService.GetBooks(remoteBook.ParsedBookInfo, remoteBook.Series);
+                    var issues = _parsingService.GetBooks(remoteBook.ParsedIssueInfo, remoteBook.Series);
 
                     if (issues.Empty() && release.IssueId.HasValue)
                     {
@@ -136,16 +136,16 @@ namespace Panelarr.Api.V1.Indexers
         }
 
         [HttpGet]
-        public async Task<List<ReleaseResource>> GetReleases(int? bookId, int? authorId)
+        public async Task<List<ReleaseResource>> GetReleases(int? issueId, int? seriesId)
         {
-            if (bookId.HasValue)
+            if (issueId.HasValue)
             {
-                return await GetBookReleases(int.Parse(Request.Query["bookId"]));
+                return await GetBookReleases(issueId.Value);
             }
 
-            if (authorId.HasValue)
+            if (seriesId.HasValue)
             {
-                return await GetSeriesReleases(int.Parse(Request.Query["authorId"]));
+                return await GetSeriesReleases(seriesId.Value);
             }
 
             return await GetRss();

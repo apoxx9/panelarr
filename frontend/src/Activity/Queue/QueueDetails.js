@@ -77,7 +77,7 @@ function QueueDetails(props) {
     return (
       <Icon
         name={icons.DOWNLOADING}
-        title={translate('BookIsDownloadingInterp', [progress.toFixed(1), title])}
+        title={translate('IssueIsDownloadingInterp', [progress.toFixed(1), title])}
       />
     );
   }

@@ -27,14 +27,14 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
             if (subject.Release.DownloadProtocol == DownloadProtocol.Usenet && !delayProfile.EnableUsenet)
             {
-                _logger.Debug("[{0}] Usenet is not enabled for this author", subject.Release.Title);
-                return Decision.Reject("Usenet is not enabled for this author");
+                _logger.Debug("[{0}] Usenet is not enabled for this series", subject.Release.Title);
+                return Decision.Reject("Usenet is not enabled for this series");
             }
 
             if (subject.Release.DownloadProtocol == DownloadProtocol.Torrent && !delayProfile.EnableTorrent)
             {
-                _logger.Debug("[{0}] Torrent is not enabled for this author", subject.Release.Title);
-                return Decision.Reject("Torrent is not enabled for this author");
+                _logger.Debug("[{0}] Torrent is not enabled for this series", subject.Release.Title);
+                return Decision.Reject("Torrent is not enabled for this series");
             }
 
             return Decision.Accept();

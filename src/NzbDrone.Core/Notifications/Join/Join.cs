@@ -38,12 +38,12 @@ namespace NzbDrone.Core.Notifications.Join
             _proxy.SendNotification(AUTHOR_DELETED_TITlE_BRANDED, deleteMessage.Message, Settings);
         }
 
-        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+        public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
             _proxy.SendNotification(BOOK_DELETED_TITLE_BRANDED, deleteMessage.Message, Settings);
         }
 
-        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
+        public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             _proxy.SendNotification(BOOK_FILE_DELETED_TITLE_BRANDED, deleteMessage.Message, Settings);
         }

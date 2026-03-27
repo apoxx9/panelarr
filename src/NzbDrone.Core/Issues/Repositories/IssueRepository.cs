@@ -46,13 +46,13 @@ namespace NzbDrone.Core.Books
             var now = DateTime.UtcNow;
 
             var inner = Builder()
-                .Select("MIN(\"Books\".\"Id\") as id, MAX(\"Books\".\"ReleaseDate\") as date")
+                .Select("MIN(\"Issues\".\"Id\") as id, MAX(\"Issues\".\"ReleaseDate\") as date")
                 .Where<Issue>(x => authorMetadataIds.Contains(x.SeriesMetadataId) && x.ReleaseDate < now)
                 .GroupBy<Issue>(x => x.SeriesMetadataId)
                 .AddSelectTemplate(typeof(Issue));
 
             var outer = Builder()
-                .Join($"({inner.RawSql}) ids on ids.id = \"Books\".\"Id\" and ids.date = \"Books\".\"ReleaseDate\"")
+                .Join($"({inner.RawSql}) ids on ids.id = \"Issues\".\"Id\" and ids.date = \"Issues\".\"ReleaseDate\"")
                 .AddParameters(inner.Parameters);
 
             return Query(outer);
@@ -63,13 +63,13 @@ namespace NzbDrone.Core.Books
             var now = DateTime.UtcNow;
 
             var inner = Builder()
-                .Select("MIN(\"Books\".\"Id\") as id, MIN(\"Books\".\"ReleaseDate\") as date")
+                .Select("MIN(\"Issues\".\"Id\") as id, MIN(\"Issues\".\"ReleaseDate\") as date")
                 .Where<Issue>(x => authorMetadataIds.Contains(x.SeriesMetadataId) && x.ReleaseDate > now)
                 .GroupBy<Issue>(x => x.SeriesMetadataId)
                 .AddSelectTemplate(typeof(Issue));
 
             var outer = Builder()
-                .Join($"({inner.RawSql}) ids on ids.id = \"Books\".\"Id\" and ids.date = \"Books\".\"ReleaseDate\"")
+                .Join($"({inner.RawSql}) ids on ids.id = \"Issues\".\"Id\" and ids.date = \"Issues\".\"ReleaseDate\"")
                 .AddParameters(inner.Parameters);
 
             return Query(outer);
@@ -140,7 +140,7 @@ namespace NzbDrone.Core.Books
             {
                 foreach (var belowCutoff in profile.QualityIds)
                 {
-                    clauses.Add(string.Format("(\"Seriess\".\"QualityProfileId\" = {0} AND \"ComicFiles\".\"Quality\" LIKE '%_quality_: {1},%')", profile.ProfileId, belowCutoff));
+                    clauses.Add(string.Format("(\"Series\".\"QualityProfileId\" = {0} AND \"ComicFiles\".\"Quality\" LIKE '%_quality_: {1},%')", profile.ProfileId, belowCutoff));
                 }
             }
 

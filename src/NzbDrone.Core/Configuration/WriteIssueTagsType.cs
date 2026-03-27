@@ -1,6 +1,6 @@
 namespace NzbDrone.Core.Configuration
 {
-    public enum WriteBookTagsType
+    public enum WriteIssueTagsType
     {
         NewFiles,
         AllFiles,

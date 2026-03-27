@@ -58,14 +58,14 @@ namespace NzbDrone.Core.Notifications.Email
             SendEmail(Settings, AUTHOR_DELETED_TITlE_BRANDED, body);
         }
 
-        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+        public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
             var body = deleteMessage.Message;
 
             SendEmail(Settings, AUTHOR_DELETED_TITlE_BRANDED, body);
         }
 
-        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
+        public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             var body = deleteMessage.Message;
 

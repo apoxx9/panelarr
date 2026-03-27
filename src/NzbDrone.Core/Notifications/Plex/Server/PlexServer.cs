@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             public bool Refreshing { get; set; }
         }
 
-        private readonly ICached<PlexUpdateQueue> _pendingSeriessCache;
+        private readonly ICached<PlexUpdateQueue> _pendingSeriesCache;
 
         public PlexServer(IPlexServerService plexServerService, IPlexTvService plexTvService, ICacheManager cacheManager, Logger logger)
         {
@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             _plexTvService = plexTvService;
             _logger = logger;
 
-            _pendingSeriessCache = cacheManager.GetRollingCache<PlexUpdateQueue>(GetType(), "pendingSeriess", TimeSpan.FromDays(1));
+            _pendingSeriesCache = cacheManager.GetRollingCache<PlexUpdateQueue>(GetType(), "pendingSeries", TimeSpan.FromDays(1));
         }
 
         public override string Link => "https://www.plex.tv/";
@@ -49,12 +49,12 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             UpdateIfEnabled(author);
         }
 
-        public override void OnBookRetag(IssueRetagMessage message)
+        public override void OnIssueRetag(IssueRetagMessage message)
         {
             UpdateIfEnabled(message.Series);
         }
 
-        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+        public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
             if (deleteMessage.DeletedFiles)
             {
@@ -76,8 +76,8 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
             if (Settings.UpdateLibrary)
             {
-                _logger.Debug("Scheduling library update for author {0} {1}", author.Id, author.Name);
-                var queue = _pendingSeriessCache.Get(Settings.Host, () => new PlexUpdateQueue());
+                _logger.Debug("Scheduling library update for series {0} {1}", author.Id, author.Name);
+                var queue = _pendingSeriesCache.Get(Settings.Host, () => new PlexUpdateQueue());
                 lock (queue)
                 {
                     queue.Pending[author.Id] = author;
@@ -87,7 +87,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
         public override void ProcessQueue()
         {
-            var queue = _pendingSeriessCache.Find(Settings.Host);
+            var queue = _pendingSeriesCache.Find(Settings.Host);
 
             if (queue == null)
             {
@@ -108,7 +108,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             {
                 while (true)
                 {
-                    List<Series> refreshingSeriess;
+                    List<Series> refreshingSeries;
                     lock (queue)
                     {
                         if (queue.Pending.Empty())
@@ -117,14 +117,14 @@ namespace NzbDrone.Core.Notifications.Plex.Server
                             return;
                         }
 
-                        refreshingSeriess = queue.Pending.Values.ToList();
+                        refreshingSeries = queue.Pending.Values.ToList();
                         queue.Pending.Clear();
                     }
 
                     if (Settings.UpdateLibrary)
                     {
-                        _logger.Debug("Performing library update for {0} authors", refreshingSeriess.Count);
-                        _plexServerService.UpdateLibrary(refreshingSeriess, Settings);
+                        _logger.Debug("Performing library update for {0} series", refreshingSeries.Count);
+                        _plexServerService.UpdateLibrary(refreshingSeries, Settings);
                     }
                 }
             }

@@ -11,7 +11,7 @@ function RootFolderSelectInputOption(props) {
     value,
     name,
     freeSpace,
-    authorFolder,
+    seriesFolder,
     isMissing,
     isMobile,
     isWindows,
@@ -37,10 +37,10 @@ function RootFolderSelectInputOption(props) {
           {text}
 
           {
-            authorFolder && id !== 'addNew' ?
-              <div className={styles.authorFolder}>
+            seriesFolder && id !== 'addNew' ?
+              <div className={styles.seriesFolder}>
                 {slashCharacter}
-                {authorFolder}
+                {seriesFolder}
               </div> :
               null
           }
@@ -71,7 +71,7 @@ RootFolderSelectInputOption.propTypes = {
   name: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   freeSpace: PropTypes.number,
-  authorFolder: PropTypes.string,
+  seriesFolder: PropTypes.string,
   isMissing: PropTypes.bool,
   isMobile: PropTypes.bool.isRequired,
   isWindows: PropTypes.bool

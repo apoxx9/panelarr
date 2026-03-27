@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using NLog;
 using NzbDrone.Common.Http;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Http;
 using NzbDrone.Core.MetadataSource.Metron.Resources;
 
@@ -21,35 +22,39 @@ namespace NzbDrone.Core.MetadataSource.Metron
     {
         private const string BaseUrl = "https://metron.cloud/api/";
         private readonly ICachedHttpResponseService _cachedHttpClient;
+        private readonly IConfigService _configService;
         private readonly MetronRateLimiter _rateLimiter;
         private readonly Logger _logger;
-        private readonly IHttpRequestBuilderFactory _requestBuilder;
 
         public MetronApiClient(ICachedHttpResponseService cachedHttpClient,
-                               MetronSettings settings,
+                               IConfigService configService,
                                Logger logger)
         {
             _cachedHttpClient = cachedHttpClient;
+            _configService = configService;
             _rateLimiter = new MetronRateLimiter();
             _logger = logger;
+        }
 
-            var credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{settings.Username}:{settings.Password}"));
+        private HttpRequest BuildRequest(string endpoint)
+        {
+            var username = _configService.MetronUsername;
+            var password = _configService.MetronPassword;
+            var credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
 
-            _requestBuilder = new HttpRequestBuilder(BaseUrl + "{endpoint}")
+            return new HttpRequestBuilder(BaseUrl + "{endpoint}")
+                .SetSegment("endpoint", endpoint)
                 .SetHeader("Authorization", $"Basic {credentials}")
                 .SetHeader("Accept", "application/json")
-                .KeepAlive()
-                .CreateFactory();
+                .Build();
         }
 
         public List<MetronSeriesListItem> SearchSeries(string title)
         {
             _rateLimiter.WaitForToken();
 
-            var request = _requestBuilder.Create()
-                .SetSegment("endpoint", "series/")
-                .AddQueryParam("name", title)
-                .Build();
+            var request = BuildRequest("series/");
+            request.Url = request.Url.AddQueryParam("name", title);
 
             var response = _cachedHttpClient.Get<MetronPagedResponse<MetronSeriesListItem>>(request, false, TimeSpan.FromHours(1));
 
@@ -60,9 +65,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
         {
             _rateLimiter.WaitForToken();
 
-            var request = _requestBuilder.Create()
-                .SetSegment("endpoint", $"series/{id}/")
-                .Build();
+            var request = BuildRequest($"series/{id}/");
 
             var response = _cachedHttpClient.Get<MetronSeriesDetail>(request, true, TimeSpan.FromHours(24));
 
@@ -73,10 +76,8 @@ namespace NzbDrone.Core.MetadataSource.Metron
         {
             _rateLimiter.WaitForToken();
 
-            var request = _requestBuilder.Create()
-                .SetSegment("endpoint", "issue/")
-                .AddQueryParam("series_id", seriesId.ToString())
-                .Build();
+            var request = BuildRequest("issue/");
+            request.Url = request.Url.AddQueryParam("series_id", seriesId.ToString());
 
             var response = _cachedHttpClient.Get<MetronPagedResponse<MetronIssueListItem>>(request, true, TimeSpan.FromHours(12));
 
@@ -87,9 +88,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
         {
             _rateLimiter.WaitForToken();
 
-            var request = _requestBuilder.Create()
-                .SetSegment("endpoint", $"issue/{id}/")
-                .Build();
+            var request = BuildRequest($"issue/{id}/");
 
             var response = _cachedHttpClient.Get<MetronIssueDetail>(request, true, TimeSpan.FromHours(12));
 
@@ -100,9 +99,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
         {
             _rateLimiter.WaitForToken();
 
-            var request = _requestBuilder.Create()
-                .SetSegment("endpoint", $"publisher/{id}/")
-                .Build();
+            var request = BuildRequest($"publisher/{id}/");
 
             var response = _cachedHttpClient.Get<MetronPublisherDetail>(request, true, TimeSpan.FromHours(48));
 

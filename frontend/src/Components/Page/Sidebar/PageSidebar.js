@@ -20,25 +20,25 @@ const SIDEBAR_WIDTH = parseInt(dimensions.sidebarWidth);
 
 const links = [
   {
-    iconName: icons.AUTHOR_CONTINUING,
+    iconName: icons.SERIES_CONTINUING,
     title: () => translate('Library'),
     to: '/',
-    alias: '/authors',
+    alias: '/seriess',
     children: [
       {
         title: () => translate('Series'),
-        to: '/authors'
+        to: '/seriess'
       },
       {
         title: () => translate('Issues'),
-        to: '/books'
+        to: '/issues'
       },
       {
         title: () => translate('AddNew'),
         to: '/add/search'
       },
       {
-        title: () => translate('Bookshelf'),
+        title: () => translate('LibraryMonitor'),
         to: '/shelf'
       },
       {

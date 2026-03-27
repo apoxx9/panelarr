@@ -10,11 +10,11 @@ import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import { kinds } from 'Helpers/Props';
 
-function formatBookFiles(items, book) {
+function formatIssueFiles(items, issue) {
 
   return (
-    <div key={book.id}>
-      <b> {book.title} </b>
+    <div key={issue.id}>
+      <b> {issue.title} </b>
       <ul>
         {
           _.sortBy(items, 'path').map((item) => {
@@ -54,7 +54,7 @@ class ConfirmImportModalContent extends Component {
 
   render() {
     const {
-      books,
+      issues,
       items,
       onConfirmImportPress,
       onModalClose,
@@ -87,14 +87,14 @@ class ConfirmImportModalContent extends Component {
             !isFetching && isPopulated &&
               <div>
                 <Alert>
-                  You already have files imported for the books listed below.  If you continue, the existing files <b>will be deleted</b> and the new files imported in their place.
+                  You already have files imported for the issues listed below.  If you continue, the existing files <b>will be deleted</b> and the new files imported in their place.
 
                   To avoid deleting existing files, press 'Cancel' and use the 'Combine with existing files' option.
                 </Alert>
 
                 { _.chain(items)
-                  .groupBy('bookId')
-                  .mapValues((value, key) => formatBookFiles(value, _.find(books, (a) => a.id === parseInt(key))))
+                  .groupBy('issueId')
+                  .mapValues((value, key) => formatIssueFiles(value, _.find(issues, (a) => a.id === parseInt(key))))
                   .values()
                   .value() }
               </div>
@@ -124,7 +124,7 @@ class ConfirmImportModalContent extends Component {
 }
 
 ConfirmImportModalContent.propTypes = {
-  books: PropTypes.arrayOf(PropTypes.object).isRequired,
+  issues: PropTypes.arrayOf(PropTypes.object).isRequired,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
   isFetching: PropTypes.bool.isRequired,
   isPopulated: PropTypes.bool.isRequired,

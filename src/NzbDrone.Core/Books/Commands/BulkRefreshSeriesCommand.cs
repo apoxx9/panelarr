@@ -9,14 +9,14 @@ namespace NzbDrone.Core.Books.Commands
         {
         }
 
-        public BulkRefreshSeriesCommand(List<int> authorIds, bool areNewSeriess = false)
+        public BulkRefreshSeriesCommand(List<int> authorIds, bool areNewSeries = false)
         {
             SeriesIds = authorIds;
-            AreNewSeriess = areNewSeriess;
+            AreNewSeries = areNewSeries;
         }
 
         public List<int> SeriesIds { get; set; }
-        public bool AreNewSeriess { get; set; }
+        public bool AreNewSeries { get; set; }
 
         public override bool SendUpdatesToClient => true;
 

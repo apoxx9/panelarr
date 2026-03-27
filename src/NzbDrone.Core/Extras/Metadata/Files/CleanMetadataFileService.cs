@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Extras.Metadata.Files
 
         public void Clean(Series author)
         {
-            _logger.Debug("Cleaning missing metadata files for author: {0}", author.Name);
+            _logger.Debug("Cleaning missing metadata files for series: {0}", author.Name);
 
             var metadataFiles = _metadataFileService.GetFilesBySeries(author.Id);
 

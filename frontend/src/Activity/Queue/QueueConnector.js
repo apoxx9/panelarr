@@ -12,18 +12,18 @@ import Queue from './Queue';
 
 function createMapStateToProps() {
   return createSelector(
-    (state) => state.authors,
-    (state) => state.books,
+    (state) => state.seriess,
+    (state) => state.issues,
     (state) => state.queue.options,
     (state) => state.queue.paged,
     createCommandExecutingSelector(commandNames.REFRESH_MONITORED_DOWNLOADS),
-    (authors, books, options, queue, isRefreshMonitoredDownloadsExecuting) => {
+    (seriess, issues, options, queue, isRefreshMonitoredDownloadsExecuting) => {
       return {
-        isAuthorFetching: authors.isFetching,
-        isAuthorPopulated: authors.isPopulated,
-        isBooksFetching: books.isFetching,
-        isBooksPopulated: books.isPopulated,
-        booksError: books.error,
+        isSeriesFetching: seriess.isFetching,
+        isSeriesPopulated: seriess.isPopulated,
+        isIssuesFetching: issues.isFetching,
+        isIssuesPopulated: issues.isPopulated,
+        issuesError: issues.error,
         isRefreshMonitoredDownloadsExecuting,
         ...options,
         ...queue
@@ -63,8 +63,8 @@ class QueueConnector extends Component {
 
   componentDidUpdate(prevProps) {
     if (
-      this.props.includeUnknownAuthorItems !==
-      prevProps.includeUnknownAuthorItems
+      this.props.includeUnknownSeriesItems !==
+      prevProps.includeUnknownSeriesItems
     ) {
       this.repopulate();
     }
@@ -155,7 +155,7 @@ class QueueConnector extends Component {
 QueueConnector.propTypes = {
   useCurrentPage: PropTypes.bool.isRequired,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
-  includeUnknownAuthorItems: PropTypes.bool.isRequired,
+  includeUnknownSeriesItems: PropTypes.bool.isRequired,
   fetchQueue: PropTypes.func.isRequired,
   fetchQueueStatus: PropTypes.func.isRequired,
   gotoQueueFirstPage: PropTypes.func.isRequired,

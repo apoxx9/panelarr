@@ -20,7 +20,7 @@ function Agenda(props) {
           return (
             <AgendaEventConnector
               key={item.id}
-              bookId={item.id}
+              issueId={item.id}
               showDate={showDate}
               {...item}
             />

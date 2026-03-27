@@ -1,13 +1,13 @@
-// This is the output of eg. http://192.168.0.3:8089/conversion/book-data/100
+// This is the output of eg. http://192.168.0.3:8089/conversion/issue-data/100
 
 const profileData = {
-  cybookg3: {
-    name: 'Cybook G3',
-    description: 'This profile is intended for the Cybook G3. [Screen size: 600 x 800 pixels]'
+  cyissueg3: {
+    name: 'Cyissue G3',
+    description: 'This profile is intended for the Cyissue G3. [Screen size: 600 x 800 pixels]'
   },
-  cybook_opus: {
-    name: 'Cybook Opus',
-    description: 'This profile is intended for the Cybook Opus. [Screen size: 590 x 775 pixels]'
+  cyissue_opus: {
+    name: 'Cyissue Opus',
+    description: 'This profile is intended for the Cyissue Opus. [Screen size: 590 x 775 pixels]'
   },
   default: {
     name: 'Default Output Profile',
@@ -53,9 +53,9 @@ const profileData = {
     name: 'IRex Digital Reader 800',
     description: 'This profile is intended for the IRex Digital Reader 800. [Screen size: 768 x 1024 pixels]'
   },
-  jetbook5: {
-    name: 'JetBook 5-inch',
-    description: 'This profile is intended for the 5-inch JetBook. [Screen size: 480 x 640 pixels]'
+  jetissue5: {
+    name: 'JetIssue 5-inch',
+    description: 'This profile is intended for the 5-inch JetIssue. [Screen size: 480 x 640 pixels]'
   },
   kindle: {
     name: 'Kindle',
@@ -94,8 +94,8 @@ const profileData = {
     description: 'This profile is intended for the Microsoft Reader. [Screen size: 480 x 652 pixels]'
   },
   mobipocket: {
-    name: 'Mobipocket Books',
-    description: 'This profile is intended for the Mobipocket books. [Screen size: 600 x 800 pixels]'
+    name: 'Mobipocket Issues',
+    description: 'This profile is intended for the Mobipocket issues. [Screen size: 600 x 800 pixels]'
   },
   nook: {
     name: 'Nook',
@@ -109,13 +109,13 @@ const profileData = {
     name: 'Nook HD+',
     description: 'Intended for the Nook HD+ and similar tablet devices with a resolution of 1280x1920 [Screen size: 1280 x 1920 pixels]'
   },
-  pocketbook_900: {
-    name: 'PocketBook Pro 900',
-    description: 'This profile is intended for the PocketBook Pro 900 series of devices. [Screen size: 810 x 1180 pixels]'
+  pocketissue_900: {
+    name: 'PocketIssue Pro 900',
+    description: 'This profile is intended for the PocketIssue Pro 900 series of devices. [Screen size: 810 x 1180 pixels]'
   },
-  pocketbook_pro_912: {
-    name: 'PocketBook Pro 912',
-    description: 'This profile is intended for the PocketBook Pro 912 series of devices. [Screen size: 825 x 1200 pixels]'
+  pocketissue_pro_912: {
+    name: 'PocketIssue Pro 912',
+    description: 'This profile is intended for the PocketIssue Pro 912 series of devices. [Screen size: 825 x 1200 pixels]'
   },
   galaxy: {
     name: 'Samsung Galaxy',

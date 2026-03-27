@@ -17,16 +17,16 @@ function getHeaderTitle(eventType) {
       return 'Grabbed';
     case 'downloadFailed':
       return 'Download Failed';
-    case 'bookFileImported':
-      return 'Book Imported';
-    case 'bookFileDeleted':
-      return 'Book File Deleted';
-    case 'bookFileRenamed':
-      return 'Book File Renamed';
-    case 'bookFileRetagged':
-      return 'Book File Tags Updated';
-    case 'bookImportIncomplete':
-      return 'Book Import Incomplete';
+    case 'issueFileImported':
+      return 'Issue Imported';
+    case 'issueFileDeleted':
+      return 'Issue File Deleted';
+    case 'issueFileRenamed':
+      return 'Issue File Renamed';
+    case 'issueFileRetagged':
+      return 'Issue File Tags Updated';
+    case 'issueImportIncomplete':
+      return 'Issue Import Incomplete';
     case 'downloadImported':
       return 'Download Completed';
     case 'downloadIgnored':

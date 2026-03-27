@@ -40,7 +40,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 if (!_upgradableSpecification.IsUpgradable(subject.Series.QualityProfile,
                                                            file.Quality,
                                                            customFormats,
-                                                           subject.ParsedBookInfo.Quality,
+                                                           subject.ParsedIssueInfo.Quality,
                                                            subject.CustomFormats))
                 {
                     return Decision.Reject("Existing files on disk is of equal or higher preference: {0}", file.Quality.Quality.Name);

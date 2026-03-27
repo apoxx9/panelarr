@@ -43,7 +43,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 if (!_upgradableSpecification.CutoffNotMet(qualityProfile,
                                                            currentQualities,
                                                            customFormats,
-                                                           subject.ParsedBookInfo.Quality))
+                                                           subject.ParsedIssueInfo.Quality))
                 {
                     _logger.Debug("Cutoff already met by existing files, rejecting.");
 

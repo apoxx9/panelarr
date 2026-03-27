@@ -16,8 +16,8 @@ import createSetClientSideCollectionSortReducer from './Creators/Reducers/create
 
 export const section = 'interactiveImport';
 
-const booksSection = `${section}.books`;
-const bookFilesSection = `${section}.bookFiles`;
+const issuesSection = `${section}.issues`;
+const issueFilesSection = `${section}.issueFiles`;
 let abortCurrentFetchRequest = null;
 let abortCurrentRequest = null;
 let currentIds = [];
@@ -47,10 +47,10 @@ export const defaultState = {
       return naturalExpansion(path.toLowerCase());
     },
 
-    author: function(item, direction) {
-      const author = item.author;
+    series: function(item, direction) {
+      const series = item.series;
 
-      return author ? author.sortName : '';
+      return series ? series.sortName : '';
     },
 
     quality: function(item, direction) {
@@ -58,7 +58,7 @@ export const defaultState = {
     }
   },
 
-  books: {
+  issues: {
     isFetching: false,
     isPopulated: false,
     error: null,
@@ -67,7 +67,7 @@ export const defaultState = {
     items: []
   },
 
-  bookFiles: {
+  issueFiles: {
     isFetching: false,
     isPopulated: false,
     error: null,
@@ -97,12 +97,12 @@ export const ADD_RECENT_FOLDER = 'interactiveImport/addRecentFolder';
 export const REMOVE_RECENT_FOLDER = 'interactiveImport/removeRecentFolder';
 export const SET_INTERACTIVE_IMPORT_MODE = 'interactiveImport/setInteractiveImportMode';
 
-export const FETCH_INTERACTIVE_IMPORT_BOOKS = 'interactiveImport/fetchInteractiveImportBooks';
-export const SET_INTERACTIVE_IMPORT_BOOKS_SORT = 'interactiveImport/clearInteractiveImportBooksSort';
-export const CLEAR_INTERACTIVE_IMPORT_BOOKS = 'interactiveImport/clearInteractiveImportBooks';
+export const FETCH_INTERACTIVE_IMPORT_ISSUES_LIST = 'interactiveImport/fetchInteractiveImportIssues';
+export const SET_INTERACTIVE_IMPORT_ISSUES_LIST_SORT = 'interactiveImport/clearInteractiveImportIssuesSort';
+export const CLEAR_INTERACTIVE_IMPORT_ISSUES_LIST = 'interactiveImport/clearInteractiveImportIssues';
 
-export const FETCH_INTERACTIVE_IMPORT_TRACKFILES = 'interactiveImport/fetchInteractiveImportBookFiles';
-export const CLEAR_INTERACTIVE_IMPORT_TRACKFILES = 'interactiveImport/clearInteractiveImportBookFiles';
+export const FETCH_INTERACTIVE_IMPORT_TRACKFILES = 'interactiveImport/fetchInteractiveImportIssueFiles';
+export const CLEAR_INTERACTIVE_IMPORT_TRACKFILES = 'interactiveImport/clearInteractiveImportIssueFiles';
 
 //
 // Action Creators
@@ -117,12 +117,12 @@ export const addRecentFolder = createAction(ADD_RECENT_FOLDER);
 export const removeRecentFolder = createAction(REMOVE_RECENT_FOLDER);
 export const setInteractiveImportMode = createAction(SET_INTERACTIVE_IMPORT_MODE);
 
-export const fetchInteractiveImportBooks = createThunk(FETCH_INTERACTIVE_IMPORT_BOOKS);
-export const setInteractiveImportBooksSort = createAction(SET_INTERACTIVE_IMPORT_BOOKS_SORT);
-export const clearInteractiveImportBooks = createAction(CLEAR_INTERACTIVE_IMPORT_BOOKS);
+export const fetchInteractiveImportIssues = createThunk(FETCH_INTERACTIVE_IMPORT_ISSUES_LIST);
+export const setInteractiveImportIssuesSort = createAction(SET_INTERACTIVE_IMPORT_ISSUES_LIST_SORT);
+export const clearInteractiveImportIssues = createAction(CLEAR_INTERACTIVE_IMPORT_ISSUES_LIST);
 
-export const fetchInteractiveImportBookFiles = createThunk(FETCH_INTERACTIVE_IMPORT_TRACKFILES);
-export const clearInteractiveImportBookFiles = createAction(CLEAR_INTERACTIVE_IMPORT_TRACKFILES);
+export const fetchInteractiveImportIssueFiles = createThunk(FETCH_INTERACTIVE_IMPORT_TRACKFILES);
+export const clearInteractiveImportIssueFiles = createAction(CLEAR_INTERACTIVE_IMPORT_TRACKFILES);
 
 //
 // Action Handlers
@@ -202,8 +202,8 @@ export const actionHandlers = handleThunks({
       return {
         id,
         path: item.path,
-        authorId: item.author ? item.author.id : undefined,
-        bookId: item.book ? item.book.id : undefined,
+        seriesId: item.series ? item.series.id : undefined,
+        issueId: item.issue ? item.issue.id : undefined,
         foreignEditionId: item.foreignEditionId ? item.ForeignEditionId : undefined,
         quality: item.quality,
         releaseGroup: item.releaseGroup,
@@ -252,9 +252,9 @@ export const actionHandlers = handleThunks({
     });
   },
 
-  [FETCH_INTERACTIVE_IMPORT_BOOKS]: createFetchHandler(booksSection, '/book'),
+  [FETCH_INTERACTIVE_IMPORT_ISSUES_LIST]: createFetchHandler(issuesSection, '/issue'),
 
-  [FETCH_INTERACTIVE_IMPORT_TRACKFILES]: createFetchHandler(bookFilesSection, '/bookFile')
+  [FETCH_INTERACTIVE_IMPORT_TRACKFILES]: createFetchHandler(issueFilesSection, '/comicfile')
 });
 
 //
@@ -335,17 +335,17 @@ export const reducers = createHandleActions({
     return Object.assign({}, state, { importMode: payload.importMode });
   },
 
-  [SET_INTERACTIVE_IMPORT_BOOKS_SORT]: createSetClientSideCollectionSortReducer(booksSection),
+  [SET_INTERACTIVE_IMPORT_ISSUES_LIST_SORT]: createSetClientSideCollectionSortReducer(issuesSection),
 
-  [CLEAR_INTERACTIVE_IMPORT_BOOKS]: (state) => {
-    return updateSectionState(state, booksSection, {
-      ...defaultState.books
+  [CLEAR_INTERACTIVE_IMPORT_ISSUES_LIST]: (state) => {
+    return updateSectionState(state, issuesSection, {
+      ...defaultState.issues
     });
   },
 
   [CLEAR_INTERACTIVE_IMPORT_TRACKFILES]: (state) => {
-    return updateSectionState(state, bookFilesSection, {
-      ...defaultState.bookFiles
+    return updateSectionState(state, issueFilesSection, {
+      ...defaultState.issueFiles
     });
   }
 

@@ -12,8 +12,8 @@ import createSetClientSideCollectionSortReducer from './Creators/Reducers/create
 // Variables
 
 export const section = 'releases';
-export const bookSection = 'releases.book';
-export const authorSection = 'releases.author';
+export const issueSection = 'releases.issue';
+export const seriesSection = 'releases.series';
 
 let abortCurrentRequest = null;
 
@@ -209,19 +209,19 @@ export const defaultState = {
     }
   ],
 
-  book: {
+  issue: {
     selectedFilterKey: 'all'
   },
 
-  author: {
+  series: {
     selectedFilterKey: 'all'
   }
 };
 
 export const persistState = [
   'releases.selectedFilterKey',
-  'releases.book.customFilters',
-  'releases.author.customFilters'
+  'releases.issue.customFilters',
+  'releases.series.customFilters'
 ];
 
 //
@@ -233,8 +233,8 @@ export const SET_RELEASES_SORT = 'releases/setReleasesSort';
 export const CLEAR_RELEASES = 'releases/clearReleases';
 export const GRAB_RELEASE = 'releases/grabRelease';
 export const UPDATE_RELEASE = 'releases/updateRelease';
-export const SET_BOOK_RELEASES_FILTER = 'releases/setBookReleasesFilter';
-export const SET_AUTHOR_RELEASES_FILTER = 'releases/setAuthorReleasesFilter';
+export const SET_ISSUE_RELEASES_FILTER = 'releases/setIssueReleasesFilter';
+export const SET_SERIES_RELEASES_FILTER = 'releases/setSeriesReleasesFilter';
 
 //
 // Action Creators
@@ -245,8 +245,8 @@ export const setReleasesSort = createAction(SET_RELEASES_SORT);
 export const clearReleases = createAction(CLEAR_RELEASES);
 export const grabRelease = createThunk(GRAB_RELEASE);
 export const updateRelease = createAction(UPDATE_RELEASE);
-export const setBookReleasesFilter = createAction(SET_BOOK_RELEASES_FILTER);
-export const setAuthorReleasesFilter = createAction(SET_AUTHOR_RELEASES_FILTER);
+export const setIssueReleasesFilter = createAction(SET_ISSUE_RELEASES_FILTER);
+export const setSeriesReleasesFilter = createAction(SET_SERIES_RELEASES_FILTER);
 
 //
 // Helpers
@@ -312,8 +312,8 @@ export const reducers = createHandleActions({
 
   [CLEAR_RELEASES]: (state) => {
     const {
-      book,
-      author,
+      issue,
+      series,
       ...otherDefaultState
     } = defaultState;
 
@@ -340,7 +340,7 @@ export const reducers = createHandleActions({
   },
 
   [SET_RELEASES_SORT]: createSetClientSideCollectionSortReducer(section),
-  [SET_BOOK_RELEASES_FILTER]: createSetClientSideCollectionFilterReducer(bookSection),
-  [SET_AUTHOR_RELEASES_FILTER]: createSetClientSideCollectionFilterReducer(authorSection)
+  [SET_ISSUE_RELEASES_FILTER]: createSetClientSideCollectionFilterReducer(issueSection),
+  [SET_SERIES_RELEASES_FILTER]: createSetClientSideCollectionFilterReducer(seriesSection)
 
 }, defaultState, section);

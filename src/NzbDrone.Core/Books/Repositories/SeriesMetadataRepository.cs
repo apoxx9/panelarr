@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Books
             UpdateMany(updateMetadataList);
             InsertMany(addMetadataList);
 
-            _logger.Debug($"{upToDateMetadataCount} author metadata up to date; Updating {updateMetadataList.Count}, Adding {addMetadataList.Count} author metadata entries.");
+            _logger.Debug($"{upToDateMetadataCount} series metadata up to date; Updating {updateMetadataList.Count}, Adding {addMetadataList.Count} series metadata entries.");
 
             return updateMetadataList.Count > 0 || addMetadataList.Count > 0;
         }

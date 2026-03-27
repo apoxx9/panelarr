@@ -53,9 +53,9 @@ class SelectEditionModalContentConnector extends Component {
   // Control
 
   populate = () => {
-    const bookId = this.props.books.map((b) => b.book.id);
+    const issueId = this.props.issues.map((b) => b.issue.id);
 
-    this.props.fetchEditions({ bookId });
+    this.props.fetchEditions({ issueId });
   };
 
   unpopulate = () => {
@@ -65,8 +65,8 @@ class SelectEditionModalContentConnector extends Component {
   //
   // Listeners
 
-  onEditionSelect = (bookId, foreignEditionId) => {
-    const ids = this.props.importIdsByBook[bookId];
+  onEditionSelect = (issueId, foreignEditionId) => {
+    const ids = this.props.importIdsByIssue[issueId];
 
     ids.forEach((id) => {
       this.props.updateInteractiveImportItem({
@@ -97,8 +97,8 @@ class SelectEditionModalContentConnector extends Component {
 }
 
 SelectEditionModalContentConnector.propTypes = {
-  importIdsByBook: PropTypes.object.isRequired,
-  books: PropTypes.arrayOf(PropTypes.object).isRequired,
+  importIdsByIssue: PropTypes.object.isRequired,
+  issues: PropTypes.arrayOf(PropTypes.object).isRequired,
   fetchEditions: PropTypes.func.isRequired,
   clearEditions: PropTypes.func.isRequired,
   updateInteractiveImportItem: PropTypes.func.isRequired,

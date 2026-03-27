@@ -4,7 +4,7 @@ using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Parser.Model
 {
-    public class ParsedBookInfo
+    public class ParsedIssueInfo
     {
         public string IssueTitle { get; set; }
         public string SeriesName { get; set; }

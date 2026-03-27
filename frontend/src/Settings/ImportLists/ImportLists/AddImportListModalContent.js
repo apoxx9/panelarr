@@ -54,7 +54,7 @@ class AddImportListModalContent extends Component {
 
                 <Alert kind={kinds.INFO}>
                   <div>
-                    {translate('PanelarrSupportsMultipleListsForImportingBooksAndAuthorsIntoTheDatabase')}
+                    {translate('PanelarrSupportsMultipleListsForImportingIssuesAndSeriesIntoTheDatabase')}
                   </div>
                   <div>
                     {translate('ForMoreInformationOnTheIndividualListsClickOnTheInfoButtons')}

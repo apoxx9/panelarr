@@ -2,17 +2,17 @@
 // Please do not change this file!
 interface CssExports {
   'absoluteEpisodeNumber': string;
-  'authorName': string;
-  'bookSeparator': string;
-  'bookTitle': string;
   'date': string;
   'downloaded': string;
   'downloading': string;
   'event': string;
   'eventWrapper': string;
+  'issueSeparator': string;
+  'issueTitle': string;
   'missing': string;
   'partial': string;
   'seasonEpisodeNumber': string;
+  'seriesName': string;
   'time': string;
   'unmonitored': string;
   'unreleased': string;

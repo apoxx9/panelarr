@@ -25,7 +25,7 @@ namespace NzbDrone.Core.MediaFiles
 {
     public interface IDiskScanService
     {
-        void Scan(List<string> folders = null, FilterFilesType filter = FilterFilesType.Known, bool addNewSeriess = false, List<int> authorIds = null);
+        void Scan(List<string> folders = null, FilterFilesType filter = FilterFilesType.Known, bool addNewSeries = false, List<int> authorIds = null);
         IFileInfo[] GetBookFiles(string path, bool allDirectories = true);
         string[] GetNonBookFiles(string path, bool allDirectories = true);
         List<IFileInfo> FilterFiles(string basePath, IEnumerable<IFileInfo> files);
@@ -77,7 +77,7 @@ namespace NzbDrone.Core.MediaFiles
             _logger = logger;
         }
 
-        public void Scan(List<string> folders = null, FilterFilesType filter = FilterFilesType.Known, bool addNewSeriess = false, List<int> authorIds = null)
+        public void Scan(List<string> folders = null, FilterFilesType filter = FilterFilesType.Known, bool addNewSeries = false, List<int> authorIds = null)
         {
             if (folders == null)
             {
@@ -111,17 +111,17 @@ namespace NzbDrone.Core.MediaFiles
                 {
                     if (!_diskProvider.FolderExists(rootFolder.Path))
                     {
-                        _logger.Warn("Seriess' root folder ({0}) doesn't exist.", rootFolder.Path);
-                        var skippedSeriess = _authorService.GetSeriess(authorIds);
-                        skippedSeriess.ForEach(x => _eventAggregator.PublishEvent(new SeriesScanSkippedEvent(x, SeriesScanSkippedReason.RootFolderDoesNotExist)));
+                        _logger.Warn("Series root folder ({0}) doesn't exist.", rootFolder.Path);
+                        var skippedSeries = _authorService.GetSeriess(authorIds);
+                        skippedSeries.ForEach(x => _eventAggregator.PublishEvent(new SeriesScanSkippedEvent(x, SeriesScanSkippedReason.RootFolderDoesNotExist)));
                         return;
                     }
 
                     if (_diskProvider.FolderEmpty(rootFolder.Path))
                     {
-                        _logger.Warn("Seriess' root folder ({0}) is empty.", rootFolder.Path);
-                        var skippedSeriess = _authorService.GetSeriess(authorIds);
-                        skippedSeriess.ForEach(x => _eventAggregator.PublishEvent(new SeriesScanSkippedEvent(x, SeriesScanSkippedReason.RootFolderIsEmpty)));
+                        _logger.Warn("Series root folder ({0}) is empty.", rootFolder.Path);
+                        var skippedSeries = _authorService.GetSeriess(authorIds);
+                        skippedSeries.ForEach(x => _eventAggregator.PublishEvent(new SeriesScanSkippedEvent(x, SeriesScanSkippedReason.RootFolderIsEmpty)));
                         return;
                     }
                 }
@@ -157,7 +157,7 @@ namespace NzbDrone.Core.MediaFiles
             {
                 Filter = filter,
                 IncludeExisting = true,
-                AddNewSeriess = addNewSeriess
+                AddNewSeries = addNewSeries
             };
 
             var decisions = _importDecisionMaker.GetImportDecisions(mediaFileList, null, null, config);
@@ -186,7 +186,8 @@ namespace NzbDrone.Core.MediaFiles
                     DateAdded = DateTime.UtcNow,
                     Quality = decision.Item.Quality,
                     MediaInfo = decision.Item.FileTrackInfo.MediaInfo,
-                    IssueId = decision.Item.Issue?.Id ?? 0
+                    IssueId = decision.Item.Issue?.Id ?? 0,
+                    ComicFormat = GetComicFormat(decision.Item.Path)
                 })
                 .ToList();
             _mediaFileService.AddMany(newFiles);
@@ -220,10 +221,10 @@ namespace NzbDrone.Core.MediaFiles
 
             _logger.Debug($"Updated info for {updatedFiles.Count} known files");
 
-            var authors = _authorService.GetSeriess(authorIds);
-            foreach (var author in authors)
+            var seriesList = _authorService.GetSeriess(authorIds);
+            foreach (var series in seriesList)
             {
-                CompletedScanning(author);
+                CompletedScanning(series);
             }
 
             importStopwatch.Stop();
@@ -236,10 +237,10 @@ namespace NzbDrone.Core.MediaFiles
             _mediaFileTableCleanupService.Clean(folder, mediaFileList);
         }
 
-        private void CompletedScanning(Series author)
+        private void CompletedScanning(Series series)
         {
-            _logger.Info("Completed scanning disk for {0}", author.Name);
-            _eventAggregator.PublishEvent(new SeriesScannedEvent(author));
+            _logger.Info("Completed scanning disk for {0}", series.Name);
+            _eventAggregator.PublishEvent(new SeriesScannedEvent(series));
         }
 
         public IFileInfo[] GetBookFiles(string path, bool allDirectories = true)
@@ -304,9 +305,23 @@ namespace NzbDrone.Core.MediaFiles
                         .ToList();
         }
 
+        private static Books.ComicFormat GetComicFormat(string path)
+        {
+            var ext = Path.GetExtension(path)?.TrimStart('.').ToLowerInvariant();
+            return ext switch
+            {
+                "cbz" => Books.ComicFormat.CBZ,
+                "cbr" => Books.ComicFormat.CBR,
+                "cb7" => Books.ComicFormat.CB7,
+                "pdf" => Books.ComicFormat.PDF,
+                "epub" or "kepub" => Books.ComicFormat.EPUB,
+                _ => Books.ComicFormat.Unknown
+            };
+        }
+
         public void Execute(RescanFoldersCommand message)
         {
-            Scan(message.Folders, message.Filter, message.AddNewSeriess, message.SeriesIds);
+            Scan(message.Folders, message.Filter, message.AddNewSeries, message.SeriesIds);
         }
     }
 }

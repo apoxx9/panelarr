@@ -6,7 +6,7 @@ import { kinds } from 'Helpers/Props';
 function OAuthInput(props) {
   const {
     label,
-    authorizing,
+    seriesizing,
     error,
     onPress
   } = props;
@@ -15,7 +15,7 @@ function OAuthInput(props) {
     <div>
       <SpinnerErrorButton
         kind={kinds.PRIMARY}
-        isSpinning={authorizing}
+        isSpinning={seriesizing}
         error={error}
         onPress={onPress}
       >
@@ -27,7 +27,7 @@ function OAuthInput(props) {
 
 OAuthInput.propTypes = {
   label: PropTypes.string.isRequired,
-  authorizing: PropTypes.bool.isRequired,
+  seriesizing: PropTypes.bool.isRequired,
   error: PropTypes.object,
   onPress: PropTypes.func.isRequired
 };

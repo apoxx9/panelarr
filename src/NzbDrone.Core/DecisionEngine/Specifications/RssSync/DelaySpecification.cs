@@ -63,7 +63,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                     foreach (var file in comicFiles)
                     {
                         var currentQuality = file.Quality;
-                        var newQuality = subject.ParsedBookInfo.Quality;
+                        var newQuality = subject.ParsedIssueInfo.Quality;
                         var qualityCompare = qualityComparer.Compare(newQuality?.Quality, currentQuality.Quality);
 
                         if (qualityCompare == 0 && newQuality?.Revision.CompareTo(currentQuality.Revision) > 0)
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
             if (delayProfile.BypassIfHighestQuality)
             {
                 var bestQualityInProfile = qualityProfile.LastAllowedQuality();
-                var isBestInProfile = qualityComparer.Compare(subject.ParsedBookInfo.Quality.Quality, bestQualityInProfile) >= 0;
+                var isBestInProfile = qualityComparer.Compare(subject.ParsedIssueInfo.Quality.Quality, bestQualityInProfile) >= 0;
 
                 if (isBestInProfile && isPreferredProtocol)
                 {

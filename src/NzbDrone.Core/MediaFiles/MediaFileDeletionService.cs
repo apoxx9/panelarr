@@ -156,9 +156,9 @@ namespace NzbDrone.Core.MediaFiles
 
                 if (!isCalibre)
                 {
-                    var allSeriess = _authorService.AllSeriesPaths();
+                    var allSeries = _authorService.AllSeriesPaths();
 
-                    foreach (var s in allSeriess)
+                    foreach (var s in allSeries)
                     {
                         if (s.Key == author.Id)
                         {

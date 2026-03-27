@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Books
             }
             catch (IOException ex)
             {
-                _logger.Error(ex, "Unable to move author from '{0}' to '{1}'. Try moving files manually", sourcePath, destinationPath);
+                _logger.Error(ex, "Unable to move series from '{0}' to '{1}'. Try moving files manually", sourcePath, destinationPath);
 
                 RevertPath(author.Id, sourcePath);
             }
@@ -99,7 +99,7 @@ namespace NzbDrone.Core.Books
             var authorToMove = message.Series;
             var destinationRootFolder = message.DestinationRootFolder;
 
-            _logger.ProgressInfo("Moving {0} author to '{1}'", authorToMove.Count, destinationRootFolder);
+            _logger.ProgressInfo("Moving {0} series to '{1}'", authorToMove.Count, destinationRootFolder);
 
             for (var index = 0; index < authorToMove.Count; index++)
             {
@@ -110,7 +110,7 @@ namespace NzbDrone.Core.Books
                 MoveSingleSeries(author, s.SourcePath, destinationPath, index, authorToMove.Count);
             }
 
-            _logger.ProgressInfo("Finished moving {0} author to '{1}'", authorToMove.Count, destinationRootFolder);
+            _logger.ProgressInfo("Finished moving {0} series to '{1}'", authorToMove.Count, destinationRootFolder);
         }
     }
 }

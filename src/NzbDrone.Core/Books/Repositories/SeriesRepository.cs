@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Books
         {
             using (var conn = _database.OpenConnection())
             {
-                var strSql = "SELECT \"Id\" AS \"Key\", \"Path\" AS \"Value\" FROM \"Seriess\"";
+                var strSql = "SELECT \"Id\" AS \"Key\", \"Path\" AS \"Value\" FROM \"Series\"";
                 return conn.Query<KeyValuePair<int, string>>(strSql).ToDictionary(x => x.Key, x => x.Value);
             }
         }
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Books
         {
             using (var conn = _database.OpenConnection())
             {
-                var strSql = "SELECT \"Id\" AS \"Key\", \"Tags\" AS \"Value\" FROM \"Seriess\" WHERE \"Tags\" IS NOT NULL";
+                var strSql = "SELECT \"Id\" AS \"Key\", \"Tags\" AS \"Value\" FROM \"Series\" WHERE \"Tags\" IS NOT NULL";
                 return conn.Query<KeyValuePair<int, List<int>>>(strSql).ToDictionary(x => x.Key, x => x.Value);
             }
         }

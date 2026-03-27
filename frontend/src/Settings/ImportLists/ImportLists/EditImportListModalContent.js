@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import AuthorMonitorNewItemsOptionsPopoverContent from 'AddAuthor/AuthorMonitorNewItemsOptionsPopoverContent';
+import SeriesMonitorNewItemsOptionsPopoverContent from 'AddSeries/SeriesMonitorNewItemsOptionsPopoverContent';
 import Alert from 'Components/Alert';
 import DescriptionList from 'Components/DescriptionList/DescriptionList';
 import DescriptionListItem from 'Components/DescriptionList/DescriptionListItem';
@@ -34,12 +34,12 @@ function ImportListMonitoringOptionsPopoverContent() {
       />
 
       <DescriptionListItem
-        title={translate('SpecificBook')}
-        data={translate('DataListMonitorSpecificBook')}
+        title={translate('SpecificIssue')}
+        data={translate('DataListMonitorSpecificIssue')}
       />
 
       <DescriptionListItem
-        title={translate('AllAuthorBooks')}
+        title={translate('AllSeriesIssues')}
         data={translate('DataListMonitorAll')}
       />
     </DescriptionList>
@@ -50,8 +50,8 @@ function EditImportListModalContent(props) {
 
   const monitorOptions = [
     { key: 'none', value: 'None' },
-    { key: 'specificBook', value: 'Specific Book' },
-    { key: 'entireAuthor', value: 'All Author Books' }
+    { key: 'specificIssue', value: 'Specific Issue' },
+    { key: 'entireSeries', value: 'All Series Issues' }
   ];
 
   const {
@@ -213,7 +213,7 @@ function EditImportListModalContent(props) {
                 </FormGroup>
               </FieldSet>
 
-              <FieldSet legend={translate('AddedAuthorSettings')} >
+              <FieldSet legend={translate('AddedSeriesSettings')} >
                 <FormGroup>
                   <FormLabel>
                     {translate('RootFolder')}
@@ -240,7 +240,7 @@ function EditImportListModalContent(props) {
                         />
                       }
                       title={translate('MonitorNewItems')}
-                      body={<AuthorMonitorNewItemsOptionsPopoverContent />}
+                      body={<SeriesMonitorNewItemsOptionsPopoverContent />}
                       position={tooltipPositions.RIGHT}
                     />
                   </FormLabel>

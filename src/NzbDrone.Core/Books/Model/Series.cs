@@ -25,6 +25,7 @@ namespace NzbDrone.Core.Books
         public string RootFolderPath { get; set; }
         public DateTime Added { get; set; }
         public int QualityProfileId { get; set; }
+        public bool AutoUnmonitorAfterDownload { get; set; }
         public HashSet<int> Tags { get; set; }
         [MemberwiseEqualityIgnore]
         public AddSeriesOptions AddOptions { get; set; }
@@ -74,6 +75,7 @@ namespace NzbDrone.Core.Books
             Added = other.Added;
             QualityProfileId = other.QualityProfileId;
             QualityProfile = other.QualityProfile;
+            AutoUnmonitorAfterDownload = other.AutoUnmonitorAfterDownload;
             Tags = other.Tags;
             AddOptions = other.AddOptions;
         }

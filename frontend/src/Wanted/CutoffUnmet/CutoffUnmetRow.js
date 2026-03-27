@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import AuthorNameLink from 'Author/AuthorNameLink';
-import bookEntities from 'Book/bookEntities';
-import BookSearchCellConnector from 'Book/BookSearchCellConnector';
-import BookTitleLink from 'Book/BookTitleLink';
+import SeriesNameLink from 'Series/SeriesNameLink';
+import issueEntities from 'Issue/issueEntities';
+import IssueSearchCellConnector from 'Issue/IssueSearchCellConnector';
+import IssueTitleLink from 'Issue/IssueTitleLink';
 import RelativeDateCellConnector from 'Components/Table/Cells/RelativeDateCellConnector';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
@@ -12,7 +12,7 @@ import TableRow from 'Components/Table/TableRow';
 function CutoffUnmetRow(props) {
   const {
     id,
-    author,
+    series,
     releaseDate,
     titleSlug,
     title,
@@ -23,7 +23,7 @@ function CutoffUnmetRow(props) {
     onSelectedChange
   } = props;
 
-  if (!author) {
+  if (!series) {
     return null;
   }
 
@@ -46,21 +46,21 @@ function CutoffUnmetRow(props) {
             return null;
           }
 
-          if (name === 'authorMetadata.sortName') {
+          if (name === 'seriesMetadata.sortName') {
             return (
               <TableRowCell key={name}>
-                <AuthorNameLink
-                  titleSlug={author.titleSlug}
-                  authorName={author.authorName}
+                <SeriesNameLink
+                  titleSlug={series.titleSlug}
+                  seriesName={series.seriesName}
                 />
               </TableRowCell>
             );
           }
 
-          if (name === 'books.title') {
+          if (name === 'issues.title') {
             return (
               <TableRowCell key={name}>
-                <BookTitleLink
+                <IssueTitleLink
                   titleSlug={titleSlug}
                   title={title}
                   disambiguation={disambiguation}
@@ -69,7 +69,7 @@ function CutoffUnmetRow(props) {
             );
           }
 
-          if (name === 'books.lastSearchTime') {
+          if (name === 'issues.lastSearchTime') {
             return (
               <RelativeDateCellConnector
                 key={name}
@@ -89,14 +89,14 @@ function CutoffUnmetRow(props) {
 
           if (name === 'actions') {
             return (
-              <BookSearchCellConnector
+              <IssueSearchCellConnector
                 key={name}
-                bookId={id}
-                authorId={author.id}
-                bookTitle={title}
-                authorName={author.authorName}
-                bookEntity={bookEntities.WANTED_CUTOFF_UNMET}
-                showOpenAuthorButton={true}
+                issueId={id}
+                seriesId={series.id}
+                issueTitle={title}
+                seriesName={series.seriesName}
+                issueEntity={issueEntities.WANTED_CUTOFF_UNMET}
+                showOpenSeriesButton={true}
               />
             );
           }
@@ -110,8 +110,8 @@ function CutoffUnmetRow(props) {
 
 CutoffUnmetRow.propTypes = {
   id: PropTypes.number.isRequired,
-  bookFileId: PropTypes.number,
-  author: PropTypes.object.isRequired,
+  issueFileId: PropTypes.number,
+  series: PropTypes.object.isRequired,
   releaseDate: PropTypes.string.isRequired,
   titleSlug: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,

@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Download.Clients.Pneumatic
             var url = remoteBook.Release.DownloadUrl;
             var title = remoteBook.Release.Title;
 
-            if (remoteBook.ParsedBookInfo.Discography)
+            if (remoteBook.ParsedIssueInfo.Discography)
             {
                 throw new NotSupportedException("Discography releases are not supported with Pneumatic.");
             }

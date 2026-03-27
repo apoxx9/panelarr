@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Books
 
             foreach (var link in update)
             {
-                var remoteSeriesBookLink = remoteSeriesBookLinks.Single(e => e.Issue.Value.Id == link.IssueId);
+                var remoteSeriesBookLink = remoteSeriesBookLinks.Single(e => e.Issue.Value.SeriesMetadataId == link.SeriesMetadataId);
                 link.UseMetadataFrom(remoteSeriesBookLink);
 
                 // make sure title is not null

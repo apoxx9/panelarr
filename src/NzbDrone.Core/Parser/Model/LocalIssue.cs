@@ -15,8 +15,8 @@ namespace NzbDrone.Core.Parser.Model
         public long Size { get; set; }
         public DateTime Modified { get; set; }
         public ParsedTrackInfo FileTrackInfo { get; set; }
-        public ParsedBookInfo FolderTrackInfo { get; set; }
-        public ParsedBookInfo DownloadClientBookInfo { get; set; }
+        public ParsedIssueInfo FolderTrackInfo { get; set; }
+        public ParsedIssueInfo DownloadClientBookInfo { get; set; }
         public List<string> AcoustIdResults { get; set; }
         public Series Series { get; set; }
         public Issue Issue { get; set; }

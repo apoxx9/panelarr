@@ -31,6 +31,7 @@
     <PackageReference Include="Equ" />
     <PackageReference Include="MonoTorrent" />
     <PackageReference Include="PdfSharpCore" />
+    <PackageReference Include="SharpCompress" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NzbDrone.Common\Panelarr.Common.csproj" />

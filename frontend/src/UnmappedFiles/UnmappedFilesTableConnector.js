@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
 import withCurrentPage from 'Components/withCurrentPage';
-import { deleteBookFile, deleteBookFiles, fetchBookFiles, setBookFilesSort, setBookFilesTableOption } from 'Store/Actions/bookFileActions';
+import { deleteIssueFile, deleteIssueFiles, fetchIssueFiles, setIssueFilesSort, setIssueFilesTableOption } from 'Store/Actions/issueFileActions';
 import { executeCommand } from 'Store/Actions/commandActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
 import createCommandExecutingSelector from 'Store/Selectors/createCommandExecutingSelector';
@@ -15,21 +15,21 @@ import UnmappedFilesTable from './UnmappedFilesTable';
 
 function createMapStateToProps() {
   return createSelector(
-    createClientSideCollectionSelector('bookFiles'),
+    createClientSideCollectionSelector('issueFiles'),
     createCommandExecutingSelector(commandNames.RESCAN_FOLDERS),
     createDimensionsSelector(),
     (
-      bookFiles,
+      issueFiles,
       isScanningFolders,
       dimensionsState
     ) => {
-      // bookFiles could pick up mapped entries via signalR so filter again here
+      // issueFiles could pick up mapped entries via signalR so filter again here
       const {
         items,
         ...otherProps
-      } = bookFiles;
+      } = issueFiles;
 
-      const unmappedFiles = _.filter(items, { bookId: 0 });
+      const unmappedFiles = _.filter(items, { issueId: 0 });
 
       return {
         items: unmappedFiles,
@@ -44,29 +44,29 @@ function createMapStateToProps() {
 function createMapDispatchToProps(dispatch, props) {
   return {
     onTableOptionChange(payload) {
-      dispatch(setBookFilesTableOption(payload));
+      dispatch(setIssueFilesTableOption(payload));
     },
 
     onSortPress(sortKey) {
-      dispatch(setBookFilesSort({ sortKey }));
+      dispatch(setIssueFilesSort({ sortKey }));
     },
 
     fetchUnmappedFiles() {
-      dispatch(fetchBookFiles({ unmapped: true }));
+      dispatch(fetchIssueFiles({ unmapped: true }));
     },
 
     deleteUnmappedFile(id) {
-      dispatch(deleteBookFile({ id }));
+      dispatch(deleteIssueFile({ id }));
     },
 
-    deleteUnmappedFiles(bookFileIds) {
-      dispatch(deleteBookFiles({ bookFileIds }));
+    deleteUnmappedFiles(issueFileIds) {
+      dispatch(deleteIssueFiles({ issueFileIds }));
     },
 
-    onAddMissingAuthorsPress() {
+    onAddMissingSeriessPress() {
       dispatch(executeCommand({
         name: commandNames.RESCAN_FOLDERS,
-        addNewAuthors: true,
+        addNewSeriess: true,
         filter: 'matched'
       }));
     }
@@ -79,7 +79,7 @@ class UnmappedFilesTableConnector extends Component {
   // Lifecycle
 
   componentDidMount() {
-    registerPagePopulator(this.repopulate, ['bookFileUpdated']);
+    registerPagePopulator(this.repopulate, ['issueFileUpdated']);
 
     this.repopulate();
   }

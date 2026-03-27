@@ -26,7 +26,7 @@ namespace NzbDrone.Core.MetadataSource.Metron.Resources
         [JsonProperty("id")]
         public int Id { get; set; }
 
-        [JsonProperty("name")]
+        [JsonProperty("series")]
         public string Name { get; set; }
 
         [JsonProperty("volume")]

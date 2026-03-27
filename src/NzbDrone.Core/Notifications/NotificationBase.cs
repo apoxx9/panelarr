@@ -67,11 +67,11 @@ namespace NzbDrone.Core.Notifications
         {
         }
 
-        public virtual void OnBookDelete(IssueDeleteMessage deleteMessage)
+        public virtual void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
         }
 
-        public virtual void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
+        public virtual void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
         }
 
@@ -87,7 +87,7 @@ namespace NzbDrone.Core.Notifications
         {
         }
 
-        public virtual void OnBookRetag(IssueRetagMessage message)
+        public virtual void OnIssueRetag(IssueRetagMessage message)
         {
         }
 
@@ -103,15 +103,15 @@ namespace NzbDrone.Core.Notifications
         public bool SupportsOnRename => HasConcreteImplementation("OnRename");
         public bool SupportsOnSeriesAdded => HasConcreteImplementation("OnSeriesAdded");
         public bool SupportsOnSeriesDelete => HasConcreteImplementation("OnSeriesDelete");
-        public bool SupportsOnBookDelete => HasConcreteImplementation("OnBookDelete");
-        public bool SupportsOnBookFileDelete => HasConcreteImplementation("OnBookFileDelete");
-        public bool SupportsOnBookFileDeleteForUpgrade => SupportsOnBookFileDelete;
+        public bool SupportsOnIssueDelete => HasConcreteImplementation("OnIssueDelete");
+        public bool SupportsOnComicFileDelete => HasConcreteImplementation("OnComicFileDelete");
+        public bool SupportsOnComicFileDeleteForUpgrade => SupportsOnComicFileDelete;
         public bool SupportsOnReleaseImport => HasConcreteImplementation("OnReleaseImport");
         public bool SupportsOnUpgrade => SupportsOnReleaseImport;
         public bool SupportsOnHealthIssue => HasConcreteImplementation("OnHealthIssue");
         public bool SupportsOnDownloadFailure => HasConcreteImplementation("OnDownloadFailure");
         public bool SupportsOnImportFailure => HasConcreteImplementation("OnImportFailure");
-        public bool SupportsOnBookRetag => HasConcreteImplementation("OnBookRetag");
+        public bool SupportsOnIssueRetag => HasConcreteImplementation("OnIssueRetag");
         public bool SupportsOnApplicationUpdate => HasConcreteImplementation("OnApplicationUpdate");
 
         protected TSettings Settings => (TSettings)Definition.Settings;
