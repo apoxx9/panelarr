@@ -29,13 +29,13 @@ export const defaultState = {
     columns: [
       {
         name: 'authorMetadata.sortName',
-        label: 'Author',
+        label: 'Series',
         isSortable: true,
         isVisible: true
       },
       {
         name: 'books.title',
-        label: 'Book',
+        label: 'Issue',
         isSortable: true,
         isVisible: true
       },
@@ -98,13 +98,13 @@ export const defaultState = {
     columns: [
       {
         name: 'authorMetadata.sortName',
-        label: 'Author',
+        label: 'Series',
         isSortable: true,
         isVisible: true
       },
       {
         name: 'books.title',
-        label: 'Book',
+        label: 'Issue',
         isSortable: true,
         isVisible: true
       },

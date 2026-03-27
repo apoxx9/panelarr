@@ -7,7 +7,7 @@ using NzbDrone.Core.Download;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
+namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
 {
     public class UpgradeSpecification : IImportDecisionEngineSpecification<LocalBook>
     {
@@ -26,31 +26,31 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
 
         public Decision IsSatisfiedBy(LocalBook item, DownloadClientItem downloadClientItem)
         {
-            var files = item.Book?.BookFiles?.Value;
+            var files = item.Issue?.ComicFiles?.Value;
             if (files == null || !files.Any())
             {
-                // No existing books, skip.  This guards against new authors not having a QualityProfile.
+                // No existing issues, skip.  This guards against new authors not having a QualityProfile.
                 return Decision.Accept();
             }
 
             var downloadPropersAndRepacks = _configService.DownloadPropersAndRepacks;
-            var qualityComparer = new QualityModelComparer(item.Author.QualityProfile);
+            var qualityComparer = new QualityModelComparer(item.Series.QualityProfile);
 
-            foreach (var bookFile in files)
+            foreach (var comicFile in files)
             {
-                var qualityCompare = qualityComparer.Compare(item.Quality.Quality, bookFile.Quality.Quality);
+                var qualityCompare = qualityComparer.Compare(item.Quality.Quality, comicFile.Quality.Quality);
 
                 if (qualityCompare < 0)
                 {
-                    _logger.Debug("This file isn't a quality upgrade for all books. Skipping {0}", item.Path);
-                    return Decision.Reject("Not an upgrade for existing book file(s)");
+                    _logger.Debug("This file isn't a quality upgrade for all issues. Skipping {0}", item.Path);
+                    return Decision.Reject("Not an upgrade for existing issue file(s)");
                 }
 
                 if (qualityCompare == 0 && downloadPropersAndRepacks != ProperDownloadTypes.DoNotPrefer &&
-                    item.Quality.Revision.CompareTo(bookFile.Quality.Revision) < 0)
+                    item.Quality.Revision.CompareTo(comicFile.Quality.Revision) < 0)
                 {
-                    _logger.Debug("This file isn't a quality upgrade for all books. Skipping {0}", item.Path);
-                    return Decision.Reject("Not an upgrade for existing book file(s)");
+                    _logger.Debug("This file isn't a quality upgrade for all issues. Skipping {0}", item.Path);
+                    return Decision.Reject("Not an upgrade for existing issue file(s)");
                 }
             }
 

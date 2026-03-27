@@ -3,7 +3,7 @@ using System.Linq;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Core.Parser.Model;
 
-namespace NzbDrone.Core.MediaFiles.BookImport
+namespace NzbDrone.Core.MediaFiles.IssueImport
 {
     public class ImportResult
     {

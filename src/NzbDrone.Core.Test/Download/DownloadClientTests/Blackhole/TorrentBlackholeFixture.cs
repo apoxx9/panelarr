@@ -104,7 +104,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.Blackhole
             torrentInfo.Title = remoteBook.Release.Title;
             torrentInfo.DownloadUrl = remoteBook.Release.DownloadUrl;
             torrentInfo.DownloadProtocol = remoteBook.Release.DownloadProtocol;
-            torrentInfo.MagnetUrl = "magnet:?xt=urn:btih:755248817d32b00cc853e633ecdc48e4c21bff15&dn=Author.Book.FLAC.loseless-DEFiNE%5Brartv%5D&tr=http%3A%2F%2Ftracker.trackerfix.com%3A80%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2710&tr=udp%3A%2F%2F9.rarbg.to%3A2710";
+            torrentInfo.MagnetUrl = "magnet:?xt=urn:btih:755248817d32b00cc853e633ecdc48e4c21bff15&dn=Series.Issue.FLAC.loseless-DEFiNE%5Brartv%5D&tr=http%3A%2F%2Ftracker.trackerfix.com%3A80%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2710&tr=udp%3A%2F%2F9.rarbg.to%3A2710";
 
             remoteBook.Release = torrentInfo;
 

@@ -13,13 +13,13 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
     public class DeleteBadMediaCovers : IHousekeepingTask
     {
         private readonly IMetadataFileService _metaFileService;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IDiskProvider _diskProvider;
         private readonly IConfigService _configService;
         private readonly Logger _logger;
 
         public DeleteBadMediaCovers(IMetadataFileService metaFileService,
-                                    IAuthorService authorService,
+                                    ISeriesService authorService,
                                     IDiskProvider diskProvider,
                                     IConfigService configService,
                                     Logger logger)
@@ -38,12 +38,12 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                 return;
             }
 
-            var authors = _authorService.AllAuthorPaths();
+            var authors = _authorService.AllSeriesPaths();
             var imageExtensions = new List<string> { ".jpg", ".png", ".gif" };
 
             foreach (var author in authors)
             {
-                var images = _metaFileService.GetFilesByAuthor(author.Key)
+                var images = _metaFileService.GetFilesBySeries(author.Key)
                     .Where(c => c.LastUpdated > new DateTime(2014, 12, 27) && imageExtensions.Any(x => c.RelativePath.EndsWith(x, StringComparison.InvariantCultureIgnoreCase)));
 
                 foreach (var image in images)

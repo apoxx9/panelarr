@@ -8,10 +8,10 @@ namespace NzbDrone.Core.Extras.Files
     public interface IExtraFileRepository<TExtraFile> : IBasicRepository<TExtraFile>
         where TExtraFile : ExtraFile, new()
     {
-        void DeleteForAuthor(int authorId);
+        void DeleteForSeries(int authorId);
         void DeleteForBook(int authorId, int bookId);
         void DeleteForBookFile(int bookFileId);
-        List<TExtraFile> GetFilesByAuthor(int authorId);
+        List<TExtraFile> GetFilesBySeries(int authorId);
         List<TExtraFile> GetFilesByBook(int authorId, int bookId);
         List<TExtraFile> GetFilesByBookFile(int bookFileId);
         TExtraFile FindByPath(int authorId, string path);
@@ -25,39 +25,39 @@ namespace NzbDrone.Core.Extras.Files
         {
         }
 
-        public void DeleteForAuthor(int authorId)
+        public void DeleteForSeries(int authorId)
         {
-            Delete(c => c.AuthorId == authorId);
+            Delete(c => c.SeriesId == authorId);
         }
 
         public void DeleteForBook(int authorId, int bookId)
         {
-            Delete(c => c.AuthorId == authorId && c.BookId == bookId);
+            Delete(c => c.SeriesId == authorId && c.IssueId == bookId);
         }
 
         public void DeleteForBookFile(int bookFileId)
         {
-            Delete(c => c.BookFileId == bookFileId);
+            Delete(c => c.ComicFileId == bookFileId);
         }
 
-        public List<TExtraFile> GetFilesByAuthor(int authorId)
+        public List<TExtraFile> GetFilesBySeries(int authorId)
         {
-            return Query(c => c.AuthorId == authorId);
+            return Query(c => c.SeriesId == authorId);
         }
 
         public List<TExtraFile> GetFilesByBook(int authorId, int bookId)
         {
-            return Query(c => c.AuthorId == authorId && c.BookId == bookId);
+            return Query(c => c.SeriesId == authorId && c.IssueId == bookId);
         }
 
         public List<TExtraFile> GetFilesByBookFile(int bookFileId)
         {
-            return Query(c => c.BookFileId == bookFileId);
+            return Query(c => c.ComicFileId == bookFileId);
         }
 
         public TExtraFile FindByPath(int authorId, string path)
         {
-            return Query(c => c.AuthorId == authorId && c.RelativePath == path).SingleOrDefault();
+            return Query(c => c.SeriesId == authorId && c.RelativePath == path).SingleOrDefault();
         }
     }
 }

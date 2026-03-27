@@ -14,41 +14,41 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.MusicTests
 {
     [TestFixture]
-    public class MoveAuthorServiceFixture : CoreTest<MoveAuthorService>
+    public class MoveSeriesServiceFixture : CoreTest<MoveSeriesService>
     {
-        private Author _author;
-        private MoveAuthorCommand _command;
-        private BulkMoveAuthorCommand _bulkCommand;
+        private Series _author;
+        private MoveSeriesCommand _command;
+        private BulkMoveSeriesCommand _bulkCommand;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Author>
+            _author = Builder<Series>
                 .CreateNew()
                 .Build();
 
-            _command = new MoveAuthorCommand
+            _command = new MoveSeriesCommand
             {
-                AuthorId = 1,
-                SourcePath = @"C:\Test\Music\Author".AsOsAgnostic(),
-                DestinationPath = @"C:\Test\Music2\Author".AsOsAgnostic()
+                SeriesId = 1,
+                SourcePath = @"C:\Test\Music\Series".AsOsAgnostic(),
+                DestinationPath = @"C:\Test\Music2\Series".AsOsAgnostic()
             };
 
-            _bulkCommand = new BulkMoveAuthorCommand
+            _bulkCommand = new BulkMoveSeriesCommand
             {
-                Author = new List<BulkMoveAuthor>
+                Series = new List<BulkMoveSeries>
                 {
-                    new BulkMoveAuthor
+                    new BulkMoveSeries
                     {
-                        AuthorId = 1,
-                        SourcePath = @"C:\Test\Music\Author".AsOsAgnostic()
+                        SeriesId = 1,
+                        SourcePath = @"C:\Test\Music\Series".AsOsAgnostic()
                     }
                 },
                 DestinationRootFolder = @"C:\Test\Music2".AsOsAgnostic()
             };
 
-            Mocker.GetMock<IAuthorService>()
-                .Setup(s => s.GetAuthor(It.IsAny<int>()))
+            Mocker.GetMock<ISeriesService>()
+                .Setup(s => s.GetSeries(It.IsAny<int>()))
                 .Returns(_author);
 
             Mocker.GetMock<IDiskProvider>()
@@ -82,8 +82,8 @@ namespace NzbDrone.Core.Test.MusicTests
 
             ExceptionVerification.ExpectedErrors(1);
 
-            Mocker.GetMock<IAuthorService>()
-                .Verify(v => v.UpdateAuthor(It.IsAny<Author>()), Times.Once());
+            Mocker.GetMock<ISeriesService>()
+                .Verify(v => v.UpdateSeries(It.IsAny<Series>()), Times.Once());
         }
 
         [Test]
@@ -99,24 +99,24 @@ namespace NzbDrone.Core.Test.MusicTests
                     Times.Once());
 
             Mocker.GetMock<IBuildFileNames>()
-                .Verify(v => v.GetAuthorFolder(It.IsAny<Author>(), null), Times.Never());
+                .Verify(v => v.GetSeriesFolder(It.IsAny<Series>(), null), Times.Never());
         }
 
         [Test]
         public void should_build_new_path_when_root_folder_is_provided()
         {
-            var authorFolder = "Author";
+            var authorFolder = "Series";
             var expectedPath = Path.Combine(_bulkCommand.DestinationRootFolder, authorFolder);
 
             Mocker.GetMock<IBuildFileNames>()
-                .Setup(s => s.GetAuthorFolder(It.IsAny<Author>(), null))
+                .Setup(s => s.GetSeriesFolder(It.IsAny<Series>(), null))
                 .Returns(authorFolder);
 
             Subject.Execute(_bulkCommand);
 
             Mocker.GetMock<IDiskTransferService>()
                 .Verify(
-                    v => v.TransferFolder(_bulkCommand.Author.First().SourcePath,
+                    v => v.TransferFolder(_bulkCommand.Series.First().SourcePath,
                                           expectedPath,
                                           TransferMode.Move),
                     Times.Once());
@@ -138,7 +138,7 @@ namespace NzbDrone.Core.Test.MusicTests
                         TransferMode.Move), Times.Never());
 
             Mocker.GetMock<IBuildFileNames>()
-                .Verify(v => v.GetAuthorFolder(It.IsAny<Author>(), null), Times.Never());
+                .Verify(v => v.GetSeriesFolder(It.IsAny<Series>(), null), Times.Never());
         }
     }
 }

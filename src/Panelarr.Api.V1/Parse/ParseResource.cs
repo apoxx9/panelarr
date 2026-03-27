@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using NzbDrone.Core.Parser.Model;
-using Panelarr.Api.V1.Author;
 using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Series;
 using Panelarr.Http.REST;
 
 namespace Panelarr.Api.V1.Parse
@@ -10,7 +10,7 @@ namespace Panelarr.Api.V1.Parse
     {
         public string Title { get; set; }
         public ParsedBookInfo ParsedBookInfo { get; set; }
-        public AuthorResource Author { get; set; }
-        public List<BookResource> Books { get; set; }
+        public SeriesResource Series { get; set; }
+        public List<IssueResource> Books { get; set; }
     }
 }

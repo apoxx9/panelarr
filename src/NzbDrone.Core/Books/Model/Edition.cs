@@ -20,7 +20,7 @@ namespace NzbDrone.Core.Books
 
         // These correspond to columns in the Books table
         // These are metadata entries
-        public int BookId { get; set; }
+        public int IssueId { get; set; }
         public string ForeignEditionId { get; set; }
         public string TitleSlug { get; set; }
         public string Isbn13 { get; set; }
@@ -44,9 +44,9 @@ namespace NzbDrone.Core.Books
 
         // These are dynamically queried from other tables
         [MemberwiseEqualityIgnore]
-        public LazyLoaded<Book> Book { get; set; }
+        public LazyLoaded<Issue> Issue { get; set; }
         [MemberwiseEqualityIgnore]
-        public LazyLoaded<List<BookFile>> BookFiles { get; set; }
+        public LazyLoaded<List<ComicFile>> ComicFiles { get; set; }
 
         public override string ToString()
         {
@@ -76,8 +76,8 @@ namespace NzbDrone.Core.Books
         public override void UseDbFieldsFrom(Edition other)
         {
             Id = other.Id;
-            BookId = other.BookId;
-            Book = other.Book;
+            IssueId = other.IssueId;
+            Issue = other.Issue;
             Monitored = other.Monitored;
             ManualAdd = other.ManualAdd;
         }

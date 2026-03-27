@@ -86,7 +86,7 @@ namespace NzbDrone.Core.ImportLists
 
             Task.WaitAll(taskList.ToArray());
 
-            result = result.DistinctBy(r => new { r.Author, r.Book }).ToList();
+            result = result.DistinctBy(r => new { r.Series, r.Issue }).ToList();
 
             _logger.Debug("Found {0} total reports from {1} lists", result.Count, importLists.Count);
 
@@ -135,7 +135,7 @@ namespace NzbDrone.Core.ImportLists
 
             Task.WaitAll(taskList.ToArray());
 
-            result = result.DistinctBy(r => new { r.Author, r.Book }).ToList();
+            result = result.DistinctBy(r => new { r.Series, r.Issue }).ToList();
 
             return result;
         }

@@ -5,14 +5,14 @@ using RestSharp;
 
 namespace NzbDrone.Integration.Test.Client
 {
-    public class WantedClient : ClientBase<BookResource>
+    public class WantedClient : ClientBase<IssueResource>
     {
         public WantedClient(IRestClient restClient, string apiKey, string resource)
             : base(restClient, apiKey, resource)
         {
         }
 
-        public PagingResource<BookResource> GetPagedIncludeAuthor(int pageNumber, int pageSize, string sortKey, string sortDir, string filterKey = null, string filterValue = null, bool includeAuthor = true)
+        public PagingResource<IssueResource> GetPagedIncludeSeries(int pageNumber, int pageSize, string sortKey, string sortDir, string filterKey = null, string filterValue = null, bool includeSeries = true)
         {
             var request = BuildRequest();
             request.AddParameter("page", pageNumber);
@@ -26,15 +26,15 @@ namespace NzbDrone.Integration.Test.Client
                 request.AddParameter("filterValue", filterValue);
             }
 
-            request.AddParameter("includeAuthor", includeAuthor);
+            request.AddParameter("includeSeries", includeSeries);
 
-            return Get<PagingResource<BookResource>>(request);
+            return Get<PagingResource<IssueResource>>(request);
         }
 
-        public List<BookResource> GetBooksInAuthor(int authorId)
+        public List<IssueResource> GetBooksInSeries(int authorId)
         {
             var request = BuildRequest("?authorId=" + authorId.ToString());
-            return Get<List<BookResource>>(request);
+            return Get<List<IssueResource>>(request);
         }
     }
 }

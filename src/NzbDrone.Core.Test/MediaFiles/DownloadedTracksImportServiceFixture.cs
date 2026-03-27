@@ -12,7 +12,7 @@ using NzbDrone.Core.Books;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.BookImport;
+using NzbDrone.Core.MediaFiles.IssueImport;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .Build();
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
-                .With(v => v.Author = new Author())
+                .With(v => v.Series = new Series())
                 .Build();
 
             _trackedDownload = new TrackedDownload
@@ -69,11 +69,11 @@ namespace NzbDrone.Core.Test.MediaFiles
             }
         }
 
-        private void GivenValidAuthor()
+        private void GivenValidSeries()
         {
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetAuthor(It.IsAny<string>()))
-                  .Returns(Builder<Author>.CreateNew().Build());
+                  .Setup(s => s.GetSeries(It.IsAny<string>()))
+                  .Returns(Builder<Series>.CreateNew().Build());
         }
 
         private void GivenSuccessfulImport()
@@ -104,13 +104,13 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             Subject.ProcessRootFolder(DiskProvider.GetDirectoryInfo(_droneFactory));
 
-            Mocker.GetMock<IParsingService>().Verify(c => c.GetAuthor("foldername"), Times.Once());
+            Mocker.GetMock<IParsingService>().Verify(c => c.GetSeries("foldername"), Times.Once());
         }
 
         [Test]
         public void should_skip_if_file_is_in_use_by_another_process()
         {
-            GivenValidAuthor();
+            GivenValidSeries();
 
             foreach (var file in _audioFiles)
             {
@@ -125,7 +125,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_not_skip_if_no_author_found()
         {
-            Mocker.GetMock<IParsingService>().Setup(c => c.GetAuthor("foldername")).Returns((Author)null);
+            Mocker.GetMock<IParsingService>().Setup(c => c.GetSeries("foldername")).Returns((Series)null);
 
             Subject.ProcessRootFolder(DiskProvider.GetDirectoryInfo(_droneFactory));
 
@@ -139,10 +139,10 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_not_import_if_folder_is_a_author_path()
         {
-            GivenValidAuthor();
+            GivenValidSeries();
 
-            Mocker.GetMock<IAuthorService>()
-                  .Setup(s => s.AuthorPathExists(It.IsAny<string>()))
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.SeriesPathExists(It.IsAny<string>()))
                   .Returns(true);
 
             Mocker.GetMock<IDiskScanService>()
@@ -173,7 +173,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_not_delete_folder_if_files_were_imported_and_audio_files_remain()
         {
-            GivenValidAuthor();
+            GivenValidSeries();
 
             var localTrack = new LocalBook();
 
@@ -206,10 +206,10 @@ namespace NzbDrone.Core.Test.MediaFiles
             Subject.ProcessRootFolder(DiskProvider.GetDirectoryInfo(_droneFactory));
 
             Mocker.GetMock<IParsingService>()
-                .Verify(v => v.GetAuthor(folderName), Times.Once());
+                .Verify(v => v.GetSeries(folderName), Times.Once());
 
             Mocker.GetMock<IParsingService>()
-                .Verify(v => v.GetAuthor(It.Is<string>(s => s.StartsWith(prefix))), Times.Never());
+                .Verify(v => v.GetSeries(It.Is<string>(s => s.StartsWith(prefix))), Times.Never());
         }
 
         [Test]
@@ -230,7 +230,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_not_delete_if_there_is_large_rar_file()
         {
-            GivenValidAuthor();
+            GivenValidSeries();
 
             var localTrack = new LocalBook();
 
@@ -262,7 +262,7 @@ namespace NzbDrone.Core.Test.MediaFiles
             Subject.ProcessPath(folderName).Should().BeEmpty();
 
             Mocker.GetMock<IParsingService>()
-                .Verify(v => v.GetAuthor(It.IsAny<string>()), Times.Never());
+                .Verify(v => v.GetSeries(It.IsAny<string>()), Times.Never());
 
             ExceptionVerification.ExpectedErrors(1);
         }
@@ -270,7 +270,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_not_delete_if_no_files_were_imported()
         {
-            GivenValidAuthor();
+            GivenValidSeries();
 
             var localTrack = new LocalBook();
 
@@ -296,13 +296,13 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_not_delete_folder_after_import()
         {
-            GivenValidAuthor();
+            GivenValidSeries();
 
             GivenSuccessfulImport();
 
             _trackedDownload.DownloadItem.CanMoveFiles = false;
 
-            Subject.ProcessPath(_droneFactory, ImportMode.Auto, _trackedDownload.RemoteBook.Author, _trackedDownload.DownloadItem);
+            Subject.ProcessPath(_droneFactory, ImportMode.Auto, _trackedDownload.RemoteBook.Series, _trackedDownload.DownloadItem);
 
             DiskProvider.FolderExists(_subFolders[0]).Should().BeTrue();
         }
@@ -310,13 +310,13 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_delete_folder_if_importmode_move()
         {
-            GivenValidAuthor();
+            GivenValidSeries();
 
             GivenSuccessfulImport();
 
             _trackedDownload.DownloadItem.CanMoveFiles = false;
 
-            Subject.ProcessPath(_droneFactory, ImportMode.Move, _trackedDownload.RemoteBook.Author, _trackedDownload.DownloadItem);
+            Subject.ProcessPath(_droneFactory, ImportMode.Move, _trackedDownload.RemoteBook.Series, _trackedDownload.DownloadItem);
 
             DiskProvider.FolderExists(_subFolders[0]).Should().BeFalse();
         }
@@ -324,13 +324,13 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_not_delete_folder_if_importmode_copy()
         {
-            GivenValidAuthor();
+            GivenValidSeries();
 
             GivenSuccessfulImport();
 
             _trackedDownload.DownloadItem.CanMoveFiles = true;
 
-            Subject.ProcessPath(_droneFactory, ImportMode.Copy, _trackedDownload.RemoteBook.Author, _trackedDownload.DownloadItem);
+            Subject.ProcessPath(_droneFactory, ImportMode.Copy, _trackedDownload.RemoteBook.Series, _trackedDownload.DownloadItem);
 
             DiskProvider.FolderExists(_subFolders[0]).Should().BeTrue();
         }

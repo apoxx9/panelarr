@@ -8,8 +8,10 @@ namespace Panelarr.Api.V1.Config
         public bool ReplaceIllegalCharacters { get; set; }
         public int ColonReplacementFormat { get; set; }
         public string StandardBookFormat { get; set; }
-        public string AuthorFolderFormat { get; set; }
-        public bool IncludeAuthorName { get; set; }
+        public string AnnualIssueFormat { get; set; }
+        public string TPBFormat { get; set; }
+        public string SeriesFolderFormat { get; set; }
+        public bool IncludeSeriesName { get; set; }
         public bool IncludeBookTitle { get; set; }
         public bool IncludeQuality { get; set; }
         public bool ReplaceSpaces { get; set; }

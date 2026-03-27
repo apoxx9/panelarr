@@ -142,13 +142,13 @@ namespace NzbDrone.Common.Test.DiskTests
         [Test]
         public void should_be_able_to_delete_nested_empty_subdirs()
         {
-            var authorDir = Path.Combine(GetTempFilePath(), "Author");
-            var bookDir = Path.Combine(authorDir, "Book");
+            var authorDir = Path.Combine(GetTempFilePath(), "Series");
+            var bookDir = Path.Combine(authorDir, "Issue");
 
             Directory.CreateDirectory(Path.Combine(bookDir));
-            Directory.CreateDirectory(Path.Combine(bookDir, "Book"));
-            Directory.CreateDirectory(Path.Combine(bookDir, "Book", "CD1"));
-            Directory.CreateDirectory(Path.Combine(bookDir, "Book", "CD2"));
+            Directory.CreateDirectory(Path.Combine(bookDir, "Issue"));
+            Directory.CreateDirectory(Path.Combine(bookDir, "Issue", "CD1"));
+            Directory.CreateDirectory(Path.Combine(bookDir, "Issue", "CD2"));
 
             Subject.RemoveEmptySubfolders(authorDir);
             Directory.Exists(bookDir).Should().BeFalse();

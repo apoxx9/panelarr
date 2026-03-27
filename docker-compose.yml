@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  panelarr:
+    build: .
+    container_name: panelarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./data/config:/config
+      - ./data/comics:/comics
+      - /path/to/downloads:/downloads
+    ports:
+      - "8787:8787"
+    restart: unless-stopped
+
+  # Optional: SABnzbd download client
+  # sabnzbd:
+  #   image: lscr.io/linuxserver/sabnzbd:latest
+  #   container_name: sabnzbd
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Etc/UTC
+  #   volumes:
+  #     - ./data/sabnzbd:/config
+  #     - /path/to/downloads:/downloads
+  #   ports:
+  #     - "8080:8080"
+  #   restart: unless-stopped

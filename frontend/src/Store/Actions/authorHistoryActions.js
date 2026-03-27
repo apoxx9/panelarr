@@ -43,7 +43,7 @@ export const actionHandlers = handleThunks({
     dispatch(set({ section, isFetching: true }));
 
     const promise = createAjaxRequest({
-      url: '/history/author',
+      url: '/history/series',
       data: payload
     }).request;
 

@@ -14,11 +14,11 @@ namespace NzbDrone.Core.Extras.Files
     public interface IManageExtraFiles
     {
         int Order { get; }
-        IEnumerable<ExtraFile> CreateAfterAuthorScan(Author author, List<BookFile> bookFiles);
-        IEnumerable<ExtraFile> CreateAfterBookImport(Author author, BookFile bookFile);
-        IEnumerable<ExtraFile> CreateAfterBookImport(Author author, Book book, string authorFolder, string bookFolder);
-        IEnumerable<ExtraFile> MoveFilesAfterRename(Author author, List<BookFile> bookFiles);
-        ExtraFile Import(Author author, BookFile bookFile, string path, string extension, bool readOnly);
+        IEnumerable<ExtraFile> CreateAfterSeriesScan(Series author, List<ComicFile> comicFiles);
+        IEnumerable<ExtraFile> CreateAfterBookImport(Series author, ComicFile comicFile);
+        IEnumerable<ExtraFile> CreateAfterBookImport(Series author, Issue issue, string authorFolder, string bookFolder);
+        IEnumerable<ExtraFile> MoveFilesAfterRename(Series author, List<ComicFile> comicFiles);
+        ExtraFile Import(Series author, ComicFile comicFile, string path, string extension, bool readOnly);
     }
 
     public abstract class ExtraFileManager<TExtraFile> : IManageExtraFiles
@@ -41,16 +41,16 @@ namespace NzbDrone.Core.Extras.Files
         }
 
         public abstract int Order { get; }
-        public abstract IEnumerable<ExtraFile> CreateAfterAuthorScan(Author author, List<BookFile> bookFiles);
-        public abstract IEnumerable<ExtraFile> CreateAfterBookImport(Author author, BookFile bookFile);
-        public abstract IEnumerable<ExtraFile> CreateAfterBookImport(Author author, Book book, string authorFolder, string bookFolder);
-        public abstract IEnumerable<ExtraFile> MoveFilesAfterRename(Author author, List<BookFile> bookFiles);
-        public abstract ExtraFile Import(Author author, BookFile bookFile, string path, string extension, bool readOnly);
+        public abstract IEnumerable<ExtraFile> CreateAfterSeriesScan(Series author, List<ComicFile> comicFiles);
+        public abstract IEnumerable<ExtraFile> CreateAfterBookImport(Series author, ComicFile comicFile);
+        public abstract IEnumerable<ExtraFile> CreateAfterBookImport(Series author, Issue issue, string authorFolder, string bookFolder);
+        public abstract IEnumerable<ExtraFile> MoveFilesAfterRename(Series author, List<ComicFile> comicFiles);
+        public abstract ExtraFile Import(Series author, ComicFile comicFile, string path, string extension, bool readOnly);
 
-        protected TExtraFile ImportFile(Author author, BookFile bookFile, string path, bool readOnly, string extension, string fileNameSuffix = null)
+        protected TExtraFile ImportFile(Series author, ComicFile comicFile, string path, bool readOnly, string extension, string fileNameSuffix = null)
         {
-            var newFolder = Path.GetDirectoryName(bookFile.Path);
-            var filenameBuilder = new StringBuilder(Path.GetFileNameWithoutExtension(bookFile.Path));
+            var newFolder = Path.GetDirectoryName(comicFile.Path);
+            var filenameBuilder = new StringBuilder(Path.GetFileNameWithoutExtension(comicFile.Path));
 
             if (fileNameSuffix.IsNotNullOrWhiteSpace())
             {
@@ -71,20 +71,20 @@ namespace NzbDrone.Core.Extras.Files
 
             return new TExtraFile
             {
-                AuthorId = author.Id,
-                BookId = bookFile.Edition.Value.BookId,
-                BookFileId = bookFile.Id,
+                SeriesId = author.Id,
+                IssueId = comicFile.IssueId,
+                ComicFileId = comicFile.Id,
                 RelativePath = author.Path.GetRelativePath(newFileName),
                 Extension = extension
             };
         }
 
-        protected TExtraFile MoveFile(Author author, BookFile bookFile, TExtraFile extraFile, string fileNameSuffix = null)
+        protected TExtraFile MoveFile(Series author, ComicFile comicFile, TExtraFile extraFile, string fileNameSuffix = null)
         {
             _logger.Trace("Renaming extra file: {0}", extraFile);
 
-            var newFolder = Path.GetDirectoryName(bookFile.Path);
-            var filenameBuilder = new StringBuilder(Path.GetFileNameWithoutExtension(bookFile.Path));
+            var newFolder = Path.GetDirectoryName(comicFile.Path);
+            var filenameBuilder = new StringBuilder(Path.GetFileNameWithoutExtension(comicFile.Path));
 
             if (fileNameSuffix.IsNotNullOrWhiteSpace())
             {

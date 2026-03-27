@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using NLog;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.MediaFiles.BookImport.Aggregation.Aggregators;
+using NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators;
 using NzbDrone.Core.Parser.Model;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Aggregation
+namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation
 {
     public interface IAugmentingService
     {
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Aggregation
             {
                 if (MediaFileExtensions.AllExtensions.Contains(Path.GetExtension(localTrack.Path)))
                 {
-                    throw new AugmentingFailedException("Unable to parse book info from path: {0}", localTrack.Path);
+                    throw new AugmentingFailedException("Unable to parse issue info from path: {0}", localTrack.Path);
                 }
             }
 
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Aggregation
                 }
                 catch (Exception ex)
                 {
-                    var message = $"Unable to augment information for file: '{localTrack.Path}'. Author: {localTrack.Author} Error: {ex.Message}";
+                    var message = $"Unable to augment information for file: '{localTrack.Path}'. Series: {localTrack.Series} Error: {ex.Message}";
 
                     _logger.Warn(ex, ex.Message);
                 }

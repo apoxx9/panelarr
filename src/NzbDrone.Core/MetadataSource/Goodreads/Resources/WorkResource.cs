@@ -8,7 +8,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
 {
     /// <summary>
     /// This class models a work as defined by the Goodreads API.
-    /// A work is the root concept of something written. Each book
+    /// A work is the root concept of something written. Each issue
     /// is a published edition of a piece of work. Most work properties
     /// are aggregate information over all the editions of a work.
     /// </summary>
@@ -23,18 +23,18 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         public long Id { get; private set; }
 
         /// <summary>
-        /// The number of books for this work.
+        /// The number of issues for this work.
         /// </summary>
-        public int BooksCount { get; private set; }
+        public int IssuesCount { get; private set; }
 
         /// <summary>
-        /// The Goodreads Book Id that is considered the best version of this work.
+        /// The Goodreads Issue Id that is considered the best version of this work.
         /// Might not be populated. See the <see cref="BestBook"/> property for details, if provided.
         /// </summary>
         public long? BestBookId { get; private set; }
 
         /// <summary>
-        /// The details for the best book of this work. Only populated
+        /// The details for the best issue of this work. Only populated
         /// if Goodreads provides it as part of the response.
         /// </summary>
         public BestBookResource BestBook { get; private set; }
@@ -109,7 +109,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
             }
 
             BestBookId = element.ElementAsNullableLong("best_book_id");
-            BooksCount = element.ElementAsInt("books_count");
+            IssuesCount = element.ElementAsInt("books_count");
             ReviewsCount = element.ElementAsInt("reviews_count");
 
             RatingsCount = element.ElementAsInt("ratings_count");

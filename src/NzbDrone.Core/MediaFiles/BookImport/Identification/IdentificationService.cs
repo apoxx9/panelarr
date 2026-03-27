@@ -6,10 +6,10 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
-using NzbDrone.Core.MediaFiles.BookImport.Aggregation;
+using NzbDrone.Core.MediaFiles.IssueImport.Aggregation;
 using NzbDrone.Core.Parser.Model;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Identification
+namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 {
     public interface IIdentificationService
     {
@@ -70,11 +70,11 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
         public List<LocalEdition> Identify(List<LocalBook> localTracks, IdentificationOverrides idOverrides, ImportDecisionMakerConfig config)
         {
             // 1 group localTracks so that we think they represent a single release
-            // 2 get candidates given specified author, book and release.  Candidates can include extra files already on disk.
+            // 2 get candidates given specified author, issue and release.  Candidates can include extra files already on disk.
             // 3 find best candidate
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            _logger.Debug("Starting book identification");
+            _logger.Debug("Starting issue identification");
 
             var releases = GetLocalBookReleases(localTracks, config.SingleRelease);
 
@@ -82,8 +82,8 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
             foreach (var localRelease in releases)
             {
                 i++;
-                _logger.ProgressInfo($"Identifying book {i}/{releases.Count}");
-                _logger.Debug($"Identifying book files:\n{localRelease.LocalBooks.Select(x => x.Path).ConcatToString("\n")}");
+                _logger.ProgressInfo($"Identifying issue {i}/{releases.Count}");
+                _logger.Debug($"Identifying issue files:\n{localRelease.LocalBooks.Select(x => x.Path).ConcatToString("\n")}");
 
                 try
                 {
@@ -102,7 +102,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
             return releases;
         }
 
-        private List<LocalBook> ToLocalTrack(IEnumerable<BookFile> trackfiles, LocalEdition localRelease)
+        private List<LocalBook> ToLocalTrack(IEnumerable<ComicFile> trackfiles, LocalEdition localRelease)
         {
             var scanned = trackfiles.Join(localRelease.LocalBooks, t => t.Path, l => l.Path, (track, localTrack) => localTrack);
             var toScan = trackfiles.ExceptBy(t => t.Path, scanned, s => s.Path, StringComparer.InvariantCulture);
@@ -142,9 +142,9 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
             {
                 _logger.Debug("No local candidates found, trying remote");
                 candidateReleases = _candidateService.GetRemoteCandidates(localBookRelease, idOverrides);
-                if (!config.AddNewAuthors)
+                if (!config.AddNewSeriess)
                 {
-                    candidateReleases = candidateReleases.Where(x => x.Edition.Book.Value.Id > 0 && x.Edition.Book.Value.AuthorId > 0);
+                    candidateReleases = candidateReleases.Where(x => x.Issue.Id > 0 && x.Issue.SeriesId > 0);
                 }
 
                 usedRemote = true;
@@ -158,24 +158,23 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
                 // populate the overrides and return
                 foreach (var localTrack in localBookRelease.LocalBooks)
                 {
-                    localTrack.Edition = idOverrides.Edition;
-                    localTrack.Book = idOverrides.Book;
-                    localTrack.Author = idOverrides.Author;
+                    localTrack.Issue = idOverrides.Issue;
+                    localTrack.Series = idOverrides.Series;
                 }
 
                 return;
             }
 
             // If the result isn't great and we haven't tried remote candidates, try looking for remote candidates
-            // Goodreads may have a better edition of a local book
+            // Goodreads may have a better edition of a local issue
             if (localBookRelease.Distance.NormalizedDistance() > 0.15 && !usedRemote)
             {
                 _logger.Debug("Match not good enough, trying remote candidates");
                 candidateReleases = _candidateService.GetRemoteCandidates(localBookRelease, idOverrides);
 
-                if (!config.AddNewAuthors)
+                if (!config.AddNewSeriess)
                 {
-                    candidateReleases = candidateReleases.Where(x => x.Edition.Book.Value.Id > 0);
+                    candidateReleases = candidateReleases.Where(x => x.Issue.Id > 0);
                 }
 
                 GetBestRelease(localBookRelease, candidateReleases, allLocalTracks, out _);
@@ -195,14 +194,14 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
             _logger.Debug("Matching {0} track files against candidates", localBookRelease.TrackCount);
             _logger.Trace("Processing files:\n{0}", string.Join("\n", localBookRelease.LocalBooks.Select(x => x.Path)));
 
-            var bestDistance = localBookRelease.Edition != null ? localBookRelease.Distance.NormalizedDistance() : 1.0;
+            var bestDistance = localBookRelease.Issue != null ? localBookRelease.Distance.NormalizedDistance() : 1.0;
             seenCandidate = false;
 
             foreach (var candidateRelease in candidateReleases)
             {
                 seenCandidate = true;
 
-                var release = candidateRelease.Edition;
+                var release = candidateRelease.Issue;
                 _logger.Debug($"Trying Release {release}");
                 var rwatch = System.Diagnostics.Stopwatch.StartNew();
 
@@ -210,7 +209,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
                 var extraTracks = extraTracksOnDisk.Where(x => extraTrackPaths.Contains(x.Path)).ToList();
                 var allLocalTracks = localBookRelease.LocalBooks.Concat(extraTracks).DistinctBy(x => x.Path).ToList();
 
-                var distance = DistanceCalculator.BookDistance(allLocalTracks, release);
+                var distance = DistanceCalculator.IssueDistance(allLocalTracks, release);
                 var currDistance = distance.NormalizedDistance();
 
                 rwatch.Stop();
@@ -223,7 +222,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
                 {
                     bestDistance = currDistance;
                     localBookRelease.Distance = distance;
-                    localBookRelease.Edition = release;
+                    localBookRelease.Issue = release;
                     localBookRelease.ExistingTracks = extraTracks;
                     if (currDistance == 0.0)
                     {
@@ -233,7 +232,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
             }
 
             watch.Stop();
-            _logger.Debug($"Best release: {localBookRelease.Edition} Distance {localBookRelease.Distance.NormalizedDistance()} found in {watch.ElapsedMilliseconds}ms");
+            _logger.Debug($"Best release: {localBookRelease.Issue} Distance {localBookRelease.Distance.NormalizedDistance()} found in {watch.ElapsedMilliseconds}ms");
         }
     }
 }

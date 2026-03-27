@@ -27,16 +27,16 @@ namespace NzbDrone.Core.Extras.Metadata
             return new ValidationResult();
         }
 
-        public virtual string GetFilenameAfterMove(Author author, BookFile bookFile, MetadataFile metadataFile)
+        public virtual string GetFilenameAfterMove(Series author, ComicFile comicFile, MetadataFile metadataFile)
         {
             var existingFilename = Path.Combine(author.Path, metadataFile.RelativePath);
             var extension = Path.GetExtension(existingFilename).TrimStart('.');
-            var newFileName = Path.ChangeExtension(bookFile.Path, extension);
+            var newFileName = Path.ChangeExtension(comicFile.Path, extension);
 
             return newFileName;
         }
 
-        public virtual string GetFilenameAfterMove(Author author, string bookPath, MetadataFile metadataFile)
+        public virtual string GetFilenameAfterMove(Series author, string bookPath, MetadataFile metadataFile)
         {
             var existingFilename = Path.GetFileName(metadataFile.RelativePath);
             var newFileName = Path.Combine(author.Path, bookPath, existingFilename);
@@ -44,12 +44,12 @@ namespace NzbDrone.Core.Extras.Metadata
             return newFileName;
         }
 
-        public abstract MetadataFile FindMetadataFile(Author author, string path);
+        public abstract MetadataFile FindMetadataFile(Series author, string path);
 
-        public abstract MetadataFileResult AuthorMetadata(Author author);
-        public abstract MetadataFileResult BookMetadata(Author author, BookFile bookFile);
-        public abstract List<ImageFileResult> AuthorImages(Author author);
-        public abstract List<ImageFileResult> BookImages(Author author, BookFile bookFile);
+        public abstract MetadataFileResult SeriesMetadata(Series author);
+        public abstract MetadataFileResult IssueMetadata(Series author, ComicFile comicFile);
+        public abstract List<ImageFileResult> SeriesImages(Series author);
+        public abstract List<ImageFileResult> IssueImages(Series author, ComicFile comicFile);
 
         public virtual object RequestAction(string action, IDictionary<string, string> query)
         {

@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
         {
             private static readonly string[] MediaFiles = new[] { "nin.mp2", "nin.mp3", "nin.flac", "nin.m4a", "nin.wma", "nin.ape", "nin.opus" };
 
-            private static readonly string[] SkipProperties = new[] { "IsValid", "Duration", "Quality", "MediaInfo", "ImageFile", "BookAuthors" };
+            private static readonly string[] SkipProperties = new[] { "IsValid", "Duration", "Quality", "MediaInfo", "ImageFile", "IssueSeriess" };
             private static readonly Dictionary<string, string[]> SkipPropertiesByFile = new Dictionary<string, string[]>
             {
                 { "nin.mp2", new[] { "OriginalReleaseDate" } }
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
                 .With(x => x.OriginalReleaseDate = new DateTime(2009, 4, 1))
                 .With(x => x.OriginalYear = 2009)
                 .With(x => x.Performers = new[] { "Performer1" })
-                .With(x => x.BookAuthors = new[] { "방탄소년단" })
+                .With(x => x.IssueSeriess = new[] { "방탄소년단" })
                 .With(x => x.Genres = new[] { "Genre1", "Genre2" })
                 .With(x => x.ImageFile = imageFile)
                 .With(x => x.ImageSize = imageSize)
@@ -195,8 +195,8 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
             var writtentags = Subject.ReadAudioTag(path);
 
             VerifySame(writtentags, _testTags, skipProperties);
-            writtentags.BookAuthors.Should().BeEquivalentTo(
-                _testTags.BookAuthors.Concat(_testTags.Performers),
+            writtentags.IssueSeriess.Should().BeEquivalentTo(
+                _testTags.IssueSeriess.Concat(_testTags.Performers),
                 options => options.WithStrictOrdering());
         }
 
@@ -213,7 +213,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
             var expected = new AudioTag()
             {
                 Performers = new string[0],
-                BookAuthors = new string[0],
+                IssueSeriess = new string[0],
                 Genres = new string[0]
             };
 
@@ -308,27 +308,21 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
             tag.OriginalReleaseDate.HasValue.Should().BeFalse();
         }
 
-        private BookFile GivenPopulatedTrackfile(int mediumOffset)
+        private ComicFile GivenPopulatedTrackfile(int mediumOffset)
         {
-            var meta = Builder<AuthorMetadata>.CreateNew().Build();
-            var author = Builder<Author>.CreateNew()
+            var meta = Builder<SeriesMetadata>.CreateNew().Build();
+            var author = Builder<Series>.CreateNew()
                 .With(x => x.Metadata = meta)
                 .Build();
 
-            var book = Builder<Book>.CreateNew()
-                .With(x => x.Author = author)
+            var issue = Builder<Issue>.CreateNew()
+                .With(x => x.Series = author)
                 .Build();
 
-            var edition = Builder<Edition>.CreateNew()
-                .With(x => x.Book = book)
+            var file = Builder<ComicFile>.CreateNew()
+                .With(x => x.Issue = issue)
+                .With(x => x.Series = author)
                 .Build();
-
-            var file = Builder<BookFile>.CreateNew()
-                .With(x => x.Edition = edition)
-                .With(x => x.Author = author)
-                .Build();
-
-            edition.BookFiles = new List<BookFile> { file };
 
             return file;
         }
@@ -370,7 +364,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
             file.Size.Should().Be(fileInfo.Length);
 
             Mocker.GetMock<IEventAggregator>()
-                .Verify(v => v.PublishEvent(It.IsAny<BookFileRetaggedEvent>()), Times.Once());
+                .Verify(v => v.PublishEvent(It.IsAny<ComicFileRetaggedEvent>()), Times.Once());
         }
 
         [TestCase("nin.mp3")]
@@ -390,7 +384,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
             Subject.WriteTags(file, false, true);
 
             Mocker.GetMock<IEventAggregator>()
-                .Verify(v => v.PublishEvent(It.IsAny<BookFileRetaggedEvent>()), Times.Once());
+                .Verify(v => v.PublishEvent(It.IsAny<ComicFileRetaggedEvent>()), Times.Once());
         }
 
         [Test]
@@ -398,12 +392,11 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
         {
             GivenFileCopy("nin.mp3");
 
-            var bookFile = GivenPopulatedTrackfile(0);
-            bookFile.Path = _copiedFile;
-            bookFile.Edition.Value.ReleaseDate = null;
-            bookFile.Edition.Value.Book.Value.ReleaseDate = null;
+            var comicFile = GivenPopulatedTrackfile(0);
+            comicFile.Path = _copiedFile;
+            comicFile.Issue.Value.ReleaseDate = null;
 
-            Assert.DoesNotThrow(() => Subject.GetTrackMetadata(bookFile));
+            Assert.DoesNotThrow(() => Subject.GetTrackMetadata(comicFile));
         }
     }
 }

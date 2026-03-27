@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
@@ -19,12 +20,12 @@ namespace NzbDrone.Core.MediaFiles
     public interface IAudioTagService
     {
         ParsedTrackInfo ReadTags(string file);
-        void WriteTags(BookFile trackfile, bool newDownload, bool force = false);
-        void SyncTags(List<Edition> tracks);
-        List<RetagBookFilePreview> GetRetagPreviewsByAuthor(int authorId);
-        List<RetagBookFilePreview> GetRetagPreviewsByBook(int bookId);
+        void WriteTags(ComicFile trackfile, bool newDownload, bool force = false);
+        void SyncTags(List<Issue> issues);
+        List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId);
+        List<RetagComicFilePreview> GetRetagPreviewsByBook(int bookId);
         void RetagFiles(RetagFilesCommand message);
-        void RetagAuthor(RetagAuthorCommand message);
+        void RetagSeries(RetagSeriesCommand message);
     }
 
     public class AudioTagService : IAudioTagService
@@ -33,7 +34,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IMediaFileService _mediaFileService;
         private readonly IDiskProvider _diskProvider;
         private readonly IRootFolderWatchingService _rootFolderWatchingService;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IMapCoversToLocal _mediaCoverService;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
@@ -42,7 +43,7 @@ namespace NzbDrone.Core.MediaFiles
                                IMediaFileService mediaFileService,
                                IDiskProvider diskProvider,
                                IRootFolderWatchingService rootFolderWatchingService,
-                               IAuthorService authorService,
+                               ISeriesService authorService,
                                IMapCoversToLocal mediaCoverService,
                                IEventAggregator eventAggregator,
                                Logger logger)
@@ -67,58 +68,51 @@ namespace NzbDrone.Core.MediaFiles
             return new AudioTag(path);
         }
 
-        public AudioTag GetTrackMetadata(BookFile trackfile)
+        public AudioTag GetTrackMetadata(ComicFile trackfile)
         {
-            var edition = trackfile.Edition.Value;
-            var book = edition.Book.Value;
-            var author = book.Author.Value;
-            var partCount = edition.BookFiles.Value.Count;
+            var issue = trackfile.Issue.Value;
+            var author = issue.Series.Value;
+            var partCount = issue.ComicFiles.Value.Count;
 
             var fileTags = ReadAudioTag(trackfile.Path);
 
-            var cover = edition.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Cover);
             string imageFile = null;
             long imageSize = 0;
-            if (cover != null)
+
+            if (issue.CoverArtUrl.IsNotNullOrWhiteSpace())
             {
-                imageFile = _mediaCoverService.GetCoverPath(book.Id, MediaCoverEntity.Book, cover.CoverType, cover.Extension, null);
-                _logger.Trace($"Embedding: {imageFile}");
-                var fileInfo = _diskProvider.GetFileInfo(imageFile);
+                var coverPath = _mediaCoverService.GetCoverPath(issue.Id, MediaCoverEntity.Issue, MediaCoverTypes.Cover, ".jpg", null);
+                _logger.Trace($"Embedding: {coverPath}");
+                var fileInfo = _diskProvider.GetFileInfo(coverPath);
                 if (fileInfo.Exists)
                 {
+                    imageFile = coverPath;
                     imageSize = fileInfo.Length;
-                }
-                else
-                {
-                    imageFile = null;
                 }
             }
 
             return new AudioTag
             {
-                Title = edition.Title,
+                Title = issue.Title,
                 Performers = new[] { author.Name },
-                BookAuthors = new[] { author.Name },
+                IssueSeriess = new[] { author.Name },
                 Track = (uint)trackfile.Part,
                 TrackCount = (uint)partCount,
-                Book = book.Title,
+                Issue = issue.Title,
                 Disc = fileTags.Disc,
                 DiscCount = fileTags.DiscCount,
-
-                // We may have omitted media so index in the list isn't the same as medium number
                 Media = fileTags.Media,
-                Date = edition.ReleaseDate,
-                Year = (uint)(edition.ReleaseDate?.Year ?? 0),
-                OriginalReleaseDate = book.ReleaseDate,
-                OriginalYear = (uint)(book.ReleaseDate?.Year ?? 0),
-                Publisher = edition.Publisher,
+                Date = issue.ReleaseDate,
+                Year = (uint)(issue.ReleaseDate?.Year ?? 0),
+                OriginalReleaseDate = issue.ReleaseDate,
+                OriginalYear = (uint)(issue.ReleaseDate?.Year ?? 0),
                 Genres = new string[0],
                 ImageFile = imageFile,
                 ImageSize = imageSize,
             };
         }
 
-        private void UpdateTrackfileSizeAndModified(BookFile trackfile, string path)
+        private void UpdateTrackfileSizeAndModified(ComicFile trackfile, string path)
         {
             // update the saved file size so that the importer doesn't get confused on the next scan
             var fileInfo = _diskProvider.GetFileInfo(path);
@@ -158,7 +152,7 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        public void WriteTags(BookFile trackfile, bool newDownload, bool force = false)
+        public void WriteTags(ComicFile trackfile, bool newDownload, bool force = false)
         {
             if (!force)
             {
@@ -194,56 +188,54 @@ namespace NzbDrone.Core.MediaFiles
 
             UpdateTrackfileSizeAndModified(trackfile, path);
 
-            _eventAggregator.PublishEvent(new BookFileRetaggedEvent(trackfile.Author.Value, trackfile, diff, _configService.ScrubAudioTags));
+            _eventAggregator.PublishEvent(new ComicFileRetaggedEvent(trackfile.Series.Value, trackfile, diff, _configService.ScrubAudioTags));
         }
 
-        public void SyncTags(List<Edition> editions)
+        public void SyncTags(List<Issue> issues)
         {
             if (_configService.WriteAudioTags != WriteAudioTagsType.Sync)
             {
                 return;
             }
 
-            // get the tracks to update
-            foreach (var edition in editions)
+            // get the files to update
+            foreach (var issue in issues)
             {
-                var bookFiles = edition.BookFiles.Value;
+                var comicFiles = issue.ComicFiles.Value;
 
-                _logger.Debug($"Syncing audio tags for {bookFiles.Count} files");
+                _logger.Debug($"Syncing audio tags for {comicFiles.Count} files");
 
-                foreach (var file in bookFiles.Where(x => MediaFileExtensions.AudioExtensions.Contains(Path.GetExtension(x.Path))))
+                foreach (var file in comicFiles.Where(x => MediaFileExtensions.AudioExtensions.Contains(Path.GetExtension(x.Path))))
                 {
-                    // populate tracks (which should also have release/book/author set) because
-                    // not all of the updates will have been committed to the database yet
-                    file.Edition = edition;
+                    file.Issue = issue;
                     WriteTags(file, false);
                 }
             }
         }
 
-        public List<RetagBookFilePreview> GetRetagPreviewsByAuthor(int authorId)
+        public List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId)
         {
-            var files = _mediaFileService.GetFilesByAuthor(authorId);
+            var files = _mediaFileService.GetFilesBySeries(authorId);
 
-            return GetPreviews(files).OrderBy(b => b.BookId).ThenBy(b => b.Path).ToList();
+            return GetPreviews(files).OrderBy(b => b.IssueId).ThenBy(b => b.Path).ToList();
         }
 
-        public List<RetagBookFilePreview> GetRetagPreviewsByBook(int bookId)
+        public List<RetagComicFilePreview> GetRetagPreviewsByBook(int bookId)
         {
             var files = _mediaFileService.GetFilesByBook(bookId);
 
-            return GetPreviews(files).OrderBy(b => b.BookId).ThenBy(b => b.Path).ToList();
+            return GetPreviews(files).OrderBy(b => b.IssueId).ThenBy(b => b.Path).ToList();
         }
 
-        private IEnumerable<RetagBookFilePreview> GetPreviews(List<BookFile> files)
+        private IEnumerable<RetagComicFilePreview> GetPreviews(List<ComicFile> files)
         {
-            foreach (var f in files.Where(x => MediaFileExtensions.AudioExtensions.Contains(Path.GetExtension(x.Path))).OrderBy(x => x.Edition.Value.Title))
+            foreach (var f in files.Where(x => MediaFileExtensions.AudioExtensions.Contains(Path.GetExtension(x.Path))).OrderBy(x => x.Issue.Value?.Title))
             {
                 var file = f;
 
-                if (f.Edition.Value == null)
+                if (f.Issue.Value == null)
                 {
-                    _logger.Warn($"File {f} is not linked to any books");
+                    _logger.Warn($"File {f} is not linked to any issues");
                     continue;
                 }
 
@@ -253,11 +245,11 @@ namespace NzbDrone.Core.MediaFiles
 
                 if (diff.Any())
                 {
-                    yield return new RetagBookFilePreview
+                    yield return new RetagComicFilePreview
                     {
-                        AuthorId = file.Author.Value.Id,
-                        BookId = file.Edition.Value.Id,
-                        BookFileId = file.Id,
+                        SeriesId = file.Series.Value.Id,
+                        IssueId = file.IssueId,
+                        ComicFileId = file.Id,
                         Path = file.Path,
                         Changes = diff
                     };
@@ -267,9 +259,9 @@ namespace NzbDrone.Core.MediaFiles
 
         public void RetagFiles(RetagFilesCommand message)
         {
-            var author = _authorService.GetAuthor(message.AuthorId);
-            var bookFiles = _mediaFileService.Get(message.Files);
-            var audioFiles = bookFiles.Where(x => MediaFileExtensions.AudioExtensions.Contains(Path.GetExtension(x.Path))).ToList();
+            var author = _authorService.GetSeries(message.SeriesId);
+            var comicFiles = _mediaFileService.Get(message.Files);
+            var audioFiles = comicFiles.Where(x => MediaFileExtensions.AudioExtensions.Contains(Path.GetExtension(x.Path))).ToList();
 
             _logger.ProgressInfo("Re-tagging {0} audio files for {1}", audioFiles.Count, author.Name);
             foreach (var file in audioFiles)
@@ -280,15 +272,15 @@ namespace NzbDrone.Core.MediaFiles
             _logger.ProgressInfo("Selected audio files re-tagged for {0}", author.Name);
         }
 
-        public void RetagAuthor(RetagAuthorCommand message)
+        public void RetagSeries(RetagSeriesCommand message)
         {
             _logger.Debug("Re-tagging all audio files for selected authors");
-            var authorToRename = _authorService.GetAuthors(message.AuthorIds);
+            var authorToRename = _authorService.GetSeriess(message.SeriesIds);
 
             foreach (var author in authorToRename)
             {
-                var bookFiles = _mediaFileService.GetFilesByAuthor(author.Id);
-                var audioFiles = bookFiles.Where(x => MediaFileExtensions.AudioExtensions.Contains(Path.GetExtension(x.Path))).ToList();
+                var comicFiles = _mediaFileService.GetFilesBySeries(author.Id);
+                var audioFiles = comicFiles.Where(x => MediaFileExtensions.AudioExtensions.Contains(Path.GetExtension(x.Path))).ToList();
 
                 _logger.ProgressInfo("Re-tagging all audio files for author: {0}", author.Name);
                 foreach (var file in audioFiles)

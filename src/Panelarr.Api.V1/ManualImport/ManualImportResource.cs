@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Core.DecisionEngine;
-using NzbDrone.Core.MediaFiles.BookImport.Manual;
+using NzbDrone.Core.MediaFiles.IssueImport.Manual;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
-using Panelarr.Api.V1.Author;
 using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Series;
 using Panelarr.Http.REST;
 
 namespace Panelarr.Api.V1.ManualImport
@@ -15,9 +15,9 @@ namespace Panelarr.Api.V1.ManualImport
         public string Path { get; set; }
         public string Name { get; set; }
         public long Size { get; set; }
-        public AuthorResource Author { get; set; }
-        public BookResource Book { get; set; }
-        public string ForeignEditionId { get; set; }
+        public SeriesResource Series { get; set; }
+        public IssueResource Issue { get; set; }
+        public string ForeignIssueId { get; set; }
         public QualityModel Quality { get; set; }
         public string ReleaseGroup { get; set; }
         public int QualityWeight { get; set; }
@@ -45,9 +45,9 @@ namespace Panelarr.Api.V1.ManualImport
                 Path = model.Path,
                 Name = model.Name,
                 Size = model.Size,
-                Author = model.Author.ToResource(),
-                Book = model.Book.ToResource(),
-                ForeignEditionId = model.Edition?.ForeignEditionId ?? model.Book?.Editions.Value.Single(x => x.Monitored).ForeignEditionId,
+                Series = model.Series.ToResource(),
+                Issue = model.Issue.ToResource(),
+                ForeignIssueId = model.Issue?.ForeignIssueId,
                 Quality = model.Quality,
                 ReleaseGroup = model.ReleaseGroup,
 

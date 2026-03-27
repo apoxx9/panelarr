@@ -11,7 +11,7 @@ namespace Panelarr.Api.V1.Config
         public string RecycleBin { get; set; }
         public int RecycleBinCleanupDays { get; set; }
         public ProperDownloadTypes DownloadPropersAndRepacks { get; set; }
-        public bool CreateEmptyAuthorFolders { get; set; }
+        public bool CreateEmptySeriesFolders { get; set; }
         public bool DeleteEmptyFolders { get; set; }
         public FileDateType FileDate { get; set; }
         public bool WatchLibraryForChanges { get; set; }
@@ -39,7 +39,7 @@ namespace Panelarr.Api.V1.Config
                 RecycleBin = model.RecycleBin,
                 RecycleBinCleanupDays = model.RecycleBinCleanupDays,
                 DownloadPropersAndRepacks = model.DownloadPropersAndRepacks,
-                CreateEmptyAuthorFolders = model.CreateEmptyAuthorFolders,
+                CreateEmptySeriesFolders = model.CreateEmptySeriesFolders,
                 DeleteEmptyFolders = model.DeleteEmptyFolders,
                 FileDate = model.FileDate,
                 WatchLibraryForChanges = model.WatchLibraryForChanges,

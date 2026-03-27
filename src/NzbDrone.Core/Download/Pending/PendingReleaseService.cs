@@ -33,13 +33,13 @@ namespace NzbDrone.Core.Download.Pending
     }
 
     public class PendingReleaseService : IPendingReleaseService,
-                                         IHandle<AuthorDeletedEvent>,
-                                         IHandle<BookGrabbedEvent>,
+                                         IHandle<SeriesDeletedEvent>,
+                                         IHandle<IssueGrabbedEvent>,
                                          IHandle<RssSyncCompleteEvent>
     {
         private readonly IIndexerStatusService _indexerStatusService;
         private readonly IPendingReleaseRepository _repository;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IParsingService _parsingService;
         private readonly IDelayProfileService _delayProfileService;
         private readonly ITaskManager _taskManager;
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Download.Pending
 
         public PendingReleaseService(IIndexerStatusService indexerStatusService,
                                     IPendingReleaseRepository repository,
-                                    IAuthorService authorService,
+                                    ISeriesService authorService,
                                     IParsingService parsingService,
                                     IDelayProfileService delayProfileService,
                                     ITaskManager taskManager,
@@ -87,10 +87,10 @@ namespace NzbDrone.Core.Download.Pending
 
         public void AddMany(List<Tuple<DownloadDecision, PendingReleaseReason>> decisions)
         {
-            foreach (var authorDecisions in decisions.GroupBy(v => v.Item1.RemoteBook.Author.Id))
+            foreach (var authorDecisions in decisions.GroupBy(v => v.Item1.RemoteBook.Series.Id))
             {
-                var author = authorDecisions.First().Item1.RemoteBook.Author;
-                var alreadyPending = _repository.AllByAuthorId(author.Id);
+                var author = authorDecisions.First().Item1.RemoteBook.Series;
+                var alreadyPending = _repository.AllBySeriesId(author.Id);
 
                 alreadyPending = IncludeRemoteBooks(alreadyPending, authorDecisions.ToDictionaryIgnoreDuplicates(v => v.Item1.RemoteBook.Release.Title, v => v.Item1.RemoteBook));
                 var alreadyPendingByBook = CreateBookLookup(alreadyPending);
@@ -171,7 +171,7 @@ namespace NzbDrone.Core.Download.Pending
 
         public List<RemoteBook> GetPendingRemoteBooks(int authorId)
         {
-            return IncludeRemoteBooks(_repository.AllByAuthorId(authorId)).Select(v => v.RemoteBook).ToList();
+            return IncludeRemoteBooks(_repository.AllBySeriesId(authorId)).Select(v => v.RemoteBook).ToList();
         }
 
         public List<Queue.Queue> GetPendingQueue()
@@ -183,7 +183,7 @@ namespace NzbDrone.Core.Download.Pending
             var pendingReleases = IncludeRemoteBooks(_repository.WithoutFallback());
             foreach (var pendingRelease in pendingReleases)
             {
-                foreach (var book in pendingRelease.RemoteBook.Books)
+                foreach (var issue in pendingRelease.RemoteBook.Books)
                 {
                     var ect = pendingRelease.Release.PublishDate.AddMinutes(GetDelay(pendingRelease.RemoteBook));
 
@@ -215,9 +215,9 @@ namespace NzbDrone.Core.Download.Pending
 
                     var queue = new Queue.Queue
                     {
-                        Id = GetQueueId(pendingRelease, book),
-                        Author = pendingRelease.RemoteBook.Author,
-                        Book = book,
+                        Id = GetQueueId(pendingRelease, issue),
+                        Series = pendingRelease.RemoteBook.Series,
+                        Issue = issue,
                         Quality = pendingRelease.RemoteBook.ParsedBookInfo.Quality,
                         Title = pendingRelease.Title,
                         Size = pendingRelease.RemoteBook.Release.Size,
@@ -235,13 +235,13 @@ namespace NzbDrone.Core.Download.Pending
                 }
             }
 
-            //Return best quality release for each book
-            var deduped = queued.GroupBy(q => q.Book.Id).Select(g =>
+            //Return best quality release for each issue
+            var deduped = queued.GroupBy(q => q.Issue.Id).Select(g =>
             {
-                var author = g.First().Author;
+                var author = g.First().Series;
 
                 return g.OrderByDescending(e => e.Quality, new QualityModelComparer(author.QualityProfile))
-                        .ThenBy(q => PrioritizeDownloadProtocol(q.Author, q.Protocol))
+                        .ThenBy(q => PrioritizeDownloadProtocol(q.Series, q.Protocol))
                         .First();
             });
 
@@ -256,10 +256,10 @@ namespace NzbDrone.Core.Download.Pending
         public void RemovePendingQueueItems(int queueId)
         {
             var targetItem = FindPendingRelease(queueId);
-            var authorReleases = _repository.AllByAuthorId(targetItem.AuthorId);
+            var authorReleases = _repository.AllBySeriesId(targetItem.SeriesId);
 
             var releasesToRemove = authorReleases.Where(
-                c => c.ParsedBookInfo.BookTitle == targetItem.ParsedBookInfo.BookTitle);
+                c => c.ParsedBookInfo.IssueTitle == targetItem.ParsedBookInfo.IssueTitle);
 
             _repository.DeleteMany(releasesToRemove.Select(c => c.Id));
         }
@@ -276,8 +276,8 @@ namespace NzbDrone.Core.Download.Pending
         private ILookup<int, PendingRelease> CreateBookLookup(IEnumerable<PendingRelease> alreadyPending)
         {
             return alreadyPending.SelectMany(v => v.RemoteBook.Books
-                                                   .Select(d => new { Book = d, PendingRelease = v }))
-                                 .ToLookup(v => v.Book.Id, v => v.PendingRelease);
+                                                   .Select(d => new { Issue = d, PendingRelease = v }))
+                                 .ToLookup(v => v.Issue.Id, v => v.PendingRelease);
         }
 
         private List<ReleaseInfo> FilterBlockedIndexers(List<ReleaseInfo> releases)
@@ -294,18 +294,18 @@ namespace NzbDrone.Core.Download.Pending
 
         private List<PendingRelease> GetPendingReleases(int authorId)
         {
-            return IncludeRemoteBooks(_repository.AllByAuthorId(authorId).ToList());
+            return IncludeRemoteBooks(_repository.AllBySeriesId(authorId).ToList());
         }
 
         private List<PendingRelease> IncludeRemoteBooks(List<PendingRelease> releases, Dictionary<string, RemoteBook> knownRemoteBooks = null)
         {
             var result = new List<PendingRelease>();
 
-            var authorMap = new Dictionary<int, Author>();
+            var authorMap = new Dictionary<int, Series>();
 
             if (knownRemoteBooks != null)
             {
-                foreach (var author in knownRemoteBooks.Values.Select(v => v.Author))
+                foreach (var author in knownRemoteBooks.Values.Select(v => v.Series))
                 {
                     if (!authorMap.ContainsKey(author.Id))
                     {
@@ -314,14 +314,14 @@ namespace NzbDrone.Core.Download.Pending
                 }
             }
 
-            foreach (var author in _authorService.GetAuthors(releases.Select(v => v.AuthorId).Distinct().Where(v => !authorMap.ContainsKey(v))))
+            foreach (var author in _authorService.GetSeriess(releases.Select(v => v.SeriesId).Distinct().Where(v => !authorMap.ContainsKey(v))))
             {
                 authorMap[author.Id] = author;
             }
 
             foreach (var release in releases)
             {
-                var author = authorMap.GetValueOrDefault(release.AuthorId);
+                var author = authorMap.GetValueOrDefault(release.SeriesId);
 
                 // Just in case the author was removed, but wasn't cleaned up yet (housekeeper will clean it up)
                 if (author == null)
@@ -329,21 +329,21 @@ namespace NzbDrone.Core.Download.Pending
                     return null;
                 }
 
-                List<Book> books;
+                List<Issue> issues;
 
                 if (knownRemoteBooks != null && knownRemoteBooks.TryGetValue(release.Release.Title, out var knownRemoteBook))
                 {
-                    books = knownRemoteBook.Books;
+                    issues = knownRemoteBook.Books;
                 }
                 else
                 {
-                    books = _parsingService.GetBooks(release.ParsedBookInfo, author);
+                    issues = _parsingService.GetBooks(release.ParsedBookInfo, author);
                 }
 
                 release.RemoteBook = new RemoteBook
                 {
-                    Author = author,
-                    Books = books,
+                    Series = author,
+                    Books = issues,
                     ReleaseSource = release.AdditionalInfo?.ReleaseSource ?? ReleaseSourceType.Unknown,
                     ParsedBookInfo = release.ParsedBookInfo,
                     Release = release.Release
@@ -362,7 +362,7 @@ namespace NzbDrone.Core.Download.Pending
         {
             _repository.Insert(new PendingRelease
             {
-                AuthorId = decision.RemoteBook.Author.Id,
+                SeriesId = decision.RemoteBook.Series.Id,
                 ParsedBookInfo = decision.RemoteBook.ParsedBookInfo,
                 Release = decision.RemoteBook.Release,
                 Title = decision.RemoteBook.Release.Title,
@@ -385,7 +385,7 @@ namespace NzbDrone.Core.Download.Pending
 
         private int GetDelay(RemoteBook remoteBook)
         {
-            var delayProfile = _delayProfileService.AllForTags(remoteBook.Author.Tags).OrderBy(d => d.Order).First();
+            var delayProfile = _delayProfileService.AllForTags(remoteBook.Series.Tags).OrderBy(d => d.Order).First();
             var delay = delayProfile.GetProtocolDelay(remoteBook.Release.DownloadProtocol);
             var minimumAge = _configService.MinimumAge;
 
@@ -394,7 +394,7 @@ namespace NzbDrone.Core.Download.Pending
 
         private void RemoveGrabbed(RemoteBook remoteBook)
         {
-            var pendingReleases = GetPendingReleases(remoteBook.Author.Id);
+            var pendingReleases = GetPendingReleases(remoteBook.Series.Id);
             var bookIds = remoteBook.Books.Select(e => e.Id);
 
             var existingReports = pendingReleases.Where(r => r.RemoteBook.Books.Select(e => e.Id)
@@ -407,7 +407,7 @@ namespace NzbDrone.Core.Download.Pending
                 return;
             }
 
-            var profile = remoteBook.Author.QualityProfile.Value;
+            var profile = remoteBook.Series.QualityProfile.Value;
 
             foreach (var existingReport in existingReports)
             {
@@ -446,12 +446,12 @@ namespace NzbDrone.Core.Download.Pending
             return GetPendingReleases().First(p => p.RemoteBook.Books.Any(e => queueId == GetQueueId(p, e)));
         }
 
-        private int GetQueueId(PendingRelease pendingRelease, Book book)
+        private int GetQueueId(PendingRelease pendingRelease, Issue issue)
         {
-            return HashConverter.GetHashInt31(string.Format("pending-{0}-book{1}", pendingRelease.Id, book.Id));
+            return HashConverter.GetHashInt31(string.Format("pending-{0}-issue{1}", pendingRelease.Id, issue.Id));
         }
 
-        private int PrioritizeDownloadProtocol(Author author, DownloadProtocol downloadProtocol)
+        private int PrioritizeDownloadProtocol(Series author, DownloadProtocol downloadProtocol)
         {
             var delayProfile = _delayProfileService.BestForTags(author.Tags);
 
@@ -463,14 +463,14 @@ namespace NzbDrone.Core.Download.Pending
             return 1;
         }
 
-        public void Handle(AuthorDeletedEvent message)
+        public void Handle(SeriesDeletedEvent message)
         {
-            _repository.DeleteByAuthorId(message.Author.Id);
+            _repository.DeleteBySeriesId(message.Series.Id);
         }
 
-        public void Handle(BookGrabbedEvent message)
+        public void Handle(IssueGrabbedEvent message)
         {
-            RemoveGrabbed(message.Book);
+            RemoveGrabbed(message.Issue);
         }
 
         public void Handle(RssSyncCompleteEvent message)

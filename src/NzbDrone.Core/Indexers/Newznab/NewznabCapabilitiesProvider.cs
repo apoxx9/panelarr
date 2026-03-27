@@ -142,7 +142,7 @@ namespace NzbDrone.Core.Indexers.Newznab
                     capabilities.SupportsAggregateIdSearch = true;
                 }
 
-                var xmlAudioSearch = xmlSearching.Element("book-search");
+                var xmlAudioSearch = xmlSearching.Element("issue-search");
                 if (xmlAudioSearch == null || xmlAudioSearch.Attribute("available").Value != "yes")
                 {
                     capabilities.SupportedBookSearchParameters = null;

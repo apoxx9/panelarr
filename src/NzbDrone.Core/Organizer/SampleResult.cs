@@ -6,8 +6,8 @@ namespace NzbDrone.Core.Organizer
     public class SampleResult
     {
         public string FileName { get; set; }
-        public Author Author { get; set; }
-        public Book Book { get; set; }
-        public BookFile BookFile { get; set; }
+        public Series Series { get; set; }
+        public Issue Issue { get; set; }
+        public ComicFile ComicFile { get; set; }
     }
 }

@@ -9,7 +9,7 @@ namespace NzbDrone.Core.Extras.Others
 {
     public interface IOtherExtraFileRenamer
     {
-        void RenameOtherExtraFile(Author author, string path);
+        void RenameOtherExtraFile(Series author, string path);
     }
 
     public class OtherExtraFileRenamer : IOtherExtraFileRenamer
@@ -17,11 +17,11 @@ namespace NzbDrone.Core.Extras.Others
         private readonly Logger _logger;
         private readonly IDiskProvider _diskProvider;
         private readonly IRecycleBinProvider _recycleBinProvider;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IOtherExtraFileService _otherExtraFileService;
 
         public OtherExtraFileRenamer(IOtherExtraFileService otherExtraFileService,
-                                     IAuthorService authorService,
+                                     ISeriesService authorService,
                                      IRecycleBinProvider recycleBinProvider,
                                      IDiskProvider diskProvider,
                                      Logger logger)
@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Extras.Others
             _otherExtraFileService = otherExtraFileService;
         }
 
-        public void RenameOtherExtraFile(Author author, string path)
+        public void RenameOtherExtraFile(Series author, string path)
         {
             if (!_diskProvider.FileExists(path))
             {
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Extras.Others
             }
         }
 
-        private void RemoveOtherExtraFile(Author author, string path)
+        private void RemoveOtherExtraFile(Series author, string path)
         {
             if (!_diskProvider.FileExists(path))
             {

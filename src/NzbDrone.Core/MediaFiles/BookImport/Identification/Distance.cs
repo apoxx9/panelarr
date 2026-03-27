@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Common.Extensions;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Identification
+namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 {
     public class Distance
     {
@@ -12,7 +12,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
         {
             { "source", 2.0 },
             { "author", 3.0 },
-            { "book", 3.0 },
+            { "issue", 3.0 },
             { "isbn", 10.0 },
             { "isbn_missing", 0.1 },
             { "asin", 10.0 },

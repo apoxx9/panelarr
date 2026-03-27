@@ -30,14 +30,14 @@ namespace NzbDrone.Core.Profiles.Qualities
                                          IHandle<CustomFormatDeletedEvent>
     {
         private readonly IProfileRepository _profileRepository;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IImportListFactory _importListFactory;
         private readonly ICustomFormatService _formatService;
         private readonly IRootFolderService _rootFolderService;
         private readonly Logger _logger;
 
         public QualityProfileService(IProfileRepository profileRepository,
-                                     IAuthorService authorService,
+                                     ISeriesService authorService,
                                      IImportListFactory importListFactory,
                                      ICustomFormatService formatService,
                                      IRootFolderService rootFolderService,
@@ -63,7 +63,7 @@ namespace NzbDrone.Core.Profiles.Qualities
 
         public void Delete(int id)
         {
-            if (_authorService.GetAllAuthors().Any(c => c.QualityProfileId == id) ||
+            if (_authorService.GetAllSeries().Any(c => c.QualityProfileId == id) ||
                 _importListFactory.All().Any(c => c.ProfileId == id) ||
                 _rootFolderService.All().Any(c => c.DefaultQualityProfileId == id))
             {
@@ -98,18 +98,16 @@ namespace NzbDrone.Core.Profiles.Qualities
 
             _logger.Info("Setting up default quality profiles");
 
-            AddDefaultProfile("eBook",
-                Quality.MOBI,
-                Quality.MOBI,
+            AddDefaultProfile("Comic",
+                Quality.CBZ,
+                Quality.Unknown,
+                Quality.PDF,
                 Quality.EPUB,
-                Quality.AZW3);
-
-            AddDefaultProfile("Spoken",
-                              Quality.MP3,
-                              Quality.UnknownAudio,
-                              Quality.MP3,
-                              Quality.M4B,
-                              Quality.FLAC);
+                Quality.CBR,
+                Quality.CBZ_Web,
+                Quality.CBZ,
+                Quality.CB7,
+                Quality.CBZ_HD);
         }
 
         public void Handle(CustomFormatAddedEvent message)

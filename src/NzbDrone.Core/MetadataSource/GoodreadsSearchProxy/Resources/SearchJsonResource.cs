@@ -8,13 +8,13 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         public string ImageUrl { get; set; }
 
         [JsonProperty("bookId")]
-        public int BookId { get; set; }
+        public int IssueId { get; set; }
 
         [JsonProperty("workId")]
         public int WorkId { get; set; }
 
         [JsonProperty("bookUrl")]
-        public string BookUrl { get; set; }
+        public string IssueUrl { get; set; }
 
         [JsonProperty("from_search")]
         public bool FromSearch { get; set; }
@@ -32,7 +32,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         public string Title { get; set; }
 
         [JsonProperty("bookTitleBare")]
-        public string BookTitleBare { get; set; }
+        public string IssueTitleBare { get; set; }
 
         [JsonProperty("numPages")]
         public int PageCount { get; set; }
@@ -44,7 +44,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         public int RatingsCount { get; set; }
 
         [JsonProperty("author")]
-        public AuthorJsonResource Author { get; set; }
+        public SeriesJsonResource Series { get; set; }
 
         [JsonProperty("kcrPreviewUrl")]
         public string KcrPreviewUrl { get; set; }
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         public DescriptionJsonResource Description { get; set; }
     }
 
-    public class AuthorJsonResource
+    public class SeriesJsonResource
     {
         [JsonProperty("id")]
         public int Id { get; set; }
@@ -61,8 +61,8 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         [JsonProperty("name")]
         public string Name { get; set; }
 
-        [JsonProperty("isGoodreadsAuthor")]
-        public bool IsGoodreadsAuthor { get; set; }
+        [JsonProperty("isGoodreadsSeries")]
+        public bool IsGoodreadsSeries { get; set; }
 
         [JsonProperty("profileUrl")]
         public string ProfileUrl { get; set; }

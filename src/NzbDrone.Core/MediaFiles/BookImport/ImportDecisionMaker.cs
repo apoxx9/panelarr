@@ -8,13 +8,13 @@ using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
-using NzbDrone.Core.MediaFiles.BookImport.Aggregation;
-using NzbDrone.Core.MediaFiles.BookImport.Identification;
+using NzbDrone.Core.MediaFiles.IssueImport.Aggregation;
+using NzbDrone.Core.MediaFiles.IssueImport.Identification;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.RootFolders;
 
-namespace NzbDrone.Core.MediaFiles.BookImport
+namespace NzbDrone.Core.MediaFiles.IssueImport
 {
     public interface IMakeImportDecision
     {
@@ -23,9 +23,8 @@ namespace NzbDrone.Core.MediaFiles.BookImport
 
     public class IdentificationOverrides
     {
-        public Author Author { get; set; }
-        public Book Book { get; set; }
-        public Edition Edition { get; set; }
+        public Series Series { get; set; }
+        public Issue Issue { get; set; }
     }
 
     public class ImportDecisionMakerInfo
@@ -40,7 +39,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport
         public bool NewDownload { get; set; }
         public bool SingleRelease { get; set; }
         public bool IncludeExisting { get; set; }
-        public bool AddNewAuthors { get; set; }
+        public bool AddNewSeriess { get; set; }
         public bool KeepAllEditions { get; set; }
     }
 
@@ -183,12 +182,12 @@ namespace NzbDrone.Core.MediaFiles.BookImport
 
         private void EnsureData(LocalEdition edition)
         {
-            if (edition.Edition != null && edition.Edition.Book.Value.Author.Value.QualityProfileId == 0)
+            if (edition.Issue != null && edition.Issue.Series.Value.QualityProfileId == 0)
             {
                 var rootFolder = _rootFolderService.GetBestRootFolder(edition.LocalBooks.First().Path);
                 var qualityProfile = _qualityProfileService.Get(rootFolder.DefaultQualityProfileId);
 
-                var author = edition.Edition.Book.Value.Author.Value;
+                var author = edition.Issue.Series.Value;
                 author.QualityProfileId = qualityProfile.Id;
                 author.QualityProfile = qualityProfile;
             }
@@ -198,9 +197,9 @@ namespace NzbDrone.Core.MediaFiles.BookImport
         {
             ImportDecision<LocalEdition> decision = null;
 
-            if (localEdition.Edition == null)
+            if (localEdition.Issue == null)
             {
-                decision = new ImportDecision<LocalEdition>(localEdition, new Rejection($"Couldn't find similar book for {localEdition}"));
+                decision = new ImportDecision<LocalEdition>(localEdition, new Rejection($"Couldn't find similar issue for {localEdition}"));
             }
             else
             {
@@ -216,11 +215,11 @@ namespace NzbDrone.Core.MediaFiles.BookImport
             }
             else if (decision.Rejections.Any())
             {
-                _logger.Debug("Book rejected for the following reasons: {0}", string.Join(", ", decision.Rejections));
+                _logger.Debug("Issue rejected for the following reasons: {0}", string.Join(", ", decision.Rejections));
             }
             else
             {
-                _logger.Debug("Book accepted");
+                _logger.Debug("Issue accepted");
             }
 
             return decision;
@@ -230,9 +229,9 @@ namespace NzbDrone.Core.MediaFiles.BookImport
         {
             ImportDecision<LocalBook> decision = null;
 
-            if (localBook.Book == null)
+            if (localBook.Issue == null)
             {
-                decision = new ImportDecision<LocalBook>(localBook, new Rejection($"Couldn't parse book from: {localBook.FileTrackInfo}"));
+                decision = new ImportDecision<LocalBook>(localBook, new Rejection($"Couldn't parse issue from: {localBook.FileTrackInfo}"));
             }
             else
             {

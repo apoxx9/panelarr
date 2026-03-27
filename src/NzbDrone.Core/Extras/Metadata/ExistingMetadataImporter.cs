@@ -5,7 +5,7 @@ using NLog;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Extras.Metadata.Files;
-using NzbDrone.Core.MediaFiles.BookImport.Aggregation;
+using NzbDrone.Core.MediaFiles.IssueImport.Aggregation;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Extras.Metadata
 
         public override int Order => 0;
 
-        public override IEnumerable<ExtraFile> ProcessFiles(Author author, List<string> filesOnDisk, List<string> importedFiles)
+        public override IEnumerable<ExtraFile> ProcessFiles(Series author, List<string> filesOnDisk, List<string> importedFiles)
         {
             _logger.Debug("Looking for existing metadata in {0}", author.Path);
 
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Extras.Metadata
                         continue;
                     }
 
-                    if (metadata.Type == MetadataType.BookImage || metadata.Type == MetadataType.BookMetadata)
+                    if (metadata.Type == MetadataType.IssueImage || metadata.Type == MetadataType.IssueMetadata)
                     {
                         var localBook = _parsingService.GetLocalBook(possibleMetadataFile, author);
 
@@ -63,15 +63,15 @@ namespace NzbDrone.Core.Extras.Metadata
                             continue;
                         }
 
-                        metadata.BookId = localBook.Id;
+                        metadata.IssueId = localBook.Id;
                     }
 
-                    if (metadata.Type == MetadataType.BookMetadata)
+                    if (metadata.Type == MetadataType.IssueMetadata)
                     {
                         var localTrack = new LocalBook
                         {
                             FileTrackInfo = Parser.Parser.ParseMusicPath(possibleMetadataFile),
-                            Author = author,
+                            Series = author,
                             Path = possibleMetadataFile
                         };
 
@@ -85,9 +85,9 @@ namespace NzbDrone.Core.Extras.Metadata
                             continue;
                         }
 
-                        if (localTrack.Book == null)
+                        if (localTrack.Issue == null)
                         {
-                            _logger.Debug("Cannot find related book for: {0}", possibleMetadataFile);
+                            _logger.Debug("Cannot find related issue for: {0}", possibleMetadataFile);
                             continue;
                         }
                     }

@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Books
         List<Edition> GetEditionsForRefresh(int bookId, List<string> foreignEditionIds);
         List<Edition> GetEditionsByBook(int bookId);
         List<Edition> GetEditionsByBook(IEnumerable<int> bookIds);
-        List<Edition> GetEditionsByAuthor(int authorId);
+        List<Edition> GetEditionsBySeries(int authorId);
         Edition FindByTitle(int authorMetadataId, string title);
         Edition FindByTitleInexact(int authorMetadataId, string title);
         List<Edition> GetCandidates(int authorMetadataId, string title);
@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Books
     }
 
     public class EditionService : IEditionService,
-        IHandle<BookDeletedEvent>
+        IHandle<IssueDeletedEvent>
     {
         private readonly IEditionRepository _editionRepository;
         private readonly IEventAggregator _eventAggregator;
@@ -88,9 +88,9 @@ namespace NzbDrone.Core.Books
             return _editionRepository.FindByBook(bookIds);
         }
 
-        public List<Edition> GetEditionsByAuthor(int authorId)
+        public List<Edition> GetEditionsBySeries(int authorId)
         {
-            return _editionRepository.FindByAuthor(authorId);
+            return _editionRepository.FindBySeries(authorId);
         }
 
         public Edition FindByTitle(int authorMetadataId, string title)
@@ -100,11 +100,11 @@ namespace NzbDrone.Core.Books
 
         public Edition FindByTitleInexact(int authorMetadataId, string title)
         {
-            var books = _editionRepository.FindByAuthorMetadataId(authorMetadataId, true);
+            var issues = _editionRepository.FindBySeriesMetadataId(authorMetadataId, true);
 
             foreach (var func in EditionScoringFunctions(title))
             {
-                var results = FindByStringInexact(books, func.Item1, func.Item2);
+                var results = FindByStringInexact(issues, func.Item1, func.Item2);
                 if (results.Count == 1)
                 {
                     return results[0];
@@ -116,12 +116,12 @@ namespace NzbDrone.Core.Books
 
         public List<Edition> GetCandidates(int authorMetadataId, string title)
         {
-            var books = _editionRepository.FindByAuthorMetadataId(authorMetadataId, true);
+            var issues = _editionRepository.FindBySeriesMetadataId(authorMetadataId, true);
             var output = new List<Edition>();
 
             foreach (var func in EditionScoringFunctions(title))
             {
-                output.AddRange(FindByStringInexact(books, func.Item1, func.Item2));
+                output.AddRange(FindByStringInexact(issues, func.Item1, func.Item2));
             }
 
             return output.DistinctBy(x => x.Id).ToList();
@@ -132,9 +132,9 @@ namespace NzbDrone.Core.Books
             return _editionRepository.SetMonitored(edition);
         }
 
-        public void Handle(BookDeletedEvent message)
+        public void Handle(IssueDeletedEvent message)
         {
-            var editions = GetEditionsByBook(message.Book.Id);
+            var editions = GetEditionsByBook(message.Issue.Id);
             DeleteMany(editions);
         }
 
@@ -144,9 +144,9 @@ namespace NzbDrone.Core.Books
             var scoringFunctions = new List<Tuple<Func<Edition, string, double>, string>>
             {
                 tc((a, t) => a.Title.FuzzyMatch(t), title),
-                tc((a, t) => a.Title.FuzzyMatch(t), title.RemoveBracketsAndContents().CleanAuthorName()),
-                tc((a, t) => a.Title.FuzzyMatch(t), title.RemoveAfterDash().CleanAuthorName()),
-                tc((a, t) => a.Title.FuzzyMatch(t), title.RemoveBracketsAndContents().RemoveAfterDash().CleanAuthorName()),
+                tc((a, t) => a.Title.FuzzyMatch(t), title.RemoveBracketsAndContents().CleanSeriesName()),
+                tc((a, t) => a.Title.FuzzyMatch(t), title.RemoveAfterDash().CleanSeriesName()),
+                tc((a, t) => a.Title.FuzzyMatch(t), title.RemoveBracketsAndContents().RemoveAfterDash().CleanSeriesName()),
                 tc((a, t) => t.FuzzyContains(a.Title), title)
             };
 

@@ -43,7 +43,7 @@ function TagDetailsModalContent(props) {
 
         {
           author.length ?
-            <FieldSet legend={translate('Authors')}>
+            <FieldSet legend={translate('Series')}>
               {
                 author.map((item) => {
                   return (

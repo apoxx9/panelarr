@@ -229,9 +229,9 @@ function getSaveAjaxOptions({ ajaxOptions, payload }) {
 
 export const actionHandlers = handleThunks({
 
-  [FETCH_AUTHOR]: createFetchHandler(section, '/author'),
-  [SAVE_AUTHOR]: createSaveProviderHandler(section, '/author', { getAjaxOptions: getSaveAjaxOptions }),
-  [DELETE_AUTHOR]: createRemoveItemHandler(section, '/author'),
+  [FETCH_AUTHOR]: createFetchHandler(section, '/series'),
+  [SAVE_AUTHOR]: createSaveProviderHandler(section, '/series', { getAjaxOptions: getSaveAjaxOptions }),
+  [DELETE_AUTHOR]: createRemoveItemHandler(section, '/series'),
 
   [TOGGLE_AUTHOR_MONITORED]: (getState, payload, dispatch) => {
     const {
@@ -248,7 +248,7 @@ export const actionHandlers = handleThunks({
     }));
 
     const promise = createAjaxRequest({
-      url: `/author/${id}`,
+      url: `/series/${id}`,
       method: 'PUT',
       data: JSON.stringify({
         ...author,
@@ -297,7 +297,7 @@ export const actionHandlers = handleThunks({
     season.monitored = monitored;
 
     const promise = createAjaxRequest({
-      url: `/author/${id}`,
+      url: `/series/${id}`,
       method: 'PUT',
       data: JSON.stringify({
         ...author,
@@ -353,7 +353,7 @@ export const actionHandlers = handleThunks({
     }));
 
     const promise = createAjaxRequest({
-      url: '/bookshelf',
+      url: '/issueshelf',
       method: 'POST',
       data: JSON.stringify({
         authors: [{ id }],

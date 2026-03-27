@@ -15,12 +15,12 @@ namespace NzbDrone.Integration.Test
             config.LogLevel = "Trace";
             HostConfig.Put(config);
 
-            var resultGet = Author.All();
+            var resultGet = Series.All();
 
             var logFile = "panelarr.trace.txt";
             var logLines = Logs.GetLogFileLines(logFile);
 
-            var result = Author.InvalidPost(new Panelarr.Api.V1.Author.AuthorResource());
+            var result = Series.InvalidPost(new Panelarr.Api.V1.Series.SeriesResource());
 
             // Skip 2 and 1 to ignore the logs endpoint
             logLines = Logs.GetLogFileLines(logFile).Skip(logLines.Length + 2).ToArray();

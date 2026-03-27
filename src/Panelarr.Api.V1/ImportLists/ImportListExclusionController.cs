@@ -21,7 +21,7 @@ namespace Panelarr.Api.V1.ImportLists
             _importListExclusionService = importListExclusionService;
 
             SharedValidator.RuleFor(c => c.ForeignId).NotEmpty().SetValidator(guidValidator).SetValidator(importListExclusionExistsValidator);
-            SharedValidator.RuleFor(c => c.AuthorName).NotEmpty();
+            SharedValidator.RuleFor(c => c.SeriesName).NotEmpty();
         }
 
         protected override ImportListExclusionResource GetResourceById(int id)

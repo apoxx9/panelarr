@@ -7,7 +7,7 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Parser.Model;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Aggregation.Aggregators
+namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 {
     public class AggregateFilenameInfo : IAggregate<LocalEdition>
     {
@@ -58,8 +58,8 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Aggregation.Aggregators
         public LocalEdition Aggregate(LocalEdition release, bool others)
         {
             var tracks = release.LocalBooks;
-            if (tracks.Any(x => x.FileTrackInfo.BookTitle.IsNullOrWhiteSpace())
-                || tracks.Any(x => x.FileTrackInfo.AuthorTitle.IsNullOrWhiteSpace()))
+            if (tracks.Any(x => x.FileTrackInfo.IssueTitle.IsNullOrWhiteSpace())
+                || tracks.Any(x => x.FileTrackInfo.SeriesTitle.IsNullOrWhiteSpace()))
             {
                 _logger.Debug("Missing data in tags, trying filename augmentation");
                 foreach (var charSep in CharsAndSeps)
@@ -120,7 +120,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Aggregation.Aggregators
 
             // Given both an "author" and "title" field, assume that one is
             // *actually* the author, which must be uniform, and use the other
-            // for the title. This, of course, won't work for VA books.
+            // for the title. This, of course, won't work for VA issues.
             string titleField;
             string author;
             if (keys.Contains("author"))
@@ -147,9 +147,9 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Aggregation.Aggregators
 
                 foreach (var track in matches.Keys)
                 {
-                    if (track.FileTrackInfo.AuthorTitle.IsNullOrWhiteSpace())
+                    if (track.FileTrackInfo.SeriesTitle.IsNullOrWhiteSpace())
                     {
-                        track.FileTrackInfo.Authors = new List<string> { author };
+                        track.FileTrackInfo.Seriess = new List<string> { author };
                     }
                 }
             }
@@ -162,11 +162,11 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Aggregation.Aggregators
             // Apply the title and track
             foreach (var track in matches.Keys)
             {
-                if (track.FileTrackInfo.BookTitle.IsNullOrWhiteSpace())
+                if (track.FileTrackInfo.IssueTitle.IsNullOrWhiteSpace())
                 {
                     var title = matches[track].Groups[titleField].Value.Trim();
                     _logger.Debug("Got title from filename: {0}", title);
-                    track.FileTrackInfo.BookTitle = title;
+                    track.FileTrackInfo.IssueTitle = title;
                 }
 
                 var trackNums = track.FileTrackInfo.TrackNumbers;

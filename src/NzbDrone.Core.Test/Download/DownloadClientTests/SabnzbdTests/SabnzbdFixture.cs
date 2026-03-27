@@ -361,7 +361,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                     .Returns(new SabnzbdAddResponse { Ids = new List<string> { "panelarrtest" } });
 
             var remoteBook = CreateRemoteBook();
-            remoteBook.Books = Builder<Book>.CreateListOfSize(1)
+            remoteBook.Books = Builder<Issue>.CreateListOfSize(1)
                                                       .All()
                                                       .With(e => e.ReleaseDate = DateTime.Today)
                                                       .Build()
@@ -647,7 +647,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         [Test]
         public void should_remove_output_path_folder_when_deleting_a_completed_item_and_delete_data_is_true()
         {
-            var path = @"C:\Test\Series.Title.S01E01".AsOsAgnostic();
+            var path = @"C:\Test\SeriesGroup.Title.S01E01".AsOsAgnostic();
             _downloadClientItem.OutputPath = new OsPath(path);
 
             Mocker.GetMock<IDiskProvider>()
@@ -671,7 +671,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         [Test]
         public void should_remove_output_path_file_when_deleting_a_completed_item_and_delete_data_is_true()
         {
-            var path = @"C:\Test\Series.Title.S01E01.mkv".AsOsAgnostic();
+            var path = @"C:\Test\SeriesGroup.Title.S01E01.mkv".AsOsAgnostic();
             _downloadClientItem.OutputPath = new OsPath(path);
 
             Mocker.GetMock<IDiskProvider>()
@@ -699,7 +699,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         [Test]
         public void should_not_remove_output_path_file_when_deleting_a_completed_item_and_delete_data_is_true_if_it_does_not_exist()
         {
-            var path = @"C:\Test\Series.Title.S01E01.mkv".AsOsAgnostic();
+            var path = @"C:\Test\SeriesGroup.Title.S01E01.mkv".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FolderExists(path))
@@ -726,7 +726,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         [Test]
         public void should_not_remove_output_path_file_when_deleting_a_completed_item_and_delete_data_is_false()
         {
-            var path = @"C:\Test\Series.Title.S01E01.mkv".AsOsAgnostic();
+            var path = @"C:\Test\SeriesGroup.Title.S01E01.mkv".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FolderExists(path))

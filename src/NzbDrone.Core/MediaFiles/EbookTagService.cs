@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using NLog;
-using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Books;
@@ -25,24 +22,24 @@ namespace NzbDrone.Core.MediaFiles
     public interface IEBookTagService
     {
         ParsedTrackInfo ReadTags(IFileInfo file);
-        void WriteTags(BookFile trackfile, bool newDownload, bool force = false);
-        void SyncTags(List<Edition> books);
-        List<RetagBookFilePreview> GetRetagPreviewsByAuthor(int authorId);
-        List<RetagBookFilePreview> GetRetagPreviewsByBook(int bookId);
+        void WriteTags(ComicFile trackfile, bool newDownload, bool force = false);
+        void SyncTags(List<Issue> issues);
+        List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId);
+        List<RetagComicFilePreview> GetRetagPreviewsByBook(int bookId);
         void RetagFiles(RetagFilesCommand message);
-        void RetagAuthor(RetagAuthorCommand message);
+        void RetagSeries(RetagSeriesCommand message);
     }
 
     public class EBookTagService : IEBookTagService
     {
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IMediaFileService _mediaFileService;
         private readonly IRootFolderService _rootFolderService;
         private readonly IConfigService _configService;
         private readonly ICalibreProxy _calibre;
         private readonly Logger _logger;
 
-        public EBookTagService(IAuthorService authorService,
+        public EBookTagService(ISeriesService authorService,
             IMediaFileService mediaFileService,
             IRootFolderService rootFolderService,
             IConfigService configService,
@@ -78,7 +75,7 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        public void WriteTags(BookFile bookFile, bool newDownload, bool force = false)
+        public void WriteTags(ComicFile comicFile, bool newDownload, bool force = false)
         {
             if (!force)
             {
@@ -88,12 +85,12 @@ namespace NzbDrone.Core.MediaFiles
                 }
             }
 
-            _logger.Debug($"Writing tags for {bookFile}");
+            _logger.Debug($"Writing tags for {comicFile}");
 
-            WriteTagsInternal(bookFile, _configService.UpdateCovers, _configService.EmbedMetadata);
+            WriteTagsInternal(comicFile, _configService.UpdateCovers, _configService.EmbedMetadata);
         }
 
-        public void SyncTags(List<Edition> editions)
+        public void SyncTags(List<Issue> issues)
         {
             if (_configService.WriteBookTags != WriteBookTagsType.Sync)
             {
@@ -101,31 +98,30 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             // get the tracks to update
-            foreach (var edition in editions)
+            foreach (var issue in issues)
             {
-                var bookFiles = edition.BookFiles.Value;
+                var comicFiles = issue.ComicFiles.Value;
 
-                _logger.Debug($"Syncing ebook tags for {edition}");
+                _logger.Debug($"Syncing ebook tags for {issue}");
 
-                foreach (var file in bookFiles.Where(x => x.CalibreId != 0))
+                foreach (var file in comicFiles)
                 {
-                    // populate tracks (which should also have release/book/author set) because
-                    // not all of the updates will have been committed to the database yet
-                    file.Edition = edition;
+                    // populate issue reference
+                    file.Issue = issue;
 
                     WriteTagsInternal(file, _configService.UpdateCovers, _configService.EmbedMetadata);
                 }
             }
         }
 
-        public List<RetagBookFilePreview> GetRetagPreviewsByAuthor(int authorId)
+        public List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId)
         {
-            var files = _mediaFileService.GetFilesByAuthor(authorId);
+            var files = _mediaFileService.GetFilesBySeries(authorId);
 
             return GetPreviews(files).ToList();
         }
 
-        public List<RetagBookFilePreview> GetRetagPreviewsByBook(int bookId)
+        public List<RetagComicFilePreview> GetRetagPreviewsByBook(int bookId)
         {
             var files = _mediaFileService.GetFilesByBook(bookId);
 
@@ -134,12 +130,12 @@ namespace NzbDrone.Core.MediaFiles
 
         public void RetagFiles(RetagFilesCommand message)
         {
-            var author = _authorService.GetAuthor(message.AuthorId);
+            var author = _authorService.GetSeries(message.SeriesId);
             var files = _mediaFileService.Get(message.Files);
 
             _logger.ProgressInfo("Re-tagging {0} ebook files for {1}", files.Count, author.Name);
 
-            foreach (var file in files.Where(x => x.CalibreId != 0))
+            foreach (var file in files)
             {
                 WriteTagsInternal(file, message.UpdateCovers, message.EmbedMetadata);
             }
@@ -147,18 +143,18 @@ namespace NzbDrone.Core.MediaFiles
             _logger.ProgressInfo("Selected ebook files re-tagged for {0}", author.Name);
         }
 
-        public void RetagAuthor(RetagAuthorCommand message)
+        public void RetagSeries(RetagSeriesCommand message)
         {
             _logger.Debug("Re-tagging all ebook files for selected authors");
-            var authorsToRename = _authorService.GetAuthors(message.AuthorIds);
+            var authorsToRename = _authorService.GetSeriess(message.SeriesIds);
 
             foreach (var author in authorsToRename)
             {
-                var files = _mediaFileService.GetFilesByAuthor(author.Id);
+                var files = _mediaFileService.GetFilesBySeries(author.Id);
 
                 _logger.ProgressInfo("Re-tagging all ebook files for author: {0}", author.Name);
 
-                foreach (var file in files.Where(x => x.CalibreId != 0))
+                foreach (var file in files)
                 {
                     WriteTagsInternal(file, message.UpdateCovers, message.EmbedMetadata);
                 }
@@ -167,13 +163,8 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        private void WriteTagsInternal(BookFile file, bool updateCover, bool embedMetadata)
+        private void WriteTagsInternal(ComicFile file, bool updateCover, bool embedMetadata)
         {
-            if (file.CalibreId == 0)
-            {
-                _logger.Trace($"No calibre id for {file.Path}, skipping writing tags");
-            }
-
             var rootFolder = _rootFolderService.GetBestRootFolder(file.Path);
 
             if (rootFolder == null)
@@ -184,77 +175,10 @@ namespace NzbDrone.Core.MediaFiles
             _calibre.SetFields(file, rootFolder.CalibreSettings, updateCover, embedMetadata);
         }
 
-        private IEnumerable<RetagBookFilePreview> GetPreviews(List<BookFile> files)
+        private IEnumerable<RetagComicFilePreview> GetPreviews(List<ComicFile> files)
         {
-            var calibreFiles = files.Where(x => x.CalibreId > 0).OrderBy(x => x.Edition.Value.Title).ToList();
-
-            var rootFolderPairs = calibreFiles.Select(x => Tuple.Create(x, _rootFolderService.GetBestRootFolder(x.Path)));
-
-            var rootFolderGroups = rootFolderPairs.GroupBy(x => x.Item2.Path);
-
-            var calibreBooks = new List<CalibreBook>();
-            foreach (var group in rootFolderGroups)
-            {
-                var rootFolder = group.First().Item2;
-                var books = _calibre.GetBooks(group.Select(x => x.Item1.CalibreId).ToList(), rootFolder.CalibreSettings);
-                calibreBooks.AddRange(books);
-            }
-
-            var dict = calibreBooks.ToDictionary(x => x.Id);
-
-            foreach (var file in calibreFiles)
-            {
-                var edition = file.Edition.Value;
-                var book = edition.Book.Value;
-                var serieslink = book.SeriesLinks.Value.OrderBy(x => x.SeriesPosition).FirstOrDefault(x => x.Series.Value.Title.IsNotNullOrWhiteSpace());
-
-                var series = serieslink?.Series.Value;
-                double? seriesIndex = null;
-                if (double.TryParse(serieslink?.Position, out var index))
-                {
-                    _logger.Trace($"Parsed {serieslink?.Position} as {index}");
-                    seriesIndex = index;
-                }
-
-                var oldTags = dict[file.CalibreId];
-
-                var textInfo = CultureInfo.InvariantCulture.TextInfo;
-                var genres = book.Genres.Select(x => textInfo.ToTitleCase(x.Replace('-', ' '))).ToList();
-
-                var newTags = new CalibreBook
-                {
-                    Title = edition.Title,
-                    Authors = new List<string> { file.Author.Value.Name },
-                    PubDate = book.ReleaseDate,
-                    Publisher = edition.Publisher,
-                    Languages = new List<string> { edition.Language.CanonicalizeLanguage() },
-                    Tags = genres,
-                    Comments = edition.Overview,
-                    Rating = (int)(edition.Ratings.Value * 2) / 2.0,
-                    Identifiers = new Dictionary<string, string>
-                    {
-                        { "isbn", edition.Isbn13 },
-                        { "asin", edition.Asin },
-                        { "goodreads", edition.ForeignEditionId }
-                    },
-                    Series = series?.Title,
-                    Position = seriesIndex
-                };
-
-                var diff = oldTags.Diff(newTags);
-
-                if (diff.Any())
-                {
-                    yield return new RetagBookFilePreview
-                    {
-                        AuthorId = file.Author.Value.Id,
-                        BookId = file.Edition.Value.Id,
-                        BookFileId = file.Id,
-                        Path = file.Path,
-                        Changes = diff
-                    };
-                }
-            }
+            // Calibre integration removed - no previews without CalibreId
+            return Enumerable.Empty<RetagComicFilePreview>();
         }
 
         private ParsedTrackInfo ReadEpub(string file)
@@ -273,8 +197,8 @@ namespace NzbDrone.Core.MediaFiles
             {
                 using (var bookRef = EpubReader.OpenBook(file))
                 {
-                    result.Authors = bookRef.AuthorList;
-                    result.BookTitle = bookRef.Title;
+                    result.Seriess = bookRef.SeriesList;
+                    result.IssueTitle = bookRef.Title;
 
                     var meta = bookRef.Schema.Package.Metadata;
 
@@ -308,20 +232,20 @@ namespace NzbDrone.Core.MediaFiles
 
             try
             {
-                var book = new Azw3File(file);
-                result.Authors = book.Authors;
-                result.BookTitle = book.Title;
-                result.Isbn = StripIsbn(book.Isbn);
-                result.Asin = book.Asin;
-                result.Language = book.Language;
-                result.Disambiguation = book.Description;
-                result.Publisher = book.Publisher;
-                result.Label = book.Imprint;
-                result.Source = book.Source;
+                var issue = new Azw3File(file);
+                result.Seriess = issue.Seriess;
+                result.IssueTitle = issue.Title;
+                result.Isbn = StripIsbn(issue.Isbn);
+                result.Asin = issue.Asin;
+                result.Language = issue.Language;
+                result.Disambiguation = issue.Description;
+                result.Publisher = issue.Publisher;
+                result.Label = issue.Imprint;
+                result.Source = issue.Source;
 
                 result.Quality = new QualityModel
                 {
-                    Quality = book.Version <= 6 ? Quality.MOBI : Quality.AZW3,
+                    Quality = Quality.EPUB,
                     QualityDetectionSource = QualityDetectionSource.TagLib
                 };
             }
@@ -331,7 +255,7 @@ namespace NzbDrone.Core.MediaFiles
 
                 result.Quality = new QualityModel
                 {
-                    Quality = Path.GetExtension(file) == ".mobi" ? Quality.MOBI : Quality.AZW3,
+                    Quality = Quality.EPUB,
                     QualityDetectionSource = QualityDetectionSource.Extension
                 };
             }
@@ -355,13 +279,13 @@ namespace NzbDrone.Core.MediaFiles
 
             try
             {
-                var book = PdfReader.Open(file, PdfDocumentOpenMode.InformationOnly);
-                if (book.Info != null)
+                var issue = PdfReader.Open(file, PdfDocumentOpenMode.InformationOnly);
+                if (issue.Info != null)
                 {
-                    result.Authors = new List<string> { book.Info.Author };
-                    result.BookTitle = book.Info.Title;
+                    result.Seriess = new List<string> { issue.Info.Subject };
+                    result.IssueTitle = issue.Info.Title;
 
-                    _logger.Trace(book.Info.ToJson());
+                    _logger.Trace(issue.Info.ToJson());
                 }
             }
             catch (Exception e)

@@ -25,7 +25,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         {
             var config = NamingConfig.GetSingle();
             config.RenameBooks = false;
-            config.StandardBookFormat = "{Author Name} - {Book Title}{ (PartNumber)}";
+            config.StandardBookFormat = "{Series Name} - {Issue Title}{ (PartNumber)}";
 
             var result = NamingConfig.Put(config);
             result.RenameBooks.Should().BeFalse();
@@ -81,7 +81,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         {
             var config = NamingConfig.GetSingle();
             config.RenameBooks = true;
-            config.AuthorFolderFormat = "This and That";
+            config.SeriesFolderFormat = "This and That";
 
             var errors = NamingConfig.InvalidPut(config);
             errors.Should().NotBeNull();

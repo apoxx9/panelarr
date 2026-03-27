@@ -38,42 +38,42 @@ namespace NzbDrone.Core.Download
 
             if (!_configService.AutoRedownloadFailed)
             {
-                _logger.Debug("Auto redownloading failed books is disabled");
+                _logger.Debug("Auto redownloading failed issues is disabled");
                 return;
             }
 
             if (message.ReleaseSource == ReleaseSourceType.InteractiveSearch && !_configService.AutoRedownloadFailedFromInteractiveSearch)
             {
-                _logger.Debug("Auto redownloading failed books from interactive search is disabled");
+                _logger.Debug("Auto redownloading failed issues from interactive search is disabled");
                 return;
             }
 
-            if (message.BookIds.Count == 1)
+            if (message.IssueIds.Count == 1)
             {
-                _logger.Debug("Failed download only contains one book, searching again");
+                _logger.Debug("Failed download only contains one issue, searching again");
 
-                _commandQueueManager.Push(new BookSearchCommand(message.BookIds));
+                _commandQueueManager.Push(new IssueSearchCommand(message.IssueIds));
 
                 return;
             }
 
-            var booksInAuthor = _bookService.GetBooksByAuthor(message.AuthorId);
+            var booksInSeries = _bookService.GetBooksBySeries(message.SeriesId);
 
-            if (message.BookIds.Count == booksInAuthor.Count)
+            if (message.IssueIds.Count == booksInSeries.Count)
             {
                 _logger.Debug("Failed download was entire author, searching again");
 
-                _commandQueueManager.Push(new AuthorSearchCommand
+                _commandQueueManager.Push(new SeriesSearchCommand
                 {
-                    AuthorId = message.AuthorId
+                    SeriesId = message.SeriesId
                 });
 
                 return;
             }
 
-            _logger.Debug("Failed download contains multiple books, searching again");
+            _logger.Debug("Failed download contains multiple issues, searching again");
 
-            _commandQueueManager.Push(new BookSearchCommand(message.BookIds));
+            _commandQueueManager.Push(new IssueSearchCommand(message.IssueIds));
         }
     }
 }

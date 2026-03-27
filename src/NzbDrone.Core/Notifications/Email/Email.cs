@@ -35,37 +35,37 @@ namespace NzbDrone.Core.Notifications.Email
             SendEmail(Settings, BOOK_GRABBED_TITLE_BRANDED, body);
         }
 
-        public override void OnReleaseImport(BookDownloadMessage message)
+        public override void OnReleaseImport(IssueDownloadMessage message)
         {
             var body = $"{message.Message} Downloaded and sorted.";
 
-            var paths = Settings.AttachFiles ? message.BookFiles.SelectList(a => a.Path) : null;
+            var paths = Settings.AttachFiles ? message.ComicFiles.SelectList(a => a.Path) : null;
 
             SendEmail(Settings, BOOK_DOWNLOADED_TITLE_BRANDED, body, false, paths);
         }
 
-        public override void OnAuthorAdded(Author author)
+        public override void OnSeriesAdded(Series author)
         {
             var body = $"{author.Name} added to library.";
 
             SendEmail(Settings, AUTHOR_ADDED_TITLE_BRANDED, body);
         }
 
-        public override void OnAuthorDelete(AuthorDeleteMessage deleteMessage)
+        public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
             var body = deleteMessage.Message;
 
             SendEmail(Settings, AUTHOR_DELETED_TITlE_BRANDED, body);
         }
 
-        public override void OnBookDelete(BookDeleteMessage deleteMessage)
+        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
         {
             var body = deleteMessage.Message;
 
             SendEmail(Settings, AUTHOR_DELETED_TITlE_BRANDED, body);
         }
 
-        public override void OnBookFileDelete(BookFileDeleteMessage deleteMessage)
+        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             var body = deleteMessage.Message;
 
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Notifications.Email
             SendEmail(Settings, DOWNLOAD_FAILURE_TITLE_BRANDED, message.Message);
         }
 
-        public override void OnImportFailure(BookDownloadMessage message)
+        public override void OnImportFailure(IssueDownloadMessage message)
         {
             SendEmail(Settings, IMPORT_FAILURE_TITLE_BRANDED, message.Message);
         }

@@ -22,12 +22,12 @@ namespace NzbDrone.Core.Test.Datastore
             Mocker.Resolve<DbFactory>();
         }
 
-        private WhereBuilderPostgres Where(Expression<Func<Author, bool>> filter)
+        private WhereBuilderPostgres Where(Expression<Func<Series, bool>> filter)
         {
             return new WhereBuilderPostgres(filter, true, 0);
         }
 
-        private WhereBuilderPostgres WhereMetadata(Expression<Func<AuthorMetadata, bool>> filter)
+        private WhereBuilderPostgres WhereMetadata(Expression<Func<SeriesMetadata, bool>> filter)
         {
             return new WhereBuilderPostgres(filter, true, 0);
         }
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Test.Datastore
         {
             _subject = Where(x => x.Id == 10);
 
-            _subject.ToString().Should().Be($"(\"Authors\".\"Id\" = @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"Id\" = @Clause1_P1)");
             _subject.Parameters.Get<int>("Clause1_P1").Should().Be(10);
         }
 
@@ -47,18 +47,18 @@ namespace NzbDrone.Core.Test.Datastore
             var id = 10;
             _subject = Where(x => x.Id == id);
 
-            _subject.ToString().Should().Be($"(\"Authors\".\"Id\" = @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"Id\" = @Clause1_P1)");
             _subject.Parameters.Get<int>("Clause1_P1").Should().Be(id);
         }
 
         [Test]
         public void postgres_where_equal_property()
         {
-            var author = new Author { Id = 10 };
+            var author = new Series { Id = 10 };
             _subject = Where(x => x.Id == author.Id);
 
             _subject.Parameters.ParameterNames.Should().HaveCount(1);
-            _subject.ToString().Should().Be($"(\"Authors\".\"Id\" = @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"Id\" = @Clause1_P1)");
             _subject.Parameters.Get<int>("Clause1_P1").Should().Be(author.Id);
         }
 
@@ -75,7 +75,7 @@ namespace NzbDrone.Core.Test.Datastore
         [Test]
         public void postgres_where_throws_without_concrete_condition_if_requiresConcreteCondition()
         {
-            Expression<Func<Author, Author, bool>> filter = (x, y) => x.Id == y.Id;
+            Expression<Func<Series, Series, bool>> filter = (x, y) => x.Id == y.Id;
             _subject = new WhereBuilderPostgres(filter, true, 0);
             Assert.Throws<InvalidOperationException>(() => _subject.ToString());
         }
@@ -83,9 +83,9 @@ namespace NzbDrone.Core.Test.Datastore
         [Test]
         public void postgres_where_allows_abstract_condition_if_not_requiresConcreteCondition()
         {
-            Expression<Func<Author, Author, bool>> filter = (x, y) => x.Id == y.Id;
+            Expression<Func<Series, Series, bool>> filter = (x, y) => x.Id == y.Id;
             _subject = new WhereBuilderPostgres(filter, false, 0);
-            _subject.ToString().Should().Be($"(\"Authors\".\"Id\" = \"Authors\".\"Id\")");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"Id\" = \"Seriess\".\"Id\")");
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Test.Datastore
         {
             _subject = Where(x => x.CleanName == null);
 
-            _subject.ToString().Should().Be($"(\"Authors\".\"CleanName\" IS NULL)");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" IS NULL)");
         }
 
         [Test]
@@ -102,16 +102,16 @@ namespace NzbDrone.Core.Test.Datastore
             string cleanName = null;
             _subject = Where(x => x.CleanName == cleanName);
 
-            _subject.ToString().Should().Be($"(\"Authors\".\"CleanName\" IS NULL)");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" IS NULL)");
         }
 
         [Test]
         public void postgres_where_equal_null_property()
         {
-            var author = new Author { CleanName = null };
+            var author = new Series { CleanName = null };
             _subject = Where(x => x.CleanName == author.CleanName);
 
-            _subject.ToString().Should().Be($"(\"Authors\".\"CleanName\" IS NULL)");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" IS NULL)");
         }
 
         [Test]
@@ -120,7 +120,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = Where(x => x.CleanName.Contains(test));
 
-            _subject.ToString().Should().Be($"(\"Authors\".\"CleanName\" ILIKE '%' || @Clause1_P1 || '%')");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" ILIKE '%' || @Clause1_P1 || '%')");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = Where(x => test.Contains(x.CleanName));
 
-            _subject.ToString().Should().Be($"(@Clause1_P1 ILIKE '%' || \"Authors\".\"CleanName\" || '%')");
+            _subject.ToString().Should().Be($"(@Clause1_P1 ILIKE '%' || \"Seriess\".\"CleanName\" || '%')");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -140,7 +140,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = Where(x => x.CleanName.StartsWith(test));
 
-            _subject.ToString().Should().Be($"(\"Authors\".\"CleanName\" ILIKE @Clause1_P1 || '%')");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" ILIKE @Clause1_P1 || '%')");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -150,7 +150,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = Where(x => x.CleanName.EndsWith(test));
 
-            _subject.ToString().Should().Be($"(\"Authors\".\"CleanName\" ILIKE '%' || @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" ILIKE '%' || @Clause1_P1)");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -160,7 +160,7 @@ namespace NzbDrone.Core.Test.Datastore
             var list = new List<int> { 1, 2, 3 };
             _subject = Where(x => list.Contains(x.Id));
 
-            _subject.ToString().Should().Be($"(\"Authors\".\"Id\" = ANY (('{{1, 2, 3}}')))");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"Id\" = ANY (('{{1, 2, 3}}')))");
         }
 
         [Test]
@@ -169,7 +169,7 @@ namespace NzbDrone.Core.Test.Datastore
             var list = new List<int> { 1, 2, 3 };
             _subject = Where(x => x.CleanName == "test" && list.Contains(x.Id));
 
-            _subject.ToString().Should().Be($"((\"Authors\".\"CleanName\" = @Clause1_P1) AND (\"Authors\".\"Id\" = ANY (('{{1, 2, 3}}'))))");
+            _subject.ToString().Should().Be($"((\"Seriess\".\"CleanName\" = @Clause1_P1) AND (\"Seriess\".\"Id\" = ANY (('{{1, 2, 3}}'))))");
         }
 
         [Test]
@@ -179,33 +179,33 @@ namespace NzbDrone.Core.Test.Datastore
 
             _subject = Where(x => list.Contains(x.CleanName));
 
-            _subject.ToString().Should().Be($"(\"Authors\".\"CleanName\" = ANY (@Clause1_P1))");
+            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" = ANY (@Clause1_P1))");
         }
 
         [Test]
         public void enum_as_int()
         {
-            _subject = WhereMetadata(x => x.Status == AuthorStatusType.Continuing);
+            _subject = WhereMetadata(x => x.Status == SeriesStatusType.Continuing);
 
-            _subject.ToString().Should().Be($"(\"AuthorMetadata\".\"Status\" = @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"SeriesMetadata\".\"Status\" = @Clause1_P1)");
         }
 
         [Test]
         public void enum_in_list()
         {
-            var allowed = new List<AuthorStatusType> { AuthorStatusType.Continuing, AuthorStatusType.Ended };
+            var allowed = new List<SeriesStatusType> { SeriesStatusType.Continuing, SeriesStatusType.Ended };
             _subject = WhereMetadata(x => allowed.Contains(x.Status));
 
-            _subject.ToString().Should().Be($"(\"AuthorMetadata\".\"Status\" = ANY (@Clause1_P1))");
+            _subject.ToString().Should().Be($"(\"SeriesMetadata\".\"Status\" = ANY (@Clause1_P1))");
         }
 
         [Test]
         public void enum_in_array()
         {
-            var allowed = new AuthorStatusType[] { AuthorStatusType.Continuing, AuthorStatusType.Ended };
+            var allowed = new SeriesStatusType[] { SeriesStatusType.Continuing, SeriesStatusType.Ended };
             _subject = WhereMetadata(x => allowed.Contains(x.Status));
 
-            _subject.ToString().Should().Be($"(\"AuthorMetadata\".\"Status\" = ANY (@Clause1_P1))");
+            _subject.ToString().Should().Be($"(\"SeriesMetadata\".\"Status\" = ANY (@Clause1_P1))");
         }
     }
 }

@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Extras.Files
     public interface IExtraFileService<TExtraFile>
         where TExtraFile : ExtraFile, new()
     {
-        List<TExtraFile> GetFilesByAuthor(int authorId);
+        List<TExtraFile> GetFilesBySeries(int authorId);
         List<TExtraFile> GetFilesByBookFile(int bookFileId);
         TExtraFile FindByPath(int authorId, string path);
         void Upsert(TExtraFile extraFile);
@@ -26,18 +26,18 @@ namespace NzbDrone.Core.Extras.Files
     }
 
     public abstract class ExtraFileService<TExtraFile> : IExtraFileService<TExtraFile>,
-                                                         IHandleAsync<AuthorDeletedEvent>,
-                                                         IHandle<BookFileDeletedEvent>
+                                                         IHandleAsync<SeriesDeletedEvent>,
+                                                         IHandle<ComicFileDeletedEvent>
         where TExtraFile : ExtraFile, new()
     {
         private readonly IExtraFileRepository<TExtraFile> _repository;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IDiskProvider _diskProvider;
         private readonly IRecycleBinProvider _recycleBinProvider;
         private readonly Logger _logger;
 
         public ExtraFileService(IExtraFileRepository<TExtraFile> repository,
-                                IAuthorService authorService,
+                                ISeriesService authorService,
                                 IDiskProvider diskProvider,
                                 IRecycleBinProvider recycleBinProvider,
                                 Logger logger)
@@ -49,9 +49,9 @@ namespace NzbDrone.Core.Extras.Files
             _logger = logger;
         }
 
-        public List<TExtraFile> GetFilesByAuthor(int authorId)
+        public List<TExtraFile> GetFilesBySeries(int authorId)
         {
-            return _repository.GetFilesByAuthor(authorId);
+            return _repository.GetFilesBySeries(authorId);
         }
 
         public List<TExtraFile> GetFilesByBookFile(int bookFileId)
@@ -95,15 +95,15 @@ namespace NzbDrone.Core.Extras.Files
             _repository.DeleteMany(ids);
         }
 
-        public void HandleAsync(AuthorDeletedEvent message)
+        public void HandleAsync(SeriesDeletedEvent message)
         {
-            _logger.Debug("Deleting Extra from database for author: {0}", message.Author);
-            _repository.DeleteForAuthor(message.Author.Id);
+            _logger.Debug("Deleting Extra from database for author: {0}", message.Series);
+            _repository.DeleteForSeries(message.Series.Id);
         }
 
-        public void Handle(BookFileDeletedEvent message)
+        public void Handle(ComicFileDeletedEvent message)
         {
-            var bookFile = message.BookFile;
+            var comicFile = message.ComicFile;
 
             if (message.Reason == DeleteMediaFileReason.NoLinkedEpisodes)
             {
@@ -111,9 +111,9 @@ namespace NzbDrone.Core.Extras.Files
             }
             else
             {
-                var author = bookFile.Author.Value;
+                var author = comicFile.Series.Value;
 
-                foreach (var extra in _repository.GetFilesByBookFile(bookFile.Id))
+                foreach (var extra in _repository.GetFilesByBookFile(comicFile.Id))
                 {
                     var path = Path.Combine(author.Path, extra.RelativePath);
 
@@ -126,8 +126,8 @@ namespace NzbDrone.Core.Extras.Files
                 }
             }
 
-            _logger.Debug("Deleting Extra from database for track file: {0}", bookFile);
-            _repository.DeleteForBookFile(bookFile.Id);
+            _logger.Debug("Deleting Extra from database for track file: {0}", comicFile);
+            _repository.DeleteForBookFile(comicFile.Id);
         }
     }
 }

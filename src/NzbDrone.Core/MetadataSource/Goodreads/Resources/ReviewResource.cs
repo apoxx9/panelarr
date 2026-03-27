@@ -16,12 +16,12 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         public long Id { get; protected set; }
 
         /// <summary>
-        /// The summary information for the book this review is for.
+        /// The summary information for the issue this review is for.
         /// </summary>
-        public BookSummaryResource Book { get; protected set; }
+        public IssueSummaryResource Issue { get; protected set; }
 
         /// <summary>
-        /// The rating the user gave the book in this review.
+        /// The rating the user gave the issue in this review.
         /// </summary>
         public int Rating { get; protected set; }
 
@@ -46,37 +46,37 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         // public IReadOnlyList<ReviewShelf> Shelves { get; protected set; }
 
         /// <summary>
-        /// Who the user would recommend reading this book.
+        /// Who the user would recommend reading this issue.
         /// </summary>
         public string RecommendedFor { get; protected set; }
 
         /// <summary>
-        /// Who recommended the user to read this book.
+        /// Who recommended the user to read this issue.
         /// </summary>
         public string RecommendedBy { get; protected set; }
 
         /// <summary>
-        /// The date the user started reading this book.
+        /// The date the user started reading this issue.
         /// </summary>
         public DateTime? DateStarted { get; protected set; }
 
         /// <summary>
-        /// The date the user finished reading this book.
+        /// The date the user finished reading this issue.
         /// </summary>
         public DateTime? DateRead { get; protected set; }
 
         /// <summary>
-        /// The date the user added this book to their shelves.
+        /// The date the user added this issue to their shelves.
         /// </summary>
         public DateTime? DateAdded { get; protected set; }
 
         /// <summary>
-        /// The date the user last updated this book on their shelves.
+        /// The date the user last updated this issue on their shelves.
         /// </summary>
         public DateTime? DateUpdated { get; protected set; }
 
         /// <summary>
-        /// The number of times this book has been read.
+        /// The number of times this issue has been read.
         /// </summary>
         public int? ReadCount { get; protected set; }
 
@@ -96,7 +96,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         public string Url { get; protected set; }
 
         /// <summary>
-        /// The owned count of the book.
+        /// The owned count of the issue.
         /// </summary>
         public int Owned { get; protected set; }
 
@@ -104,11 +104,11 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         {
             Id = element.ElementAsLong("id");
 
-            var bookElement = element.Element("book");
+            var bookElement = element.Element("issue");
             if (bookElement != null)
             {
-                Book = new BookSummaryResource();
-                Book.Parse(bookElement);
+                Issue = new IssueSummaryResource();
+                Issue.Parse(bookElement);
             }
 
             Rating = element.ElementAsInt("rating");

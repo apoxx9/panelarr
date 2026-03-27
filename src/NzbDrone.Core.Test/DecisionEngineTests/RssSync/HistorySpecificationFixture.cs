@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         private RemoteBook _parseResultSingle;
         private QualityModel _upgradableQuality;
         private QualityModel _notupgradableQuality;
-        private Author _fakeAuthor;
+        private Series _fakeSeries;
 
         [SetUp]
         public void Setup()
@@ -41,19 +41,19 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 
             CustomFormatsTestHelpers.GivenCustomFormats();
 
-            var singleBookList = new List<Book> { new Book { Id = FIRST_ALBUM_ID } };
-            var doubleBookList = new List<Book>
+            var singleBookList = new List<Issue> { new Issue { Id = FIRST_ALBUM_ID } };
+            var doubleBookList = new List<Issue>
             {
-                                                            new Book { Id = FIRST_ALBUM_ID },
-                                                            new Book { Id = SECOND_ALBUM_ID },
-                                                            new Book { Id = 3 }
+                                                            new Issue { Id = FIRST_ALBUM_ID },
+                                                            new Issue { Id = SECOND_ALBUM_ID },
+                                                            new Issue { Id = 3 }
             };
 
-            _fakeAuthor = Builder<Author>.CreateNew()
+            _fakeSeries = Builder<Series>.CreateNew()
                 .With(c => c.QualityProfile = new QualityProfile
                 {
                     UpgradeAllowed = true,
-                    Cutoff = Quality.MP3.Id,
+                    Cutoff = Quality.CBR.Id,
                     FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems("None"),
                     MinFormatScore = 0,
                     Items = Qualities.QualityFixture.GetDefaultQualities()
@@ -62,29 +62,29 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 
             _parseResultMulti = new RemoteBook
             {
-                Author = _fakeAuthor,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MP3, new Revision(version: 2)) },
+                Series = _fakeSeries,
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
                 Books = doubleBookList,
                 CustomFormats = new List<CustomFormat>()
             };
 
             _parseResultSingle = new RemoteBook
             {
-                Author = _fakeAuthor,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MP3, new Revision(version: 2)) },
+                Series = _fakeSeries,
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
                 Books = singleBookList,
                 CustomFormats = new List<CustomFormat>()
             };
 
-            _upgradableQuality = new QualityModel(Quality.MP3, new Revision(version: 1));
-            _notupgradableQuality = new QualityModel(Quality.MP3, new Revision(version: 2));
+            _upgradableQuality = new QualityModel(Quality.CBR, new Revision(version: 1));
+            _notupgradableQuality = new QualityModel(Quality.CBR, new Revision(version: 2));
 
             Mocker.GetMock<IConfigService>()
                   .SetupGet(s => s.EnableCompletedDownloadHandling)
                   .Returns(true);
 
             Mocker.GetMock<ICustomFormatCalculationService>()
-                  .Setup(x => x.ParseCustomFormat(It.IsAny<EntityHistory>(), It.IsAny<Author>()))
+                  .Setup(x => x.ParseCustomFormat(It.IsAny<EntityHistory>(), It.IsAny<Series>()))
                   .Returns(new List<CustomFormat>());
         }
 
@@ -104,7 +104,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_return_true_if_it_is_a_search()
         {
-            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, new BookSearchCriteria()).Accepted.Should().BeTrue();
+            _upgradeHistory.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -176,9 +176,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_not_be_upgradable_if_book_is_of_same_quality_as_existing()
         {
-            _fakeAuthor.QualityProfile = new QualityProfile { Cutoff = Quality.MP3.Id, Items = Qualities.QualityFixture.GetDefaultQualities() };
-            _parseResultSingle.ParsedBookInfo.Quality = new QualityModel(Quality.MP3, new Revision(version: 1));
-            _upgradableQuality = new QualityModel(Quality.MP3, new Revision(version: 1));
+            _fakeSeries.QualityProfile = new QualityProfile { Cutoff = Quality.CBR.Id, Items = Qualities.QualityFixture.GetDefaultQualities() };
+            _parseResultSingle.ParsedBookInfo.Quality = new QualityModel(Quality.CBR, new Revision(version: 1));
+            _upgradableQuality = new QualityModel(Quality.CBR, new Revision(version: 1));
 
             GivenMostRecentForBook(FIRST_ALBUM_ID, string.Empty, _upgradableQuality, DateTime.UtcNow, EntityHistoryEventType.Grabbed);
 
@@ -188,9 +188,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_not_be_upgradable_if_cutoff_already_met()
         {
-            _fakeAuthor.QualityProfile = new QualityProfile { Cutoff = Quality.MP3.Id, Items = Qualities.QualityFixture.GetDefaultQualities() };
-            _parseResultSingle.ParsedBookInfo.Quality = new QualityModel(Quality.MP3, new Revision(version: 1));
-            _upgradableQuality = new QualityModel(Quality.MP3, new Revision(version: 1));
+            _fakeSeries.QualityProfile = new QualityProfile { Cutoff = Quality.CBR.Id, Items = Qualities.QualityFixture.GetDefaultQualities() };
+            _parseResultSingle.ParsedBookInfo.Quality = new QualityModel(Quality.CBR, new Revision(version: 1));
+            _upgradableQuality = new QualityModel(Quality.CBR, new Revision(version: 1));
 
             GivenMostRecentForBook(FIRST_ALBUM_ID, string.Empty, _upgradableQuality, DateTime.UtcNow, EntityHistoryEventType.Grabbed);
 
@@ -216,9 +216,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         public void should_return_false_if_cutoff_already_met_and_cdh_is_disabled()
         {
             GivenCdhDisabled();
-            _fakeAuthor.QualityProfile = new QualityProfile { Cutoff = Quality.MP3.Id, Items = Qualities.QualityFixture.GetDefaultQualities() };
-            _parseResultSingle.ParsedBookInfo.Quality = new QualityModel(Quality.MP3, new Revision(version: 1));
-            _upgradableQuality = new QualityModel(Quality.MP3, new Revision(version: 1));
+            _fakeSeries.QualityProfile = new QualityProfile { Cutoff = Quality.CBR.Id, Items = Qualities.QualityFixture.GetDefaultQualities() };
+            _parseResultSingle.ParsedBookInfo.Quality = new QualityModel(Quality.CBR, new Revision(version: 1));
+            _upgradableQuality = new QualityModel(Quality.CBR, new Revision(version: 1));
 
             GivenMostRecentForBook(FIRST_ALBUM_ID, "test", _upgradableQuality, DateTime.UtcNow.AddDays(-100), EntityHistoryEventType.Grabbed);
 

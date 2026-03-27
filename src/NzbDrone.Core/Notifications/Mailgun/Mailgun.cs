@@ -25,27 +25,27 @@ namespace NzbDrone.Core.Notifications.Mailgun
             _proxy.SendNotification(BOOK_GRABBED_TITLE, grabMessage.Message, Settings);
         }
 
-        public override void OnReleaseImport(BookDownloadMessage downloadMessage)
+        public override void OnReleaseImport(IssueDownloadMessage downloadMessage)
         {
             _proxy.SendNotification(BOOK_DOWNLOADED_TITLE, downloadMessage.Message, Settings);
         }
 
-        public override void OnAuthorAdded(Author author)
+        public override void OnSeriesAdded(Series author)
         {
             _proxy.SendNotification(AUTHOR_ADDED_TITLE, author.Name, Settings);
         }
 
-        public override void OnAuthorDelete(AuthorDeleteMessage deleteMessage)
+        public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
             _proxy.SendNotification(AUTHOR_DELETED_TITLE, deleteMessage.Message, Settings);
         }
 
-        public override void OnBookDelete(BookDeleteMessage deleteMessage)
+        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
         {
             _proxy.SendNotification(BOOK_DELETED_TITLE, deleteMessage.Message, Settings);
         }
 
-        public override void OnBookFileDelete(BookFileDeleteMessage deleteMessage)
+        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             _proxy.SendNotification(BOOK_FILE_DELETED_TITLE, deleteMessage.Message, Settings);
         }

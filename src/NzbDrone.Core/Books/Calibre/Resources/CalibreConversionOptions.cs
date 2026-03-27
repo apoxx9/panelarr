@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Books.Calibre
     public class CalibreBookData
     {
         public CalibreConversionOptions Conversion_options { get; set; }
-        public int Book_id { get; set; }
+        public int Issue_id { get; set; }
         public List<string> Input_formats { get; set; }
         public List<string> Output_formats { get; set; }
     }

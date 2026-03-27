@@ -26,27 +26,27 @@ namespace NzbDrone.Core.Notifications.Notifiarr
             _proxy.SendNotification(BuildOnGrabPayload(message), Settings);
         }
 
-        public override void OnReleaseImport(BookDownloadMessage message)
+        public override void OnReleaseImport(IssueDownloadMessage message)
         {
             _proxy.SendNotification(BuildOnReleaseImportPayload(message), Settings);
         }
 
-        public override void OnAuthorAdded(Author author)
+        public override void OnSeriesAdded(Series author)
         {
-            _proxy.SendNotification(BuildOnAuthorAdded(author), Settings);
+            _proxy.SendNotification(BuildOnSeriesAdded(author), Settings);
         }
 
-        public override void OnAuthorDelete(AuthorDeleteMessage deleteMessage)
+        public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(BuildOnAuthorDelete(deleteMessage), Settings);
+            _proxy.SendNotification(BuildOnSeriesDelete(deleteMessage), Settings);
         }
 
-        public override void OnBookDelete(BookDeleteMessage deleteMessage)
+        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
         {
             _proxy.SendNotification(BuildOnBookDelete(deleteMessage), Settings);
         }
 
-        public override void OnBookFileDelete(BookFileDeleteMessage deleteMessage)
+        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             _proxy.SendNotification(BuildOnBookFileDelete(deleteMessage), Settings);
         }

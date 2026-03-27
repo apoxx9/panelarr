@@ -36,41 +36,41 @@ namespace NzbDrone.Core.ImportLists.Panelarr
             try
             {
                 var remoteBooks = _panelarrV1Proxy.GetBooks(Settings);
-                var remoteAuthors = _panelarrV1Proxy.GetAuthors(Settings);
+                var remoteSeriess = _panelarrV1Proxy.GetSeriess(Settings);
 
-                var authorDict = remoteAuthors.ToDictionary(x => x.Id);
+                var authorDict = remoteSeriess.ToDictionary(x => x.Id);
 
                 foreach (var remoteBook in remoteBooks)
                 {
-                    var remoteAuthor = authorDict[remoteBook.AuthorId];
+                    var remoteSeries = authorDict[remoteBook.SeriesId];
 
-                    if (Settings.ProfileIds.Any() && !Settings.ProfileIds.Contains(remoteAuthor.QualityProfileId))
+                    if (Settings.ProfileIds.Any() && !Settings.ProfileIds.Contains(remoteSeries.QualityProfileId))
                     {
                         continue;
                     }
 
-                    if (Settings.TagIds.Any() && !Settings.TagIds.Any(x => remoteAuthor.Tags.Any(y => y == x)))
+                    if (Settings.TagIds.Any() && !Settings.TagIds.Any(x => remoteSeries.Tags.Any(y => y == x)))
                     {
                         continue;
                     }
 
-                    if (Settings.RootFolderPaths.Any() && !Settings.RootFolderPaths.Any(rootFolderPath => remoteAuthor.RootFolderPath.ContainsIgnoreCase(rootFolderPath)))
+                    if (Settings.RootFolderPaths.Any() && !Settings.RootFolderPaths.Any(rootFolderPath => remoteSeries.RootFolderPath.ContainsIgnoreCase(rootFolderPath)))
                     {
                         continue;
                     }
 
-                    if (!remoteBook.Monitored || !remoteAuthor.Monitored)
+                    if (!remoteBook.Monitored || !remoteSeries.Monitored)
                     {
                         continue;
                     }
 
                     authorsAndBooks.Add(new ImportListItemInfo
                     {
-                        BookGoodreadsId = remoteBook.ForeignBookId,
-                        Book = remoteBook.Title,
+                        IssueGoodreadsId = remoteBook.ForeignIssueId,
+                        Issue = remoteBook.Title,
                         EditionGoodreadsId = remoteBook.ForeignEditionId,
-                        Author = remoteAuthor.AuthorName,
-                        AuthorGoodreadsId = remoteAuthor.ForeignAuthorId
+                        Series = remoteSeries.SeriesName,
+                        SeriesGoodreadsId = remoteSeries.ForeignSeriesId
                     });
                 }
 

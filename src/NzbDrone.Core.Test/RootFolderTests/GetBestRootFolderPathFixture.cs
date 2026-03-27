@@ -21,20 +21,20 @@ namespace NzbDrone.Core.Test.RootFolderTests
         public void should_return_root_folder_that_is_parent_path()
         {
             GivenRootFolders(@"C:\Test\Books".AsOsAgnostic(), @"D:\Test\Books".AsOsAgnostic());
-            Subject.GetBestRootFolderPath(@"C:\Test\Books\Author Title".AsOsAgnostic()).Should().Be(@"C:\Test\Books".AsOsAgnostic());
+            Subject.GetBestRootFolderPath(@"C:\Test\Books\Series Title".AsOsAgnostic()).Should().Be(@"C:\Test\Books".AsOsAgnostic());
         }
 
         [Test]
         public void should_return_root_folder_that_is_grandparent_path()
         {
             GivenRootFolders(@"C:\Test\Books".AsOsAgnostic(), @"D:\Test\Books".AsOsAgnostic());
-            Subject.GetBestRootFolderPath(@"C:\Test\Books\S\Author Title".AsOsAgnostic()).Should().Be(@"C:\Test\Books".AsOsAgnostic());
+            Subject.GetBestRootFolderPath(@"C:\Test\Books\S\Series Title".AsOsAgnostic()).Should().Be(@"C:\Test\Books".AsOsAgnostic());
         }
 
         [Test]
         public void should_get_parent_path_from_os_path_if_matching_root_folder_is_not_found()
         {
-            var artistPath = @"T:\Test\Books\Author Title".AsOsAgnostic();
+            var artistPath = @"T:\Test\Books\Series Title".AsOsAgnostic();
 
             GivenRootFolders(@"C:\Test\Books".AsOsAgnostic(), @"D:\Test\Books".AsOsAgnostic());
             Subject.GetBestRootFolderPath(artistPath).Should().Be(@"T:\Test\Books".AsOsAgnostic());
@@ -45,10 +45,10 @@ namespace NzbDrone.Core.Test.RootFolderTests
         {
             WindowsOnly();
 
-            var artistPath = "/mnt/books/Author Title";
+            var artistPath = "/mnt/issues/Series Title";
 
             GivenRootFolders(@"C:\Test\Books".AsOsAgnostic(), @"D:\Test\Books".AsOsAgnostic());
-            Subject.GetBestRootFolderPath(artistPath).Should().Be(@"/mnt/books");
+            Subject.GetBestRootFolderPath(artistPath).Should().Be(@"/mnt/issues");
         }
 
         [Test]
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Test.RootFolderTests
         {
             PosixOnly();
 
-            var artistPath = @"T:\Test\Books\Author Title";
+            var artistPath = @"T:\Test\Books\Series Title";
 
             GivenRootFolders(@"C:\Test\Books".AsOsAgnostic(), @"D:\Test\Books".AsOsAgnostic());
             Subject.GetBestRootFolderPath(artistPath).Should().Be(@"T:\Test\Books");

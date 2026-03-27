@@ -11,16 +11,15 @@ namespace NzbDrone.Core.Parser.Model
         //public int TrackNumber { get; set; }
         public string Title { get; set; }
         public string CleanTitle { get; set; }
-        public List<string> Authors { get; set; }
-        public string AuthorTitle => Authors.FirstOrDefault();
-        public string BookTitle { get; set; }
+        public List<string> Seriess { get; set; }
+        public string IssueTitle { get; set; }
         public string SeriesTitle { get; set; }
         public string SeriesIndex { get; set; }
         public string Isbn { get; set; }
         public string Asin { get; set; }
         public string GoodreadsId { get; set; }
-        public string AuthorMBId { get; set; }
-        public string BookMBId { get; set; }
+        public string SeriesMBId { get; set; }
+        public string IssueMBId { get; set; }
         public string ReleaseMBId { get; set; }
         public string RecordingMBId { get; set; }
         public string TrackMBId { get; set; }
@@ -43,7 +42,7 @@ namespace NzbDrone.Core.Parser.Model
 
         public ParsedTrackInfo()
         {
-            Authors = new List<string>();
+            Seriess = new List<string>();
             TrackNumbers = new int[0];
         }
 
@@ -56,7 +55,7 @@ namespace NzbDrone.Core.Parser.Model
                 trackString = string.Format("{0}", string.Join("-", TrackNumbers.Select(c => c.ToString("00"))));
             }
 
-            return string.Format("{0} - {1} - {2}:{3} {4}: {5}", Authors.ConcatToString(" & "), BookTitle, DiscNumber, trackString, Title, Quality);
+            return string.Format("{0} - {1} - {2}:{3} {4}: {5}", Seriess.ConcatToString(" & "), IssueTitle, DiscNumber, trackString, Title, Quality);
         }
     }
 }

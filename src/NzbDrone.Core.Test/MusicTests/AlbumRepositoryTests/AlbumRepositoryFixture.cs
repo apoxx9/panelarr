@@ -9,16 +9,16 @@ using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Test.Framework;
 
-namespace NzbDrone.Core.Test.MusicTests.BookRepositoryTests
+namespace NzbDrone.Core.Test.MusicTests.IssueRepositoryTests
 {
     [TestFixture]
-    public class BookRepositoryFixture : DbTest<BookService, Book>
+    public class IssueRepositoryFixture : DbTest<IssueService, Issue>
     {
-        private Author _author;
-        private Book _book;
-        private Book _bookSpecial;
-        private List<Book> _books;
-        private BookRepository _bookRepo;
+        private Series _author;
+        private Issue _book;
+        private Issue _bookSpecial;
+        private List<Issue> _books;
+        private IssueRepository _bookRepo;
 
         [SetUp]
         public void Setup()
@@ -30,38 +30,38 @@ namespace NzbDrone.Core.Test.MusicTests.BookRepositoryTests
                 return options;
             });
 
-            _author = new Author
+            _author = new Series
             {
                 Name = "Alien Ant Farm",
                 Monitored = true,
-                ForeignAuthorId = "this is a fake id",
+                ForeignSeriesId = "this is a fake id",
                 Id = 1,
-                AuthorMetadataId = 1
+                SeriesMetadataId = 1
             };
 
-            _bookRepo = Mocker.Resolve<BookRepository>();
+            _bookRepo = Mocker.Resolve<IssueRepository>();
 
-            _book = new Book
+            _book = new Issue
             {
                 Title = "ANThology",
-                ForeignBookId = "1",
+                ForeignIssueId = "1",
                 TitleSlug = "1-ANThology",
                 CleanTitle = "anthology",
-                Author = _author,
-                AuthorMetadataId = _author.AuthorMetadataId,
+                Series = _author,
+                SeriesMetadataId = _author.SeriesMetadataId,
             };
 
             _bookRepo.Insert(_book);
             _bookRepo.Update(_book);
 
-            _bookSpecial = new Book
+            _bookSpecial = new Issue
             {
                 Title = "+",
-                ForeignBookId = "2",
+                ForeignIssueId = "2",
                 TitleSlug = "2-_",
                 CleanTitle = "",
-                Author = _author,
-                AuthorMetadataId = _author.AuthorMetadataId
+                Series = _author,
+                SeriesMetadataId = _author.SeriesMetadataId
             };
 
             _bookRepo.Insert(_bookSpecial);
@@ -72,19 +72,19 @@ namespace NzbDrone.Core.Test.MusicTests.BookRepositoryTests
         [TestCase("anthology!")]
         public void should_find_book_in_db_by_title(string title)
         {
-            var book = _bookRepo.FindByTitle(_author.AuthorMetadataId, title);
+            var issue = _bookRepo.FindByTitle(_author.SeriesMetadataId, title);
 
-            book.Should().NotBeNull();
-            book.Title.Should().Be(_book.Title);
+            issue.Should().NotBeNull();
+            issue.Title.Should().Be(_book.Title);
         }
 
         [Test]
         public void should_find_book_in_db_by_title_all_special_characters()
         {
-            var book = _bookRepo.FindByTitle(_author.AuthorMetadataId, "+");
+            var issue = _bookRepo.FindByTitle(_author.SeriesMetadataId, "+");
 
-            book.Should().NotBeNull();
-            book.Title.Should().Be(_bookSpecial.Title);
+            issue.Should().NotBeNull();
+            issue.Title.Should().Be(_bookSpecial.Title);
         }
 
         [TestCase("ANTholog")]
@@ -93,38 +93,38 @@ namespace NzbDrone.Core.Test.MusicTests.BookRepositoryTests
         [TestCase("÷")]
         public void should_not_find_book_in_db_by_incorrect_title(string title)
         {
-            var book = _bookRepo.FindByTitle(_author.AuthorMetadataId, title);
+            var issue = _bookRepo.FindByTitle(_author.SeriesMetadataId, title);
 
-            book.Should().BeNull();
+            issue.Should().BeNull();
         }
 
         [Test]
         public void should_not_find_book_when_two_books_have_same_name()
         {
-            var books = Builder<Book>.CreateListOfSize(2)
+            var issues = Builder<Issue>.CreateListOfSize(2)
                 .All()
                 .With(x => x.Id = 0)
-                .With(x => x.Author = _author)
-                .With(x => x.AuthorMetadataId = _author.AuthorMetadataId)
+                .With(x => x.Series = _author)
+                .With(x => x.SeriesMetadataId = _author.SeriesMetadataId)
                 .With(x => x.Title = "Weezer")
                 .With(x => x.CleanTitle = "weezer")
                 .Build();
 
-            _bookRepo.InsertMany(books);
+            _bookRepo.InsertMany(issues);
 
-            var book = _bookRepo.FindByTitle(_author.AuthorMetadataId, "Weezer");
+            var issue = _bookRepo.FindByTitle(_author.SeriesMetadataId, "Weezer");
 
             _bookRepo.All().Should().HaveCount(4);
-            book.Should().BeNull();
+            issue.Should().BeNull();
         }
 
         private void GivenMultipleBooks()
         {
-            _books = Builder<Book>.CreateListOfSize(4)
+            _books = Builder<Issue>.CreateListOfSize(4)
                 .All()
                 .With(x => x.Id = 0)
-                .With(x => x.Author = _author)
-                .With(x => x.AuthorMetadataId = _author.AuthorMetadataId)
+                .With(x => x.Series = _author)
+                .With(x => x.SeriesMetadataId = _author.SeriesMetadataId)
                 .TheFirst(1)
 
                 // next
@@ -151,8 +151,8 @@ namespace NzbDrone.Core.Test.MusicTests.BookRepositoryTests
         {
             GivenMultipleBooks();
 
-            var result = _bookRepo.GetNextBooks(new[] { _author.AuthorMetadataId });
-            result.Should().BeEquivalentTo(_books.Take(1), BookComparerOptions);
+            var result = _bookRepo.GetNextBooks(new[] { _author.SeriesMetadataId });
+            result.Should().BeEquivalentTo(_books.Take(1), IssueComparerOptions);
         }
 
         [Test]
@@ -160,13 +160,13 @@ namespace NzbDrone.Core.Test.MusicTests.BookRepositoryTests
         {
             GivenMultipleBooks();
 
-            var result = _bookRepo.GetLastBooks(new[] { _author.AuthorMetadataId });
-            result.Should().BeEquivalentTo(_books.Skip(2).Take(1), BookComparerOptions);
+            var result = _bookRepo.GetLastBooks(new[] { _author.SeriesMetadataId });
+            result.Should().BeEquivalentTo(_books.Skip(2).Take(1), IssueComparerOptions);
         }
 
-        private EquivalencyAssertionOptions<Book> BookComparerOptions(EquivalencyAssertionOptions<Book> opts) => opts.ComparingByMembers<Book>()
+        private EquivalencyAssertionOptions<Issue> IssueComparerOptions(EquivalencyAssertionOptions<Issue> opts) => opts.ComparingByMembers<Issue>()
                 .Excluding(ctx => ctx.SelectedMemberInfo.MemberType.IsGenericType && ctx.SelectedMemberInfo.MemberType.GetGenericTypeDefinition() == typeof(LazyLoaded<>))
-                .Excluding(x => x.AuthorId)
-                .Excluding(x => x.ForeignEditionId);
+                .Excluding(x => x.SeriesId)
+                .Excluding(x => x.ForeignIssueId);
     }
 }

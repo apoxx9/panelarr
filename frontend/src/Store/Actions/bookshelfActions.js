@@ -118,7 +118,7 @@ export const actionHandlers = handleThunks({
     }));
 
     const promise = createAjaxRequest({
-      url: '/bookshelf',
+      url: '/issueshelf',
       method: 'POST',
       data: JSON.stringify({
         authors,

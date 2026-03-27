@@ -14,7 +14,7 @@ namespace Panelarr.Api.V1.Config
                                            PathExistsValidator pathExistsValidator,
                                            FolderChmodValidator folderChmodValidator,
                                            FolderWritableValidator folderWritableValidator,
-                                           AuthorPathValidator authorPathValidator,
+                                           SeriesPathValidator authorPathValidator,
                                            StartupFolderValidator startupFolderValidator,
                                            SystemFolderValidator systemFolderValidator,
                                            RootFolderAncestorValidator rootFolderAncestorValidator,

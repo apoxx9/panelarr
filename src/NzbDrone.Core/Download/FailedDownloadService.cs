@@ -123,8 +123,8 @@ namespace NzbDrone.Core.Download
 
             var downloadFailedEvent = new DownloadFailedEvent
             {
-                AuthorId = historyItem.AuthorId,
-                BookIds = historyItems.Select(h => h.BookId).ToList(),
+                SeriesId = historyItem.SeriesId,
+                IssueIds = historyItems.Select(h => h.IssueId).ToList(),
                 Quality = historyItem.Quality,
                 SourceTitle = historyItem.SourceTitle,
                 DownloadClient = historyItem.Data.GetValueOrDefault(EntityHistory.DOWNLOAD_CLIENT),

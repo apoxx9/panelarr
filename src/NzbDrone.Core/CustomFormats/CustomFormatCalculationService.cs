@@ -15,10 +15,10 @@ namespace NzbDrone.Core.CustomFormats
     public interface ICustomFormatCalculationService
     {
         List<CustomFormat> ParseCustomFormat(RemoteBook remoteBook, long size);
-        List<CustomFormat> ParseCustomFormat(BookFile bookFile, Author artist);
-        List<CustomFormat> ParseCustomFormat(BookFile bookFile);
-        List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Author artist);
-        List<CustomFormat> ParseCustomFormat(EntityHistory history, Author artist);
+        List<CustomFormat> ParseCustomFormat(ComicFile comicFile, Series artist);
+        List<CustomFormat> ParseCustomFormat(ComicFile comicFile);
+        List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Series artist);
+        List<CustomFormat> ParseCustomFormat(EntityHistory history, Series artist);
         List<CustomFormat> ParseCustomFormat(LocalBook localBook);
     }
 
@@ -38,7 +38,7 @@ namespace NzbDrone.Core.CustomFormats
             var input = new CustomFormatInput
             {
                 BookInfo = remoteBook.ParsedBookInfo,
-                Author = remoteBook.Author,
+                Series = remoteBook.Series,
                 Size = size,
                 IndexerFlags = remoteBook.Release?.IndexerFlags ?? 0
             };
@@ -46,23 +46,23 @@ namespace NzbDrone.Core.CustomFormats
             return ParseCustomFormat(input);
         }
 
-        public List<CustomFormat> ParseCustomFormat(BookFile bookFile, Author author)
+        public List<CustomFormat> ParseCustomFormat(ComicFile comicFile, Series author)
         {
-            return ParseCustomFormat(bookFile, author, _formatService.All());
+            return ParseCustomFormat(comicFile, author, _formatService.All());
         }
 
-        public List<CustomFormat> ParseCustomFormat(BookFile bookFile)
+        public List<CustomFormat> ParseCustomFormat(ComicFile comicFile)
         {
-            return ParseCustomFormat(bookFile, bookFile.Author.Value, _formatService.All());
+            return ParseCustomFormat(comicFile, comicFile.Series.Value, _formatService.All());
         }
 
-        public List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Author author)
+        public List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Series author)
         {
             var parsed = Parser.Parser.ParseBookTitle(blocklist.SourceTitle);
 
             var bookInfo = new ParsedBookInfo
             {
-                AuthorName = author.Name,
+                SeriesName = author.Name,
                 ReleaseTitle = parsed?.ReleaseTitle ?? blocklist.SourceTitle,
                 Quality = blocklist.Quality,
                 ReleaseGroup = parsed?.ReleaseGroup
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.CustomFormats
             var input = new CustomFormatInput
             {
                 BookInfo = bookInfo,
-                Author = author,
+                Series = author,
                 Size = blocklist.Size ?? 0,
                 IndexerFlags = blocklist.IndexerFlags
             };
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.CustomFormats
             return ParseCustomFormat(input);
         }
 
-        public List<CustomFormat> ParseCustomFormat(EntityHistory history, Author author)
+        public List<CustomFormat> ParseCustomFormat(EntityHistory history, Series author)
         {
             var parsed = Parser.Parser.ParseBookTitle(history.SourceTitle);
 
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.CustomFormats
 
             var bookInfo = new ParsedBookInfo
             {
-                AuthorName = author.Name,
+                SeriesName = author.Name,
                 ReleaseTitle = parsed?.ReleaseTitle ?? history.SourceTitle,
                 Quality = history.Quality,
                 ReleaseGroup = parsed?.ReleaseGroup,
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.CustomFormats
             var input = new CustomFormatInput
             {
                 BookInfo = bookInfo,
-                Author = author,
+                Series = author,
                 Size = size,
                 IndexerFlags = indexerFlags
             };
@@ -109,7 +109,7 @@ namespace NzbDrone.Core.CustomFormats
         {
             var bookInfo = new ParsedBookInfo
             {
-                AuthorName = localBook.Author.Name,
+                SeriesName = localBook.Series.Name,
                 ReleaseTitle = localBook.SceneName,
                 Quality = localBook.Quality,
                 ReleaseGroup = localBook.ReleaseGroup
@@ -118,7 +118,7 @@ namespace NzbDrone.Core.CustomFormats
             var input = new CustomFormatInput
             {
                 BookInfo = bookInfo,
-                Author = localBook.Author,
+                Series = localBook.Series,
                 Size = localBook.Size,
                 IndexerFlags = localBook.IndexerFlags,
             };
@@ -154,41 +154,41 @@ namespace NzbDrone.Core.CustomFormats
             return matches.OrderBy(x => x.Name).ToList();
         }
 
-        private List<CustomFormat> ParseCustomFormat(BookFile bookFile, Author author, List<CustomFormat> allCustomFormats)
+        private List<CustomFormat> ParseCustomFormat(ComicFile comicFile, Series author, List<CustomFormat> allCustomFormats)
         {
             var releaseTitle = string.Empty;
 
-            if (bookFile.SceneName.IsNotNullOrWhiteSpace())
+            if (comicFile.SceneName.IsNotNullOrWhiteSpace())
             {
-                _logger.Trace("Using scene name for release title: {0}", bookFile.SceneName);
-                releaseTitle = bookFile.SceneName;
+                _logger.Trace("Using scene name for release title: {0}", comicFile.SceneName);
+                releaseTitle = comicFile.SceneName;
             }
-            else if (bookFile.OriginalFilePath.IsNotNullOrWhiteSpace())
+            else if (comicFile.OriginalFilePath.IsNotNullOrWhiteSpace())
             {
-                _logger.Trace("Using original file path for release title: {0}", bookFile.OriginalFilePath);
-                releaseTitle = bookFile.OriginalFilePath;
+                _logger.Trace("Using original file path for release title: {0}", comicFile.OriginalFilePath);
+                releaseTitle = comicFile.OriginalFilePath;
             }
-            else if (bookFile.Path.IsNotNullOrWhiteSpace())
+            else if (comicFile.Path.IsNotNullOrWhiteSpace())
             {
-                _logger.Trace("Using path for release title: {0}", Path.GetFileName(bookFile.Path));
-                releaseTitle = Path.GetFileName(bookFile.Path);
+                _logger.Trace("Using path for release title: {0}", Path.GetFileName(comicFile.Path));
+                releaseTitle = Path.GetFileName(comicFile.Path);
             }
 
             var bookInfo = new ParsedBookInfo
             {
-                AuthorName = author.Name,
+                SeriesName = author.Name,
                 ReleaseTitle = releaseTitle,
-                Quality = bookFile.Quality,
-                ReleaseGroup = bookFile.ReleaseGroup
+                Quality = comicFile.Quality,
+                ReleaseGroup = comicFile.ReleaseGroup
             };
 
             var input = new CustomFormatInput
             {
                 BookInfo = bookInfo,
-                Author = author,
-                Size = bookFile.Size,
-                IndexerFlags = bookFile.IndexerFlags,
-                Filename = Path.GetFileName(bookFile.Path)
+                Series = author,
+                Size = comicFile.Size,
+                IndexerFlags = comicFile.IndexerFlags,
+                Filename = Path.GetFileName(comicFile.Path)
             };
 
             return ParseCustomFormat(input, allCustomFormats);

@@ -10,7 +10,7 @@ using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.Extras
 {
-    public class ExistingExtraFileService : IHandle<AuthorScannedEvent>
+    public class ExistingExtraFileService : IHandle<SeriesScannedEvent>
     {
         private readonly IDiskProvider _diskProvider;
         private readonly IDiskScanService _diskScanService;
@@ -28,9 +28,9 @@ namespace NzbDrone.Core.Extras
             _logger = logger;
         }
 
-        public void Handle(AuthorScannedEvent message)
+        public void Handle(SeriesScannedEvent message)
         {
-            var author = message.Author;
+            var author = message.Series;
             var extraFiles = new List<ExtraFile>();
 
             if (!_diskProvider.FolderExists(author.Path))

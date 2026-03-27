@@ -7,20 +7,20 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Test.Framework;
 
-namespace NzbDrone.Core.Test.MusicTests.AuthorRepositoryTests
+namespace NzbDrone.Core.Test.MusicTests.SeriesRepositoryTests
 {
     [TestFixture]
 
-    public class AuthorMetadataRepositoryFixture : DbTest<AuthorMetadataRepository, AuthorMetadata>
+    public class SeriesMetadataRepositoryFixture : DbTest<SeriesMetadataRepository, SeriesMetadata>
     {
-        private AuthorMetadataRepository _authorMetadataRepo;
-        private List<AuthorMetadata> _metadataList;
+        private SeriesMetadataRepository _authorMetadataRepo;
+        private List<SeriesMetadata> _metadataList;
 
         [SetUp]
         public void Setup()
         {
-            _authorMetadataRepo = Mocker.Resolve<AuthorMetadataRepository>();
-            _metadataList = Builder<AuthorMetadata>.CreateListOfSize(10).All().With(x => x.Id = 0).BuildList();
+            _authorMetadataRepo = Mocker.Resolve<SeriesMetadataRepository>();
+            _metadataList = Builder<SeriesMetadata>.CreateListOfSize(10).All().With(x => x.Id = 0).BuildList();
         }
 
         [Test]

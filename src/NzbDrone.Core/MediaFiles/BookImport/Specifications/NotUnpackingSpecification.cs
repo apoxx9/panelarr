@@ -8,7 +8,7 @@ using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Parser.Model;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
+namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
 {
     public class NotUnpackingSpecification : IImportDecisionEngineSpecification<LocalBook>
     {

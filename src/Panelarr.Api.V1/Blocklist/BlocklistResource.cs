@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Qualities;
-using Panelarr.Api.V1.Author;
 using Panelarr.Api.V1.CustomFormats;
+using Panelarr.Api.V1.Series;
 using Panelarr.Http.REST;
 
 namespace Panelarr.Api.V1.Blocklist
 {
     public class BlocklistResource : RestResource
     {
-        public int AuthorId { get; set; }
-        public List<int> BookIds { get; set; }
+        public int SeriesId { get; set; }
+        public List<int> IssueIds { get; set; }
         public string SourceTitle { get; set; }
         public QualityModel Quality { get; set; }
         public List<CustomFormatResource> CustomFormats { get; set; }
@@ -21,7 +21,7 @@ namespace Panelarr.Api.V1.Blocklist
         public string Indexer { get; set; }
         public string Message { get; set; }
 
-        public AuthorResource Author { get; set; }
+        public SeriesResource Series { get; set; }
     }
 
     public static class BlocklistResourceMapper
@@ -37,17 +37,17 @@ namespace Panelarr.Api.V1.Blocklist
             {
                 Id = model.Id,
 
-                AuthorId = model.AuthorId,
-                BookIds = model.BookIds,
+                SeriesId = model.SeriesId,
+                IssueIds = model.IssueIds,
                 SourceTitle = model.SourceTitle,
                 Quality = model.Quality,
-                CustomFormats = formatCalculator.ParseCustomFormat(model, model.Author).ToResource(false),
+                CustomFormats = formatCalculator.ParseCustomFormat(model, model.Series).ToResource(false),
                 Date = model.Date,
                 Protocol = model.Protocol,
                 Indexer = model.Indexer,
                 Message = model.Message,
 
-                Author = model.Author.ToResource()
+                Series = model.Series.ToResource()
             };
         }
     }

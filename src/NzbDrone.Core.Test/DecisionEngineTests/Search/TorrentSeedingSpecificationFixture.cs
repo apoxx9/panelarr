@@ -15,22 +15,22 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
     [TestFixture]
     public class TorrentSeedingSpecificationFixture : TestBase<TorrentSeedingSpecification>
     {
-        private Author _author;
+        private Series _author;
         private RemoteBook _remoteBook;
         private IndexerDefinition _indexerDefinition;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Author>.CreateNew().With(s => s.Id = 1).Build();
+            _author = Builder<Series>.CreateNew().With(s => s.Id = 1).Build();
 
             _remoteBook = new RemoteBook
             {
-                Author = _author,
+                Series = _author,
                 Release = new TorrentInfo
                 {
                     IndexerId = 1,
-                    Title = "Author - Book [FLAC-RlsGrp]",
+                    Title = "Series - Issue [FLAC-RlsGrp]",
                     Seeders = 0
                 }
             };
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
             _remoteBook.Release = new ReleaseInfo
             {
                 IndexerId = 1,
-                Title = "Author - Book [FLAC-RlsGrp]"
+                Title = "Series - Issue [FLAC-RlsGrp]"
             };
 
             Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();

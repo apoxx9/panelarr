@@ -69,10 +69,10 @@ namespace NzbDrone.Core.DecisionEngine
         {
             if (_configService.DownloadPropersAndRepacks == ProperDownloadTypes.DoNotPrefer)
             {
-                return CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Author.QualityProfile.Value.GetIndex(remoteBook.ParsedBookInfo.Quality.Quality));
+                return CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Series.QualityProfile.Value.GetIndex(remoteBook.ParsedBookInfo.Quality.Quality));
             }
 
-            return CompareAll(CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Author.QualityProfile.Value.GetIndex(remoteBook.ParsedBookInfo.Quality.Quality)),
+            return CompareAll(CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Series.QualityProfile.Value.GetIndex(remoteBook.ParsedBookInfo.Quality.Quality)),
                            CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.ParsedBookInfo.Quality.Revision));
         }
 
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.DecisionEngine
         {
             var result = CompareBy(x.RemoteBook, y.RemoteBook, remoteBook =>
             {
-                var delayProfile = _delayProfileService.BestForTags(remoteBook.Author.Tags);
+                var delayProfile = _delayProfileService.BestForTags(remoteBook.Series.Tags);
                 var downloadProtocol = remoteBook.Release.DownloadProtocol;
                 return downloadProtocol == delayProfile.PreferredProtocol;
             });

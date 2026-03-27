@@ -30,7 +30,7 @@ namespace Panelarr.Api.V1.Config
             _filenameBuilder = filenameBuilder;
 
             SharedValidator.RuleFor(c => c.StandardBookFormat).ValidBookFormat();
-            SharedValidator.RuleFor(c => c.AuthorFolderFormat).ValidAuthorFolderFormat();
+            SharedValidator.RuleFor(c => c.SeriesFolderFormat).ValidSeriesFolderFormat();
         }
 
         protected override NamingConfigResource GetResourceById(int id)
@@ -86,9 +86,9 @@ namespace Panelarr.Api.V1.Config
                 ? null
                 : multiDiscTrackSampleResult.FileName;
 
-            sampleResource.AuthorFolderExample = nameSpec.AuthorFolderFormat.IsNullOrWhiteSpace()
+            sampleResource.SeriesFolderExample = nameSpec.SeriesFolderFormat.IsNullOrWhiteSpace()
                 ? null
-                : _filenameSampleService.GetAuthorFolderSample(nameSpec);
+                : _filenameSampleService.GetSeriesFolderSample(nameSpec);
 
             return sampleResource;
         }

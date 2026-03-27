@@ -14,37 +14,37 @@ namespace NzbDrone.Core.Test.NotificationTests
     [TestFixture]
     public class SynologyIndexerFixture : CoreTest<SynologyIndexer>
     {
-        private Author _author;
-        private BookDownloadMessage _upgrade;
+        private Series _author;
+        private IssueDownloadMessage _upgrade;
         private string _rootPath = @"C:\Test\".AsOsAgnostic();
 
         [SetUp]
         public void SetUp()
         {
-            _author = new Author()
+            _author = new Series()
             {
                 Path = _rootPath,
             };
 
-            _upgrade = new BookDownloadMessage()
+            _upgrade = new IssueDownloadMessage()
             {
-                Author = _author,
+                Series = _author,
 
-                BookFiles = new List<BookFile>
+                ComicFiles = new List<ComicFile>
                 {
-                    new BookFile
+                    new ComicFile
                     {
                         Path = Path.Combine(_rootPath, "file1.S01E01E02.mkv")
                     }
                 },
 
-                OldFiles = new List<BookFile>
+                OldFiles = new List<ComicFile>
                 {
-                    new BookFile
+                    new ComicFile
                     {
                         Path = Path.Combine(_rootPath, "file1.S01E01.mkv")
                     },
-                    new BookFile
+                    new ComicFile
                     {
                         Path = Path.Combine(_rootPath, "file1.S01E02.mkv")
                     }
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.NotificationTests
         {
             (Subject.Definition.Settings as SynologyIndexerSettings).UpdateLibrary = false;
 
-            Subject.OnRename(_author, new List<RenamedBookFile>());
+            Subject.OnRename(_author, new List<RenamedComicFile>());
 
             Mocker.GetMock<ISynologyIndexerProxy>()
                 .Verify(v => v.UpdateFolder(_author.Path), Times.Never());
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Test.NotificationTests
         [Test]
         public void should_update_entire_series_folder_on_rename()
         {
-            Subject.OnRename(_author, new List<RenamedBookFile>());
+            Subject.OnRename(_author, new List<RenamedComicFile>());
 
             Mocker.GetMock<ISynologyIndexerProxy>()
                 .Verify(v => v.UpdateFolder(@"C:\Test\".AsOsAgnostic()), Times.Once());

@@ -35,10 +35,10 @@ namespace NzbDrone.Core.Test.Download
                 .Setup(v => v.GetDownloadClient(It.IsAny<DownloadProtocol>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<HashSet<int>>()))
                 .Returns<DownloadProtocol, int, bool, HashSet<int>>((v, i, f, t) => _downloadClients.FirstOrDefault(d => d.Protocol == v));
 
-            var episodes = Builder<Book>.CreateListOfSize(2)
+            var episodes = Builder<Issue>.CreateListOfSize(2)
                 .TheFirst(1).With(s => s.Id = 12)
                 .TheNext(1).With(s => s.Id = 99)
-                .All().With(s => s.AuthorId = 5)
+                .All().With(s => s.SeriesId = 5)
                 .Build().ToList();
 
             var releaseInfo = Builder<ReleaseInfo>.CreateNew()
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Test.Download
                 .Build();
 
             _parseResult = Builder<RemoteBook>.CreateNew()
-                   .With(c => c.Author = Builder<Author>.CreateNew().Build())
+                   .With(c => c.Series = Builder<Series>.CreateNew().Build())
                    .With(c => c.Release = releaseInfo)
                    .With(c => c.Books = episodes)
                    .Build();
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.Test.Download
 
             await Subject.DownloadReport(_parseResult, null);
 
-            VerifyEventPublished<BookGrabbedEvent>();
+            VerifyEventPublished<IssueGrabbedEvent>();
         }
 
         [Test]
@@ -108,7 +108,7 @@ namespace NzbDrone.Core.Test.Download
 
             Assert.ThrowsAsync<WebException>(async () => await Subject.DownloadReport(_parseResult, null));
 
-            VerifyEventNotPublished<BookGrabbedEvent>();
+            VerifyEventNotPublished<IssueGrabbedEvent>();
         }
 
         [Test]
@@ -203,7 +203,7 @@ namespace NzbDrone.Core.Test.Download
             Assert.ThrowsAsync<DownloadClientUnavailableException>(async () => await Subject.DownloadReport(_parseResult, null));
 
             Mocker.GetMock<IDownloadClient>().Verify(c => c.Download(It.IsAny<RemoteBook>(), It.IsAny<IIndexer>()), Times.Never());
-            VerifyEventNotPublished<BookGrabbedEvent>();
+            VerifyEventNotPublished<IssueGrabbedEvent>();
         }
 
         [Test]
@@ -226,7 +226,7 @@ namespace NzbDrone.Core.Test.Download
 
             Mocker.GetMock<IDownloadClientStatusService>().Verify(c => c.GetBlockedProviders(), Times.Never());
             mockUsenet.Verify(c => c.Download(It.IsAny<RemoteBook>(), It.IsAny<IIndexer>()), Times.Once());
-            VerifyEventPublished<BookGrabbedEvent>();
+            VerifyEventPublished<IssueGrabbedEvent>();
         }
 
         [Test]

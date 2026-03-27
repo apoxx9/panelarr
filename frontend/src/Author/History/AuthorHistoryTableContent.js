@@ -17,7 +17,7 @@ const columns = [
   },
   {
     name: 'book',
-    label: () => translate('Book'),
+    label: () => translate('Issue'),
     isVisible: true
   },
   {

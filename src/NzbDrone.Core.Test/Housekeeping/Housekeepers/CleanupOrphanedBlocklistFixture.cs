@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         public void should_delete_orphaned_blocklist_items()
         {
             var blocklist = Builder<Blocklist>.CreateNew()
-                                              .With(h => h.BookIds = new List<int>())
+                                              .With(h => h.IssueIds = new List<int>())
                                               .With(h => h.Quality = new QualityModel())
                                               .BuildNew();
 
@@ -29,14 +29,14 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_delete_unorphaned_blocklist_items()
         {
-            var author = Builder<Author>.CreateNew().BuildNew();
+            var author = Builder<Series>.CreateNew().BuildNew();
 
             Db.Insert(author);
 
             var blocklist = Builder<Blocklist>.CreateNew()
-                                              .With(h => h.BookIds = new List<int>())
+                                              .With(h => h.IssueIds = new List<int>())
                                               .With(h => h.Quality = new QualityModel())
-                                              .With(b => b.AuthorId = author.Id)
+                                              .With(b => b.SeriesId = author.Id)
                                               .BuildNew();
 
             Db.Insert(blocklist);

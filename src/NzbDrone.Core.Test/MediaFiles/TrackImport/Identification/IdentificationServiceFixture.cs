@@ -12,10 +12,10 @@ using NzbDrone.Core.Books.Commands;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.ImportLists.Exclusions;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.BookImport;
-using NzbDrone.Core.MediaFiles.BookImport.Aggregation;
-using NzbDrone.Core.MediaFiles.BookImport.Aggregation.Aggregators;
-using NzbDrone.Core.MediaFiles.BookImport.Identification;
+using NzbDrone.Core.MediaFiles.IssueImport;
+using NzbDrone.Core.MediaFiles.IssueImport.Aggregation;
+using NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators;
+using NzbDrone.Core.MediaFiles.IssueImport.Identification;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.MetadataSource.BookInfo;
@@ -24,14 +24,14 @@ using NzbDrone.Core.Profiles.Metadata;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
-namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
+namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 {
     [TestFixture]
     public class IdentificationServiceFixture : DbTest
     {
-        private AuthorService _authorService;
-        private AddAuthorService _addAuthorService;
-        private RefreshAuthorService _refreshAuthorService;
+        private SeriesService _authorService;
+        private AddSeriesService _addSeriesService;
+        private RefreshSeriesService _refreshSeriesService;
 
         private IdentificationService _Subject;
 
@@ -41,31 +41,31 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
             UseRealHttp();
 
             // Resolve all the parts we need
-            Mocker.SetConstant<IAuthorRepository>(Mocker.Resolve<AuthorRepository>());
-            Mocker.SetConstant<IAuthorMetadataRepository>(Mocker.Resolve<AuthorMetadataRepository>());
-            Mocker.SetConstant<IBookRepository>(Mocker.Resolve<BookRepository>());
+            Mocker.SetConstant<ISeriesRepository>(Mocker.Resolve<SeriesRepository>());
+            Mocker.SetConstant<ISeriesMetadataRepository>(Mocker.Resolve<SeriesMetadataRepository>());
+            Mocker.SetConstant<IBookRepository>(Mocker.Resolve<IssueRepository>());
             Mocker.SetConstant<IImportListExclusionRepository>(Mocker.Resolve<ImportListExclusionRepository>());
             Mocker.SetConstant<IMediaFileRepository>(Mocker.Resolve<MediaFileRepository>());
 
             Mocker.GetMock<IMetadataProfileService>().Setup(x => x.Exists(It.IsAny<int>())).Returns(true);
 
-            _authorService = Mocker.Resolve<AuthorService>();
-            Mocker.SetConstant<IAuthorService>(_authorService);
-            Mocker.SetConstant<IAuthorMetadataService>(Mocker.Resolve<AuthorMetadataService>());
-            Mocker.SetConstant<IBookService>(Mocker.Resolve<BookService>());
+            _authorService = Mocker.Resolve<SeriesService>();
+            Mocker.SetConstant<ISeriesService>(_authorService);
+            Mocker.SetConstant<ISeriesMetadataService>(Mocker.Resolve<SeriesMetadataService>());
+            Mocker.SetConstant<IBookService>(Mocker.Resolve<IssueService>());
             Mocker.SetConstant<IImportListExclusionService>(Mocker.Resolve<ImportListExclusionService>());
             Mocker.SetConstant<IMediaFileService>(Mocker.Resolve<MediaFileService>());
 
             Mocker.SetConstant<IConfigService>(Mocker.Resolve<IConfigService>());
-            Mocker.SetConstant<IProvideAuthorInfo>(Mocker.Resolve<BookInfoProxy>());
+            Mocker.SetConstant<IProvideSeriesInfo>(Mocker.Resolve<BookInfoProxy>());
             Mocker.SetConstant<IProvideBookInfo>(Mocker.Resolve<BookInfoProxy>());
 
-            _addAuthorService = Mocker.Resolve<AddAuthorService>();
+            _addSeriesService = Mocker.Resolve<AddSeriesService>();
 
             Mocker.SetConstant<IRefreshBookService>(Mocker.Resolve<RefreshBookService>());
-            _refreshAuthorService = Mocker.Resolve<RefreshAuthorService>();
+            _refreshSeriesService = Mocker.Resolve<RefreshSeriesService>();
 
-            Mocker.GetMock<IAddAuthorValidator>().Setup(x => x.Validate(It.IsAny<Author>())).Returns(new ValidationResult());
+            Mocker.GetMock<IAddSeriesValidator>().Setup(x => x.Validate(It.IsAny<Series>())).Returns(new ValidationResult());
 
             Mocker.SetConstant<ITrackGroupingService>(Mocker.Resolve<TrackGroupingService>());
             Mocker.SetConstant<ICandidateService>(Mocker.Resolve<CandidateService>());
@@ -86,41 +86,40 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
             Mocker.GetMock<IMetadataProfileService>().Setup(x => x.Get(profile.Id)).Returns(profile);
         }
 
-        private List<Author> GivenAuthors(List<AuthorTestCase> authors)
+        private List<Series> GivenSeriess(List<SeriesTestCase> authors)
         {
-            var outp = new List<Author>();
+            var outp = new List<Series>();
             for (var i = 0; i < authors.Count; i++)
             {
                 var meta = authors[i].MetadataProfile;
                 meta.Id = i + 1;
                 GivenMetadataProfile(meta);
-                outp.Add(GivenAuthor(authors[i].Author, meta.Id));
+                outp.Add(GivenSeries(authors[i].Series, meta.Id));
             }
 
             return outp;
         }
 
-        private Author GivenAuthor(string foreignAuthorId, int metadataProfileId)
+        private Series GivenSeries(string foreignSeriesId, int metadataProfileId)
         {
-            var author = _addAuthorService.AddAuthor(new Author
+            var author = _addSeriesService.AddSeries(new Series
             {
-                Metadata = new AuthorMetadata
+                Metadata = new SeriesMetadata
                 {
-                    ForeignAuthorId = foreignAuthorId
+                    ForeignSeriesId = foreignSeriesId
                 },
-                Path = @"c:\test".AsOsAgnostic(),
-                MetadataProfileId = metadataProfileId
+                Path = @"c:\test".AsOsAgnostic()
             });
 
-            var command = new RefreshAuthorCommand
+            var command = new RefreshSeriesCommand
             {
-                AuthorId = author.Id,
+                SeriesId = author.Id,
                 Trigger = CommandTrigger.Unspecified
             };
 
-            _refreshAuthorService.Execute(command);
+            _refreshSeriesService.Execute(command);
 
-            return _authorService.FindById(foreignAuthorId);
+            return _authorService.FindById(foreignSeriesId);
         }
 
         public static class IdTestCaseFactory
@@ -157,9 +156,9 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
             var path = Path.Combine(TestContext.CurrentContext.TestDirectory, "Files", "Identification", file);
             var testcase = JsonConvert.DeserializeObject<IdTestCase>(File.ReadAllText(path));
 
-            var authors = GivenAuthors(testcase.LibraryAuthors);
-            var specifiedAuthor = authors.SingleOrDefault(x => x.Metadata.Value.ForeignAuthorId == testcase.Author);
-            var idOverrides = new IdentificationOverrides { Author = specifiedAuthor };
+            var authors = GivenSeriess(testcase.LibrarySeriess);
+            var specifiedSeries = authors.SingleOrDefault(x => x.Metadata.Value.ForeignSeriesId == testcase.Series);
+            var idOverrides = new IdentificationOverrides { Series = specifiedSeries };
 
             var tracks = testcase.Tracks.Select(x => new LocalBook
             {

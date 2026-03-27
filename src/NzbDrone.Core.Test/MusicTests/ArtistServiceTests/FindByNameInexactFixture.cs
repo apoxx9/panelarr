@@ -5,31 +5,31 @@ using NUnit.Framework;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Test.Framework;
 
-namespace NzbDrone.Core.Test.MusicTests.AuthorServiceTests
+namespace NzbDrone.Core.Test.MusicTests.SeriesServiceTests
 {
     [TestFixture]
 
-    public class FindByNameInexactFixture : CoreTest<AuthorService>
+    public class FindByNameInexactFixture : CoreTest<SeriesService>
     {
-        private List<Author> _authors;
+        private List<Series> _authors;
 
-        private Author CreateAuthor(string name)
+        private Series CreateSeries(string name)
         {
-            return Builder<Author>.CreateNew()
+            return Builder<Series>.CreateNew()
                 .With(a => a.Name = name)
-                .With(a => a.CleanName = Parser.Parser.CleanAuthorName(name))
-                .With(a => a.ForeignAuthorId = name)
+                .With(a => a.CleanName = Parser.Parser.CleanSeriesName(name))
+                .With(a => a.ForeignSeriesId = name)
                 .BuildNew();
         }
 
         [SetUp]
         public void Setup()
         {
-            _authors = new List<Author>();
-            _authors.Add(CreateAuthor("The Black Eyed Peas"));
-            _authors.Add(CreateAuthor("The Black Keys"));
+            _authors = new List<Series>();
+            _authors.Add(CreateSeries("The Black Eyed Peas"));
+            _authors.Add(CreateSeries("The Black Keys"));
 
-            Mocker.GetMock<IAuthorRepository>()
+            Mocker.GetMock<ISeriesRepository>()
                 .Setup(s => s.All())
                 .Returns(_authors);
         }

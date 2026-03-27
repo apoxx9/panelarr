@@ -34,8 +34,8 @@ namespace NzbDrone.Core.Test.Download.FailedDownloadServiceTests
 
             var remoteBook = new RemoteBook
             {
-                Author = new Author(),
-                Books = new List<Book> { new Book { Id = 1 } }
+                Series = new Series(),
+                Books = new List<Issue> { new Issue { Id = 1 } }
             };
 
             _trackedDownload = Builder<TrackedDownload>.CreateNew()

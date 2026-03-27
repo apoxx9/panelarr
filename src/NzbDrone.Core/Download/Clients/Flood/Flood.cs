@@ -51,8 +51,8 @@ namespace NzbDrone.Core.Download.Clients.Flood
                 {
                     switch (additionalTag)
                     {
-                        case (int)AdditionalTags.Author:
-                            result.Add(remoteBook.Author.Name);
+                        case (int)AdditionalTags.Series:
+                            result.Add(remoteBook.Series.Name);
                             break;
                         case (int)AdditionalTags.Format:
                             result.Add(remoteBook.ParsedBookInfo.Quality.Quality.ToString());
@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Download.Clients.Flood
                             result.Add(remoteBook.ParsedBookInfo.ReleaseGroup);
                             break;
                         case (int)AdditionalTags.Year:
-                            result.UnionWith(remoteBook.Books.ConvertAll(book => book.ReleaseDate.Value.Year.ToString()));
+                            result.UnionWith(remoteBook.Books.ConvertAll(issue => issue.ReleaseDate.Value.Year.ToString()));
                             break;
                         case (int)AdditionalTags.Indexer:
                             result.Add(remoteBook.Release.Indexer);

@@ -7,7 +7,7 @@ using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Parser.Model;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
+namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
 {
     public class FreeSpaceSpecification : IImportDecisionEngineSpecification<LocalBook>
     {
@@ -34,11 +34,11 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
             {
                 if (item.ExistingFile)
                 {
-                    _logger.Debug("Skipping free space check for existing book");
+                    _logger.Debug("Skipping free space check for existing issue");
                     return Decision.Accept();
                 }
 
-                var path = Directory.GetParent(item.Author.Path);
+                var path = Directory.GetParent(item.Series.Path);
                 var freeSpace = _diskProvider.GetAvailableSpace(path.FullName);
 
                 if (!freeSpace.HasValue)

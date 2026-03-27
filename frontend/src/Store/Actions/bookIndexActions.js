@@ -74,14 +74,14 @@ export const defaultState = {
     },
     {
       name: 'title',
-      label: 'Book',
+      label: 'Issue',
       isSortable: true,
       isVisible: true,
       isModifiable: false
     },
     {
       name: 'authorName',
-      label: 'Author',
+      label: 'Series',
       isSortable: true,
       isVisible: true,
       isModifiable: true
@@ -191,7 +191,7 @@ export const defaultState = {
   filterBuilderProps: [
     {
       name: 'author',
-      label: 'Author',
+      label: 'Series',
       type: filterBuilderTypes.STRING
     },
     {
@@ -328,7 +328,7 @@ export const actionHandlers = handleThunks({
     }));
 
     const promise = createAjaxRequest({
-      url: '/book/editor',
+      url: '/issue/editor',
       method: 'PUT',
       data: JSON.stringify(payload),
       dataType: 'json'
@@ -368,7 +368,7 @@ export const actionHandlers = handleThunks({
     }));
 
     const promise = createAjaxRequest({
-      url: '/book/editor',
+      url: '/issue/editor',
       method: 'DELETE',
       data: JSON.stringify(payload),
       dataType: 'json'

@@ -7,12 +7,12 @@ using FizzWare.NBuilder;
 using FizzWare.NBuilder.PropertyNaming;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.MediaFiles.BookImport.Identification;
+using NzbDrone.Core.MediaFiles.IssueImport.Identification;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
-namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
+namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 {
     // we need to use random strings to test the va (so we don't just get author1, author2 etc which are too similar)
     // but the standard random value namer would give paths that are too long on windows
@@ -66,14 +66,14 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
     [TestFixture]
     public class TrackGroupingServiceFixture : CoreTest<TrackGroupingService>
     {
-        private List<LocalBook> GivenTracks(string root, string author, string book, int count)
+        private List<LocalBook> GivenTracks(string root, string author, string issue, int count)
         {
             var fileInfos = Builder<ParsedTrackInfo>
                 .CreateListOfSize(count)
                 .All()
-                .With(f => f.Authors = new List<string> { author })
-                .With(f => f.BookTitle = book)
-                .With(f => f.BookMBId = null)
+                .With(f => f.Seriess = new List<string> { author })
+                .With(f => f.IssueTitle = issue)
+                .With(f => f.IssueMBId = null)
                 .With(f => f.ReleaseMBId = null)
                 .Build();
 
@@ -104,7 +104,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         }
 
         [Repeat(100)]
-        private List<LocalBook> GivenVaTracks(string root, string book, int count)
+        private List<LocalBook> GivenVaTracks(string root, string issue, int count)
         {
             var settings = new BuilderSettings();
             settings.SetPropertyNamerFor<ParsedTrackInfo>(new RandomValueNamerShortStrings(settings));
@@ -114,8 +114,8 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
             var fileInfos = builder
                 .CreateListOfSize<ParsedTrackInfo>(count)
                 .All()
-                .With(f => f.BookTitle = "book")
-                .With(f => f.BookMBId = null)
+                .With(f => f.IssueTitle = "issue")
+                .With(f => f.IssueMBId = null)
                 .With(f => f.ReleaseMBId = null)
                 .Build();
 
@@ -133,8 +133,8 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         [TestCase(10)]
         public void single_author_is_not_various_authors(int count)
         {
-            var tracks = GivenTracks(@"C:\music\incoming".AsOsAgnostic(), "author", "book", count);
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            var tracks = GivenTracks(@"C:\music\incoming".AsOsAgnostic(), "author", "issue", count);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
         }
 
         // GivenVaTracks uses random names so repeat multiple times to try to prompt any intermittent failures
@@ -143,18 +143,18 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         [Repeat(100)]
         public void all_different_authors_is_various_authors()
         {
-            var tracks = GivenVaTracks(@"C:\music\incoming".AsOsAgnostic(), "book", 10);
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(true);
+            var tracks = GivenVaTracks(@"C:\music\incoming".AsOsAgnostic(), "issue", 10);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(true);
         }
 
         [Test]
         public void two_authors_is_not_various_authors()
         {
             var dir = @"C:\music\incoming".AsOsAgnostic();
-            var tracks = GivenTracks(dir, "author1", "book", 10);
-            tracks.AddRange(GivenTracks(dir, "author2", "book", 10));
+            var tracks = GivenTracks(dir, "author1", "issue", 10);
+            tracks.AddRange(GivenTracks(dir, "author2", "issue", 10));
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
         }
 
         [Ignore("TODO: fix")]
@@ -163,20 +163,20 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         public void mostly_different_authors_is_various_authors()
         {
             var dir = @"C:\music\incoming".AsOsAgnostic();
-            var tracks = GivenVaTracks(dir, "book", 10);
-            tracks.AddRange(GivenTracks(dir, "single_author", "book", 2));
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(true);
+            var tracks = GivenVaTracks(dir, "issue", 10);
+            tracks.AddRange(GivenTracks(dir, "single_author", "issue", 2));
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(true);
         }
 
         [TestCase("")]
-        [TestCase("Various Authors")]
+        [TestCase("Various Seriess")]
         [TestCase("Various")]
         [TestCase("VA")]
         [TestCase("Unknown")]
         public void va_author_title_is_various_authors(string author)
         {
-            var tracks = GivenTracks(@"C:\music\incoming".AsOsAgnostic(), author, "book", 10);
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(true);
+            var tracks = GivenTracks(@"C:\music\incoming".AsOsAgnostic(), author, "issue", 10);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(true);
         }
 
         [TestCase("Va?!")]
@@ -185,8 +185,8 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         [TestCase("Ca Va")]
         public void va_in_author_name_is_not_various_authors(string author)
         {
-            var tracks = GivenTracks(@"C:\music\incoming".AsOsAgnostic(), author, "book", 10);
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            var tracks = GivenTracks(@"C:\music\incoming".AsOsAgnostic(), author, "issue", 10);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
         }
 
         [TestCase(1)]
@@ -194,10 +194,10 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         [TestCase(10)]
         public void should_group_single_author_book(int count)
         {
-            var tracks = GivenTracks(@"C:\music\incoming".AsOsAgnostic(), "author", "book", count);
+            var tracks = GivenTracks(@"C:\music\incoming".AsOsAgnostic(), "author", "issue", count);
             var output = Subject.GroupTracks(tracks);
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
 
             output.Count.Should().Be(1);
@@ -209,10 +209,10 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         [TestCase("disk")]
         public void should_group_multi_disc_release(string mediaName)
         {
-            var tracks = GivenTracks($"C:\\music\\incoming\\author - book\\{mediaName} 1".AsOsAgnostic(), "author", "book", 10);
-            tracks.AddRange(GivenTracks($"C:\\music\\incoming\\author - book\\{mediaName} 2".AsOsAgnostic(), "author", "book", 5));
+            var tracks = GivenTracks($"C:\\music\\incoming\\author - issue\\{mediaName} 1".AsOsAgnostic(), "author", "issue", 10);
+            tracks.AddRange(GivenTracks($"C:\\music\\incoming\\author - issue\\{mediaName} 2".AsOsAgnostic(), "author", "issue", 5));
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
 
             var output = Subject.GroupTracks(tracks);
@@ -226,7 +226,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
             var tracks = GivenTracks($"C:\\music\\incoming\\author - book1".AsOsAgnostic(), "author", "book1", 10);
             tracks.AddRange(GivenTracks($"C:\\music\\incoming\\author - book2".AsOsAgnostic(), "author", "book2", 5));
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
 
             var output = Subject.GroupTracks(tracks);
@@ -238,10 +238,10 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         [Test]
         public void should_group_books_with_typos()
         {
-            var tracks = GivenTracks($"C:\\music\\incoming\\author - book".AsOsAgnostic(), "author", "Rastaman Vibration (Remastered)", 10);
-            tracks.AddRange(GivenTracks($"C:\\music\\incoming\\author - book".AsOsAgnostic(), "author", "Rastaman Vibration (Remastered", 5));
+            var tracks = GivenTracks($"C:\\music\\incoming\\author - issue".AsOsAgnostic(), "author", "Rastaman Vibration (Remastered)", 10);
+            tracks.AddRange(GivenTracks($"C:\\music\\incoming\\author - issue".AsOsAgnostic(), "author", "Rastaman Vibration (Remastered", 5));
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
 
             var output = Subject.GroupTracks(tracks);
@@ -255,7 +255,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
             var tracks = GivenTracks($"C:\\music\\incoming".AsOsAgnostic(), "author", "book1", 1);
             tracks.AddRange(GivenTracks($"C:\\music\\incoming".AsOsAgnostic(), "author", "book2", 1));
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
 
             var output = Subject.GroupTracks(tracks);
@@ -270,7 +270,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
             var tracks = GivenTracks($"C:\\music\\incoming\\author discog".AsOsAgnostic(), "author", "book1", 10);
             tracks.AddRange(GivenTracks($"C:\\music\\incoming\\author disog".AsOsAgnostic(), "author", "book2", 5));
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
 
             var output = Subject.GroupTracks(tracks);
@@ -285,10 +285,10 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
             var tracks = new List<LocalBook>();
             for (var i = 0; i < 100; i++)
             {
-                tracks.AddRange(GivenTracks($"C:\\music".AsOsAgnostic(), "author" + i, "book" + i, 10));
+                tracks.AddRange(GivenTracks($"C:\\music".AsOsAgnostic(), "author" + i, "issue" + i, 10));
             }
 
-            // don't test various authors here because it's designed to only work if there's a common book
+            // don't test various authors here because it's designed to only work if there's a common issue
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
 
             var output = Subject.GroupTracks(tracks);
@@ -302,7 +302,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
             var tracks = GivenTracks($"C:\\music\\incoming".AsOsAgnostic(), "author1", "book1", 10);
             tracks.AddRange(GivenTracks($"C:\\music\\incoming".AsOsAgnostic(), "author2", "book2", 5));
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
 
             var output = Subject.GroupTracks(tracks);
@@ -316,9 +316,9 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         [Repeat(100)]
         public void should_group_va_release()
         {
-            var tracks = GivenVaTracks(@"C:\music\incoming".AsOsAgnostic(), "book", 10);
+            var tracks = GivenVaTracks(@"C:\music\incoming".AsOsAgnostic(), "issue", 10);
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(true);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(true);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
 
             var output = Subject.GroupTracks(tracks);
@@ -329,10 +329,10 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         [Test]
         public void should_not_group_two_books_by_different_authors_with_same_title()
         {
-            var tracks = GivenTracks($"C:\\music\\incoming\\book".AsOsAgnostic(), "author1", "book", 10);
-            tracks.AddRange(GivenTracks($"C:\\music\\incoming\\book".AsOsAgnostic(), "author2", "book", 5));
+            var tracks = GivenTracks($"C:\\music\\incoming\\issue".AsOsAgnostic(), "author1", "issue", 10);
+            tracks.AddRange(GivenTracks($"C:\\music\\incoming\\issue".AsOsAgnostic(), "author2", "issue", 5));
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
 
             var output = Subject.GroupTracks(tracks);
@@ -345,9 +345,9 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         [Test]
         public void should_not_fail_if_all_tags_null()
         {
-            var tracks = GivenTracksWithNoTags($"C:\\music\\incoming\\book".AsOsAgnostic(), 10);
+            var tracks = GivenTracksWithNoTags($"C:\\music\\incoming\\issue".AsOsAgnostic(), 10);
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
 
             var output = Subject.GroupTracks(tracks);
@@ -358,10 +358,10 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         [Test]
         public void should_not_fail_if_some_tags_null()
         {
-            var tracks = GivenTracks($"C:\\music\\incoming\\book".AsOsAgnostic(), "author1", "book", 10);
-            tracks.AddRange(GivenTracksWithNoTags($"C:\\music\\incoming\\book".AsOsAgnostic(), 2));
+            var tracks = GivenTracks($"C:\\music\\incoming\\issue".AsOsAgnostic(), "author1", "issue", 10);
+            tracks.AddRange(GivenTracksWithNoTags($"C:\\music\\incoming\\issue".AsOsAgnostic(), 2));
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
 
             var output = Subject.GroupTracks(tracks);
@@ -372,10 +372,10 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         [Test]
         public void should_cope_with_one_book_in_subfolder_of_another()
         {
-            var tracks = GivenTracks($"C:\\music\\incoming\\book".AsOsAgnostic(), "author1", "book", 10);
-            tracks.AddRange(GivenTracks($"C:\\music\\incoming\\book\\anotherbook".AsOsAgnostic(), "author2", "book2", 10));
+            var tracks = GivenTracks($"C:\\music\\incoming\\issue".AsOsAgnostic(), "author1", "issue", 10);
+            tracks.AddRange(GivenTracks($"C:\\music\\incoming\\issue\\anotherbook".AsOsAgnostic(), "author2", "book2", 10));
 
-            TrackGroupingService.IsVariousAuthors(tracks).Should().Be(false);
+            TrackGroupingService.IsVariousSeriess(tracks).Should().Be(false);
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
 
             var output = Subject.GroupTracks(tracks);

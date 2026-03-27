@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Tags
         private readonly IImportListFactory _importListFactory;
         private readonly INotificationFactory _notificationFactory;
         private readonly IReleaseProfileService _releaseProfileService;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IIndexerFactory _indexerService;
         private readonly IRootFolderService _rootFolderService;
         private readonly IDownloadClientFactory _downloadClientFactory;
@@ -44,7 +44,7 @@ namespace NzbDrone.Core.Tags
                           IImportListFactory importListFactory,
                           INotificationFactory notificationFactory,
                           IReleaseProfileService releaseProfileService,
-                          IAuthorService authorService,
+                          ISeriesService authorService,
                           IIndexerFactory indexerService,
                           IRootFolderService rootFolderService,
                           IDownloadClientFactory downloadClientFactory)
@@ -98,7 +98,7 @@ namespace NzbDrone.Core.Tags
                 ImportListIds = importLists.Select(c => c.Id).ToList(),
                 NotificationIds = notifications.Select(c => c.Id).ToList(),
                 RestrictionIds = restrictions.Select(c => c.Id).ToList(),
-                AuthorIds = author.Select(c => c.Id).ToList(),
+                SeriesIds = author.Select(c => c.Id).ToList(),
                 IndexerIds = indexers.Select(c => c.Id).ToList(),
                 RootFolderIds = rootFolders.Select(c => c.Id).ToList(),
                 DownloadClientIds = downloadClients.Select(c => c.Id).ToList()
@@ -112,7 +112,7 @@ namespace NzbDrone.Core.Tags
             var importLists = _importListFactory.All();
             var notifications = _notificationFactory.All();
             var restrictions = _releaseProfileService.All();
-            var authors = _authorService.GetAllAuthorTags();
+            var authors = _authorService.GetAllSeriesTags();
             var indexers = _indexerService.All();
             var rootFolders = _rootFolderService.All();
             var downloadClients = _downloadClientFactory.All();
@@ -129,7 +129,7 @@ namespace NzbDrone.Core.Tags
                     ImportListIds = importLists.Where(c => c.Tags.Contains(tag.Id)).Select(c => c.Id).ToList(),
                     NotificationIds = notifications.Where(c => c.Tags.Contains(tag.Id)).Select(c => c.Id).ToList(),
                     RestrictionIds = restrictions.Where(c => c.Tags.Contains(tag.Id)).Select(c => c.Id).ToList(),
-                    AuthorIds = authors.Where(c => c.Value.Contains(tag.Id)).Select(c => c.Key).ToList(),
+                    SeriesIds = authors.Where(c => c.Value.Contains(tag.Id)).Select(c => c.Key).ToList(),
                     IndexerIds = indexers.Where(c => c.Tags.Contains(tag.Id)).Select(c => c.Id).ToList(),
                     RootFolderIds = rootFolders.Where(c => c.DefaultTags.Contains(tag.Id)).Select(c => c.Id).ToList(),
                     DownloadClientIds = downloadClients.Where(c => c.Tags.Contains(tag.Id)).Select(c => c.Id).ToList()

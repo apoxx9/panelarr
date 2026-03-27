@@ -20,10 +20,10 @@ namespace NzbDrone.Core.MediaFiles
 
         public string Title { get; set; }
         public string[] Performers { get; set; }
-        public string[] BookAuthors { get; set; }
+        public string[] IssueSeriess { get; set; }
         public uint Track { get; set; }
         public uint TrackCount { get; set; }
-        public string Book { get; set; }
+        public string Issue { get; set; }
         public uint Disc { get; set; }
         public uint DiscCount { get; set; }
         public string Media { get; set; }
@@ -85,10 +85,10 @@ namespace NzbDrone.Core.MediaFiles
                     authors.AddRange(tag.PerformersSort);
                 }
 
-                BookAuthors = authors.Distinct().ToArray();
+                IssueSeriess = authors.Distinct().ToArray();
                 Track = tag.Track;
                 TrackCount = tag.TrackCount;
-                Book = tag.Album ?? tag.AlbumSort;
+                Issue = tag.Album ?? tag.AlbumSort;
                 Disc = tag.Disc;
                 DiscCount = tag.DiscCount;
                 Year = tag.Year;
@@ -307,7 +307,7 @@ namespace NzbDrone.Core.MediaFiles
             // patch up any null fields to work around TagLib exception for
             // WMA with null performers/bookauthors
             Performers = Performers ?? new string[0];
-            BookAuthors = BookAuthors ?? new string[0];
+            IssueSeriess = IssueSeriess ?? new string[0];
             Genres = Genres ?? new string[0];
 
             TagLib.File file = null;
@@ -319,10 +319,10 @@ namespace NzbDrone.Core.MediaFiles
                 // do the ones with direct support in TagLib
                 tag.Title = Title;
                 tag.Performers = Performers;
-                tag.AlbumArtists = BookAuthors;
+                tag.AlbumArtists = IssueSeriess;
                 tag.Track = Track;
                 tag.TrackCount = TrackCount;
-                tag.Album = Book;
+                tag.Album = Issue;
                 tag.Disc = Disc;
                 tag.DiscCount = DiscCount;
                 tag.Publisher = Publisher;
@@ -430,20 +430,20 @@ namespace NzbDrone.Core.MediaFiles
                 var oldValue = Performers.Any() ? string.Join(" / ", Performers) : null;
                 var newValue = other.Performers.Any() ? string.Join(" / ", other.Performers) : null;
 
-                output.Add("Author", Tuple.Create(oldValue, newValue));
+                output.Add("Series", Tuple.Create(oldValue, newValue));
             }
 
-            if (Book != other.Book)
+            if (Issue != other.Issue)
             {
-                output.Add("Book", Tuple.Create(Book, other.Book));
+                output.Add("Issue", Tuple.Create(Issue, other.Issue));
             }
 
-            if (!BookAuthors.SequenceEqual(other.BookAuthors))
+            if (!IssueSeriess.SequenceEqual(other.IssueSeriess))
             {
-                var oldValue = BookAuthors.Any() ? string.Join(" / ", BookAuthors) : null;
-                var newValue = other.BookAuthors.Any() ? string.Join(" / ", other.BookAuthors) : null;
+                var oldValue = IssueSeriess.Any() ? string.Join(" / ", IssueSeriess) : null;
+                var newValue = other.IssueSeriess.Any() ? string.Join(" / ", other.IssueSeriess) : null;
 
-                output.Add("Book Author", Tuple.Create(oldValue, newValue));
+                output.Add("Issue Series", Tuple.Create(oldValue, newValue));
             }
 
             if (Track != other.Track)
@@ -527,7 +527,7 @@ namespace NzbDrone.Core.MediaFiles
                 };
             }
 
-            var authors = tag.BookAuthors.Where(x => x.IsNotNullOrWhiteSpace()).ToList();
+            var authors = tag.IssueSeriess.Where(x => x.IsNotNullOrWhiteSpace()).ToList();
             if (!authors.Any())
             {
                 authors.AddRange(tag.Performers.Where(x => x.IsNotNullOrWhiteSpace()));
@@ -535,8 +535,8 @@ namespace NzbDrone.Core.MediaFiles
 
             return new ParsedTrackInfo
             {
-                BookTitle = tag.Book.IsNotNullOrWhiteSpace() ? tag.Book : tag.Title,
-                Authors = authors,
+                IssueTitle = tag.Issue.IsNotNullOrWhiteSpace() ? tag.Issue : tag.Title,
+                Seriess = authors,
                 DiscNumber = (int)tag.Disc,
                 DiscCount = (int)tag.DiscCount,
                 Year = tag.Year,

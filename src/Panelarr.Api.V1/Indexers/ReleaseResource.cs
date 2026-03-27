@@ -29,8 +29,8 @@ namespace Panelarr.Api.V1.Indexers
         public bool Discography { get; set; }
         public bool SceneSource { get; set; }
         public string AirDate { get; set; }
-        public string AuthorName { get; set; }
-        public string BookTitle { get; set; }
+        public string SeriesName { get; set; }
+        public string IssueTitle { get; set; }
         public bool Approved { get; set; }
         public bool TemporarilyRejected { get; set; }
         public bool Rejected { get; set; }
@@ -53,10 +53,10 @@ namespace Panelarr.Api.V1.Indexers
 
         // Sent when queuing an unknown release
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public int? AuthorId { get; set; }
+        public int? SeriesId { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public int? BookId { get; set; }
+        public int? IssueId { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public int? DownloadClientId { get; set; }
@@ -91,8 +91,8 @@ namespace Panelarr.Api.V1.Indexers
                 ReleaseGroup = parsedBookInfo.ReleaseGroup,
                 ReleaseHash = parsedBookInfo.ReleaseHash,
                 Title = releaseInfo.Title,
-                AuthorName = parsedBookInfo.AuthorName,
-                BookTitle = parsedBookInfo.BookTitle,
+                SeriesName = parsedBookInfo.SeriesName,
+                IssueTitle = parsedBookInfo.IssueTitle,
                 Discography = parsedBookInfo.Discography,
                 Approved = model.Approved,
                 TemporarilyRejected = model.TemporarilyRejected,

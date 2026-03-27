@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Download
         {
             var filterBlockedClients = remoteBook.Release.PendingReleaseReason == PendingReleaseReason.DownloadClientUnavailable;
 
-            var tags = remoteBook.Author?.Tags;
+            var tags = remoteBook.Series?.Tags;
 
             var downloadClient = downloadClientId.HasValue
                 ? _downloadClientProvider.Get(downloadClientId.Value)
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Download
 
         private async Task DownloadReport(RemoteBook remoteBook, IDownloadClient downloadClient)
         {
-            Ensure.That(remoteBook.Author, () => remoteBook.Author).IsNotNull();
+            Ensure.That(remoteBook.Series, () => remoteBook.Series).IsNotNull();
             Ensure.That(remoteBook.Books, () => remoteBook.Books).HasItems();
 
             var downloadTitle = remoteBook.Release.Title;
@@ -128,7 +128,7 @@ namespace NzbDrone.Core.Download
                 throw;
             }
 
-            var bookGrabbedEvent = new BookGrabbedEvent(remoteBook);
+            var bookGrabbedEvent = new IssueGrabbedEvent(remoteBook);
             bookGrabbedEvent.DownloadClient = downloadClient.Name;
             bookGrabbedEvent.DownloadClientId = downloadClient.Definition.Id;
             bookGrabbedEvent.DownloadClientName = downloadClient.Definition.Name;

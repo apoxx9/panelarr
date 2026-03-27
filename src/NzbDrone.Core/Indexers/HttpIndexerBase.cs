@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Indexers
             return FetchReleases(g => g.GetRecentRequests(), true);
         }
 
-        public override Task<IList<ReleaseInfo>> Fetch(BookSearchCriteria searchCriteria)
+        public override Task<IList<ReleaseInfo>> Fetch(IssueSearchCriteria searchCriteria)
         {
             if (!SupportsSearch)
             {
@@ -60,7 +60,7 @@ namespace NzbDrone.Core.Indexers
             return FetchReleases(g => g.GetSearchRequests(searchCriteria));
         }
 
-        public override Task<IList<ReleaseInfo>> Fetch(AuthorSearchCriteria searchCriteria)
+        public override Task<IList<ReleaseInfo>> Fetch(SeriesSearchCriteria searchCriteria)
         {
             if (!SupportsSearch)
             {

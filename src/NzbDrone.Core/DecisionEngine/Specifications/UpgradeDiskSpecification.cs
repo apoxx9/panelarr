@@ -28,7 +28,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
         {
-            foreach (var file in subject.Books.SelectMany(c => c.BookFiles.Value))
+            foreach (var file in subject.Books.SelectMany(c => c.ComicFiles.Value))
             {
                 if (file == null)
                 {
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
                 var customFormats = _formatService.ParseCustomFormat(file);
 
-                if (!_upgradableSpecification.IsUpgradable(subject.Author.QualityProfile,
+                if (!_upgradableSpecification.IsUpgradable(subject.Series.QualityProfile,
                                                            file.Quality,
                                                            customFormats,
                                                            subject.ParsedBookInfo.Quality,

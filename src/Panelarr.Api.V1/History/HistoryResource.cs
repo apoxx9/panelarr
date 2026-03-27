@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Qualities;
-using Panelarr.Api.V1.Author;
 using Panelarr.Api.V1.Books;
 using Panelarr.Api.V1.CustomFormats;
+using Panelarr.Api.V1.Series;
 using Panelarr.Http.REST;
 
 namespace Panelarr.Api.V1.History
 {
     public class HistoryResource : RestResource
     {
-        public int BookId { get; set; }
-        public int AuthorId { get; set; }
+        public int IssueId { get; set; }
+        public int SeriesId { get; set; }
         public string SourceTitle { get; set; }
         public QualityModel Quality { get; set; }
         public List<CustomFormatResource> CustomFormats { get; set; }
@@ -26,8 +26,8 @@ namespace Panelarr.Api.V1.History
 
         public Dictionary<string, string> Data { get; set; }
 
-        public BookResource Book { get; set; }
-        public AuthorResource Author { get; set; }
+        public IssueResource Issue { get; set; }
+        public SeriesResource Series { get; set; }
     }
 
     public static class HistoryResourceMapper
@@ -39,15 +39,15 @@ namespace Panelarr.Api.V1.History
                 return null;
             }
 
-            var customFormats = formatCalculator.ParseCustomFormat(model, model.Author);
-            var customFormatScore = model.Author?.QualityProfile?.Value?.CalculateCustomFormatScore(customFormats) ?? 0;
+            var customFormats = formatCalculator.ParseCustomFormat(model, model.Series);
+            var customFormatScore = model.Series?.QualityProfile?.Value?.CalculateCustomFormatScore(customFormats) ?? 0;
 
             return new HistoryResource
             {
                 Id = model.Id,
 
-                BookId = model.BookId,
-                AuthorId = model.AuthorId,
+                IssueId = model.IssueId,
+                SeriesId = model.SeriesId,
                 SourceTitle = model.SourceTitle,
                 Quality = model.Quality,
                 CustomFormats = customFormats.ToResource(false),
@@ -62,7 +62,7 @@ namespace Panelarr.Api.V1.History
                 Data = model.Data
 
                 //Episode
-                //Series
+                //SeriesGroup
             };
         }
     }

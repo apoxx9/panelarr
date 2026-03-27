@@ -9,7 +9,7 @@ namespace NzbDrone.Core.Download.History
     public class DownloadHistory : ModelBase
     {
         public DownloadHistoryEventType EventType { get; set; }
-        public int AuthorId { get; set; }
+        public int SeriesId { get; set; }
         public string DownloadId { get; set; }
         public string SourceTitle { get; set; }
         public DateTime Date { get; set; }

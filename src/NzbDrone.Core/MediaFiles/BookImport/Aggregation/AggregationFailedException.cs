@@ -1,7 +1,7 @@
 using System;
 using NzbDrone.Common.Exceptions;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Aggregation
+namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation
 {
     public class AugmentingFailedException : NzbDroneException
     {

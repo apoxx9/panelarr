@@ -49,9 +49,9 @@ namespace NzbDrone.Core.Queue
         {
             if (trackedDownload.RemoteBook?.Books != null && trackedDownload.RemoteBook.Books.Any())
             {
-                foreach (var book in trackedDownload.RemoteBook.Books)
+                foreach (var issue in trackedDownload.RemoteBook.Books)
                 {
-                    yield return MapQueueItem(trackedDownload, book);
+                    yield return MapQueueItem(trackedDownload, issue);
                 }
             }
             else
@@ -60,7 +60,7 @@ namespace NzbDrone.Core.Queue
             }
         }
 
-        private Queue MapQueueItem(TrackedDownload trackedDownload, Book book)
+        private Queue MapQueueItem(TrackedDownload trackedDownload, Issue issue)
         {
             var downloadForced = false;
             var history = _historyService.Find(trackedDownload.DownloadItem.DownloadId, EntityHistoryEventType.Grabbed).FirstOrDefault();
@@ -71,8 +71,8 @@ namespace NzbDrone.Core.Queue
 
             var queue = new Queue
             {
-                Author = trackedDownload.RemoteBook?.Author,
-                Book = book,
+                Series = trackedDownload.RemoteBook?.Series,
+                Issue = issue,
                 Quality = trackedDownload.RemoteBook?.ParsedBookInfo.Quality ?? new QualityModel(Quality.Unknown),
                 Title = Parser.Parser.RemoveFileExtension(trackedDownload.DownloadItem.Title),
                 Size = trackedDownload.DownloadItem.TotalSize,
@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Queue
                 DownloadClientHasPostImportCategory = trackedDownload.DownloadItem.DownloadClientInfo.HasPostImportCategory
             };
 
-            queue.Id = HashConverter.GetHashInt31($"trackedDownload-{trackedDownload.DownloadClient}-{trackedDownload.DownloadItem.DownloadId}-book{book?.Id ?? 0}");
+            queue.Id = HashConverter.GetHashInt31($"trackedDownload-{trackedDownload.DownloadClient}-{trackedDownload.DownloadItem.DownloadId}-issue{issue?.Id ?? 0}");
 
             if (queue.Timeleft.HasValue)
             {

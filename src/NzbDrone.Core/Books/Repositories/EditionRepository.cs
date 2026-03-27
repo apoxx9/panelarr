@@ -11,8 +11,8 @@ namespace NzbDrone.Core.Books
         List<Edition> GetAllMonitoredEditions();
         Edition FindByForeignEditionId(string foreignEditionId);
         List<Edition> FindByBook(IEnumerable<int> ids);
-        List<Edition> FindByAuthor(int id);
-        List<Edition> FindByAuthorMetadataId(int id, bool onlyMonitored);
+        List<Edition> FindBySeries(int id);
+        List<Edition> FindBySeriesMetadataId(int id, bool onlyMonitored);
         Edition FindByTitle(int authorMetadataId, string title);
         List<Edition> GetEditionsForRefresh(int bookId, List<string> foreignEditionIds);
         List<Edition> SetMonitored(Edition edition);
@@ -39,46 +39,45 @@ namespace NzbDrone.Core.Books
 
         public List<Edition> GetEditionsForRefresh(int bookId, List<string> foreignEditionIds)
         {
-            return Query(r => r.BookId == bookId || foreignEditionIds.Contains(r.ForeignEditionId));
+            return Query(r => r.IssueId == bookId || foreignEditionIds.Contains(r.ForeignEditionId));
         }
 
         public List<Edition> FindByBook(IEnumerable<int> ids)
         {
-            // populate the books and author metadata also
+            // populate the issues and author metadata also
             // this hopefully speeds up the track matching a lot
             var builder = new SqlBuilder(_database.DatabaseType)
-                .LeftJoin<Edition, Book>((e, b) => e.BookId == b.Id)
-                .LeftJoin<Book, AuthorMetadata>((b, a) => b.AuthorMetadataId == a.Id)
-                .Where<Edition>(r => ids.Contains(r.BookId));
+                .LeftJoin<Edition, Issue>((e, b) => e.IssueId == b.Id)
+                .LeftJoin<Issue, SeriesMetadata>((b, a) => b.SeriesMetadataId == a.Id)
+                .Where<Edition>(r => ids.Contains(r.IssueId));
 
-            return _database.QueryJoined<Edition, Book, AuthorMetadata>(builder, (edition, book, metadata) =>
+            return _database.QueryJoined<Edition, Issue, SeriesMetadata>(builder, (edition, issue, metadata) =>
                     {
-                        if (book != null)
+                        if (issue != null)
                         {
-                            book.AuthorMetadata = metadata;
-                            edition.Book = book;
+                            issue.SeriesMetadata = metadata;
+                            edition.Issue = issue;
                         }
 
                         return edition;
                     }).ToList();
         }
 
-        public List<Edition> FindByAuthor(int id)
+        public List<Edition> FindBySeries(int id)
         {
-            return Query(Builder().Join<Edition, Book>((e, b) => e.BookId == b.Id)
-                         .Join<Book, Author>((b, a) => b.AuthorMetadataId == a.AuthorMetadataId)
-                         .Where<Author>(a => a.Id == id));
+            return Query(Builder().Join<Edition, Issue>((e, b) => e.IssueId == b.Id)
+                         .Join<Issue, Series>((b, a) => b.SeriesMetadataId == a.SeriesMetadataId)
+                         .Where<Series>(a => a.Id == id));
         }
 
-        public List<Edition> FindByAuthorMetadataId(int authorMetadataId, bool onlyMonitored)
+        public List<Edition> FindBySeriesMetadataId(int authorMetadataId, bool onlyMonitored)
         {
-            var builder = Builder().Join<Edition, Book>((e, b) => e.BookId == b.Id)
-                .Where<Book>(b => b.AuthorMetadataId == authorMetadataId);
+            var builder = Builder().Join<Edition, Issue>((e, b) => e.IssueId == b.Id)
+                .Where<Issue>(b => b.SeriesMetadataId == authorMetadataId);
 
             if (onlyMonitored)
             {
                 builder = builder.OrWhere<Edition>(e => e.Monitored == true);
-                builder = builder.OrWhere<Book>(b => b.AnyEditionOk == true);
             }
 
             return Query(builder);
@@ -86,8 +85,8 @@ namespace NzbDrone.Core.Books
 
         public Edition FindByTitle(int authorMetadataId, string title)
         {
-            return Query(Builder().Join<Edition, Book>((e, b) => e.BookId == b.Id)
-                .Where<Book>(b => b.AuthorMetadataId == authorMetadataId)
+            return Query(Builder().Join<Edition, Issue>((e, b) => e.IssueId == b.Id)
+                .Where<Issue>(b => b.SeriesMetadataId == authorMetadataId)
                 .Where<Edition>(e => e.Monitored == true)
                 .Where<Edition>(e => e.Title == title))
                 .FirstOrDefault();
@@ -95,7 +94,7 @@ namespace NzbDrone.Core.Books
 
         public List<Edition> SetMonitored(Edition edition)
         {
-            var allEditions = FindByBook(new[] { edition.BookId });
+            var allEditions = FindByBook(new[] { edition.IssueId });
             allEditions.ForEach(r => r.Monitored = r.Id == edition.Id);
             Ensure.That(allEditions.Count(x => x.Monitored) == 1).IsTrue();
             UpdateMany(allEditions);

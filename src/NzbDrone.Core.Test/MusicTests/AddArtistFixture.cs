@@ -16,118 +16,118 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.MusicTests
 {
     [TestFixture]
-    public class AddAuthorFixture : CoreTest<AddAuthorService>
+    public class AddSeriesFixture : CoreTest<AddSeriesService>
     {
-        private Author _fakeAuthor;
+        private Series _fakeSeries;
 
         [SetUp]
         public void Setup()
         {
-            _fakeAuthor = Builder<Author>
+            _fakeSeries = Builder<Series>
                 .CreateNew()
                 .With(s => s.Path = null)
                 .Build();
-            _fakeAuthor.Books = new List<Book>();
+            _fakeSeries.Books = new List<Issue>();
 
-            Mocker.GetMock<IAuthorService>()
-                .Setup(s => s.AddAuthor(It.IsAny<Author>(), It.IsAny<bool>()))
-                .Returns<Author, bool>((author, _) => author);
+            Mocker.GetMock<ISeriesService>()
+                .Setup(s => s.AddSeries(It.IsAny<Series>(), It.IsAny<bool>()))
+                .Returns<Series, bool>((author, _) => author);
         }
 
-        private void GivenValidAuthor(string panelarrId)
+        private void GivenValidSeries(string panelarrId)
         {
-            Mocker.GetMock<IProvideAuthorInfo>()
-                .Setup(s => s.GetAuthorInfo(panelarrId, false))
-                .Returns(_fakeAuthor);
+            Mocker.GetMock<IProvideSeriesInfo>()
+                .Setup(s => s.GetSeriesInfo(panelarrId, false))
+                .Returns(_fakeSeries);
         }
 
         private void GivenValidPath()
         {
             Mocker.GetMock<IBuildFileNames>()
-                  .Setup(s => s.GetAuthorFolder(It.IsAny<Author>(), null))
-                  .Returns<Author, NamingConfig>((c, n) => c.Name);
+                  .Setup(s => s.GetSeriesFolder(It.IsAny<Series>(), null))
+                  .Returns<Series, NamingConfig>((c, n) => c.Name);
 
-            Mocker.GetMock<IAddAuthorValidator>()
-                  .Setup(s => s.Validate(It.IsAny<Author>()))
+            Mocker.GetMock<IAddSeriesValidator>()
+                  .Setup(s => s.Validate(It.IsAny<Series>()))
                   .Returns(new ValidationResult());
         }
 
         [Test]
         public void should_be_able_to_add_a_author_without_passing_in_name()
         {
-            var newAuthor = new Author
+            var newSeries = new Series
             {
-                ForeignAuthorId = "ce09ea31-3d4a-4487-a797-e315175457a0",
+                ForeignSeriesId = "ce09ea31-3d4a-4487-a797-e315175457a0",
                 RootFolderPath = @"C:\Test\Music"
             };
 
-            GivenValidAuthor(newAuthor.ForeignAuthorId);
+            GivenValidSeries(newSeries.ForeignSeriesId);
             GivenValidPath();
 
-            var author = Subject.AddAuthor(newAuthor);
+            var author = Subject.AddSeries(newSeries);
 
-            author.Name.Should().Be(_fakeAuthor.Name);
+            author.Name.Should().Be(_fakeSeries.Name);
         }
 
         [Test]
         public void should_have_proper_path()
         {
-            var newAuthor = new Author
+            var newSeries = new Series
             {
-                ForeignAuthorId = "ce09ea31-3d4a-4487-a797-e315175457a0",
+                ForeignSeriesId = "ce09ea31-3d4a-4487-a797-e315175457a0",
                 RootFolderPath = @"C:\Test\Music"
             };
 
-            GivenValidAuthor(newAuthor.ForeignAuthorId);
+            GivenValidSeries(newSeries.ForeignSeriesId);
             GivenValidPath();
 
-            var author = Subject.AddAuthor(newAuthor);
+            var author = Subject.AddSeries(newSeries);
 
-            author.Path.Should().Be(Path.Combine(newAuthor.RootFolderPath, _fakeAuthor.Name));
+            author.Path.Should().Be(Path.Combine(newSeries.RootFolderPath, _fakeSeries.Name));
         }
 
         [Test]
         public void should_throw_if_author_validation_fails()
         {
-            var newAuthor = new Author
+            var newSeries = new Series
             {
-                ForeignAuthorId = "ce09ea31-3d4a-4487-a797-e315175457a0",
+                ForeignSeriesId = "ce09ea31-3d4a-4487-a797-e315175457a0",
                 Path = @"C:\Test\Music\Name1"
             };
 
-            GivenValidAuthor(newAuthor.ForeignAuthorId);
+            GivenValidSeries(newSeries.ForeignSeriesId);
 
-            Mocker.GetMock<IAddAuthorValidator>()
-                  .Setup(s => s.Validate(It.IsAny<Author>()))
+            Mocker.GetMock<IAddSeriesValidator>()
+                  .Setup(s => s.Validate(It.IsAny<Series>()))
                   .Returns(new ValidationResult(new List<ValidationFailure>
                                                 {
                                                     new ValidationFailure("Path", "Test validation failure")
                                                 }));
 
-            Assert.Throws<ValidationException>(() => Subject.AddAuthor(newAuthor));
+            Assert.Throws<ValidationException>(() => Subject.AddSeries(newSeries));
         }
 
         [Test]
         public void should_throw_if_author_cannot_be_found()
         {
-            var newAuthor = new Author
+            var newSeries = new Series
             {
-                ForeignAuthorId = "ce09ea31-3d4a-4487-a797-e315175457a0",
+                ForeignSeriesId = "ce09ea31-3d4a-4487-a797-e315175457a0",
                 Path = @"C:\Test\Music\Name1"
             };
 
-            Mocker.GetMock<IProvideAuthorInfo>()
-                  .Setup(s => s.GetAuthorInfo(newAuthor.ForeignAuthorId, false))
-                  .Throws(new AuthorNotFoundException(newAuthor.ForeignAuthorId));
+            Mocker.GetMock<IProvideSeriesInfo>()
+                  .Setup(s => s.GetSeriesInfo(newSeries.ForeignSeriesId, false))
+                  .Throws(new SeriesNotFoundException(newSeries.ForeignSeriesId));
 
-            Mocker.GetMock<IAddAuthorValidator>()
-                  .Setup(s => s.Validate(It.IsAny<Author>()))
+            Mocker.GetMock<IAddSeriesValidator>()
+                  .Setup(s => s.Validate(It.IsAny<Series>()))
                   .Returns(new ValidationResult(new List<ValidationFailure>
                                                 {
                                                     new ValidationFailure("Path", "Test validation failure")
                                                 }));
 
-            Assert.Throws<ValidationException>(() => Subject.AddAuthor(newAuthor));
+            Assert.Throws<ValidationException>(() => Subject.AddSeries(newSeries));
 
             ExceptionVerification.ExpectedErrors(1);
         }
@@ -135,87 +135,87 @@ namespace NzbDrone.Core.Test.MusicTests
         [Test]
         public void should_disambiguate_if_author_folder_exists()
         {
-            var newAuthor = new Author
+            var newSeries = new Series
             {
-                ForeignAuthorId = "ce09ea31-3d4a-4487-a797-e315175457a0",
+                ForeignSeriesId = "ce09ea31-3d4a-4487-a797-e315175457a0",
                 Path = @"C:\Test\Music\Name1",
             };
 
-            _fakeAuthor.Metadata = Builder<AuthorMetadata>.CreateNew().With(x => x.Disambiguation = "Disambiguation").Build();
+            _fakeSeries.Metadata = Builder<SeriesMetadata>.CreateNew().With(x => x.Disambiguation = "Disambiguation").Build();
 
-            GivenValidAuthor(newAuthor.ForeignAuthorId);
+            GivenValidSeries(newSeries.ForeignSeriesId);
             GivenValidPath();
 
-            Mocker.GetMock<IAuthorService>()
-                .Setup(x => x.AuthorPathExists(newAuthor.Path))
+            Mocker.GetMock<ISeriesService>()
+                .Setup(x => x.SeriesPathExists(newSeries.Path))
                 .Returns(true);
 
-            var author = Subject.AddAuthor(newAuthor);
-            author.Path.Should().Be(newAuthor.Path + " (Disambiguation)");
+            var author = Subject.AddSeries(newSeries);
+            author.Path.Should().Be(newSeries.Path + " (Disambiguation)");
         }
 
         [Test]
         public void should_disambiguate_with_numbers_if_author_folder_still_exists()
         {
-            var newAuthor = new Author
+            var newSeries = new Series
             {
-                ForeignAuthorId = "ce09ea31-3d4a-4487-a797-e315175457a0",
+                ForeignSeriesId = "ce09ea31-3d4a-4487-a797-e315175457a0",
                 Path = @"C:\Test\Music\Name1",
             };
 
-            _fakeAuthor.Metadata = Builder<AuthorMetadata>.CreateNew().With(x => x.Disambiguation = "Disambiguation").Build();
+            _fakeSeries.Metadata = Builder<SeriesMetadata>.CreateNew().With(x => x.Disambiguation = "Disambiguation").Build();
 
-            GivenValidAuthor(newAuthor.ForeignAuthorId);
+            GivenValidSeries(newSeries.ForeignSeriesId);
             GivenValidPath();
 
-            Mocker.GetMock<IAuthorService>()
-                .Setup(x => x.AuthorPathExists(newAuthor.Path))
+            Mocker.GetMock<ISeriesService>()
+                .Setup(x => x.SeriesPathExists(newSeries.Path))
                 .Returns(true);
 
-            Mocker.GetMock<IAuthorService>()
-                .Setup(x => x.AuthorPathExists(newAuthor.Path + " (Disambiguation)"))
+            Mocker.GetMock<ISeriesService>()
+                .Setup(x => x.SeriesPathExists(newSeries.Path + " (Disambiguation)"))
                 .Returns(true);
 
-            Mocker.GetMock<IAuthorService>()
-                .Setup(x => x.AuthorPathExists(newAuthor.Path + " (Disambiguation) (1)"))
+            Mocker.GetMock<ISeriesService>()
+                .Setup(x => x.SeriesPathExists(newSeries.Path + " (Disambiguation) (1)"))
                 .Returns(true);
 
-            Mocker.GetMock<IAuthorService>()
-                .Setup(x => x.AuthorPathExists(newAuthor.Path + " (Disambiguation) (2)"))
+            Mocker.GetMock<ISeriesService>()
+                .Setup(x => x.SeriesPathExists(newSeries.Path + " (Disambiguation) (2)"))
                 .Returns(true);
 
-            var author = Subject.AddAuthor(newAuthor);
-            author.Path.Should().Be(newAuthor.Path + " (Disambiguation) (3)");
+            var author = Subject.AddSeries(newSeries);
+            author.Path.Should().Be(newSeries.Path + " (Disambiguation) (3)");
         }
 
         [Test]
         public void should_disambiguate_with_numbers_if_author_folder_exists_and_no_disambiguation()
         {
-            var newAuthor = new Author
+            var newSeries = new Series
             {
-                ForeignAuthorId = "ce09ea31-3d4a-4487-a797-e315175457a0",
+                ForeignSeriesId = "ce09ea31-3d4a-4487-a797-e315175457a0",
                 Path = @"C:\Test\Music\Name1",
             };
 
-            _fakeAuthor.Metadata = Builder<AuthorMetadata>.CreateNew().With(x => x.Disambiguation = string.Empty).Build();
+            _fakeSeries.Metadata = Builder<SeriesMetadata>.CreateNew().With(x => x.Disambiguation = string.Empty).Build();
 
-            GivenValidAuthor(newAuthor.ForeignAuthorId);
+            GivenValidSeries(newSeries.ForeignSeriesId);
             GivenValidPath();
 
-            Mocker.GetMock<IAuthorService>()
-                .Setup(x => x.AuthorPathExists(newAuthor.Path))
+            Mocker.GetMock<ISeriesService>()
+                .Setup(x => x.SeriesPathExists(newSeries.Path))
                 .Returns(true);
 
-            Mocker.GetMock<IAuthorService>()
-                .Setup(x => x.AuthorPathExists(newAuthor.Path + " (1)"))
+            Mocker.GetMock<ISeriesService>()
+                .Setup(x => x.SeriesPathExists(newSeries.Path + " (1)"))
                 .Returns(true);
 
-            Mocker.GetMock<IAuthorService>()
-                .Setup(x => x.AuthorPathExists(newAuthor.Path + " (2)"))
+            Mocker.GetMock<ISeriesService>()
+                .Setup(x => x.SeriesPathExists(newSeries.Path + " (2)"))
                 .Returns(true);
 
-            var author = Subject.AddAuthor(newAuthor);
-            author.Path.Should().Be(newAuthor.Path + " (3)");
+            var author = Subject.AddSeries(newSeries);
+            author.Path.Should().Be(newSeries.Path + " (3)");
         }
     }
 }

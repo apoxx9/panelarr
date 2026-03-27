@@ -60,9 +60,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _reports = new List<ReleaseInfo> { new ReleaseInfo { Title = "Coldplay-A Head Full Of Dreams-CD-FLAC-2015-PERFECT" } };
             _remoteBook = new RemoteBook
             {
-                Author = new Author(),
-                Books = new List<Book> { new Book() },
-                ParsedBookInfo = Builder<ParsedBookInfo>.CreateNew().With(x => x.Quality = new QualityModel(Quality.FLAC)).Build()
+                Series = new Series(),
+                Books = new List<Issue> { new Issue() },
+                ParsedBookInfo = Builder<ParsedBookInfo>.CreateNew().With(x => x.Quality = new QualityModel(Quality.CBZ_HD)).Build()
             };
 
             Mocker.GetMock<IParsingService>()
@@ -186,20 +186,16 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenSpecifications(_pass1, _pass2, _pass3);
             _reports[0].Title = "1937 - Snow White and the Seven Dwarves";
 
-            var author = new Author { Name = "Some Author" };
-            var books = new List<Book>
+            var author = new Series { Name = "Some Series" };
+            var issues = new List<Issue>
             {
-                new Book
+                new Issue
                 {
-                    Title = "Some Book",
-                    Editions = new List<Edition>
-                    {
-                        new Edition { Title = "Some Edition Title" }
-                    }
+                    Title = "Some Issue"
                 }
             };
 
-            Subject.GetSearchDecision(_reports, new BookSearchCriteria { Author = author, Books = books }).ToList();
+            Subject.GetSearchDecision(_reports, new IssueSearchCriteria { Series = author, Books = issues }).ToList();
 
             Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
 
@@ -213,7 +209,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
 
-            _remoteBook.Author = null;
+            _remoteBook.Series = null;
 
             Subject.GetRssDecision(_reports);
 
@@ -249,7 +245,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
 
-            _remoteBook.Author = null;
+            _remoteBook.Series = null;
 
             var result = Subject.GetRssDecision(_reports);
 
@@ -259,17 +255,17 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_only_include_reports_for_requested_books()
         {
-            var author = Builder<Author>.CreateNew().Build();
+            var author = Builder<Series>.CreateNew().Build();
 
-            var books = Builder<Book>.CreateListOfSize(2)
+            var issues = Builder<Issue>.CreateListOfSize(2)
                 .All()
-                .With(v => v.AuthorId, author.Id)
-                .With(v => v.Author, new LazyLoaded<Author>(author))
+                .With(v => v.SeriesId, author.Id)
+                .With(v => v.Series, new LazyLoaded<Series>(author))
                 .BuildList();
 
-            var criteria = new AuthorSearchCriteria { Books = books.Take(1).ToList() };
+            var criteria = new SeriesSearchCriteria { Books = issues.Take(1).ToList() };
 
-            var reports = books.Select(v =>
+            var reports = issues.Select(v =>
                 new ReleaseInfo()
                 {
                     Title = string.Format("{0}-{1}[FLAC][2017][DRONE]", author.Name, v.Title)
@@ -282,13 +278,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                     {
                         DownloadAllowed = true,
                         ParsedBookInfo = p,
-                        Author = author,
-                        Books = books.Where(v => v.Title == p.BookTitle).ToList()
+                        Series = author,
+                        Books = issues.Where(v => v.Title == p.IssueTitle).ToList()
                     });
 
             Mocker.SetConstant<IEnumerable<IDecisionEngineSpecification>>(new List<IDecisionEngineSpecification>
             {
-                Mocker.Resolve<NzbDrone.Core.DecisionEngine.Specifications.Search.BookRequestedSpecification>()
+                Mocker.Resolve<NzbDrone.Core.DecisionEngine.Specifications.Search.IssueRequestedSpecification>()
             });
 
             var decisions = Subject.GetSearchDecision(reports, criteria);
@@ -303,7 +299,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
 
-            _remoteBook.Author = null;
+            _remoteBook.Series = null;
 
             var result = Subject.GetRssDecision(_reports);
 
@@ -317,7 +313,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
 
-            _remoteBook.Books = new List<Book>();
+            _remoteBook.Books = new List<Issue>();
 
             var result = Subject.GetRssDecision(_reports);
 

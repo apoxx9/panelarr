@@ -38,30 +38,30 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                                       .With(d => d.PreferredProtocol = DownloadProtocol.Usenet)
                                       .Build();
 
-            var author = Builder<Author>.CreateNew()
+            var author = Builder<Series>.CreateNew()
                                         .With(s => s.QualityProfile = _profile)
                                         .Build();
 
             _remoteBook = Builder<RemoteBook>.CreateNew()
-                                                   .With(r => r.Author = author)
+                                                   .With(r => r.Series = author)
                                                    .Build();
 
             _profile.Items = new List<QualityProfileQualityItem>();
             _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.PDF });
-            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.AZW3 });
-            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.MP3 });
+            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBZ });
+            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBR });
 
-            _profile.Cutoff = Quality.AZW3.Id;
+            _profile.Cutoff = Quality.CBZ.Id;
 
             _remoteBook.ParsedBookInfo = new ParsedBookInfo();
             _remoteBook.Release = new ReleaseInfo();
             _remoteBook.Release.DownloadProtocol = DownloadProtocol.Usenet;
 
-            _remoteBook.Books = Builder<Book>.CreateListOfSize(1).Build().ToList();
+            _remoteBook.Books = Builder<Issue>.CreateListOfSize(1).Build().ToList();
 
             Mocker.GetMock<IMediaFileService>()
                 .Setup(s => s.GetFilesByBook(It.IsAny<int>()))
-                .Returns(new List<BookFile> { });
+                .Returns(new List<ComicFile> { });
 
             Mocker.GetMock<IDelayProfileService>()
                   .Setup(s => s.BestForTags(It.IsAny<HashSet<int>>()))
@@ -76,9 +76,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         {
             Mocker.GetMock<IMediaFileService>()
                 .Setup(s => s.GetFilesByBook(It.IsAny<int>()))
-                .Returns(new List<BookFile>
+                .Returns(new List<ComicFile>
                 {
-                    new BookFile
+                    new ComicFile
                     {
                         Quality = quality
                     }
@@ -95,18 +95,18 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_true_when_user_invoked_search()
         {
-            Subject.IsSatisfiedBy(new RemoteBook(), new BookSearchCriteria { UserInvokedSearch = true }).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(new RemoteBook(), new IssueSearchCriteria { UserInvokedSearch = true }).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_be_false_when_system_invoked_search_and_release_is_younger_than_delay()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.MOBI);
+            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR);
             _remoteBook.Release.PublishDate = DateTime.UtcNow;
 
             _delayProfile.UsenetDelay = 720;
 
-            Subject.IsSatisfiedBy(_remoteBook, new BookSearchCriteria()).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteBook, new IssueSearchCriteria()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -121,7 +121,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         public void should_be_false_when_quality_is_last_allowed_in_profile_and_bypass_disabled()
         {
             _remoteBook.Release.PublishDate = DateTime.UtcNow;
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.MP3);
+            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR);
 
             _delayProfile.UsenetDelay = 720;
 
@@ -135,7 +135,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _delayProfile.BypassIfHighestQuality = true;
 
             _remoteBook.Release.PublishDate = DateTime.UtcNow;
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.MP3);
+            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR);
 
             Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
         }
@@ -143,7 +143,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_true_when_release_is_older_than_delay()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.MOBI);
+            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR);
             _remoteBook.Release.PublishDate = DateTime.UtcNow.AddHours(-10);
 
             _delayProfile.UsenetDelay = 60;
@@ -154,7 +154,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_false_when_release_is_younger_than_delay()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.MOBI);
+            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR);
             _remoteBook.Release.PublishDate = DateTime.UtcNow;
 
             _delayProfile.UsenetDelay = 720;
@@ -165,10 +165,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_true_when_release_is_a_proper_for_existing_book()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.MP3, new Revision(version: 2));
+            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR, new Revision(version: 2));
             _remoteBook.Release.PublishDate = DateTime.UtcNow;
 
-            GivenExistingFile(new QualityModel(Quality.MP3));
+            GivenExistingFile(new QualityModel(Quality.CBR));
             GivenUpgradeForExistingFile();
 
             Mocker.GetMock<IUpgradableSpecification>()
@@ -183,10 +183,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_true_when_release_is_a_real_for_existing_book()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.MP3, new Revision(real: 1));
+            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR, new Revision(real: 1));
             _remoteBook.Release.PublishDate = DateTime.UtcNow;
 
-            GivenExistingFile(new QualityModel(Quality.MP3));
+            GivenExistingFile(new QualityModel(Quality.CBR));
             GivenUpgradeForExistingFile();
 
             Mocker.GetMock<IUpgradableSpecification>()
@@ -201,7 +201,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_false_when_release_is_proper_for_existing_book_of_different_quality()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.AZW3, new Revision(version: 2));
+            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBZ, new Revision(version: 2));
             _remoteBook.Release.PublishDate = DateTime.UtcNow;
 
             GivenExistingFile(new QualityModel(Quality.PDF));

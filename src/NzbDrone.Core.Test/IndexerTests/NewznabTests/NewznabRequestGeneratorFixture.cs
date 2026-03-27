@@ -10,7 +10,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 {
     public class NewznabRequestGeneratorFixture : CoreTest<NewznabRequestGenerator>
     {
-        private BookSearchCriteria _singleBookSearchCriteria;
+        private IssueSearchCriteria _singleBookSearchCriteria;
         private NewznabCapabilities _capabilities;
 
         [SetUp]
@@ -23,10 +23,10 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
                 ApiKey = "abcd",
             };
 
-            _singleBookSearchCriteria = new BookSearchCriteria
+            _singleBookSearchCriteria = new IssueSearchCriteria
             {
-                Author = new Books.Author { Name = "Alien Ant Farm" },
-                BookTitle = "TruANT"
+                Series = new Books.Series { Name = "Alien Ant Farm" },
+                IssueTitle = "TruANT"
             };
 
             _capabilities = new NewznabCapabilities();
@@ -69,8 +69,8 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         {
             _capabilities.SupportedBookSearchParameters = new[] { "q", "author", "title" };
 
-            // _capabilities.BookTextSearchEngine = "raw";
-            _singleBookSearchCriteria.BookTitle = "Daisy Jones & The Six";
+            // _capabilities.IssueTextSearchEngine = "raw";
+            _singleBookSearchCriteria.IssueTitle = "Daisy Jones & The Six";
 
             var results = Subject.GetSearchRequests(_singleBookSearchCriteria);
             results.Tiers.Should().Be(1);
@@ -87,8 +87,8 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         {
             _capabilities.SupportedBookSearchParameters = new[] { "q", "author", "title" };
 
-            // _capabilities.BookTextSearchEngine = "sphinx";
-            _singleBookSearchCriteria.BookTitle = "Daisy Jones & The Six";
+            // _capabilities.IssueTextSearchEngine = "sphinx";
+            _singleBookSearchCriteria.IssueTitle = "Daisy Jones & The Six";
 
             var results = Subject.GetSearchRequests(_singleBookSearchCriteria);
             results.Tiers.Should().Be(2);

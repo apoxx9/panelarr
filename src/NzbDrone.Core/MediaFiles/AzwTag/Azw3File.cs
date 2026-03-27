@@ -11,8 +11,8 @@ namespace NzbDrone.Core.MediaFiles.Azw
         }
 
         public string Title => MobiHeader.Title;
-        public List<string> Authors => MobiHeader.ExtMeta.StringList(100);
-        public string Author => MobiHeader.ExtMeta.StringOrNull(100);
+        public List<string> Seriess => MobiHeader.ExtMeta.StringList(100);
+        public string Series => MobiHeader.ExtMeta.StringOrNull(100);
         public string Isbn => MobiHeader.ExtMeta.StringOrNull(104);
         public string Asin => MobiHeader.ExtMeta.StringOrNull(113);
         public string PublishDate => MobiHeader.ExtMeta.StringOrNull(106);

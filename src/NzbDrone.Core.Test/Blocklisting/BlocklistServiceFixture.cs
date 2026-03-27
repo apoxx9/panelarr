@@ -19,10 +19,10 @@ namespace NzbDrone.Core.Test.Blocklisting
         {
             _event = new DownloadFailedEvent
             {
-                AuthorId = 12345,
-                BookIds = new List<int> { 1 },
-                Quality = new QualityModel(Quality.MP3),
-                SourceTitle = "author.name.book.title",
+                SeriesId = 12345,
+                IssueIds = new List<int> { 1 },
+                Quality = new QualityModel(Quality.CBR),
+                SourceTitle = "author.name.issue.title",
                 DownloadClient = "SabnzbdClient",
                 DownloadId = "Sabnzbd_nzo_2dfh73k"
             };
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Test.Blocklisting
             Subject.Handle(_event);
 
             Mocker.GetMock<IBlocklistRepository>()
-                .Verify(v => v.Insert(It.Is<Blocklist>(b => b.BookIds == _event.BookIds)), Times.Once());
+                .Verify(v => v.Insert(It.Is<Blocklist>(b => b.IssueIds == _event.IssueIds)), Times.Once());
         }
 
         [Test]
@@ -52,7 +52,7 @@ namespace NzbDrone.Core.Test.Blocklisting
             _event.Data.Remove("protocol");
 
             Mocker.GetMock<IBlocklistRepository>()
-                .Verify(v => v.Insert(It.Is<Blocklist>(b => b.BookIds == _event.BookIds)), Times.Once());
+                .Verify(v => v.Insert(It.Is<Blocklist>(b => b.IssueIds == _event.IssueIds)), Times.Once());
         }
     }
 }

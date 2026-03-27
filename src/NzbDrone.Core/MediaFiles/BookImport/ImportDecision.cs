@@ -3,7 +3,7 @@ using System.Linq;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.DecisionEngine;
 
-namespace NzbDrone.Core.MediaFiles.BookImport
+namespace NzbDrone.Core.MediaFiles.IssueImport
 {
     public class ImportDecision<T>
     {

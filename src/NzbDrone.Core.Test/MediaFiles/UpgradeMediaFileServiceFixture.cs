@@ -17,20 +17,20 @@ namespace NzbDrone.Core.Test.MediaFiles
 {
     public class UpgradeMediaFileServiceFixture : CoreTest<UpgradeMediaFileService>
     {
-        private BookFile _trackFile;
+        private ComicFile _trackFile;
         private LocalBook _localTrack;
-        private string _rootPath = @"C:\Test\Music\Author".AsOsAgnostic();
+        private string _rootPath = @"C:\Test\Music\Series".AsOsAgnostic();
 
         [SetUp]
         public void Setup()
         {
             _localTrack = new LocalBook();
-            _localTrack.Author = new Author
+            _localTrack.Series = new Series
             {
                 Path = _rootPath
             };
 
-            _trackFile = Builder<BookFile>
+            _trackFile = Builder<ComicFile>
                 .CreateNew()
                 .Build();
 
@@ -53,11 +53,11 @@ namespace NzbDrone.Core.Test.MediaFiles
 
         private void GivenSingleTrackWithSingleTrackFile()
         {
-            _localTrack.Book = Builder<Book>.CreateNew()
-                .With(e => e.BookFiles = new LazyLoaded<List<BookFile>>(
-                          new List<BookFile>
+            _localTrack.Issue = Builder<Issue>.CreateNew()
+                .With(e => e.ComicFiles = new LazyLoaded<List<ComicFile>>(
+                          new List<ComicFile>
                           {
-                              new BookFile
+                              new ComicFile
                               {
                                   Id = 1,
                                   Path = Path.Combine(_rootPath, @"Season 01\30.rock.s01e01.avi"),
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             Subject.UpgradeBookFile(_trackFile, _localTrack);
 
-            Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(It.IsAny<BookFile>(), DeleteMediaFileReason.Upgrade), Times.Once());
+            Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(It.IsAny<ComicFile>(), DeleteMediaFileReason.Upgrade), Times.Once());
         }
 
         [Test]
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             Subject.UpgradeBookFile(_trackFile, _localTrack);
 
-            // Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_localTrack.Book.BookFiles.Value, DeleteMediaFileReason.Upgrade), Times.Once());
+            // Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_localTrack.Issue.ComicFiles.Value, DeleteMediaFileReason.Upgrade), Times.Once());
         }
 
         [Test]
@@ -126,13 +126,13 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Ignore("Pending panelarr fix")]
         public void should_import_if_existing_file_doesnt_exist_in_db()
         {
-            _localTrack.Book = Builder<Book>.CreateNew()
-                .With(e => e.BookFiles = new LazyLoaded<List<BookFile>>())
+            _localTrack.Issue = Builder<Issue>.CreateNew()
+                .With(e => e.ComicFiles = new LazyLoaded<List<ComicFile>>())
                 .Build();
 
             Subject.UpgradeBookFile(_trackFile, _localTrack);
 
-            // Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_localTrack.Book.BookFiles.Value, It.IsAny<DeleteMediaFileReason>()), Times.Never());
+            // Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_localTrack.Issue.ComicFiles.Value, It.IsAny<DeleteMediaFileReason>()), Times.Never());
         }
     }
 }

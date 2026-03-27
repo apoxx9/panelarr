@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             Mocker.GetMock<IMediaFileRepository>()
                 .Setup(c => c.GetFileWithPath(It.IsAny<List<string>>()))
-                .Returns(new List<BookFile>());
+                .Returns(new List<ComicFile>());
 
             Subject.FilterUnchangedFiles(files, filter).Should().BeEquivalentTo(files);
         }
@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             Mocker.GetMock<IMediaFileRepository>()
                 .Setup(c => c.GetFileWithPath(It.IsAny<List<string>>()))
-                .Returns(files.Select(f => new BookFile
+                .Returns(files.Select(f => new ComicFile
                 {
                     Path = f.FullName,
                     Modified = _lastWrite
@@ -83,9 +83,9 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             Mocker.GetMock<IMediaFileRepository>()
                 .Setup(c => c.GetFileWithPath(It.IsAny<List<string>>()))
-                .Returns(new List<BookFile>
+                .Returns(new List<ComicFile>
                 {
-                    new BookFile
+                    new ComicFile
                     {
                         Path = "C:\\file2.avi".AsOsAgnostic(),
                         Modified = _lastWrite
@@ -111,9 +111,9 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             Mocker.GetMock<IMediaFileRepository>()
                 .Setup(c => c.GetFileWithPath(It.IsAny<List<string>>()))
-                .Returns(new List<BookFile>
+                .Returns(new List<ComicFile>
                 {
-                    new BookFile
+                    new ComicFile
                     {
                         Path = "C:\\file2.avi".AsOsAgnostic(),
                         Modified = _lastWrite
@@ -139,9 +139,9 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             Mocker.GetMock<IMediaFileRepository>()
                 .Setup(c => c.GetFileWithPath(It.IsAny<List<string>>()))
-                .Returns(new List<BookFile>
+                .Returns(new List<ComicFile>
                 {
-                    new BookFile
+                    new ComicFile
                     {
                         Path = "C:\\file2.avi".AsOsAgnostic(),
                         Modified = _lastWrite
@@ -162,7 +162,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             Mocker.GetMock<IMediaFileRepository>()
                 .Setup(c => c.GetFileWithPath(It.IsAny<List<string>>()))
-                .Returns(new List<BookFile>());
+                .Returns(new List<ComicFile>());
 
             Subject.FilterUnchangedFiles(files, filter).Should().HaveCount(1);
             Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().NotContain(files.First().FullName.ToLower());
@@ -181,9 +181,9 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             Mocker.GetMock<IMediaFileRepository>()
                 .Setup(c => c.GetFileWithPath(It.IsAny<List<string>>()))
-                .Returns(new List<BookFile>
+                .Returns(new List<ComicFile>
                 {
-                    new BookFile
+                    new ComicFile
                     {
                         Path = "C:\\file2.avi".AsOsAgnostic(),
                         Size = 10,
@@ -206,14 +206,14 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             Mocker.GetMock<IMediaFileRepository>()
                 .Setup(c => c.GetFileWithPath(It.IsAny<List<string>>()))
-                .Returns(new List<BookFile>
+                .Returns(new List<ComicFile>
                 {
-                    new BookFile
+                    new ComicFile
                     {
                         Path = "C:\\file2.avi".AsOsAgnostic(),
                         Size = 10,
                         Modified = _lastWrite,
-                        Edition = new LazyLoaded<Edition>(null)
+                        Issue = new LazyLoaded<Issue>(null)
                     }
                 });
 
@@ -232,14 +232,14 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             Mocker.GetMock<IMediaFileRepository>()
                 .Setup(c => c.GetFileWithPath(It.IsAny<List<string>>()))
-                .Returns(new List<BookFile>
+                .Returns(new List<ComicFile>
                 {
-                    new BookFile
+                    new ComicFile
                     {
                         Path = "C:\\file2.avi".AsOsAgnostic(),
                         Size = 10,
                         Modified = _lastWrite,
-                        Edition = Builder<Edition>.CreateNew().Build()
+                        Issue = Builder<Issue>.CreateNew().Build()
                     }
                 });
 
@@ -259,9 +259,9 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             Mocker.GetMock<IMediaFileRepository>()
                 .Setup(c => c.GetFileWithPath(It.IsAny<List<string>>()))
-                .Returns(new List<BookFile>
+                .Returns(new List<ComicFile>
                 {
-                    new BookFile
+                    new ComicFile
                     {
                         Path = "C:\\file2.avi".AsOsAgnostic(),
                         Size = 10,

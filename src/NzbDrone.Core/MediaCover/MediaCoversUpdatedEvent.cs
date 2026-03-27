@@ -5,17 +5,17 @@ namespace NzbDrone.Core.MediaCover
 {
     public class MediaCoversUpdatedEvent : IEvent
     {
-        public Author Author { get; set; }
-        public Book Book { get; set; }
+        public Series Series { get; set; }
+        public Issue Issue { get; set; }
 
-        public MediaCoversUpdatedEvent(Author author)
+        public MediaCoversUpdatedEvent(Series author)
         {
-            Author = author;
+            Series = author;
         }
 
-        public MediaCoversUpdatedEvent(Book book)
+        public MediaCoversUpdatedEvent(Issue issue)
         {
-            Book = book;
+            Issue = issue;
         }
     }
 }

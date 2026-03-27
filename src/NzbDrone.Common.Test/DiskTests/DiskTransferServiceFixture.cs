@@ -449,7 +449,7 @@ namespace NzbDrone.Common.Test.DiskTests
             var original = GetFilledTempFolder();
             var root = new DirectoryInfo(GetTempFilePath());
             var source = new DirectoryInfo(root.FullName + "A/series");
-            var destination = new DirectoryInfo(root.FullName + "A/Series");
+            var destination = new DirectoryInfo(root.FullName + "A/SeriesGroup");
 
             Subject.TransferFolder(original.FullName, source.FullName, TransferMode.Copy);
 
@@ -532,7 +532,7 @@ namespace NzbDrone.Common.Test.DiskTests
             var original = GetFilledTempFolder();
             var root = new DirectoryInfo(GetTempFilePath());
             var source = new DirectoryInfo(root.FullName + "A/series");
-            var destination = new DirectoryInfo(root.FullName + "A/Series");
+            var destination = new DirectoryInfo(root.FullName + "A/SeriesGroup");
 
             Subject.TransferFolder(original.FullName, source.FullName, TransferMode.Copy);
 

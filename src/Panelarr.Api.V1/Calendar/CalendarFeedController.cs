@@ -17,10 +17,10 @@ namespace Panelarr.Api.V1.Calendar
     public class CalendarFeedController : Controller
     {
         private readonly IBookService _bookService;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly ITagService _tagService;
 
-        public CalendarFeedController(IBookService bookService, IAuthorService authorService, ITagService tagService)
+        public CalendarFeedController(IBookService bookService, ISeriesService authorService, ITagService tagService)
         {
             _bookService = bookService;
             _authorService = authorService;
@@ -39,19 +39,19 @@ namespace Panelarr.Api.V1.Calendar
                 tags.AddRange(tagList.Split(',').Select(_tagService.GetTag).Select(t => t.Id));
             }
 
-            var books = _bookService.BooksBetweenDates(start, end, unmonitored);
+            var issues = _bookService.IssuesBetweenDates(start, end, unmonitored);
             var calendar = new Ical.Net.Calendar
             {
                 ProductId = "-//panelarr.com//Panelarr//EN"
             };
 
-            var calendarName = "Panelarr Book Schedule";
+            var calendarName = "Panelarr Issue Schedule";
             calendar.AddProperty(new CalendarProperty("NAME", calendarName));
             calendar.AddProperty(new CalendarProperty("X-WR-CALNAME", calendarName));
 
-            foreach (var book in books.OrderBy(v => v.ReleaseDate.Value))
+            foreach (var issue in issues.OrderBy(v => v.ReleaseDate.Value))
             {
-                var author = _authorService.GetAuthor(book.AuthorId); // Temp fix TODO: Figure out why Book.Author is not populated during BooksBetweenDates Query
+                var author = _authorService.GetSeries(issue.SeriesId); // Temp fix TODO: Figure out why Issue.Series is not populated during IssuesBetweenDates Query
 
                 if (tags.Any() && tags.None(author.Tags.Contains))
                 {
@@ -59,17 +59,17 @@ namespace Panelarr.Api.V1.Calendar
                 }
 
                 var occurrence = calendar.Create<CalendarEvent>();
-                occurrence.Uid = "Panelarr_book_" + book.Id;
+                occurrence.Uid = "Panelarr_book_" + issue.Id;
 
-                //occurrence.Status = book.HasFile ? EventStatus.Confirmed : EventStatus.Tentative;
-                occurrence.Description = book.Editions.Value.Single(x => x.Monitored).Overview;
-                occurrence.Categories = book.Genres;
+                //occurrence.Status = issue.HasFile ? EventStatus.Confirmed : EventStatus.Tentative;
+                occurrence.Description = string.Empty;
+                occurrence.Categories = issue.Genres;
 
-                occurrence.Start = new CalDateTime(book.ReleaseDate.Value.ToLocalTime()) { HasTime = false };
+                occurrence.Start = new CalDateTime(issue.ReleaseDate.Value.ToLocalTime()) { HasTime = false };
                 occurrence.End = occurrence.Start;
                 occurrence.IsAllDay = true;
 
-                occurrence.Summary = $"{author.Name} - {book.Title}";
+                occurrence.Summary = $"{author.Name} - {issue.Title}";
             }
 
             var serializer = (IStringSerializer)new SerializerFactory().Build(calendar.GetType(), new SerializationContext());

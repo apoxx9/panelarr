@@ -106,7 +106,7 @@ class AuthorIndexFooter extends PureComponent {
               <div className={styles.statistics}>
                 <DescriptionList>
                   <DescriptionListItem
-                    title={translate('Authors')}
+                    title={translate('Series')}
                     data={count}
                   />
 
@@ -135,7 +135,7 @@ class AuthorIndexFooter extends PureComponent {
 
                 <DescriptionList>
                   <DescriptionListItem
-                    title={translate('Books')}
+                    title={translate('Issues')}
                     data={books}
                   />
 

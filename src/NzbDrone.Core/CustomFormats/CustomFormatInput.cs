@@ -6,29 +6,29 @@ namespace NzbDrone.Core.CustomFormats
     public class CustomFormatInput
     {
         public ParsedBookInfo BookInfo { get; set; }
-        public Author Author { get; set; }
+        public Series Series { get; set; }
         public long Size { get; set; }
         public IndexerFlags IndexerFlags { get; set; }
         public string Filename { get; set; }
 
-        // public CustomFormatInput(ParsedEpisodeInfo episodeInfo, Series series)
+        // public CustomFormatInput(ParsedEpisodeInfo episodeInfo, SeriesGroup series)
         // {
         //     EpisodeInfo = episodeInfo;
-        //     Series = series;
+        //     SeriesGroup = series;
         // }
         //
-        // public CustomFormatInput(ParsedEpisodeInfo episodeInfo, Series series, long size, List<Language> languages)
+        // public CustomFormatInput(ParsedEpisodeInfo episodeInfo, SeriesGroup series, long size, List<Language> languages)
         // {
         //     EpisodeInfo = episodeInfo;
-        //     Series = series;
+        //     SeriesGroup = series;
         //     Size = size;
         //     Languages = languages;
         // }
         //
-        // public CustomFormatInput(ParsedEpisodeInfo episodeInfo, Series series, long size, List<Language> languages, string filename)
+        // public CustomFormatInput(ParsedEpisodeInfo episodeInfo, SeriesGroup series, long size, List<Language> languages, string filename)
         // {
         //     EpisodeInfo = episodeInfo;
-        //     Series = series;
+        //     SeriesGroup = series;
         //     Size = size;
         //     Languages = languages;
         //     Filename = filename;

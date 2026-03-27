@@ -6,7 +6,7 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Configuration;
-using NzbDrone.Core.MetadataSource;
+using NzbDrone.Core.MetadataSource.Goodreads;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
@@ -14,20 +14,20 @@ namespace NzbDrone.Core.ImportLists.Goodreads
 {
     public class GoodreadsSeriesImportList : ImportListBase<GoodreadsSeriesImportListSettings>
     {
-        private readonly IProvideSeriesInfo _seriesInfo;
+        private readonly IGoodreadsProxy _goodreadsProxy;
 
-        public override string Name => "Goodreads Series";
+        public override string Name => "Goodreads SeriesGroup";
         public override ImportListType ListType => ImportListType.Goodreads;
         public override TimeSpan MinRefreshInterval => TimeSpan.FromHours(12);
 
-        public GoodreadsSeriesImportList(IProvideSeriesInfo seriesInfo,
+        public GoodreadsSeriesImportList(IGoodreadsProxy goodreadsProxy,
             IImportListStatusService importListStatusService,
             IConfigService configService,
             IParsingService parsingService,
             Logger logger)
             : base(importListStatusService, configService, parsingService, logger)
         {
-            _seriesInfo = seriesInfo;
+            _goodreadsProxy = goodreadsProxy;
         }
 
         public override IList<ImportListItemInfo> Fetch()
@@ -36,17 +36,17 @@ namespace NzbDrone.Core.ImportLists.Goodreads
 
             try
             {
-                var series = _seriesInfo.GetSeriesInfo(Settings.SeriesId);
+                var seriesGroup = _goodreadsProxy.GetSeriesInfo(Settings.SeriesId);
 
-                foreach (var work in series.Works)
+                foreach (var work in seriesGroup.Works)
                 {
                     result.Add(new ImportListItemInfo
                     {
-                        BookGoodreadsId = work.Id.ToString(),
-                        Book = work.OriginalTitle,
+                        IssueGoodreadsId = work.Id.ToString(),
+                        Issue = work.OriginalTitle,
                         EditionGoodreadsId = work.BestBook.Id.ToString(),
-                        Author = work.BestBook.AuthorName,
-                        AuthorGoodreadsId = work.BestBook.AuthorId.ToString()
+                        Series = work.BestBook.SeriesName,
+                        SeriesGoodreadsId = work.BestBook.SeriesId.ToString()
                     });
                 }
 
@@ -69,7 +69,7 @@ namespace NzbDrone.Core.ImportLists.Goodreads
         {
             try
             {
-                _seriesInfo.GetSeriesInfo(Settings.SeriesId);
+                _goodreadsProxy.GetSeriesInfo(Settings.SeriesId);
                 return null;
             }
             catch (HttpException e)
@@ -77,7 +77,7 @@ namespace NzbDrone.Core.ImportLists.Goodreads
                 _logger.Warn(e, "Goodreads API Error");
                 if (e.Response.StatusCode == HttpStatusCode.NotFound)
                 {
-                    return new ValidationFailure(nameof(Settings.SeriesId), $"Series {Settings.SeriesId} not found");
+                    return new ValidationFailure(nameof(Settings.SeriesId), $"SeriesGroup {Settings.SeriesId} not found");
                 }
 
                 return new ValidationFailure(nameof(Settings.SeriesId), $"Could not get series data");

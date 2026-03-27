@@ -19,61 +19,59 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.MusicTests
 {
     [TestFixture]
-    public class RefreshAuthorServiceFixture : CoreTest<RefreshAuthorService>
+    public class RefreshSeriesServiceFixture : CoreTest<RefreshSeriesService>
     {
-        private Author _author;
-        private Book _book1;
-        private Book _book2;
-        private List<Book> _books;
-        private List<Book> _remoteBooks;
+        private Series _author;
+        private Issue _book1;
+        private Issue _book2;
+        private List<Issue> _books;
+        private List<Issue> _remoteBooks;
 
         [SetUp]
         public void Setup()
         {
-            _book1 = Builder<Book>.CreateNew()
-                .With(s => s.ForeignBookId = "1")
+            _book1 = Builder<Issue>.CreateNew()
+                .With(s => s.ForeignIssueId = "1")
                 .Build();
 
-            _book2 = Builder<Book>.CreateNew()
-                .With(s => s.ForeignBookId = "2")
+            _book2 = Builder<Issue>.CreateNew()
+                .With(s => s.ForeignIssueId = "2")
                 .Build();
 
-            _books = new List<Book> { _book1, _book2 };
+            _books = new List<Issue> { _book1, _book2 };
 
             _remoteBooks = _books.JsonClone();
             _remoteBooks.ForEach(x => x.Id = 0);
 
-            var metadata = Builder<AuthorMetadata>.CreateNew().Build();
-            var series = Builder<Series>.CreateListOfSize(1).BuildList();
-            var profile = Builder<MetadataProfile>.CreateNew().Build();
+            var metadata = Builder<SeriesMetadata>.CreateNew().Build();
+            var series = Builder<SeriesGroup>.CreateListOfSize(1).BuildList();
 
-            _author = Builder<Author>.CreateNew()
+            _author = Builder<Series>.CreateNew()
                 .With(a => a.Metadata = metadata)
-                .With(a => a.Series = series)
-                .With(a => a.MetadataProfile = profile)
+                .With(a => a.SeriesGroups = series)
                 .Build();
 
-            Mocker.GetMock<IAuthorService>(MockBehavior.Strict)
-                  .Setup(s => s.GetAuthors(new List<int> { _author.Id }))
-                  .Returns(new List<Author> { _author });
+            Mocker.GetMock<ISeriesService>(MockBehavior.Strict)
+                  .Setup(s => s.GetSeriess(new List<int> { _author.Id }))
+                  .Returns(new List<Series> { _author });
 
             Mocker.GetMock<IBookService>(MockBehavior.Strict)
-                .Setup(s => s.InsertMany(It.IsAny<List<Book>>()));
+                .Setup(s => s.InsertMany(It.IsAny<List<Issue>>()));
 
             Mocker.GetMock<IMetadataProfileService>()
-                .Setup(s => s.FilterBooks(It.IsAny<Author>(), It.IsAny<int>()))
+                .Setup(s => s.FilterBooks(It.IsAny<Series>(), It.IsAny<int>()))
                 .Returns(_remoteBooks);
 
-            Mocker.GetMock<IProvideAuthorInfo>()
-                .Setup(s => s.GetAuthorInfo(It.IsAny<string>(), true))
-                .Callback(() => { throw new AuthorNotFoundException(_author.ForeignAuthorId); });
+            Mocker.GetMock<IProvideSeriesInfo>()
+                .Setup(s => s.GetSeriesInfo(It.IsAny<string>(), true))
+                .Callback(() => { throw new SeriesNotFoundException(_author.ForeignSeriesId); });
 
             Mocker.GetMock<IMediaFileService>()
-                .Setup(x => x.GetFilesByAuthor(It.IsAny<int>()))
-                .Returns(new List<BookFile>());
+                .Setup(x => x.GetFilesBySeries(It.IsAny<int>()))
+                .Returns(new List<ComicFile>());
 
             Mocker.GetMock<IHistoryService>()
-                .Setup(x => x.GetByAuthor(It.IsAny<int>(), It.IsAny<EntityHistoryEventType?>()))
+                .Setup(x => x.GetBySeries(It.IsAny<int>(), It.IsAny<EntityHistoryEventType?>()))
                 .Returns(new List<EntityHistory>());
 
             Mocker.GetMock<IImportListExclusionService>()
@@ -85,94 +83,94 @@ namespace NzbDrone.Core.Test.MusicTests
                 .Returns(new List<RootFolder>());
 
             Mocker.GetMock<IMonitorNewBookService>()
-                .Setup(x => x.ShouldMonitorNewBook(It.IsAny<Book>(), It.IsAny<List<Book>>(), It.IsAny<NewItemMonitorTypes>()))
+                .Setup(x => x.ShouldMonitorNewBook(It.IsAny<Issue>(), It.IsAny<List<Issue>>(), It.IsAny<NewItemMonitorTypes>()))
                 .Returns(true);
         }
 
-        private void GivenNewAuthorInfo(Author author)
+        private void GivenNewSeriesInfo(Series author)
         {
-            Mocker.GetMock<IProvideAuthorInfo>()
-                .Setup(s => s.GetAuthorInfo(_author.ForeignAuthorId, true))
+            Mocker.GetMock<IProvideSeriesInfo>()
+                .Setup(s => s.GetSeriesInfo(_author.ForeignSeriesId, true))
                 .Returns(author);
         }
 
-        private void GivenAuthorFiles()
+        private void GivenSeriesFiles()
         {
             Mocker.GetMock<IMediaFileService>()
-                  .Setup(x => x.GetFilesByAuthor(It.IsAny<int>()))
-                  .Returns(Builder<BookFile>.CreateListOfSize(1).BuildList());
+                  .Setup(x => x.GetFilesBySeries(It.IsAny<int>()))
+                  .Returns(Builder<ComicFile>.CreateListOfSize(1).BuildList());
         }
 
-        private void GivenBooksForRefresh(List<Book> books)
+        private void GivenBooksForRefresh(List<Issue> issues)
         {
             Mocker.GetMock<IBookService>(MockBehavior.Strict)
                 .Setup(s => s.GetBooksForRefresh(It.IsAny<int>(), It.IsAny<List<string>>()))
-                .Returns(books);
+                .Returns(issues);
         }
 
-        private void AllowAuthorUpdate()
+        private void AllowSeriesUpdate()
         {
-            Mocker.GetMock<IAuthorService>(MockBehavior.Strict)
-                .Setup(x => x.UpdateAuthor(It.IsAny<Author>()))
-                .Returns((Author a) => a);
+            Mocker.GetMock<ISeriesService>(MockBehavior.Strict)
+                .Setup(x => x.UpdateSeries(It.IsAny<Series>()))
+                .Returns((Series a) => a);
         }
 
         [Test]
         public void should_not_publish_author_updated_event_if_metadata_not_updated()
         {
-            var newAuthorInfo = _author.JsonClone();
-            newAuthorInfo.Metadata = _author.Metadata.Value.JsonClone();
-            newAuthorInfo.Books = _remoteBooks;
+            var newSeriesInfo = _author.JsonClone();
+            newSeriesInfo.Metadata = _author.Metadata.Value.JsonClone();
+            newSeriesInfo.Books = _remoteBooks;
 
-            GivenNewAuthorInfo(newAuthorInfo);
+            GivenNewSeriesInfo(newSeriesInfo);
             GivenBooksForRefresh(_books);
-            AllowAuthorUpdate();
+            AllowSeriesUpdate();
 
-            Subject.Execute(new RefreshAuthorCommand(_author.Id));
+            Subject.Execute(new RefreshSeriesCommand(_author.Id));
 
-            VerifyEventNotPublished<AuthorUpdatedEvent>();
-            VerifyEventPublished<AuthorRefreshCompleteEvent>();
+            VerifyEventNotPublished<SeriesUpdatedEvent>();
+            VerifyEventPublished<SeriesRefreshCompleteEvent>();
         }
 
         [Test]
         public void should_publish_author_updated_event_if_metadata_updated()
         {
-            var newAuthorInfo = _author.JsonClone();
-            newAuthorInfo.Metadata = _author.Metadata.Value.JsonClone();
-            newAuthorInfo.Metadata.Value.Images = new List<MediaCover.MediaCover>
+            var newSeriesInfo = _author.JsonClone();
+            newSeriesInfo.Metadata = _author.Metadata.Value.JsonClone();
+            newSeriesInfo.Metadata.Value.Images = new List<MediaCover.MediaCover>
             {
                 new MediaCover.MediaCover(MediaCover.MediaCoverTypes.Logo, "dummy")
             };
-            newAuthorInfo.Books = _remoteBooks;
+            newSeriesInfo.Books = _remoteBooks;
 
-            GivenNewAuthorInfo(newAuthorInfo);
-            GivenBooksForRefresh(new List<Book>());
-            AllowAuthorUpdate();
+            GivenNewSeriesInfo(newSeriesInfo);
+            GivenBooksForRefresh(new List<Issue>());
+            AllowSeriesUpdate();
 
-            Subject.Execute(new RefreshAuthorCommand(_author.Id));
+            Subject.Execute(new RefreshSeriesCommand(_author.Id));
 
-            VerifyEventPublished<AuthorUpdatedEvent>();
-            VerifyEventPublished<AuthorRefreshCompleteEvent>();
+            VerifyEventPublished<SeriesUpdatedEvent>();
+            VerifyEventPublished<SeriesRefreshCompleteEvent>();
         }
 
         [Test]
         public void should_call_new_book_monitor_service_when_adding_book()
         {
-            var newBook = Builder<Book>.CreateNew()
+            var newBook = Builder<Issue>.CreateNew()
                 .With(x => x.Id = 0)
-                .With(x => x.ForeignBookId = "3")
+                .With(x => x.ForeignIssueId = "3")
                 .Build();
             _remoteBooks.Add(newBook);
 
-            var newAuthorInfo = _author.JsonClone();
-            newAuthorInfo.Metadata = _author.Metadata.Value.JsonClone();
-            newAuthorInfo.Books = _remoteBooks;
+            var newSeriesInfo = _author.JsonClone();
+            newSeriesInfo.Metadata = _author.Metadata.Value.JsonClone();
+            newSeriesInfo.Books = _remoteBooks;
 
-            GivenNewAuthorInfo(newAuthorInfo);
+            GivenNewSeriesInfo(newSeriesInfo);
             GivenBooksForRefresh(_books);
-            AllowAuthorUpdate();
+            AllowSeriesUpdate();
 
-            Subject.Execute(new RefreshAuthorCommand(_author.Id));
+            Subject.Execute(new RefreshSeriesCommand(_author.Id));
 
             Mocker.GetMock<IMonitorNewBookService>()
                 .Verify(x => x.ShouldMonitorNewBook(newBook, _books, _author.MonitorNewItems), Times.Once());
@@ -181,16 +179,16 @@ namespace NzbDrone.Core.Test.MusicTests
         [Test]
         public void should_log_error_and_delete_if_musicbrainz_id_not_found_and_author_has_no_files()
         {
-            Mocker.GetMock<IAuthorService>()
-                .Setup(x => x.DeleteAuthor(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<bool>()));
+            Mocker.GetMock<ISeriesService>()
+                .Setup(x => x.DeleteSeries(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<bool>()));
 
-            Subject.Execute(new RefreshAuthorCommand(_author.Id));
+            Subject.Execute(new RefreshSeriesCommand(_author.Id));
 
-            Mocker.GetMock<IAuthorService>()
-                .Verify(v => v.UpdateAuthor(It.IsAny<Author>()), Times.Never());
+            Mocker.GetMock<ISeriesService>()
+                .Verify(v => v.UpdateSeries(It.IsAny<Series>()), Times.Never());
 
-            Mocker.GetMock<IAuthorService>()
-                .Verify(v => v.DeleteAuthor(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Once());
+            Mocker.GetMock<ISeriesService>()
+                .Verify(v => v.DeleteSeries(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Once());
 
             ExceptionVerification.ExpectedErrors(1);
             ExceptionVerification.ExpectedWarns(1);
@@ -199,16 +197,16 @@ namespace NzbDrone.Core.Test.MusicTests
         [Test]
         public void should_log_error_but_not_delete_if_musicbrainz_id_not_found_and_author_has_files()
         {
-            GivenAuthorFiles();
-            GivenBooksForRefresh(new List<Book>());
+            GivenSeriesFiles();
+            GivenBooksForRefresh(new List<Issue>());
 
-            Subject.Execute(new RefreshAuthorCommand(_author.Id));
+            Subject.Execute(new RefreshSeriesCommand(_author.Id));
 
-            Mocker.GetMock<IAuthorService>()
-                .Verify(v => v.UpdateAuthor(It.IsAny<Author>()), Times.Never());
+            Mocker.GetMock<ISeriesService>()
+                .Verify(v => v.UpdateSeries(It.IsAny<Series>()), Times.Never());
 
-            Mocker.GetMock<IAuthorService>()
-                .Verify(v => v.DeleteAuthor(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
+            Mocker.GetMock<ISeriesService>()
+                .Verify(v => v.DeleteSeries(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never());
 
             ExceptionVerification.ExpectedErrors(2);
         }
@@ -216,41 +214,41 @@ namespace NzbDrone.Core.Test.MusicTests
         [Test]
         public void should_update_if_musicbrainz_id_changed_and_no_clash()
         {
-            var newAuthorInfo = _author.JsonClone();
-            newAuthorInfo.Metadata = _author.Metadata.Value.JsonClone();
-            newAuthorInfo.Books = _remoteBooks;
-            newAuthorInfo.ForeignAuthorId = _author.ForeignAuthorId + 1;
-            newAuthorInfo.Metadata.Value.Id = 100;
+            var newSeriesInfo = _author.JsonClone();
+            newSeriesInfo.Metadata = _author.Metadata.Value.JsonClone();
+            newSeriesInfo.Books = _remoteBooks;
+            newSeriesInfo.ForeignSeriesId = _author.ForeignSeriesId + 1;
+            newSeriesInfo.Metadata.Value.Id = 100;
 
-            GivenNewAuthorInfo(newAuthorInfo);
+            GivenNewSeriesInfo(newSeriesInfo);
 
             var seq = new MockSequence();
 
-            Mocker.GetMock<IAuthorService>(MockBehavior.Strict)
-                .Setup(x => x.FindById(newAuthorInfo.ForeignAuthorId))
-                .Returns(default(Author));
+            Mocker.GetMock<ISeriesService>(MockBehavior.Strict)
+                .Setup(x => x.FindById(newSeriesInfo.ForeignSeriesId))
+                .Returns(default(Series));
 
-            // Make sure that the author is updated before we refresh the books
-            Mocker.GetMock<IAuthorService>(MockBehavior.Strict)
+            // Make sure that the author is updated before we refresh the issues
+            Mocker.GetMock<ISeriesService>(MockBehavior.Strict)
                 .InSequence(seq)
-                .Setup(x => x.UpdateAuthor(It.IsAny<Author>()))
-                .Returns((Author a) => a);
+                .Setup(x => x.UpdateSeries(It.IsAny<Series>()))
+                .Returns((Series a) => a);
 
             Mocker.GetMock<IBookService>(MockBehavior.Strict)
                 .InSequence(seq)
                 .Setup(x => x.GetBooksForRefresh(It.IsAny<int>(), It.IsAny<List<string>>()))
-                .Returns(new List<Book>());
+                .Returns(new List<Issue>());
 
             // Update called twice for a move/merge
-            Mocker.GetMock<IAuthorService>(MockBehavior.Strict)
+            Mocker.GetMock<ISeriesService>(MockBehavior.Strict)
                 .InSequence(seq)
-                .Setup(x => x.UpdateAuthor(It.IsAny<Author>()))
-                .Returns((Author a) => a);
+                .Setup(x => x.UpdateSeries(It.IsAny<Series>()))
+                .Returns((Series a) => a);
 
-            Subject.Execute(new RefreshAuthorCommand(_author.Id));
+            Subject.Execute(new RefreshSeriesCommand(_author.Id));
 
-            Mocker.GetMock<IAuthorService>()
-                .Verify(v => v.UpdateAuthor(It.Is<Author>(s => s.AuthorMetadataId == 100 && s.ForeignAuthorId == newAuthorInfo.ForeignAuthorId)),
+            Mocker.GetMock<ISeriesService>()
+                .Verify(v => v.UpdateSeries(It.Is<Series>(s => s.SeriesMetadataId == 100 && s.ForeignSeriesId == newSeriesInfo.ForeignSeriesId)),
                         Times.Exactly(2));
         }
 
@@ -263,62 +261,62 @@ namespace NzbDrone.Core.Test.MusicTests
             clash.Id = 100;
             clash.Metadata = existing.Metadata.Value.JsonClone();
             clash.Metadata.Value.Id = 101;
-            clash.Metadata.Value.ForeignAuthorId = clash.Metadata.Value.ForeignAuthorId + 1;
+            clash.Metadata.Value.ForeignSeriesId = clash.Metadata.Value.ForeignSeriesId + 1;
 
-            Mocker.GetMock<IAuthorService>(MockBehavior.Strict)
-                .Setup(x => x.FindById(clash.Metadata.Value.ForeignAuthorId))
+            Mocker.GetMock<ISeriesService>(MockBehavior.Strict)
+                .Setup(x => x.FindById(clash.Metadata.Value.ForeignSeriesId))
                 .Returns(clash);
 
-            var newAuthorInfo = clash.JsonClone();
-            newAuthorInfo.Metadata = clash.Metadata.Value.JsonClone();
-            newAuthorInfo.Books = _remoteBooks;
+            var newSeriesInfo = clash.JsonClone();
+            newSeriesInfo.Metadata = clash.Metadata.Value.JsonClone();
+            newSeriesInfo.Books = _remoteBooks;
 
-            GivenNewAuthorInfo(newAuthorInfo);
+            GivenNewSeriesInfo(newSeriesInfo);
 
             var seq = new MockSequence();
 
-            // Make sure that the author is updated before we refresh the books
+            // Make sure that the author is updated before we refresh the issues
             Mocker.GetMock<IBookService>(MockBehavior.Strict)
                 .InSequence(seq)
-                .Setup(x => x.GetBooksByAuthor(existing.Id))
+                .Setup(x => x.GetBooksBySeries(existing.Id))
                 .Returns(_books);
 
             Mocker.GetMock<IBookService>(MockBehavior.Strict)
                 .InSequence(seq)
-                .Setup(x => x.UpdateMany(It.IsAny<List<Book>>()));
+                .Setup(x => x.UpdateMany(It.IsAny<List<Issue>>()));
 
-            Mocker.GetMock<IAuthorService>(MockBehavior.Strict)
+            Mocker.GetMock<ISeriesService>(MockBehavior.Strict)
                 .InSequence(seq)
-                .Setup(x => x.DeleteAuthor(existing.Id, It.IsAny<bool>(), false));
+                .Setup(x => x.DeleteSeries(existing.Id, It.IsAny<bool>(), false));
 
-            Mocker.GetMock<IAuthorService>(MockBehavior.Strict)
+            Mocker.GetMock<ISeriesService>(MockBehavior.Strict)
                 .InSequence(seq)
-                .Setup(x => x.UpdateAuthor(It.Is<Author>(a => a.Id == clash.Id)))
-                .Returns((Author a) => a);
+                .Setup(x => x.UpdateSeries(It.Is<Series>(a => a.Id == clash.Id)))
+                .Returns((Series a) => a);
 
             Mocker.GetMock<IBookService>(MockBehavior.Strict)
                 .InSequence(seq)
-                .Setup(x => x.GetBooksForRefresh(clash.AuthorMetadataId, It.IsAny<List<string>>()))
+                .Setup(x => x.GetBooksForRefresh(clash.SeriesMetadataId, It.IsAny<List<string>>()))
                 .Returns(_books);
 
             // Update called twice for a move/merge
-            Mocker.GetMock<IAuthorService>(MockBehavior.Strict)
+            Mocker.GetMock<ISeriesService>(MockBehavior.Strict)
                 .InSequence(seq)
-                .Setup(x => x.UpdateAuthor(It.IsAny<Author>()))
-                .Returns((Author a) => a);
+                .Setup(x => x.UpdateSeries(It.IsAny<Series>()))
+                .Returns((Series a) => a);
 
-            Subject.Execute(new RefreshAuthorCommand(_author.Id));
+            Subject.Execute(new RefreshSeriesCommand(_author.Id));
 
             // the retained author gets updated
-            Mocker.GetMock<IAuthorService>()
-                .Verify(v => v.UpdateAuthor(It.Is<Author>(s => s.Id == clash.Id)), Times.Exactly(2));
+            Mocker.GetMock<ISeriesService>()
+                .Verify(v => v.UpdateSeries(It.Is<Series>(s => s.Id == clash.Id)), Times.Exactly(2));
 
             // the old one gets removed
-            Mocker.GetMock<IAuthorService>()
-                .Verify(v => v.DeleteAuthor(existing.Id, false, false));
+            Mocker.GetMock<ISeriesService>()
+                .Verify(v => v.DeleteSeries(existing.Id, false, false));
 
             Mocker.GetMock<IBookService>()
-                .Verify(v => v.UpdateMany(It.Is<List<Book>>(x => x.Count == _books.Count)));
+                .Verify(v => v.UpdateMany(It.Is<List<Issue>>(x => x.Count == _books.Count)));
 
             ExceptionVerification.ExpectedWarns(1);
         }

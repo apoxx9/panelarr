@@ -114,7 +114,7 @@ export const defaultState = {
     },
     {
       name: 'bookProgress',
-      label: 'Books',
+      label: 'Issues',
       isSortable: true,
       isVisible: true
     },
@@ -371,7 +371,7 @@ export const actionHandlers = handleThunks({
     }));
 
     const promise = createAjaxRequest({
-      url: '/author/editor',
+      url: '/series/editor',
       method: 'PUT',
       data: JSON.stringify(payload),
       dataType: 'json'
@@ -411,7 +411,7 @@ export const actionHandlers = handleThunks({
     }));
 
     const promise = createAjaxRequest({
-      url: '/author/editor',
+      url: '/series/editor',
       method: 'DELETE',
       data: JSON.stringify(payload),
       dataType: 'json'

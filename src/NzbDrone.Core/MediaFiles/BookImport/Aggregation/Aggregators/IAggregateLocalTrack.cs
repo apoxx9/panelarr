@@ -1,4 +1,4 @@
-namespace NzbDrone.Core.MediaFiles.BookImport.Aggregation.Aggregators
+namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 {
     public interface IAggregate<T>
     {

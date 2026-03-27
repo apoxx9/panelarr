@@ -8,7 +8,7 @@ namespace Panelarr.Api.V1.ImportLists
     public class ImportListExclusionResource : RestResource
     {
         public string ForeignId { get; set; }
-        public string AuthorName { get; set; }
+        public string SeriesName { get; set; }
     }
 
     public static class ImportListExclusionResourceMapper
@@ -24,7 +24,7 @@ namespace Panelarr.Api.V1.ImportLists
             {
                 Id = model.Id,
                 ForeignId = model.ForeignId,
-                AuthorName = model.Name,
+                SeriesName = model.Name,
             };
         }
 
@@ -39,7 +39,7 @@ namespace Panelarr.Api.V1.ImportLists
             {
                 Id = resource.Id,
                 ForeignId = resource.ForeignId,
-                Name = resource.AuthorName
+                Name = resource.SeriesName
             };
         }
 

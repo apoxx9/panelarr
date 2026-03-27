@@ -5,12 +5,12 @@ using System.IO;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.MediaFiles.BookImport.Aggregation.Aggregators;
+using NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
-namespace NzbDrone.Core.Test.MediaFiles.BookImport.Aggregation.Aggregators
+namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Aggregation.Aggregators
 {
     [TestFixture]
     public class AggregateFilenameInfoFixture : CoreTest<AggregateFilenameInfo>
@@ -30,8 +30,8 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Aggregation.Aggregators
 
         private void VerifyData(LocalBook track, string author, string title, int trackNum, int disc)
         {
-            track.FileTrackInfo.AuthorTitle.Should().Be(author);
-            track.FileTrackInfo.BookTitle.Should().Be(title);
+            track.FileTrackInfo.SeriesTitle.Should().Be(author);
+            track.FileTrackInfo.IssueTitle.Should().Be(title);
             track.FileTrackInfo.TrackNumbers[0].Should().Be(trackNum);
             track.FileTrackInfo.DiscNumber.Should().Be(disc);
         }
@@ -167,12 +167,12 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Aggregation.Aggregators
 
                 if (tokens.Contains("author"))
                 {
-                    info.AuthorTitle.Should().Be("author name".Replace(" ", whitespace));
+                    info.SeriesTitle.Should().Be("author name".Replace(" ", whitespace));
                 }
 
                 if (tokens.Contains("title"))
                 {
-                    info.BookTitle.Should().Be($"{(char)(96 + i)} track title {i}".Replace(" ", whitespace));
+                    info.IssueTitle.Should().Be($"{(char)(96 + i)} track title {i}".Replace(" ", whitespace));
                 }
             }
         }

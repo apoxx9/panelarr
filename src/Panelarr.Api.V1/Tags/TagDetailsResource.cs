@@ -14,7 +14,7 @@ namespace Panelarr.Api.V1.Tags
         public List<int> RestrictionIds { get; set; }
         public List<int> IndexerIds { get; set; }
         public List<int> DownloadClientIds { get; set; }
-        public List<int> AuthorIds { get; set; }
+        public List<int> SeriesIds { get; set; }
     }
 
     public static class TagDetailsResourceMapper
@@ -36,7 +36,7 @@ namespace Panelarr.Api.V1.Tags
                 RestrictionIds = model.RestrictionIds,
                 IndexerIds = model.IndexerIds,
                 DownloadClientIds = model.DownloadClientIds,
-                AuthorIds = model.AuthorIds
+                SeriesIds = model.SeriesIds
             };
         }
 

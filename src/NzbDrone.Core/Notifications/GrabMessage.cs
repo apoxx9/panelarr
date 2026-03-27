@@ -7,7 +7,7 @@ namespace NzbDrone.Core.Notifications
     public class GrabMessage
     {
         public string Message { get; set; }
-        public Author Author { get; set; }
+        public Series Series { get; set; }
         public RemoteBook RemoteBook { get; set; }
         public QualityModel Quality { get; set; }
         public string DownloadClientType { get; set; }

@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Books.Calibre
     public class CalibreChanges
     {
         public string Title { get; set; }
-        public List<string> Authors { get; set; }
+        public List<string> Seriess { get; set; }
         public string Cover { get; set; }
         [JsonProperty("pubdate")]
         public DateTime? PubDate { get; set; }
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Books.Calibre
         public decimal Rating { get; set; }
         public Dictionary<string, string> Identifiers { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
-        public string Series { get; set; }
+        public string SeriesGroup { get; set; }
         [JsonProperty("series_index")]
         public double? SeriesIndex { get; set; }
         [JsonProperty("added_formats")]

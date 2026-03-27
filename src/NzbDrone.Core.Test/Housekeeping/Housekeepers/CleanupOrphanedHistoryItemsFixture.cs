@@ -12,20 +12,20 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
     [TestFixture]
     public class CleanupOrphanedHistoryItemsFixture : DbTest<CleanupOrphanedHistoryItems, EntityHistory>
     {
-        private Author _author;
-        private Book _book;
+        private Series _author;
+        private Issue _book;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Author>.CreateNew()
+            _author = Builder<Series>.CreateNew()
                                      .BuildNew();
 
-            _book = Builder<Book>.CreateNew()
+            _book = Builder<Issue>.CreateNew()
                 .BuildNew();
         }
 
-        private void GivenAuthor()
+        private void GivenSeries()
         {
             Db.Insert(_author);
         }
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
 
             var history = Builder<EntityHistory>.CreateNew()
                                                   .With(h => h.Quality = new QualityModel())
-                                                  .With(h => h.BookId = _book.Id)
+                                                  .With(h => h.IssueId = _book.Id)
                                                   .BuildNew();
             Db.Insert(history);
 
@@ -53,11 +53,11 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_delete_orphaned_items_by_book()
         {
-            GivenAuthor();
+            GivenSeries();
 
             var history = Builder<EntityHistory>.CreateNew()
                                                   .With(h => h.Quality = new QualityModel())
-                                                  .With(h => h.AuthorId = _author.Id)
+                                                  .With(h => h.SeriesId = _author.Id)
                                                   .BuildNew();
             Db.Insert(history);
 
@@ -68,43 +68,43 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_delete_unorphaned_data_by_author()
         {
-            GivenAuthor();
+            GivenSeries();
             GivenBook();
 
             var history = Builder<EntityHistory>.CreateListOfSize(2)
                                                   .All()
                                                   .With(h => h.Quality = new QualityModel())
-                                                  .With(h => h.BookId = _book.Id)
+                                                  .With(h => h.IssueId = _book.Id)
                                                   .TheFirst(1)
-                                                  .With(h => h.AuthorId = _author.Id)
+                                                  .With(h => h.SeriesId = _author.Id)
                                                   .BuildListOfNew();
 
             Db.InsertMany(history);
 
             Subject.Clean();
             AllStoredModels.Should().HaveCount(1);
-            AllStoredModels.Should().Contain(h => h.AuthorId == _author.Id);
+            AllStoredModels.Should().Contain(h => h.SeriesId == _author.Id);
         }
 
         [Test]
         public void should_not_delete_unorphaned_data_by_book()
         {
-            GivenAuthor();
+            GivenSeries();
             GivenBook();
 
             var history = Builder<EntityHistory>.CreateListOfSize(2)
                                                   .All()
                                                   .With(h => h.Quality = new QualityModel())
-                                                  .With(h => h.AuthorId = _author.Id)
+                                                  .With(h => h.SeriesId = _author.Id)
                                                   .TheFirst(1)
-                                                  .With(h => h.BookId = _book.Id)
+                                                  .With(h => h.IssueId = _book.Id)
                                                   .BuildListOfNew();
 
             Db.InsertMany(history);
 
             Subject.Clean();
             AllStoredModels.Should().HaveCount(1);
-            AllStoredModels.Should().Contain(h => h.BookId == _book.Id);
+            AllStoredModels.Should().Contain(h => h.IssueId == _book.Id);
         }
     }
 }

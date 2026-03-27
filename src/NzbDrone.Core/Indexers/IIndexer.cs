@@ -14,8 +14,8 @@ namespace NzbDrone.Core.Indexers
         DownloadProtocol Protocol { get; }
 
         Task<IList<ReleaseInfo>> FetchRecent();
-        Task<IList<ReleaseInfo>> Fetch(BookSearchCriteria searchCriteria);
-        Task<IList<ReleaseInfo>> Fetch(AuthorSearchCriteria searchCriteria);
+        Task<IList<ReleaseInfo>> Fetch(IssueSearchCriteria searchCriteria);
+        Task<IList<ReleaseInfo>> Fetch(SeriesSearchCriteria searchCriteria);
         HttpRequest GetDownloadRequest(string link);
     }
 }

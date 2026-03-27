@@ -36,7 +36,7 @@ namespace Panelarr.Api.V1.System
         public string RuntimeName { get; set; }
         public DateTime StartTime { get; set; }
         public string PackageVersion { get; set; }
-        public string PackageAuthor { get; set; }
+        public string PackageSeries { get; set; }
         public UpdateMechanism PackageUpdateMechanism { get; set; }
         public string PackageUpdateMechanismMessage { get; set; }
     }

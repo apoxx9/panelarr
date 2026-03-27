@@ -9,8 +9,8 @@ using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.History;
-using Panelarr.Api.V1.Author;
 using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Series;
 using Panelarr.Http;
 using Panelarr.Http.Extensions;
 
@@ -23,13 +23,13 @@ namespace Panelarr.Api.V1.History
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly IUpgradableSpecification _upgradableSpecification;
         private readonly IFailedDownloadService _failedDownloadService;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
 
         public HistoryController(IHistoryService historyService,
                              ICustomFormatCalculationService formatCalculator,
                              IUpgradableSpecification upgradableSpecification,
                              IFailedDownloadService failedDownloadService,
-                             IAuthorService authorService)
+                             ISeriesService authorService)
         {
             _historyService = historyService;
             _formatCalculator = formatCalculator;
@@ -38,23 +38,23 @@ namespace Panelarr.Api.V1.History
             _authorService = authorService;
         }
 
-        protected HistoryResource MapToResource(EntityHistory model, bool includeAuthor, bool includeBook)
+        protected HistoryResource MapToResource(EntityHistory model, bool includeSeries, bool includeBook)
         {
             var resource = model.ToResource(_formatCalculator);
 
-            if (includeAuthor)
+            if (includeSeries)
             {
-                resource.Author = model.Author.ToResource();
+                resource.Series = model.Series.ToResource();
             }
 
             if (includeBook)
             {
-                resource.Book = model.Book.ToResource();
+                resource.Issue = model.Issue.ToResource();
             }
 
-            if (model.Author != null)
+            if (model.Series != null)
             {
-                resource.QualityCutoffNotMet = _upgradableSpecification.QualityCutoffNotMet(model.Author.QualityProfile.Value, model.Quality);
+                resource.QualityCutoffNotMet = _upgradableSpecification.QualityCutoffNotMet(model.Series.QualityProfile.Value, model.Quality);
             }
 
             return resource;
@@ -62,7 +62,7 @@ namespace Panelarr.Api.V1.History
 
         [HttpGet]
         [Produces("application/json")]
-        public PagingResource<HistoryResource> GetHistory([FromQuery] PagingRequestResource paging, bool includeAuthor, bool includeBook, [FromQuery(Name = "eventType")] int[] eventTypes, int? bookId, string downloadId)
+        public PagingResource<HistoryResource> GetHistory([FromQuery] PagingRequestResource paging, bool includeSeries, bool includeBook, [FromQuery(Name = "eventType")] int[] eventTypes, int? bookId, string downloadId)
         {
             var pagingResource = new PagingResource<HistoryResource>(paging);
             var pagingSpec = pagingResource.MapToPagingSpec<HistoryResource, EntityHistory>("date", SortDirection.Descending);
@@ -74,7 +74,7 @@ namespace Panelarr.Api.V1.History
 
             if (bookId.HasValue)
             {
-                pagingSpec.FilterExpressions.Add(h => h.BookId == bookId);
+                pagingSpec.FilterExpressions.Add(h => h.IssueId == bookId);
             }
 
             if (downloadId.IsNotNullOrWhiteSpace())
@@ -82,35 +82,35 @@ namespace Panelarr.Api.V1.History
                 pagingSpec.FilterExpressions.Add(h => h.DownloadId == downloadId);
             }
 
-            return pagingSpec.ApplyToPage(_historyService.Paged, h => MapToResource(h, includeAuthor, includeBook));
+            return pagingSpec.ApplyToPage(_historyService.Paged, h => MapToResource(h, includeSeries, includeBook));
         }
 
         [HttpGet("since")]
-        public List<HistoryResource> GetHistorySince(DateTime date, EntityHistoryEventType? eventType = null, bool includeAuthor = false, bool includeBook = false)
+        public List<HistoryResource> GetHistorySince(DateTime date, EntityHistoryEventType? eventType = null, bool includeSeries = false, bool includeBook = false)
         {
-            return _historyService.Since(date, eventType).Select(h => MapToResource(h, includeAuthor, includeBook)).ToList();
+            return _historyService.Since(date, eventType).Select(h => MapToResource(h, includeSeries, includeBook)).ToList();
         }
 
         [HttpGet("author")]
-        public List<HistoryResource> GetAuthorHistory(int authorId, int? bookId = null, EntityHistoryEventType? eventType = null, bool includeAuthor = false, bool includeBook = false)
+        public List<HistoryResource> GetSeriesHistory(int authorId, int? bookId = null, EntityHistoryEventType? eventType = null, bool includeSeries = false, bool includeBook = false)
         {
-            var author = _authorService.GetAuthor(authorId);
+            var author = _authorService.GetSeries(authorId);
 
             if (bookId.HasValue)
             {
                 return _historyService.GetByBook(bookId.Value, eventType).Select(h =>
                 {
-                    h.Author = author;
+                    h.Series = author;
 
-                    return MapToResource(h, includeAuthor, includeBook);
+                    return MapToResource(h, includeSeries, includeBook);
                 }).ToList();
             }
 
-            return _historyService.GetByAuthor(authorId, eventType).Select(h =>
+            return _historyService.GetBySeries(authorId, eventType).Select(h =>
             {
-                h.Author = author;
+                h.Series = author;
 
-                return MapToResource(h, includeAuthor, includeBook);
+                return MapToResource(h, includeSeries, includeBook);
             }).ToList();
         }
 

@@ -15,8 +15,8 @@ namespace NzbDrone.Core.Notifications
         List<INotification> OnUpgradeEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnRenameEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnHealthIssueEnabled(bool filterBlockedNotifications = true);
-        List<INotification> OnAuthorAddedEnabled(bool filterBlockedNotifications = true);
-        List<INotification> OnAuthorDeleteEnabled(bool filterBlockedNotifications = true);
+        List<INotification> OnSeriesAddedEnabled(bool filterBlockedNotifications = true);
+        List<INotification> OnSeriesDeleteEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnBookDeleteEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnBookFileDeleteEnabled(bool filterBlockedNotifications = true);
         List<INotification> OnBookFileDeleteForUpgradeEnabled(bool filterBlockedNotifications = true);
@@ -83,24 +83,24 @@ namespace NzbDrone.Core.Notifications
             return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnRename).ToList();
         }
 
-        public List<INotification> OnAuthorAddedEnabled(bool filterBlockedNotifications = true)
+        public List<INotification> OnSeriesAddedEnabled(bool filterBlockedNotifications = true)
         {
             if (filterBlockedNotifications)
             {
-                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnAuthorAdded)).ToList();
+                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnSeriesAdded)).ToList();
             }
 
-            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnAuthorAdded).ToList();
+            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnSeriesAdded).ToList();
         }
 
-        public List<INotification> OnAuthorDeleteEnabled(bool filterBlockedNotifications = true)
+        public List<INotification> OnSeriesDeleteEnabled(bool filterBlockedNotifications = true)
         {
             if (filterBlockedNotifications)
             {
-                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnAuthorDelete)).ToList();
+                return FilterBlockedNotifications(GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnSeriesDelete)).ToList();
             }
 
-            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnAuthorDelete).ToList();
+            return GetAvailableProviders().Where(n => ((NotificationDefinition)n.Definition).OnSeriesDelete).ToList();
         }
 
         public List<INotification> OnBookDeleteEnabled(bool filterBlockedNotifications = true)
@@ -207,8 +207,8 @@ namespace NzbDrone.Core.Notifications
             definition.SupportsOnReleaseImport = provider.SupportsOnReleaseImport;
             definition.SupportsOnUpgrade = provider.SupportsOnUpgrade;
             definition.SupportsOnRename = provider.SupportsOnRename;
-            definition.SupportsOnAuthorAdded = provider.SupportsOnAuthorAdded;
-            definition.SupportsOnAuthorDelete = provider.SupportsOnAuthorDelete;
+            definition.SupportsOnSeriesAdded = provider.SupportsOnSeriesAdded;
+            definition.SupportsOnSeriesDelete = provider.SupportsOnSeriesDelete;
             definition.SupportsOnBookDelete = provider.SupportsOnBookDelete;
             definition.SupportsOnBookFileDelete = provider.SupportsOnBookFileDelete;
             definition.SupportsOnBookFileDeleteForUpgrade = provider.SupportsOnBookFileDeleteForUpgrade;

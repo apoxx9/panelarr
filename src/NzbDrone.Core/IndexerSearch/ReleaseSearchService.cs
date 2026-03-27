@@ -15,21 +15,21 @@ namespace NzbDrone.Core.IndexerSearch
 {
     public interface ISearchForReleases
     {
-        Task<List<DownloadDecision>> BookSearch(int bookId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch);
-        Task<List<DownloadDecision>> AuthorSearch(int authorId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch);
+        Task<List<DownloadDecision>> IssueSearch(int bookId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch);
+        Task<List<DownloadDecision>> SeriesSearch(int authorId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch);
     }
 
     public class ReleaseSearchService : ISearchForReleases
     {
         private readonly IIndexerFactory _indexerFactory;
         private readonly IBookService _bookService;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IMakeDownloadDecision _makeDownloadDecision;
         private readonly Logger _logger;
 
         public ReleaseSearchService(IIndexerFactory indexerFactory,
                                 IBookService bookService,
-                                IAuthorService authorService,
+                                ISeriesService authorService,
                                 IMakeDownloadDecision makeDownloadDecision,
                                 Logger logger)
         {
@@ -40,77 +40,77 @@ namespace NzbDrone.Core.IndexerSearch
             _logger = logger;
         }
 
-        public async Task<List<DownloadDecision>> BookSearch(int bookId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
+        public async Task<List<DownloadDecision>> IssueSearch(int bookId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
         {
             var downloadDecisions = new List<DownloadDecision>();
 
-            var book = _bookService.GetBook(bookId);
+            var issue = _bookService.GetBook(bookId);
 
-            var decisions = await BookSearch(book, missingOnly, userInvokedSearch, interactiveSearch);
+            var decisions = await IssueSearch(issue, missingOnly, userInvokedSearch, interactiveSearch);
             downloadDecisions.AddRange(decisions);
 
             return DeDupeDecisions(downloadDecisions);
         }
 
-        public async Task<List<DownloadDecision>> AuthorSearch(int authorId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
+        public async Task<List<DownloadDecision>> SeriesSearch(int authorId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
         {
             var downloadDecisions = new List<DownloadDecision>();
 
-            var author = _authorService.GetAuthor(authorId);
+            var author = _authorService.GetSeries(authorId);
 
-            var decisions = await AuthorSearch(author, missingOnly, userInvokedSearch, interactiveSearch);
+            var decisions = await SeriesSearch(author, missingOnly, userInvokedSearch, interactiveSearch);
             downloadDecisions.AddRange(decisions);
 
             return DeDupeDecisions(downloadDecisions);
         }
 
-        public async Task<List<DownloadDecision>> AuthorSearch(Author author, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
+        public async Task<List<DownloadDecision>> SeriesSearch(Series author, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
         {
-            var searchSpec = Get<AuthorSearchCriteria>(author, userInvokedSearch, interactiveSearch);
-            var books = _bookService.GetBooksByAuthor(author.Id);
+            var searchSpec = Get<SeriesSearchCriteria>(author, userInvokedSearch, interactiveSearch);
+            var issues = _bookService.GetBooksBySeries(author.Id);
 
-            books = books.Where(a => a.Monitored).ToList();
+            issues = issues.Where(a => a.Monitored).ToList();
 
-            searchSpec.Books = books;
+            searchSpec.Books = issues;
 
             return await Dispatch(indexer => indexer.Fetch(searchSpec), searchSpec);
         }
 
-        public async Task<List<DownloadDecision>> BookSearch(Book book, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
+        public async Task<List<DownloadDecision>> IssueSearch(Issue issue, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
         {
-            var author = _authorService.GetAuthor(book.AuthorId);
+            var author = _authorService.GetSeries(issue.SeriesId);
 
-            var searchSpec = Get<BookSearchCriteria>(author, new List<Book> { book }, userInvokedSearch, interactiveSearch);
+            var searchSpec = Get<IssueSearchCriteria>(author, new List<Issue> { issue }, userInvokedSearch, interactiveSearch);
 
-            searchSpec.BookTitle = book.Editions.Value.SingleOrDefault(x => x.Monitored).Title;
+            searchSpec.IssueTitle = issue.Title;
 
-            // searchSpec.BookIsbn = book.Isbn13;
-            if (book.ReleaseDate.HasValue)
+            // searchSpec.IssueIsbn = issue.Isbn13;
+            if (issue.ReleaseDate.HasValue)
             {
-                searchSpec.BookYear = book.ReleaseDate.Value.Year;
+                searchSpec.IssueYear = issue.ReleaseDate.Value.Year;
             }
 
             return await Dispatch(indexer => indexer.Fetch(searchSpec), searchSpec);
         }
 
-        private TSpec Get<TSpec>(Author author, List<Book> books, bool userInvokedSearch, bool interactiveSearch)
+        private TSpec Get<TSpec>(Series author, List<Issue> issues, bool userInvokedSearch, bool interactiveSearch)
             where TSpec : SearchCriteriaBase, new()
         {
             var spec = new TSpec();
 
-            spec.Books = books;
-            spec.Author = author;
+            spec.Books = issues;
+            spec.Series = author;
             spec.UserInvokedSearch = userInvokedSearch;
             spec.InteractiveSearch = interactiveSearch;
 
             return spec;
         }
 
-        private static TSpec Get<TSpec>(Author author, bool userInvokedSearch, bool interactiveSearch)
+        private static TSpec Get<TSpec>(Series author, bool userInvokedSearch, bool interactiveSearch)
             where TSpec : SearchCriteriaBase, new()
         {
             var spec = new TSpec();
-            spec.Author = author;
+            spec.Series = author;
             spec.UserInvokedSearch = userInvokedSearch;
             spec.InteractiveSearch = interactiveSearch;
 
@@ -124,7 +124,7 @@ namespace NzbDrone.Core.IndexerSearch
                 _indexerFactory.AutomaticSearchEnabled();
 
             // Filter indexers to untagged indexers and indexers with intersecting tags
-            indexers = indexers.Where(i => i.Definition.Tags.Empty() || i.Definition.Tags.Intersect(criteriaBase.Author.Tags).Any()).ToList();
+            indexers = indexers.Where(i => i.Definition.Tags.Empty() || i.Definition.Tags.Intersect(criteriaBase.Series.Tags).Any()).ToList();
 
             _logger.ProgressInfo("Searching indexers for {0}. {1} active indexers", criteriaBase, indexers.Count);
 

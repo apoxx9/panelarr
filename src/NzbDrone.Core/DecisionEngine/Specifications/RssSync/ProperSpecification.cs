@@ -41,11 +41,11 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                 return Decision.Accept();
             }
 
-            foreach (var book in subject.Books)
+            foreach (var issue in subject.Books)
             {
-                var bookFiles = _mediaFileService.GetFilesByBook(book.Id);
+                var comicFiles = _mediaFileService.GetFilesByBook(issue.Id);
 
-                foreach (var file in bookFiles)
+                foreach (var file in comicFiles)
                 {
                     if (_qualityUpgradableSpecification.IsRevisionUpgrade(file.Quality, subject.ParsedBookInfo.Quality))
                     {

@@ -24,8 +24,8 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                                     SELECT MIN(""Id"")
                                     FROM ""Editions""
                                     WHERE ""Monitored"" = true
-                                    GROUP BY ""BookId""
-                                    HAVING COUNT(""BookId"") > 1
+                                    GROUP BY ""IssueId""
+                                    HAVING COUNT(""IssueId"") > 1
                                 )");
             }
             else
@@ -36,8 +36,8 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                                     SELECT MIN(""Id"")
                                     FROM ""Editions""
                                     WHERE ""Monitored"" = 1
-                                    GROUP BY ""BookId""
-                                    HAVING COUNT(""BookId"") > 1
+                                    GROUP BY ""IssueId""
+                                    HAVING COUNT(""IssueId"") > 1
                                 )");
             }
         }

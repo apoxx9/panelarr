@@ -11,8 +11,8 @@ namespace NzbDrone.Core.Queue
 {
     public class Queue : ModelBase
     {
-        public Author Author { get; set; }
-        public Book Book { get; set; }
+        public Series Series { get; set; }
+        public Issue Issue { get; set; }
         public QualityModel Quality { get; set; }
         public decimal Size { get; set; }
         public string Title { get; set; }

@@ -21,11 +21,11 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
         private class PlexUpdateQueue
         {
-            public Dictionary<int, Author> Pending { get; } = new ();
+            public Dictionary<int, Series> Pending { get; } = new ();
             public bool Refreshing { get; set; }
         }
 
-        private readonly ICached<PlexUpdateQueue> _pendingAuthorsCache;
+        private readonly ICached<PlexUpdateQueue> _pendingSeriessCache;
 
         public PlexServer(IPlexServerService plexServerService, IPlexTvService plexTvService, ICacheManager cacheManager, Logger logger)
         {
@@ -33,51 +33,51 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             _plexTvService = plexTvService;
             _logger = logger;
 
-            _pendingAuthorsCache = cacheManager.GetRollingCache<PlexUpdateQueue>(GetType(), "pendingAuthors", TimeSpan.FromDays(1));
+            _pendingSeriessCache = cacheManager.GetRollingCache<PlexUpdateQueue>(GetType(), "pendingSeriess", TimeSpan.FromDays(1));
         }
 
         public override string Link => "https://www.plex.tv/";
         public override string Name => "Plex Media Server";
 
-        public override void OnReleaseImport(BookDownloadMessage message)
+        public override void OnReleaseImport(IssueDownloadMessage message)
         {
-            UpdateIfEnabled(message.Author);
+            UpdateIfEnabled(message.Series);
         }
 
-        public override void OnRename(Author author, List<RenamedBookFile> renamedFiles)
+        public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
         {
             UpdateIfEnabled(author);
         }
 
-        public override void OnBookRetag(BookRetagMessage message)
+        public override void OnBookRetag(IssueRetagMessage message)
         {
-            UpdateIfEnabled(message.Author);
+            UpdateIfEnabled(message.Series);
         }
 
-        public override void OnBookDelete(BookDeleteMessage deleteMessage)
-        {
-            if (deleteMessage.DeletedFiles)
-            {
-                UpdateIfEnabled(deleteMessage.Book.Author);
-            }
-        }
-
-        public override void OnAuthorDelete(AuthorDeleteMessage deleteMessage)
+        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
         {
             if (deleteMessage.DeletedFiles)
             {
-                UpdateIfEnabled(deleteMessage.Author);
+                UpdateIfEnabled(deleteMessage.Issue.Series);
             }
         }
 
-        private void UpdateIfEnabled(Author author)
+        public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
+        {
+            if (deleteMessage.DeletedFiles)
+            {
+                UpdateIfEnabled(deleteMessage.Series);
+            }
+        }
+
+        private void UpdateIfEnabled(Series author)
         {
             _plexTvService.Ping(Settings.AuthToken);
 
             if (Settings.UpdateLibrary)
             {
                 _logger.Debug("Scheduling library update for author {0} {1}", author.Id, author.Name);
-                var queue = _pendingAuthorsCache.Get(Settings.Host, () => new PlexUpdateQueue());
+                var queue = _pendingSeriessCache.Get(Settings.Host, () => new PlexUpdateQueue());
                 lock (queue)
                 {
                     queue.Pending[author.Id] = author;
@@ -87,7 +87,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
         public override void ProcessQueue()
         {
-            var queue = _pendingAuthorsCache.Find(Settings.Host);
+            var queue = _pendingSeriessCache.Find(Settings.Host);
 
             if (queue == null)
             {
@@ -108,7 +108,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             {
                 while (true)
                 {
-                    List<Author> refreshingAuthors;
+                    List<Series> refreshingSeriess;
                     lock (queue)
                     {
                         if (queue.Pending.Empty())
@@ -117,14 +117,14 @@ namespace NzbDrone.Core.Notifications.Plex.Server
                             return;
                         }
 
-                        refreshingAuthors = queue.Pending.Values.ToList();
+                        refreshingSeriess = queue.Pending.Values.ToList();
                         queue.Pending.Clear();
                     }
 
                     if (Settings.UpdateLibrary)
                     {
-                        _logger.Debug("Performing library update for {0} authors", refreshingAuthors.Count);
-                        _plexServerService.UpdateLibrary(refreshingAuthors, Settings);
+                        _logger.Debug("Performing library update for {0} authors", refreshingSeriess.Count);
+                        _plexServerService.UpdateLibrary(refreshingSeriess, Settings);
                     }
                 }
             }

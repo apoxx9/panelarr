@@ -86,7 +86,7 @@ namespace Panelarr.Api.V1.System
                 RuntimeName = "netcore",
                 StartTime = _runtimeInfo.StartTime,
                 PackageVersion = _deploymentInfoProvider.PackageVersion,
-                PackageAuthor = _deploymentInfoProvider.PackageAuthor,
+                PackageSeries = _deploymentInfoProvider.PackageSeries,
                 PackageUpdateMechanism = _deploymentInfoProvider.PackageUpdateMechanism,
                 PackageUpdateMechanismMessage = _deploymentInfoProvider.PackageUpdateMechanismMessage
             };

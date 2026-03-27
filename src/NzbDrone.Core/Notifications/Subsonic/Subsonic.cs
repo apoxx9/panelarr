@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Notifications.Subsonic
             Notify(Settings, header, grabMessage.Message);
         }
 
-        public override void OnReleaseImport(BookDownloadMessage message)
+        public override void OnReleaseImport(IssueDownloadMessage message)
         {
             const string header = "Panelarr - Downloaded";
 
@@ -36,19 +36,19 @@ namespace NzbDrone.Core.Notifications.Subsonic
             Update();
         }
 
-        public override void OnRename(Author author, List<RenamedBookFile> renamedFiles)
+        public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
         {
             Update();
         }
 
-        public override void OnAuthorAdded(Author author)
+        public override void OnSeriesAdded(Series author)
         {
             Notify(Settings, AUTHOR_ADDED_TITLE_BRANDED, author.Name);
         }
 
-        public override void OnAuthorDelete(AuthorDeleteMessage deleteMessage)
+        public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
-            const string header = "Panelarr - Author Deleted";
+            const string header = "Panelarr - Series Deleted";
 
             Notify(Settings, header, deleteMessage.Message);
 
@@ -58,9 +58,9 @@ namespace NzbDrone.Core.Notifications.Subsonic
             }
         }
 
-        public override void OnBookDelete(BookDeleteMessage deleteMessage)
+        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
         {
-            const string header = "Panelarr - Book Deleted";
+            const string header = "Panelarr - Issue Deleted";
 
             Notify(Settings, header, deleteMessage.Message);
 
@@ -70,9 +70,9 @@ namespace NzbDrone.Core.Notifications.Subsonic
             }
         }
 
-        public override void OnBookFileDelete(BookFileDeleteMessage deleteMessage)
+        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
         {
-            const string header = "Panelarr - Book File Deleted";
+            const string header = "Panelarr - Issue File Deleted";
 
             Notify(Settings, header, deleteMessage.Message);
             Update();
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Notifications.Subsonic
             Notify(Settings, HEALTH_ISSUE_TITLE_BRANDED, healthCheck.Message);
         }
 
-        public override void OnBookRetag(BookRetagMessage message)
+        public override void OnBookRetag(IssueRetagMessage message)
         {
             Notify(Settings, BOOK_RETAGGED_TITLE_BRANDED, message.Message);
         }

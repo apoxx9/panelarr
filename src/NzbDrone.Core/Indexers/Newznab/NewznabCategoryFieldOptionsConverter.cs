@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Indexers.Newznab
                     Name = "Books",
                     Subcategories = new List<NewznabCategory>
                     {
-                        new NewznabCategory { Id = 7010, Name = "Misc books" },
+                        new NewznabCategory { Id = 7010, Name = "Misc issues" },
                         new NewznabCategory { Id = 7020, Name = "Ebook" },
                         new NewznabCategory { Id = 7030, Name = "Comics" },
                         new NewznabCategory { Id = 7040, Name = "Magazines" }

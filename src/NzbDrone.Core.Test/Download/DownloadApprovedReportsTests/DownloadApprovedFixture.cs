@@ -31,27 +31,27 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
                 .Returns<List<DownloadDecision>>(v => v);
         }
 
-        private Book GetBook(int id)
+        private Issue GetBook(int id)
         {
-            return Builder<Book>.CreateNew()
+            return Builder<Issue>.CreateNew()
                             .With(e => e.Id = id)
                             .Build();
         }
 
-        private RemoteBook GetRemoteBook(List<Book> books, QualityModel quality, DownloadProtocol downloadProtocol = DownloadProtocol.Usenet)
+        private RemoteBook GetRemoteBook(List<Issue> issues, QualityModel quality, DownloadProtocol downloadProtocol = DownloadProtocol.Usenet)
         {
             var remoteBook = new RemoteBook();
             remoteBook.ParsedBookInfo = new ParsedBookInfo();
             remoteBook.ParsedBookInfo.Quality = quality;
 
-            remoteBook.Books = new List<Book>();
-            remoteBook.Books.AddRange(books);
+            remoteBook.Books = new List<Issue>();
+            remoteBook.Books.AddRange(issues);
 
             remoteBook.Release = new ReleaseInfo();
             remoteBook.Release.DownloadProtocol = downloadProtocol;
             remoteBook.Release.PublishDate = DateTime.UtcNow;
 
-            remoteBook.Author = Builder<Author>.CreateNew()
+            remoteBook.Series = Builder<Series>.CreateNew()
                 .With(e => e.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() })
                 .Build();
 
@@ -61,8 +61,8 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_download_report_if_book_was_not_already_downloaded()
         {
-            var books = new List<Book> { GetBook(1) };
-            var remoteBook = GetRemoteBook(books, new QualityModel(Quality.MP3));
+            var issues = new List<Issue> { GetBook(1) };
+            var remoteBook = GetRemoteBook(issues, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook));
@@ -74,8 +74,8 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_only_download_book_once()
         {
-            var books = new List<Book> { GetBook(1) };
-            var remoteBook = GetRemoteBook(books, new QualityModel(Quality.MP3));
+            var issues = new List<Issue> { GetBook(1) };
+            var remoteBook = GetRemoteBook(issues, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook));
@@ -89,12 +89,12 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_not_download_if_any_book_was_already_downloaded()
         {
             var remoteBook1 = GetRemoteBook(
-                                                    new List<Book> { GetBook(1) },
-                                                    new QualityModel(Quality.MP3));
+                                                    new List<Issue> { GetBook(1) },
+                                                    new QualityModel(Quality.CBR));
 
             var remoteBook2 = GetRemoteBook(
-                                                    new List<Book> { GetBook(1), GetBook(2) },
-                                                    new QualityModel(Quality.MP3));
+                                                    new List<Issue> { GetBook(1), GetBook(2) },
+                                                    new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
@@ -107,8 +107,8 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_return_downloaded_reports()
         {
-            var books = new List<Book> { GetBook(1) };
-            var remoteBook = GetRemoteBook(books, new QualityModel(Quality.MP3));
+            var issues = new List<Issue> { GetBook(1) };
+            var remoteBook = GetRemoteBook(issues, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook));
@@ -122,12 +122,12 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_return_all_downloaded_reports()
         {
             var remoteBook1 = GetRemoteBook(
-                                                    new List<Book> { GetBook(1) },
-                                                    new QualityModel(Quality.MP3));
+                                                    new List<Issue> { GetBook(1) },
+                                                    new QualityModel(Quality.CBR));
 
             var remoteBook2 = GetRemoteBook(
-                                                    new List<Book> { GetBook(2) },
-                                                    new QualityModel(Quality.MP3));
+                                                    new List<Issue> { GetBook(2) },
+                                                    new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
@@ -142,16 +142,16 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_only_return_downloaded_reports()
         {
             var remoteBook1 = GetRemoteBook(
-                                                    new List<Book> { GetBook(1) },
-                                                    new QualityModel(Quality.MP3));
+                                                    new List<Issue> { GetBook(1) },
+                                                    new QualityModel(Quality.CBR));
 
             var remoteBook2 = GetRemoteBook(
-                                                    new List<Book> { GetBook(2) },
-                                                    new QualityModel(Quality.MP3));
+                                                    new List<Issue> { GetBook(2) },
+                                                    new QualityModel(Quality.CBR));
 
             var remoteBook3 = GetRemoteBook(
-                                                    new List<Book> { GetBook(2) },
-                                                    new QualityModel(Quality.MP3));
+                                                    new List<Issue> { GetBook(2) },
+                                                    new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
@@ -166,8 +166,8 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_not_add_to_downloaded_list_when_download_fails()
         {
-            var books = new List<Book> { GetBook(1) };
-            var remoteBook = GetRemoteBook(books, new QualityModel(Quality.MP3));
+            var issues = new List<Issue> { GetBook(1) };
+            var remoteBook = GetRemoteBook(issues, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook));
@@ -194,8 +194,8 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_not_grab_if_pending()
         {
-            var books = new List<Book> { GetBook(1) };
-            var remoteBook = GetRemoteBook(books, new QualityModel(Quality.MP3));
+            var issues = new List<Issue> { GetBook(1) };
+            var remoteBook = GetRemoteBook(issues, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook, new Rejection("Failure!", RejectionType.Temporary)));
@@ -207,8 +207,8 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_not_add_to_pending_if_book_was_grabbed()
         {
-            var books = new List<Book> { GetBook(1) };
-            var remoteBook = GetRemoteBook(books, new QualityModel(Quality.MP3));
+            var issues = new List<Issue> { GetBook(1) };
+            var remoteBook = GetRemoteBook(issues, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook));
@@ -221,8 +221,8 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_add_to_pending_even_if_already_added_to_pending()
         {
-            var books = new List<Book> { GetBook(1) };
-            var remoteBook = GetRemoteBook(books, new QualityModel(Quality.MP3));
+            var issues = new List<Issue> { GetBook(1) };
+            var remoteBook = GetRemoteBook(issues, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook, new Rejection("Failure!", RejectionType.Temporary)));
@@ -235,8 +235,8 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_add_to_failed_if_already_failed_for_that_protocol()
         {
-            var books = new List<Book> { GetBook(1) };
-            var remoteBook = GetRemoteBook(books, new QualityModel(Quality.MP3));
+            var issues = new List<Issue> { GetBook(1) };
+            var remoteBook = GetRemoteBook(issues, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook));
@@ -252,9 +252,9 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_not_add_to_failed_if_failed_for_a_different_protocol()
         {
-            var books = new List<Book> { GetBook(1) };
-            var remoteBook = GetRemoteBook(books, new QualityModel(Quality.MP3), DownloadProtocol.Usenet);
-            var remoteBook2 = GetRemoteBook(books, new QualityModel(Quality.MP3), DownloadProtocol.Torrent);
+            var issues = new List<Issue> { GetBook(1) };
+            var remoteBook = GetRemoteBook(issues, new QualityModel(Quality.CBR), DownloadProtocol.Usenet);
+            var remoteBook2 = GetRemoteBook(issues, new QualityModel(Quality.CBR), DownloadProtocol.Torrent);
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook));
@@ -271,8 +271,8 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         [Test]
         public async Task should_add_to_rejected_if_release_unavailable_on_indexer()
         {
-            var books = new List<Book> { GetBook(1) };
-            var remoteBook = GetRemoteBook(books, new QualityModel(Quality.MP3));
+            var issues = new List<Issue> { GetBook(1) };
+            var remoteBook = GetRemoteBook(issues, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook));

@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteBook = new RemoteBook();
             _remoteBook.Release = new ReleaseInfo();
-            _remoteBook.Author = new Author();
+            _remoteBook.Series = new Series();
 
             _delayProfile = new DelayProfile();
 

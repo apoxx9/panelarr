@@ -28,14 +28,14 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads.Resources
         public void parse_minimal_work()
         {
             var element = new XElement("work",
-                new XElement("original_title", "Book Title"),
+                new XElement("original_title", "Issue Title"),
                 new XElement("id", "123456789"));
 
             var work = new WorkResource();
 
             work.Parse(element);
 
-            work.OriginalTitle.Should().Be("Book Title");
+            work.OriginalTitle.Should().Be("Issue Title");
             work.Id.Should().Be(123456789);
 
             ExceptionVerification.IgnoreWarns();
@@ -46,14 +46,14 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads.Resources
         {
             var element = new XElement("series_works",
                 new XElement("work",
-                    new XElement("original_title", "Book Title"),
+                    new XElement("original_title", "Issue Title"),
                     new XElement("id", "123456789")));
 
             var work = new WorkResource();
 
             work.Parse(element);
 
-            work.OriginalTitle.Should().Be("Book Title");
+            work.OriginalTitle.Should().Be("Issue Title");
             work.Id.Should().Be(123456789);
 
             ExceptionVerification.IgnoreWarns();

@@ -5,7 +5,7 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Extras.Files;
-using NzbDrone.Core.MediaFiles.BookImport.Aggregation;
+using NzbDrone.Core.MediaFiles.IssueImport.Aggregation;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.Extras.Others
@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Extras.Others
 
         public override int Order => 2;
 
-        public override IEnumerable<ExtraFile> ProcessFiles(Author author, List<string> filesOnDisk, List<string> importedFiles)
+        public override IEnumerable<ExtraFile> ProcessFiles(Series author, List<string> filesOnDisk, List<string> importedFiles)
         {
             _logger.Debug("Looking for existing extra files in {0}", author.Path);
 
@@ -48,7 +48,7 @@ namespace NzbDrone.Core.Extras.Others
                 var localTrack = new LocalBook
                 {
                     FileTrackInfo = Parser.Parser.ParseMusicPath(possibleExtraFile),
-                    Author = author,
+                    Series = author,
                     Path = possibleExtraFile
                 };
 
@@ -62,16 +62,16 @@ namespace NzbDrone.Core.Extras.Others
                     continue;
                 }
 
-                if (localTrack.Book == null)
+                if (localTrack.Issue == null)
                 {
-                    _logger.Debug("Cannot find related book for: {0}", possibleExtraFile);
+                    _logger.Debug("Cannot find related issue for: {0}", possibleExtraFile);
                     continue;
                 }
 
                 var extraFile = new OtherExtraFile
                 {
-                    AuthorId = author.Id,
-                    BookId = localTrack.Book.Id,
+                    SeriesId = author.Id,
+                    IssueId = localTrack.Issue.Id,
                     RelativePath = author.Path.GetRelativePath(possibleExtraFile),
                     Extension = extension
                 };

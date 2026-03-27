@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Metadata;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Identification
+namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 {
     public class BasicLocalTrack
     {
@@ -10,18 +10,18 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
         public ParsedTrackInfo FileTrackInfo { get; set; }
     }
 
-    public class AuthorTestCase
+    public class SeriesTestCase
     {
-        public string Author { get; set; }
+        public string Series { get; set; }
         public MetadataProfile MetadataProfile { get; set; }
     }
 
     public class IdTestCase
     {
         public List<string> ExpectedMusicBrainzReleaseIds { get; set; }
-        public List<AuthorTestCase> LibraryAuthors { get; set; }
-        public string Author { get; set; }
-        public string Book { get; set; }
+        public List<SeriesTestCase> LibrarySeriess { get; set; }
+        public string Series { get; set; }
+        public string Issue { get; set; }
         public string Release { get; set; }
         public bool NewDownload { get; set; }
         public bool SingleRelease { get; set; }

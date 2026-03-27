@@ -88,8 +88,8 @@ namespace NzbDrone.Core.Indexers.Newznab
         {
             releaseInfo = base.ProcessItem(item, releaseInfo);
 
-            releaseInfo.Author = GetAuthor(item);
-            releaseInfo.Book = GetBook(item);
+            releaseInfo.Series = GetSeries(item);
+            releaseInfo.Issue = GetBook(item);
 
             return releaseInfo;
         }
@@ -171,7 +171,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             return cats;
         }
 
-        protected virtual string GetAuthor(XElement item)
+        protected virtual string GetSeries(XElement item)
         {
             var authorString = TryGetNewznabAttribute(item, "author");
 

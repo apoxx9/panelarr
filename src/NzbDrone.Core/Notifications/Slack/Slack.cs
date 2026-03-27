@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Notifications.Slack
                                   new Attachment
                                   {
                                       Fallback = message.Message,
-                                      Title = message.Author.Name,
+                                      Title = message.Series.Name,
                                       Text = message.Message,
                                       Color = "warning"
                                   }
@@ -38,14 +38,14 @@ namespace NzbDrone.Core.Notifications.Slack
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnReleaseImport(BookDownloadMessage message)
+        public override void OnReleaseImport(IssueDownloadMessage message)
         {
             var attachments = new List<Attachment>
             {
                 new Attachment
                 {
                     Fallback = message.Message,
-                    Title = message.Author.Name,
+                    Title = message.Series.Name,
                     Text = message.Message,
                     Color = "good"
                 }
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Notifications.Slack
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnRename(Author author, List<RenamedBookFile> renamedFiles)
+        public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
         {
             var attachments = new List<Attachment>
                               {
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Notifications.Slack
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnAuthorAdded(Author author)
+        public override void OnSeriesAdded(Series author)
         {
             var attachments = new List<Attachment>
                              {
@@ -80,55 +80,55 @@ namespace NzbDrone.Core.Notifications.Slack
                                  }
                              };
 
-            var payload = CreatePayload("Author Added", attachments);
+            var payload = CreatePayload("Series Added", attachments);
 
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnAuthorDelete(AuthorDeleteMessage deleteMessage)
+        public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
             var attachments = new List<Attachment>
                              {
                                  new Attachment
                                  {
-                                     Title = deleteMessage.Author.Name,
+                                     Title = deleteMessage.Series.Name,
                                      Text = deleteMessage.DeletedFilesMessage
                                  }
                              };
 
-            var payload = CreatePayload("Author Deleted", attachments);
+            var payload = CreatePayload("Series Deleted", attachments);
 
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnBookDelete(BookDeleteMessage deleteMessage)
+        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
         {
             var attachments = new List<Attachment>
                              {
                                  new Attachment
                                  {
-                                     Title =  $"${deleteMessage.Book.Author.Value.Name} - ${deleteMessage.Book.Title}",
+                                     Title =  $"${deleteMessage.Issue.Series.Value.Name} - ${deleteMessage.Issue.Title}",
                                      Text = deleteMessage.DeletedFilesMessage
                                  }
                              };
 
-            var payload = CreatePayload("Book Deleted", attachments);
+            var payload = CreatePayload("Issue Deleted", attachments);
 
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnBookFileDelete(BookFileDeleteMessage deleteMessage)
+        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             var attachments = new List<Attachment>
                              {
                                  new Attachment
                                  {
-                                     Title =  $"${deleteMessage.Book.Author.Value.Name} - ${deleteMessage.Book.Title} - file deleted",
-                                     Text = deleteMessage.BookFile.Path
+                                     Title =  $"${deleteMessage.Issue.Series.Value.Name} - ${deleteMessage.Issue.Title} - file deleted",
+                                     Text = deleteMessage.ComicFile.Path
                                  }
                              };
 
-            var payload = CreatePayload("Book File Deleted", attachments);
+            var payload = CreatePayload("Issue File Deleted", attachments);
 
             _proxy.SendPayload(payload, Settings);
         }
@@ -150,7 +150,7 @@ namespace NzbDrone.Core.Notifications.Slack
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnBookRetag(BookRetagMessage message)
+        public override void OnBookRetag(IssueRetagMessage message)
         {
             var attachments = new List<Attachment>
                               {
@@ -183,7 +183,7 @@ namespace NzbDrone.Core.Notifications.Slack
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnImportFailure(BookDownloadMessage message)
+        public override void OnImportFailure(IssueDownloadMessage message)
         {
             var attachments = new List<Attachment>
             {

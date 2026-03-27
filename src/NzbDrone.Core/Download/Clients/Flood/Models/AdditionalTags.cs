@@ -5,7 +5,7 @@ namespace NzbDrone.Core.Download.Clients.Flood.Models
     public enum AdditionalTags
     {
         [FieldOption(Hint = "J.R.R. Tolkien")]
-        Author = 0,
+        Series = 0,
 
         [FieldOption(Hint = "EPUB")]
         Format = 1,

@@ -10,16 +10,16 @@ namespace NzbDrone.Core.Notifications
     public abstract class NotificationBase<TSettings> : INotification
         where TSettings : IProviderConfig, new()
     {
-        protected const string BOOK_GRABBED_TITLE = "Book Grabbed";
-        protected const string BOOK_DOWNLOADED_TITLE = "Book Downloaded";
-        protected const string AUTHOR_ADDED_TITLE = "Author Added";
-        protected const string AUTHOR_DELETED_TITLE = "Author Deleted";
-        protected const string BOOK_DELETED_TITLE = "Book Deleted";
-        protected const string BOOK_FILE_DELETED_TITLE = "Book File Deleted";
+        protected const string BOOK_GRABBED_TITLE = "Issue Grabbed";
+        protected const string BOOK_DOWNLOADED_TITLE = "Issue Downloaded";
+        protected const string AUTHOR_ADDED_TITLE = "Series Added";
+        protected const string AUTHOR_DELETED_TITLE = "Series Deleted";
+        protected const string BOOK_DELETED_TITLE = "Issue Deleted";
+        protected const string BOOK_FILE_DELETED_TITLE = "Issue File Deleted";
         protected const string HEALTH_ISSUE_TITLE = "Health Check Failure";
         protected const string DOWNLOAD_FAILURE_TITLE = "Download Failed";
         protected const string IMPORT_FAILURE_TITLE = "Import Failed";
-        protected const string BOOK_RETAGGED_TITLE = "Book File Tags Updated";
+        protected const string BOOK_RETAGGED_TITLE = "Issue File Tags Updated";
         protected const string APPLICATION_UPDATE_TITLE = "Application Updated";
 
         protected const string BOOK_GRABBED_TITLE_BRANDED = "Panelarr - " + BOOK_GRABBED_TITLE;
@@ -51,27 +51,27 @@ namespace NzbDrone.Core.Notifications
         {
         }
 
-        public virtual void OnReleaseImport(BookDownloadMessage message)
+        public virtual void OnReleaseImport(IssueDownloadMessage message)
         {
         }
 
-        public virtual void OnRename(Author author, List<RenamedBookFile> renamedFiles)
+        public virtual void OnRename(Series author, List<RenamedComicFile> renamedFiles)
         {
         }
 
-        public virtual void OnAuthorAdded(Author author)
+        public virtual void OnSeriesAdded(Series author)
         {
         }
 
-        public virtual void OnAuthorDelete(AuthorDeleteMessage deleteMessage)
+        public virtual void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
         }
 
-        public virtual void OnBookDelete(BookDeleteMessage deleteMessage)
+        public virtual void OnBookDelete(IssueDeleteMessage deleteMessage)
         {
         }
 
-        public virtual void OnBookFileDelete(BookFileDeleteMessage deleteMessage)
+        public virtual void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
         {
         }
 
@@ -83,11 +83,11 @@ namespace NzbDrone.Core.Notifications
         {
         }
 
-        public virtual void OnImportFailure(BookDownloadMessage message)
+        public virtual void OnImportFailure(IssueDownloadMessage message)
         {
         }
 
-        public virtual void OnBookRetag(BookRetagMessage message)
+        public virtual void OnBookRetag(IssueRetagMessage message)
         {
         }
 
@@ -101,8 +101,8 @@ namespace NzbDrone.Core.Notifications
 
         public bool SupportsOnGrab => HasConcreteImplementation("OnGrab");
         public bool SupportsOnRename => HasConcreteImplementation("OnRename");
-        public bool SupportsOnAuthorAdded => HasConcreteImplementation("OnAuthorAdded");
-        public bool SupportsOnAuthorDelete => HasConcreteImplementation("OnAuthorDelete");
+        public bool SupportsOnSeriesAdded => HasConcreteImplementation("OnSeriesAdded");
+        public bool SupportsOnSeriesDelete => HasConcreteImplementation("OnSeriesDelete");
         public bool SupportsOnBookDelete => HasConcreteImplementation("OnBookDelete");
         public bool SupportsOnBookFileDelete => HasConcreteImplementation("OnBookFileDelete");
         public bool SupportsOnBookFileDeleteForUpgrade => SupportsOnBookFileDelete;

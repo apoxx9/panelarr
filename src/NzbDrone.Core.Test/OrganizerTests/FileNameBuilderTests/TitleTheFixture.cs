@@ -15,46 +15,38 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     [TestFixture]
     public class TitleTheFixture : CoreTest<FileNameBuilder>
     {
-        private Author _author;
-        private Book _book;
-        private Edition _edition;
-        private BookFile _trackFile;
+        private Series _author;
+        private Issue _book;
+        private ComicFile _trackFile;
         private NamingConfig _namingConfig;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Author>
+            _author = Builder<Series>
                     .CreateNew()
                     .With(s => s.Name = "Alien Ant Farm")
                     .Build();
 
-            var series = Builder<Series>
+            var series = Builder<SeriesGroup>
                 .CreateNew()
-                .With(x => x.Title = "Series Title")
+                .With(x => x.Title = "SeriesGroup Title")
                 .Build();
 
-            var seriesLink = Builder<SeriesBookLink>
+            var seriesLink = Builder<SeriesGroupLink>
                 .CreateListOfSize(1)
                 .All()
                 .With(s => s.Position = "1-2")
-                .With(s => s.Series = series)
+                .With(s => s.SeriesGroup = series)
                 .BuildListOfNew();
 
-            _book = Builder<Book>
+            _book = Builder<Issue>
                     .CreateNew()
                     .With(s => s.Title = "Anthology")
-                    .With(s => s.AuthorMetadata = _author.Metadata.Value)
+                    .With(s => s.SeriesMetadata = _author.Metadata.Value)
                     .With(s => s.SeriesLinks = seriesLink)
                     .Build();
-
-            _edition = Builder<Edition>
-                .CreateNew()
-                .With(s => s.Title = _book.Title)
-                .With(s => s.Book = _book)
-                .Build();
-
-            _trackFile = new BookFile { Quality = new QualityModel(Quality.MP3), ReleaseGroup = "PanelarrTest" };
+            _trackFile = new ComicFile { Quality = new QualityModel(Quality.CBR), ReleaseGroup = "PanelarrTest" };
 
             _namingConfig = NamingConfig.Default;
             _namingConfig.RenameBooks = true;
@@ -84,9 +76,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         public void should_get_expected_title_back(string name, string expected)
         {
             _author.Name = name;
-            _namingConfig.StandardBookFormat = "{Author NameThe}";
+            _namingConfig.StandardBookFormat = "{Series NameThe}";
 
-            Subject.BuildBookFileName(_author, _edition, _trackFile)
+            Subject.BuildBookFileName(_author, _book, _trackFile)
                    .Should().Be(expected);
         }
 
@@ -97,9 +89,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         public void should_not_change_title(string name)
         {
             _author.Name = name;
-            _namingConfig.StandardBookFormat = "{Author NameThe}";
+            _namingConfig.StandardBookFormat = "{Series NameThe}";
 
-            Subject.BuildBookFileName(_author, _edition, _trackFile)
+            Subject.BuildBookFileName(_author, _book, _trackFile)
                    .Should().Be(name);
         }
     }

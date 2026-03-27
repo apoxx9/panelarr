@@ -27,9 +27,9 @@ namespace NzbDrone.Core.DecisionEngine
             }
         }
 
-        public DownloadDecision(RemoteBook book, params Rejection[] rejections)
+        public DownloadDecision(RemoteBook issue, params Rejection[] rejections)
         {
-            RemoteBook = book;
+            RemoteBook = issue;
             Rejections = rejections.ToList();
         }
 

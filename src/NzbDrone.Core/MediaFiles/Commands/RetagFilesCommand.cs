@@ -5,7 +5,7 @@ namespace NzbDrone.Core.MediaFiles.Commands
 {
     public class RetagFilesCommand : Command
     {
-        public int AuthorId { get; set; }
+        public int SeriesId { get; set; }
         public List<int> Files { get; set; }
         public bool UpdateCovers { get; set; }
         public bool EmbedMetadata { get; set; }
@@ -19,7 +19,7 @@ namespace NzbDrone.Core.MediaFiles.Commands
 
         public RetagFilesCommand(int authorId, List<int> files)
         {
-            AuthorId = authorId;
+            SeriesId = authorId;
             Files = files;
         }
     }

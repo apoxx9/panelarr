@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
 
         private void GivenMissingRootFolder(string rootFolderPath)
         {
-            var author = Builder<Author>.CreateListOfSize(1)
+            var author = Builder<Series>.CreateListOfSize(1)
                                         .Build()
                                         .ToList();
 
@@ -35,8 +35,8 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
                 .Build()
                 .ToList();
 
-            Mocker.GetMock<IAuthorService>()
-                  .Setup(s => s.AllAuthorPaths())
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.AllSeriesPaths())
                   .Returns(author.ToDictionary(x => x.Id, x => x.Path));
 
             Mocker.GetMock<IImportListFactory>()
@@ -55,8 +55,8 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         public void should_not_return_error_when_no_book()
         {
-            Mocker.GetMock<IAuthorService>()
-                  .Setup(s => s.AllAuthorPaths())
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.AllSeriesPaths())
                   .Returns(new Dictionary<int, string>());
 
             Mocker.GetMock<IImportListFactory>()
@@ -78,7 +78,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         public void should_return_error_if_series_path_is_for_posix_os()
         {
             WindowsOnly();
-            GivenMissingRootFolder("/mnt/books");
+            GivenMissingRootFolder("/mnt/issues");
 
             Subject.Check().ShouldBeError();
         }

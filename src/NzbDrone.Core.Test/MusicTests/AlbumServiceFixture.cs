@@ -5,51 +5,51 @@ using NUnit.Framework;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Test.Framework;
 
-namespace NzbDrone.Core.Test.MusicTests.BookRepositoryTests
+namespace NzbDrone.Core.Test.MusicTests.IssueRepositoryTests
 {
     [TestFixture]
-    public class BookServiceFixture : CoreTest<BookService>
+    public class IssueServiceFixture : CoreTest<IssueService>
     {
-        private List<Book> _books;
+        private List<Issue> _books;
 
         [SetUp]
         public void Setup()
         {
-            _books = new List<Book>();
-            _books.Add(new Book
+            _books = new List<Issue>();
+            _books.Add(new Issue
             {
                 Title = "ANThology",
                 CleanTitle = "anthology",
-                AuthorMetadata = new AuthorMetadata
+                SeriesMetadata = new SeriesMetadata
                 {
-                    Name = "Author"
+                    Name = "Series"
                 }
             });
 
-            _books.Add(new Book
+            _books.Add(new Issue
             {
                 Title = "+",
                 CleanTitle = "",
-                AuthorMetadata = new AuthorMetadata
+                SeriesMetadata = new SeriesMetadata
                 {
-                    Name = "Author"
+                    Name = "Series"
                 }
             });
 
             Mocker.GetMock<IBookRepository>()
-                .Setup(s => s.GetBooksByAuthorMetadataId(It.IsAny<int>()))
+                .Setup(s => s.GetBooksBySeriesMetadataId(It.IsAny<int>()))
                 .Returns(_books);
         }
 
         private void GivenSimilarBook()
         {
-            _books.Add(new Book
+            _books.Add(new Issue
             {
                 Title = "ANThology2",
                 CleanTitle = "anthology2",
-                AuthorMetadata = new AuthorMetadata
+                SeriesMetadata = new SeriesMetadata
                 {
-                    Name = "Author"
+                    Name = "Series"
                 }
             });
         }
@@ -61,10 +61,10 @@ namespace NzbDrone.Core.Test.MusicTests.BookRepositoryTests
         [TestCase("+ (Plus) - I feel the need for redundant information in the title field", "+")]
         public void should_find_book_in_db_by_inexact_title(string title, string expected)
         {
-            var book = Subject.FindByTitleInexact(0, title);
+            var issue = Subject.FindByTitleInexact(0, title);
 
-            book.Should().NotBeNull();
-            book.Title.Should().Be(expected);
+            issue.Should().NotBeNull();
+            issue.Title.Should().Be(expected);
         }
 
         [TestCase("ANTholog")]
@@ -75,9 +75,9 @@ namespace NzbDrone.Core.Test.MusicTests.BookRepositoryTests
         public void should_not_find_book_in_db_by_inexact_title_when_two_similar_matches(string title)
         {
             GivenSimilarBook();
-            var book = Subject.FindByTitleInexact(0, title);
+            var issue = Subject.FindByTitleInexact(0, title);
 
-            book.Should().BeNull();
+            issue.Should().BeNull();
         }
     }
 }

@@ -15,18 +15,18 @@ namespace NzbDrone.Core.IndexerSearch.Definitions
         public virtual bool UserInvokedSearch { get; set; }
         public virtual bool InteractiveSearch { get; set; }
 
-        public Author Author { get; set; }
-        public List<Book> Books { get; set; }
+        public Series Series { get; set; }
+        public List<Issue> Books { get; set; }
 
-        public string AuthorQuery => GetQueryTitle(Author.Name);
+        public string SeriesQuery => GetQueryTitle(Series.Name);
 
         public static string GetQueryTitle(string title)
         {
             Ensure.That(title, () => title).IsNotNullOrWhiteSpace();
 
-            // Most VA books are listed as VA, not Various Authors
+            // Most VA issues are listed as VA, not Various Seriess
             // TODO: Needed in Panelarr??
-            if (title == "Various Authors")
+            if (title == "Various Seriess")
             {
                 title = "VA";
             }

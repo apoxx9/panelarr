@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NzbDrone.Core.Books;
-using NzbDrone.Core.MediaFiles.BookImport.Identification;
+using NzbDrone.Core.MediaFiles.IssueImport.Identification;
 
 namespace NzbDrone.Core.Parser.Model
 {
@@ -30,50 +30,43 @@ namespace NzbDrone.Core.Parser.Model
         public int TrackCount => LocalBooks.Count;
 
         public Distance Distance { get; set; }
-        public Edition Edition { get; set; }
+        public Issue Issue { get; set; }
         public List<LocalBook> ExistingTracks { get; set; }
         public bool NewDownload { get; set; }
 
         public void PopulateMatch(bool keepAllEditions)
         {
-            if (Edition != null)
+            if (Issue != null)
             {
                 LocalBooks = LocalBooks.Concat(ExistingTracks).DistinctBy(x => x.Path).ToList();
 
                 if (!keepAllEditions)
                 {
-                    // Manually clone the edition / book to avoid holding references to *every* edition we have
-                    // seen during the matching process
-                    var edition = new Edition();
-                    edition.UseMetadataFrom(Edition);
-                    edition.UseDbFieldsFrom(Edition);
-                    edition.BookFiles = Edition.BookFiles;
+                    // Manually clone the issue to avoid holding references to every issue seen during matching
+                    var fullBook = Issue;
 
-                    var fullBook = Edition.Book.Value;
-
-                    var book = new Book();
-                    book.UseMetadataFrom(fullBook);
-                    book.UseDbFieldsFrom(fullBook);
-                    book.Author.Value.UseMetadataFrom(fullBook.Author.Value);
-                    book.Author.Value.UseDbFieldsFrom(fullBook.Author.Value);
-                    book.Author.Value.Metadata = fullBook.AuthorMetadata.Value;
-                    book.AuthorMetadata = fullBook.AuthorMetadata.Value;
-                    book.BookFiles = fullBook.BookFiles;
-                    book.Editions = new List<Edition> { edition };
+                    var issue = new Issue();
+                    issue.UseMetadataFrom(fullBook);
+                    issue.UseDbFieldsFrom(fullBook);
+                    issue.Series.Value.UseMetadataFrom(fullBook.Series.Value);
+                    issue.Series.Value.UseDbFieldsFrom(fullBook.Series.Value);
+                    issue.Series.Value.Metadata = fullBook.SeriesMetadata.Value;
+                    issue.SeriesMetadata = fullBook.SeriesMetadata.Value;
+                    issue.ComicFiles = fullBook.ComicFiles;
 
                     if (fullBook.SeriesLinks.IsLoaded)
                     {
-                        book.SeriesLinks = fullBook.SeriesLinks.Value.Select(l => new SeriesBookLink
+                        issue.SeriesLinks = fullBook.SeriesLinks.Value.Select(l => new SeriesGroupLink
                         {
-                            Book = book,
-                            Series = new Series
+                            Issue = issue,
+                            SeriesGroup = new SeriesGroup
                             {
-                                ForeignSeriesId = l.Series.Value.ForeignSeriesId,
-                                Title = l.Series.Value.Title,
-                                Description = l.Series.Value.Description,
-                                Numbered = l.Series.Value.Numbered,
-                                WorkCount = l.Series.Value.WorkCount,
-                                PrimaryWorkCount = l.Series.Value.PrimaryWorkCount
+                                ForeignSeriesGroupId = l.SeriesGroup.Value.ForeignSeriesGroupId,
+                                Title = l.SeriesGroup.Value.Title,
+                                Description = l.SeriesGroup.Value.Description,
+                                Numbered = l.SeriesGroup.Value.Numbered,
+                                WorkCount = l.SeriesGroup.Value.WorkCount,
+                                PrimaryWorkCount = l.SeriesGroup.Value.PrimaryWorkCount
                             },
                             IsPrimary = l.IsPrimary,
                             Position = l.Position,
@@ -82,18 +75,15 @@ namespace NzbDrone.Core.Parser.Model
                     }
                     else
                     {
-                        book.SeriesLinks = fullBook.SeriesLinks;
+                        issue.SeriesLinks = fullBook.SeriesLinks;
                     }
 
-                    edition.Book = book;
-
-                    Edition = edition;
+                    Issue = issue;
 
                     foreach (var localTrack in LocalBooks)
                     {
-                        localTrack.Edition = edition;
-                        localTrack.Book = book;
-                        localTrack.Author = book.Author.Value;
+                        localTrack.Issue = issue;
+                        localTrack.Series = issue.Series.Value;
                         localTrack.PartCount = LocalBooks.Count;
                     }
                 }
@@ -101,9 +91,8 @@ namespace NzbDrone.Core.Parser.Model
                 {
                     foreach (var localTrack in LocalBooks)
                     {
-                        localTrack.Edition = Edition;
-                        localTrack.Book = Edition.Book.Value;
-                        localTrack.Author = Edition.Book.Value.Author.Value;
+                        localTrack.Issue = Issue;
+                        localTrack.Series = Issue.Series.Value;
                         localTrack.PartCount = LocalBooks.Count;
                     }
                 }

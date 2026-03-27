@@ -7,16 +7,16 @@ using NzbDrone.Core.Test.Framework;
 namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
 {
     [TestFixture]
-    public class GetAuthorFixture : CoreTest<ParsingService>
+    public class GetSeriesFixture : CoreTest<ParsingService>
     {
         [Test]
         public void should_use_passed_in_title_when_it_cannot_be_parsed()
         {
             const string title = "30 Rock";
 
-            Subject.GetAuthor(title);
+            Subject.GetSeries(title);
 
-            Mocker.GetMock<IAuthorService>()
+            Mocker.GetMock<ISeriesService>()
                   .Verify(s => s.FindByName(title), Times.Once());
         }
 
@@ -25,10 +25,10 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         {
             const string title = "30 Rock - Get Some [FLAC]";
 
-            Subject.GetAuthor(title);
+            Subject.GetSeries(title);
 
-            Mocker.GetMock<IAuthorService>()
-                  .Verify(s => s.FindByName(Parser.Parser.ParseBookTitle(title).AuthorName), Times.Once());
+            Mocker.GetMock<ISeriesService>()
+                  .Verify(s => s.FindByName(Parser.Parser.ParseBookTitle(title).SeriesName), Times.Once());
         }
     }
 }

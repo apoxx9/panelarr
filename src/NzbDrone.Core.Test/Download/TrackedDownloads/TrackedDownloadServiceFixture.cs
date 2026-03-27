@@ -27,9 +27,9 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
                     new EntityHistory()
                     {
                          DownloadId = "35238",
-                         SourceTitle = "Audio Author - Audio Book [2018 - FLAC]",
-                         AuthorId = 5,
-                         BookId = 4,
+                         SourceTitle = "Audio Series - Audio Issue [2018 - FLAC]",
+                         SeriesId = 5,
+                         IssueId = 4,
                     }
                 });
         }
@@ -41,17 +41,17 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var remoteBook = new RemoteBook
             {
-                Author = new Author() { Id = 5 },
-                Books = new List<Book> { new Book { Id = 4 } },
+                Series = new Series() { Id = 5 },
+                Books = new List<Issue> { new Issue { Id = 4 } },
                 ParsedBookInfo = new ParsedBookInfo()
                 {
-                    BookTitle = "Audio Book",
-                    AuthorName = "Audio Author"
+                    IssueTitle = "Audio Issue",
+                    SeriesName = "Audio Series"
                 }
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.Is<ParsedBookInfo>(i => i.BookTitle == "Audio Book" && i.AuthorName == "Audio Author"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
+                  .Setup(s => s.Map(It.Is<ParsedBookInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
                   .Returns(remoteBook);
 
             var client = new DownloadClientDefinition()
@@ -76,8 +76,8 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             trackedDownload.Should().NotBeNull();
             trackedDownload.RemoteBook.Should().NotBeNull();
-            trackedDownload.RemoteBook.Author.Should().NotBeNull();
-            trackedDownload.RemoteBook.Author.Id.Should().Be(5);
+            trackedDownload.RemoteBook.Series.Should().NotBeNull();
+            trackedDownload.RemoteBook.Series.Id.Should().Be(5);
             trackedDownload.RemoteBook.Books.First().Id.Should().Be(4);
         }
 
@@ -88,17 +88,17 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var remoteBook = new RemoteBook
             {
-                Author = new Author() { Id = 5 },
-                Books = new List<Book> { new Book { Id = 4 } },
+                Series = new Series() { Id = 5 },
+                Books = new List<Issue> { new Issue { Id = 4 } },
                 ParsedBookInfo = new ParsedBookInfo()
                 {
-                    BookTitle = "Audio Book",
-                    AuthorName = "Audio Author"
+                    IssueTitle = "Audio Issue",
+                    SeriesName = "Audio Series"
                 }
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.Is<ParsedBookInfo>(i => i.BookTitle == "Audio Book" && i.AuthorName == "Audio Author"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
+                  .Setup(s => s.Map(It.Is<ParsedBookInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
                   .Returns(remoteBook);
 
             var client = new DownloadClientDefinition()
@@ -109,7 +109,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var item = new DownloadClientItem()
             {
-                Title = "Audio Author - Audio Book [2018 - FLAC]",
+                Title = "Audio Series - Audio Issue [2018 - FLAC]",
                 DownloadId = "35238",
                 DownloadClientInfo = new DownloadClientItemClientInfo
                 {
@@ -123,15 +123,15 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             var trackedDownload = Subject.TrackDownload(client, item);
             Subject.GetTrackedDownloads().Should().HaveCount(1);
 
-            // simulate deletion - book no longer maps
+            // simulate deletion - issue no longer maps
             Mocker.GetMock<IParsingService>()
-                .Setup(s => s.Map(It.Is<ParsedBookInfo>(i => i.BookTitle == "Audio Book" && i.AuthorName == "Audio Author"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
+                .Setup(s => s.Map(It.Is<ParsedBookInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
                 .Returns(default(RemoteBook));
 
             // handle deletion event
-            Subject.Handle(new BookInfoRefreshedEvent(remoteBook.Author, new List<Book>(), new List<Book>(), remoteBook.Books));
+            Subject.Handle(new BookInfoRefreshedEvent(remoteBook.Series, new List<Issue>(), new List<Issue>(), remoteBook.Books));
 
-            // verify download has null remote book
+            // verify download has null remote issue
             var trackedDownloads = Subject.GetTrackedDownloads();
             trackedDownloads.Should().HaveCount(1);
             trackedDownloads.First().RemoteBook.Should().BeNull();
@@ -144,11 +144,11 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var remoteEpisode = new RemoteBook
             {
-                Author = new Author() { Id = 5 },
-                Books = new List<Book> { new Book { Id = 4 } },
+                Series = new Series() { Id = 5 },
+                Books = new List<Issue> { new Issue { Id = 4 } },
                 ParsedBookInfo = new ParsedBookInfo()
                 {
-                    BookTitle = "TV Series"
+                    IssueTitle = "TV SeriesGroup"
                 }
             };
 
@@ -168,7 +168,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var item = new DownloadClientItem()
             {
-                Title = "TV Series - S01E01",
+                Title = "TV SeriesGroup - S01E01",
                 DownloadId = "12345",
                 DownloadClientInfo = new DownloadClientItemClientInfo
                 {
@@ -186,7 +186,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
                   .Setup(s => s.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<int>(), It.IsAny<List<int>>()))
                   .Returns(default(RemoteBook));
 
-            Subject.Handle(new BookInfoRefreshedEvent(remoteEpisode.Author, new List<Book>(), new List<Book>(), remoteEpisode.Books));
+            Subject.Handle(new BookInfoRefreshedEvent(remoteEpisode.Series, new List<Issue>(), new List<Issue>(), remoteEpisode.Books));
 
             var trackedDownloads = Subject.GetTrackedDownloads();
             trackedDownloads.Should().HaveCount(1);
@@ -200,11 +200,11 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var remoteEpisode = new RemoteBook
             {
-                Author = new Author() { Id = 5 },
-                Books = new List<Book> { new Book { Id = 4 } },
+                Series = new Series() { Id = 5 },
+                Books = new List<Issue> { new Issue { Id = 4 } },
                 ParsedBookInfo = new ParsedBookInfo()
                 {
-                    BookTitle = "TV Series",
+                    IssueTitle = "TV SeriesGroup",
                 }
             };
 
@@ -224,7 +224,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var item = new DownloadClientItem()
             {
-                Title = "TV Series - S01E01",
+                Title = "TV SeriesGroup - S01E01",
                 DownloadId = "12345",
                 DownloadClientInfo = new DownloadClientItemClientInfo
                 {
@@ -242,7 +242,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
                   .Setup(s => s.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<int>(), It.IsAny<List<int>>()))
                   .Returns(default(RemoteBook));
 
-            Subject.Handle(new AuthorDeletedEvent(remoteEpisode.Author, true, true));
+            Subject.Handle(new SeriesDeletedEvent(remoteEpisode.Series, true, true));
 
             var trackedDownloads = Subject.GetTrackedDownloads();
             trackedDownloads.Should().HaveCount(1);

@@ -127,7 +127,7 @@ export const actionHandlers = handleThunks({
     const newAuthor = getNewAuthor(_.cloneDeep(itemToAdd.author), payload);
 
     const promise = createAjaxRequest({
-      url: '/author',
+      url: '/series',
       method: 'POST',
       dataType: 'json',
       contentType: 'application/json',
@@ -166,7 +166,7 @@ export const actionHandlers = handleThunks({
     const newBook = getNewBook(_.cloneDeep(itemToAdd.book), payload);
 
     const promise = createAjaxRequest({
-      url: '/book',
+      url: '/issue',
       method: 'POST',
       dataType: 'json',
       contentType: 'application/json',

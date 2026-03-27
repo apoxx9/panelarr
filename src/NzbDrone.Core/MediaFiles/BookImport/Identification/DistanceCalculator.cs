@@ -6,17 +6,16 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Calibre;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Identification
+namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 {
     public static class DistanceCalculator
     {
         private static readonly Logger Logger = NzbDroneLogger.GetLogger(typeof(DistanceCalculator));
 
-        public static readonly List<string> VariousAuthorIds = new List<string> { "89ad4ac3-39f7-470e-963a-56509c546377" };
+        public static readonly List<string> VariousSeriesIds = new List<string> { "89ad4ac3-39f7-470e-963a-56509c546377" };
 
         private static readonly RegexReplace StripSeriesRegex = new RegexReplace(@"\([^\)].+?\)$", string.Empty, RegexOptions.Compiled);
 
@@ -26,83 +25,59 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
 
         private static readonly List<string> AudiobookFormats = new List<string> { "Audiobook", "Audio CD", "Audio Cassette", "Audible Audio", "CD-ROM", "MP3 CD" };
 
-        public static Distance BookDistance(List<LocalBook> localTracks, Edition edition)
+        public static Distance IssueDistance(List<LocalBook> localTracks, Issue issue)
         {
             var dist = new Distance();
 
             // the most common list of authors reported by a file
-            var fileAuthors = localTracks.Select(x => x.FileTrackInfo.Authors.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
+            var fileSeriess = localTracks.Select(x => x.FileTrackInfo.Seriess.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
                 .GroupBy(x => x.ConcatToString())
                 .OrderByDescending(x => x.Count())
                 .First()
                 .First();
 
-            var authors = GetAuthorVariants(fileAuthors);
+            var authors = GetSeriesVariants(fileSeriess);
 
-            dist.AddString("author", authors, edition.Book.Value.AuthorMetadata.Value.Name);
-            Logger.Trace("author: '{0}' vs '{1}'; {2}", authors.ConcatToString("' or '"), edition.Book.Value.AuthorMetadata.Value.Name, dist.NormalizedDistance());
+            dist.AddString("author", authors, issue.SeriesMetadata.Value.Name);
+            Logger.Trace("author: '{0}' vs '{1}'; {2}", authors.ConcatToString("' or '"), issue.SeriesMetadata.Value.Name, dist.NormalizedDistance());
 
-            var title = localTracks.MostCommon(x => x.FileTrackInfo.BookTitle) ?? "";
-            var titleOptions = new List<string> { edition.Title };
+            var title = localTracks.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
+            var titleOptions = new List<string> { issue.Title };
             if (titleOptions[0].Contains("#"))
             {
                 titleOptions.Add(StripSeriesRegex.Replace(titleOptions[0]));
             }
 
-            var (maintitle, _) = edition.Title.SplitBookTitle(edition.Book.Value.AuthorMetadata.Value.Name);
+            var (maintitle, _) = issue.Title.SplitBookTitle(issue.SeriesMetadata.Value.Name);
             if (!titleOptions.Contains(maintitle))
             {
                 titleOptions.Add(maintitle);
             }
 
-            if (edition.Book.Value.SeriesLinks?.Value?.Any() ?? false)
+            if (issue.SeriesLinks?.Value?.Any() ?? false)
             {
-                foreach (var l in edition.Book.Value.SeriesLinks.Value)
+                foreach (var l in issue.SeriesLinks.Value)
                 {
-                    if (l.Series?.Value?.Title?.IsNotNullOrWhiteSpace() ?? false)
+                    if (l.SeriesGroup?.Value?.Title?.IsNotNullOrWhiteSpace() ?? false)
                     {
-                        titleOptions.Add($"{l.Series.Value.Title} {l.Position} {edition.Title}");
-                        titleOptions.Add($"{l.Series.Value.Title} Book {l.Position} {edition.Title}");
-                        titleOptions.Add($"{edition.Title} {l.Series.Value.Title} {l.Position}");
-                        titleOptions.Add($"{edition.Title} {l.Series.Value.Title} Book {l.Position}");
+                        titleOptions.Add($"{l.SeriesGroup.Value.Title} {l.Position} {issue.Title}");
+                        titleOptions.Add($"{l.SeriesGroup.Value.Title} Issue {l.Position} {issue.Title}");
+                        titleOptions.Add($"{issue.Title} {l.SeriesGroup.Value.Title} {l.Position}");
+                        titleOptions.Add($"{issue.Title} {l.SeriesGroup.Value.Title} Issue {l.Position}");
                     }
                 }
             }
 
             var fileTitles = new[] { title, CleanTitleCruft.Replace(title) }.Distinct().ToList();
 
-            dist.AddString("book", fileTitles, titleOptions);
-            Logger.Trace("book: '{0}' vs '{1}'; {2}", fileTitles.ConcatToString("' or '"), titleOptions.ConcatToString("' or '"), dist.NormalizedDistance());
-
-            var isbn = localTracks.MostCommon(x => x.FileTrackInfo.Isbn);
-            if (isbn.IsNotNullOrWhiteSpace() && edition.Isbn13.IsNotNullOrWhiteSpace())
-            {
-                dist.AddBool("isbn", isbn != edition.Isbn13);
-                Logger.Trace("isbn: '{0}' vs '{1}'; {2}", isbn, edition.Isbn13, dist.NormalizedDistance());
-            }
-            else if (isbn.IsNullOrWhiteSpace() != edition.Isbn13.IsNullOrWhiteSpace())
-            {
-                dist.AddBool("isbn_missing", true);
-                Logger.Trace("isbn: '{0}' vs '{1}'; {2}", isbn, edition.Isbn13, dist.NormalizedDistance());
-            }
-
-            var asin = localTracks.MostCommon(x => x.FileTrackInfo.Asin);
-            if (asin.IsNotNullOrWhiteSpace() && edition.Asin.IsNotNullOrWhiteSpace())
-            {
-                dist.AddBool("asin", asin != edition.Asin);
-                Logger.Trace("asin: '{0}' vs '{1}'; {2}", asin, edition.Asin, dist.NormalizedDistance());
-            }
-            else if (asin.IsNullOrWhiteSpace() != edition.Asin.IsNullOrWhiteSpace())
-            {
-                dist.AddBool("asin_missing", true);
-                Logger.Trace("asin: '{0}' vs '{1}'; {2}", asin, edition.Asin, dist.NormalizedDistance());
-            }
+            dist.AddString("issue", fileTitles, titleOptions);
+            Logger.Trace("issue: '{0}' vs '{1}'; {2}", fileTitles.ConcatToString("' or '"), titleOptions.ConcatToString("' or '"), dist.NormalizedDistance());
 
             // Year
             var localYear = localTracks.MostCommon(x => x.FileTrackInfo.Year);
-            if (localYear > 0 && edition.ReleaseDate.HasValue)
+            if (localYear > 0 && issue.ReleaseDate.HasValue)
             {
-                var bookYear = edition.ReleaseDate?.Year ?? 0;
+                var bookYear = issue.ReleaseDate?.Year ?? 0;
                 if (localYear == bookYear)
                 {
                     dist.Add("year", 0.0);
@@ -115,60 +90,22 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
                     dist.AddRatio("year", diff, diff_max);
                 }
 
-                Logger.Trace($"year: {localYear} vs {edition.ReleaseDate?.Year}; {dist.NormalizedDistance()}");
-            }
-
-            // Language - only if set for both the local book and remote edition
-            var localLanguage = localTracks.MostCommon(x => x.FileTrackInfo.Language).CanonicalizeLanguage();
-            var editionLanguage = edition.Language.CanonicalizeLanguage();
-            if (localLanguage.IsNotNullOrWhiteSpace() && editionLanguage.IsNotNullOrWhiteSpace())
-            {
-                dist.AddBool("language", localLanguage != editionLanguage);
-                Logger.Trace($"language: {localLanguage} vs {editionLanguage}; {dist.NormalizedDistance()}");
-            }
-
-            // Publisher - only if set for both the local book and remote edition
-            var localPublisher = localTracks.MostCommon(x => x.FileTrackInfo.Publisher);
-            var editionPublisher = edition.Publisher;
-            if (localPublisher.IsNotNullOrWhiteSpace() && editionPublisher.IsNotNullOrWhiteSpace())
-            {
-                dist.AddString("publisher", localPublisher, editionPublisher);
-                Logger.Trace($"publisher: {localPublisher} vs {editionPublisher}; {dist.NormalizedDistance()}");
-            }
-
-            // try to tilt it towards the correct "type" of release
-            var isAudio = MediaFileExtensions.AudioExtensions.Contains(localTracks.First().Path.GetPathExtension());
-
-            if (edition.Format.IsNotNullOrWhiteSpace())
-            {
-                if (!isAudio)
-                {
-                    // text books should prefer ebook formats
-                    dist.AddBool("ebook_format", !EbookFormats.Contains(edition.Format));
-
-                    // text books should not match audio entries
-                    dist.AddBool("wrong_format", AudiobookFormats.Contains(edition.Format));
-                }
-                else
-                {
-                    // audio books should prefer audio formats
-                    dist.AddBool("audio_format", !AudiobookFormats.Contains(edition.Format));
-                }
+                Logger.Trace($"year: {localYear} vs {issue.ReleaseDate?.Year}; {dist.NormalizedDistance()}");
             }
 
             return dist;
         }
 
-        public static List<string> GetAuthorVariants(List<string> fileAuthors)
+        public static List<string> GetSeriesVariants(List<string> fileSeriess)
         {
-            var authors = new List<string>(fileAuthors);
+            var authors = new List<string>(fileSeriess);
 
-            if (fileAuthors.Count == 1)
+            if (fileSeriess.Count == 1)
             {
-                authors.AddRange(SplitAuthor(fileAuthors[0]));
+                authors.AddRange(SplitSeries(fileSeriess[0]));
             }
 
-            foreach (var author in fileAuthors)
+            foreach (var author in fileSeriess)
             {
                 if (author.Contains(','))
                 {
@@ -183,7 +120,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
             return authors;
         }
 
-        private static List<string> SplitAuthor(string input)
+        private static List<string> SplitSeries(string input)
         {
             var seps = new[] { ';', '/' };
             foreach (var sep in seps)
@@ -202,7 +139,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Identification
                     var result = new List<string>();
                     foreach (var s in input.Split(sep).Select(x => x.Trim()))
                     {
-                        var s2 = SplitAuthor(s);
+                        var s2 = SplitSeries(s);
                         if (s2.Any())
                         {
                             result.AddRange(s2);

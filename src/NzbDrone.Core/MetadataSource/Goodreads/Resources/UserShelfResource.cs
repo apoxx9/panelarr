@@ -21,13 +21,13 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         public string Name { get; private set; }
 
         /// <summary>
-        /// The number of books on this user shelf.
+        /// The number of issues on this user shelf.
         /// </summary>
-        public int BookCount { get; private set; }
+        public int IssueCount { get; private set; }
 
         /// <summary>
         /// Determines if this shelf is exclusive or not.
-        /// A single book can only be on one exclusive shelf.
+        /// A single issue can only be on one exclusive shelf.
         /// </summary>
         public bool IsExclusive { get; private set; }
 
@@ -80,7 +80,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
         {
             Id = element.ElementAsLong("id");
             Name = element.ElementAsString("name");
-            BookCount = element.ElementAsInt("book_count");
+            IssueCount = element.ElementAsInt("book_count");
             Description = element.ElementAsString("description");
             Sort = element.ElementAsString("sort");
             IsExclusive = element.ElementAsBool("exclusive_flag");

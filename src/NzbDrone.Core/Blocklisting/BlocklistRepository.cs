@@ -9,7 +9,7 @@ namespace NzbDrone.Core.Blocklisting
     {
         List<Blocklist> BlocklistedByTitle(int authorId, string sourceTitle);
         List<Blocklist> BlocklistedByTorrentInfoHash(int authorId, string torrentInfoHash);
-        List<Blocklist> BlocklistedByAuthor(int authorId);
+        List<Blocklist> BlocklistedBySeries(int authorId);
     }
 
     public class BlocklistRepository : BasicRepository<Blocklist>, IBlocklistRepository
@@ -21,27 +21,27 @@ namespace NzbDrone.Core.Blocklisting
 
         public List<Blocklist> BlocklistedByTitle(int authorId, string sourceTitle)
         {
-            return Query(e => e.AuthorId == authorId && e.SourceTitle.Contains(sourceTitle));
+            return Query(e => e.SeriesId == authorId && e.SourceTitle.Contains(sourceTitle));
         }
 
         public List<Blocklist> BlocklistedByTorrentInfoHash(int authorId, string torrentInfoHash)
         {
-            return Query(e => e.AuthorId == authorId && e.TorrentInfoHash.Contains(torrentInfoHash));
+            return Query(e => e.SeriesId == authorId && e.TorrentInfoHash.Contains(torrentInfoHash));
         }
 
-        public List<Blocklist> BlocklistedByAuthor(int authorId)
+        public List<Blocklist> BlocklistedBySeries(int authorId)
         {
-            return Query(b => b.AuthorId == authorId);
+            return Query(b => b.SeriesId == authorId);
         }
 
         protected override SqlBuilder PagedBuilder() => new SqlBuilder(_database.DatabaseType)
-            .Join<Blocklist, Author>((b, m) => b.AuthorId == m.Id)
-            .Join<Author, AuthorMetadata>((l, r) => l.AuthorMetadataId == r.Id);
-        protected override IEnumerable<Blocklist> PagedQuery(SqlBuilder builder) => _database.QueryJoined<Blocklist, Author, AuthorMetadata>(builder,
+            .Join<Blocklist, Series>((b, m) => b.SeriesId == m.Id)
+            .Join<Series, SeriesMetadata>((l, r) => l.SeriesMetadataId == r.Id);
+        protected override IEnumerable<Blocklist> PagedQuery(SqlBuilder builder) => _database.QueryJoined<Blocklist, Series, SeriesMetadata>(builder,
             (bl, author, metadata) =>
                     {
                         author.Metadata = metadata;
-                        bl.Author = author;
+                        bl.Series = author;
                         return bl;
                     });
     }

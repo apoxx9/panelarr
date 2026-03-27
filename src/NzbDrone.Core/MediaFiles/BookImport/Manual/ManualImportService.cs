@@ -16,17 +16,16 @@ using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.RootFolders;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Manual
+namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
 {
     public interface IManualImportService
     {
-        List<ManualImportItem> GetMediaFiles(string path, string downloadId, Author author, FilterFilesType filter, bool replaceExistingFiles);
+        List<ManualImportItem> GetMediaFiles(string path, string downloadId, Series author, FilterFilesType filter, bool replaceExistingFiles);
         List<ManualImportItem> UpdateItems(List<ManualImportItem> item);
     }
 
@@ -37,10 +36,8 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
         private readonly IRootFolderService _rootFolderService;
         private readonly IDiskScanService _diskScanService;
         private readonly IMakeImportDecision _importDecisionMaker;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IBookService _bookService;
-        private readonly IEditionService _editionService;
-        private readonly IProvideBookInfo _bookInfo;
         private readonly IMetadataTagService _metadataTagService;
         private readonly IImportApprovedBooks _importApprovedBooks;
         private readonly ICustomFormatCalculationService _formatCalculator;
@@ -55,10 +52,8 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
                                    IRootFolderService rootFolderService,
                                    IDiskScanService diskScanService,
                                    IMakeImportDecision importDecisionMaker,
-                                   IAuthorService authorService,
+                                   ISeriesService authorService,
                                    IBookService bookService,
-                                   IEditionService editionService,
-                                   IProvideBookInfo bookInfo,
                                    IMetadataTagService metadataTagService,
                                    IImportApprovedBooks importApprovedBooks,
                                    ICustomFormatCalculationService formatCalculator,
@@ -75,8 +70,6 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
             _importDecisionMaker = importDecisionMaker;
             _authorService = authorService;
             _bookService = bookService;
-            _editionService = editionService;
-            _bookInfo = bookInfo;
             _metadataTagService = metadataTagService;
             _importApprovedBooks = importApprovedBooks;
             _formatCalculator = formatCalculator;
@@ -87,7 +80,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
             _logger = logger;
         }
 
-        public List<ManualImportItem> GetMediaFiles(string path, string downloadId, Author author, FilterFilesType filter, bool replaceExistingFiles)
+        public List<ManualImportItem> GetMediaFiles(string path, string downloadId, Series author, FilterFilesType filter, bool replaceExistingFiles)
         {
             if (downloadId.IsNotNullOrWhiteSpace())
             {
@@ -121,7 +114,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
                     NewDownload = true,
                     SingleRelease = false,
                     IncludeExisting = !replaceExistingFiles,
-                    AddNewAuthors = false,
+                    AddNewSeriess = false,
                     KeepAllEditions = true
                 };
 
@@ -134,11 +127,11 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
             return ProcessFolder(path, downloadId, author, filter, replaceExistingFiles);
         }
 
-        private List<ManualImportItem> ProcessFolder(string folder, string downloadId, Author author, FilterFilesType filter, bool replaceExistingFiles)
+        private List<ManualImportItem> ProcessFolder(string folder, string downloadId, Series author, FilterFilesType filter, bool replaceExistingFiles)
         {
             DownloadClientItem downloadClientItem = null;
             var directoryInfo = new DirectoryInfo(folder);
-            author = author ?? _parsingService.GetAuthor(directoryInfo.Name);
+            author = author ?? _parsingService.GetSeries(directoryInfo.Name);
 
             if (downloadId.IsNotNullOrWhiteSpace())
             {
@@ -147,14 +140,14 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
 
                 if (author == null)
                 {
-                    author = trackedDownload?.RemoteBook?.Author;
+                    author = trackedDownload?.RemoteBook?.Series;
                 }
             }
 
             var authorFiles = _diskScanService.GetBookFiles(folder).ToList();
             var idOverrides = new IdentificationOverrides
             {
-                Author = author
+                Series = author
             };
             var itemInfo = new ImportDecisionMakerInfo
             {
@@ -167,7 +160,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
                 NewDownload = true,
                 SingleRelease = false,
                 IncludeExisting = !replaceExistingFiles,
-                AddNewAuthors = false,
+                AddNewSeriess = false,
                 KeepAllEditions = true
             };
 
@@ -190,7 +183,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
         public List<ManualImportItem> UpdateItems(List<ManualImportItem> items)
         {
             var replaceExistingFiles = items.All(x => x.ReplaceExistingFiles);
-            var groupedItems = items.Where(x => !x.AdditionalFile).GroupBy(x => x.Book?.Id);
+            var groupedItems = items.Where(x => !x.AdditionalFile).GroupBy(x => x.Issue?.Id);
             _logger.Debug($"UpdateItems, {groupedItems.Count()} groups, replaceExisting {replaceExistingFiles}");
 
             var result = new List<ManualImportItem>();
@@ -204,9 +197,8 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
                 var files = group.Select(x => _diskProvider.GetFileInfo(x.Path)).ToList();
                 var idOverride = new IdentificationOverrides
                 {
-                    Author = group.First().Author,
-                    Book = group.First().Book,
-                    Edition = group.First().Edition
+                    Series = group.First().Series,
+                    Issue = group.First().Issue
                 };
                 var config = new ImportDecisionMakerConfig
                 {
@@ -214,7 +206,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
                     NewDownload = true,
                     SingleRelease = true,
                     IncludeExisting = !replaceExistingFiles,
-                    AddNewAuthors = false
+                    AddNewSeriess = false
                 };
                 var decisions = _importDecisionMaker.GetImportDecisions(files, idOverride, null, config);
 
@@ -229,15 +221,14 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
                     var item = pair.Item;
                     var decision = pair.Decision;
 
-                    if (decision.Item.Author != null)
+                    if (decision.Item.Series != null)
                     {
-                        item.Author = decision.Item.Author;
+                        item.Series = decision.Item.Series;
                     }
 
-                    if (decision.Item.Book != null)
+                    if (decision.Item.Issue != null)
                     {
-                        item.Book = decision.Item.Book;
-                        item.Edition = decision.Item.Edition;
+                        item.Issue = decision.Item.Issue;
                     }
 
                     if (item.Quality?.Quality == Quality.Unknown)
@@ -272,17 +263,16 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
             item.Name = Path.GetFileNameWithoutExtension(decision.Item.Path);
             item.DownloadId = downloadId;
 
-            if (decision.Item.Author != null)
+            if (decision.Item.Series != null)
             {
-                item.Author = decision.Item.Author;
+                item.Series = decision.Item.Series;
 
                 item.CustomFormats = _formatCalculator.ParseCustomFormat(decision.Item);
             }
 
-            if (decision.Item.Book != null)
+            if (decision.Item.Issue != null)
             {
-                item.Book = decision.Item.Book;
-                item.Edition = decision.Item.Edition;
+                item.Issue = decision.Item.Issue;
             }
 
             item.Quality = decision.Item.Quality;
@@ -303,34 +293,19 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
 
             var imported = new List<ImportResult>();
             var importedTrackedDownload = new List<ManuallyImportedFile>();
-            var bookIds = message.Files.GroupBy(e => e.BookId).ToList();
+            var bookIds = message.Files.GroupBy(e => e.IssueId).ToList();
             var fileCount = 0;
 
             foreach (var importBookId in bookIds)
             {
                 var bookImportDecisions = new List<ImportDecision<LocalBook>>();
 
-                // turn off anyReleaseOk if specified
-                if (importBookId.First().DisableReleaseSwitching)
-                {
-                    var book = _bookService.GetBook(importBookId.First().BookId);
-                    book.AnyEditionOk = false;
-                    _bookService.UpdateBook(book);
-                }
-
                 foreach (var file in importBookId)
                 {
                     _logger.ProgressTrace("Processing file {0} of {1}", fileCount + 1, message.Files.Count);
 
-                    var author = _authorService.GetAuthor(file.AuthorId);
-                    var book = _bookService.GetBook(file.BookId);
-
-                    var edition = _editionService.GetEditionByForeignEditionId(file.ForeignEditionId);
-                    if (edition == null)
-                    {
-                        var tuple = _bookInfo.GetBookInfo(book.ForeignBookId);
-                        edition = tuple.Item2.Editions.Value.SingleOrDefault(x => x.ForeignEditionId == file.ForeignEditionId);
-                    }
+                    var author = _authorService.GetSeries(file.SeriesId);
+                    var issue = _bookService.GetBook(file.IssueId);
 
                     var fileRootFolder = _rootFolderService.GetBestRootFolder(file.Path);
                     var fileInfo = _diskProvider.GetFileInfo(file.Path);
@@ -347,9 +322,8 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
                         Modified = fileInfo.LastWriteTimeUtc,
                         Quality = file.Quality,
                         IndexerFlags = (IndexerFlags)file.IndexerFlags,
-                        Author = author,
-                        Book = book,
-                        Edition = edition
+                        Series = author,
+                        Issue = issue
                     };
 
                     var importDecision = new ImportDecision<LocalBook>(localTrack);
@@ -410,7 +384,7 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
                 if (allItemsImported)
                 {
                     trackedDownload.State = TrackedDownloadState.Imported;
-                    _eventAggregator.PublishEvent(new DownloadCompletedEvent(trackedDownload, imported.First().ImportDecision.Item.Author.Id));
+                    _eventAggregator.PublishEvent(new DownloadCompletedEvent(trackedDownload, imported.First().ImportDecision.Item.Series.Id));
                 }
             }
         }

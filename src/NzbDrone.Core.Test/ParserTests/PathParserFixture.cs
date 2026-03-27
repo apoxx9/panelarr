@@ -24,10 +24,10 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase(@"C:\Test\Unsorted\The.Big.Bang.Theory.S01E01.720p.HDTV\tbbt101.avi", 1, 1)]
         [TestCase(@"C:\Test\Unsorted\Terminator.The.Sarah.Connor.Chronicles.S02E19.720p.BluRay.x264-SiNNERS-RP\ba27283b17c00d01193eacc02a8ba98eeb523a76.mkv", 2, 19)]
         [TestCase(@"C:\Test\Unsorted\Terminator.The.Sarah.Connor.Chronicles.S02E18.720p.BluRay.x264-SiNNERS-RP\45a55debe3856da318cc35882ad07e43cd32fd15.mkv", 2, 18)]
-        [TestCase(@"C:\Test\Series\Season 01\01 Pilot (1080p HD).mkv", 1, 1)]
-        [TestCase(@"C:\Test\Series\Season 01\1 Pilot (1080p HD).mkv", 1, 1)]
-        [TestCase(@"C:\Test\Series\Season 1\02 Honor Thy Father (1080p HD).m4v", 1, 2)]
-        [TestCase(@"C:\Test\Series\Season 1\2 Honor Thy Father (1080p HD).m4v", 1, 2)]
+        [TestCase(@"C:\Test\SeriesGroup\Season 01\01 Pilot (1080p HD).mkv", 1, 1)]
+        [TestCase(@"C:\Test\SeriesGroup\Season 01\1 Pilot (1080p HD).mkv", 1, 1)]
+        [TestCase(@"C:\Test\SeriesGroup\Season 1\02 Honor Thy Father (1080p HD).m4v", 1, 2)]
+        [TestCase(@"C:\Test\SeriesGroup\Season 1\2 Honor Thy Father (1080p HD).m4v", 1, 2)]
 
         //        [TestCase(@"C:\CSI.NY.S02E04.720p.WEB-DL.DD5.1.H.264\73696S02-04.mkv", 2, 4)] //Gets treated as S01E04 (because it gets parsed as anime)
         public void should_parse_from_path(string path, int season, int episode)

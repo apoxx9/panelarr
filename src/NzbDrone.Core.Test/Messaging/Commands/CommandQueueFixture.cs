@@ -161,8 +161,8 @@ namespace NzbDrone.Core.Test.Messaging.Commands
 
             var newCommandModel = Builder<CommandModel>
                 .CreateNew()
-                .With(c => c.Name = "RefreshAuthor")
-                .With(c => c.Body = new RefreshAuthorCommand())
+                .With(c => c.Name = "RefreshSeries")
+                .With(c => c.Body = new RefreshSeriesCommand())
                 .Build();
 
             Subject.Add(newCommandModel);
@@ -198,8 +198,8 @@ namespace NzbDrone.Core.Test.Messaging.Commands
 
             var newCommandModel = Builder<CommandModel>
                 .CreateNew()
-                .With(c => c.Name = "RefreshAuthor")
-                .With(c => c.Body = new RefreshAuthorCommand())
+                .With(c => c.Name = "RefreshSeries")
+                .With(c => c.Body = new RefreshSeriesCommand())
                 .Build();
 
             Subject.Add(newCommandModel);

@@ -28,7 +28,7 @@ namespace Panelarr.Api.V1.Indexers
         private readonly IMakeDownloadDecision _downloadDecisionMaker;
         private readonly IPrioritizeDownloadDecision _prioritizeDownloadDecision;
         private readonly IDownloadService _downloadService;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IBookService _bookService;
         private readonly IParsingService _parsingService;
         private readonly Logger _logger;
@@ -40,7 +40,7 @@ namespace Panelarr.Api.V1.Indexers
                              IMakeDownloadDecision downloadDecisionMaker,
                              IPrioritizeDownloadDecision prioritizeDownloadDecision,
                              IDownloadService downloadService,
-                             IAuthorService authorService,
+                             ISeriesService authorService,
                              IBookService bookService,
                              IParsingService parsingService,
                              ICacheManager cacheManager,
@@ -78,50 +78,50 @@ namespace Panelarr.Api.V1.Indexers
 
             try
             {
-                if (remoteBook.Author == null)
+                if (remoteBook.Series == null)
                 {
-                    if (release.BookId.HasValue)
+                    if (release.IssueId.HasValue)
                     {
-                        var book = _bookService.GetBook(release.BookId.Value);
+                        var issue = _bookService.GetBook(release.IssueId.Value);
 
-                        remoteBook.Author = _authorService.GetAuthor(book.AuthorId);
-                        remoteBook.Books = new List<Book> { book };
+                        remoteBook.Series = _authorService.GetSeries(issue.SeriesId);
+                        remoteBook.Books = new List<Issue> { issue };
                     }
-                    else if (release.AuthorId.HasValue)
+                    else if (release.SeriesId.HasValue)
                     {
-                        var author = _authorService.GetAuthor(release.AuthorId.Value);
-                        var books = _parsingService.GetBooks(remoteBook.ParsedBookInfo, author);
+                        var author = _authorService.GetSeries(release.SeriesId.Value);
+                        var issues = _parsingService.GetBooks(remoteBook.ParsedBookInfo, author);
 
-                        if (books.Empty())
+                        if (issues.Empty())
                         {
-                            throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to parse books in the release");
+                            throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to parse issues in the release");
                         }
 
-                        remoteBook.Author = author;
-                        remoteBook.Books = books;
+                        remoteBook.Series = author;
+                        remoteBook.Books = issues;
                     }
                     else
                     {
-                        throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to find matching author and books");
+                        throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to find matching author and issues");
                     }
                 }
                 else if (remoteBook.Books.Empty())
                 {
-                    var books = _parsingService.GetBooks(remoteBook.ParsedBookInfo, remoteBook.Author);
+                    var issues = _parsingService.GetBooks(remoteBook.ParsedBookInfo, remoteBook.Series);
 
-                    if (books.Empty() && release.BookId.HasValue)
+                    if (issues.Empty() && release.IssueId.HasValue)
                     {
-                        var book = _bookService.GetBook(release.BookId.Value);
+                        var issue = _bookService.GetBook(release.IssueId.Value);
 
-                        books = new List<Book> { book };
+                        issues = new List<Issue> { issue };
                     }
 
-                    remoteBook.Books = books;
+                    remoteBook.Books = issues;
                 }
 
                 if (remoteBook.Books.Empty())
                 {
-                    throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to parse books in the release");
+                    throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to parse issues in the release");
                 }
 
                 await _downloadService.DownloadReport(remoteBook, release.DownloadClientId);
@@ -145,7 +145,7 @@ namespace Panelarr.Api.V1.Indexers
 
             if (authorId.HasValue)
             {
-                return await GetAuthorReleases(int.Parse(Request.Query["authorId"]));
+                return await GetSeriesReleases(int.Parse(Request.Query["authorId"]));
             }
 
             return await GetRss();
@@ -155,30 +155,30 @@ namespace Panelarr.Api.V1.Indexers
         {
             try
             {
-                var decisions = await _releaseSearchService.BookSearch(bookId, true, true, true);
+                var decisions = await _releaseSearchService.IssueSearch(bookId, true, true, true);
                 var prioritizedDecisions = _prioritizeDownloadDecision.PrioritizeDecisions(decisions);
 
                 return MapDecisions(prioritizedDecisions);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Book search failed");
+                _logger.Error(ex, "Issue search failed");
                 throw new NzbDroneClientException(HttpStatusCode.InternalServerError, ex.Message);
             }
         }
 
-        private async Task<List<ReleaseResource>> GetAuthorReleases(int authorId)
+        private async Task<List<ReleaseResource>> GetSeriesReleases(int authorId)
         {
             try
             {
-                var decisions = await _releaseSearchService.AuthorSearch(authorId, false, true, true);
+                var decisions = await _releaseSearchService.SeriesSearch(authorId, false, true, true);
                 var prioritizedDecisions = _prioritizeDownloadDecision.PrioritizeDecisions(decisions);
 
                 return MapDecisions(prioritizedDecisions);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Author search failed");
+                _logger.Error(ex, "Series search failed");
                 throw new NzbDroneClientException(HttpStatusCode.InternalServerError, ex.Message);
             }
         }

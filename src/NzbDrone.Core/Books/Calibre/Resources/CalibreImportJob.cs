@@ -10,7 +10,7 @@ namespace NzbDrone.Core.Books.Calibre
         [JsonProperty("id")]
         public int JobId { get; set; }
         public string Filename { get; set; }
-        public List<string> Authors { get; set; }
+        public List<string> Seriess { get; set; }
         public string Title { get; set; }
         public List<string> Languages { get; set; }
     }

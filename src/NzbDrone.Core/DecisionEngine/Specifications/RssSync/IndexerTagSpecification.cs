@@ -24,7 +24,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
 
         public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
         {
-            if (subject.Release == null || subject.Author?.Tags == null || subject.Release.IndexerId == 0)
+            if (subject.Release == null || subject.Series?.Tags == null || subject.Release.IndexerId == 0)
             {
                 return Decision.Accept();
             }
@@ -43,11 +43,11 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
             // If indexer has tags, check that at least one of them is present on the series
             var indexerTags = indexer.Tags;
 
-            if (indexerTags.Any() && indexerTags.Intersect(subject.Author.Tags).Empty())
+            if (indexerTags.Any() && indexerTags.Intersect(subject.Series.Tags).Empty())
             {
-                _logger.Debug("Indexer {0} has tags. None of these are present on author {1}. Rejecting", subject.Release.Indexer, subject.Author);
+                _logger.Debug("Indexer {0} has tags. None of these are present on author {1}. Rejecting", subject.Release.Indexer, subject.Series);
 
-                return Decision.Reject("Author tags do not match any of the indexer tags");
+                return Decision.Reject("Series tags do not match any of the indexer tags");
             }
 
             return Decision.Accept();

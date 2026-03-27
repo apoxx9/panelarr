@@ -114,12 +114,12 @@ class BookIndexFooter extends PureComponent {
 
                 <DescriptionList>
                   <DescriptionListItem
-                    title={translate('Authors')}
+                    title={translate('Series')}
                     data={authors.size}
                   />
 
                   <DescriptionListItem
-                    title={translate('Books')}
+                    title={translate('Issues')}
                     data={books}
                   />
 

@@ -113,13 +113,13 @@ export const clearBookFiles = createAction(CLEAR_BOOK_FILES);
 //
 // Helpers
 
-const deleteBookFileHelper = createRemoveItemHandler(section, '/bookFile');
+const deleteBookFileHelper = createRemoveItemHandler(section, '/comicfile');
 
 //
 // Action Handlers
 
 export const actionHandlers = handleThunks({
-  [FETCH_BOOK_FILES]: createFetchHandler(section, '/bookFile'),
+  [FETCH_BOOK_FILES]: createFetchHandler(section, '/comicfile'),
 
   [DELETE_BOOK_FILE]: function(getState, payload, dispatch) {
     const {
@@ -155,7 +155,7 @@ export const actionHandlers = handleThunks({
     dispatch(set({ section, isDeleting: true }));
 
     const promise = createAjaxRequest({
-      url: '/bookFile/bulk',
+      url: '/comicfile/bulk',
       method: 'DELETE',
       dataType: 'json',
       data: JSON.stringify({ bookFileIds })
@@ -217,7 +217,7 @@ export const actionHandlers = handleThunks({
     }
 
     const promise = createAjaxRequest({
-      url: '/bookFile/editor',
+      url: '/comicfile/editor',
       method: 'PUT',
       dataType: 'json',
       data: JSON.stringify(requestData)

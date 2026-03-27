@@ -4,11 +4,11 @@ using NzbDrone.Common.EnvironmentInfo;
 
 namespace NzbDrone.Mono.EnvironmentInfo.VersionAdapters
 {
-    public class IssueFileVersionAdapter : IOsVersionAdapter
+    public class ComicFileVersionAdapter : IOsVersionAdapter
     {
         private readonly IDiskProvider _diskProvider;
 
-        public IssueFileVersionAdapter(IDiskProvider diskProvider)
+        public ComicFileVersionAdapter(IDiskProvider diskProvider)
         {
             _diskProvider = diskProvider;
         }
@@ -20,14 +20,14 @@ namespace NzbDrone.Mono.EnvironmentInfo.VersionAdapters
                 return null;
             }
 
-            var issueFile = _diskProvider.GetFiles("/etc/", false).SingleOrDefault(c => c.EndsWith("/issue"));
+            var comicFile = _diskProvider.GetFiles("/etc/", false).SingleOrDefault(c => c.EndsWith("/issue"));
 
-            if (issueFile == null)
+            if (comicFile == null)
             {
                 return null;
             }
 
-            var fileContent = _diskProvider.ReadAllText(issueFile);
+            var fileContent = _diskProvider.ReadAllText(comicFile);
 
             // Ubuntu 14.04.5 LTS \n \l
             // Ubuntu 16.04.1 LTS \n \l

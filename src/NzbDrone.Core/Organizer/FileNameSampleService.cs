@@ -11,58 +11,51 @@ namespace NzbDrone.Core.Organizer
     {
         SampleResult GetStandardTrackSample(NamingConfig nameSpec);
         SampleResult GetMultiDiscTrackSample(NamingConfig nameSpec);
-        string GetAuthorFolderSample(NamingConfig nameSpec);
+        string GetSeriesFolderSample(NamingConfig nameSpec);
     }
 
     public class FileNameSampleService : IFilenameSampleService
     {
         private readonly IBuildFileNames _buildFileNames;
 
-        private static Author _standardAuthor;
-        private static Book _standardBook;
-        private static Edition _standardEdition;
-        private static BookFile _singleTrackFile;
-        private static BookFile _multiTrackFile;
+        private static Series _standardSeries;
+        private static Issue _standardBook;
+        private static ComicFile _singleTrackFile;
+        private static ComicFile _multiTrackFile;
         private static List<CustomFormat> _customFormats;
 
         public FileNameSampleService(IBuildFileNames buildFileNames)
         {
             _buildFileNames = buildFileNames;
 
-            _standardAuthor = new Author
+            _standardSeries = new Series
             {
-                Metadata = new AuthorMetadata
+                Metadata = new SeriesMetadata
                 {
-                    Name = "The Author Name",
-                    Disambiguation = "US Author",
-                    NameLastFirst = "Last name, First name"
+                    Name = "The Series Name",
+                    Disambiguation = "US Series"
                 }
             };
 
-            var series = new Series
+            var series = new SeriesGroup
             {
-                Title = "Series Title"
+                Title = "SeriesGroup Title"
             };
 
-            var seriesLink = new SeriesBookLink
+            var seriesLink = new SeriesGroupLink
             {
                 Position = "1",
-                Series = series
+                SeriesGroup = series
             };
 
-            _standardBook = new Book
+            _standardBook = new Issue
             {
-                Title = "The Book Title",
+                Title = "The Issue Title",
+                IssueNumber = 42f,
                 ReleaseDate = System.DateTime.Today,
-                Author = _standardAuthor,
-                AuthorMetadata = _standardAuthor.Metadata.Value,
-                SeriesLinks = new List<SeriesBookLink> { seriesLink }
-            };
-
-            _standardEdition = new Edition
-            {
-                Title = "The Edition Title",
-                Book = _standardBook
+                Series = _standardSeries,
+                SeriesMetadata = _standardSeries.Metadata.Value,
+                SeriesLinks = new List<SeriesGroupLink> { seriesLink }
             };
 
             _customFormats = new List<CustomFormat>
@@ -88,26 +81,26 @@ namespace NzbDrone.Core.Organizer
                 AudioSampleRate = 44100
             };
 
-            _singleTrackFile = new BookFile
+            _singleTrackFile = new ComicFile
             {
-                Quality = new QualityModel(Quality.MP3, new Revision(2)),
-                Path = "/music/Author.Name.Book.Name.TrackNum.Track.Title.MP3256.mp3",
-                SceneName = "Author.Name.Book.Name.TrackNum.Track.Title.MP3256",
+                Quality = new QualityModel(Quality.CBZ, new Revision(2)),
+                Path = "/comics/The.Series.Name.042.CBZ",
+                SceneName = "The.Series.Name.042",
                 ReleaseGroup = "RlsGrp",
                 MediaInfo = mediaInfo,
-                Edition = _standardEdition,
+                Issue = _standardBook,
                 Part = 1,
                 PartCount = 1
             };
 
-            _multiTrackFile = new BookFile
+            _multiTrackFile = new ComicFile
             {
-                Quality = new QualityModel(Quality.MP3, new Revision(2)),
-                Path = "/music/Author.Name.Book.Name.TrackNum.Track.Title.MP3256.mp3",
-                SceneName = "Author.Name.Book.Name.TrackNum.Track.Title.MP3256",
+                Quality = new QualityModel(Quality.CBZ, new Revision(2)),
+                Path = "/comics/The.Series.Name.042.CBZ",
+                SceneName = "The.Series.Name.042",
                 ReleaseGroup = "RlsGrp",
                 MediaInfo = mediaInfo,
-                Edition = _standardEdition,
+                Issue = _standardBook,
                 Part = 1,
                 PartCount = 2
             };
@@ -117,10 +110,10 @@ namespace NzbDrone.Core.Organizer
         {
             var result = new SampleResult
             {
-                FileName = BuildTrackSample(_standardAuthor, _singleTrackFile, nameSpec),
-                Author = _standardAuthor,
-                Book = _standardBook,
-                BookFile = _singleTrackFile
+                FileName = BuildTrackSample(_standardSeries, _standardBook, _singleTrackFile, nameSpec),
+                Series = _standardSeries,
+                Issue = _standardBook,
+                ComicFile = _singleTrackFile
             };
 
             return result;
@@ -130,25 +123,25 @@ namespace NzbDrone.Core.Organizer
         {
             var result = new SampleResult
             {
-                FileName = BuildTrackSample(_standardAuthor, _multiTrackFile, nameSpec),
-                Author = _standardAuthor,
-                Book = _standardBook,
-                BookFile = _singleTrackFile
+                FileName = BuildTrackSample(_standardSeries, _standardBook, _multiTrackFile, nameSpec),
+                Series = _standardSeries,
+                Issue = _standardBook,
+                ComicFile = _singleTrackFile
             };
 
             return result;
         }
 
-        public string GetAuthorFolderSample(NamingConfig nameSpec)
+        public string GetSeriesFolderSample(NamingConfig nameSpec)
         {
-            return _buildFileNames.GetAuthorFolder(_standardAuthor, nameSpec);
+            return _buildFileNames.GetSeriesFolder(_standardSeries, nameSpec);
         }
 
-        private string BuildTrackSample(Author author, BookFile bookFile, NamingConfig nameSpec)
+        private string BuildTrackSample(Series author, Issue issue, ComicFile comicFile, NamingConfig nameSpec)
         {
             try
             {
-                return _buildFileNames.BuildBookFileName(author, bookFile.Edition.Value, bookFile, nameSpec, _customFormats);
+                return _buildFileNames.BuildBookFileName(author, issue, comicFile, nameSpec, _customFormats);
             }
             catch (NamingFormatException)
             {

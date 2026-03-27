@@ -40,13 +40,13 @@ const COLUMNS = [
   },
   {
     name: 'author',
-    label: 'Author',
+    label: 'Series',
     isSortable: true,
     isVisible: true
   },
   {
     name: 'book',
-    label: 'Book',
+    label: 'Issue',
     isVisible: true
   },
   {

@@ -10,12 +10,12 @@ namespace NzbDrone.Core.Test.MusicTests
     [TestFixture]
     public class ShouldRefreshBookFixture : TestBase<ShouldRefreshBook>
     {
-        private Book _book;
+        private Issue _book;
 
         [SetUp]
         public void Setup()
         {
-            _book = Builder<Book>.CreateNew()
+            _book = Builder<Issue>.CreateNew()
                                    .With(e => e.ReleaseDate = DateTime.Today.AddDays(-100))
                                    .Build();
         }

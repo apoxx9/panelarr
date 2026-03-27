@@ -18,28 +18,28 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         public static object[] AllowedTestCases =
         {
-            new object[] { Quality.MP3 },
-            new object[] { Quality.MP3 },
-            new object[] { Quality.MP3 }
+            new object[] { Quality.CBR },
+            new object[] { Quality.CBR },
+            new object[] { Quality.CBR }
         };
 
         public static object[] DeniedTestCases =
         {
-            new object[] { Quality.FLAC },
+            new object[] { Quality.CBZ_HD },
             new object[] { Quality.Unknown }
         };
 
         [SetUp]
         public void Setup()
         {
-            var fakeAuthor = Builder<Author>.CreateNew()
-                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.MP3.Id })
+            var fakeSeries = Builder<Series>.CreateNew()
+                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.CBR.Id })
                          .Build();
 
             _remoteBook = new RemoteBook
             {
-                Author = fakeAuthor,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MP3, new Revision(version: 2)) },
+                Series = fakeSeries,
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
             };
         }
 
@@ -48,7 +48,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_allow_if_quality_is_defined_in_profile(Quality qualityType)
         {
             _remoteBook.ParsedBookInfo.Quality.Quality = qualityType;
-            _remoteBook.Author.QualityProfile.Value.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.MP3, Quality.MP3, Quality.MP3);
+            _remoteBook.Series.QualityProfile.Value.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.CBR, Quality.CBR, Quality.CBR);
 
             Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
         }
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_not_allow_if_quality_is_not_defined_in_profile(Quality qualityType)
         {
             _remoteBook.ParsedBookInfo.Quality.Quality = qualityType;
-            _remoteBook.Author.QualityProfile.Value.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.MP3, Quality.MP3, Quality.MP3);
+            _remoteBook.Series.QualityProfile.Value.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.CBR, Quality.CBR, Quality.CBR);
 
             Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
         }

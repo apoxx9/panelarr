@@ -17,12 +17,12 @@ namespace NzbDrone.Core.Indexers.Torrentleech
             return pageableRequests;
         }
 
-        public virtual IndexerPageableRequestChain GetSearchRequests(BookSearchCriteria searchCriteria)
+        public virtual IndexerPageableRequestChain GetSearchRequests(IssueSearchCriteria searchCriteria)
         {
             throw new System.NotImplementedException();
         }
 
-        public virtual IndexerPageableRequestChain GetSearchRequests(AuthorSearchCriteria searchCriteria)
+        public virtual IndexerPageableRequestChain GetSearchRequests(SeriesSearchCriteria searchCriteria)
         {
             throw new System.NotImplementedException();
         }

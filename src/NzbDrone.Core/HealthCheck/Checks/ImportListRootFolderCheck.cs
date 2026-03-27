@@ -8,9 +8,9 @@ using NzbDrone.Core.MediaFiles.Events;
 
 namespace NzbDrone.Core.HealthCheck.Checks
 {
-    [CheckOn(typeof(AuthorDeletedEvent))]
-    [CheckOn(typeof(AuthorMovedEvent))]
-    [CheckOn(typeof(BookImportedEvent), CheckOnCondition.FailedOnly)]
+    [CheckOn(typeof(SeriesDeletedEvent))]
+    [CheckOn(typeof(SeriesMovedEvent))]
+    [CheckOn(typeof(IssueImportedEvent), CheckOnCondition.FailedOnly)]
     [CheckOn(typeof(TrackImportedEvent), CheckOnCondition.FailedOnly)]
     [CheckOn(typeof(TrackImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
     public class ImportListRootFolderCheck : HealthCheckBase

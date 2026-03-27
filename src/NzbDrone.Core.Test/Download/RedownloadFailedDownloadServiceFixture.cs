@@ -22,8 +22,8 @@ namespace NzbDrone.Core.Test.Download
                 .Returns(true);
 
             Mocker.GetMock<IBookService>()
-                .Setup(x => x.GetBooksByAuthor(It.IsAny<int>()))
-                .Returns(Builder<Book>.CreateListOfSize(3).Build() as List<Book>);
+                .Setup(x => x.GetBooksBySeries(It.IsAny<int>()))
+                .Returns(Builder<Issue>.CreateListOfSize(3).Build() as List<Issue>);
         }
 
         [Test]
@@ -31,8 +31,8 @@ namespace NzbDrone.Core.Test.Download
         {
             var failedEvent = new DownloadFailedEvent
             {
-                AuthorId = 1,
-                BookIds = new List<int> { 1 },
+                SeriesId = 1,
+                IssueIds = new List<int> { 1 },
                 SkipRedownload = true
             };
 
@@ -48,8 +48,8 @@ namespace NzbDrone.Core.Test.Download
         {
             var failedEvent = new DownloadFailedEvent
             {
-                AuthorId = 1,
-                BookIds = new List<int> { 1 }
+                SeriesId = 1,
+                IssueIds = new List<int> { 1 }
             };
 
             Mocker.GetMock<IConfigService>()
@@ -68,21 +68,21 @@ namespace NzbDrone.Core.Test.Download
         {
             var failedEvent = new DownloadFailedEvent
             {
-                AuthorId = 1,
-                BookIds = new List<int> { 2 }
+                SeriesId = 1,
+                IssueIds = new List<int> { 2 }
             };
 
             Subject.Handle(failedEvent);
 
             Mocker.GetMock<IManageCommandQueue>()
-                .Verify(x => x.Push(It.Is<BookSearchCommand>(c => c.BookIds.Count == 1 &&
-                                                              c.BookIds[0] == 2),
+                .Verify(x => x.Push(It.Is<IssueSearchCommand>(c => c.IssueIds.Count == 1 &&
+                                                              c.IssueIds[0] == 2),
                                     It.IsAny<CommandPriority>(),
                                     It.IsAny<CommandTrigger>()),
                         Times.Once());
 
             Mocker.GetMock<IManageCommandQueue>()
-                .Verify(x => x.Push(It.IsAny<AuthorSearchCommand>(), It.IsAny<CommandPriority>(), It.IsAny<CommandTrigger>()),
+                .Verify(x => x.Push(It.IsAny<SeriesSearchCommand>(), It.IsAny<CommandPriority>(), It.IsAny<CommandTrigger>()),
                         Times.Never());
         }
 
@@ -91,45 +91,45 @@ namespace NzbDrone.Core.Test.Download
         {
             var failedEvent = new DownloadFailedEvent
             {
-                AuthorId = 1,
-                BookIds = new List<int> { 2, 3 }
+                SeriesId = 1,
+                IssueIds = new List<int> { 2, 3 }
             };
 
             Subject.Handle(failedEvent);
 
             Mocker.GetMock<IManageCommandQueue>()
-                .Verify(x => x.Push(It.Is<BookSearchCommand>(c => c.BookIds.Count == 2 &&
-                                                              c.BookIds[0] == 2 &&
-                                                              c.BookIds[1] == 3),
+                .Verify(x => x.Push(It.Is<IssueSearchCommand>(c => c.IssueIds.Count == 2 &&
+                                                              c.IssueIds[0] == 2 &&
+                                                              c.IssueIds[1] == 3),
                                     It.IsAny<CommandPriority>(),
                                     It.IsAny<CommandTrigger>()),
                         Times.Once());
 
             Mocker.GetMock<IManageCommandQueue>()
-                .Verify(x => x.Push(It.IsAny<AuthorSearchCommand>(), It.IsAny<CommandPriority>(), It.IsAny<CommandTrigger>()),
+                .Verify(x => x.Push(It.IsAny<SeriesSearchCommand>(), It.IsAny<CommandPriority>(), It.IsAny<CommandTrigger>()),
                         Times.Never());
         }
 
         [Test]
         public void should_redownload_author_on_failure()
         {
-            // note that author is set to have 3 books in setup
+            // note that author is set to have 3 issues in setup
             var failedEvent = new DownloadFailedEvent
             {
-                AuthorId = 2,
-                BookIds = new List<int> { 1, 2, 3 }
+                SeriesId = 2,
+                IssueIds = new List<int> { 1, 2, 3 }
             };
 
             Subject.Handle(failedEvent);
 
             Mocker.GetMock<IManageCommandQueue>()
-                .Verify(x => x.Push(It.Is<AuthorSearchCommand>(c => c.AuthorId == failedEvent.AuthorId),
+                .Verify(x => x.Push(It.Is<SeriesSearchCommand>(c => c.SeriesId == failedEvent.SeriesId),
                                     It.IsAny<CommandPriority>(),
                                     It.IsAny<CommandTrigger>()),
                         Times.Once());
 
             Mocker.GetMock<IManageCommandQueue>()
-                .Verify(x => x.Push(It.IsAny<BookSearchCommand>(), It.IsAny<CommandPriority>(), It.IsAny<CommandTrigger>()),
+                .Verify(x => x.Push(It.IsAny<IssueSearchCommand>(), It.IsAny<CommandPriority>(), It.IsAny<CommandTrigger>()),
                         Times.Never());
         }
     }

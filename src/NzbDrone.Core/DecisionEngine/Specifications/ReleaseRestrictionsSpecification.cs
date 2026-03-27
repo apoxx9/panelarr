@@ -29,7 +29,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             _logger.Debug("Checking if release meets restrictions: {0}", subject);
 
             var title = subject.Release.Title;
-            var releaseProfiles = _releaseProfileService.EnabledForTags(subject.Author.Tags, subject.Release.IndexerId);
+            var releaseProfiles = _releaseProfileService.EnabledForTags(subject.Series.Tags, subject.Release.IndexerId);
 
             var required = releaseProfiles.Where(r => r.Required.Any());
             var ignored = releaseProfiles.Where(r => r.Ignored.Any());

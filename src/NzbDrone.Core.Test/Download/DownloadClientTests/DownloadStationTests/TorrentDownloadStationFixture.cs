@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
 
         protected string _serialNumber = "SERIALNUMBER";
         protected string _category = "panelarr";
-        protected string _musicDirectory = @"music/Author";
+        protected string _musicDirectory = @"music/Series";
         protected string _defaultDestination = "somepath";
         protected OsPath _physicalPath = new OsPath("/mnt/sdb1/mydata");
 
@@ -367,11 +367,11 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
 
         protected override RemoteBook CreateRemoteBook()
         {
-            var book = base.CreateRemoteBook();
+            var issue = base.CreateRemoteBook();
 
-            book.Release.DownloadUrl = DownloadURL;
+            issue.Release.DownloadUrl = DownloadURL;
 
-            return book;
+            return issue;
         }
 
         protected int GivenAllKindOfTasks()

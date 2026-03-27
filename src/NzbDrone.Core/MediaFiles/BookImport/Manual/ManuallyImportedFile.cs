@@ -1,6 +1,6 @@
 using NzbDrone.Core.Download.TrackedDownloads;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Manual
+namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
 {
     public class ManuallyImportedFile
     {

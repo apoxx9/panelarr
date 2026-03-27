@@ -11,11 +11,11 @@ namespace NzbDrone.Core.Test.ParserTests
     {
         public static object[] SelfQualityParserCases =
         {
-            new object[] { Quality.MP3 },
-            new object[] { Quality.FLAC },
+            new object[] { Quality.CBR },
+            new object[] { Quality.CBZ_HD },
             new object[] { Quality.EPUB },
-            new object[] { Quality.MOBI },
-            new object[] { Quality.AZW3 }
+            new object[] { Quality.CBR },
+            new object[] { Quality.CBZ }
         };
 
         [TestCase("VA - The Best 101 Love Ballads (2017) MP3 [192 kbps]")]
@@ -27,10 +27,10 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Some Song [192][2014][MP3]")]
         [TestCase("Other Song (192)[2014][MP3]")]
         [TestCase("Caetano Veloso Discografia Completa MP3 @256")]
-        [TestCase("Jake Bugg - Jake Bugg (Book) [2012] {MP3 256 kbps}")]
+        [TestCase("Jake Bugg - Jake Bugg (Issue) [2012] {MP3 256 kbps}")]
         [TestCase("Clean Bandit - New Eyes [2014] [Mp3-256]-V3nom [GLT]")]
         [TestCase("PJ Harvey - Let England Shake [mp3-256-2011][trfkad]")]
-        [TestCase("Childish Gambino - Awaken, My Love Book 2016 mp3 320 Kbps")]
+        [TestCase("Childish Gambino - Awaken, My Love Issue 2016 mp3 320 Kbps")]
         [TestCase("Maluma – Felices Los 4 MP3 320 Kbps 2017 Download")]
         [TestCase("Sia - This Is Acting (Standard Edition) [2016-Web-MP3-V0(VBR)]")]
         [TestCase("Mount Eerie - A Crow Looked at Me (2017) [MP3 V0 VBR)]")]
@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Maroon 5 Ft Kendrick Lamar -Dont Wanna Know MP3 2016")]
         public void should_parse_mp3_quality(string title)
         {
-            ParseAndVerifyQuality(title, null, 0, Quality.MP3);
+            ParseAndVerifyQuality(title, null, 0, Quality.CBR);
         }
 
         [TestCase("Kendrick Lamar - DAMN (2017) FLAC")]
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("ADELE 25 CD FLAC 2015 PERFECT")]
         public void should_parse_flac_quality(string title)
         {
-            ParseAndVerifyQuality(title, null, 0, Quality.FLAC);
+            ParseAndVerifyQuality(title, null, 0, Quality.CBZ_HD);
         }
 
         // Flack doesn't get match for 'FLAC' quality
@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCaseSource(nameof(SelfQualityParserCases))]
         public void parsing_our_own_quality_enum_name(Quality quality)
         {
-            var fileName = string.Format("Some book [{0}]", quality.Name);
+            var fileName = string.Format("Some issue [{0}]", quality.Name);
             var result = QualityParser.ParseQuality(fileName);
             result.Quality.Should().Be(quality);
         }
@@ -91,9 +91,9 @@ namespace NzbDrone.Core.Test.ParserTests
             QualityParser.ParseCodec(null, null).Should().Be(Codec.Unknown);
         }
 
-        [TestCase("Author Title - Book Title 2017 REPACK FLAC aAF", true)]
-        [TestCase("Author Title - Book Title 2017 RERIP FLAC aAF", true)]
-        [TestCase("Author Title - Book Title 2017 PROPER FLAC aAF", false)]
+        [TestCase("Series Title - Issue Title 2017 REPACK FLAC aAF", true)]
+        [TestCase("Series Title - Issue Title 2017 RERIP FLAC aAF", true)]
+        [TestCase("Series Title - Issue Title 2017 PROPER FLAC aAF", false)]
         public void should_be_able_to_parse_repack(string title, bool isRepack)
         {
             var result = QualityParser.ParseQuality(title);

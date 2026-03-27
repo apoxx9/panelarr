@@ -26,6 +26,6 @@ namespace NzbDrone.Core.ImportLists
     {
         None,
         SpecificBook,
-        EntireAuthor
+        EntireSeries
     }
 }

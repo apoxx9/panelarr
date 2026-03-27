@@ -1,7 +1,7 @@
 using FluentAssertions;
 using NUnit.Framework;
-using Panelarr.Api.V1.Author;
 using Panelarr.Api.V1.Blocklist;
+using Panelarr.Api.V1.Series;
 
 namespace NzbDrone.Integration.Test.ApiTests
 {
@@ -9,18 +9,18 @@ namespace NzbDrone.Integration.Test.ApiTests
     [Ignore("Waiting for metadata to be back again", Until = "2026-01-15 00:00:00Z")]
     public class BlocklistFixture : IntegrationTest
     {
-        private AuthorResource _author;
+        private SeriesResource _author;
 
         [Test]
         [Ignore("Adding to blocklist not supported")]
         public void should_be_able_to_add_to_blocklist()
         {
-            _author = EnsureAuthor("14586394", "43765115", "Andrew Hunter Murray");
+            _author = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray");
 
             Blocklist.Post(new BlocklistResource
             {
-                AuthorId = _author.Id,
-                SourceTitle = "Blacklist - Book 1 [2015 FLAC]"
+                SeriesId = _author.Id,
+                SourceTitle = "Blacklist - Issue 1 [2015 FLAC]"
             });
         }
 

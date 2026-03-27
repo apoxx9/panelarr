@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                              WHERE ""Id"" IN (
                              SELECT ""Editions"".""Id"" FROM ""Editions""
                              LEFT OUTER JOIN ""Books""
-                             ON ""Editions"".""BookId"" = ""Books"".""Id""
+                             ON ""Editions"".""IssueId"" = ""Books"".""Id""
                              WHERE ""Books"".""Id"" IS NULL)");
         }
     }

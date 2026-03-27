@@ -6,7 +6,7 @@ namespace Panelarr.Api.V1.Config
     {
         public string SingleBookExample { get; set; }
         public string MultiPartBookExample { get; set; }
-        public string AuthorFolderExample { get; set; }
+        public string SeriesFolderExample { get; set; }
     }
 
     public static class NamingConfigResourceMapper
@@ -21,13 +21,15 @@ namespace Panelarr.Api.V1.Config
                 ReplaceIllegalCharacters = model.ReplaceIllegalCharacters,
                 ColonReplacementFormat = (int)model.ColonReplacementFormat,
                 StandardBookFormat = model.StandardBookFormat,
-                AuthorFolderFormat = model.AuthorFolderFormat
+                AnnualIssueFormat = model.AnnualIssueFormat,
+                TPBFormat = model.TPBFormat,
+                SeriesFolderFormat = model.SeriesFolderFormat
             };
         }
 
         public static void AddToResource(this BasicNamingConfig basicNamingConfig, NamingConfigResource resource)
         {
-            resource.IncludeAuthorName = basicNamingConfig.IncludeAuthorName;
+            resource.IncludeSeriesName = basicNamingConfig.IncludeSeriesName;
             resource.IncludeBookTitle = basicNamingConfig.IncludeBookTitle;
             resource.IncludeQuality = basicNamingConfig.IncludeQuality;
             resource.ReplaceSpaces = basicNamingConfig.ReplaceSpaces;
@@ -45,7 +47,9 @@ namespace Panelarr.Api.V1.Config
                 ReplaceIllegalCharacters = resource.ReplaceIllegalCharacters,
                 ColonReplacementFormat = (ColonReplacementFormat)resource.ColonReplacementFormat,
                 StandardBookFormat = resource.StandardBookFormat,
-                AuthorFolderFormat = resource.AuthorFolderFormat,
+                AnnualIssueFormat = resource.AnnualIssueFormat,
+                TPBFormat = resource.TPBFormat,
+                SeriesFolderFormat = resource.SeriesFolderFormat,
             };
         }
     }

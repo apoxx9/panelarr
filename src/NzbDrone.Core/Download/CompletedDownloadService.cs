@@ -9,8 +9,8 @@ using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.BookImport;
 using NzbDrone.Core.MediaFiles.Events;
+using NzbDrone.Core.MediaFiles.IssueImport;
 using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.Download
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Download
             trackedDownload.State = TrackedDownloadState.Importing;
 
             var outputPath = trackedDownload.ImportItem.OutputPath.FullPath;
-            var importResults = _downloadedTracksImportService.ProcessPath(outputPath, ImportMode.Auto, trackedDownload.RemoteBook?.Author, trackedDownload.DownloadItem);
+            var importResults = _downloadedTracksImportService.ProcessPath(outputPath, ImportMode.Auto, trackedDownload.RemoteBook?.Series, trackedDownload.DownloadItem);
 
             if (importResults.Empty())
             {
@@ -114,7 +114,7 @@ namespace NzbDrone.Core.Download
                     .ToArray();
 
                 trackedDownload.Warn(statusMessages);
-                _eventAggregator.PublishEvent(new BookImportIncompleteEvent(trackedDownload));
+                _eventAggregator.PublishEvent(new IssueImportIncompleteEvent(trackedDownload));
                 return;
             }
         }
@@ -122,18 +122,18 @@ namespace NzbDrone.Core.Download
         public bool VerifyImport(TrackedDownload trackedDownload, List<ImportResult> importResults)
         {
             var allItemsImported = importResults.Where(c => c.Result == ImportResultType.Imported)
-                                                   .Select(c => c.ImportDecision.Item.Book)
+                                                   .Select(c => c.ImportDecision.Item.Issue)
                                                    .Count() >= Math.Max(1, trackedDownload.RemoteBook?.Books.Count ?? 1);
 
             if (allItemsImported)
             {
-                _logger.Debug("All books were imported for {0}", trackedDownload.DownloadItem.Title);
+                _logger.Debug("All issues were imported for {0}", trackedDownload.DownloadItem.Title);
                 trackedDownload.State = TrackedDownloadState.Imported;
 
-                var importedAuthorId = importResults.Where(x => x.Result == ImportResultType.Imported)
-                    .Select(c => c.ImportDecision.Item.Author.Id)
+                var importedSeriesId = importResults.Where(x => x.Result == ImportResultType.Imported)
+                    .Select(c => c.ImportDecision.Item.Series.Id)
                     .MostCommon();
-                _eventAggregator.PublishEvent(new DownloadCompletedEvent(trackedDownload, trackedDownload.RemoteBook?.Author.Id ?? importedAuthorId));
+                _eventAggregator.PublishEvent(new DownloadCompletedEvent(trackedDownload, trackedDownload.RemoteBook?.Series.Id ?? importedSeriesId));
                 return true;
             }
 
@@ -159,13 +159,13 @@ namespace NzbDrone.Core.Download
                 // The second message shouldn't be logged in most cases, but continued reporting would indicate an ongoing issue.
                 if (atLeastOneEpisodeImported)
                 {
-                    _logger.Debug("All books were imported in history for {0}", trackedDownload.DownloadItem.Title);
+                    _logger.Debug("All issues were imported in history for {0}", trackedDownload.DownloadItem.Title);
                 }
                 else
                 {
                     _logger.ForDebugEvent()
-                           .Message("No books were just imported, but all books were previously imported, possible issue with download history.")
-                           .Property("AuthorId", trackedDownload.RemoteBook.Author.Id)
+                           .Message("No issues were just imported, but all issues were previously imported, possible issue with download history.")
+                           .Property("SeriesId", trackedDownload.RemoteBook.Series.Id)
                            .Property("DownloadId", trackedDownload.DownloadItem.DownloadId)
                            .Property("Title", trackedDownload.DownloadItem.Title)
                            .Property("Path", trackedDownload.DownloadItem.OutputPath.ToString())
@@ -175,15 +175,15 @@ namespace NzbDrone.Core.Download
 
                 trackedDownload.State = TrackedDownloadState.Imported;
 
-                var importedAuthorId = historyItems.Where(x => x.EventType == EntityHistoryEventType.BookFileImported)
-                    .Select(x => x.AuthorId)
+                var importedSeriesId = historyItems.Where(x => x.EventType == EntityHistoryEventType.ComicFileImported)
+                    .Select(x => x.SeriesId)
                     .MostCommon();
-                _eventAggregator.PublishEvent(new DownloadCompletedEvent(trackedDownload, trackedDownload.RemoteBook?.Author.Id ?? importedAuthorId));
+                _eventAggregator.PublishEvent(new DownloadCompletedEvent(trackedDownload, trackedDownload.RemoteBook?.Series.Id ?? importedSeriesId));
 
                 return true;
             }
 
-            _logger.Debug("Not all books have been imported for {0}", trackedDownload.DownloadItem.Title);
+            _logger.Debug("Not all issues have been imported for {0}", trackedDownload.DownloadItem.Title);
             return false;
         }
 

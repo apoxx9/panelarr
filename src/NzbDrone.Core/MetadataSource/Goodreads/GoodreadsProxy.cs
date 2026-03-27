@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using NLog;
@@ -14,10 +12,11 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
 {
     public interface IGoodreadsProxy
     {
-        Book GetBookInfo(string foreignEditionId, bool useCache = true);
+        Issue GetBookInfo(string foreignEditionId, bool useCache = true);
+        SeriesResource GetSeriesInfo(int foreignSeriesId, bool useCache = true);
     }
 
-    public class GoodreadsProxy : IGoodreadsProxy, IProvideSeriesInfo, IProvideListInfo
+    public class GoodreadsProxy : IGoodreadsProxy, IProvideListInfo
     {
         private readonly ICachedHttpResponseService _cachedHttpClient;
         private readonly Logger _logger;
@@ -39,7 +38,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
 
         public SeriesResource GetSeriesInfo(int foreignSeriesId, bool useCache = true)
         {
-            _logger.Debug("Getting Series with GoodreadsId of {0}", foreignSeriesId);
+            _logger.Debug("Getting SeriesGroup with GoodreadsId of {0}", foreignSeriesId);
 
             var httpRequest = _requestBuilder.Create()
                 .SetSegment("route", $"series/{foreignSeriesId}")
@@ -65,14 +64,14 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
 
             var resource = httpResponse.Deserialize<ShowSeriesResource>();
 
-            return resource.Series;
+            return resource.SeriesGroup;
         }
 
         public ListResource GetListInfo(int foreignListId, int page, bool useCache = true)
         {
             _logger.Debug("Getting List with GoodreadsId of {0}", foreignListId);
 
-            var httpRequest = new HttpRequestBuilder("https://www.goodreads.com/book/list/listopia.xml")
+            var httpRequest = new HttpRequestBuilder("https://www.goodreads.com/issue/list/listopia.xml")
                 .AddQueryParam("key", new string("whFzJP3Ud0gZsAdyXxSr7T".Reverse().ToArray()))
                 .AddQueryParam("_nc", "1")
                 .AddQueryParam("format", "xml")
@@ -110,12 +109,12 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
             return httpResponse.Deserialize<ListResource>();
         }
 
-        public Book GetBookInfo(string foreignEditionId, bool useCache = true)
+        public Issue GetBookInfo(string foreignEditionId, bool useCache = true)
         {
-            _logger.Debug("Getting Book with GoodreadsId of {0}", foreignEditionId);
+            _logger.Debug("Getting Issue with GoodreadsId of {0}", foreignEditionId);
 
             var httpRequest = _requestBuilder.Create()
-                .SetSegment("route", $"api/book/basic_book_data/{foreignEditionId}")
+                .SetSegment("route", $"api/issue/basic_book_data/{foreignEditionId}")
                 .AddQueryParam("format", "xml")
                 .Build();
 
@@ -128,7 +127,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
             {
                 if (httpResponse.StatusCode == HttpStatusCode.NotFound)
                 {
-                    throw new BookNotFoundException(foreignEditionId);
+                    throw new IssueNotFoundException(foreignEditionId);
                 }
                 else if (httpResponse.StatusCode == HttpStatusCode.BadRequest)
                 {
@@ -140,29 +139,27 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
                 }
             }
 
-            var resource = httpResponse.Deserialize<BookResource>();
+            var resource = httpResponse.Deserialize<IssueResource>();
 
-            var book = MapBook(resource);
-            book.CleanTitle = Parser.Parser.CleanAuthorName(book.Title);
+            var issue = MapBook(resource);
+            issue.CleanTitle = Parser.Parser.CleanSeriesName(issue.Title);
 
-            var authors = resource.Authors.SelectList(MapAuthor);
-            book.AuthorMetadata = authors.First();
+            var authors = resource.Seriess.SelectList(MapSeries);
+            issue.SeriesMetadata = authors.First();
 
-            return book;
+            return issue;
         }
 
-        private static AuthorMetadata MapAuthor(AuthorSummaryResource resource)
+        private static SeriesMetadata MapSeries(SeriesSummaryResource resource)
         {
-            var author = new AuthorMetadata
+            var author = new SeriesMetadata
             {
-                ForeignAuthorId = resource.Id.ToString(),
+                ForeignSeriesId = resource.Id.ToString(),
                 Name = resource.Name.CleanSpaces(),
                 TitleSlug = resource.Id.ToString()
             };
 
             author.SortName = author.Name.ToLower();
-            author.NameLastFirst = author.Name.ToLastFirst();
-            author.SortNameLastFirst = author.NameLastFirst.ToLower();
 
             if (resource.RatingsCount.HasValue)
             {
@@ -176,49 +173,26 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
             return author;
         }
 
-        private static Book MapBook(BookResource resource)
+        private static Issue MapBook(IssueResource resource)
         {
-            var book = new Book
+            var issue = new Issue
             {
-                ForeignBookId = resource.Work.Id.ToString(),
+                ForeignIssueId = resource.Work.Id.ToString(),
                 Title = (resource.Work.OriginalTitle ?? resource.TitleWithoutSeries).CleanSpaces(),
                 TitleSlug = resource.Work.Id.ToString(),
                 ReleaseDate = resource.Work.OriginalPublicationDate ?? resource.PublicationDate,
                 Ratings = new Ratings { Votes = resource.Work.RatingsCount, Value = resource.Work.AverageRating },
-                AnyEditionOk = true
+                PageCount = resource.Pages
             };
 
             if (resource.EditionsUrl != null)
             {
-                book.Links.Add(new Links { Url = resource.EditionsUrl, Name = "Goodreads Editions" });
+                issue.Links.Add(new Links { Url = resource.EditionsUrl, Name = "Goodreads Editions" });
             }
 
-            var edition = new Edition
-            {
-                ForeignEditionId = resource.Id.ToString(),
-                TitleSlug = resource.Id.ToString(),
-                Isbn13 = resource.Isbn13,
-                Asin = resource.Asin ?? resource.KindleAsin,
-                Title = resource.TitleWithoutSeries,
-                Language = resource.LanguageCode,
-                Overview = resource.Description,
-                Format = resource.Format,
-                IsEbook = resource.IsEbook,
-                Disambiguation = resource.EditionInformation,
-                Publisher = resource.Publisher,
-                PageCount = resource.Pages,
-                ReleaseDate = resource.PublicationDate,
-                Ratings = new Ratings { Votes = resource.RatingsCount, Value = resource.AverageRating },
-                Monitored = true
-            };
+            issue.Links.Add(new Links { Url = resource.Url, Name = "Goodreads Issue" });
 
-            edition.Links.Add(new Links { Url = resource.Url, Name = "Goodreads Book" });
-
-            book.Editions = new List<Edition> { edition };
-
-            Debug.Assert(!book.Editions.Value.Any() || book.Editions.Value.Count(x => x.Monitored) == 1, "one edition monitored");
-
-            return book;
+            return issue;
         }
     }
 }

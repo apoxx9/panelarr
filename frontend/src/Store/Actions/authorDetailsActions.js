@@ -29,7 +29,7 @@ export const defaultState = {
   filters: [
     {
       key: 'authorId',
-      label: 'Author',
+      label: 'Series',
       filters: [
         {
           key: 'authorId',
@@ -74,7 +74,7 @@ export const actionHandlers = handleThunks({
       filters: [
         {
           key: 'authorId',
-          label: 'Author',
+          label: 'Series',
           filters: [
             {
               key: 'authorId',

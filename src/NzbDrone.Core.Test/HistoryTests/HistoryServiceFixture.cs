@@ -27,31 +27,31 @@ namespace NzbDrone.Core.Test.HistoryTests
         {
             _profile = new QualityProfile
             {
-                Cutoff = Quality.MP3.Id,
+                Cutoff = Quality.CBR.Id,
                 Items = QualityFixture.GetDefaultQualities(),
             };
 
             _profileCustom = new QualityProfile
             {
-                Cutoff = Quality.MP3.Id,
-                Items = QualityFixture.GetDefaultQualities(Quality.MP3),
+                Cutoff = Quality.CBR.Id,
+                Items = QualityFixture.GetDefaultQualities(Quality.CBR),
             };
         }
 
         [Test]
         public void should_use_file_name_for_source_title_if_scene_name_is_null()
         {
-            var author = Builder<Author>.CreateNew().Build();
-            var trackFile = Builder<BookFile>.CreateNew()
+            var author = Builder<Series>.CreateNew().Build();
+            var trackFile = Builder<ComicFile>.CreateNew()
                 .With(f => f.SceneName = null)
-                .With(f => f.Author = author)
+                .With(f => f.Series = author)
                 .Build();
 
             var localTrack = new LocalBook
             {
-                Author = author,
-                Book = new Book(),
-                Path = @"C:\Test\Unsorted\Author.01.Hymn.mp3"
+                Series = author,
+                Issue = new Issue(),
+                Path = @"C:\Test\Unsorted\Series.01.Hymn.mp3"
             };
 
             var downloadClientItem = new DownloadClientItem
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.HistoryTests
                 DownloadId = "abcd"
             };
 
-            Subject.Handle(new TrackImportedEvent(localTrack, trackFile, new List<BookFile>(), true, downloadClientItem));
+            Subject.Handle(new TrackImportedEvent(localTrack, trackFile, new List<ComicFile>(), true, downloadClientItem));
 
             Mocker.GetMock<IHistoryRepository>()
                 .Verify(v => v.Insert(It.Is<EntityHistory>(h => h.SourceTitle == Path.GetFileNameWithoutExtension(localTrack.Path))));

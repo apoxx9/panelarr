@@ -295,25 +295,25 @@ Stories are ordered by dependency (must be completed top-to-bottom within each p
 
 | Story | Status | Depends On |
 |---|---|---|
-| P1-01 | Ready | — |
-| P1-02 | Ready | — |
-| P1-03 | Ready | P1-02 |
-| P1-04 | Ready | P1-01, P1-03 |
-| P1-05 | Ready | P1-04 |
-| P1-06 | Ready | P1-04 |
-| P1-07 | Ready | P1-04 |
-| P1-08 | Ready | P1-05 |
-| P1-09 | Ready | P1-08 |
-| P1-10 | Ready | P1-09, P1-06 |
-| P1-11 | Ready | P1-05 |
-| P1-12 | Ready | P1-11 |
-| P1-13 | Ready | P1-05, P1-06 |
-| P1-14 | Ready | P1-13 |
-| P1-15 | Ready | P1-05 |
-| P1-16 | Ready | P1-05, P1-06, P1-07 |
-| P1-17 | Ready | P1-16 |
-| P1-18 | Ready | P1-12, P1-13, P1-15, P1-17 |
-| P1-19 | Ready | P1-18 |
+| P1-01 | Done | — |
+| P1-02 | Done | — |
+| P1-03 | Done | P1-02 |
+| P1-04 | Done | P1-01, P1-03 |
+| P1-05 | Done | P1-04 |
+| P1-06 | Done | P1-04 |
+| P1-07 | Done | P1-04 |
+| P1-08 | Done | P1-05 |
+| P1-09 | Done | P1-08 |
+| P1-10 | Done | P1-09, P1-06 |
+| P1-11 | Done | P1-05 |
+| P1-12 | Done | P1-11 |
+| P1-13 | Done | P1-05, P1-06 |
+| P1-14 | Done | P1-13 |
+| P1-15 | Done | P1-05 |
+| P1-16 | Done | P1-05, P1-06, P1-07 |
+| P1-17 | Done | P1-16 |
+| P1-18 | Done | P1-12, P1-13, P1-15, P1-17 |
+| P1-19 | Done | P1-18 |
 | P2-01 | Ready | Phase 1 complete |
 | P2-02 | Ready | P2-01 |
 | P2-03 | Ready | P2-02 |

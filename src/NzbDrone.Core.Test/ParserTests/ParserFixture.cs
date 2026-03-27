@@ -12,16 +12,16 @@ namespace NzbDrone.Core.Test.ParserTests
     [TestFixture]
     public class ParserFixture : CoreTest
     {
-        private Author _author = new Author();
-        private List<Book> _books = new List<Book> { new Book() };
+        private Series _author = new Series();
+        private List<Issue> _books = new List<Issue> { new Issue() };
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Author>
+            _author = Builder<Series>
                 .CreateNew()
                 .Build();
-            _books = Builder<List<Book>>
+            _books = Builder<List<Issue>>
                 .CreateNew()
                 .Build();
         }
@@ -29,10 +29,9 @@ namespace NzbDrone.Core.Test.ParserTests
         private void GivenSearchCriteria(string authorName, string bookTitle)
         {
             _author.Name = authorName;
-            var a = new Book
+            var a = new Issue
             {
-                Title = bookTitle,
-                Editions = new List<Edition> { new Edition { Title = bookTitle, Monitored = true } }
+                Title = bookTitle
             };
             _books.Add(a);
         }
@@ -40,8 +39,8 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Bad Format", "badformat")]
         public void should_parse_author_name(string postTitle, string title)
         {
-            var result = Parser.Parser.ParseAuthorName(postTitle).CleanAuthorName();
-            result.Should().Be(title.CleanAuthorName());
+            var result = Parser.Parser.ParseSeriesName(postTitle).CleanSeriesName();
+            result.Should().Be(title.CleanSeriesName());
         }
 
         [Test]
@@ -49,16 +48,16 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             const string title = "Carniv\u00E0le";
 
-            title.CleanAuthorName().Should().Be("carnivale");
+            title.CleanSeriesName().Should().Be("carnivale");
         }
 
         [TestCase("Songs of Experience (Deluxe Edition)", "Songs of Experience")]
         [TestCase("Songs of Experience (iTunes Deluxe Edition)", "Songs of Experience")]
         [TestCase("Songs of Experience [Super Special Edition]", "Songs of Experience")]
         [TestCase("Mr. Bad Guy [Special Edition]", "Mr. Bad Guy")]
-        [TestCase("Sweet Dreams (Book)", "Sweet Dreams")]
+        [TestCase("Sweet Dreams (Issue)", "Sweet Dreams")]
         [TestCase("Now What?! (Limited Edition)", "Now What?!")]
-        [TestCase("Random Book Title (Promo CD)", "Random Book Title")]
+        [TestCase("Random Issue Title (Promo CD)", "Random Issue Title")]
         [TestCase("Hello, I Must Be Going (2016 Remastered)", "Hello, I Must Be Going")]
         [TestCase("Limited Edition", "Limited Edition")]
         public void should_remove_common_tags_from_book_title(string title, string correct)
@@ -89,11 +88,11 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("[scnzbefnet][509103] Jay-Z - 4:44 (Deluxe Edition) (2017) 320", "Jay-Z")]
         public void should_remove_request_info_from_title(string postTitle, string title)
         {
-            Parser.Parser.ParseBookTitle(postTitle).AuthorName.Should().Be(title);
+            Parser.Parser.ParseBookTitle(postTitle).SeriesName.Should().Be(title);
         }
 
         [TestCase("02 Unchained.flac")] // This isn't valid on any regex we have. We must always have an author
-        [TestCase("Fall Out Boy - 02 - Title.wav")] // This isn't valid on any regex we have. We don't support Author - Track - TrackName
+        [TestCase("Fall Out Boy - 02 - Title.wav")] // This isn't valid on any regex we have. We don't support Series - Track - TrackName
         [Ignore("Ignore Test until track parsing rework")]
         public void should_parse_quality_from_extension(string title)
         {
@@ -113,7 +112,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Gary Clark Jr - Live North America 2016 (2017) MP3 192kbps", "Gary Clark Jr", "Live North America 2016")]
 
         //[TestCase("Beyoncé Lemonade [320] 2016 Beyonce Lemonade [320] 2016", "Beyoncé", "Lemonade")]
-        [TestCase("Childish Gambino - Awaken, My Love Book 2016 mp3 320 Kbps", "Childish Gambino", "Awaken, My Love Book")]
+        [TestCase("Childish Gambino - Awaken, My Love Issue 2016 mp3 320 Kbps", "Childish Gambino", "Awaken, My Love Issue")]
 
         //[TestCase("Maluma – Felices Los 4 MP3 320 Kbps 2017 Download", "Maluma", "Felices Los 4")]
         [TestCase("Ricardo Arjona - APNEA (Single 2014) (320 kbps)", "Ricardo Arjona", "APNEA")]
@@ -122,7 +121,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Caetano Veloso Discografia Completa MP3 @256", "Caetano Veloso", "Discography", true)]
         [TestCase("Little Mix - Salute [Deluxe Edition] [2013] [M4A-256]-V3nom [GLT", "Little Mix", "Salute")]
         [TestCase("Ricky Martin - A Quien Quiera Escuchar (2015) 256 kbps [GloDLS]", "Ricky Martin", "A Quien Quiera Escuchar")]
-        [TestCase("Jake Bugg - Jake Bugg (Book) [2012] {MP3 256 kbps}", "Jake Bugg", "Jake Bugg")]
+        [TestCase("Jake Bugg - Jake Bugg (Issue) [2012] {MP3 256 kbps}", "Jake Bugg", "Jake Bugg")]
         [TestCase("Milky Chance - Sadnecessary [256 Kbps] [M4A]", "Milky Chance", "Sadnecessary")]
         [TestCase("Clean Bandit - New Eyes [2014] [Mp3-256]-V3nom [GLT]", "Clean Bandit", "New Eyes")]
         [TestCase("Armin van Buuren - A State Of Trance 810 (20.04.2017) 256 kbps", "Armin van Buuren", "A State Of Trance 810")]
@@ -155,7 +154,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("New.Edition-One.Love-CD-FLAC-2017-MrFlac", "New Edition", "One Love")]
         [TestCase("David_Gray-The_Best_of_David_Gray-(Deluxe_Edition)-2CD-2016-MTD", "David Gray", "The Best of David Gray")]
         [TestCase("Shinedown-Us and Them-NMR-2005-NMR", "Shinedown", "Us and Them")]
-        [TestCase("Led Zeppelin - Studio Discography 1969-1982 (10 books)(flac)", "Led Zeppelin", "Discography", true)]
+        [TestCase("Led Zeppelin - Studio Discography 1969-1982 (10 issues)(flac)", "Led Zeppelin", "Discography", true)]
         [TestCase("Minor Threat - Complete Discography [1989] [Anthology]", "Minor Threat", "Discography", true)]
         [TestCase("Captain-Discography_1998_-_2001-CD-FLAC-2007-UTP", "Captain", "Discography", true)]
         [TestCase("Coolio - Gangsta's Paradise (1995) (FLAC Lossless)", "Coolio", "Gangsta's Paradise")]
@@ -174,7 +173,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("(Folk Rock / Pop) Aztec Two-Step - Naked - 2017, MP3, 320 kbps", "Aztec Two-Step", "Naked")]
         [TestCase("(Zeuhl / Progressive Rock) [WEB] Dai Kaht - Dai Kaht - 2017, FLAC (tracks), lossless", "Dai Kaht", "Dai Kaht")]
 
-        //[TestCase("(Industrial Folk) Bumblebee(Shmely, AntiVirus) - Discography, 23 books - 1998-2011, FLAC(image + .cue), lossless")]
+        //[TestCase("(Industrial Folk) Bumblebee(Shmely, AntiVirus) - Discography, 23 issues - 1998-2011, FLAC(image + .cue), lossless")]
         //[TestCase("(Heavy Metal) Sergey Mavrin(Mavrik) - Discography(14 CD) [1998-2010], FLAC(image + .cue), lossless")]
         [TestCase("(Heavy Metal) [CD] Black Obelisk - Discography - 1991-2015 (36 releases, 32 CDs), FLAC(image + .cue), lossless", "Black Obelisk", "Discography", true)]
 
@@ -188,8 +187,8 @@ namespace NzbDrone.Core.Test.ParserTests
         public void should_parse_author_name_and_book_title(string postTitle, string name, string title, bool discography = false)
         {
             var parseResult = Parser.Parser.ParseBookTitle(postTitle);
-            parseResult.AuthorName.Should().Be(name);
-            parseResult.BookTitle.Should().Be(title);
+            parseResult.SeriesName.Should().Be(name);
+            parseResult.IssueTitle.Should().Be(title);
             parseResult.Discography.Should().Be(discography);
         }
 
@@ -203,13 +202,13 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             GivenSearchCriteria("Black Sabbath", "Black Sabbath");
             var parseResult = Parser.Parser.ParseBookTitleWithSearchCriteria(releaseTitle, _author, _books);
-            parseResult.AuthorName.ToLowerInvariant().Should().Be("black sabbath");
-            parseResult.BookTitle.ToLowerInvariant().Should().Be("black sabbath");
+            parseResult.SeriesName.ToLowerInvariant().Should().Be("black sabbath");
+            parseResult.IssueTitle.ToLowerInvariant().Should().Be("black sabbath");
         }
 
         [TestCase("Captain-Discography_1998_-_2001-CD-FLAC-2007-UTP", 1998, 2001)]
         [TestCase("(Heavy Metal) Aria - Discography(46 CD) [1985 - 2015]", 1985, 2015)]
-        [TestCase("Led Zeppelin - Studio Discography 1969-1982 (10 books)(flac)", 1969, 1982)]
+        [TestCase("Led Zeppelin - Studio Discography 1969-1982 (10 issues)(flac)", 1969, 1982)]
         [TestCase("Minor Threat - Complete Discography [1989] [Anthology]", 0, 1989)]
         [TestCase("Caetano Veloso Discografia Completa MP3 @256", 0, 0)]
         public void should_parse_year_or_year_range_from_discography(string releaseTitle, int startyear, int endyear)
@@ -227,22 +226,22 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Stephen King", "It", "Stephen_Cleobury-The_Music_of_Kings_Choral_Favourites_from_Cambridge-WEB-2019-ENRiCH")]
         [TestCase("Stephen King", "Guns", "Stephen King - The Gunslinger: Dark Tower 1 MP3")]
         [TestCase("Rick Riordan", "An Interview with Rick Riordan", "AnInterviewwithRickRiordan_ep6")]
-        public void should_not_parse_author_name_and_book_title_by_incorrect_search_criteria(string searchAuthor, string searchBook, string report)
+        public void should_not_parse_author_name_and_book_title_by_incorrect_search_criteria(string searchSeries, string searchBook, string report)
         {
-            GivenSearchCriteria(searchAuthor, searchBook);
+            GivenSearchCriteria(searchSeries, searchBook);
             var parseResult = Parser.Parser.ParseBookTitleWithSearchCriteria(report, _author, _books);
             parseResult.Should().BeNull();
         }
 
         [TestCase("George R.R. Martin", "The Hero", "The Hero George R R Martin", "George R R Martin", "The Hero")]
         [TestCase("James Herbert", "48", "James Hertbert Collection/'48 - James Herbert (epub)", "James Herbert", "48")]
-        public void should_parse_with_search_criteria(string searchAuthor, string searchBook, string report, string expectedAuthor, string expectedBook)
+        public void should_parse_with_search_criteria(string searchSeries, string searchBook, string report, string expectedSeries, string expectedBook)
         {
-            GivenSearchCriteria(searchAuthor, searchBook);
+            GivenSearchCriteria(searchSeries, searchBook);
             var parseResult = Parser.Parser.ParseBookTitleWithSearchCriteria(report, _author, _books);
 
-            parseResult.AuthorName.Should().Be(expectedAuthor);
-            parseResult.BookTitle.Should().Be(expectedBook);
+            parseResult.SeriesName.Should().Be(expectedSeries);
+            parseResult.IssueTitle.Should().Be(expectedBook);
         }
 
         [TestCase("Ed Sheeran", "I See Fire", "Ed Sheeran I See Fire[Mimp3.eu].mp3 FLAC")]
@@ -252,31 +251,31 @@ namespace NzbDrone.Core.Test.ParserTests
         //[TestCase("Glasvegas", @"EUPHORIC /// HEARTBREAK \\\", @"EUPHORIC /// HEARTBREAK \\\ FLAC")] // slashes not being escaped properly
         [TestCase("XXXTENTACION", "?", "XXXTENTACION ? FLAC")]
         [TestCase("Hey", "BŁYSK", "Hey - BŁYSK FLAC")]
-        public void should_escape_books(string author, string book, string releaseTitle)
+        public void should_escape_books(string author, string issue, string releaseTitle)
         {
-            GivenSearchCriteria(author, book);
+            GivenSearchCriteria(author, issue);
             var parseResult = Parser.Parser.ParseBookTitleWithSearchCriteria(releaseTitle, _author, _books);
-            parseResult.BookTitle.Should().Be(book);
+            parseResult.IssueTitle.Should().Be(issue);
         }
 
-        [TestCase("???", "Book", "??? Book FLAC")]
-        [TestCase("+", "Book", "+ Book FLAC")]
-        [TestCase(@"/\", "Book", @"/\ Book FLAC")]
+        [TestCase("???", "Issue", "??? Issue FLAC")]
+        [TestCase("+", "Issue", "+ Issue FLAC")]
+        [TestCase(@"/\", "Issue", @"/\ Issue FLAC")]
         [TestCase("+44", "When Your Heart Stops Beating", "+44 When Your Heart Stops Beating FLAC")]
-        public void should_escape_authors(string author, string book, string releaseTitle)
+        public void should_escape_authors(string author, string issue, string releaseTitle)
         {
-            GivenSearchCriteria(author, book);
+            GivenSearchCriteria(author, issue);
             var parseResult = Parser.Parser.ParseBookTitleWithSearchCriteria(releaseTitle, _author, _books);
-            parseResult.AuthorName.Should().Be(author);
+            parseResult.SeriesName.Should().Be(author);
         }
 
         [TestCase("Michael Bubl\u00E9", "Michael Bubl\u00E9", @"Michael Buble Michael Buble CD FLAC 2003 PERFECT")]
-        public void should_match_with_accent_in_author_and_book(string author, string book, string releaseTitle)
+        public void should_match_with_accent_in_author_and_book(string author, string issue, string releaseTitle)
         {
-            GivenSearchCriteria(author, book);
+            GivenSearchCriteria(author, issue);
             var parseResult = Parser.Parser.ParseBookTitleWithSearchCriteria(releaseTitle, _author, _books);
-            parseResult.AuthorName.Should().Be("Michael Buble");
-            parseResult.BookTitle.Should().Be("Michael Buble");
+            parseResult.SeriesName.Should().Be("Michael Buble");
+            parseResult.IssueTitle.Should().Be("Michael Buble");
         }
 
         [Test]
@@ -289,18 +288,18 @@ namespace NzbDrone.Core.Test.ParserTests
             GivenSearchCriteria("Michael Bubl\u00E9", "To Be Loved");
             var parseResult = Parser.Parser.ParseBookTitleWithSearchCriteria(
                 "Michael Buble Christmas (Deluxe Special Edition) CD FLAC 2012 UNDERTONE iNT", _author, _books);
-            parseResult.AuthorName.Should().Be("Michael Buble");
-            parseResult.BookTitle.Should().Be("Christmas");
+            parseResult.SeriesName.Should().Be("Michael Buble");
+            parseResult.IssueTitle.Should().Be("Christmas");
         }
 
         [TestCase("Tom Clancy", "Tom Clancy: Ghost Protocol", "Ghost Protocol", "")]
         [TestCase("Andrew Steele", "Ageless: The New Science of Getting Older Without Getting Old", "Ageless", "The New Science of Getting Older Without Getting Old")]
-        [TestCase("Author", "Title (Subtitle with spaces)", "Title", "Subtitle with spaces")]
-        [TestCase("Author", "Title (Unabridged)", "Title (Unabridged)", "")]
-        [TestCase("Author", "asdf)(", "asdf)(", "")]
-        public void should_split_title_correctly(string author, string book, string expectedTitle, string expectedSubtitle)
+        [TestCase("Series", "Title (Subtitle with spaces)", "Title", "Subtitle with spaces")]
+        [TestCase("Series", "Title (Unabridged)", "Title (Unabridged)", "")]
+        [TestCase("Series", "asdf)(", "asdf)(", "")]
+        public void should_split_title_correctly(string author, string issue, string expectedTitle, string expectedSubtitle)
         {
-            var (title, subtitle) = book.SplitBookTitle(author);
+            var (title, subtitle) = issue.SplitBookTitle(author);
 
             title.Should().Be(expectedTitle);
             subtitle.Should().Be(expectedSubtitle);

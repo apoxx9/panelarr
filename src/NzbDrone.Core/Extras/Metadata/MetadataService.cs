@@ -59,14 +59,14 @@ namespace NzbDrone.Core.Extras.Metadata
 
         public override int Order => 0;
 
-        public override IEnumerable<ExtraFile> CreateAfterAuthorScan(Author author, List<BookFile> bookFiles)
+        public override IEnumerable<ExtraFile> CreateAfterSeriesScan(Series author, List<ComicFile> comicFiles)
         {
-            var metadataFiles = _metadataFileService.GetFilesByAuthor(author.Id);
+            var metadataFiles = _metadataFileService.GetFilesBySeries(author.Id);
             _cleanMetadataService.Clean(author);
 
             if (!_diskProvider.FolderExists(author.Path))
             {
-                _logger.Info("Author folder does not exist, skipping metadata creation");
+                _logger.Info("Series folder does not exist, skipping metadata creation");
                 return Enumerable.Empty<MetadataFile>();
             }
 
@@ -76,12 +76,12 @@ namespace NzbDrone.Core.Extras.Metadata
             {
                 var consumerFiles = GetMetadataFilesForConsumer(consumer, metadataFiles);
 
-                files.AddIfNotNull(ProcessAuthorMetadata(consumer, author, consumerFiles));
-                files.AddRange(ProcessAuthorImages(consumer, author, consumerFiles));
+                files.AddIfNotNull(ProcessSeriesMetadata(consumer, author, consumerFiles));
+                files.AddRange(ProcessSeriesImages(consumer, author, consumerFiles));
 
-                foreach (var bookFile in bookFiles)
+                foreach (var comicFile in comicFiles)
                 {
-                    files.AddIfNotNull(ProcessBookMetadata(consumer, author, bookFile, consumerFiles));
+                    files.AddIfNotNull(ProcessBookMetadata(consumer, author, comicFile, consumerFiles));
                 }
             }
 
@@ -90,13 +90,13 @@ namespace NzbDrone.Core.Extras.Metadata
             return files;
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterBookImport(Author author, BookFile bookFile)
+        public override IEnumerable<ExtraFile> CreateAfterBookImport(Series author, ComicFile comicFile)
         {
             var files = new List<MetadataFile>();
 
             foreach (var consumer in _metadataFactory.Enabled())
             {
-                files.AddIfNotNull(ProcessBookMetadata(consumer, author, bookFile, new List<MetadataFile>()));
+                files.AddIfNotNull(ProcessBookMetadata(consumer, author, comicFile, new List<MetadataFile>()));
             }
 
             _metadataFileService.Upsert(files);
@@ -104,9 +104,9 @@ namespace NzbDrone.Core.Extras.Metadata
             return files;
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterBookImport(Author author, Book book, string authorFolder, string bookFolder)
+        public override IEnumerable<ExtraFile> CreateAfterBookImport(Series author, Issue issue, string authorFolder, string bookFolder)
         {
-            var metadataFiles = _metadataFileService.GetFilesByAuthor(author.Id);
+            var metadataFiles = _metadataFileService.GetFilesBySeries(author.Id);
 
             if (authorFolder.IsNullOrWhiteSpace() && bookFolder.IsNullOrWhiteSpace())
             {
@@ -121,8 +121,8 @@ namespace NzbDrone.Core.Extras.Metadata
 
                 if (authorFolder.IsNotNullOrWhiteSpace())
                 {
-                    files.AddIfNotNull(ProcessAuthorMetadata(consumer, author, consumerFiles));
-                    files.AddRange(ProcessAuthorImages(consumer, author, consumerFiles));
+                    files.AddIfNotNull(ProcessSeriesMetadata(consumer, author, consumerFiles));
+                    files.AddRange(ProcessSeriesImages(consumer, author, consumerFiles));
                 }
             }
 
@@ -131,11 +131,11 @@ namespace NzbDrone.Core.Extras.Metadata
             return files;
         }
 
-        public override IEnumerable<ExtraFile> MoveFilesAfterRename(Author author, List<BookFile> bookFiles)
+        public override IEnumerable<ExtraFile> MoveFilesAfterRename(Series author, List<ComicFile> comicFiles)
         {
-            var metadataFiles = _metadataFileService.GetFilesByAuthor(author.Id);
+            var metadataFiles = _metadataFileService.GetFilesBySeries(author.Id);
             var movedFiles = new List<MetadataFile>();
-            var distinctTrackFilePaths = bookFiles.DistinctBy(s => Path.GetDirectoryName(s.Path)).ToList();
+            var distinctTrackFilePaths = comicFiles.DistinctBy(s => Path.GetDirectoryName(s.Path)).ToList();
 
             // TODO: Move EpisodeImage and EpisodeMetadata metadata files, instead of relying on consumers to do it
             // (Xbmc's EpisodeImage is more than just the extension)
@@ -144,8 +144,8 @@ namespace NzbDrone.Core.Extras.Metadata
                 foreach (var filePath in distinctTrackFilePaths)
                 {
                     var metadataFilesForConsumer = GetMetadataFilesForConsumer(consumer, metadataFiles)
-                        .Where(m => m.BookId == filePath.Edition.Value.BookId)
-                        .Where(m => m.Type == MetadataType.BookImage || m.Type == MetadataType.BookMetadata)
+                        .Where(m => m.IssueId == filePath.IssueId)
+                        .Where(m => m.Type == MetadataType.IssueImage || m.Type == MetadataType.IssueMetadata)
                         .ToList();
 
                     foreach (var metadataFile in metadataFilesForConsumer)
@@ -169,13 +169,13 @@ namespace NzbDrone.Core.Extras.Metadata
                     }
                 }
 
-                foreach (var bookFile in bookFiles)
+                foreach (var comicFile in comicFiles)
                 {
-                    var metadataFilesForConsumer = GetMetadataFilesForConsumer(consumer, metadataFiles).Where(m => m.BookFileId == bookFile.Id).ToList();
+                    var metadataFilesForConsumer = GetMetadataFilesForConsumer(consumer, metadataFiles).Where(m => m.ComicFileId == comicFile.Id).ToList();
 
                     foreach (var metadataFile in metadataFilesForConsumer)
                     {
-                        var newFileName = consumer.GetFilenameAfterMove(author, bookFile, metadataFile);
+                        var newFileName = consumer.GetFilenameAfterMove(author, comicFile, metadataFile);
                         var existingFileName = Path.Combine(author.Path, metadataFile.RelativePath);
 
                         if (newFileName.PathNotEquals(existingFileName))
@@ -200,7 +200,7 @@ namespace NzbDrone.Core.Extras.Metadata
             return movedFiles;
         }
 
-        public override ExtraFile Import(Author author, BookFile bookFile, string path, string extension, bool readOnly)
+        public override ExtraFile Import(Series author, ComicFile comicFile, string path, string extension, bool readOnly)
         {
             return null;
         }
@@ -210,9 +210,9 @@ namespace NzbDrone.Core.Extras.Metadata
             return authorMetadata.Where(c => c.Consumer == consumer.GetType().Name).ToList();
         }
 
-        private MetadataFile ProcessAuthorMetadata(IMetadata consumer, Author author, List<MetadataFile> existingMetadataFiles)
+        private MetadataFile ProcessSeriesMetadata(IMetadata consumer, Series author, List<MetadataFile> existingMetadataFiles)
         {
-            var authorMetadata = consumer.AuthorMetadata(author);
+            var authorMetadata = consumer.SeriesMetadata(author);
 
             if (authorMetadata == null)
             {
@@ -221,12 +221,12 @@ namespace NzbDrone.Core.Extras.Metadata
 
             var hash = authorMetadata.Contents.SHA256Hash();
 
-            var metadata = GetMetadataFile(author, existingMetadataFiles, e => e.Type == MetadataType.AuthorMetadata) ??
+            var metadata = GetMetadataFile(author, existingMetadataFiles, e => e.Type == MetadataType.SeriesMetadata) ??
                                new MetadataFile
                                {
-                                   AuthorId = author.Id,
+                                   SeriesId = author.Id,
                                    Consumer = consumer.GetType().Name,
-                                   Type = MetadataType.AuthorMetadata
+                                   Type = MetadataType.SeriesMetadata
                                };
 
             if (hash == metadata.Hash)
@@ -245,7 +245,7 @@ namespace NzbDrone.Core.Extras.Metadata
 
             _otherExtraFileRenamer.RenameOtherExtraFile(author, fullPath);
 
-            _logger.Debug("Writing Author Metadata to: {0}", fullPath);
+            _logger.Debug("Writing Series Metadata to: {0}", fullPath);
             SaveMetadataFile(fullPath, authorMetadata.Contents);
 
             metadata.Hash = hash;
@@ -255,9 +255,9 @@ namespace NzbDrone.Core.Extras.Metadata
             return metadata;
         }
 
-        private MetadataFile ProcessBookMetadata(IMetadata consumer, Author author, BookFile bookFile, List<MetadataFile> existingMetadataFiles)
+        private MetadataFile ProcessBookMetadata(IMetadata consumer, Series author, ComicFile comicFile, List<MetadataFile> existingMetadataFiles)
         {
-            var trackMetadata = consumer.BookMetadata(author, bookFile);
+            var trackMetadata = consumer.IssueMetadata(author, comicFile);
 
             if (trackMetadata == null)
             {
@@ -268,8 +268,8 @@ namespace NzbDrone.Core.Extras.Metadata
 
             _otherExtraFileRenamer.RenameOtherExtraFile(author, fullPath);
 
-            var existingMetadata = GetMetadataFile(author, existingMetadataFiles, c => c.Type == MetadataType.BookMetadata &&
-                                                                                  c.BookFileId == bookFile.Id);
+            var existingMetadata = GetMetadataFile(author, existingMetadataFiles, c => c.Type == MetadataType.IssueMetadata &&
+                                                                                  c.ComicFileId == comicFile.Id);
 
             if (existingMetadata != null)
             {
@@ -286,11 +286,11 @@ namespace NzbDrone.Core.Extras.Metadata
             var metadata = existingMetadata ??
                            new MetadataFile
                            {
-                               AuthorId = author.Id,
-                               BookId = bookFile.Edition.Value.BookId,
-                               BookFileId = bookFile.Id,
+                               SeriesId = author.Id,
+                               IssueId = comicFile.IssueId,
+                               ComicFileId = comicFile.Id,
                                Consumer = consumer.GetType().Name,
-                               Type = MetadataType.BookMetadata,
+                               Type = MetadataType.IssueMetadata,
                                RelativePath = trackMetadata.RelativePath,
                                Extension = Path.GetExtension(fullPath)
                            };
@@ -308,29 +308,29 @@ namespace NzbDrone.Core.Extras.Metadata
             return metadata;
         }
 
-        private List<MetadataFile> ProcessAuthorImages(IMetadata consumer, Author author, List<MetadataFile> existingMetadataFiles)
+        private List<MetadataFile> ProcessSeriesImages(IMetadata consumer, Series author, List<MetadataFile> existingMetadataFiles)
         {
             var result = new List<MetadataFile>();
 
-            foreach (var image in consumer.AuthorImages(author))
+            foreach (var image in consumer.SeriesImages(author))
             {
                 var fullPath = Path.Combine(author.Path, image.RelativePath);
 
                 if (_diskProvider.FileExists(fullPath))
                 {
-                    _logger.Debug("Author image already exists: {0}", fullPath);
+                    _logger.Debug("Series image already exists: {0}", fullPath);
                     continue;
                 }
 
                 _otherExtraFileRenamer.RenameOtherExtraFile(author, fullPath);
 
-                var metadata = GetMetadataFile(author, existingMetadataFiles, c => c.Type == MetadataType.AuthorImage &&
+                var metadata = GetMetadataFile(author, existingMetadataFiles, c => c.Type == MetadataType.SeriesImage &&
                                                                               c.RelativePath == image.RelativePath) ??
                                new MetadataFile
                                {
-                                   AuthorId = author.Id,
+                                   SeriesId = author.Id,
                                    Consumer = consumer.GetType().Name,
-                                   Type = MetadataType.AuthorImage,
+                                   Type = MetadataType.SeriesImage,
                                    RelativePath = image.RelativePath,
                                    Extension = Path.GetExtension(fullPath)
                                };
@@ -343,7 +343,7 @@ namespace NzbDrone.Core.Extras.Metadata
             return result;
         }
 
-        private void DownloadImage(Author author, ImageFileResult image)
+        private void DownloadImage(Series author, ImageFileResult image)
         {
             var fullPath = Path.Combine(author.Path, image.RelativePath);
             var downloaded = true;
@@ -388,7 +388,7 @@ namespace NzbDrone.Core.Extras.Metadata
             _mediaFileAttributeService.SetFilePermissions(path);
         }
 
-        private MetadataFile GetMetadataFile(Author author, List<MetadataFile> existingMetadataFiles, Func<MetadataFile, bool> predicate)
+        private MetadataFile GetMetadataFile(Series author, List<MetadataFile> existingMetadataFiles, Func<MetadataFile, bool> predicate)
         {
             var matchingMetadataFiles = existingMetadataFiles.Where(predicate).ToList();
 

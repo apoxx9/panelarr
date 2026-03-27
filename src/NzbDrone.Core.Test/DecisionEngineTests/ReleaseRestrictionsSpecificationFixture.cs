@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             _remoteBook = new RemoteBook
             {
-                Author = new Author
+                Series = new Series
                 {
                     Tags = new HashSet<int>()
                 },

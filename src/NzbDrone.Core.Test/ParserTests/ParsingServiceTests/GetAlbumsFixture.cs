@@ -18,23 +18,23 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         [Test]
         public void should_not_fail_if_search_criteria_contains_multiple_books_with_the_same_name()
         {
-            var author = Builder<Author>.CreateNew().Build();
-            var books = Builder<Book>.CreateListOfSize(2).All().With(x => x.Title = "IdenticalTitle").Build().ToList();
-            var criteria = new BookSearchCriteria
+            var author = Builder<Series>.CreateNew().Build();
+            var issues = Builder<Issue>.CreateListOfSize(2).All().With(x => x.Title = "IdenticalTitle").Build().ToList();
+            var criteria = new IssueSearchCriteria
             {
-                Author = author,
-                Books = books
+                Series = author,
+                Books = issues
             };
 
             var parsed = new ParsedBookInfo
             {
-                BookTitle = "IdenticalTitle"
+                IssueTitle = "IdenticalTitle"
             };
 
-            Subject.GetBooks(parsed, author, criteria).Should().BeEquivalentTo(new List<Book>());
+            Subject.GetBooks(parsed, author, criteria).Should().BeEquivalentTo(new List<Issue>());
 
             Mocker.GetMock<IBookService>()
-                .Verify(s => s.FindByTitle(author.AuthorMetadataId, "IdenticalTitle"), Times.Once());
+                .Verify(s => s.FindByTitle(author.SeriesMetadataId, "IdenticalTitle"), Times.Once());
         }
     }
 }

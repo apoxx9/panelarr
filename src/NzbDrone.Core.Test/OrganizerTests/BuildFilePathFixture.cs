@@ -9,7 +9,7 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.OrganizerTests
 {
     [TestFixture]
-    [Ignore("Don't use book folder in panelarr")]
+    [Ignore("Don't use issue folder in panelarr")]
     public class BuildFilePathFixture : CoreTest<FileNameBuilder>
     {
         private NamingConfig _namingConfig;
@@ -27,24 +27,18 @@ namespace NzbDrone.Core.Test.OrganizerTests
         public void should_clean_book_folder_when_it_contains_illegal_characters_in_book_or_author_title()
         {
             var filename = @"bookfile";
-            var expectedPath = @"C:\Test\Fake- The Author\Fake- The Book\bookfile.mobi";
+            var expectedPath = @"C:\Test\Fake- The Series\Fake- The Issue\bookfile.mobi";
 
-            var fakeAuthor = Builder<Author>.CreateNew()
-                .With(s => s.Name = "Fake: The Author")
-                .With(s => s.Path = @"C:\Test\Fake- The Author".AsOsAgnostic())
+            var fakeSeries = Builder<Series>.CreateNew()
+                .With(s => s.Name = "Fake: The Series")
+                .With(s => s.Path = @"C:\Test\Fake- The Series".AsOsAgnostic())
                 .Build();
 
-            var fakeBook = Builder<Book>.CreateNew()
-                .With(s => s.Title = "Fake: Book")
+            var fakeBook = Builder<Issue>.CreateNew()
+                .With(s => s.Title = "Fake: Issue")
                 .Build();
 
-            var fakeEdition = Builder<Edition>
-                .CreateNew()
-                .With(s => s.Title = fakeBook.Title)
-                .With(s => s.Book = fakeBook)
-                .Build();
-
-            Subject.BuildBookFilePath(fakeAuthor, fakeEdition, filename, ".mobi").Should().Be(expectedPath.AsOsAgnostic());
+            Subject.BuildBookFilePath(fakeSeries, fakeBook, filename, ".mobi").Should().Be(expectedPath.AsOsAgnostic());
         }
     }
 }

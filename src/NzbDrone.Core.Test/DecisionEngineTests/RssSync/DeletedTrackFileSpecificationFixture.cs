@@ -23,54 +23,54 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
     {
         private RemoteBook _parseResultMulti;
         private RemoteBook _parseResultSingle;
-        private BookFile _firstFile;
-        private BookFile _secondFile;
+        private ComicFile _firstFile;
+        private ComicFile _secondFile;
 
         [SetUp]
         public void Setup()
         {
             _firstFile =
-                new BookFile
+                new ComicFile
                 {
                     Id = 1,
-                    Path = "/My.Author.S01E01.mp3",
-                    Quality = new QualityModel(Quality.FLAC, new Revision(version: 1)),
+                    Path = "/My.Series.S01E01.mp3",
+                    Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)),
                     DateAdded = DateTime.Now,
-                    EditionId = 1
+                    IssueId = 1
                 };
             _secondFile =
-                new BookFile
+                new ComicFile
                 {
                     Id = 2,
-                    Path = "/My.Author.S01E02.mp3",
-                    Quality = new QualityModel(Quality.FLAC, new Revision(version: 1)),
+                    Path = "/My.Series.S01E02.mp3",
+                    Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)),
                     DateAdded = DateTime.Now,
-                    EditionId = 2
+                    IssueId = 2
                 };
 
-            var singleBookList = new List<Book> { new Book { Id = 1 } };
-            var doubleBookList = new List<Book>
+            var singleBookList = new List<Issue> { new Issue { Id = 1 } };
+            var doubleBookList = new List<Issue>
             {
-                new Book { Id = 1 },
-                new Book { Id = 2 }
+                new Issue { Id = 1 },
+                new Issue { Id = 2 }
             };
 
-            var fakeAuthor = Builder<Author>.CreateNew()
-                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.FLAC.Id })
-                         .With(c => c.Path = @"C:\Music\My.Author".AsOsAgnostic())
+            var fakeSeries = Builder<Series>.CreateNew()
+                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.CBZ_HD.Id })
+                         .With(c => c.Path = @"C:\Music\My.Series".AsOsAgnostic())
                          .Build();
 
             _parseResultMulti = new RemoteBook
             {
-                Author = fakeAuthor,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MP3, new Revision(version: 2)) },
+                Series = fakeSeries,
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
                 Books = doubleBookList
             };
 
             _parseResultSingle = new RemoteBook
             {
-                Author = fakeAuthor,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MP3, new Revision(version: 2)) },
+                Series = fakeSeries,
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
                 Books = singleBookList
             };
 
@@ -84,14 +84,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                   .Returns(enabled);
         }
 
-        private void SetupMediaFile(List<BookFile> files)
+        private void SetupMediaFile(List<ComicFile> files)
         {
             Mocker.GetMock<IMediaFileService>()
                               .Setup(v => v.GetFilesByBook(It.IsAny<int>()))
                               .Returns(files);
         }
 
-        private void WithExistingFile(BookFile trackFile)
+        private void WithExistingFile(ComicFile trackFile)
         {
             var path = trackFile.Path;
 
@@ -111,14 +111,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_return_true_when_searching()
         {
-            Subject.IsSatisfiedBy(_parseResultSingle, new AuthorSearchCriteria()).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_parseResultSingle, new SeriesSearchCriteria()).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_true_if_file_exists()
         {
             WithExistingFile(_firstFile);
-            SetupMediaFile(new List<BookFile> { _firstFile });
+            SetupMediaFile(new List<ComicFile> { _firstFile });
 
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
         }
@@ -126,7 +126,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_return_false_if_file_is_missing()
         {
-            SetupMediaFile(new List<BookFile> { _firstFile });
+            SetupMediaFile(new List<ComicFile> { _firstFile });
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
@@ -135,7 +135,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         {
             WithExistingFile(_firstFile);
             WithExistingFile(_secondFile);
-            SetupMediaFile(new List<BookFile> { _firstFile, _secondFile });
+            SetupMediaFile(new List<ComicFile> { _firstFile, _secondFile });
 
             Subject.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeTrue();
         }
@@ -144,7 +144,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         public void should_return_false_if_one_of_multiple_episode_is_missing()
         {
             WithExistingFile(_firstFile);
-            SetupMediaFile(new List<BookFile> { _firstFile, _secondFile });
+            SetupMediaFile(new List<ComicFile> { _firstFile, _secondFile });
 
             Subject.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeFalse();
         }

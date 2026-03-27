@@ -8,9 +8,9 @@ namespace NzbDrone.Core.HealthCheck.Checks
     public class MountCheck : HealthCheckBase
     {
         private readonly IDiskProvider _diskProvider;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
 
-        public MountCheck(IDiskProvider diskProvider, IAuthorService authorService, ILocalizationService localizationService)
+        public MountCheck(IDiskProvider diskProvider, ISeriesService authorService, ILocalizationService localizationService)
             : base(localizationService)
         {
             _diskProvider = diskProvider;
@@ -20,7 +20,7 @@ namespace NzbDrone.Core.HealthCheck.Checks
         public override HealthCheck Check()
         {
             // Not best for optimization but due to possible symlinks and junctions, we get mounts based on series path so internals can handle mount resolution.
-            var mounts = _authorService.AllAuthorPaths()
+            var mounts = _authorService.AllSeriesPaths()
                                       .Select(p => _diskProvider.GetMount(p.Value))
                                       .Where(m => m != null && m.MountOptions != null && m.MountOptions.IsReadOnly)
                                       .DistinctBy(m => m.RootDirectory)

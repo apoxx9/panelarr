@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Jobs
                     new ScheduledTask
                     {
                         Interval = 24 * 60,
-                        TypeName = typeof(RefreshAuthorCommand).FullName
+                        TypeName = typeof(RefreshSeriesCommand).FullName
                     },
 
                     new ScheduledTask

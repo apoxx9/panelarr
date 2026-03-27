@@ -18,11 +18,11 @@ namespace NzbDrone.Core.Organizer
 {
     public interface IBuildFileNames
     {
-        string BuildBookFileName(Author author, Edition edition, BookFile bookFile, NamingConfig namingConfig = null, List<CustomFormat> customFormats = null);
-        string BuildBookFilePath(Author author, Edition edition, string fileName, string extension);
-        string BuildBookPath(Author author);
+        string BuildBookFileName(Series author, Issue issue, ComicFile comicFile, NamingConfig namingConfig = null, List<CustomFormat> customFormats = null);
+        string BuildBookFilePath(Series author, Issue issue, string fileName, string extension);
+        string BuildBookPath(Series author);
         BasicNamingConfig GetBasicNamingConfig(NamingConfig nameSpec);
-        string GetAuthorFolder(Author author, NamingConfig namingConfig = null);
+        string GetSeriesFolder(Series author, NamingConfig namingConfig = null);
     }
 
     public class FileNameBuilder : IBuildFileNames
@@ -30,7 +30,8 @@ namespace NzbDrone.Core.Organizer
         private readonly INamingConfigService _namingConfigService;
         private readonly IQualityDefinitionService _qualityDefinitionService;
         private readonly ICustomFormatCalculationService _formatCalculator;
-        private readonly ICached<BookFormat[]> _trackFormatCache;
+        private readonly IPublisherService _publisherService;
+        private readonly ICached<IssueFormat[]> _trackFormatCache;
         private readonly Logger _logger;
 
         private static readonly Regex TitleRegex = new Regex(@"\{(?<prefix>[- ._\[(]*)(?<token>(?:[a-z0-9]+)(?:(?<separator>[- ._]+)(?:[a-z0-9]+))?)(?::(?<customFormat>[a-z0-9]+))?(?<suffix>[- ._)\]]*)\}",
@@ -42,10 +43,10 @@ namespace NzbDrone.Core.Organizer
         public static readonly Regex SeasonEpisodePatternRegex = new Regex(@"(?<separator>(?<=})[- ._]+?)?(?<seasonEpisode>s?{season(?:\:0+)?}(?<episodeSeparator>[- ._]?[ex])(?<episode>{episode(?:\:0+)?}))(?<separator>[- ._]+?(?={))?",
                                                                             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public static readonly Regex AuthorNameRegex = new Regex(@"(?<token>\{(?:Author)(?<separator>[- ._])(Clean)?(Sort)?Name(The)?\})",
+        public static readonly Regex SeriesNameRegex = new Regex(@"(?<token>\{(?:Series)(?<separator>[- ._])(Clean)?(Sort)?Name(The)?\})",
                                                                             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public static readonly Regex BookTitleRegex = new Regex(@"(?<token>\{(?:Book)(?<separator>[- ._])(Clean)?Title(The)?(NoSub)?\})",
+        public static readonly Regex IssueTitleRegex = new Regex(@"(?<token>\{(?:Issue)(?<separator>[- ._])(Clean)?Title(The)?(NoSub)?\})",
                                                                             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static readonly Regex FileNameCleanupRegex = new Regex(@"([- ._])(\1)+", RegexOptions.Compiled);
@@ -60,16 +61,18 @@ namespace NzbDrone.Core.Organizer
                                IQualityDefinitionService qualityDefinitionService,
                                ICacheManager cacheManager,
                                ICustomFormatCalculationService formatCalculator,
+                               IPublisherService publisherService,
                                Logger logger)
         {
             _namingConfigService = namingConfigService;
             _qualityDefinitionService = qualityDefinitionService;
             _formatCalculator = formatCalculator;
-            _trackFormatCache = cacheManager.GetCache<BookFormat[]>(GetType(), "bookFormat");
+            _publisherService = publisherService;
+            _trackFormatCache = cacheManager.GetCache<IssueFormat[]>(GetType(), "bookFormat");
             _logger = logger;
         }
 
-        public string BuildBookFileName(Author author, Edition edition, BookFile bookFile, NamingConfig namingConfig = null, List<CustomFormat> customFormats = null)
+        public string BuildBookFileName(Series author, Issue issue, ComicFile comicFile, NamingConfig namingConfig = null, List<CustomFormat> customFormats = null)
         {
             if (namingConfig == null)
             {
@@ -78,7 +81,7 @@ namespace NzbDrone.Core.Organizer
 
             if (!namingConfig.RenameBooks)
             {
-                return GetOriginalFileName(bookFile);
+                return GetOriginalFileName(comicFile);
             }
 
             if (namingConfig.StandardBookFormat.IsNullOrWhiteSpace())
@@ -86,16 +89,25 @@ namespace NzbDrone.Core.Organizer
                 throw new NamingFormatException("File name format cannot be empty");
             }
 
-            var pattern = namingConfig.StandardBookFormat;
+            var pattern = issue.IssueType switch
+            {
+                IssueType.Annual => namingConfig.AnnualIssueFormat.IsNullOrWhiteSpace()
+                    ? namingConfig.StandardBookFormat
+                    : namingConfig.AnnualIssueFormat,
+                IssueType.TPB or IssueType.Hardcover or IssueType.Omnibus => namingConfig.TPBFormat.IsNullOrWhiteSpace()
+                    ? namingConfig.StandardBookFormat
+                    : namingConfig.TPBFormat,
+                _ => namingConfig.StandardBookFormat
+            };
 
             var tokenHandlers = new Dictionary<string, Func<TokenMatch, string>>(FileNameBuilderTokenEqualityComparer.Instance);
 
-            AddAuthorTokens(tokenHandlers, author);
-            AddBookTokens(tokenHandlers, edition);
-            AddBookFileTokens(tokenHandlers, bookFile);
-            AddQualityTokens(tokenHandlers, author, bookFile);
-            AddMediaInfoTokens(tokenHandlers, bookFile);
-            AddCustomFormats(tokenHandlers, author, bookFile, customFormats);
+            AddSeriesTokens(tokenHandlers, author);
+            AddBookTokens(tokenHandlers, issue);
+            AddBookFileTokens(tokenHandlers, comicFile);
+            AddQualityTokens(tokenHandlers, author, comicFile);
+            AddMediaInfoTokens(tokenHandlers, comicFile);
+            AddCustomFormats(tokenHandlers, author, comicFile, customFormats);
 
             var splitPatterns = pattern.Split(new char[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
             var components = new List<string>();
@@ -119,7 +131,7 @@ namespace NzbDrone.Core.Organizer
             return Path.Combine(components.ToArray());
         }
 
-        public string BuildBookFilePath(Author author, Edition edition, string fileName, string extension)
+        public string BuildBookFilePath(Series author, Issue issue, string fileName, string extension)
         {
             Ensure.That(extension, () => extension).IsNotNullOrWhiteSpace();
 
@@ -128,7 +140,7 @@ namespace NzbDrone.Core.Organizer
             return Path.Combine(path, fileName + extension);
         }
 
-        public string BuildBookPath(Author author)
+        public string BuildBookPath(Series author)
         {
             return author.Path;
         }
@@ -159,12 +171,12 @@ namespace NzbDrone.Core.Organizer
                     basicNamingConfig.ReplaceSpaces = true;
                 }
 
-                if (token.StartsWith("{Author", StringComparison.InvariantCultureIgnoreCase))
+                if (token.StartsWith("{Series", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    basicNamingConfig.IncludeAuthorName = true;
+                    basicNamingConfig.IncludeSeriesName = true;
                 }
 
-                if (token.StartsWith("{Book", StringComparison.InvariantCultureIgnoreCase))
+                if (token.StartsWith("{Issue", StringComparison.InvariantCultureIgnoreCase))
                 {
                     basicNamingConfig.IncludeBookTitle = true;
                 }
@@ -178,17 +190,17 @@ namespace NzbDrone.Core.Organizer
             return basicNamingConfig;
         }
 
-        public string GetAuthorFolder(Author author, NamingConfig namingConfig = null)
+        public string GetSeriesFolder(Series author, NamingConfig namingConfig = null)
         {
             if (namingConfig == null)
             {
                 namingConfig = _namingConfigService.GetConfig();
             }
 
-            var pattern = namingConfig.AuthorFolderFormat;
+            var pattern = namingConfig.SeriesFolderFormat;
             var tokenHandlers = new Dictionary<string, Func<TokenMatch, string>>(FileNameBuilderTokenEqualityComparer.Instance);
 
-            AddAuthorTokens(tokenHandlers, author);
+            AddSeriesTokens(tokenHandlers, author);
 
             var splitPatterns = pattern.Split(new char[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
             var components = new List<string>();
@@ -235,103 +247,103 @@ namespace NzbDrone.Core.Organizer
             return name.Trim(' ', '.');
         }
 
-        private void AddAuthorTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Author author)
+        private void AddSeriesTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Series author)
         {
-            tokenHandlers["{Author Name}"] = m => author.Name;
-            tokenHandlers["{Author CleanName}"] = m => CleanTitle(author.Name);
-            tokenHandlers["{Author NameThe}"] = m => TitleThe(author.Name);
-            tokenHandlers["{Author SortName}"] = m => author?.Metadata?.Value?.NameLastFirst ?? string.Empty;
-            tokenHandlers["{Author NameFirstCharacter}"] = m => TitleThe(author.Name).Substring(0, 1).FirstCharToUpper();
+            tokenHandlers["{Series Name}"] = m => author.Name;
+            tokenHandlers["{Series Title}"] = m => author.Name;
+            tokenHandlers["{Series CleanName}"] = m => CleanTitle(author.Name);
+            tokenHandlers["{Series NameThe}"] = m => TitleThe(author.Name);
+            tokenHandlers["{Series SortName}"] = m => author?.Metadata?.Value?.SortName ?? string.Empty;
+            tokenHandlers["{Series NameFirstCharacter}"] = m => TitleThe(author.Name).Substring(0, 1).FirstCharToUpper();
 
             if (author.Metadata.Value.Disambiguation != null)
             {
-                tokenHandlers["{Author Disambiguation}"] = m => author.Metadata.Value.Disambiguation;
+                tokenHandlers["{Series Disambiguation}"] = m => author.Metadata.Value.Disambiguation;
+            }
+
+            var seriesYear = author?.Metadata?.Value?.Year;
+            tokenHandlers["{Series Year}"] = m => seriesYear.HasValue ? seriesYear.Value.ToString() : string.Empty;
+
+            var publisherId = author?.Metadata?.Value?.PublisherId;
+            if (publisherId.HasValue)
+            {
+                var publisher = _publisherService.GetPublisher(publisherId.Value);
+                tokenHandlers["{Publisher}"] = m => publisher?.Name ?? string.Empty;
+            }
+            else
+            {
+                tokenHandlers["{Publisher}"] = m => string.Empty;
             }
         }
 
-        private void AddBookTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Edition edition)
+        private void AddBookTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Issue issue)
         {
-            tokenHandlers["{Book Title}"] = m => edition.Title;
-            tokenHandlers["{Book CleanTitle}"] = m => CleanTitle(edition.Title);
-            tokenHandlers["{Book TitleThe}"] = m => TitleThe(edition.Title);
+            tokenHandlers["{Issue Title}"] = m => issue.Title;
+            tokenHandlers["{Issue CleanTitle}"] = m => CleanTitle(issue.Title);
+            tokenHandlers["{Issue TitleThe}"] = m => TitleThe(issue.Title);
 
-            var (titleNoSub, subtitle) = edition.Title.SplitBookTitle(edition.Book.Value.AuthorMetadata.Value.Name);
+            var (titleNoSub, subtitle) = issue.Title.SplitBookTitle(issue.SeriesMetadata.Value.Name);
 
-            tokenHandlers["{Book TitleNoSub}"] = m => titleNoSub;
-            tokenHandlers["{Book CleanTitleNoSub}"] = m => CleanTitle(titleNoSub);
-            tokenHandlers["{Book TitleTheNoSub}"] = m => TitleThe(titleNoSub);
+            tokenHandlers["{Issue TitleNoSub}"] = m => titleNoSub;
+            tokenHandlers["{Issue CleanTitleNoSub}"] = m => CleanTitle(titleNoSub);
+            tokenHandlers["{Issue TitleTheNoSub}"] = m => TitleThe(titleNoSub);
 
-            tokenHandlers["{Book Subtitle}"] = m => subtitle;
-            tokenHandlers["{Book CleanSubtitle}"] = m => CleanTitle(subtitle);
-            tokenHandlers["{Book SubtitleThe}"] = m => TitleThe(subtitle);
+            tokenHandlers["{Issue Subtitle}"] = m => subtitle;
+            tokenHandlers["{Issue CleanSubtitle}"] = m => CleanTitle(subtitle);
+            tokenHandlers["{Issue SubtitleThe}"] = m => TitleThe(subtitle);
 
-            var seriesLinks = edition.Book.Value.SeriesLinks.Value;
-            if (seriesLinks.Any())
+            var seriesLinks = issue.SeriesLinks.Value;
+            if (seriesLinks != null && seriesLinks.Any())
             {
                 var primarySeries = seriesLinks.OrderBy(x => x.SeriesPosition).First();
-                var seriesTitle = primarySeries.Series?.Value?.Title + (primarySeries.Position.IsNotNullOrWhiteSpace() ? $" #{primarySeries.Position}" : string.Empty);
+                var seriesTitle = primarySeries.SeriesGroup?.Value?.Title + (primarySeries.Position.IsNotNullOrWhiteSpace() ? $" #{primarySeries.Position}" : string.Empty);
 
-                tokenHandlers["{Book Series}"] = m => primarySeries.Series.Value.Title;
-                tokenHandlers["{Book SeriesPosition}"] = m => primarySeries.Position;
-                tokenHandlers["{Book SeriesTitle}"] = m => seriesTitle;
+                tokenHandlers["{Issue SeriesGroup}"] = m => primarySeries.SeriesGroup.Value.Title;
+                tokenHandlers["{Issue SeriesPosition}"] = m => primarySeries.Position;
+                tokenHandlers["{Issue SeriesTitle}"] = m => seriesTitle;
             }
 
-            if (edition.Disambiguation != null)
-            {
-                tokenHandlers["{Book Disambiguation}"] = m => edition.Disambiguation;
-            }
+            tokenHandlers["{Issue Number}"] = m => issue.IssueNumber.ToString(m.CustomFormat ?? "0.##");
+            tokenHandlers["{Issue Type}"] = m => issue.IssueType.ToString();
 
-            if (edition.ReleaseDate.HasValue)
+            var volumeNumber = issue.SeriesMetadata?.Value?.VolumeNumber;
+            tokenHandlers["{Volume Number}"] = m => volumeNumber.HasValue
+                ? volumeNumber.Value.ToString(m.CustomFormat ?? "0")
+                : string.Empty;
+
+            if (issue.ReleaseDate.HasValue)
             {
-                tokenHandlers["{Release Year}"] = m => edition.ReleaseDate.Value.Year.ToString();
-            }
-            else if (edition.Book.Value.ReleaseDate.HasValue)
-            {
-                tokenHandlers["{Release Year}"] = m => edition.Book.Value.ReleaseDate.Value.Year.ToString();
+                tokenHandlers["{Release Year}"] = m => issue.ReleaseDate.Value.Year.ToString();
+                tokenHandlers["{Edition Year}"] = m => issue.ReleaseDate.Value.Year.ToString();
+                tokenHandlers["{Release YearFirst}"] = m => issue.ReleaseDate.Value.Year.ToString();
             }
             else
             {
                 tokenHandlers["{Release Year}"] = m => "Unknown";
-            }
-
-            if (edition.ReleaseDate.HasValue)
-            {
-                tokenHandlers["{Edition Year}"] = m => edition.ReleaseDate.Value.Year.ToString();
-            }
-            else
-            {
                 tokenHandlers["{Edition Year}"] = m => "Unknown";
-            }
-
-            if (edition.Book.Value.ReleaseDate.HasValue)
-            {
-                tokenHandlers["{Release YearFirst}"] = m => edition.Book.Value.ReleaseDate.Value.Year.ToString();
-            }
-            else
-            {
                 tokenHandlers["{Release YearFirst}"] = m => "Unknown";
             }
         }
 
-        private void AddBookFileTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, BookFile bookFile)
+        private void AddBookFileTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, ComicFile comicFile)
         {
-            tokenHandlers["{Original Title}"] = m => GetOriginalTitle(bookFile);
-            tokenHandlers["{Original Filename}"] = m => GetOriginalFileName(bookFile);
-            tokenHandlers["{Release Group}"] = m => bookFile.ReleaseGroup ?? m.DefaultValue("Panelarr");
+            tokenHandlers["{Original Title}"] = m => GetOriginalTitle(comicFile);
+            tokenHandlers["{Original Filename}"] = m => GetOriginalFileName(comicFile);
+            tokenHandlers["{Release Group}"] = m => comicFile.ReleaseGroup ?? m.DefaultValue("Panelarr");
 
-            if (bookFile.PartCount > 1)
+            if (comicFile.PartCount > 1)
             {
-                tokenHandlers["{PartNumber}"] = m => bookFile.Part.ToString(m.CustomFormat);
-                tokenHandlers["{PartCount}"] = m => bookFile.PartCount.ToString(m.CustomFormat);
+                tokenHandlers["{PartNumber}"] = m => comicFile.Part.ToString(m.CustomFormat);
+                tokenHandlers["{PartCount}"] = m => comicFile.PartCount.ToString(m.CustomFormat);
             }
         }
 
-        private void AddQualityTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Author author, BookFile bookFile)
+        private void AddQualityTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Series author, ComicFile comicFile)
         {
-            var qualityTitle = _qualityDefinitionService.Get(bookFile.Quality.Quality).Title;
-            var qualityProper = GetQualityProper(bookFile.Quality);
+            var qualityTitle = _qualityDefinitionService.Get(comicFile.Quality.Quality).Title;
+            var qualityProper = GetQualityProper(comicFile.Quality);
 
-            //var qualityReal = GetQualityReal(author, bookFile.Quality);
+            //var qualityReal = GetQualityReal(author, comicFile.Quality);
             tokenHandlers["{Quality Full}"] = m => string.Format("{0}", qualityTitle);
             tokenHandlers["{Quality Title}"] = m => qualityTitle;
             tokenHandlers["{Quality Proper}"] = m => qualityProper;
@@ -339,34 +351,34 @@ namespace NzbDrone.Core.Organizer
             //tokenHandlers["{Quality Real}"] = m => qualityReal;
         }
 
-        private void AddMediaInfoTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, BookFile bookFile)
+        private void AddMediaInfoTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, ComicFile comicFile)
         {
-            if (bookFile.MediaInfo == null)
+            if (comicFile.MediaInfo == null)
             {
-                _logger.Trace("Media info is unavailable for {0}", bookFile);
+                _logger.Trace("Media info is unavailable for {0}", comicFile);
 
                 return;
             }
 
-            var audioCodec = MediaInfoFormatter.FormatAudioCodec(bookFile.MediaInfo);
-            var audioChannels = MediaInfoFormatter.FormatAudioChannels(bookFile.MediaInfo);
+            var audioCodec = MediaInfoFormatter.FormatAudioCodec(comicFile.MediaInfo);
+            var audioChannels = MediaInfoFormatter.FormatAudioChannels(comicFile.MediaInfo);
             var audioChannelsFormatted = audioChannels > 0 ?
                                 audioChannels.ToString("F1", CultureInfo.InvariantCulture) :
                                 string.Empty;
 
             tokenHandlers["{MediaInfo AudioCodec}"] = m => audioCodec;
             tokenHandlers["{MediaInfo AudioChannels}"] = m => audioChannelsFormatted;
-            tokenHandlers["{MediaInfo AudioBitRate}"] = m => MediaInfoFormatter.FormatAudioBitrate(bookFile.MediaInfo);
-            tokenHandlers["{MediaInfo AudioBitsPerSample}"] = m => MediaInfoFormatter.FormatAudioBitsPerSample(bookFile.MediaInfo);
-            tokenHandlers["{MediaInfo AudioSampleRate}"] = m => MediaInfoFormatter.FormatAudioSampleRate(bookFile.MediaInfo);
+            tokenHandlers["{MediaInfo AudioBitRate}"] = m => MediaInfoFormatter.FormatAudioBitrate(comicFile.MediaInfo);
+            tokenHandlers["{MediaInfo AudioBitsPerSample}"] = m => MediaInfoFormatter.FormatAudioBitsPerSample(comicFile.MediaInfo);
+            tokenHandlers["{MediaInfo AudioSampleRate}"] = m => MediaInfoFormatter.FormatAudioSampleRate(comicFile.MediaInfo);
         }
 
-        private void AddCustomFormats(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Author author, BookFile bookFile, List<CustomFormat> customFormats = null)
+        private void AddCustomFormats(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Series author, ComicFile comicFile, List<CustomFormat> customFormats = null)
         {
             if (customFormats == null)
             {
-                bookFile.Author = author;
-                customFormats = _formatCalculator.ParseCustomFormat(bookFile, author);
+                comicFile.Series = author;
+                customFormats = _formatCalculator.ParseCustomFormat(comicFile, author);
             }
 
             tokenHandlers["{Custom Formats}"] = m => string.Join(" ", customFormats.Where(x => x.IncludeCustomFormatWhenRenaming));
@@ -456,14 +468,14 @@ namespace NzbDrone.Core.Organizer
             return $"{prefix}{tokenText1}{separator}{tokenText2}{suffix}";
         }
 
-        private BookFormat[] GetTrackFormat(string pattern)
+        private IssueFormat[] GetTrackFormat(string pattern)
         {
             return _trackFormatCache.Get(pattern, () => SeasonEpisodePatternRegex.Matches(pattern).OfType<Match>()
-                .Select(match => new BookFormat
+                .Select(match => new IssueFormat
                 {
-                    BookSeparator = match.Groups["episodeSeparator"].Value,
+                    IssueSeparator = match.Groups["episodeSeparator"].Value,
                     Separator = match.Groups["separator"].Value,
-                    BookPattern = match.Groups["episode"].Value,
+                    IssuePattern = match.Groups["episode"].Value,
                 }).ToArray());
         }
 
@@ -482,19 +494,19 @@ namespace NzbDrone.Core.Organizer
             return string.Empty;
         }
 
-        private string GetOriginalTitle(BookFile bookFile)
+        private string GetOriginalTitle(ComicFile comicFile)
         {
-            if (bookFile.SceneName.IsNullOrWhiteSpace())
+            if (comicFile.SceneName.IsNullOrWhiteSpace())
             {
-                return GetOriginalFileName(bookFile);
+                return GetOriginalFileName(comicFile);
             }
 
-            return bookFile.SceneName;
+            return comicFile.SceneName;
         }
 
-        private string GetOriginalFileName(BookFile bookFile)
+        private string GetOriginalFileName(ComicFile comicFile)
         {
-            return Path.GetFileNameWithoutExtension(bookFile.Path);
+            return Path.GetFileNameWithoutExtension(comicFile.Path);
         }
 
         private static string CleanFileName(string name, NamingConfig namingConfig)

@@ -41,8 +41,8 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                 return Decision.Accept();
             }
 
-            var qualityProfile = subject.Author.QualityProfile.Value;
-            var delayProfile = _delayProfileService.BestForTags(subject.Author.Tags);
+            var qualityProfile = subject.Series.QualityProfile.Value;
+            var delayProfile = _delayProfileService.BestForTags(subject.Series.Tags);
             var delay = delayProfile.GetProtocolDelay(subject.Release.DownloadProtocol);
             var isPreferredProtocol = subject.Release.DownloadProtocol == delayProfile.PreferredProtocol;
 
@@ -56,11 +56,11 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
 
             if (isPreferredProtocol)
             {
-                foreach (var book in subject.Books)
+                foreach (var issue in subject.Books)
                 {
-                    var bookFiles = _mediaFileService.GetFilesByBook(book.Id);
+                    var comicFiles = _mediaFileService.GetFilesByBook(issue.Id);
 
-                    foreach (var file in bookFiles)
+                    foreach (var file in comicFiles)
                     {
                         var currentQuality = file.Quality;
                         var newQuality = subject.ParsedBookInfo.Quality;
@@ -103,7 +103,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
 
             var bookIds = subject.Books.Select(e => e.Id);
 
-            var oldest = _pendingReleaseService.OldestPendingRelease(subject.Author.Id, bookIds.ToArray());
+            var oldest = _pendingReleaseService.OldestPendingRelease(subject.Series.Id, bookIds.ToArray());
 
             if (oldest != null && oldest.Release.AgeMinutes > delay)
             {

@@ -12,9 +12,9 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Castle (2009)", "castle2009")]
         [TestCase("Parenthood.2010", "parenthood2010")]
         [TestCase("Law_and_Order_SVU", "lawordersvu")]
-        public void should_normalize_author_title(string parsedAuthorName, string authorName)
+        public void should_normalize_author_title(string parsedSeriesName, string authorName)
         {
-            var result = parsedAuthorName.CleanAuthorName();
+            var result = parsedSeriesName.CleanSeriesName();
             result.Should().Be(authorName);
         }
 
@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("24", "24")]
         public void should_remove_special_characters_and_casing(string dirty, string clean)
         {
-            var result = dirty.CleanAuthorName();
+            var result = dirty.CleanSeriesName();
             result.Should().Be(clean);
         }
 
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Test.ParserTests
             foreach (var s in dirtyFormat)
             {
                 var dirty = string.Format(s, word);
-                dirty.CleanAuthorName().Should().Be("wordword");
+                dirty.CleanSeriesName().Should().Be("wordword");
             }
         }
 
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.ParserTests
             foreach (var s in dirtyFormat)
             {
                 var dirty = string.Format(s, word);
-                dirty.CleanAuthorName().Should().Be("wordword" + word.ToLower());
+                dirty.CleanSeriesName().Should().Be("wordword" + word.ToLower());
             }
         }
 
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.Test.ParserTests
             foreach (var s in dirtyFormat)
             {
                 var dirty = string.Format(s, "a");
-                dirty.CleanAuthorName().Should().Be("wordword");
+                dirty.CleanSeriesName().Should().Be("wordword");
             }
         }
 
@@ -110,16 +110,16 @@ namespace NzbDrone.Core.Test.ParserTests
             foreach (var s in dirtyFormat)
             {
                 var dirty = string.Format(s, word);
-                dirty.CleanAuthorName().Should().Be("word" + word.ToLower() + "word");
+                dirty.CleanSeriesName().Should().Be("word" + word.ToLower() + "word");
             }
         }
 
         [TestCase("The Office", "theoffice")]
         [TestCase("The Tonight Show With Jay Leno", "thetonightshowwithjayleno")]
         [TestCase("The.Daily.Show", "thedailyshow")]
-        public void should_not_remove_from_the_beginning_of_the_title(string parsedAuthorName, string authorName)
+        public void should_not_remove_from_the_beginning_of_the_title(string parsedSeriesName, string authorName)
         {
-            var result = parsedAuthorName.CleanAuthorName();
+            var result = parsedSeriesName.CleanSeriesName();
             result.Should().Be(authorName);
         }
 
@@ -141,14 +141,14 @@ namespace NzbDrone.Core.Test.ParserTests
             foreach (var s in dirtyFormat)
             {
                 var dirty = string.Format(s, word);
-                dirty.CleanAuthorName().Should().Be(word + "wordword");
+                dirty.CleanSeriesName().Should().Be(word + "wordword");
             }
         }
 
         [Test]
         public void should_not_clean_trailing_a()
         {
-            "Tokyo Ghoul A".CleanAuthorName().Should().Be("tokyoghoula");
+            "Tokyo Ghoul A".CleanSeriesName().Should().Be("tokyoghoula");
         }
 
         [TestCase("3%", "3percent")]
@@ -156,7 +156,7 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Big Jay Oakerson's What's Your F@%king Deal?!", "bigjayoakersonswhatsyourfkingdeal")]
         public void should_replace_percent_sign_with_percent_following_numbers(string input, string expected)
         {
-            input.CleanAuthorName().Should().Be(expected);
+            input.CleanSeriesName().Should().Be(expected);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace NzbDrone.Automation.Test
             var imageName = MethodBase.GetCurrentMethod().Name;
             TakeScreenshot(imageName);
 
-            _page.Find(By.CssSelector("div[class*='AuthorIndex']")).Should().NotBeNull();
+            _page.Find(By.CssSelector("div[class*='SeriesIndex']")).Should().NotBeNull();
         }
 
         [Test]

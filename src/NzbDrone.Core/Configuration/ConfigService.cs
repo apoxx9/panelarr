@@ -151,11 +151,11 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("AutoRedownloadFailedFromInteractiveSearch", value); }
         }
 
-        public bool CreateEmptyAuthorFolders
+        public bool CreateEmptySeriesFolders
         {
-            get { return GetValueBoolean("CreateEmptyAuthorFolders", false); }
+            get { return GetValueBoolean("CreateEmptySeriesFolders", false); }
 
-            set { SetValue("CreateEmptyAuthorFolders", value); }
+            set { SetValue("CreateEmptySeriesFolders", value); }
         }
 
         public bool DeleteEmptyFolders

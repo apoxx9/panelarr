@@ -11,25 +11,24 @@ using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.BookImport;
-using NzbDrone.Core.MediaFiles.BookImport.Aggregation;
-using NzbDrone.Core.MediaFiles.BookImport.Identification;
+using NzbDrone.Core.MediaFiles.IssueImport;
+using NzbDrone.Core.MediaFiles.IssueImport.Aggregation;
+using NzbDrone.Core.MediaFiles.IssueImport.Identification;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
-namespace NzbDrone.Core.Test.MediaFiles.BookImport
+namespace NzbDrone.Core.Test.MediaFiles.IssueImport
 {
     [TestFixture]
     public class ImportDecisionMakerFixture : FileSystemTest<ImportDecisionMaker>
     {
         private List<IFileInfo> _fileInfos;
         private LocalBook _localTrack;
-        private Author _author;
-        private Book _book;
-        private Edition _edition;
+        private Series _author;
+        private Issue _book;
         private QualityModel _quality;
 
         private IdentificationOverrides _idOverrides;
@@ -86,32 +85,28 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport
             _fail2.Setup(c => c.IsSatisfiedBy(It.IsAny<LocalBook>(), It.IsAny<DownloadClientItem>())).Returns(Decision.Reject("_fail2"));
             _fail3.Setup(c => c.IsSatisfiedBy(It.IsAny<LocalBook>(), It.IsAny<DownloadClientItem>())).Returns(Decision.Reject("_fail3"));
 
-            _author = Builder<Author>.CreateNew()
+            _author = Builder<Series>.CreateNew()
                 .With(e => e.QualityProfileId = 1)
                 .With(e => e.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() })
                 .Build();
 
-            _book = Builder<Book>.CreateNew()
-                .With(x => x.Author = _author)
+            _book = Builder<Issue>.CreateNew()
+                .With(x => x.Series = _author)
                 .Build();
 
-            _edition = Builder<Edition>.CreateNew()
-                .With(x => x.Book = _book)
-                .Build();
-
-            _quality = new QualityModel(Quality.MP3);
+            _quality = new QualityModel(Quality.CBR);
 
             _localTrack = new LocalBook
             {
-                Author = _author,
+                Series = _author,
                 Quality = _quality,
-                Book = new Book(),
+                Issue = new Issue(),
                 Path = @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV.avi".AsOsAgnostic()
             };
 
             _idOverrides = new IdentificationOverrides
             {
-                Author = _author
+                Series = _author
             };
 
             _idConfig = new ImportDecisionMakerConfig();
@@ -123,7 +118,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport
                 .Returns((List<LocalBook> tracks, IdentificationOverrides idOverrides, ImportDecisionMakerConfig config) =>
                 {
                     var ret = new LocalEdition(tracks);
-                    ret.Edition = _edition;
+                    ret.Issue = _book;
                     return new List<LocalEdition> { ret };
                 });
 
@@ -163,7 +158,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport
                   .Setup(s => s.Augment(It.IsAny<LocalBook>(), It.IsAny<bool>()))
                   .Callback<LocalBook, bool>((localTrack, otherFiles) =>
                   {
-                      localTrack.Book = _localTrack.Book;
+                      localTrack.Issue = _localTrack.Issue;
                   });
         }
 

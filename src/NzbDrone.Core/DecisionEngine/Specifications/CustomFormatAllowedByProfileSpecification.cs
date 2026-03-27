@@ -11,12 +11,12 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
         {
-            var minScore = subject.Author.QualityProfile.Value.MinFormatScore;
+            var minScore = subject.Series.QualityProfile.Value.MinFormatScore;
             var score = subject.CustomFormatScore;
 
             if (score < minScore)
             {
-                return Decision.Reject("Custom Formats {0} have score {1} below Author profile minimum {2}", subject.CustomFormats.ConcatToString(), score, minScore);
+                return Decision.Reject("Custom Formats {0} have score {1} below Series profile minimum {2}", subject.CustomFormats.ConcatToString(), score, minScore);
             }
 
             return Decision.Accept();

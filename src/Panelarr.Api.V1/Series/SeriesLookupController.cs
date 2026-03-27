@@ -1,0 +1,53 @@
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using NzbDrone.Core.MediaCover;
+using NzbDrone.Core.MetadataSource;
+using NzbDrone.Core.Organizer;
+using Panelarr.Http;
+
+namespace Panelarr.Api.V1.Series
+{
+    [V1ApiController("author/lookup")]
+    public class SeriesLookupController : Controller
+    {
+        private readonly ISearchForNewSeries _searchProxy;
+        private readonly IBuildFileNames _fileNameBuilder;
+        private readonly IMapCoversToLocal _coverMapper;
+
+        public SeriesLookupController(ISearchForNewSeries searchProxy, IBuildFileNames fileNameBuilder, IMapCoversToLocal coverMapper)
+        {
+            _searchProxy = searchProxy;
+            _fileNameBuilder = fileNameBuilder;
+            _coverMapper = coverMapper;
+        }
+
+        [HttpGet]
+        public object Search([FromQuery] string term)
+        {
+            var searchResults = _searchProxy.SearchForNewSeries(term);
+            return MapToResource(searchResults).ToList();
+        }
+
+        private IEnumerable<SeriesResource> MapToResource(IEnumerable<NzbDrone.Core.Books.Series> author)
+        {
+            foreach (var currentSeries in author)
+            {
+                var resource = currentSeries.ToResource();
+
+                _coverMapper.ConvertToLocalUrls(resource.Id, MediaCoverEntity.Series, resource.Images);
+
+                var poster = resource.Images.FirstOrDefault(c => c.CoverType == MediaCoverTypes.Poster);
+
+                if (poster != null)
+                {
+                    resource.RemotePoster = poster.RemoteUrl;
+                }
+
+                resource.Folder = _fileNameBuilder.GetSeriesFolder(currentSeries);
+
+                yield return resource;
+            }
+        }
+    }
+}

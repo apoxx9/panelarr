@@ -11,8 +11,8 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
         public DateTime? ReleaseDate { get; set; }
         public List<string> Genres { get; set; }
         public List<int> RelatedWorks { get; set; }
-        public List<BookResource> Books { get; set; }
-        public List<SeriesResource> Series { get; set; } = new List<SeriesResource>();
-        public List<AuthorResource> Authors { get; set; } = new List<AuthorResource>();
+        public List<IssueResource> Books { get; set; }
+        public List<SeriesResource> SeriesGroup { get; set; } = new List<SeriesResource>();
+        public List<SeriesResource> Seriess { get; set; } = new List<SeriesResource>();
     }
 }

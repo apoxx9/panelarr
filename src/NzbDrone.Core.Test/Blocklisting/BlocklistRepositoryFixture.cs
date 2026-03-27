@@ -19,10 +19,10 @@ namespace NzbDrone.Core.Test.Blocklisting
         {
             _blocklist = new Blocklist
             {
-                AuthorId = 12345,
-                BookIds = new List<int> { 1 },
-                Quality = new QualityModel(Quality.FLAC),
-                SourceTitle = "author.name.book.title",
+                SeriesId = 12345,
+                IssueIds = new List<int> { 1 },
+                Quality = new QualityModel(Quality.CBZ_HD),
+                SourceTitle = "author.name.issue.title",
                 Date = DateTime.UtcNow
             };
         }
@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Test.Blocklisting
         {
             Subject.Insert(_blocklist);
 
-            Subject.All().First().BookIds.Should().Contain(_blocklist.BookIds);
+            Subject.All().First().IssueIds.Should().Contain(_blocklist.IssueIds);
         }
 
         [Test]
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Test.Blocklisting
         {
             Subject.Insert(_blocklist);
 
-            Subject.BlocklistedByTitle(_blocklist.AuthorId, _blocklist.SourceTitle.ToUpperInvariant()).Should().HaveCount(1);
+            Subject.BlocklistedByTitle(_blocklist.SeriesId, _blocklist.SourceTitle.ToUpperInvariant()).Should().HaveCount(1);
         }
     }
 }

@@ -40,95 +40,95 @@ namespace NzbDrone.Core.Parser
 
         private static readonly Regex[] ReportBookTitleRegex = new[]
         {
-            //ruTracker - (Genre) [Source]? Author - Discography
+            //ruTracker - (Genre) [Source]? Series - Discography
             new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<author>.+?)(?: - )(?<discography>Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author - Discography with two years
+            //Series - Discography with two years
             new Regex(@"^(?<author>.+?)(?: - )(?:.+?)?(?<discography>Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author - Discography with end year
+            //Series - Discography with end year
             new Regex(@"^(?<author>.+?)(?: - )(?:.+?)?(?<discography>Discography|Discografia).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author Discography with two years
+            //Series Discography with two years
             new Regex(@"^(?<author>.+?)\W*(?<discography>Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author Discography with end year
+            //Series Discography with end year
             new Regex(@"^(?<author>.+?)\W*(?<discography>Discography|Discografia).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author Discography
+            //Series Discography
             new Regex(@"^(?<author>.+?)\W*(?<discography>Discography|Discografia)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //MyAnonaMouse - Title by Author [lang / pdf]
-            new Regex(@"^(?<book>.+)\bby\b(?<author>.+?)(?:\[|\()",
+            //MyAnonaMouse - Title by Series [lang / pdf]
+            new Regex(@"^(?<issue>.+)\bby\b(?<author>.+?)(?:\[|\()",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //ruTracker - (Genre) [Source]? Author - Book - Year
-            new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<author>.+?)(?: - )(?<book>.+?)(?: - )(?<releaseyear>\d{4})",
+            //ruTracker - (Genre) [Source]? Series - Issue - Year
+            new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<author>.+?)(?: - )(?<issue>.+?)(?: - )(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author-Book-Version-Source-Year
+            //Series-Issue-Version-Source-Year
             //ex. Imagine Dragons-Smoke And Mirrors-Deluxe Edition-2CD-FLAC-2015-JLM
-            new Regex(@"^(?<author>.+?)[-](?<book>.+?)[-](?:[\(|\[]?)(?<version>.+?(?:Edition)?)(?:[\)|\]]?)[-](?<source>\d?CD|WEB).+?(?<releaseyear>\d{4})",
+            new Regex(@"^(?<author>.+?)[-](?<issue>.+?)[-](?:[\(|\[]?)(?<version>.+?(?:Edition)?)(?:[\)|\]]?)[-](?<source>\d?CD|WEB).+?(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author-Book-Source-Year
+            //Series-Issue-Source-Year
             //ex. Dani_Sbert-Togheter-WEB-2017-FURY
-            new Regex(@"^(?<author>.+?)[-](?<book>.+?)[-](?<source>\d?CD|WEB).+?(?<releaseyear>\d{4})",
+            new Regex(@"^(?<author>.+?)[-](?<issue>.+?)[-](?<source>\d?CD|WEB).+?(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author - Book (Year) Strict
-            new Regex(@"^(?:(?<author>.+?)(?: - )+)(?<book>.+?)\W*(?:\(|\[).+?(?<releaseyear>\d{4})",
+            //Series - Issue (Year) Strict
+            new Regex(@"^(?:(?<author>.+?)(?: - )+)(?<issue>.+?)\W*(?:\(|\[).+?(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author - Book (Year)
-            new Regex(@"^(?:(?<author>.+?)(?: - )+)(?<book>.+?)\W*(?:\(|\[)(?<releaseyear>\d{4})",
+            //Series - Issue (Year)
+            new Regex(@"^(?:(?<author>.+?)(?: - )+)(?<issue>.+?)\W*(?:\(|\[)(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author - Book - Year [something]
-            new Regex(@"^(?:(?<author>.+?)(?: - )+)(?<book>.+?)\W*(?: - )(?<releaseyear>\d{4})\W*(?:\(|\[)",
+            //Series - Issue - Year [something]
+            new Regex(@"^(?:(?<author>.+?)(?: - )+)(?<issue>.+?)\W*(?: - )(?<releaseyear>\d{4})\W*(?:\(|\[)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author - Book [something] or Author - Book (something)
-            new Regex(@"^(?:(?<author>.+?)(?: - )+)(?<book>.+?)\W*(?:\(|\[)",
+            //Series - Issue [something] or Series - Issue (something)
+            new Regex(@"^(?:(?<author>.+?)(?: - )+)(?<issue>.+?)\W*(?:\(|\[)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author - Book Year
-            new Regex(@"^(?:(?<author>.+?)(?: - )+)(?<book>.+?)\W*(?<releaseyear>\d{4})",
+            //Series - Issue Year
+            new Regex(@"^(?:(?<author>.+?)(?: - )+)(?<issue>.+?)\W*(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author-Book (Year) Strict
-            //Hyphen no space between author and book
-            new Regex(@"^(?:(?<author>.+?)(?:-)+)(?<book>.+?)\W*(?:\(|\[).+?(?<releaseyear>\d{4})",
+            //Series-Issue (Year) Strict
+            //Hyphen no space between author and issue
+            new Regex(@"^(?:(?<author>.+?)(?:-)+)(?<issue>.+?)\W*(?:\(|\[).+?(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author-Book (Year)
-            //Hyphen no space between author and book
-            new Regex(@"^(?:(?<author>.+?)(?:-)+)(?<book>.+?)\W*(?:\(|\[)(?<releaseyear>\d{4})",
+            //Series-Issue (Year)
+            //Hyphen no space between author and issue
+            new Regex(@"^(?:(?<author>.+?)(?:-)+)(?<issue>.+?)\W*(?:\(|\[)(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author-Book [something] or Author-Book (something)
-            //Hyphen no space between author and book
-            new Regex(@"^(?:(?<author>.+?)(?:-)+)(?<book>.+?)\W*(?:\(|\[)",
+            //Series-Issue [something] or Series-Issue (something)
+            //Hyphen no space between author and issue
+            new Regex(@"^(?:(?<author>.+?)(?:-)+)(?<issue>.+?)\W*(?:\(|\[)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author-Book-something-Year
-            new Regex(@"^(?:(?<author>.+?)(?:-)+)(?<book>.+?)(?:-.+?)(?<releaseyear>\d{4})",
+            //Series-Issue-something-Year
+            new Regex(@"^(?:(?<author>.+?)(?:-)+)(?<issue>.+?)(?:-.+?)(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author-Book Year
-            //Hyphen no space between author and book
-            new Regex(@"^(?:(?<author>.+?)(?:-)+)(?:(?<book>.+?)(?:-)+)(?<releaseyear>\d{4})",
+            //Series-Issue Year
+            //Hyphen no space between author and issue
+            new Regex(@"^(?:(?<author>.+?)(?:-)+)(?:(?<issue>.+?)(?:-)+)(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Author - Year - Book
-            // Hypen with no or more spaces between author/book/year
-            new Regex(@"^(?:(?<author>.+?)(?:-))(?<releaseyear>\d{4})(?:-)(?<book>[^-]+)",
+            //Series - Year - Issue
+            // Hypen with no or more spaces between author/issue/year
+            new Regex(@"^(?:(?<author>.+?)(?:-))(?<releaseyear>\d{4})(?:-)(?<issue>[^-]+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -218,7 +218,7 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex[] CommonTagRegex = new Regex[]
         {
             new Regex(@"(\[|\()*\b((featuring|feat.|feat|ft|ft.)\s{1}){1}\s*.*(\]|\))*", RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            new Regex(@"(?:\(|\[)(?:[^\(\[]*)(?:version|limited|deluxe|single|clean|book|special|bonus|promo|remastered)(?:[^\)\]]*)(?:\)|\])", RegexOptions.IgnoreCase | RegexOptions.Compiled)
+            new Regex(@"(?:\(|\[)(?:[^\(\[]*)(?:version|limited|deluxe|single|clean|issue|special|bonus|promo|remastered)(?:[^\)\]]*)(?:\)|\])", RegexOptions.IgnoreCase | RegexOptions.Compiled)
         };
 
         private static readonly Regex[] BracketRegex = new Regex[]
@@ -235,12 +235,12 @@ namespace NzbDrone.Core.Parser
 
             ParsedTrackInfo result = null;
 
-            Logger.Debug("Attempting to parse book info using directory and file names. {0}", fileInfo.Directory.Name);
+            Logger.Debug("Attempting to parse issue info using directory and file names. {0}", fileInfo.Directory.Name);
             result = ParseTitle(fileInfo.Directory.Name + " " + fileInfo.Name);
 
             if (result == null)
             {
-                Logger.Debug("Attempting to parse book info using directory name. {0}", fileInfo.Directory.Name);
+                Logger.Debug("Attempting to parse issue info using directory name. {0}", fileInfo.Directory.Name);
                 result = ParseTitle(fileInfo.Directory.Name + fileInfo.Extension);
             }
 
@@ -330,7 +330,7 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        public static ParsedBookInfo ParseBookTitleWithSearchCriteria(string title, Author author, List<Book> books)
+        public static ParsedBookInfo ParseBookTitleWithSearchCriteria(string title, Series author, List<Issue> issues)
         {
             try
             {
@@ -339,12 +339,12 @@ namespace NzbDrone.Core.Parser
                     return null;
                 }
 
-                var authorName = author.Name == "Various Authors" ? "VA" : author.Name.RemoveAccent();
+                var authorName = author.Name == "Various Seriess" ? "VA" : author.Name.RemoveAccent();
 
-                Logger.Debug("Parsing string '{0}' using search criteria author: '{1}' books: '{2}'",
+                Logger.Debug("Parsing string '{0}' using search criteria author: '{1}' issues: '{2}'",
                              title,
                              authorName.RemoveAccent(),
-                             string.Join(", ", books.Select(a => a.Title.RemoveAccent())));
+                             string.Join(", ", issues.Select(a => a.Title.RemoveAccent())));
 
                 var releaseTitle = RemoveFileExtension(title);
 
@@ -355,17 +355,15 @@ namespace NzbDrone.Core.Parser
 
                 simpleTitle = CleanTorrentSuffixRegex.Replace(simpleTitle);
 
-                var bestBook = books
-                    .OrderByDescending(x => simpleTitle.FuzzyMatch(x.Editions.Value.Single(x => x.Monitored).Title, wordDelimiters: WordDelimiters))
-                    .First()
-                    .Editions.Value
-                    .Single(x => x.Monitored);
+                var bestBook = issues
+                    .OrderByDescending(x => simpleTitle.FuzzyMatch(x.Title, wordDelimiters: WordDelimiters))
+                    .First();
 
-                var foundAuthor = GetTitleFuzzy(simpleTitle, authorName, out var remainder);
+                var foundSeries = GetTitleFuzzy(simpleTitle, authorName, out var remainder);
 
-                if (foundAuthor == null)
+                if (foundSeries == null)
                 {
-                    foundAuthor = GetTitleFuzzy(simpleTitle, authorName.ToLastFirst(), out remainder);
+                    foundSeries = GetTitleFuzzy(simpleTitle, authorName.ToLastFirst(), out remainder);
                 }
 
                 var foundBook = GetTitleFuzzy(remainder, bestBook.Title, out _);
@@ -375,18 +373,18 @@ namespace NzbDrone.Core.Parser
                     foundBook = GetTitleFuzzy(remainder, bestBook.Title.SplitBookTitle(authorName).Item1, out _);
                 }
 
-                Logger.Trace($"Found {foundAuthor} - {foundBook} with fuzzy parser");
+                Logger.Trace($"Found {foundSeries} - {foundBook} with fuzzy parser");
 
-                if (foundAuthor == null || foundBook == null)
+                if (foundSeries == null || foundBook == null)
                 {
                     return null;
                 }
 
                 var result = new ParsedBookInfo
                 {
-                    AuthorName = foundAuthor,
-                    AuthorTitleInfo = GetAuthorTitleInfo(foundAuthor),
-                    BookTitle = foundBook
+                    SeriesName = foundSeries,
+                    SeriesTitleInfo = GetSeriesTitleInfo(foundSeries),
+                    IssueTitle = foundBook
                 };
 
                 try
@@ -538,23 +536,23 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        public static (string, string) SplitBookTitle(this string book, string author)
+        public static (string, string) SplitBookTitle(this string issue, string author)
         {
             // Strip author from title, eg Tom Clancy: Ghost Protocol
-            if (book.StartsWith($"{author}:"))
+            if (issue.StartsWith($"{author}:"))
             {
-                book = book.Split(':', 2)[1].Trim();
+                issue = issue.Split(':', 2)[1].Trim();
             }
 
-            var parenthesis = book.IndexOf('(');
-            var colon = book.IndexOf(':');
+            var parenthesis = issue.IndexOf('(');
+            var colon = issue.IndexOf(':');
 
             string[] parts = null;
 
             if (parenthesis > -1)
             {
-                var endParenthesis = book.IndexOf(')', parenthesis);
-                if (endParenthesis == -1 || !book.Substring(parenthesis + 1, endParenthesis - parenthesis).Contains(' '))
+                var endParenthesis = issue.IndexOf(')', parenthesis);
+                if (endParenthesis == -1 || !issue.Substring(parenthesis + 1, endParenthesis - parenthesis).Contains(' '))
                 {
                     parenthesis = -1;
                 }
@@ -564,21 +562,21 @@ namespace NzbDrone.Core.Parser
             {
                 if (colon < parenthesis)
                 {
-                    parts = book.Split(':', 2);
+                    parts = issue.Split(':', 2);
                 }
                 else
                 {
-                    parts = book.Split('(', 2);
+                    parts = issue.Split('(', 2);
                     parts[1] = parts[1].TrimEnd(')');
                 }
             }
             else if (colon > -1)
             {
-                parts = book.Split(':', 2);
+                parts = issue.Split(':', 2);
             }
             else if (parenthesis > -1)
             {
-                parts = book.Split('(');
+                parts = issue.Split('(');
                 parts[1] = parts[1].TrimEnd(')');
             }
 
@@ -587,10 +585,10 @@ namespace NzbDrone.Core.Parser
                 return (parts[0].Trim(), parts[1].TrimEnd(':').Trim());
             }
 
-            return (book, string.Empty);
+            return (issue, string.Empty);
         }
 
-        public static string CleanAuthorName(this string name)
+        public static string CleanSeriesName(this string name)
         {
             if (name.IsNullOrWhiteSpace())
             {
@@ -675,14 +673,14 @@ namespace NzbDrone.Core.Parser
             return title;
         }
 
-        public static string CleanBookTitle(this string book)
+        public static string CleanBookTitle(this string issue)
         {
-            return CommonTagRegex[1].Replace(book, string.Empty).Trim();
+            return CommonTagRegex[1].Replace(issue, string.Empty).Trim();
         }
 
-        public static string RemoveBracketsAndContents(this string book)
+        public static string RemoveBracketsAndContents(this string issue)
         {
-            var intermediate = book;
+            var intermediate = issue;
             foreach (var regex in BracketRegex)
             {
                 intermediate = regex.Replace(intermediate, string.Empty).Trim();
@@ -754,21 +752,21 @@ namespace NzbDrone.Core.Parser
 
             var result = new ParsedTrackInfo();
 
-            result.Authors = new List<string> { authorName };
+            result.Seriess = new List<string> { authorName };
 
             Logger.Debug("Track Parsed. {0}", result);
             return result;
         }
 
-        private static AuthorTitleInfo GetAuthorTitleInfo(string title)
+        private static SeriesTitleInfo GetSeriesTitleInfo(string title)
         {
-            var authorTitleInfo = new AuthorTitleInfo();
+            var authorTitleInfo = new SeriesTitleInfo();
             authorTitleInfo.Title = title;
 
             return authorTitleInfo;
         }
 
-        public static string ParseAuthorName(string title)
+        public static string ParseSeriesName(string title)
         {
             Logger.Debug("Parsing string '{0}'", title);
 
@@ -776,16 +774,16 @@ namespace NzbDrone.Core.Parser
 
             if (parseResult == null)
             {
-                return CleanAuthorName(title);
+                return CleanSeriesName(title);
             }
 
-            return parseResult.AuthorName;
+            return parseResult.SeriesName;
         }
 
         private static ParsedBookInfo ParseBookMatchCollection(MatchCollection matchCollection, string releaseTitle)
         {
             var authorName = matchCollection[0].Groups["author"].Value.Replace('.', ' ').Replace('_', ' ');
-            var bookTitle = matchCollection[0].Groups["book"].Value.Replace('.', ' ').Replace('_', ' ');
+            var bookTitle = matchCollection[0].Groups["issue"].Value.Replace('.', ' ').Replace('_', ' ');
             var releaseVersion = matchCollection[0].Groups["version"].Value.Replace('.', ' ').Replace('_', ' ');
             authorName = RequestInfoRegex.Replace(authorName, "").Trim(' ');
             bookTitle = RequestInfoRegex.Replace(bookTitle, "").Trim(' ');
@@ -800,9 +798,9 @@ namespace NzbDrone.Core.Parser
                 ReleaseTitle = releaseTitle
             };
 
-            result.AuthorName = authorName;
-            result.BookTitle = bookTitle;
-            result.AuthorTitleInfo = GetAuthorTitleInfo(result.AuthorName);
+            result.SeriesName = authorName;
+            result.IssueTitle = bookTitle;
+            result.SeriesTitleInfo = GetSeriesTitleInfo(result.SeriesName);
             result.ReleaseDate = releaseYear.ToString();
             result.ReleaseVersion = releaseVersion;
 
@@ -822,10 +820,10 @@ namespace NzbDrone.Core.Parser
                     result.DiscographyEnd = discEnd;
                 }
 
-                result.BookTitle = "Discography";
+                result.IssueTitle = "Discography";
             }
 
-            Logger.Debug("Book Parsed. {0}", result);
+            Logger.Debug("Issue Parsed. {0}", result);
 
             return result;
         }

@@ -24,27 +24,27 @@ namespace NzbDrone.Core.Notifications.Twitter
             _twitterService.SendNotification($"Grabbed: {message.Message}", Settings);
         }
 
-        public override void OnReleaseImport(BookDownloadMessage message)
+        public override void OnReleaseImport(IssueDownloadMessage message)
         {
             _twitterService.SendNotification($"Imported: {message.Message}", Settings);
         }
 
-        public override void OnAuthorAdded(Author author)
+        public override void OnSeriesAdded(Series author)
         {
-            _twitterService.SendNotification($"Author added: {author.Name}", Settings);
+            _twitterService.SendNotification($"Series added: {author.Name}", Settings);
         }
 
-        public override void OnAuthorDelete(AuthorDeleteMessage deleteMessage)
-        {
-            _twitterService.SendNotification($"Deleted: {deleteMessage.Message}", Settings);
-        }
-
-        public override void OnBookDelete(BookDeleteMessage deleteMessage)
+        public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
             _twitterService.SendNotification($"Deleted: {deleteMessage.Message}", Settings);
         }
 
-        public override void OnBookFileDelete(BookFileDeleteMessage deleteMessage)
+        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
+        {
+            _twitterService.SendNotification($"Deleted: {deleteMessage.Message}", Settings);
+        }
+
+        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             _twitterService.SendNotification($"Deleted: {deleteMessage.Message}", Settings);
         }
@@ -59,7 +59,7 @@ namespace NzbDrone.Core.Notifications.Twitter
             _twitterService.SendNotification($"Download Failed: {message.Message}", Settings);
         }
 
-        public override void OnImportFailure(BookDownloadMessage message)
+        public override void OnImportFailure(IssueDownloadMessage message)
         {
             _twitterService.SendNotification($"Import Failed: {message.Message}", Settings);
         }

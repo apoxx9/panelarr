@@ -11,7 +11,7 @@ namespace Panelarr.Api.V1.Books
 {
     public class EditionResource : RestResource
     {
-        public int BookId { get; set; }
+        public int IssueId { get; set; }
         public string ForeignEditionId { get; set; }
         public string TitleSlug { get; set; }
         public string Isbn13 { get; set; }
@@ -50,7 +50,7 @@ namespace Panelarr.Api.V1.Books
             return new EditionResource
             {
                 Id = model.Id,
-                BookId = model.BookId,
+                IssueId = model.IssueId,
                 ForeignEditionId = model.ForeignEditionId,
                 TitleSlug = model.TitleSlug,
                 Isbn13 = model.Isbn13,
@@ -82,7 +82,7 @@ namespace Panelarr.Api.V1.Books
             return new Edition
             {
                 Id = resource.Id,
-                BookId = resource.BookId,
+                IssueId = resource.IssueId,
                 ForeignEditionId = resource.ForeignEditionId,
                 TitleSlug = resource.TitleSlug,
                 Isbn13 = resource.Isbn13,

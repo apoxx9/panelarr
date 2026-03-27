@@ -23,7 +23,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
         {
-            var delayProfile = _delayProfileService.BestForTags(subject.Author.Tags);
+            var delayProfile = _delayProfileService.BestForTags(subject.Series.Tags);
 
             if (subject.Release.DownloadProtocol == DownloadProtocol.Usenet && !delayProfile.EnableUsenet)
             {

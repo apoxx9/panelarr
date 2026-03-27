@@ -55,7 +55,7 @@ class BookIndexOverview extends Component {
     // We want to avoid storing overviews for *all* books which is
     // why it's not put into the redux store
     const promise = createAjaxRequest({
-      url: `/book/${id}/overview`
+      url: `/issue/${id}/overview`
     }).request;
 
     promise.done((data) => {

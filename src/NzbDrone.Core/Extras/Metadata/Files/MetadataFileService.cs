@@ -12,7 +12,7 @@ namespace NzbDrone.Core.Extras.Metadata.Files
 
     public class MetadataFileService : ExtraFileService<MetadataFile>, IMetadataFileService
     {
-        public MetadataFileService(IExtraFileRepository<MetadataFile> repository, IAuthorService authorService, IDiskProvider diskProvider, IRecycleBinProvider recycleBinProvider, Logger logger)
+        public MetadataFileService(IExtraFileRepository<MetadataFile> repository, ISeriesService authorService, IDiskProvider diskProvider, IRecycleBinProvider recycleBinProvider, Logger logger)
             : base(repository, authorService, diskProvider, recycleBinProvider, logger)
         {
         }

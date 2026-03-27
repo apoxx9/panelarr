@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Indexers.Newznab
 
             if (capabilities.SupportedBookSearchParameters != null)
             {
-                pageableRequests.Add(GetPagedRequests(MaxPages, Settings.Categories, "book", ""));
+                pageableRequests.Add(GetPagedRequests(MaxPages, Settings.Categories, "issue", ""));
             }
             else if (capabilities.SupportedSearchParameters != null)
             {
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             return pageableRequests;
         }
 
-        public virtual IndexerPageableRequestChain GetSearchRequests(BookSearchCriteria searchCriteria)
+        public virtual IndexerPageableRequestChain GetSearchRequests(IssueSearchCriteria searchCriteria)
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
@@ -61,11 +61,11 @@ namespace NzbDrone.Core.Indexers.Newznab
             {
                 AddBookPageableRequests(pageableRequests,
                     searchCriteria,
-                    $"&author={NewsnabifyTitle(searchCriteria.AuthorQuery)}&title={NewsnabifyTitle(searchCriteria.BookQuery)}");
+                    $"&author={NewsnabifyTitle(searchCriteria.SeriesQuery)}&title={NewsnabifyTitle(searchCriteria.IssueQuery)}");
 
                 AddBookPageableRequests(pageableRequests,
                     searchCriteria,
-                    $"&title={NewsnabifyTitle(searchCriteria.BookQuery)}");
+                    $"&title={NewsnabifyTitle(searchCriteria.IssueQuery)}");
             }
 
             if (SupportsSearch)
@@ -75,25 +75,25 @@ namespace NzbDrone.Core.Indexers.Newznab
                 pageableRequests.Add(GetPagedRequests(MaxPages,
                     Settings.Categories,
                     "search",
-                    $"&q={NewsnabifyTitle(searchCriteria.BookQuery)}+{NewsnabifyTitle(searchCriteria.AuthorQuery)}"));
+                    $"&q={NewsnabifyTitle(searchCriteria.IssueQuery)}+{NewsnabifyTitle(searchCriteria.SeriesQuery)}"));
 
                 pageableRequests.Add(GetPagedRequests(MaxPages,
                     Settings.Categories,
                     "search",
-                    $"&q={NewsnabifyTitle(searchCriteria.AuthorQuery)}+{NewsnabifyTitle(searchCriteria.BookQuery)}"));
+                    $"&q={NewsnabifyTitle(searchCriteria.SeriesQuery)}+{NewsnabifyTitle(searchCriteria.IssueQuery)}"));
 
                 pageableRequests.AddTier();
 
                 pageableRequests.Add(GetPagedRequests(MaxPages,
                     Settings.Categories,
                     "search",
-                    $"&q={NewsnabifyTitle(searchCriteria.BookQuery)}"));
+                    $"&q={NewsnabifyTitle(searchCriteria.IssueQuery)}"));
             }
 
             return pageableRequests;
         }
 
-        public virtual IndexerPageableRequestChain GetSearchRequests(AuthorSearchCriteria searchCriteria)
+        public virtual IndexerPageableRequestChain GetSearchRequests(SeriesSearchCriteria searchCriteria)
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
@@ -101,7 +101,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             {
                 AddBookPageableRequests(pageableRequests,
                     searchCriteria,
-                    $"&author={NewsnabifyTitle(searchCriteria.AuthorQuery)}");
+                    $"&author={NewsnabifyTitle(searchCriteria.SeriesQuery)}");
             }
 
             if (SupportsSearch)
@@ -111,7 +111,7 @@ namespace NzbDrone.Core.Indexers.Newznab
                 pageableRequests.Add(GetPagedRequests(MaxPages,
                     Settings.Categories,
                     "search",
-                    $"&q={NewsnabifyTitle(searchCriteria.AuthorQuery)}"));
+                    $"&q={NewsnabifyTitle(searchCriteria.SeriesQuery)}"));
             }
 
             return pageableRequests;
@@ -121,7 +121,7 @@ namespace NzbDrone.Core.Indexers.Newznab
         {
             chain.AddTier();
 
-            chain.Add(GetPagedRequests(MaxPages, Settings.Categories, "book", $"{parameters}"));
+            chain.Add(GetPagedRequests(MaxPages, Settings.Categories, "issue", $"{parameters}"));
         }
 
         private IEnumerable<IndexerRequest> GetPagedRequests(int maxPages, IEnumerable<int> categories, string searchType, string parameters)

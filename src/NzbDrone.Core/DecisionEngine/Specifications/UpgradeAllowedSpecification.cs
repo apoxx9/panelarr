@@ -26,9 +26,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
         {
-            var qualityProfile = subject.Author.QualityProfile.Value;
+            var qualityProfile = subject.Series.QualityProfile.Value;
 
-            foreach (var file in subject.Books.SelectMany(b => b.BookFiles.Value))
+            foreach (var file in subject.Books.SelectMany(b => b.ComicFiles.Value))
             {
                 if (file == null)
                 {
@@ -36,7 +36,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                     continue;
                 }
 
-                var fileCustomFormats = _formatService.ParseCustomFormat(file, subject.Author);
+                var fileCustomFormats = _formatService.ParseCustomFormat(file, subject.Series);
                 _logger.Debug("Comparing file quality with report. Existing files contain {0}", file.Quality);
 
                 if (!_upgradableSpecification.IsUpgradeAllowed(qualityProfile,

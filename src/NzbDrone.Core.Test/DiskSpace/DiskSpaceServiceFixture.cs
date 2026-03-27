@@ -51,13 +51,13 @@ namespace NzbDrone.Core.Test.DiskSpace
                   .Setup(v => v.GetTotalSize(It.IsAny<string>()))
                   .Returns(0);
 
-            GivenAuthor();
+            GivenSeries();
         }
 
-        private void GivenAuthor(params Author[] author)
+        private void GivenSeries(params Series[] author)
         {
-            Mocker.GetMock<IAuthorService>()
-                  .Setup(v => v.GetAllAuthors())
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(v => v.GetAllSeries())
                   .Returns(author.ToList());
         }
 
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.Test.DiskSpace
         [Test]
         public void should_check_diskspace_for_author_folders()
         {
-            GivenAuthor(new Author { Path = _authorFolder1 });
+            GivenSeries(new Series { Path = _authorFolder1 });
 
             GivenExistingFolder(_authorFolder1);
 
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Test.DiskSpace
         [Test]
         public void should_check_diskspace_for_same_root_folder_only_once()
         {
-            GivenAuthor(new Author { Path = _authorFolder1 }, new Author { Path = _authorFolder2 });
+            GivenSeries(new Series { Path = _authorFolder1 }, new Series { Path = _authorFolder2 });
 
             GivenExistingFolder(_authorFolder1);
             GivenExistingFolder(_authorFolder2);

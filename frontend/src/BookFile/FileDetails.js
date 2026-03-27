@@ -80,14 +80,14 @@ function FileDetails(props) {
           {
             audioTags.bookTitle !== undefined &&
               <DescriptionListItem
-                title={translate('Book')}
+                title={translate('Issue')}
                 data={audioTags.bookTitle}
               />
           }
           {
             audioTags.authorTitle !== undefined &&
               <DescriptionListItem
-                title={translate('Author')}
+                title={translate('Series')}
                 data={audioTags.authorTitle}
               />
           }

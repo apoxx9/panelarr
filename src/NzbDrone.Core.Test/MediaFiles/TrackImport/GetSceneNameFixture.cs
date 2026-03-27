@@ -3,14 +3,14 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Books;
-using NzbDrone.Core.MediaFiles.BookImport;
+using NzbDrone.Core.MediaFiles.IssueImport;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
-namespace NzbDrone.Core.Test.MediaFiles.BookImport
+namespace NzbDrone.Core.Test.MediaFiles.IssueImport
 {
     [TestFixture]
     public class GetSceneNameFixture : CoreTest
@@ -22,20 +22,20 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport
         [SetUp]
         public void Setup()
         {
-            var series = Builder<Author>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                                         .With(e => e.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() })
                                         .With(s => s.Path = @"C:\Test\Music\Artist Title".AsOsAgnostic())
                                         .Build();
 
-            var episode = Builder<Book>.CreateNew()
+            var episode = Builder<Issue>.CreateNew()
                                           .Build();
 
             _localEpisode = new LocalBook
             {
-                Author = series,
-                Book = episode,
+                Series = series,
+                Issue = episode,
                 Path = Path.Combine(series.Path, "01 Some Body Loves.mkv"),
-                Quality = new QualityModel(Quality.FLAC),
+                Quality = new QualityModel(Quality.CBZ_HD),
                 ReleaseGroup = "DRONE"
             };
         }

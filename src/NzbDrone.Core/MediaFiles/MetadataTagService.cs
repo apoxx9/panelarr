@@ -12,15 +12,15 @@ namespace NzbDrone.Core.MediaFiles
     public interface IMetadataTagService
     {
         ParsedTrackInfo ReadTags(IFileInfo file);
-        void WriteTags(BookFile trackfile, bool newDownload, bool force = false);
-        void SyncTags(List<Edition> books);
-        List<RetagBookFilePreview> GetRetagPreviewsByAuthor(int authorId);
-        List<RetagBookFilePreview> GetRetagPreviewsByBook(int authorId);
+        void WriteTags(ComicFile trackfile, bool newDownload, bool force = false);
+        void SyncTags(List<Issue> issues);
+        List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId);
+        List<RetagComicFilePreview> GetRetagPreviewsByBook(int authorId);
     }
 
     public class MetadataTagService : IMetadataTagService,
         IExecute<RetagFilesCommand>,
-        IExecute<RetagAuthorCommand>
+        IExecute<RetagSeriesCommand>
     {
         private readonly IAudioTagService _audioTagService;
         private readonly IEBookTagService _eBookTagService;
@@ -48,34 +48,34 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        public void WriteTags(BookFile bookFile, bool newDownload, bool force = false)
+        public void WriteTags(ComicFile comicFile, bool newDownload, bool force = false)
         {
-            var extension = Path.GetExtension(bookFile.Path);
+            var extension = Path.GetExtension(comicFile.Path);
             if (MediaFileExtensions.AudioExtensions.Contains(extension))
             {
-                _audioTagService.WriteTags(bookFile, newDownload, force);
+                _audioTagService.WriteTags(comicFile, newDownload, force);
             }
-            else if (bookFile.CalibreId > 0)
+            else
             {
-                _eBookTagService.WriteTags(bookFile, newDownload, force);
+                _eBookTagService.WriteTags(comicFile, newDownload, force);
             }
         }
 
-        public void SyncTags(List<Edition> editions)
+        public void SyncTags(List<Issue> issues)
         {
-            _audioTagService.SyncTags(editions);
-            _eBookTagService.SyncTags(editions);
+            _audioTagService.SyncTags(issues);
+            _eBookTagService.SyncTags(issues);
         }
 
-        public List<RetagBookFilePreview> GetRetagPreviewsByAuthor(int authorId)
+        public List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId)
         {
-            var previews = _audioTagService.GetRetagPreviewsByAuthor(authorId);
-            previews.AddRange(_eBookTagService.GetRetagPreviewsByAuthor(authorId));
+            var previews = _audioTagService.GetRetagPreviewsBySeries(authorId);
+            previews.AddRange(_eBookTagService.GetRetagPreviewsBySeries(authorId));
 
             return previews;
         }
 
-        public List<RetagBookFilePreview> GetRetagPreviewsByBook(int bookId)
+        public List<RetagComicFilePreview> GetRetagPreviewsByBook(int bookId)
         {
             var previews = _audioTagService.GetRetagPreviewsByBook(bookId);
             previews.AddRange(_eBookTagService.GetRetagPreviewsByBook(bookId));
@@ -89,10 +89,10 @@ namespace NzbDrone.Core.MediaFiles
             _audioTagService.RetagFiles(message);
         }
 
-        public void Execute(RetagAuthorCommand message)
+        public void Execute(RetagSeriesCommand message)
         {
-            _eBookTagService.RetagAuthor(message);
-            _audioTagService.RetagAuthor(message);
+            _eBookTagService.RetagSeries(message);
+            _audioTagService.RetagSeries(message);
         }
     }
 }

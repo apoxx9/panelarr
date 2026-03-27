@@ -17,20 +17,20 @@ namespace NzbDrone.Core.MediaFiles
 {
     public interface IDeleteMediaFiles
     {
-        void DeleteTrackFile(Author author, BookFile bookFile);
-        void DeleteTrackFile(BookFile bookFile, string subfolder = "");
+        void DeleteTrackFile(Series author, ComicFile comicFile);
+        void DeleteTrackFile(ComicFile comicFile, string subfolder = "");
     }
 
     public class MediaFileDeletionService : IDeleteMediaFiles,
-                                            IHandle<AuthorDeletedEvent>,
-                                            IHandleAsync<AuthorDeletedEvent>,
-                                            IHandleAsync<BookDeletedEvent>,
-                                            IHandle<BookFileDeletedEvent>
+                                            IHandle<SeriesDeletedEvent>,
+                                            IHandleAsync<SeriesDeletedEvent>,
+                                            IHandleAsync<IssueDeletedEvent>,
+                                            IHandle<ComicFileDeletedEvent>
     {
         private readonly IDiskProvider _diskProvider;
         private readonly IRecycleBinProvider _recycleBinProvider;
         private readonly IMediaFileService _mediaFileService;
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IConfigService _configService;
         private readonly IEventAggregator _eventAggregator;
         private readonly IRootFolderService _rootFolderService;
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.MediaFiles
         public MediaFileDeletionService(IDiskProvider diskProvider,
                                         IRecycleBinProvider recycleBinProvider,
                                         IMediaFileService mediaFileService,
-                                        IAuthorService authorService,
+                                        ISeriesService authorService,
                                         IConfigService configService,
                                         IEventAggregator eventAggregator,
                                         IRootFolderService rootFolderService,
@@ -58,107 +58,107 @@ namespace NzbDrone.Core.MediaFiles
             _logger = logger;
         }
 
-        public void DeleteTrackFile(Author author, BookFile bookFile)
+        public void DeleteTrackFile(Series author, ComicFile comicFile)
         {
-            var fullPath = bookFile.Path;
+            var fullPath = comicFile.Path;
             var rootFolder = _diskProvider.GetParentFolder(author.Path);
 
             if (!_diskProvider.FolderExists(rootFolder))
             {
-                _logger.Warn("Author's root folder ({0}) doesn't exist.", rootFolder);
-                throw new NzbDroneClientException(HttpStatusCode.Conflict, "Author's root folder ({0}) doesn't exist.", rootFolder);
+                _logger.Warn("Series's root folder ({0}) doesn't exist.", rootFolder);
+                throw new NzbDroneClientException(HttpStatusCode.Conflict, "Series's root folder ({0}) doesn't exist.", rootFolder);
             }
 
             if (_diskProvider.GetDirectories(rootFolder).Empty())
             {
-                _logger.Warn("Author's root folder ({0}) is empty.", rootFolder);
-                throw new NzbDroneClientException(HttpStatusCode.Conflict, "Author's root folder ({0}) is empty.", rootFolder);
+                _logger.Warn("Series's root folder ({0}) is empty.", rootFolder);
+                throw new NzbDroneClientException(HttpStatusCode.Conflict, "Series's root folder ({0}) is empty.", rootFolder);
             }
 
             if (_diskProvider.FolderExists(author.Path))
             {
                 var subfolder = _diskProvider.GetParentFolder(author.Path).GetRelativePath(_diskProvider.GetParentFolder(fullPath));
-                DeleteTrackFile(bookFile, subfolder);
+                DeleteTrackFile(comicFile, subfolder);
             }
             else
             {
                 // delete from db even if the author folder is missing
-                _mediaFileService.Delete(bookFile, DeleteMediaFileReason.Manual);
+                _mediaFileService.Delete(comicFile, DeleteMediaFileReason.Manual);
             }
         }
 
-        public void DeleteTrackFile(BookFile bookFile, string subfolder = "")
+        public void DeleteTrackFile(ComicFile comicFile, string subfolder = "")
         {
-            var fullPath = bookFile.Path;
+            var fullPath = comicFile.Path;
 
             if (_diskProvider.FileExists(fullPath))
             {
-                _logger.Info("Deleting book file: {0}", fullPath);
-                DeleteFile(bookFile, subfolder);
+                _logger.Info("Deleting issue file: {0}", fullPath);
+                DeleteFile(comicFile, subfolder);
             }
 
             // Delete the track file from the database to clean it up even if the file was already deleted
-            _mediaFileService.Delete(bookFile, DeleteMediaFileReason.Manual);
+            _mediaFileService.Delete(comicFile, DeleteMediaFileReason.Manual);
 
             _eventAggregator.PublishEvent(new DeleteCompletedEvent());
         }
 
-        private void DeleteFile(BookFile bookFile, string subfolder = "")
+        private void DeleteFile(ComicFile comicFile, string subfolder = "")
         {
-            var rootFolder = _rootFolderService.GetBestRootFolder(bookFile.Path);
+            var rootFolder = _rootFolderService.GetBestRootFolder(comicFile.Path);
             var isCalibre = rootFolder.IsCalibreLibrary && rootFolder.CalibreSettings != null;
 
             try
             {
                 if (!isCalibre)
                 {
-                    _recycleBinProvider.DeleteFile(bookFile.Path, subfolder);
+                    _recycleBinProvider.DeleteFile(comicFile.Path, subfolder);
                 }
                 else
                 {
-                    _calibre.DeleteBook(bookFile, rootFolder.CalibreSettings);
+                    _calibre.DeleteBook(comicFile, rootFolder.CalibreSettings);
                 }
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Unable to delete book file");
-                throw new NzbDroneClientException(HttpStatusCode.InternalServerError, "Unable to delete book file");
+                _logger.Error(e, "Unable to delete issue file");
+                throw new NzbDroneClientException(HttpStatusCode.InternalServerError, "Unable to delete issue file");
             }
         }
 
         [EventHandleOrder(EventHandleOrder.First)]
-        public void Handle(AuthorDeletedEvent message)
+        public void Handle(SeriesDeletedEvent message)
         {
             if (message.DeleteFiles)
             {
-                var author = message.Author;
+                var author = message.Series;
 
-                var rootFolder = _rootFolderService.GetBestRootFolder(message.Author.Path);
+                var rootFolder = _rootFolderService.GetBestRootFolder(message.Series.Path);
                 var isCalibre = rootFolder.IsCalibreLibrary && rootFolder.CalibreSettings != null;
 
                 if (isCalibre)
                 {
                     // use metadataId instead of authorId so that query works even after author deleted
-                    var books = _mediaFileService.GetFilesByAuthorMetadataId(author.AuthorMetadataId);
-                    _calibre.DeleteBooks(books, rootFolder.CalibreSettings);
+                    var issues = _mediaFileService.GetFilesBySeriesMetadataId(author.SeriesMetadataId);
+                    _calibre.DeleteBooks(issues, rootFolder.CalibreSettings);
                 }
             }
         }
 
-        public void HandleAsync(AuthorDeletedEvent message)
+        public void HandleAsync(SeriesDeletedEvent message)
         {
             if (message.DeleteFiles)
             {
-                var author = message.Author;
+                var author = message.Series;
 
-                var rootFolder = _rootFolderService.GetBestRootFolder(message.Author.Path);
+                var rootFolder = _rootFolderService.GetBestRootFolder(message.Series.Path);
                 var isCalibre = rootFolder.IsCalibreLibrary && rootFolder.CalibreSettings != null;
 
                 if (!isCalibre)
                 {
-                    var allAuthors = _authorService.AllAuthorPaths();
+                    var allSeriess = _authorService.AllSeriesPaths();
 
-                    foreach (var s in allAuthors)
+                    foreach (var s in allSeriess)
                     {
                         if (s.Key == author.Id)
                         {
@@ -167,20 +167,20 @@ namespace NzbDrone.Core.MediaFiles
 
                         if (author.Path.IsParentPath(s.Value))
                         {
-                            _logger.Error("Author path: '{0}' is a parent of another author, not deleting files.", author.Path);
+                            _logger.Error("Series path: '{0}' is a parent of another author, not deleting files.", author.Path);
                             return;
                         }
 
                         if (author.Path.PathEquals(s.Value))
                         {
-                            _logger.Error("Author path: '{0}' is the same as another author, not deleting files.", author.Path);
+                            _logger.Error("Series path: '{0}' is the same as another author, not deleting files.", author.Path);
                             return;
                         }
                     }
 
-                    if (_diskProvider.FolderExists(message.Author.Path))
+                    if (_diskProvider.FolderExists(message.Series.Path))
                     {
-                        _recycleBinProvider.DeleteFolder(message.Author.Path);
+                        _recycleBinProvider.DeleteFolder(message.Series.Path);
                     }
 
                     _eventAggregator.PublishEvent(new DeleteCompletedEvent());
@@ -188,11 +188,11 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        public void HandleAsync(BookDeletedEvent message)
+        public void HandleAsync(IssueDeletedEvent message)
         {
             if (message.DeleteFiles)
             {
-                var files = _mediaFileService.GetFilesByBook(message.Book.Id);
+                var files = _mediaFileService.GetFilesByBook(message.Issue.Id);
                 foreach (var file in files)
                 {
                     DeleteFile(file);
@@ -201,7 +201,7 @@ namespace NzbDrone.Core.MediaFiles
         }
 
         [EventHandleOrder(EventHandleOrder.Last)]
-        public void Handle(BookFileDeletedEvent message)
+        public void Handle(ComicFileDeletedEvent message)
         {
             if (message.Reason == DeleteMediaFileReason.Upgrade)
             {
@@ -210,8 +210,8 @@ namespace NzbDrone.Core.MediaFiles
 
             if (_configService.DeleteEmptyFolders)
             {
-                var author = message.BookFile.Author.Value;
-                var bookFolder = message.BookFile.Path.GetParentPath();
+                var author = message.ComicFile.Series.Value;
+                var bookFolder = message.ComicFile.Path.GetParentPath();
 
                 if (_diskProvider.GetFiles(author.Path, true).Empty())
                 {

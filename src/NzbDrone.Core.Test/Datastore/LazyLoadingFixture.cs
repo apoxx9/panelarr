@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using FizzWare.NBuilder;
 using NUnit.Framework;
@@ -22,51 +21,38 @@ namespace NzbDrone.Core.Test.Datastore
             var profile = new QualityProfile
             {
                 Name = "Test",
-                Cutoff = Quality.MP3.Id,
+                Cutoff = Quality.CBR.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities()
             };
 
             profile = Db.Insert(profile);
 
-            var metadata = Builder<AuthorMetadata>.CreateNew()
+            var metadata = Builder<SeriesMetadata>.CreateNew()
                 .With(v => v.Id = 0)
                 .Build();
             Db.Insert(metadata);
 
-            var author = Builder<Author>.CreateListOfSize(1)
+            var author = Builder<Series>.CreateListOfSize(1)
                 .All()
                 .With(v => v.Id = 0)
                 .With(v => v.QualityProfileId = profile.Id)
-                .With(v => v.AuthorMetadataId = metadata.Id)
+                .With(v => v.SeriesMetadataId = metadata.Id)
                 .BuildListOfNew();
 
             Db.InsertMany(author);
 
-            var books = Builder<Book>.CreateListOfSize(3)
+            var issues = Builder<Issue>.CreateListOfSize(3)
                 .All()
                 .With(v => v.Id = 0)
-                .With(v => v.AuthorMetadataId = metadata.Id)
+                .With(v => v.SeriesMetadataId = metadata.Id)
                 .BuildListOfNew();
 
-            Db.InsertMany(books);
+            Db.InsertMany(issues);
 
-            var editions = new List<Edition>();
-            foreach (var book in books)
-            {
-                editions.Add(
-                    Builder<Edition>.CreateNew()
-                    .With(v => v.Id = 0)
-                    .With(v => v.BookId = book.Id)
-                    .With(v => v.ForeignEditionId = "test" + book.Id)
-                    .Build());
-            }
-
-            Db.InsertMany(editions);
-
-            var trackFiles = Builder<BookFile>.CreateListOfSize(1)
+            var trackFiles = Builder<ComicFile>.CreateListOfSize(1)
                 .All()
                 .With(v => v.Id = 0)
-                .With(v => v.EditionId = editions[0].Id)
+                .With(v => v.IssueId = issues[0].Id)
                 .With(v => v.Quality = new QualityModel())
                 .BuildListOfNew();
 
@@ -77,15 +63,15 @@ namespace NzbDrone.Core.Test.Datastore
         public void should_lazy_load_author_for_trackfile()
         {
             var db = Mocker.Resolve<IDatabase>();
-            var tracks = db.Query<BookFile>(new SqlBuilder(db.DatabaseType)).ToList();
+            var tracks = db.Query<ComicFile>(new SqlBuilder(db.DatabaseType)).ToList();
 
             Assert.IsNotEmpty(tracks);
             foreach (var track in tracks)
             {
-                Assert.IsFalse(track.Author.IsLoaded);
-                Assert.IsNotNull(track.Author.Value);
-                Assert.IsTrue(track.Author.IsLoaded);
-                Assert.IsTrue(track.Author.Value.Metadata.IsLoaded);
+                Assert.IsFalse(track.Series.IsLoaded);
+                Assert.IsNotNull(track.Series.Value);
+                Assert.IsTrue(track.Series.IsLoaded);
+                Assert.IsTrue(track.Series.Value.Metadata.IsLoaded);
             }
         }
 
@@ -93,13 +79,13 @@ namespace NzbDrone.Core.Test.Datastore
         public void should_lazy_load_trackfile_if_not_joined()
         {
             var db = Mocker.Resolve<IDatabase>();
-            var tracks = db.Query<Book>(new SqlBuilder(db.DatabaseType)).ToList();
+            var tracks = db.Query<Issue>(new SqlBuilder(db.DatabaseType)).ToList();
 
             foreach (var track in tracks)
             {
-                Assert.IsFalse(track.BookFiles.IsLoaded);
-                Assert.IsNotNull(track.BookFiles.Value);
-                Assert.IsTrue(track.BookFiles.IsLoaded);
+                Assert.IsFalse(track.ComicFiles.IsLoaded);
+                Assert.IsNotNull(track.ComicFiles.Value);
+                Assert.IsTrue(track.ComicFiles.IsLoaded);
             }
         }
 
@@ -109,17 +95,16 @@ namespace NzbDrone.Core.Test.Datastore
             var db = Mocker.Resolve<IDatabase>();
             var files = MediaFileRepository.Query(db,
                                                   new SqlBuilder(db.DatabaseType)
-                                                  .Join<BookFile, Edition>((t, a) => t.EditionId == a.Id)
-                                                  .Join<Edition, Book>((e, b) => e.BookId == b.Id)
-                                                  .Join<Book, Author>((book, author) => book.AuthorMetadataId == author.AuthorMetadataId)
-                                                  .Join<Author, AuthorMetadata>((a, m) => a.AuthorMetadataId == m.Id));
+                                                  .Join<ComicFile, Issue>((t, b) => t.IssueId == b.Id)
+                                                  .Join<Issue, Series>((issue, author) => issue.SeriesMetadataId == author.SeriesMetadataId)
+                                                  .Join<Series, SeriesMetadata>((a, m) => a.SeriesMetadataId == m.Id));
 
             Assert.IsNotEmpty(files);
             foreach (var file in files)
             {
-                Assert.IsTrue(file.Edition.IsLoaded);
-                Assert.IsTrue(file.Author.IsLoaded);
-                Assert.IsTrue(file.Author.Value.Metadata.IsLoaded);
+                Assert.IsTrue(file.Issue.IsLoaded);
+                Assert.IsTrue(file.Series.IsLoaded);
+                Assert.IsTrue(file.Series.Value.Metadata.IsLoaded);
             }
         }
     }

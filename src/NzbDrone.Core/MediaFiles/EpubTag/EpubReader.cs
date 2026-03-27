@@ -9,7 +9,7 @@ namespace VersOne.Epub
     public static class EpubReader
     {
         /// <summary>
-        /// Opens the book synchronously without reading its whole content. Holds the handle to the EPUB file.
+        /// Opens the issue synchronously without reading its whole content. Holds the handle to the EPUB file.
         /// </summary>
         /// <param name="filePath">path to the EPUB file</param>
         /// <returns></returns>
@@ -19,7 +19,7 @@ namespace VersOne.Epub
         }
 
         /// <summary>
-        /// Opens the book asynchronously without reading its whole content. Holds the handle to the EPUB file.
+        /// Opens the issue asynchronously without reading its whole content. Holds the handle to the EPUB file.
         /// </summary>
         /// <param name="filePath">path to the EPUB file</param>
         /// <returns></returns>
@@ -50,8 +50,8 @@ namespace VersOne.Epub
                 result.FilePath = filePath;
                 result.Schema = await SchemaReader.ReadSchemaAsync(zipArchive).ConfigureAwait(false);
                 result.Title = result.Schema.Package.Metadata.Titles.FirstOrDefault() ?? string.Empty;
-                result.AuthorList = result.Schema.Package.Metadata.Creators.Select(creator => creator.Creator).ToList();
-                result.Author = string.Join(", ", result.AuthorList);
+                result.SeriesList = result.Schema.Package.Metadata.Creators.Select(creator => creator.Creator).ToList();
+                result.Series = string.Join(", ", result.SeriesList);
                 return result;
             }
             catch

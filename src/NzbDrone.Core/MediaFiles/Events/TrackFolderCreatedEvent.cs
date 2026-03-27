@@ -5,16 +5,16 @@ namespace NzbDrone.Core.MediaFiles.Events
 {
     public class TrackFolderCreatedEvent : IEvent
     {
-        public Author Author { get; private set; }
-        public BookFile BookFile { get; private set; }
-        public string AuthorFolder { get; set; }
-        public string BookFolder { get; set; }
+        public Series Series { get; private set; }
+        public ComicFile ComicFile { get; private set; }
+        public string SeriesFolder { get; set; }
+        public string IssueFolder { get; set; }
         public string TrackFolder { get; set; }
 
-        public TrackFolderCreatedEvent(Author author, BookFile bookFile)
+        public TrackFolderCreatedEvent(Series author, ComicFile comicFile)
         {
-            Author = author;
-            BookFile = bookFile;
+            Series = author;
+            ComicFile = comicFile;
         }
     }
 }

@@ -67,7 +67,7 @@ export const defaultState = {
       },
       {
         name: 'authorMetadata.sortName',
-        label: () => translate('Author'),
+        label: () => translate('Series'),
         isSortable: true,
         isVisible: true
       },

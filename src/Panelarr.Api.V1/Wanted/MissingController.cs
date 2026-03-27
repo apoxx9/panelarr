@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.AuthorStats;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.MediaCover;
+using NzbDrone.Core.SeriesStats;
 using NzbDrone.SignalR;
 using Panelarr.Api.V1.Books;
 using Panelarr.Http;
@@ -12,11 +12,11 @@ using Panelarr.Http.Extensions;
 namespace Panelarr.Api.V1.Wanted
 {
     [V1ApiController("wanted/missing")]
-    public class MissingController : BookControllerWithSignalR
+    public class MissingController : IssueControllerWithSignalR
     {
         public MissingController(IBookService bookService,
                              ISeriesBookLinkService seriesBookLinkService,
-                             IAuthorStatisticsService authorStatisticsService,
+                             ISeriesStatisticsService authorStatisticsService,
                              IMapCoversToLocal coverMapper,
                              IUpgradableSpecification upgradableSpecification,
                              IBroadcastSignalRMessage signalRBroadcaster)
@@ -25,10 +25,10 @@ namespace Panelarr.Api.V1.Wanted
         }
 
         [HttpGet]
-        public PagingResource<BookResource> GetMissingBooks([FromQuery] PagingRequestResource paging, bool includeAuthor = false, bool monitored = true)
+        public PagingResource<IssueResource> GetMissingBooks([FromQuery] PagingRequestResource paging, bool includeSeries = false, bool monitored = true)
         {
-            var pagingResource = new PagingResource<BookResource>(paging);
-            var pagingSpec = new PagingSpec<Book>
+            var pagingResource = new PagingResource<IssueResource>(paging);
+            var pagingSpec = new PagingSpec<Issue>
             {
                 Page = pagingResource.Page,
                 PageSize = pagingResource.PageSize,
@@ -38,14 +38,14 @@ namespace Panelarr.Api.V1.Wanted
 
             if (monitored)
             {
-                pagingSpec.FilterExpressions.Add(v => v.Monitored == true && v.Author.Value.Monitored == true);
+                pagingSpec.FilterExpressions.Add(v => v.Monitored == true && v.Series.Value.Monitored == true);
             }
             else
             {
-                pagingSpec.FilterExpressions.Add(v => v.Monitored == false || v.Author.Value.Monitored == false);
+                pagingSpec.FilterExpressions.Add(v => v.Monitored == false || v.Series.Value.Monitored == false);
             }
 
-            return pagingSpec.ApplyToPage(_bookService.BooksWithoutFiles, v => MapToResource(v, includeAuthor));
+            return pagingSpec.ApplyToPage(_bookService.IssuesWithoutFiles, v => MapToResource(v, includeSeries));
         }
     }
 }

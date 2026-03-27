@@ -44,15 +44,6 @@ namespace NzbDrone.Core.Books
             _editionService.DeleteMany(delete.Concat(merge.Select(x => x.Item1)).ToList());
             _editionService.UpdateMany(updateList);
 
-            var tagsToUpdate = updateList;
-            if (forceUpdateFileTags)
-            {
-                _logger.Debug("Forcing tag update due to Author/Book/Edition updates");
-                tagsToUpdate = updateList.Concat(upToDate).ToList();
-            }
-
-            _metadataTagService.SyncTags(tagsToUpdate);
-
             return add.Any() || delete.Any() || updateList.Any() || merge.Any();
         }
     }

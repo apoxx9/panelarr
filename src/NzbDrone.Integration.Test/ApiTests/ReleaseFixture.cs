@@ -16,7 +16,7 @@ namespace NzbDrone.Integration.Test.ApiTests
             var releases = Releases.All();
             var indexers = Indexers.All();
 
-            releases.Should().OnlyContain(c => c.Rejections.Contains("Unknown Series"));
+            releases.Should().OnlyContain(c => c.Rejections.Contains("Unknown SeriesGroup"));
             releases.Should().OnlyContain(c => BeValidRelease(c));
         }
 
@@ -33,7 +33,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         {
             var releases = Releases.All();
 
-            // InternalServerError is caused by the Release being invalid for download (no Series).
+            // InternalServerError is caused by the Release being invalid for download (no SeriesGroup).
             // But if it didn't accept it, it would return NotFound.
             // TODO: Maybe we should create a full mock Newznab server endpoint.
             //var result = Releases.Post(new ReleaseResource { Guid = releases.First().Guid });
@@ -47,7 +47,7 @@ namespace NzbDrone.Integration.Test.ApiTests
             releaseResource.Age.Should().BeGreaterOrEqualTo(-1);
             releaseResource.Title.Should().NotBeNullOrWhiteSpace();
             releaseResource.DownloadUrl.Should().NotBeNullOrWhiteSpace();
-            releaseResource.AuthorName.Should().NotBeNullOrWhiteSpace();
+            releaseResource.SeriesName.Should().NotBeNullOrWhiteSpace();
 
             //TODO: uncomment these after moving to restsharp for rss
             //releaseResource.NzbInfoUrl.Should().NotBeNullOrWhiteSpace();

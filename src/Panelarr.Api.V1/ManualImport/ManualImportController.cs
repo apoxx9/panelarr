@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using NLog;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.BookImport.Manual;
+using NzbDrone.Core.MediaFiles.IssueImport.Manual;
 using NzbDrone.Core.Qualities;
 using Panelarr.Http;
 
@@ -13,14 +13,14 @@ namespace Panelarr.Api.V1.ManualImport
     [V1ApiController]
     public class ManualImportController : Controller
     {
-        private readonly IAuthorService _authorService;
+        private readonly ISeriesService _authorService;
         private readonly IBookService _bookService;
         private readonly IEditionService _editionService;
         private readonly IManualImportService _manualImportService;
         private readonly Logger _logger;
 
         public ManualImportController(IManualImportService manualImportService,
-                                  IAuthorService authorService,
+                                  ISeriesService authorService,
                                   IEditionService editionService,
                                   IBookService bookService,
                                   Logger logger)
@@ -41,11 +41,11 @@ namespace Panelarr.Api.V1.ManualImport
         [HttpGet]
         public List<ManualImportResource> GetMediaFiles(string folder, string downloadId, int? authorId, bool filterExistingFiles = true, bool replaceExistingFiles = true)
         {
-            NzbDrone.Core.Books.Author author = null;
+            NzbDrone.Core.Books.Series author = null;
 
             if (authorId > 0)
             {
-                author = _authorService.GetAuthor(authorId.Value);
+                author = _authorService.GetSeries(authorId.Value);
             }
 
             var filter = filterExistingFiles ? FilterFilesType.Matched : FilterFilesType.None;
@@ -75,10 +75,8 @@ namespace Panelarr.Api.V1.ManualImport
                     Id = resource.Id,
                     Path = resource.Path,
                     Name = resource.Name,
-                    Author = resource.AuthorId.HasValue ? _authorService.GetAuthor(resource.AuthorId.Value) : null,
-                    Book = resource.BookId.HasValue ? _bookService.GetBook(resource.BookId.Value) : null,
-                    Edition = resource.ForeignEditionId == null ? null : _editionService.GetEditionByForeignEditionId(resource.ForeignEditionId),
-                    Quality = resource.Quality,
+                    Series = resource.SeriesId.HasValue ? _authorService.GetSeries(resource.SeriesId.Value) : null,
+                    Issue = resource.IssueId.HasValue ? _bookService.GetBook(resource.IssueId.Value) : null,                    Quality = resource.Quality,
                     ReleaseGroup = resource.ReleaseGroup,
                     IndexerFlags = resource.IndexerFlags,
                     DownloadId = resource.DownloadId,

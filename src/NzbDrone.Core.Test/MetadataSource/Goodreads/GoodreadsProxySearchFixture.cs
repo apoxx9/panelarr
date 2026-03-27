@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads
 
             result.Should().NotBeEmpty();
 
-            result[0].Author.Id.Should().Be(expected);
+            result[0].Series.Id.Should().Be(expected);
 
             ExceptionVerification.IgnoreWarns();
         }
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads
 
             result.Should().NotBeEmpty();
 
-            result[0].BookId.Should().Be(expected);
+            result[0].IssueId.Should().Be(expected);
 
             ExceptionVerification.IgnoreWarns();
         }

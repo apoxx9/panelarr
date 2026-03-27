@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.MediaFiles.BookImport.Identification;
+using NzbDrone.Core.MediaFiles.IssueImport.Identification;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.MetadataSource.Goodreads;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
-namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
+namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 {
     [TestFixture]
     public class CandidateServiceFixture : CoreTest<CandidateService>
@@ -28,8 +28,8 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
                     {
                         FileTrackInfo = new ParsedTrackInfo
                         {
-                            Authors = new List<string> { "Author" },
-                            BookTitle = "Book"
+                            Seriess = new List<string> { "Series" },
+                            IssueTitle = "Issue"
                         }
                     }
                 }

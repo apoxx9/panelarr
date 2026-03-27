@@ -1,172 +1,419 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Common.Instrumentation.Extensions;
+using NzbDrone.Core.Books.Commands;
+using NzbDrone.Core.Books.Events;
+using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Exceptions;
+using NzbDrone.Core.History;
+using NzbDrone.Core.ImportLists.Exclusions;
+using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.MediaFiles.Commands;
+using NzbDrone.Core.Messaging.Commands;
+using NzbDrone.Core.Messaging.Events;
+using NzbDrone.Core.MetadataSource;
+using NzbDrone.Core.Profiles.Metadata;
+using NzbDrone.Core.RootFolders;
 
 namespace NzbDrone.Core.Books
 {
     public interface IRefreshSeriesService
     {
-        bool RefreshSeriesInfo(int authorMetadataId, List<Series> remoteBooks, Author remoteData, bool forceBookRefresh, bool forceUpdateFileTags, DateTime? lastUpdate);
     }
 
-    public class RefreshSeriesService : RefreshEntityServiceBase<Series, SeriesBookLink>, IRefreshSeriesService
+    public class RefreshSeriesService : RefreshEntityServiceBase<Series, Issue>,
+        IRefreshSeriesService,
+        IExecute<RefreshSeriesCommand>,
+        IExecute<BulkRefreshSeriesCommand>
     {
+        private readonly IProvideSeriesInfo _authorInfo;
+        private readonly ISeriesService _authorService;
         private readonly IBookService _bookService;
-        private readonly ISeriesService _seriesService;
-        private readonly ISeriesBookLinkService _linkService;
-        private readonly IRefreshSeriesBookLinkService _refreshLinkService;
+        private readonly IMetadataProfileService _metadataProfileService;
+        private readonly IRefreshBookService _refreshBookService;
+        private readonly IRefreshSeriesGroupService _refreshSeriesGroupService;
+        private readonly IEventAggregator _eventAggregator;
+        private readonly IManageCommandQueue _commandQueueManager;
+        private readonly IMediaFileService _mediaFileService;
+        private readonly IHistoryService _historyService;
+        private readonly IRootFolderService _rootFolderService;
+        private readonly ICheckIfSeriesShouldBeRefreshed _checkIfSeriesShouldBeRefreshed;
+        private readonly IMonitorNewBookService _monitorNewBookService;
+        private readonly IConfigService _configService;
+        private readonly IImportListExclusionService _importListExclusionService;
         private readonly Logger _logger;
 
-        public RefreshSeriesService(IBookService bookService,
-                                    ISeriesService seriesService,
-                                    ISeriesBookLinkService linkService,
-                                    IRefreshSeriesBookLinkService refreshLinkService,
-                                    IAuthorMetadataService authorMetadataService,
+        public RefreshSeriesService(IProvideSeriesInfo authorInfo,
+                                    ISeriesService authorService,
+                                    ISeriesMetadataService authorMetadataService,
+                                    IBookService bookService,
+                                    IMetadataProfileService metadataProfileService,
+                                    IRefreshBookService refreshBookService,
+                                    IRefreshSeriesGroupService refreshSeriesGroupService,
+                                    IEventAggregator eventAggregator,
+                                    IManageCommandQueue commandQueueManager,
+                                    IMediaFileService mediaFileService,
+                                    IHistoryService historyService,
+                                    IRootFolderService rootFolderService,
+                                    ICheckIfSeriesShouldBeRefreshed checkIfSeriesShouldBeRefreshed,
+                                    IMonitorNewBookService monitorNewBookService,
+                                    IConfigService configService,
+                                    IImportListExclusionService importListExclusionService,
                                     Logger logger)
         : base(logger, authorMetadataService)
         {
+            _authorInfo = authorInfo;
+            _authorService = authorService;
             _bookService = bookService;
-            _seriesService = seriesService;
-            _linkService = linkService;
-            _refreshLinkService = refreshLinkService;
+            _metadataProfileService = metadataProfileService;
+            _refreshBookService = refreshBookService;
+            _refreshSeriesGroupService = refreshSeriesGroupService;
+            _eventAggregator = eventAggregator;
+            _commandQueueManager = commandQueueManager;
+            _mediaFileService = mediaFileService;
+            _historyService = historyService;
+            _rootFolderService = rootFolderService;
+            _checkIfSeriesShouldBeRefreshed = checkIfSeriesShouldBeRefreshed;
+            _monitorNewBookService = monitorNewBookService;
+            _configService = configService;
+            _importListExclusionService = importListExclusionService;
             _logger = logger;
         }
 
-        protected override RemoteData GetRemoteData(Series local, List<Series> remote, Author data)
+        private Series GetSkyhookData(string foreignId)
         {
-            return new RemoteData
+            try
             {
-                Entity = remote.SingleOrDefault(x => x.ForeignSeriesId == local.ForeignSeriesId)
-            };
+                return _authorInfo.GetSeriesInfo(foreignId);
+            }
+            catch (SeriesNotFoundException)
+            {
+                _logger.Error($"Could not find author with id {foreignId}");
+            }
+
+            return null;
+        }
+
+        protected override RemoteData GetRemoteData(Series local, List<Series> remote, Series data)
+        {
+            var result = new RemoteData();
+
+            if (data != null)
+            {
+                result.Entity = data;
+                result.Metadata = new List<SeriesMetadata> { data.Metadata.Value };
+            }
+
+            return result;
+        }
+
+        protected override bool ShouldDelete(Series local)
+        {
+            return !_mediaFileService.GetFilesBySeries(local.Id).Any();
+        }
+
+        protected override void LogProgress(Series local)
+        {
+            _logger.ProgressInfo("Updating Info for {0}", local.Name);
         }
 
         protected override bool IsMerge(Series local, Series remote)
         {
-            return local.ForeignSeriesId != remote.ForeignSeriesId;
+            _logger.Trace($"local: {local.SeriesMetadataId} remote: {remote.Metadata.Value.Id}");
+            return local.SeriesMetadataId != remote.Metadata.Value.Id;
         }
 
         protected override UpdateResult UpdateEntity(Series local, Series remote)
         {
-            if (local.Equals(remote))
+            var result = UpdateResult.None;
+
+            if (!local.Metadata.Value.Equals(remote.Metadata.Value))
             {
-                return UpdateResult.None;
+                result = UpdateResult.UpdateTags;
             }
 
             local.UseMetadataFrom(remote);
+            local.Metadata = remote.Metadata;
+            local.LastInfoSync = DateTime.UtcNow;
 
+            try
+            {
+                local.Path = new DirectoryInfo(local.Path).FullName;
+                local.Path = local.Path.GetActualCasing();
+            }
+            catch (Exception e)
+            {
+                _logger.Warn(e, "Couldn't update author path for " + local.Path);
+            }
+
+            return result;
+        }
+
+        protected override UpdateResult MoveEntity(Series local, Series remote)
+        {
+            _logger.Debug($"Updating foreign id for {local} to {remote}");
+
+            // We are moving from one metadata to another (will already have been poplated)
+            local.SeriesMetadataId = remote.Metadata.Value.Id;
+            local.Metadata = remote.Metadata.Value;
+
+            // Update list exclusion if one exists
+            var importExclusion = _importListExclusionService.FindByForeignId(local.Metadata.Value.ForeignSeriesId);
+
+            if (importExclusion != null)
+            {
+                importExclusion.ForeignId = remote.Metadata.Value.ForeignSeriesId;
+                _importListExclusionService.Update(importExclusion);
+            }
+
+            // Do the standard update
+            UpdateEntity(local, remote);
+
+            // We know we need to update tags as author id has changed
+            return UpdateResult.UpdateTags;
+        }
+
+        protected override UpdateResult MergeEntity(Series local, Series target, Series remote)
+        {
+            _logger.Warn($"Series {local} was replaced with {remote} because the original was a duplicate.");
+
+            // Update list exclusion if one exists
+            var importExclusionLocal = _importListExclusionService.FindByForeignId(local.Metadata.Value.ForeignSeriesId);
+
+            if (importExclusionLocal != null)
+            {
+                var importExclusionTarget = _importListExclusionService.FindByForeignId(target.Metadata.Value.ForeignSeriesId);
+                if (importExclusionTarget == null)
+                {
+                    importExclusionLocal.ForeignId = remote.Metadata.Value.ForeignSeriesId;
+                    _importListExclusionService.Update(importExclusionLocal);
+                }
+            }
+
+            // move any issues over to the new author and remove the local author
+            var issues = _bookService.GetBooksBySeries(local.Id);
+            issues.ForEach(x => x.SeriesMetadataId = target.SeriesMetadataId);
+            _bookService.UpdateMany(issues);
+            _authorService.DeleteSeries(local.Id, false);
+
+            // Update history entries to new id
+            var items = _historyService.GetBySeries(local.Id, null);
+            items.ForEach(x => x.SeriesId = target.Id);
+            _historyService.UpdateMany(items);
+
+            // We know we need to update tags as author id has changed
             return UpdateResult.UpdateTags;
         }
 
         protected override Series GetEntityByForeignId(Series local)
         {
-            return _seriesService.FindById(local.ForeignSeriesId);
+            return _authorService.FindById(local.ForeignSeriesId);
         }
 
         protected override void SaveEntity(Series local)
         {
-            // Use UpdateMany to avoid firing the book edited event
-            _seriesService.UpdateMany(new List<Series> { local });
+            _authorService.UpdateSeries(local);
         }
 
         protected override void DeleteEntity(Series local, bool deleteFiles)
         {
-            _logger.Trace($"Removing links for series {local} author {local.ForeignAuthorId}");
-            var children = GetLocalChildren(local, null);
-            _linkService.DeleteMany(children);
-
-            if (!_linkService.GetLinksBySeries(local.Id).Any())
-            {
-                _logger.Trace($"Series {local} has no links remaining, removing");
-                _seriesService.Delete(local.Id);
-            }
+            _authorService.DeleteSeries(local.Id, deleteFiles);
         }
 
-        protected override List<SeriesBookLink> GetRemoteChildren(Series local, Series remote)
+        protected override List<Issue> GetRemoteChildren(Series local, Series remote)
         {
-            return remote.LinkItems;
+            // MetadataProfileId has been removed from Series; get all remote issues unfiltered
+            var filtered = remote.Books.Value;
+
+            var all = filtered.DistinctBy(m => m.ForeignIssueId).ToList();
+            var ids = all.Select(x => x.ForeignIssueId).ToList();
+            var excluded = _importListExclusionService.FindByForeignId(ids).Select(x => x.ForeignId).ToList();
+            return all.Where(x => !excluded.Contains(x.ForeignIssueId)).ToList();
         }
 
-        protected override List<SeriesBookLink> GetLocalChildren(Series entity, List<SeriesBookLink> remoteChildren)
+        protected override List<Issue> GetLocalChildren(Series entity, List<Issue> remoteChildren)
         {
-            return _linkService.GetLinksBySeriesAndAuthor(entity.Id, entity.ForeignAuthorId);
+            return _bookService.GetBooksForRefresh(entity.SeriesMetadataId,
+                                                     remoteChildren.Select(x => x.ForeignIssueId).ToList());
         }
 
-        protected override Tuple<SeriesBookLink, List<SeriesBookLink>> GetMatchingExistingChildren(List<SeriesBookLink> existingChildren, SeriesBookLink remote)
+        protected override Tuple<Issue, List<Issue>> GetMatchingExistingChildren(List<Issue> existingChildren, Issue remote)
         {
-            var existingChild = existingChildren.SingleOrDefault(x => x.BookId == remote.Book.Value.Id);
-            var mergeChildren = new List<SeriesBookLink>();
+            var existingChild = existingChildren.SingleOrDefault(x => x.ForeignIssueId == remote.ForeignIssueId);
+            var mergeChildren = new List<Issue>();
             return Tuple.Create(existingChild, mergeChildren);
         }
 
-        protected override void PrepareNewChild(SeriesBookLink child, Series entity)
+        protected override void PrepareNewChild(Issue child, Series entity)
         {
             child.Series = entity;
-            child.SeriesId = entity.Id;
-            child.BookId = child.Book.Value.Id;
+            child.SeriesMetadata = entity.Metadata.Value;
+            child.SeriesMetadataId = entity.Metadata.Value.Id;
+            child.Added = DateTime.UtcNow;
+            child.LastInfoSync = DateTime.MinValue;
+            child.Monitored = entity.Monitored;
         }
 
-        protected override void PrepareExistingChild(SeriesBookLink local, SeriesBookLink remote, Series entity)
+        protected override void PrepareExistingChild(Issue local, Issue remote, Series entity)
         {
             local.Series = entity;
-            local.SeriesId = entity.Id;
+            local.SeriesMetadata = entity.Metadata.Value;
+            local.SeriesMetadataId = entity.Metadata.Value.Id;
 
-            remote.Id = local.Id;
-            remote.BookId = local.BookId;
-            remote.SeriesId = entity.Id;
+            remote.UseDbFieldsFrom(local);
         }
 
-        protected override void AddChildren(List<SeriesBookLink> children)
+        protected override void ProcessChildren(Series entity, SortedChildren children)
         {
-            _linkService.InsertMany(children);
+            foreach (var issue in children.Added)
+            {
+                issue.Monitored = _monitorNewBookService.ShouldMonitorNewBook(issue, children.UpToDate, entity.MonitorNewItems);
+            }
         }
 
-        protected override bool RefreshChildren(SortedChildren localChildren, List<SeriesBookLink> remoteChildren, Author remoteData, bool forceChildRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
+        protected override void AddChildren(List<Issue> children)
         {
-            return _refreshLinkService.RefreshSeriesBookLinkInfo(localChildren.Added, localChildren.Updated, localChildren.Merged, localChildren.Deleted, localChildren.UpToDate, remoteChildren, forceUpdateFileTags);
+            _bookService.InsertMany(children);
         }
 
-        public bool RefreshSeriesInfo(int authorMetadataId, List<Series> remoteSeries, Author remoteData, bool forceBookRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
+        protected override bool RefreshChildren(SortedChildren localChildren, List<Issue> remoteChildren, Series remoteData, bool forceChildRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
+        {
+            return _refreshBookService.RefreshBookInfo(localChildren.All, remoteChildren, remoteData, forceChildRefresh, forceUpdateFileTags, lastUpdate);
+        }
+
+        protected override void PublishEntityUpdatedEvent(Series entity)
+        {
+            _eventAggregator.PublishEvent(new SeriesUpdatedEvent(entity));
+        }
+
+        protected override void PublishRefreshCompleteEvent(Series entity)
+        {
+            // little hack - trigger the series group update here
+            var seriesGroups = entity.SeriesGroups?.Value ?? new System.Collections.Generic.List<SeriesGroup>();
+            _refreshSeriesGroupService.RefreshSeriesInfo(entity.SeriesMetadataId, seriesGroups, entity, false, false, null);
+            _eventAggregator.PublishEvent(new SeriesRefreshCompleteEvent(entity));
+        }
+
+        protected override void PublishChildrenUpdatedEvent(Series entity, List<Issue> newChildren, List<Issue> updateChildren, List<Issue> deleteChildren)
+        {
+            _eventAggregator.PublishEvent(new BookInfoRefreshedEvent(entity, newChildren, updateChildren, deleteChildren));
+        }
+
+        private void Rescan(List<int> authorIds, bool isNew, CommandTrigger trigger, bool infoUpdated)
+        {
+            var rescanAfterRefresh = _configService.RescanAfterRefresh;
+            var shouldRescan = true;
+
+            if (isNew)
+            {
+                _logger.Trace("Forcing rescan. Reason: New author added");
+                shouldRescan = true;
+            }
+            else if (rescanAfterRefresh == RescanAfterRefreshType.Never)
+            {
+                _logger.Trace("Skipping rescan. Reason: never rescan after refresh");
+                shouldRescan = false;
+            }
+            else if (rescanAfterRefresh == RescanAfterRefreshType.AfterManual && trigger != CommandTrigger.Manual)
+            {
+                _logger.Trace("Skipping rescan. Reason: not after automatic refreshes");
+                shouldRescan = false;
+            }
+            else if (!infoUpdated)
+            {
+                _logger.Trace("Skipping rescan. Reason: no metadata updated");
+                shouldRescan = false;
+            }
+
+            if (shouldRescan)
+            {
+                // some metadata has updated so rescan unmatched
+                // (but don't add new authors to reduce repeated searches against api)
+                var folders = _rootFolderService.All().Select(x => x.Path).ToList();
+
+                _commandQueueManager.Push(new RescanFoldersCommand(folders, FilterFilesType.Matched, false, authorIds));
+            }
+        }
+
+        private void RefreshSelectedSeriess(List<int> authorIds, bool isNew, CommandTrigger trigger)
         {
             var updated = false;
+            var authors = _authorService.GetSeriess(authorIds);
 
-            var existingByAuthor = _seriesService.GetByAuthorMetadataId(authorMetadataId);
-            var existingBySeries = _seriesService.FindById(remoteSeries.Select(x => x.ForeignSeriesId).ToList());
-            var existing = existingByAuthor.Concat(existingBySeries).GroupBy(x => x.ForeignSeriesId).Select(x => x.First()).ToList();
-
-            var books = _bookService.GetBooksByAuthorMetadataId(authorMetadataId);
-            var bookDict = books.ToDictionary(x => x.ForeignBookId);
-            var links = new List<SeriesBookLink>();
-
-            foreach (var s in remoteData.Series.Value)
+            foreach (var author in authors)
             {
-                s.LinkItems.Value.ForEach(x => x.Series = s);
-                links.AddRange(s.LinkItems.Value.Where(x => bookDict.ContainsKey(x.Book.Value.ForeignBookId)));
+                try
+                {
+                    var data = GetSkyhookData(author.ForeignSeriesId);
+                    updated |= RefreshEntityInfo(author, null, data, true, false, null);
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e, "Couldn't refresh info for {0}", author);
+                }
             }
 
-            var grouped = links.GroupBy(x => x.Series.Value);
+            Rescan(authorIds, isNew, trigger, updated);
+        }
 
-            // Put in the links that go with the books we actually have
-            foreach (var group in grouped)
+        public void Execute(BulkRefreshSeriesCommand message)
+        {
+            RefreshSelectedSeriess(message.SeriesIds, message.AreNewSeriess, message.Trigger);
+        }
+
+        public void Execute(RefreshSeriesCommand message)
+        {
+            var trigger = message.Trigger;
+            var isNew = message.IsNewSeries;
+
+            if (message.SeriesId.HasValue)
             {
-                group.Key.LinkItems = group.ToList();
+                RefreshSelectedSeriess(new List<int> { message.SeriesId.Value }, isNew, trigger);
             }
-
-            remoteSeries = grouped.Select(x => x.Key).ToList();
-
-            var toAdd = remoteSeries.ExceptBy(x => x.ForeignSeriesId, existing, x => x.ForeignSeriesId, StringComparer.Ordinal).ToList();
-            var all = toAdd.Union(existing).ToList();
-
-            _seriesService.InsertMany(toAdd);
-
-            foreach (var item in all)
+            else
             {
-                item.ForeignAuthorId = remoteData.ForeignAuthorId;
-                updated |= RefreshEntityInfo(item, remoteSeries, remoteData, true, forceUpdateFileTags, null);
-            }
+                var updated = false;
+                var authors = _authorService.GetAllSeries().OrderBy(c => c.Name).ToList();
+                var authorIds = authors.Select(x => x.Id).ToList();
 
-            return updated;
+                var updatedGoodreadsSeriess = new HashSet<string>();
+
+                if (message.LastExecutionTime.HasValue && message.LastExecutionTime.Value.AddDays(14) > DateTime.UtcNow)
+                {
+                    updatedGoodreadsSeriess = _authorInfo.GetChangedSeries(message.LastStartTime.Value);
+                }
+
+                foreach (var author in authors)
+                {
+                    var manualTrigger = message.Trigger == CommandTrigger.Manual;
+
+                    if ((updatedGoodreadsSeriess == null && _checkIfSeriesShouldBeRefreshed.ShouldRefresh(author)) ||
+                        (updatedGoodreadsSeriess != null && updatedGoodreadsSeriess.Contains(author.ForeignSeriesId)) ||
+                        manualTrigger)
+                    {
+                        try
+                        {
+                            LogProgress(author);
+                            var data = GetSkyhookData(author.ForeignSeriesId);
+                            updated |= RefreshEntityInfo(author, null, data, manualTrigger, false, message.LastStartTime);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error(e, "Couldn't refresh info for {0}", author);
+                        }
+                    }
+                    else
+                    {
+                        _logger.Info("Skipping refresh of author: {0}", author.Name);
+                    }
+                }
+
+                Rescan(authorIds, isNew, trigger, updated);
+            }
         }
     }
 }

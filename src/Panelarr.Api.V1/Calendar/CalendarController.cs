@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.AuthorStats;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.MediaCover;
+using NzbDrone.Core.SeriesStats;
 using NzbDrone.SignalR;
 using Panelarr.Api.V1.Books;
 using Panelarr.Http;
@@ -14,11 +14,11 @@ using Panelarr.Http.Extensions;
 namespace Panelarr.Api.V1.Calendar
 {
     [V1ApiController]
-    public class CalendarController : BookControllerWithSignalR
+    public class CalendarController : IssueControllerWithSignalR
     {
         public CalendarController(IBookService bookService,
                               ISeriesBookLinkService seriesBookLinkService,
-                              IAuthorStatisticsService authorStatisticsService,
+                              ISeriesStatisticsService authorStatisticsService,
                               IMapCoversToLocal coverMapper,
                               IUpgradableSpecification upgradableSpecification,
                               IBroadcastSignalRMessage signalRBroadcaster)
@@ -27,15 +27,15 @@ namespace Panelarr.Api.V1.Calendar
         }
 
         [HttpGet]
-        public List<BookResource> GetCalendar(DateTime? start, DateTime? end, bool unmonitored = false, bool includeAuthor = false)
+        public List<IssueResource> GetCalendar(DateTime? start, DateTime? end, bool unmonitored = false, bool includeSeries = false)
         {
-            //TODO: Add Book Image support to BookControllerWithSignalR
+            //TODO: Add Issue Image support to IssueControllerWithSignalR
             var includeBookImages = Request.GetBooleanQueryParameter("includeBookImages");
 
             var startUse = start ?? DateTime.Today;
             var endUse = end ?? DateTime.Today.AddDays(2);
 
-            var resources = MapToResource(_bookService.BooksBetweenDates(startUse, endUse, unmonitored), includeAuthor);
+            var resources = MapToResource(_bookService.IssuesBetweenDates(startUse, endUse, unmonitored), includeSeries);
 
             return resources.OrderBy(e => e.ReleaseDate).ToList();
         }

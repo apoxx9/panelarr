@@ -38,7 +38,7 @@ namespace Panelarr.Api.V1.Queue
         }
 
         [HttpGet]
-        public List<QueueResource> GetQueue(int? authorId, [FromQuery]List<int> bookIds, bool includeAuthor = false, bool includeBook = true)
+        public List<QueueResource> GetQueue(int? authorId, [FromQuery]List<int> bookIds, bool includeSeries = false, bool includeBook = true)
         {
             var queue = _queueService.GetQueue();
             var pending = _pendingReleaseService.GetPendingQueue();
@@ -46,15 +46,15 @@ namespace Panelarr.Api.V1.Queue
 
             if (authorId.HasValue)
             {
-                return fullQueue.Where(q => q.Author?.Id == authorId.Value).ToResource(includeAuthor, includeBook);
+                return fullQueue.Where(q => q.Series?.Id == authorId.Value).ToResource(includeSeries, includeBook);
             }
 
             if (bookIds.Any())
             {
-                return fullQueue.Where(q => q.Book != null && bookIds.Contains(q.Book.Id)).ToResource(includeAuthor, includeBook);
+                return fullQueue.Where(q => q.Issue != null && bookIds.Contains(q.Issue.Id)).ToResource(includeSeries, includeBook);
             }
 
-            return fullQueue.ToResource(includeAuthor, includeBook);
+            return fullQueue.ToResource(includeSeries, includeBook);
         }
 
         [NonAction]

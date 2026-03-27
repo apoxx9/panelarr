@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Blocklisting
 
                                     IExecute<ClearBlocklistCommand>,
                                     IHandle<DownloadFailedEvent>,
-                                    IHandleAsync<AuthorDeletedEvent>
+                                    IHandleAsync<SeriesDeletedEvent>
     {
         private readonly IBlocklistRepository _blocklistRepository;
 
@@ -76,8 +76,8 @@ namespace NzbDrone.Core.Blocklisting
         {
             var blocklist = new Blocklist
                             {
-                                AuthorId = remoteEpisode.Author.Id,
-                                BookIds = remoteEpisode.Books.Select(e => e.Id).ToList(),
+                                SeriesId = remoteEpisode.Series.Id,
+                                IssueIds = remoteEpisode.Books.Select(e => e.Id).ToList(),
                                 SourceTitle =  remoteEpisode.Release.Title,
                                 Quality = remoteEpisode.ParsedBookInfo.Quality,
                                 Date = DateTime.UtcNow,
@@ -175,8 +175,8 @@ namespace NzbDrone.Core.Blocklisting
         {
             var blocklist = new Blocklist
             {
-                AuthorId = message.AuthorId,
-                BookIds = message.BookIds,
+                SeriesId = message.SeriesId,
+                IssueIds = message.IssueIds,
                 SourceTitle = message.SourceTitle,
                 Quality = message.Quality,
                 Date = DateTime.UtcNow,
@@ -196,9 +196,9 @@ namespace NzbDrone.Core.Blocklisting
             _blocklistRepository.Insert(blocklist);
         }
 
-        public void HandleAsync(AuthorDeletedEvent message)
+        public void HandleAsync(SeriesDeletedEvent message)
         {
-            var blocklisted = _blocklistRepository.BlocklistedByAuthor(message.Author.Id);
+            var blocklisted = _blocklistRepository.BlocklistedBySeries(message.Series.Id);
 
             _blocklistRepository.DeleteMany(blocklisted);
         }

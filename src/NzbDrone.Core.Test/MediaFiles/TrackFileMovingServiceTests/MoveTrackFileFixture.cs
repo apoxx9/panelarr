@@ -17,40 +17,40 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.MediaFiles.TrackFileMovingServiceTests
 {
     [TestFixture]
-    public class MoveTrackFileFixture : CoreTest<BookFileMovingService>
+    public class MoveTrackFileFixture : CoreTest<ComicFileMovingService>
     {
-        private Author _author;
-        private BookFile _trackFile;
+        private Series _author;
+        private ComicFile _trackFile;
         private LocalBook _localtrack;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Author>.CreateNew()
-                                     .With(s => s.Path = @"C:\Test\Music\Author".AsOsAgnostic())
+            _author = Builder<Series>.CreateNew()
+                                     .With(s => s.Path = @"C:\Test\Music\Series".AsOsAgnostic())
                                      .Build();
 
-            _trackFile = Builder<BookFile>.CreateNew()
+            _trackFile = Builder<ComicFile>.CreateNew()
                                                .With(f => f.Path = null)
-                                               .With(f => f.Path = Path.Combine(_author.Path, @"Book\File.mp3"))
+                                               .With(f => f.Path = Path.Combine(_author.Path, @"Issue\File.mp3"))
                                                .Build();
 
             _localtrack = Builder<LocalBook>.CreateNew()
-                                                 .With(l => l.Author = _author)
-                                                 .With(l => l.Book = Builder<Book>.CreateNew().Build())
+                                                 .With(l => l.Series = _author)
+                                                 .With(l => l.Issue = Builder<Issue>.CreateNew().Build())
                                                  .Build();
 
             Mocker.GetMock<IBuildFileNames>()
-                  .Setup(s => s.BuildBookFileName(It.IsAny<Author>(), It.IsAny<Edition>(), It.IsAny<BookFile>(), null, null))
+                  .Setup(s => s.BuildBookFileName(It.IsAny<Series>(), It.IsAny<Issue>(), It.IsAny<ComicFile>(), null, null))
                   .Returns("File Name");
 
             Mocker.GetMock<IBuildFileNames>()
-                  .Setup(s => s.BuildBookFilePath(It.IsAny<Author>(), It.IsAny<Edition>(), It.IsAny<string>(), It.IsAny<string>()))
-                  .Returns(@"C:\Test\Music\Author\Book\File Name.mp3".AsOsAgnostic());
+                  .Setup(s => s.BuildBookFilePath(It.IsAny<Series>(), It.IsAny<Issue>(), It.IsAny<string>(), It.IsAny<string>()))
+                  .Returns(@"C:\Test\Music\Series\Issue\File Name.mp3".AsOsAgnostic());
 
             Mocker.GetMock<IBuildFileNames>()
-                  .Setup(s => s.BuildBookPath(It.IsAny<Author>()))
-                  .Returns(@"C:\Test\Music\Author\Book".AsOsAgnostic());
+                  .Setup(s => s.BuildBookPath(It.IsAny<Series>()))
+                  .Returns(@"C:\Test\Music\Series\Issue".AsOsAgnostic());
 
             var rootFolder = @"C:\Test\Music\".AsOsAgnostic();
             Mocker.GetMock<IDiskProvider>()
@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Test.MediaFiles.TrackFileMovingServiceTests
 
             Mocker.GetMock<IEventAggregator>()
                   .Verify(s => s.PublishEvent<TrackFolderCreatedEvent>(It.Is<TrackFolderCreatedEvent>(p =>
-                      p.AuthorFolder.IsNotNullOrWhiteSpace())), Times.Once());
+                      p.SeriesFolder.IsNotNullOrWhiteSpace())), Times.Once());
         }
 
         [Test]
@@ -103,7 +103,7 @@ namespace NzbDrone.Core.Test.MediaFiles.TrackFileMovingServiceTests
 
             Mocker.GetMock<IEventAggregator>()
                   .Verify(s => s.PublishEvent<TrackFolderCreatedEvent>(It.Is<TrackFolderCreatedEvent>(p =>
-                      p.BookFolder.IsNotNullOrWhiteSpace())), Times.Once());
+                      p.IssueFolder.IsNotNullOrWhiteSpace())), Times.Once());
         }
 
         [Test]
@@ -117,7 +117,7 @@ namespace NzbDrone.Core.Test.MediaFiles.TrackFileMovingServiceTests
 
             Mocker.GetMock<IEventAggregator>()
                   .Verify(s => s.PublishEvent<TrackFolderCreatedEvent>(It.Is<TrackFolderCreatedEvent>(p =>
-                      p.AuthorFolder.IsNotNullOrWhiteSpace())), Times.Never());
+                      p.SeriesFolder.IsNotNullOrWhiteSpace())), Times.Never());
         }
     }
 }

@@ -42,17 +42,17 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             }
 
             _logger.Debug("Performing already imported check on report");
-            foreach (var book in subject.Books)
+            foreach (var issue in subject.Books)
             {
-                var bookFiles = _mediaFileService.GetFilesByBook(book.Id);
+                var comicFiles = _mediaFileService.GetFilesByBook(issue.Id);
 
-                if (bookFiles.Count() == 0)
+                if (comicFiles.Count() == 0)
                 {
-                    _logger.Debug("Skipping already imported check for book without files");
+                    _logger.Debug("Skipping already imported check for issue without files");
                     continue;
                 }
 
-                var historyForBook = _historyService.GetByBook(book.Id, null);
+                var historyForBook = _historyService.GetByBook(issue.Id, null);
                 var lastGrabbed = historyForBook.FirstOrDefault(h => h.EventType == EntityHistoryEventType.Grabbed);
 
                 if (lastGrabbed == null)
@@ -61,7 +61,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 }
 
                 var imported = historyForBook.FirstOrDefault(h =>
-                    h.EventType == EntityHistoryEventType.BookFileImported &&
+                    h.EventType == EntityHistoryEventType.ComicFileImported &&
                     h.DownloadId == lastGrabbed.DownloadId);
 
                 if (imported == null)

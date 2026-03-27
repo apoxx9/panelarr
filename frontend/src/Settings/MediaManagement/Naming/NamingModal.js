@@ -259,7 +259,7 @@ class NamingModal extends Component {
                 </FieldSet>
             }
 
-            <FieldSet legend={translate('Author')}>
+            <FieldSet legend={translate('Series')}>
               <div className={styles.groups}>
                 {
                   authorTokens.map(({ token, example }) => {
@@ -284,7 +284,7 @@ class NamingModal extends Component {
             {
               book &&
                 <div>
-                  <FieldSet legend={translate('Book')}>
+                  <FieldSet legend={translate('Issue')}>
                     <div className={styles.groups}>
                       {
                         bookTokens.map(({ token, example }) => {

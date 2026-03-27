@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.NotificationTests
                 throw new NotImplementedException();
             }
 
-            public override void OnReleaseImport(BookDownloadMessage message)
+            public override void OnReleaseImport(IssueDownloadMessage message)
             {
                 TestLogger.Info("OnDownload was called");
             }
@@ -54,32 +54,32 @@ namespace NzbDrone.Core.Test.NotificationTests
                 TestLogger.Info("OnGrab was called");
             }
 
-            public override void OnReleaseImport(BookDownloadMessage message)
+            public override void OnReleaseImport(IssueDownloadMessage message)
             {
                 TestLogger.Info("OnDownload was called");
             }
 
-            public override void OnRename(Author author, List<RenamedBookFile> renamedFiles)
+            public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
             {
                 TestLogger.Info("OnRename was called");
             }
 
-            public override void OnAuthorAdded(Author author)
+            public override void OnSeriesAdded(Series author)
             {
-                TestLogger.Info("OnAuthorAdded was called");
+                TestLogger.Info("OnSeriesAdded was called");
             }
 
-            public override void OnAuthorDelete(AuthorDeleteMessage message)
+            public override void OnSeriesDelete(SeriesDeleteMessage message)
             {
-                TestLogger.Info("OnAuthorDelete was called");
+                TestLogger.Info("OnSeriesDelete was called");
             }
 
-            public override void OnBookDelete(BookDeleteMessage message)
+            public override void OnBookDelete(IssueDeleteMessage message)
             {
                 TestLogger.Info("OnBookDelete was called");
             }
 
-            public override void OnBookFileDelete(BookFileDeleteMessage message)
+            public override void OnBookFileDelete(ComicFileDeleteMessage message)
             {
                 TestLogger.Info("OnBookFileDelete was called");
             }
@@ -94,12 +94,12 @@ namespace NzbDrone.Core.Test.NotificationTests
                 TestLogger.Info("OnDownloadFailure was called");
             }
 
-            public override void OnImportFailure(BookDownloadMessage message)
+            public override void OnImportFailure(IssueDownloadMessage message)
             {
                 TestLogger.Info("OnImportFailure was called");
             }
 
-            public override void OnBookRetag(BookRetagMessage message)
+            public override void OnBookRetag(IssueRetagMessage message)
             {
                 TestLogger.Info("OnBookRetag was called");
             }
@@ -143,8 +143,8 @@ namespace NzbDrone.Core.Test.NotificationTests
             notification.SupportsOnUpgrade.Should().BeTrue();
             notification.SupportsOnRename.Should().BeTrue();
             notification.SupportsOnHealthIssue.Should().BeTrue();
-            notification.SupportsOnAuthorAdded.Should().BeTrue();
-            notification.SupportsOnAuthorDelete.Should().BeTrue();
+            notification.SupportsOnSeriesAdded.Should().BeTrue();
+            notification.SupportsOnSeriesDelete.Should().BeTrue();
             notification.SupportsOnBookDelete.Should().BeTrue();
             notification.SupportsOnBookFileDelete.Should().BeTrue();
             notification.SupportsOnBookFileDeleteForUpgrade.Should().BeTrue();
@@ -163,8 +163,8 @@ namespace NzbDrone.Core.Test.NotificationTests
             notification.SupportsOnReleaseImport.Should().BeFalse();
             notification.SupportsOnUpgrade.Should().BeFalse();
             notification.SupportsOnRename.Should().BeFalse();
-            notification.SupportsOnAuthorAdded.Should().BeFalse();
-            notification.SupportsOnAuthorDelete.Should().BeFalse();
+            notification.SupportsOnSeriesAdded.Should().BeFalse();
+            notification.SupportsOnSeriesDelete.Should().BeFalse();
             notification.SupportsOnBookDelete.Should().BeFalse();
             notification.SupportsOnBookFileDelete.Should().BeFalse();
             notification.SupportsOnBookFileDeleteForUpgrade.Should().BeFalse();

@@ -16,18 +16,18 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
     public class DeleteTrackFileFixture : CoreTest<Core.MediaFiles.MediaFileDeletionService>
     {
         private static readonly string RootFolder = @"C:\Test\Music";
-        private Author _author;
-        private BookFile _trackFile;
+        private Series _author;
+        private ComicFile _trackFile;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Author>.CreateNew()
-                                     .With(s => s.Path = Path.Combine(RootFolder, "Author Name"))
+            _author = Builder<Series>.CreateNew()
+                                     .With(s => s.Path = Path.Combine(RootFolder, "Series Name"))
                                      .Build();
 
-            _trackFile = Builder<BookFile>.CreateNew()
-                                               .With(f => f.Path = "/Author Name - Track01")
+            _trackFile = Builder<ComicFile>.CreateNew()
+                                               .With(f => f.Path = "/Series Name - Track01")
                                                .Build();
 
             Mocker.GetMock<IDiskProvider>()
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
                   .Returns(new[] { _author.Path });
         }
 
-        private void GivenAuthorFolderExists()
+        private void GivenSeriesFolderExists()
         {
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FolderExists(_author.Path))
@@ -99,7 +99,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
         {
             GivenRootFolderExists();
             GivenRootFolderHasFolders();
-            GivenAuthorFolderExists();
+            GivenSeriesFolderExists();
 
             Subject.DeleteTrackFile(_author, _trackFile);
 
@@ -113,7 +113,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
             GivenNonCalibreRootFolder();
             GivenRootFolderExists();
             GivenRootFolderHasFolders();
-            GivenAuthorFolderExists();
+            GivenSeriesFolderExists();
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FileExists(_trackFile.Path))
@@ -121,7 +121,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
 
             Subject.DeleteTrackFile(_author, _trackFile);
 
-            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_trackFile.Path, "Author Name"), Times.Once());
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_trackFile.Path, "Series Name"), Times.Once());
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_trackFile, DeleteMediaFileReason.Manual), Times.Once());
         }
 
@@ -131,20 +131,20 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
             GivenNonCalibreRootFolder();
             GivenRootFolderExists();
             GivenRootFolderHasFolders();
-            GivenAuthorFolderExists();
+            GivenSeriesFolderExists();
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FileExists(_trackFile.Path))
                   .Returns(true);
 
             Mocker.GetMock<IRecycleBinProvider>()
-                  .Setup(s => s.DeleteFile(_trackFile.Path, "Author Name"))
+                  .Setup(s => s.DeleteFile(_trackFile.Path, "Series Name"))
                   .Throws(new IOException());
 
             Assert.Throws<NzbDroneClientException>(() => Subject.DeleteTrackFile(_author, _trackFile));
 
             ExceptionVerification.ExpectedErrors(1);
-            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_trackFile.Path, "Author Name"), Times.Once());
+            Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_trackFile.Path, "Series Name"), Times.Once());
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_trackFile, DeleteMediaFileReason.Manual), Times.Never());
         }
     }

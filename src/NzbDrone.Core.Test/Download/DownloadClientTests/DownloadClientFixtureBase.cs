@@ -55,9 +55,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
 
             remoteBook.ParsedBookInfo = new ParsedBookInfo();
 
-            remoteBook.Books = new List<Book>();
+            remoteBook.Books = new List<Issue>();
 
-            remoteBook.Author = new Author();
+            remoteBook.Series = new Series();
 
             return remoteBook;
         }

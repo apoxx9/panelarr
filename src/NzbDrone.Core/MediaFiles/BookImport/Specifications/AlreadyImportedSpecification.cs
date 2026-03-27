@@ -6,7 +6,7 @@ using NzbDrone.Core.Download;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Parser.Model;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
+namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
 {
     public class AlreadyImportedSpecification : IImportDecisionEngineSpecification<LocalEdition>
     {
@@ -30,34 +30,34 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
                 return Decision.Accept();
             }
 
-            var bookRelease = localBookRelease.Edition;
+            var bookRelease = localBookRelease.Issue;
 
-            if ((!bookRelease.BookFiles?.Value?.Any()) ?? true)
+            if ((!bookRelease?.ComicFiles?.Value?.Any()) ?? true)
             {
-                _logger.Debug("Skipping already imported check for book without files");
+                _logger.Debug("Skipping already imported check for issue without files");
                 return Decision.Accept();
             }
 
-            var bookHistory = _historyService.GetByBook(bookRelease.BookId, null);
-            var lastImported = bookHistory.FirstOrDefault(h => h.EventType == EntityHistoryEventType.BookFileImported);
+            var bookHistory = _historyService.GetByBook(bookRelease.Id, null);
+            var lastImported = bookHistory.FirstOrDefault(h => h.EventType == EntityHistoryEventType.ComicFileImported);
             var lastGrabbed = bookHistory.FirstOrDefault(h => h.EventType == EntityHistoryEventType.Grabbed);
 
             if (lastImported == null)
             {
-                _logger.Trace("Book file has not been imported");
+                _logger.Trace("Issue file has not been imported");
                 return Decision.Accept();
             }
 
             if (lastGrabbed != null && lastGrabbed.Date.After(lastImported.Date))
             {
-                _logger.Trace("Book file was grabbed again after importing");
+                _logger.Trace("Issue file was grabbed again after importing");
                 return Decision.Accept();
             }
 
             if (lastImported.DownloadId == downloadClientItem.DownloadId)
             {
-                _logger.Debug("Book previously imported at {0}", lastImported.Date);
-                return Decision.Reject("Book already imported at {0}", lastImported.Date);
+                _logger.Debug("Issue previously imported at {0}", lastImported.Date);
+                return Decision.Reject("Issue already imported at {0}", lastImported.Date);
             }
 
             return Decision.Accept();

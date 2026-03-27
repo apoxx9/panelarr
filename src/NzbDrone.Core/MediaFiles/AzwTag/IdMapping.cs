@@ -8,7 +8,7 @@ namespace NzbDrone.Core.MediaFiles.Azw
         {
            { 1, "Drm Server Id (1)" },
            { 2, "Drm Commerce Id (2)" },
-           { 3, "Drm Ebookbase Book Id(3)" },
+           { 3, "Drm Ebookbase Issue Id(3)" },
            { 100, "Creator_(100)" },
            { 101, "Publisher_(101)" },
            { 102, "Imprint_(102)" },
@@ -28,7 +28,7 @@ namespace NzbDrone.Core.MediaFiles.Azw
            { 118, "Price_(118)" },
            { 119, "Currency_(119)" },
            { 122, "fixed-layout_(122)" },
-           { 123, "book-type_(123)" },
+           { 123, "issue-type_(123)" },
            { 124, "orientation-lock_(124)" },
            { 126, "original-resolution_(126)" },
            { 127, "zero-gutter_(127)" },

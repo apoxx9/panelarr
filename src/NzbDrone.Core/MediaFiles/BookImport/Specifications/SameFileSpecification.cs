@@ -4,7 +4,7 @@ using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Parser.Model;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
+namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
 {
     public class SameFileSpecification : IImportDecisionEngineSpecification<LocalBook>
     {
@@ -17,25 +17,25 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Specifications
 
         public Decision IsSatisfiedBy(LocalBook localBook, DownloadClientItem downloadClientItem)
         {
-            var bookFiles = localBook.Book?.BookFiles?.Value;
+            var comicFiles = localBook.Issue?.ComicFiles?.Value;
 
-            if (bookFiles == null || !bookFiles.Any())
+            if (comicFiles == null || !comicFiles.Any())
             {
-                _logger.Debug("No existing book file, skipping");
+                _logger.Debug("No existing issue file, skipping");
                 return Decision.Accept();
             }
 
-            foreach (var bookFile in bookFiles)
+            foreach (var comicFile in comicFiles)
             {
-                if (bookFile == null)
+                if (comicFile == null)
                 {
-                    var book = localBook.Book;
-                    _logger.Trace("Unable to get book file details from the DB. BookId: {0}", book.Id);
+                    var issue = localBook.Issue;
+                    _logger.Trace("Unable to get issue file details from the DB. IssueId: {0}", issue.Id);
 
                     return Decision.Accept();
                 }
 
-                if (bookFile.Size == localBook.Size)
+                if (comicFile.Size == localBook.Size)
                 {
                     _logger.Debug("'{0}' Has the same filesize as existing file", localBook.Path);
                     return Decision.Reject("Has the same filesize as existing file");

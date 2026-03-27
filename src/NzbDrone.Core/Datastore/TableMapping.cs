@@ -85,8 +85,8 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(i => i.SupportsOnReleaseImport)
                   .Ignore(i => i.SupportsOnUpgrade)
                   .Ignore(i => i.SupportsOnRename)
-                  .Ignore(i => i.SupportsOnAuthorAdded)
-                  .Ignore(i => i.SupportsOnAuthorDelete)
+                  .Ignore(i => i.SupportsOnSeriesAdded)
+                  .Ignore(i => i.SupportsOnSeriesDelete)
                   .Ignore(i => i.SupportsOnBookDelete)
                   .Ignore(i => i.SupportsOnBookFileDelete)
                   .Ignore(i => i.SupportsOnBookFileDeleteForUpgrade)
@@ -106,71 +106,62 @@ namespace NzbDrone.Core.Datastore
 
             Mapper.Entity<EntityHistory>("History").RegisterModel();
 
-            Mapper.Entity<Author>("Authors")
+            Mapper.Entity<Series>("Series")
                   .Ignore(s => s.RootFolderPath)
                   .Ignore(s => s.Name)
-                  .Ignore(s => s.ForeignAuthorId)
-                  .HasOne(a => a.Metadata, a => a.AuthorMetadataId)
+                  .Ignore(s => s.ForeignSeriesId)
+                  .HasOne(a => a.Metadata, a => a.SeriesMetadataId)
                   .HasOne(a => a.QualityProfile, a => a.QualityProfileId)
-                  .HasOne(s => s.MetadataProfile, s => s.MetadataProfileId)
-                  .LazyLoad(a => a.Books, (db, a) => db.Query<Book>(new SqlBuilder(db.DatabaseType).Where<Book>(b => b.AuthorMetadataId == a.AuthorMetadataId)).ToList(), a => a.AuthorMetadataId > 0);
+                  .LazyLoad(a => a.Books, (db, a) => db.Query<Issue>(new SqlBuilder(db.DatabaseType).Where<Issue>(b => b.SeriesMetadataId == a.SeriesMetadataId)).ToList(), a => a.SeriesMetadataId > 0);
 
-            Mapper.Entity<Series>("Series").RegisterModel()
-                .Ignore(s => s.ForeignAuthorId)
+            Mapper.Entity<SeriesGroup>("SeriesGroup").RegisterModel()
+                .Ignore(s => s.ForeignSeriesId)
+                .Ignore(s => s.Numbered)
+                .Ignore(s => s.WorkCount)
+                .Ignore(s => s.PrimaryWorkCount)
+                .Ignore(s => s.Works)
                 .LazyLoad(s => s.LinkItems,
-                          (db, series) => db.Query<SeriesBookLink>(new SqlBuilder(db.DatabaseType).Where<SeriesBookLink>(s => s.SeriesId == series.Id)).ToList(),
+                          (db, series) => db.Query<SeriesGroupLink>(new SqlBuilder(db.DatabaseType).Where<SeriesGroupLink>(s => s.SeriesId == series.Id)).ToList(),
                           s => s.Id > 0)
                 .LazyLoad(s => s.Books,
-                          (db, series) => db.Query<Book>(new SqlBuilder(db.DatabaseType)
-                                                         .Join<Book, SeriesBookLink>((l, r) => l.Id == r.BookId)
-                                                         .Join<SeriesBookLink, Series>((l, r) => l.SeriesId == r.Id)
-                                                         .Where<Series>(s => s.Id == series.Id)).ToList(),
+                          (db, series) => db.Query<Issue>(new SqlBuilder(db.DatabaseType)
+                                                         .Join<Issue, SeriesGroupLink>((l, r) => l.Id == r.IssueId)
+                                                         .Join<SeriesGroupLink, SeriesGroup>((l, r) => l.SeriesId == r.Id)
+                                                         .Where<SeriesGroup>(s => s.Id == series.Id)).ToList(),
                           s => s.Id > 0);
 
-            Mapper.Entity<SeriesBookLink>("SeriesBookLink").RegisterModel()
-                  .HasOne(l => l.Book, l => l.BookId)
-                  .HasOne(l => l.Series, l => l.SeriesId);
+            Mapper.Entity<SeriesGroupLink>("SeriesGroupLink").RegisterModel()
+                  .HasOne(l => l.Issue, l => l.IssueId)
+                  .HasOne(l => l.SeriesGroup, l => l.SeriesId);
 
-            Mapper.Entity<AuthorMetadata>("AuthorMetadata").RegisterModel();
+            Mapper.Entity<SeriesMetadata>("SeriesMetadata").RegisterModel();
 
-            Mapper.Entity<Book>("Books").RegisterModel()
-                .Ignore(x => x.AuthorId)
-                .Ignore(x => x.ForeignEditionId)
-                .HasOne(r => r.AuthorMetadata, r => r.AuthorMetadataId)
-                .LazyLoad(x => x.BookFiles,
-                          (db, book) => db.Query<BookFile>(new SqlBuilder(db.DatabaseType)
-                                                           .Join<BookFile, Edition>((l, r) => l.EditionId == r.Id)
-                                                           .Where<Edition>(b => b.BookId == book.Id)).ToList(),
+            Mapper.Entity<Issue>("Books").RegisterModel()
+                .Ignore(x => x.SeriesId)
+                .HasOne(r => r.SeriesMetadata, r => r.SeriesMetadataId)
+                .LazyLoad(x => x.ComicFiles,
+                          (db, issue) => db.Query<ComicFile>(new SqlBuilder(db.DatabaseType)
+                                                           .Where<ComicFile>(f => f.IssueId == issue.Id)).ToList(),
                           b => b.Id > 0)
-                .LazyLoad(x => x.Editions,
-                          (db, book) => db.Query<Edition>(new SqlBuilder(db.DatabaseType).Where<Edition>(e => e.BookId == book.Id)).ToList(),
-                          b => b.Id > 0)
-                .LazyLoad(a => a.Author,
-                          (db, book) => AuthorRepository.Query(db,
+                .LazyLoad(a => a.Series,
+                          (db, issue) => SeriesRepository.Query(db,
                                                                 new SqlBuilder(db.DatabaseType)
-                                                                .Join<Author, AuthorMetadata>((a, m) => a.AuthorMetadataId == m.Id)
-                                                                .Where<Author>(a => a.AuthorMetadataId == book.AuthorMetadataId)).SingleOrDefault(),
-                          a => a.AuthorMetadataId > 0)
+                                                                .Join<Series, SeriesMetadata>((a, m) => a.SeriesMetadataId == m.Id)
+                                                                .Where<Series>(a => a.SeriesMetadataId == issue.SeriesMetadataId)).SingleOrDefault(),
+                          a => a.SeriesMetadataId > 0)
                 .LazyLoad(b => b.SeriesLinks,
-                          (db, book) => db.Query<SeriesBookLink>(new SqlBuilder(db.DatabaseType).Where<SeriesBookLink>(s => s.BookId == book.Id)).ToList(),
+                          (db, issue) => db.Query<SeriesGroupLink>(new SqlBuilder(db.DatabaseType).Where<SeriesGroupLink>(s => s.IssueId == issue.Id)).ToList(),
                           b => b.Id > 0);
 
-            Mapper.Entity<Edition>("Editions").RegisterModel()
-                .HasOne(r => r.Book, r => r.BookId)
-                .LazyLoad(x => x.BookFiles,
-                          (db, edition) => db.Query<BookFile>(new SqlBuilder(db.DatabaseType).Where<BookFile>(f => f.EditionId == edition.Id)).ToList(),
-                          b => b.Id > 0);
-
-            Mapper.Entity<BookFile>("BookFiles").RegisterModel()
+            Mapper.Entity<ComicFile>("ComicFiles").RegisterModel()
                 .Ignore(x => x.PartCount)
-                .HasOne(f => f.Edition, f => f.EditionId)
-                .LazyLoad(x => x.Author,
-                          (db, f) => AuthorRepository.Query(db,
+                .HasOne(f => f.Issue, f => f.IssueId)
+                .LazyLoad(x => x.Series,
+                          (db, f) => SeriesRepository.Query(db,
                                                             new SqlBuilder(db.DatabaseType)
-                                                            .Join<Author, AuthorMetadata>((a, m) => a.AuthorMetadataId == m.Id)
-                                                            .Join<Author, Book>((l, r) => l.AuthorMetadataId == r.AuthorMetadataId)
-                                                            .Join<Book, Edition>((l, r) => l.Id == r.BookId)
-                                                            .Where<Edition>(a => a.Id == f.EditionId)).SingleOrDefault(),
+                                                            .Join<Series, SeriesMetadata>((a, m) => a.SeriesMetadataId == m.Id)
+                                                            .Join<Series, Issue>((l, r) => l.SeriesMetadataId == r.SeriesMetadataId)
+                                                            .Where<Issue>(a => a.Id == f.IssueId)).SingleOrDefault(),
                           t => t.Id > 0);
 
             Mapper.Entity<QualityDefinition>("QualityDefinitions").RegisterModel()

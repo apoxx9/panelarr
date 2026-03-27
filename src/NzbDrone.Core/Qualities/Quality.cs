@@ -70,15 +70,14 @@ namespace NzbDrone.Core.Qualities
             return !Equals(left, right);
         }
 
-        public static Quality Unknown => new Quality(0, "Unknown Text");
+        public static Quality Unknown => new Quality(0, "Unknown");
         public static Quality PDF => new Quality(1, "PDF");
-        public static Quality MOBI => new Quality(2, "MOBI");
-        public static Quality EPUB => new Quality(3, "EPUB");
-        public static Quality AZW3 => new Quality(4, "AZW3");
-        public static Quality MP3 => new Quality(10, "MP3");
-        public static Quality FLAC => new Quality(11, "FLAC");
-        public static Quality M4B => new Quality(12, "M4B");
-        public static Quality UnknownAudio => new Quality(13, "Unknown Audio");
+        public static Quality EPUB => new Quality(2, "EPUB");
+        public static Quality CBR => new Quality(3, "CBR");
+        public static Quality CBZ => new Quality(4, "CBZ");
+        public static Quality CB7 => new Quality(5, "CB7");
+        public static Quality CBZ_Web => new Quality(6, "CBZ Web");
+        public static Quality CBZ_HD => new Quality(7, "CBZ HD");
 
         static Quality()
         {
@@ -86,13 +85,12 @@ namespace NzbDrone.Core.Qualities
             {
                 Unknown,
                 PDF,
-                MOBI,
                 EPUB,
-                AZW3,
-                UnknownAudio,
-                MP3,
-                M4B,
-                FLAC
+                CBR,
+                CBZ,
+                CB7,
+                CBZ_Web,
+                CBZ_HD
             };
 
             AllLookup = new Quality[All.Select(v => v.Id).Max() + 1];
@@ -103,15 +101,14 @@ namespace NzbDrone.Core.Qualities
 
             DefaultQualityDefinitions = new HashSet<QualityDefinition>
             {
-                new QualityDefinition(Quality.Unknown)      { Weight = 1, MinSize = 0, MaxSize = 350, GroupWeight = 1 },
-                new QualityDefinition(Quality.PDF)          { Weight = 5, MinSize = 0, MaxSize = 350, GroupWeight = 2 },
-                new QualityDefinition(Quality.MOBI)         { Weight = 10, MinSize = 0, MaxSize = 350, GroupWeight = 10 },
-                new QualityDefinition(Quality.EPUB)         { Weight = 11, MinSize = 0, MaxSize = 350, GroupWeight = 11 },
-                new QualityDefinition(Quality.AZW3)         { Weight = 12, MinSize = 0, MaxSize = 350, GroupWeight = 12 },
-                new QualityDefinition(Quality.UnknownAudio) { Weight = 50, MinSize = 0, MaxSize = 350, GroupWeight = 50 },
-                new QualityDefinition(Quality.MP3)      { Weight = 100, MinSize = 0, MaxSize = 350, GroupWeight = 100 },
-                new QualityDefinition(Quality.M4B)          { Weight = 105, MinSize = 0, MaxSize = 350, GroupWeight = 105 },
-                new QualityDefinition(Quality.FLAC)         { Weight = 110, MinSize = 0, MaxSize = null, GroupWeight = 110 },
+                new QualityDefinition(Quality.Unknown)  { Weight = 1,  MinSize = 0, MaxSize = null, GroupWeight = 1 },
+                new QualityDefinition(Quality.PDF)      { Weight = 10, MinSize = 0, MaxSize = null, GroupWeight = 10 },
+                new QualityDefinition(Quality.EPUB)     { Weight = 20, MinSize = 0, MaxSize = null, GroupWeight = 20 },
+                new QualityDefinition(Quality.CBR)      { Weight = 30, MinSize = 0, MaxSize = null, GroupWeight = 30 },
+                new QualityDefinition(Quality.CBZ_Web)  { Weight = 35, MinSize = 0, MaxSize = null, GroupWeight = 35 },
+                new QualityDefinition(Quality.CBZ)      { Weight = 40, MinSize = 0, MaxSize = null, GroupWeight = 40 },
+                new QualityDefinition(Quality.CB7)      { Weight = 45, MinSize = 0, MaxSize = null, GroupWeight = 45 },
+                new QualityDefinition(Quality.CBZ_HD)   { Weight = 50, MinSize = 0, MaxSize = null, GroupWeight = 50 },
             };
         }
 

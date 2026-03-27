@@ -26,7 +26,7 @@ namespace Panelarr.Api.V1.MediaCovers
         }
 
         [HttpGet(@"author/{authorId:int}/{filename:regex((.+)\.(jpg|png|gif))}")]
-        public IActionResult GetAuthorMediaCover(int authorId, string filename)
+        public IActionResult GetSeriesMediaCover(int authorId, string filename)
         {
             var filePath = Path.Combine(_appFolderInfo.GetAppDataPath(), "MediaCover", authorId.ToString(), filename);
 
@@ -46,7 +46,7 @@ namespace Panelarr.Api.V1.MediaCovers
             return PhysicalFile(filePath, GetContentType(filePath));
         }
 
-        [HttpGet(@"book/{bookId:int}/{filename:regex((.+)\.(jpg|png|gif))}")]
+        [HttpGet(@"issue/{bookId:int}/{filename:regex((.+)\.(jpg|png|gif))}")]
         public IActionResult GetBookMediaCover(int bookId, string filename)
         {
             var filePath = Path.Combine(_appFolderInfo.GetAppDataPath(), "MediaCover", "Books", bookId.ToString(), filename);

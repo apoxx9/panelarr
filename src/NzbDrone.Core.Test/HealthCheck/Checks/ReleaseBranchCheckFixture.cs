@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
                     .Returns(branch);
         }
 
-        [TestCase("book-index")]
+        [TestCase("issue-index")]
         [TestCase("phantom")]
 
         // ToDo: Master should be valid once released

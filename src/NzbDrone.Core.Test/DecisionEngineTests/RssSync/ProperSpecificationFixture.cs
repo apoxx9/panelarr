@@ -23,39 +23,39 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
     {
         private RemoteBook _parseResultMulti;
         private RemoteBook _parseResultSingle;
-        private BookFile _firstFile;
-        private BookFile _secondFile;
+        private ComicFile _firstFile;
+        private ComicFile _secondFile;
 
         [SetUp]
         public void Setup()
         {
             Mocker.Resolve<UpgradableSpecification>();
 
-            _firstFile = new BookFile { Quality = new QualityModel(Quality.FLAC, new Revision(version: 1)), DateAdded = DateTime.Now };
-            _secondFile = new BookFile { Quality = new QualityModel(Quality.FLAC, new Revision(version: 1)), DateAdded = DateTime.Now };
+            _firstFile = new ComicFile { Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)), DateAdded = DateTime.Now };
+            _secondFile = new ComicFile { Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)), DateAdded = DateTime.Now };
 
-            var singleBookList = new List<Book> { new Book { }, new Book { } };
-            var doubleBookList = new List<Book> { new Book { }, new Book { }, new Book { } };
+            var singleBookList = new List<Issue> { new Issue { }, new Issue { } };
+            var doubleBookList = new List<Issue> { new Issue { }, new Issue { }, new Issue { } };
 
-            var fakeAuthor = Builder<Author>.CreateNew()
-                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.FLAC.Id })
+            var fakeSeries = Builder<Series>.CreateNew()
+                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.CBZ_HD.Id })
                          .Build();
 
             Mocker.GetMock<IMediaFileService>()
                 .Setup(c => c.GetFilesByBook(It.IsAny<int>()))
-                .Returns(new List<BookFile> { _firstFile, _secondFile });
+                .Returns(new List<ComicFile> { _firstFile, _secondFile });
 
             _parseResultMulti = new RemoteBook
             {
-                Author = fakeAuthor,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MOBI, new Revision(version: 2)) },
+                Series = fakeSeries,
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
                 Books = doubleBookList
             };
 
             _parseResultSingle = new RemoteBook
             {
-                Author = fakeAuthor,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.MOBI, new Revision(version: 2)) },
+                Series = fakeSeries,
+                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
                 Books = singleBookList
             };
         }
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_return_false_when_trackFile_was_added_more_than_7_days_ago()
         {
-            _firstFile.Quality.Quality = Quality.MOBI;
+            _firstFile.Quality.Quality = Quality.CBR;
 
             _firstFile.DateAdded = DateTime.Today.AddDays(-30);
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
@@ -77,8 +77,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_return_false_when_first_trackFile_was_added_more_than_7_days_ago()
         {
-            _firstFile.Quality.Quality = Quality.MOBI;
-            _secondFile.Quality.Quality = Quality.MOBI;
+            _firstFile.Quality.Quality = Quality.CBR;
+            _secondFile.Quality.Quality = Quality.CBR;
 
             _firstFile.DateAdded = DateTime.Today.AddDays(-30);
             Subject.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeFalse();
@@ -87,8 +87,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_return_false_when_second_trackFile_was_added_more_than_7_days_ago()
         {
-            _firstFile.Quality.Quality = Quality.MOBI;
-            _secondFile.Quality.Quality = Quality.MOBI;
+            _firstFile.Quality.Quality = Quality.CBR;
+            _secondFile.Quality.Quality = Quality.CBR;
 
             _secondFile.DateAdded = DateTime.Today.AddDays(-30);
             Subject.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeFalse();
@@ -109,7 +109,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             WithFirstFileUpgradable();
 
             _firstFile.DateAdded = DateTime.Today.AddDays(-30);
-            Subject.IsSatisfiedBy(_parseResultSingle, new BookSearchCriteria()).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_parseResultSingle, new IssueSearchCriteria()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 .Setup(s => s.DownloadPropersAndRepacks)
                 .Returns(ProperDownloadTypes.DoNotUpgrade);
 
-            _firstFile.Quality.Quality = Quality.MOBI;
+            _firstFile.Quality.Quality = Quality.CBR;
 
             _firstFile.DateAdded = DateTime.Today;
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
@@ -132,7 +132,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.PreferAndUpgrade);
 
-            _firstFile.Quality.Quality = Quality.MOBI;
+            _firstFile.Quality.Quality = Quality.CBR;
 
             _firstFile.DateAdded = DateTime.Today;
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
@@ -145,7 +145,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotPrefer);
 
-            _firstFile.Quality.Quality = Quality.MOBI;
+            _firstFile.Quality.Quality = Quality.CBR;
 
             _firstFile.DateAdded = DateTime.Today;
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();

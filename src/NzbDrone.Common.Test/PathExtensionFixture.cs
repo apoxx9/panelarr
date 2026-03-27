@@ -293,28 +293,28 @@ namespace NzbDrone.Common.Test
         public void GetAncestorFolders_should_return_all_ancestors_in_path_Windows()
         {
             WindowsOnly();
-            var path = @"C:\Test\Music\Author Title";
+            var path = @"C:\Test\Music\Series Title";
             var result = path.GetAncestorFolders();
 
             result.Count.Should().Be(4);
             result[0].Should().Be(@"C:\");
             result[1].Should().Be(@"Test");
             result[2].Should().Be(@"Music");
-            result[3].Should().Be(@"Author Title");
+            result[3].Should().Be(@"Series Title");
         }
 
         [Test]
         public void GetAncestorFolders_should_return_all_ancestors_in_path_Linux()
         {
             PosixOnly();
-            var path = @"/Test/Music/Author Title";
+            var path = @"/Test/Music/Series Title";
             var result = path.GetAncestorFolders();
 
             result.Count.Should().Be(4);
             result[0].Should().Be(@"/");
             result[1].Should().Be(@"Test");
             result[2].Should().Be(@"Music");
-            result[3].Should().Be(@"Author Title");
+            result[3].Should().Be(@"Series Title");
         }
     }
 }

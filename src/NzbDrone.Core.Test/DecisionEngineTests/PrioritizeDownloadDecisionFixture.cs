@@ -27,21 +27,21 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenPreferredDownloadProtocol(DownloadProtocol.Usenet);
         }
 
-        private Book GivenBook(int id)
+        private Issue GivenBook(int id)
         {
-            return Builder<Book>.CreateNew()
+            return Builder<Issue>.CreateNew()
                             .With(e => e.Id = id)
                             .Build();
         }
 
-        private RemoteBook GivenRemoteBook(List<Book> books, QualityModel quality, int age = 0, long size = 0, DownloadProtocol downloadProtocol = DownloadProtocol.Usenet, int indexerPriority = 25)
+        private RemoteBook GivenRemoteBook(List<Issue> issues, QualityModel quality, int age = 0, long size = 0, DownloadProtocol downloadProtocol = DownloadProtocol.Usenet, int indexerPriority = 25)
         {
             var remoteBook = new RemoteBook();
             remoteBook.ParsedBookInfo = new ParsedBookInfo();
             remoteBook.ParsedBookInfo.Quality = quality;
 
-            remoteBook.Books = new List<Book>();
-            remoteBook.Books.AddRange(books);
+            remoteBook.Books = new List<Issue>();
+            remoteBook.Books.AddRange(issues);
 
             remoteBook.Release = new ReleaseInfo();
             remoteBook.Release.PublishDate = DateTime.Now.AddDays(-age);
@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             remoteBook.Release.DownloadProtocol = downloadProtocol;
             remoteBook.Release.IndexerPriority = indexerPriority;
 
-            remoteBook.Author = Builder<Author>.CreateNew()
+            remoteBook.Series = Builder<Series>.CreateNew()
                                                 .With(e => e.QualityProfile = new QualityProfile
                                                 {
                                                     Items = Qualities.QualityFixture.GetDefaultQualities()
@@ -73,8 +73,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_put_reals_before_non_reals()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3, new Revision(version: 1, real: 0)));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3, new Revision(version: 1, real: 1)));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR, new Revision(version: 1, real: 0)));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR, new Revision(version: 1, real: 1)));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
@@ -87,8 +87,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_put_propers_before_non_propers()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3, new Revision(version: 1)));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3, new Revision(version: 2)));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR, new Revision(version: 1)));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR, new Revision(version: 2)));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
@@ -101,24 +101,24 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_put_higher_quality_before_lower()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
             decisions.Add(new DownloadDecision(remoteBook2));
 
             var qualifiedReports = Subject.PrioritizeDecisions(decisions);
-            qualifiedReports.First().RemoteBook.ParsedBookInfo.Quality.Quality.Should().Be(Quality.MP3);
+            qualifiedReports.First().RemoteBook.ParsedBookInfo.Quality.Quality.Should().Be(Quality.CBR);
         }
 
         [Test]
         public void should_order_by_age_then_largest_rounded_to_200mb()
         {
-            var remoteBookSd = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), size: 100.Megabytes(), age: 1);
-            var remoteBookHdSmallOld = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), size: 1200.Megabytes(), age: 1000);
-            var remoteBookSmallYoung = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), size: 1250.Megabytes(), age: 10);
-            var remoteBookHdLargeYoung = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), size: 3000.Megabytes(), age: 1);
+            var remoteBookSd = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), size: 100.Megabytes(), age: 1);
+            var remoteBookHdSmallOld = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), size: 1200.Megabytes(), age: 1000);
+            var remoteBookSmallYoung = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), size: 1250.Megabytes(), age: 10);
+            var remoteBookHdLargeYoung = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), size: 3000.Megabytes(), age: 1);
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBookSd));
@@ -133,8 +133,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_order_by_youngest()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), age: 10);
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), age: 5);
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), age: 10);
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), age: 5);
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
@@ -147,10 +147,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_not_throw_if_no_books_are_found()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), size: 500.Megabytes());
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), size: 500.Megabytes());
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), size: 500.Megabytes());
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), size: 500.Megabytes());
 
-            remoteBook1.Books = new List<Book>();
+            remoteBook1.Books = new List<Issue>();
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
@@ -164,8 +164,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenPreferredDownloadProtocol(DownloadProtocol.Usenet);
 
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), downloadProtocol: DownloadProtocol.Torrent);
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), downloadProtocol: DownloadProtocol.Usenet);
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), downloadProtocol: DownloadProtocol.Torrent);
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), downloadProtocol: DownloadProtocol.Usenet);
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
@@ -180,8 +180,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenPreferredDownloadProtocol(DownloadProtocol.Torrent);
 
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), downloadProtocol: DownloadProtocol.Torrent);
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3), downloadProtocol: DownloadProtocol.Usenet);
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), downloadProtocol: DownloadProtocol.Torrent);
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR), downloadProtocol: DownloadProtocol.Usenet);
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
@@ -194,8 +194,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_discography_pack_above_single_book()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1), GivenBook(2) }, new QualityModel(Quality.FLAC));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1), GivenBook(2) }, new QualityModel(Quality.CBZ_HD));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD));
 
             remoteBook1.ParsedBookInfo.Discography = true;
 
@@ -210,8 +210,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_quality_over_discography_pack()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1), GivenBook(2) }, new QualityModel(Quality.MP3));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1), GivenBook(2) }, new QualityModel(Quality.CBR));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD));
 
             remoteBook1.ParsedBookInfo.Discography = true;
 
@@ -226,8 +226,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_single_book_over_multi_book()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1), GivenBook(2) }, new QualityModel(Quality.MP3));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1), GivenBook(2) }, new QualityModel(Quality.CBR));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
@@ -240,8 +240,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_releases_with_more_seeders()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
 
             var torrentInfo1 = new TorrentInfo();
             torrentInfo1.PublishDate = DateTime.Now;
@@ -266,8 +266,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_releases_with_more_peers_given_equal_number_of_seeds()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
 
             var torrentInfo1 = new TorrentInfo();
             torrentInfo1.PublishDate = DateTime.Now;
@@ -293,8 +293,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_releases_with_more_peers_no_seeds()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
 
             var torrentInfo1 = new TorrentInfo();
             torrentInfo1.PublishDate = DateTime.Now;
@@ -321,8 +321,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_first_release_if_peers_and_size_are_too_similar()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
 
             var torrentInfo1 = new TorrentInfo();
             torrentInfo1.PublishDate = DateTime.Now;
@@ -350,8 +350,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_first_release_if_age_and_size_are_too_similar()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
 
             remoteBook1.Release.PublishDate = DateTime.UtcNow.AddDays(-100);
             remoteBook1.Release.Size = 200.Megabytes();
@@ -370,8 +370,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_quality_over_the_number_of_peers()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.AZW3));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ));
 
             var torrentInfo1 = new TorrentInfo();
             torrentInfo1.PublishDate = DateTime.Now;
@@ -399,22 +399,22 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_put_higher_quality_before_lower_always()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.MP3));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBR));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteBook1));
             decisions.Add(new DownloadDecision(remoteBook2));
 
             var qualifiedReports = Subject.PrioritizeDecisions(decisions);
-            qualifiedReports.First().RemoteBook.ParsedBookInfo.Quality.Quality.Should().Be(Quality.MP3);
+            qualifiedReports.First().RemoteBook.ParsedBookInfo.Quality.Quality.Should().Be(Quality.CBR);
         }
 
         [Test]
         public void should_prefer_higher_score_over_lower_score()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD));
 
             remoteBook1.CustomFormatScore = 10;
             remoteBook2.CustomFormatScore = 0;
@@ -434,8 +434,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.PreferAndUpgrade);
 
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC, new Revision(1)));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC, new Revision(2)));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD, new Revision(1)));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD, new Revision(2)));
 
             remoteBook1.CustomFormatScore = 10;
             remoteBook2.CustomFormatScore = 0;
@@ -455,8 +455,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotUpgrade);
 
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC, new Revision(1)));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC, new Revision(2)));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD, new Revision(1)));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD, new Revision(2)));
 
             remoteBook1.CustomFormatScore = 10;
             remoteBook2.CustomFormatScore = 0;
@@ -476,8 +476,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotPrefer);
 
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC, new Revision(1)));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC, new Revision(2)));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD, new Revision(1)));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD, new Revision(2)));
 
             remoteBook1.CustomFormatScore = 10;
             remoteBook2.CustomFormatScore = 0;
@@ -487,7 +487,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             decisions.Add(new DownloadDecision(remoteBook2));
 
             var qualifiedReports = Subject.PrioritizeDecisions(decisions);
-            qualifiedReports.First().RemoteBook.ParsedBookInfo.Quality.Quality.Should().Be(Quality.FLAC);
+            qualifiedReports.First().RemoteBook.ParsedBookInfo.Quality.Quality.Should().Be(Quality.CBZ_HD);
             qualifiedReports.First().RemoteBook.ParsedBookInfo.Quality.Revision.Version.Should().Be(1);
             qualifiedReports.First().RemoteBook.CustomFormatScore.Should().Be(10);
         }
@@ -495,9 +495,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void sort_download_decisions_based_on_indexer_priority()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.AZW3, new Revision(1)), indexerPriority: 25);
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.AZW3, new Revision(1)), indexerPriority: 50);
-            var remoteBook3 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.AZW3, new Revision(1)), indexerPriority: 1);
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ, new Revision(1)), indexerPriority: 25);
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ, new Revision(1)), indexerPriority: 50);
+            var remoteBook3 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ, new Revision(1)), indexerPriority: 1);
 
             var decisions = new List<DownloadDecision>();
             decisions.AddRange(new[] { new DownloadDecision(remoteBook1), new DownloadDecision(remoteBook2), new DownloadDecision(remoteBook3) });
@@ -511,10 +511,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void ensure_download_decisions_indexer_priority_is_not_perfered_over_quality()
         {
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.EPUB, new Revision(1)), indexerPriority: 25);
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.AZW3, new Revision(1)), indexerPriority: 50);
-            var remoteBook3 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.PDF, new Revision(1)), indexerPriority: 1);
-            var remoteBook4 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.AZW3, new Revision(1)), indexerPriority: 25);
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.EPUB, new Revision(1)), indexerPriority: 25);
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ, new Revision(1)), indexerPriority: 50);
+            var remoteBook3 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.PDF, new Revision(1)), indexerPriority: 1);
+            var remoteBook4 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ, new Revision(1)), indexerPriority: 25);
 
             var decisions = new List<DownloadDecision>();
             decisions.AddRange(new[] { new DownloadDecision(remoteBook1), new DownloadDecision(remoteBook2), new DownloadDecision(remoteBook3), new DownloadDecision(remoteBook4) });
@@ -533,8 +533,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotPrefer);
 
-            var remoteBook1 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC, new Revision(1, 0)));
-            var remoteBook2 = GivenRemoteBook(new List<Book> { GivenBook(1) }, new QualityModel(Quality.FLAC, new Revision(1, 1)));
+            var remoteBook1 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD, new Revision(1, 0)));
+            var remoteBook2 = GivenRemoteBook(new List<Issue> { GivenBook(1) }, new QualityModel(Quality.CBZ_HD, new Revision(1, 1)));
 
             remoteBook1.CustomFormatScore = 10;
             remoteBook2.CustomFormatScore = 0;
@@ -545,7 +545,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             var qualifiedReports = Subject.PrioritizeDecisions(decisions);
 
-            qualifiedReports.First().RemoteBook.ParsedBookInfo.Quality.Quality.Should().Be(Quality.FLAC);
+            qualifiedReports.First().RemoteBook.ParsedBookInfo.Quality.Quality.Should().Be(Quality.CBZ_HD);
             qualifiedReports.First().RemoteBook.ParsedBookInfo.Quality.Revision.Version.Should().Be(1);
             qualifiedReports.First().RemoteBook.ParsedBookInfo.Quality.Revision.Real.Should().Be(0);
             qualifiedReports.First().RemoteBook.CustomFormatScore.Should().Be(10);

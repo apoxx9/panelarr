@@ -10,9 +10,9 @@ namespace NzbDrone.Core.Blocklisting
 {
     public class Blocklist : ModelBase
     {
-        public int AuthorId { get; set; }
-        public Author Author { get; set; }
-        public List<int> BookIds { get; set; }
+        public int SeriesId { get; set; }
+        public Series Series { get; set; }
+        public List<int> IssueIds { get; set; }
         public string SourceTitle { get; set; }
         public QualityModel Quality { get; set; }
         public DateTime Date { get; set; }

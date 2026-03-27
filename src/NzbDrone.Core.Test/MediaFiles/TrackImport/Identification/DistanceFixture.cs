@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.MediaFiles.BookImport.Identification;
+using NzbDrone.Core.MediaFiles.IssueImport.Identification;
 using NzbDrone.Test.Common;
 
-namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
+namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 {
     [TestFixture]
     public class DistanceFixture : TestBase
@@ -183,7 +183,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         public void test_distance()
         {
             var dist = new Distance();
-            dist.Add("book", 0.5);
+            dist.Add("issue", 0.5);
             dist.Add("media_count", 0.25);
             dist.Add("media_count", 0.75);
 
@@ -194,7 +194,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         public void test_max_distance()
         {
             var dist = new Distance();
-            dist.Add("book", 0.5);
+            dist.Add("issue", 0.5);
             dist.Add("media_count", 0.0);
             dist.Add("media_count", 0.0);
 
@@ -205,7 +205,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Identification
         public void test_raw_distance()
         {
             var dist = new Distance();
-            dist.Add("book", 0.5);
+            dist.Add("issue", 0.5);
             dist.Add("media_count", 0.25);
             dist.Add("media_count", 0.5);
 

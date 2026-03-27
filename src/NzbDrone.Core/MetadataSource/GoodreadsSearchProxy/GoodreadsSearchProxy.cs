@@ -24,7 +24,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
             _cachedHttpClient = cachedHttpClient;
             _logger = logger;
 
-            _searchBuilder = new HttpRequestBuilder("https://www.goodreads.com/book/auto_complete")
+            _searchBuilder = new HttpRequestBuilder("https://www.goodreads.com/issue/auto_complete")
                 .AddQueryParam("format", "json")
                 .SetHeader("User-Agent",
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36")

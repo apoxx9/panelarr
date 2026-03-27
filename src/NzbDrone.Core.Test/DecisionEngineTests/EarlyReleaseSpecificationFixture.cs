@@ -17,27 +17,27 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     [TestFixture]
     public class EarlyReleaseSpecificationFixture : TestBase<EarlyReleaseSpecification>
     {
-        private Author _author;
-        private Book _book1;
-        private Book _book2;
+        private Series _author;
+        private Issue _book1;
+        private Issue _book2;
         private RemoteBook _remoteBook;
         private IndexerDefinition _indexerDefinition;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Author>.CreateNew().With(s => s.Id = 1).Build();
-            _book1 = Builder<Book>.CreateNew().With(s => s.ReleaseDate = DateTime.Today).Build();
-            _book2 = Builder<Book>.CreateNew().With(s => s.ReleaseDate = DateTime.Today).Build();
+            _author = Builder<Series>.CreateNew().With(s => s.Id = 1).Build();
+            _book1 = Builder<Issue>.CreateNew().With(s => s.ReleaseDate = DateTime.Today).Build();
+            _book2 = Builder<Issue>.CreateNew().With(s => s.ReleaseDate = DateTime.Today).Build();
 
             _remoteBook = new RemoteBook
             {
-                Author = _author,
-                Books = new List<Book> { _book1 },
+                Series = _author,
+                Books = new List<Issue> { _book1 },
                 Release = new TorrentInfo
                 {
                     IndexerId = 1,
-                    Title = "Author - Book [FLAC-RlsGrp]",
+                    Title = "Series - Issue [FLAC-RlsGrp]",
                     PublishDate = DateTime.Today
                 }
             };

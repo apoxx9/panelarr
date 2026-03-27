@@ -2,14 +2,13 @@ using System;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Qualities;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Manual
+namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
 {
     public class ManualImportFile : IEquatable<ManualImportFile>
     {
         public string Path { get; set; }
-        public int AuthorId { get; set; }
-        public int BookId { get; set; }
-        public string ForeignEditionId { get; set; }
+        public int SeriesId { get; set; }
+        public int IssueId { get; set; }
         public QualityModel Quality { get; set; }
         public int IndexerFlags { get; set; }
         public string DownloadId { get; set; }

@@ -99,7 +99,7 @@ namespace NzbDrone.Core.Test.Instrumentation
         [Test]
         public void null_string_as_arg_should_not_fail()
         {
-            var epFile = new BookFile();
+            var epFile = new ComicFile();
             _logger.Debug("File {0} no longer exists on disk. removing from database.", epFile.Path);
 
             Thread.Sleep(1000);

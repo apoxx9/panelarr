@@ -7,7 +7,7 @@ namespace NzbDrone.Core.Extras.Metadata.Files
 {
     public interface ICleanMetadataService
     {
-        void Clean(Author author);
+        void Clean(Series author);
     }
 
     public class CleanExtraFileService : ICleanMetadataService
@@ -25,11 +25,11 @@ namespace NzbDrone.Core.Extras.Metadata.Files
             _logger = logger;
         }
 
-        public void Clean(Author author)
+        public void Clean(Series author)
         {
             _logger.Debug("Cleaning missing metadata files for author: {0}", author.Name);
 
-            var metadataFiles = _metadataFileService.GetFilesByAuthor(author.Id);
+            var metadataFiles = _metadataFileService.GetFilesBySeries(author.Id);
 
             foreach (var metadataFile in metadataFiles)
             {

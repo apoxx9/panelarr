@@ -17,44 +17,44 @@ namespace NzbDrone.Core.Extras
 {
     public interface IExtraService
     {
-        void ImportTrack(LocalBook localBook, BookFile bookFile, bool isReadOnly);
+        void ImportTrack(LocalBook localBook, ComicFile comicFile, bool isReadOnly);
     }
 
     public class ExtraService : IExtraService,
                                 IHandle<MediaCoversUpdatedEvent>,
                                 IHandle<TrackFolderCreatedEvent>,
-                                IHandle<AuthorRenamedEvent>
+                                IHandle<SeriesRenamedEvent>
     {
         private readonly IMediaFileService _mediaFileService;
-        private readonly IEditionService _editionService;
+        private readonly IBookService _bookService;
         private readonly IDiskProvider _diskProvider;
         private readonly IConfigService _configService;
         private readonly List<IManageExtraFiles> _extraFileManagers;
         private readonly Logger _logger;
 
         public ExtraService(IMediaFileService mediaFileService,
-                            IEditionService editionService,
+                            IBookService bookService,
                             IDiskProvider diskProvider,
                             IConfigService configService,
                             IEnumerable<IManageExtraFiles> extraFileManagers,
                             Logger logger)
         {
             _mediaFileService = mediaFileService;
-            _editionService = editionService;
+            _bookService = bookService;
             _diskProvider = diskProvider;
             _configService = configService;
             _extraFileManagers = extraFileManagers.OrderBy(e => e.Order).ToList();
             _logger = logger;
         }
 
-        public void ImportTrack(LocalBook localBook, BookFile bookFile, bool isReadOnly)
+        public void ImportTrack(LocalBook localBook, ComicFile comicFile, bool isReadOnly)
         {
-            ImportExtraFiles(localBook, bookFile, isReadOnly);
+            ImportExtraFiles(localBook, comicFile, isReadOnly);
 
-            CreateAfterImport(localBook.Author, bookFile);
+            CreateAfterImport(localBook.Series, comicFile);
         }
 
-        public void ImportExtraFiles(LocalBook localBook, BookFile bookFile, bool isReadOnly)
+        public void ImportExtraFiles(LocalBook localBook, ComicFile comicFile, bool isReadOnly)
         {
             if (!_configService.ImportExtraFiles)
             {
@@ -104,7 +104,7 @@ namespace NzbDrone.Core.Extras
                     foreach (var extraFileManager in _extraFileManagers)
                     {
                         var extension = Path.GetExtension(matchingFilename);
-                        var extraFile = extraFileManager.Import(localBook.Author, bookFile, matchingFilename, extension, isReadOnly);
+                        var extraFile = extraFileManager.Import(localBook.Series, comicFile, matchingFilename, extension, isReadOnly);
 
                         if (extraFile != null)
                         {
@@ -119,51 +119,51 @@ namespace NzbDrone.Core.Extras
             }
         }
 
-        private void CreateAfterImport(Author author, BookFile bookFile)
+        private void CreateAfterImport(Series author, ComicFile comicFile)
         {
             foreach (var extraFileManager in _extraFileManagers)
             {
-                extraFileManager.CreateAfterBookImport(author, bookFile);
+                extraFileManager.CreateAfterBookImport(author, comicFile);
             }
         }
 
         public void Handle(MediaCoversUpdatedEvent message)
         {
-            var author = message.Author;
+            var author = message.Series;
 
-            var bookFiles = GetBookFiles(author.Id);
+            var comicFiles = GetBookFiles(author.Id);
 
             foreach (var extraFileManager in _extraFileManagers)
             {
-                extraFileManager.CreateAfterAuthorScan(author, bookFiles);
+                extraFileManager.CreateAfterSeriesScan(author, comicFiles);
             }
         }
 
         public void Handle(TrackFolderCreatedEvent message)
         {
-            var author = message.Author;
-            var edition = _editionService.GetEdition(message.BookFile.EditionId);
+            var author = message.Series;
+            var issue = _bookService.GetBook(message.ComicFile.IssueId);
 
             foreach (var extraFileManager in _extraFileManagers)
             {
-                extraFileManager.CreateAfterBookImport(author, edition.Book.Value, message.AuthorFolder, message.BookFolder);
+                extraFileManager.CreateAfterBookImport(author, issue, message.SeriesFolder, message.IssueFolder);
             }
         }
 
-        public void Handle(AuthorRenamedEvent message)
+        public void Handle(SeriesRenamedEvent message)
         {
-            var author = message.Author;
-            var bookFiles = GetBookFiles(author.Id);
+            var author = message.Series;
+            var comicFiles = GetBookFiles(author.Id);
 
             foreach (var extraFileManager in _extraFileManagers)
             {
-                extraFileManager.MoveFilesAfterRename(author, bookFiles);
+                extraFileManager.MoveFilesAfterRename(author, comicFiles);
             }
         }
 
-        private List<BookFile> GetBookFiles(int authorId)
+        private List<ComicFile> GetBookFiles(int authorId)
         {
-            return _mediaFileService.GetFilesByAuthor(authorId);
+            return _mediaFileService.GetFilesBySeries(authorId);
         }
     }
 }

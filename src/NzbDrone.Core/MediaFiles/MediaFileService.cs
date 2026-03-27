@@ -14,29 +14,29 @@ namespace NzbDrone.Core.MediaFiles
 {
     public interface IMediaFileService
     {
-        BookFile Add(BookFile bookFile);
-        void AddMany(List<BookFile> bookFiles);
-        void Update(BookFile bookFile);
-        void Update(List<BookFile> bookFiles);
-        void Delete(BookFile bookFile, DeleteMediaFileReason reason);
-        void DeleteMany(List<BookFile> bookFiles, DeleteMediaFileReason reason);
-        List<BookFile> GetFilesByAuthor(int authorId);
-        List<BookFile> GetFilesByAuthorMetadataId(int authorMetadataId);
-        List<BookFile> GetFilesByBook(int bookId);
-        List<BookFile> GetFilesByEdition(int editionId);
-        List<BookFile> GetUnmappedFiles();
+        ComicFile Add(ComicFile comicFile);
+        void AddMany(List<ComicFile> comicFiles);
+        void Update(ComicFile comicFile);
+        void Update(List<ComicFile> comicFiles);
+        void Delete(ComicFile comicFile, DeleteMediaFileReason reason);
+        void DeleteMany(List<ComicFile> comicFiles, DeleteMediaFileReason reason);
+        List<ComicFile> GetFilesBySeries(int authorId);
+        List<ComicFile> GetFilesBySeriesMetadataId(int authorMetadataId);
+        List<ComicFile> GetFilesByBook(int bookId);
+        List<ComicFile> GetFilesByEdition(int editionId);
+        List<ComicFile> GetUnmappedFiles();
         List<IFileInfo> FilterUnchangedFiles(List<IFileInfo> files, FilterFilesType filter);
-        BookFile Get(int id);
-        List<BookFile> Get(IEnumerable<int> ids);
-        List<BookFile> GetFilesWithBasePath(string path);
-        List<BookFile> GetFileWithPath(List<string> path);
-        BookFile GetFileWithPath(string path);
-        void UpdateMediaInfo(List<BookFile> bookFiles);
+        ComicFile Get(int id);
+        List<ComicFile> Get(IEnumerable<int> ids);
+        List<ComicFile> GetFilesWithBasePath(string path);
+        List<ComicFile> GetFileWithPath(List<string> path);
+        ComicFile GetFileWithPath(string path);
+        void UpdateMediaInfo(List<ComicFile> comicFiles);
     }
 
     public class MediaFileService : IMediaFileService,
-        IHandle<AuthorMovedEvent>,
-        IHandleAsync<BookDeletedEvent>,
+        IHandle<SeriesMovedEvent>,
+        IHandleAsync<IssueDeletedEvent>,
         IHandleAsync<ModelEvent<RootFolder>>
     {
         private readonly IEventAggregator _eventAggregator;
@@ -50,51 +50,51 @@ namespace NzbDrone.Core.MediaFiles
             _logger = logger;
         }
 
-        public BookFile Add(BookFile bookFile)
+        public ComicFile Add(ComicFile comicFile)
         {
-            var addedFile = _mediaFileRepository.Insert(bookFile);
-            _eventAggregator.PublishEvent(new BookFileAddedEvent(addedFile));
+            var addedFile = _mediaFileRepository.Insert(comicFile);
+            _eventAggregator.PublishEvent(new ComicFileAddedEvent(addedFile));
             return addedFile;
         }
 
-        public void AddMany(List<BookFile> bookFiles)
+        public void AddMany(List<ComicFile> comicFiles)
         {
-            _mediaFileRepository.InsertMany(bookFiles);
-            foreach (var addedFile in bookFiles)
+            _mediaFileRepository.InsertMany(comicFiles);
+            foreach (var addedFile in comicFiles)
             {
-                _eventAggregator.PublishEvent(new BookFileAddedEvent(addedFile));
+                _eventAggregator.PublishEvent(new ComicFileAddedEvent(addedFile));
             }
         }
 
-        public void Update(BookFile bookFile)
+        public void Update(ComicFile comicFile)
         {
-            _mediaFileRepository.Update(bookFile);
+            _mediaFileRepository.Update(comicFile);
         }
 
-        public void Update(List<BookFile> bookFiles)
+        public void Update(List<ComicFile> comicFiles)
         {
-            _mediaFileRepository.UpdateMany(bookFiles);
+            _mediaFileRepository.UpdateMany(comicFiles);
         }
 
-        public void Delete(BookFile bookFile, DeleteMediaFileReason reason)
+        public void Delete(ComicFile comicFile, DeleteMediaFileReason reason)
         {
-            _mediaFileRepository.Delete(bookFile);
+            _mediaFileRepository.Delete(comicFile);
 
             // If the trackfile wasn't mapped to a track, don't publish an event
-            if (bookFile.EditionId > 0)
+            if (comicFile.IssueId > 0)
             {
-                _eventAggregator.PublishEvent(new BookFileDeletedEvent(bookFile, reason));
+                _eventAggregator.PublishEvent(new ComicFileDeletedEvent(comicFile, reason));
             }
         }
 
-        public void DeleteMany(List<BookFile> bookFiles, DeleteMediaFileReason reason)
+        public void DeleteMany(List<ComicFile> comicFiles, DeleteMediaFileReason reason)
         {
-            _mediaFileRepository.DeleteMany(bookFiles);
+            _mediaFileRepository.DeleteMany(comicFiles);
 
             // publish events where trackfile was mapped to a track
-            foreach (var bookFile in bookFiles.Where(x => x.EditionId > 0))
+            foreach (var comicFile in comicFiles.Where(x => x.IssueId > 0))
             {
-                _eventAggregator.PublishEvent(new BookFileDeletedEvent(bookFile, reason));
+                _eventAggregator.PublishEvent(new ComicFileDeletedEvent(comicFile, reason));
             }
         }
 
@@ -139,7 +139,7 @@ namespace NzbDrone.Core.MediaFiles
                 unwanted = combined
                     .Where(x => x.DiskFile.Length == x.DbFile.Size &&
                            Math.Abs((x.DiskFile.LastWriteTimeUtc - x.DbFile.Modified.ToUniversalTime()).TotalSeconds) <= 1 &&
-                           (x.DbFile.Edition == null || (x.DbFile.Edition.IsLoaded && x.DbFile.Edition.Value != null)))
+                           (x.DbFile.Issue == null || (x.DbFile.Issue.IsLoaded && x.DbFile.Issue.Value != null)))
                     .Select(x => x.DiskFile)
                     .ToList();
                 _logger.Trace($"{unwanted.Count} unchanged and matched files");
@@ -152,62 +152,62 @@ namespace NzbDrone.Core.MediaFiles
             return files.Except(unwanted).ToList();
         }
 
-        public BookFile Get(int id)
+        public ComicFile Get(int id)
         {
             return _mediaFileRepository.Get(id);
         }
 
-        public List<BookFile> Get(IEnumerable<int> ids)
+        public List<ComicFile> Get(IEnumerable<int> ids)
         {
             return _mediaFileRepository.Get(ids).ToList();
         }
 
-        public List<BookFile> GetFilesWithBasePath(string path)
+        public List<ComicFile> GetFilesWithBasePath(string path)
         {
             return _mediaFileRepository.GetFilesWithBasePath(path);
         }
 
-        public List<BookFile> GetFileWithPath(List<string> path)
+        public List<ComicFile> GetFileWithPath(List<string> path)
         {
             return _mediaFileRepository.GetFileWithPath(path);
         }
 
-        public BookFile GetFileWithPath(string path)
+        public ComicFile GetFileWithPath(string path)
         {
             return _mediaFileRepository.GetFileWithPath(path);
         }
 
-        public List<BookFile> GetFilesByAuthor(int authorId)
+        public List<ComicFile> GetFilesBySeries(int authorId)
         {
-            return _mediaFileRepository.GetFilesByAuthor(authorId);
+            return _mediaFileRepository.GetFilesBySeries(authorId);
         }
 
-        public List<BookFile> GetFilesByAuthorMetadataId(int authorMetadataId)
+        public List<ComicFile> GetFilesBySeriesMetadataId(int authorMetadataId)
         {
-            return _mediaFileRepository.GetFilesByAuthorMetadataId(authorMetadataId);
+            return _mediaFileRepository.GetFilesBySeriesMetadataId(authorMetadataId);
         }
 
-        public List<BookFile> GetFilesByBook(int bookId)
+        public List<ComicFile> GetFilesByBook(int bookId)
         {
             return _mediaFileRepository.GetFilesByBook(bookId);
         }
 
-        public List<BookFile> GetFilesByEdition(int editionId)
+        public List<ComicFile> GetFilesByEdition(int editionId)
         {
             return _mediaFileRepository.GetFilesByEdition(editionId);
         }
 
-        public List<BookFile> GetUnmappedFiles()
+        public List<ComicFile> GetUnmappedFiles()
         {
             return _mediaFileRepository.GetUnmappedFiles();
         }
 
-        public void UpdateMediaInfo(List<BookFile> bookFiles)
+        public void UpdateMediaInfo(List<ComicFile> comicFiles)
         {
-            _mediaFileRepository.SetFields(bookFiles, t => t.MediaInfo);
+            _mediaFileRepository.SetFields(comicFiles, t => t.MediaInfo);
         }
 
-        public void Handle(AuthorMovedEvent message)
+        public void Handle(SeriesMovedEvent message)
         {
             var files = _mediaFileRepository.GetFilesWithBasePath(message.SourcePath);
 
@@ -220,15 +220,15 @@ namespace NzbDrone.Core.MediaFiles
             Update(files);
         }
 
-        public void HandleAsync(BookDeletedEvent message)
+        public void HandleAsync(IssueDeletedEvent message)
         {
             if (message.DeleteFiles)
             {
-                _mediaFileRepository.DeleteFilesByBook(message.Book.Id);
+                _mediaFileRepository.DeleteFilesByBook(message.Issue.Id);
             }
             else
             {
-                _mediaFileRepository.UnlinkFilesByBook(message.Book.Id);
+                _mediaFileRepository.UnlinkFilesByBook(message.Issue.Id);
             }
         }
 

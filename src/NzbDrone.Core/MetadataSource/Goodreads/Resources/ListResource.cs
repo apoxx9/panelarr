@@ -5,7 +5,7 @@ using System.Xml.Linq;
 namespace NzbDrone.Core.MetadataSource.Goodreads
 {
     /// <summary>
-    /// Represents information about a book series as defined by the Goodreads API.
+    /// Represents information about a issue series as defined by the Goodreads API.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public sealed class ListResource : GoodreadsResource
@@ -18,7 +18,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
 
         public int ListBooksCount { get; private set; }
 
-        public List<BookResource> Books { get; set; }
+        public List<IssueResource> Books { get; set; }
 
         public override void Parse(XElement element)
         {
@@ -26,7 +26,7 @@ namespace NzbDrone.Core.MetadataSource.Goodreads
             PerPage = element.ElementAsInt("per_page");
             ListBooksCount = element.ElementAsInt("total_books");
 
-            Books = element.ParseChildren<BookResource>("books", "book") ?? new List<BookResource>();
+            Books = element.ParseChildren<IssueResource>("issues", "issue") ?? new List<IssueResource>();
         }
     }
 }

@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Parser;
-using Panelarr.Api.V1.Author;
 using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Series;
 using Panelarr.Http;
 
 namespace Panelarr.Api.V1.Parse
@@ -43,7 +43,7 @@ namespace Panelarr.Api.V1.Parse
                 {
                     Title = title,
                     ParsedBookInfo = remoteBook.ParsedBookInfo,
-                    Author = remoteBook.Author.ToResource(),
+                    Series = remoteBook.Series.ToResource(),
                     Books = remoteBook.Books.ToResource()
                 };
             }

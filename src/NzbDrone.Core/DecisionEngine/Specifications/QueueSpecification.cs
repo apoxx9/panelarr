@@ -38,15 +38,15 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
         {
             var queue = _queueService.GetQueue();
-            var matchingBook = queue.Where(q => q.RemoteBook?.Author != null &&
-                                                 q.RemoteBook.Author.Id == subject.Author.Id &&
+            var matchingBook = queue.Where(q => q.RemoteBook?.Series != null &&
+                                                 q.RemoteBook.Series.Id == subject.Series.Id &&
                                                  q.RemoteBook.Books.Select(e => e.Id).Intersect(subject.Books.Select(e => e.Id)).Any())
                            .ToList();
 
             foreach (var queueItem in matchingBook)
             {
                 var remoteBook = queueItem.RemoteBook;
-                var qualityProfile = subject.Author.QualityProfile.Value;
+                var qualityProfile = subject.Series.QualityProfile.Value;
 
                 // To avoid a race make sure it's not FailedPending (failed awaiting removal/search).
                 // Failed items (already searching for a replacement) won't be part of the queue since

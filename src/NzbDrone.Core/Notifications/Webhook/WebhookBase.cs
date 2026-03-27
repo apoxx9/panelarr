@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Notifications.Webhook
             {
                 EventType = WebhookEventType.Grab,
                 InstanceName = _configFileProvider.InstanceName,
-                Author = new WebhookAuthor(message.Author),
+                Series = new WebhookSeries(message.Series),
                 Books = remoteBook.Books.ConvertAll(x => new WebhookBook(x)),
                 Release = new WebhookRelease(quality, remoteBook),
                 DownloadClient = message.DownloadClientName,
@@ -36,17 +36,17 @@ namespace NzbDrone.Core.Notifications.Webhook
             };
         }
 
-        public WebhookImportPayload BuildOnReleaseImportPayload(BookDownloadMessage message)
+        public WebhookImportPayload BuildOnReleaseImportPayload(IssueDownloadMessage message)
         {
-            var trackFiles = message.BookFiles;
+            var trackFiles = message.ComicFiles;
 
             var payload = new WebhookImportPayload
             {
                 EventType = WebhookEventType.Download,
                 InstanceName = _configFileProvider.InstanceName,
-                Author = new WebhookAuthor(message.Author),
-                Book = new WebhookBook(message.Book),
-                BookFiles = trackFiles.ConvertAll(x => new WebhookBookFile(x)),
+                Series = new WebhookSeries(message.Series),
+                Issue = new WebhookBook(message.Issue),
+                ComicFiles = trackFiles.ConvertAll(x => new WebhookBookFile(x)),
                 IsUpgrade = message.OldFiles.Any(),
                 DownloadClient = message.DownloadClientInfo?.Name,
                 DownloadClientType = message.DownloadClientInfo?.Type,
@@ -61,69 +61,69 @@ namespace NzbDrone.Core.Notifications.Webhook
             return payload;
         }
 
-        public WebhookRenamePayload BuildOnRenamePayload(Author author, List<RenamedBookFile> renamedFiles)
+        public WebhookRenamePayload BuildOnRenamePayload(Series author, List<RenamedComicFile> renamedFiles)
         {
             return new WebhookRenamePayload
             {
                 EventType = WebhookEventType.Rename,
                 InstanceName = _configFileProvider.InstanceName,
-                Author = new WebhookAuthor(author),
+                Series = new WebhookSeries(author),
                 RenamedBookFiles = renamedFiles.ConvertAll(x => new WebhookRenamedBookFile(x))
             };
         }
 
-        public WebhookRetagPayload BuildOnBookRetagPayload(BookRetagMessage message)
+        public WebhookRetagPayload BuildOnBookRetagPayload(IssueRetagMessage message)
         {
             return new WebhookRetagPayload
             {
                 EventType = WebhookEventType.Retag,
                 InstanceName = _configFileProvider.InstanceName,
-                Author = new WebhookAuthor(message.Author),
-                BookFile = new WebhookBookFile(message.BookFile)
+                Series = new WebhookSeries(message.Series),
+                ComicFile = new WebhookBookFile(message.ComicFile)
             };
         }
 
-        public WebhookBookDeletePayload BuildOnBookDelete(BookDeleteMessage deleteMessage)
+        public WebhookBookDeletePayload BuildOnBookDelete(IssueDeleteMessage deleteMessage)
         {
             return new WebhookBookDeletePayload
             {
-                EventType = WebhookEventType.BookDelete,
+                EventType = WebhookEventType.IssueDelete,
                 InstanceName = _configFileProvider.InstanceName,
-                Author = new WebhookAuthor(deleteMessage.Book.Author),
-                Book = new WebhookBook(deleteMessage.Book),
+                Series = new WebhookSeries(deleteMessage.Issue.Series),
+                Issue = new WebhookBook(deleteMessage.Issue),
                 DeletedFiles = deleteMessage.DeletedFiles
             };
         }
 
-        public WebhookBookFileDeletePayload BuildOnBookFileDelete(BookFileDeleteMessage deleteMessage)
+        public WebhookBookFileDeletePayload BuildOnBookFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             return new WebhookBookFileDeletePayload
             {
-                EventType = WebhookEventType.BookFileDelete,
+                EventType = WebhookEventType.ComicFileDelete,
                 InstanceName = _configFileProvider.InstanceName,
-                Author = new WebhookAuthor(deleteMessage.Book.Author),
-                Book = new WebhookBook(deleteMessage.Book),
-                BookFile = new WebhookBookFile(deleteMessage.BookFile)
+                Series = new WebhookSeries(deleteMessage.Issue.Series),
+                Issue = new WebhookBook(deleteMessage.Issue),
+                ComicFile = new WebhookBookFile(deleteMessage.ComicFile)
             };
         }
 
-        public WebhookAuthorAddedPayload BuildOnAuthorAdded(Author author)
+        public WebhookSeriesAddedPayload BuildOnSeriesAdded(Series author)
         {
-            return new WebhookAuthorAddedPayload
+            return new WebhookSeriesAddedPayload
             {
-                EventType = WebhookEventType.AuthorAdded,
+                EventType = WebhookEventType.SeriesAdded,
                 InstanceName = _configFileProvider.InstanceName,
-                Author = new WebhookAuthor(author)
+                Series = new WebhookSeries(author)
             };
         }
 
-        public WebhookAuthorDeletePayload BuildOnAuthorDelete(AuthorDeleteMessage deleteMessage)
+        public WebhookSeriesDeletePayload BuildOnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
-            return new WebhookAuthorDeletePayload
+            return new WebhookSeriesDeletePayload
             {
-                EventType = WebhookEventType.AuthorDelete,
+                EventType = WebhookEventType.SeriesDelete,
                 InstanceName = _configFileProvider.InstanceName,
-                Author = new WebhookAuthor(deleteMessage.Author),
+                Series = new WebhookSeries(deleteMessage.Series),
                 DeletedFiles = deleteMessage.DeletedFiles
             };
         }
@@ -159,7 +159,7 @@ namespace NzbDrone.Core.Notifications.Webhook
             {
                 EventType = WebhookEventType.Test,
                 InstanceName = _configFileProvider.InstanceName,
-                Author = new WebhookAuthor()
+                Series = new WebhookSeries()
                 {
                     Id = 1,
                     Name = "Test Name",

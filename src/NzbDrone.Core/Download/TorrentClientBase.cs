@@ -172,7 +172,7 @@ namespace NzbDrone.Core.Download
             {
                 if (ex.Response.StatusCode == HttpStatusCode.NotFound)
                 {
-                    _logger.Error(ex, "Downloading torrent file for book '{0}' failed since it no longer exists ({1})", remoteBook.Release.Title, torrentUrl);
+                    _logger.Error(ex, "Downloading torrent file for issue '{0}' failed since it no longer exists ({1})", remoteBook.Release.Title, torrentUrl);
                     throw new ReleaseUnavailableException(remoteBook.Release, "Downloading torrent failed", ex);
                 }
 
@@ -263,7 +263,7 @@ namespace NzbDrone.Core.Download
 
                 if (remoteBook.ReleaseSource != ReleaseSourceType.InteractiveSearch &&
                     indexerSettings?.RejectBlocklistedTorrentHashesWhileGrabbing == true &&
-                    _blocklistService.BlocklistedTorrentHash(remoteBook.Author.Id, hash))
+                    _blocklistService.BlocklistedTorrentHash(remoteBook.Series.Id, hash))
                 {
                     throw new ReleaseBlockedException(remoteBook.Release, "Release previously added to blocklist");
                 }

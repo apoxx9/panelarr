@@ -17,7 +17,7 @@ import styles from './SelectEditionModalContent.css';
 const columns = [
   {
     name: 'book',
-    label: 'Book',
+    label: 'Issue',
     isVisible: true
   },
   {

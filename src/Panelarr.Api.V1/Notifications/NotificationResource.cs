@@ -9,8 +9,8 @@ namespace Panelarr.Api.V1.Notifications
         public bool OnReleaseImport { get; set; }
         public bool OnUpgrade { get; set; }
         public bool OnRename { get; set; }
-        public bool OnAuthorAdded { get; set; }
-        public bool OnAuthorDelete { get; set; }
+        public bool OnSeriesAdded { get; set; }
+        public bool OnSeriesDelete { get; set; }
         public bool OnBookDelete { get; set; }
         public bool OnBookFileDelete { get; set; }
         public bool OnBookFileDeleteForUpgrade { get; set; }
@@ -23,8 +23,8 @@ namespace Panelarr.Api.V1.Notifications
         public bool SupportsOnReleaseImport { get; set; }
         public bool SupportsOnUpgrade { get; set; }
         public bool SupportsOnRename { get; set; }
-        public bool SupportsOnAuthorAdded { get; set; }
-        public bool SupportsOnAuthorDelete { get; set; }
+        public bool SupportsOnSeriesAdded { get; set; }
+        public bool SupportsOnSeriesDelete { get; set; }
         public bool SupportsOnBookDelete { get; set; }
         public bool SupportsOnBookFileDelete { get; set; }
         public bool SupportsOnBookFileDeleteForUpgrade { get; set; }
@@ -52,8 +52,8 @@ namespace Panelarr.Api.V1.Notifications
             resource.OnReleaseImport = definition.OnReleaseImport;
             resource.OnUpgrade = definition.OnUpgrade;
             resource.OnRename = definition.OnRename;
-            resource.OnAuthorAdded = definition.OnAuthorAdded;
-            resource.OnAuthorDelete = definition.OnAuthorDelete;
+            resource.OnSeriesAdded = definition.OnSeriesAdded;
+            resource.OnSeriesDelete = definition.OnSeriesDelete;
             resource.OnBookDelete = definition.OnBookDelete;
             resource.OnBookFileDelete = definition.OnBookFileDelete;
             resource.OnBookFileDeleteForUpgrade = definition.OnBookFileDeleteForUpgrade;
@@ -66,8 +66,8 @@ namespace Panelarr.Api.V1.Notifications
             resource.SupportsOnReleaseImport = definition.SupportsOnReleaseImport;
             resource.SupportsOnUpgrade = definition.SupportsOnUpgrade;
             resource.SupportsOnRename = definition.SupportsOnRename;
-            resource.SupportsOnAuthorAdded = definition.SupportsOnAuthorAdded;
-            resource.SupportsOnAuthorDelete = definition.SupportsOnAuthorDelete;
+            resource.SupportsOnSeriesAdded = definition.SupportsOnSeriesAdded;
+            resource.SupportsOnSeriesDelete = definition.SupportsOnSeriesDelete;
             resource.SupportsOnBookDelete = definition.SupportsOnBookDelete;
             resource.SupportsOnBookFileDelete = definition.SupportsOnBookFileDelete;
             resource.SupportsOnBookFileDeleteForUpgrade = definition.SupportsOnBookFileDeleteForUpgrade;
@@ -94,8 +94,8 @@ namespace Panelarr.Api.V1.Notifications
             definition.OnReleaseImport = resource.OnReleaseImport;
             definition.OnUpgrade = resource.OnUpgrade;
             definition.OnRename = resource.OnRename;
-            definition.OnAuthorAdded = resource.OnAuthorAdded;
-            definition.OnAuthorDelete = resource.OnAuthorDelete;
+            definition.OnSeriesAdded = resource.OnSeriesAdded;
+            definition.OnSeriesDelete = resource.OnSeriesDelete;
             definition.OnBookDelete = resource.OnBookDelete;
             definition.OnBookFileDelete = resource.OnBookFileDelete;
             definition.OnBookFileDeleteForUpgrade = resource.OnBookFileDeleteForUpgrade;
@@ -108,8 +108,8 @@ namespace Panelarr.Api.V1.Notifications
             definition.SupportsOnReleaseImport = resource.SupportsOnReleaseImport;
             definition.SupportsOnUpgrade = resource.SupportsOnUpgrade;
             definition.SupportsOnRename = resource.SupportsOnRename;
-            definition.SupportsOnAuthorAdded = resource.SupportsOnAuthorAdded;
-            definition.SupportsOnAuthorDelete = resource.SupportsOnAuthorDelete;
+            definition.SupportsOnSeriesAdded = resource.SupportsOnSeriesAdded;
+            definition.SupportsOnSeriesDelete = resource.SupportsOnSeriesDelete;
             definition.SupportsOnBookDelete = resource.SupportsOnBookDelete;
             definition.SupportsOnBookFileDelete = resource.SupportsOnBookFileDelete;
             definition.SupportsOnBookFileDeleteForUpgrade = resource.SupportsOnBookFileDeleteForUpgrade;

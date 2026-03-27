@@ -20,27 +20,27 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [SetUp]
         public void Setup()
         {
-            var author = Builder<Author>.CreateNew().With(s => s.Id = 1234).Build();
+            var author = Builder<Series>.CreateNew().With(s => s.Id = 1234).Build();
             _remoteBook = new RemoteBook
             {
                 ParsedBookInfo = new ParsedBookInfo
                 {
                     Discography = true
                 },
-                Books = Builder<Book>.CreateListOfSize(3)
+                Books = Builder<Issue>.CreateListOfSize(3)
                                            .All()
                                            .With(e => e.ReleaseDate = DateTime.UtcNow.AddDays(-8))
-                                           .With(s => s.AuthorId = author.Id)
+                                           .With(s => s.SeriesId = author.Id)
                                            .BuildList(),
-                Author = author,
+                Series = author,
                 Release = new ReleaseInfo
                 {
-                    Title = "Author.Discography.1978.2005.FLAC-RlsGrp"
+                    Title = "Series.Discography.1978.2005.FLAC-RlsGrp"
                 }
             };
 
-            Mocker.GetMock<IBookService>().Setup(s => s.BooksBetweenDates(It.IsAny<DateTime>(), It.IsAny<DateTime>(), false))
-                                             .Returns(new List<Book>());
+            Mocker.GetMock<IBookService>().Setup(s => s.IssuesBetweenDates(It.IsAny<DateTime>(), It.IsAny<DateTime>(), false))
+                                             .Returns(new List<Issue>());
         }
 
         [Test]

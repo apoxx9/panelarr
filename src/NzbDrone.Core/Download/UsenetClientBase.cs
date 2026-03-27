@@ -59,7 +59,7 @@ namespace NzbDrone.Core.Download
             {
                 if (ex.Response.StatusCode == HttpStatusCode.NotFound)
                 {
-                    _logger.Error(ex, "Downloading nzb file for book '{0}' failed since it no longer exists ({1})", remoteBook.Release.Title, url);
+                    _logger.Error(ex, "Downloading nzb file for issue '{0}' failed since it no longer exists ({1})", remoteBook.Release.Title, url);
                     throw new ReleaseUnavailableException(remoteBook.Release, "Downloading torrent failed", ex);
                 }
 

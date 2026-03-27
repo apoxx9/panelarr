@@ -8,10 +8,10 @@ namespace NzbDrone.Core.Books
     public abstract class RefreshEntityServiceBase<TEntity, TChild>
     {
         private readonly Logger _logger;
-        private readonly IAuthorMetadataService _authorMetadataService;
+        private readonly ISeriesMetadataService _authorMetadataService;
 
         protected RefreshEntityServiceBase(Logger logger,
-                                           IAuthorMetadataService authorMetadataService)
+                                           ISeriesMetadataService authorMetadataService)
         {
             _logger = logger;
             _authorMetadataService = authorMetadataService;
@@ -49,14 +49,14 @@ namespace NzbDrone.Core.Books
         public class RemoteData
         {
             public TEntity Entity { get; set; }
-            public List<AuthorMetadata> Metadata { get; set; }
+            public List<SeriesMetadata> Metadata { get; set; }
         }
 
         protected virtual void LogProgress(TEntity local)
         {
         }
 
-        protected abstract RemoteData GetRemoteData(TEntity local, List<TEntity> remote, Author data);
+        protected abstract RemoteData GetRemoteData(TEntity local, List<TEntity> remote, Series data);
 
         protected virtual void EnsureNewParent(TEntity local, TEntity remote)
         {
@@ -98,7 +98,7 @@ namespace NzbDrone.Core.Books
         }
 
         protected abstract void AddChildren(List<TChild> children);
-        protected abstract bool RefreshChildren(SortedChildren localChildren, List<TChild> remoteChildren, Author remoteData, bool forceChildRefresh, bool forceUpdateFileTags, DateTime? lastUpdate);
+        protected abstract bool RefreshChildren(SortedChildren localChildren, List<TChild> remoteChildren, Series remoteData, bool forceChildRefresh, bool forceUpdateFileTags, DateTime? lastUpdate);
 
         protected virtual void PublishEntityUpdatedEvent(TEntity entity)
         {
@@ -112,7 +112,7 @@ namespace NzbDrone.Core.Books
         {
         }
 
-        public bool RefreshEntityInfo(TEntity local, List<TEntity> remoteItems, Author remoteData, bool forceChildRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
+        public bool RefreshEntityInfo(TEntity local, List<TEntity> remoteItems, Series remoteData, bool forceChildRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
         {
             var updated = false;
 
@@ -138,7 +138,7 @@ namespace NzbDrone.Core.Books
 
             if (data.Metadata != null)
             {
-                var metadataResult = UpdateAuthorMetadata(data.Metadata);
+                var metadataResult = UpdateSeriesMetadata(data.Metadata);
                 updated |= metadataResult >= UpdateResult.Standard;
                 forceUpdateFileTags |= metadataResult == UpdateResult.UpdateTags;
             }
@@ -199,7 +199,7 @@ namespace NzbDrone.Core.Books
             return updated;
         }
 
-        public bool RefreshEntityInfo(List<TEntity> localList, List<TEntity> remoteItems, Author remoteData, bool forceChildRefresh, bool forceUpdateFileTags)
+        public bool RefreshEntityInfo(List<TEntity> localList, List<TEntity> remoteItems, Series remoteData, bool forceChildRefresh, bool forceUpdateFileTags)
         {
             var updated = false;
             foreach (var entity in localList)
@@ -210,14 +210,14 @@ namespace NzbDrone.Core.Books
             return updated;
         }
 
-        public UpdateResult UpdateAuthorMetadata(List<AuthorMetadata> data)
+        public UpdateResult UpdateSeriesMetadata(List<SeriesMetadata> data)
         {
-            var remoteMetadata = data.DistinctBy(x => x.ForeignAuthorId).ToList();
+            var remoteMetadata = data.DistinctBy(x => x.ForeignSeriesId).ToList();
             var updated = _authorMetadataService.UpsertMany(remoteMetadata);
             return updated ? UpdateResult.UpdateTags : UpdateResult.None;
         }
 
-        protected bool SortChildren(TEntity entity, List<TChild> remoteChildren, Author remoteData, bool forceChildRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
+        protected bool SortChildren(TEntity entity, List<TChild> remoteChildren, Series remoteData, bool forceChildRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
         {
             // Get existing children (and children to be) from the database
             var localChildren = GetLocalChildren(entity, remoteChildren);

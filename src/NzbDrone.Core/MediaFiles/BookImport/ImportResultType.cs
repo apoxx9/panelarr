@@ -1,4 +1,4 @@
-namespace NzbDrone.Core.MediaFiles.BookImport
+namespace NzbDrone.Core.MediaFiles.IssueImport
 {
     public enum ImportResultType
     {

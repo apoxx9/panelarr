@@ -2,7 +2,7 @@ using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using Panelarr.Http.REST;
 
-namespace Panelarr.Api.V1.BookFiles
+namespace Panelarr.Api.V1.ComicFiles
 {
     public class MediaInfoResource : RestResource
     {

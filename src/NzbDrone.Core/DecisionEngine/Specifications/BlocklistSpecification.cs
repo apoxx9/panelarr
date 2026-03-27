@@ -21,7 +21,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
         {
-            if (_blocklistService.Blocklisted(subject.Author.Id, subject.Release))
+            if (_blocklistService.Blocklisted(subject.Series.Id, subject.Release))
             {
                 _logger.Debug("{0} is blocklisted, rejecting.", subject.Release.Title);
                 return Decision.Reject("Release is blocklisted");

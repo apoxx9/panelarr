@@ -19,13 +19,13 @@ namespace NzbDrone.Core.History
             Data = new Dictionary<string, string>();
         }
 
-        public int BookId { get; set; }
-        public int AuthorId { get; set; }
+        public int IssueId { get; set; }
+        public int SeriesId { get; set; }
         public string SourceTitle { get; set; }
         public QualityModel Quality { get; set; }
         public DateTime Date { get; set; }
-        public Book Book { get; set; }
-        public Author Author { get; set; }
+        public Issue Issue { get; set; }
+        public Series Series { get; set; }
         public EntityHistoryEventType EventType { get; set; }
         public Dictionary<string, string> Data { get; set; }
 
@@ -36,13 +36,13 @@ namespace NzbDrone.Core.History
     {
         Unknown = 0,
         Grabbed = 1,
-        BookFileImported = 3,
+        ComicFileImported = 3,
         DownloadFailed = 4,
-        BookFileDeleted = 5,
-        BookFileRenamed = 6,
-        BookImportIncomplete = 7,
+        ComicFileDeleted = 5,
+        ComicFileRenamed = 6,
+        IssueImportIncomplete = 7,
         DownloadImported = 8,
-        BookFileRetagged = 9,
+        ComicFileRetagged = 9,
         DownloadIgnored = 10
     }
 }

@@ -6,12 +6,12 @@ using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
-using NzbDrone.Core.MediaFiles.BookImport.Specifications;
+using NzbDrone.Core.MediaFiles.IssueImport.Specifications;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
-namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
+namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
 {
     [TestFixture]
     public class NotUnpackingSpecificationFixture : CoreTest<NotUnpackingSpecification>
@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Test.MediaFiles.BookImport.Specifications
             {
                 Path = @"C:\Test\Unsorted Music\Kid.Rock\Kid.Rock.Cowboy.mp3".AsOsAgnostic(),
                 Size = 100,
-                Author = Builder<Author>.CreateNew().Build()
+                Series = Builder<Series>.CreateNew().Build()
             };
         }
 

@@ -15,6 +15,6 @@ namespace NzbDrone.Core.Books.Calibre
         [JsonProperty("base_url")]
         public string BaseUrl { get; set; }
         [JsonProperty("book_ids")]
-        public List<int> BookIds { get; set; }
+        public List<int> IssueIds { get; set; }
     }
 }

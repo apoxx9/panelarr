@@ -28,12 +28,12 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_delete_unorphaned_pending_items()
         {
-            var author = Builder<Author>.CreateNew().BuildNew();
+            var author = Builder<Series>.CreateNew().BuildNew();
 
             Db.Insert(author);
 
             var pendingRelease = Builder<PendingRelease>.CreateNew()
-                .With(h => h.AuthorId = author.Id)
+                .With(h => h.SeriesId = author.Id)
                 .With(h => h.ParsedBookInfo = new ParsedBookInfo())
                 .With(h => h.Release = new ReleaseInfo())
                 .BuildNew();

@@ -25,37 +25,37 @@ namespace NzbDrone.Core.Notifications.Webhook
             _proxy.SendWebhook(BuildOnGrabPayload(message), Settings);
         }
 
-        public override void OnReleaseImport(BookDownloadMessage message)
+        public override void OnReleaseImport(IssueDownloadMessage message)
         {
             _proxy.SendWebhook(BuildOnReleaseImportPayload(message), Settings);
         }
 
-        public override void OnRename(Author author, List<RenamedBookFile> renamedFiles)
+        public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
         {
             _proxy.SendWebhook(BuildOnRenamePayload(author, renamedFiles), Settings);
         }
 
-        public override void OnAuthorAdded(Author author)
+        public override void OnSeriesAdded(Series author)
         {
-            _proxy.SendWebhook(BuildOnAuthorAdded(author), Settings);
+            _proxy.SendWebhook(BuildOnSeriesAdded(author), Settings);
         }
 
-        public override void OnAuthorDelete(AuthorDeleteMessage deleteMessage)
+        public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
-            _proxy.SendWebhook(BuildOnAuthorDelete(deleteMessage), Settings);
+            _proxy.SendWebhook(BuildOnSeriesDelete(deleteMessage), Settings);
         }
 
-        public override void OnBookDelete(BookDeleteMessage deleteMessage)
+        public override void OnBookDelete(IssueDeleteMessage deleteMessage)
         {
             _proxy.SendWebhook(BuildOnBookDelete(deleteMessage), Settings);
         }
 
-        public override void OnBookFileDelete(BookFileDeleteMessage deleteMessage)
+        public override void OnBookFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             _proxy.SendWebhook(BuildOnBookFileDelete(deleteMessage), Settings);
         }
 
-        public override void OnBookRetag(BookRetagMessage message)
+        public override void OnBookRetag(IssueRetagMessage message)
         {
             _proxy.SendWebhook(BuildOnBookRetagPayload(message), Settings);
         }

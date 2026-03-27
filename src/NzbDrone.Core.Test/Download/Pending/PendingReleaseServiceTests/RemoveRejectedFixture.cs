@@ -22,8 +22,8 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
     public class RemoveRejectedFixture : CoreTest<PendingReleaseService>
     {
         private DownloadDecision _temporarilyRejected;
-        private Author _author;
-        private Book _book;
+        private Series _author;
+        private Issue _book;
         private QualityProfile _profile;
         private ReleaseInfo _release;
         private ParsedBookInfo _parsedBookInfo;
@@ -32,21 +32,21 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Author>.CreateNew()
+            _author = Builder<Series>.CreateNew()
                                      .Build();
 
-            _book = Builder<Book>.CreateNew()
+            _book = Builder<Issue>.CreateNew()
                                        .Build();
 
             _profile = new QualityProfile
             {
                 Name = "Test",
-                Cutoff = Quality.MP3.Id,
+                Cutoff = Quality.CBR.Id,
                 Items = new List<QualityProfileQualityItem>
                                    {
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.MP3 },
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.MP3 },
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.MP3 }
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBR },
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBR },
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBR }
                                    },
             };
 
@@ -55,11 +55,11 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
             _release = Builder<ReleaseInfo>.CreateNew().Build();
 
             _parsedBookInfo = Builder<ParsedBookInfo>.CreateNew().Build();
-            _parsedBookInfo.Quality = new QualityModel(Quality.MP3);
+            _parsedBookInfo.Quality = new QualityModel(Quality.CBR);
 
             _remoteBook = new RemoteBook();
-            _remoteBook.Books = new List<Book> { _book };
-            _remoteBook.Author = _author;
+            _remoteBook.Books = new List<Issue> { _book };
+            _remoteBook.Series = _author;
             _remoteBook.ParsedBookInfo = _parsedBookInfo;
             _remoteBook.Release = _release;
 
@@ -69,17 +69,17 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
                   .Setup(s => s.All())
                   .Returns(new List<PendingRelease>());
 
-            Mocker.GetMock<IAuthorService>()
-                  .Setup(s => s.GetAuthor(It.IsAny<int>()))
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.GetSeries(It.IsAny<int>()))
                   .Returns(_author);
 
-            Mocker.GetMock<IAuthorService>()
-                  .Setup(s => s.GetAuthors(It.IsAny<IEnumerable<int>>()))
-                  .Returns(new List<Author> { _author });
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.GetSeriess(It.IsAny<IEnumerable<int>>()))
+                  .Returns(new List<Series> { _author });
 
             Mocker.GetMock<IParsingService>()
                   .Setup(s => s.GetBooks(It.IsAny<ParsedBookInfo>(), _author, null))
-                  .Returns(new List<Book> { _book });
+                  .Returns(new List<Issue> { _book });
 
             Mocker.GetMock<IPrioritizeDownloadDecision>()
                   .Setup(s => s.PrioritizeDecisions(It.IsAny<List<DownloadDecision>>()))
@@ -94,7 +94,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
 
             var heldReleases = Builder<PendingRelease>.CreateListOfSize(1)
                                                    .All()
-                                                   .With(h => h.AuthorId = _author.Id)
+                                                   .With(h => h.SeriesId = _author.Id)
                                                    .With(h => h.Title = title)
                                                    .With(h => h.Release = release)
                                                    .Build();

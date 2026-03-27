@@ -13,7 +13,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.BookImport;
+using NzbDrone.Core.MediaFiles.IssueImport;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.RootFolders;
@@ -25,18 +25,18 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
     [TestFixture]
     public class ScanFixture : FileSystemTest<DiskScanService>
     {
-        private Author _author;
+        private Series _author;
         private string _rootFolder;
-        private string _otherAuthorFolder;
+        private string _otherSeriesFolder;
 
         [SetUp]
         public void Setup()
         {
             _rootFolder = @"C:\Test\Music".AsOsAgnostic();
-            _otherAuthorFolder = @"C:\Test\Music\OtherAuthor".AsOsAgnostic();
-            var authorFolder = @"C:\Test\Music\Author".AsOsAgnostic();
+            _otherSeriesFolder = @"C:\Test\Music\OtherSeries".AsOsAgnostic();
+            var authorFolder = @"C:\Test\Music\Series".AsOsAgnostic();
 
-            _author = Builder<Author>.CreateNew()
+            _author = Builder<Series>.CreateNew()
                                      .With(s => s.Path = authorFolder)
                                      .Build();
 
@@ -44,21 +44,21 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                 .Setup(s => s.GetBestRootFolder(It.IsAny<string>()))
                 .Returns(new RootFolder { Path = _rootFolder });
 
-            Mocker.GetMock<IAuthorService>()
-                .Setup(s => s.GetAuthors(It.IsAny<List<int>>()))
-                .Returns(new List<Author>());
+            Mocker.GetMock<ISeriesService>()
+                .Setup(s => s.GetSeriess(It.IsAny<List<int>>()))
+                .Returns(new List<Series>());
 
             Mocker.GetMock<IMakeImportDecision>()
                 .Setup(v => v.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()))
                 .Returns(new List<ImportDecision<LocalBook>>());
 
             Mocker.GetMock<IMediaFileService>()
-                .Setup(v => v.GetFilesByAuthor(It.IsAny<int>()))
-                .Returns(new List<BookFile>());
+                .Setup(v => v.GetFilesBySeries(It.IsAny<int>()))
+                .Returns(new List<ComicFile>());
 
             Mocker.GetMock<IMediaFileService>()
                 .Setup(v => v.GetFilesWithBasePath(It.IsAny<string>()))
-                .Returns(new List<BookFile>());
+                .Returns(new List<ComicFile>());
 
             Mocker.GetMock<IMediaFileService>()
                 .Setup(v => v.FilterUnchangedFiles(It.IsAny<List<IFileInfo>>(), It.IsAny<FilterFilesType>()))
@@ -91,7 +91,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             }
         }
 
-        private void GivenAuthorFolder()
+        private void GivenSeriesFolder()
         {
             GivenRootFolder(_author.Path);
         }
@@ -124,7 +124,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             Mocker.GetMock<IMediaFileService>()
                 .Setup(x => x.GetFilesWithBasePath(_author.Path))
-                .Returns(files.Select(x => new BookFile
+                .Returns(files.Select(x => new ComicFile
                 {
                     Path = x,
                     Modified = lastWrite.Value.UtcDateTime
@@ -170,7 +170,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_clean_if_folder_does_not_exist()
         {
-            GivenRootFolder(_otherAuthorFolder);
+            GivenRootFolder(_otherSeriesFolder);
 
             Subject.Scan(new List<string> { _author.Path });
 
@@ -183,7 +183,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_find_files_at_root_of_author_folder()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             GivenFiles(new List<string>
                        {
@@ -200,7 +200,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_not_scan_extras_subfolder()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             GivenFiles(new List<string>
                        {
@@ -223,7 +223,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_not_scan_AppleDouble_subfolder()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             GivenFiles(new List<string>
                        {
@@ -243,7 +243,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         {
             _author.Path = @"C:\Test\Music\Extras".AsOsAgnostic();
 
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             GivenFiles(new List<string>
                        {
@@ -264,11 +264,11 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_scan_files_that_start_with_period()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             GivenFiles(new List<string>
                        {
-                           Path.Combine(_author.Path, "Book 1", ".t01.mobi")
+                           Path.Combine(_author.Path, "Issue 1", ".t01.mobi")
                        });
 
             Subject.Scan(new List<string> { _author.Path });
@@ -280,7 +280,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_not_scan_subfolders_that_start_with_period()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             GivenFiles(new List<string>
                        {
@@ -299,7 +299,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_not_scan_subfolder_of_season_folder_that_starts_with_a_period()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             GivenFiles(new List<string>
                        {
@@ -319,7 +319,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_not_scan_Synology_eaDir()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             GivenFiles(new List<string>
                        {
@@ -336,7 +336,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_not_scan_thumb_folder()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             GivenFiles(new List<string>
                        {
@@ -355,7 +355,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         {
             _author.Path = @"C:\Test\Music\.hack".AsOsAgnostic();
 
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             GivenFiles(new List<string>
                        {
@@ -372,7 +372,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_exclude_osx_metadata_files()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             GivenFiles(new List<string>
                        {
@@ -394,7 +394,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                 .Returns((List<IFileInfo> fileList, IdentificationOverrides idOverrides, ImportDecisionMakerInfo idInfo, ImportDecisionMakerConfig idConfig) =>
                           fileList.Select(x => new LocalBook
                           {
-                              Author = _author,
+                              Series = _author,
                               Path = x.FullName,
                               Modified = x.LastWriteTimeUtc,
                               FileTrackInfo = new ParsedTrackInfo()
@@ -406,7 +406,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         [Test]
         public void should_insert_new_unmatched_files_when_all_new()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             var files = new List<string>
             {
@@ -421,14 +421,14 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Subject.Scan(new List<string> { _author.Path });
 
             Mocker.GetMock<IMediaFileService>()
-                .Verify(x => x.AddMany(It.Is<List<BookFile>>(l => l.Select(t => t.Path).SequenceEqual(files))),
+                .Verify(x => x.AddMany(It.Is<List<ComicFile>>(l => l.Select(t => t.Path).SequenceEqual(files))),
                         Times.Once());
         }
 
         [Test]
         public void should_insert_new_unmatched_files_when_some_known()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             var files = new List<string>
             {
@@ -443,14 +443,14 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Subject.Scan(new List<string> { _author.Path });
 
             Mocker.GetMock<IMediaFileService>()
-                .Verify(x => x.AddMany(It.Is<List<BookFile>>(l => l.Select(t => t.Path).SequenceEqual(files.GetRange(0, 1)))),
+                .Verify(x => x.AddMany(It.Is<List<ComicFile>>(l => l.Select(t => t.Path).SequenceEqual(files.GetRange(0, 1)))),
                         Times.Once());
         }
 
         [Test]
         public void should_not_insert_files_when_all_known()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             var files = new List<string>
             {
@@ -465,18 +465,18 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Subject.Scan(new List<string> { _author.Path });
 
             Mocker.GetMock<IMediaFileService>()
-                .Verify(x => x.AddMany(It.Is<List<BookFile>>(l => l.Count == 0)),
+                .Verify(x => x.AddMany(It.Is<List<ComicFile>>(l => l.Count == 0)),
                         Times.Once());
 
             Mocker.GetMock<IMediaFileService>()
-                .Verify(x => x.AddMany(It.Is<List<BookFile>>(l => l.Count > 0)),
+                .Verify(x => x.AddMany(It.Is<List<ComicFile>>(l => l.Count > 0)),
                         Times.Never());
         }
 
         [Test]
         public void should_not_update_info_for_unchanged_known_files()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             var files = new List<string>
             {
@@ -491,18 +491,18 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Subject.Scan(new List<string> { _author.Path });
 
             Mocker.GetMock<IMediaFileService>()
-                .Verify(x => x.Update(It.Is<List<BookFile>>(l => l.Count == 0)),
+                .Verify(x => x.Update(It.Is<List<ComicFile>>(l => l.Count == 0)),
                         Times.Once());
 
             Mocker.GetMock<IMediaFileService>()
-                .Verify(x => x.Update(It.Is<List<BookFile>>(l => l.Count > 0)),
+                .Verify(x => x.Update(It.Is<List<ComicFile>>(l => l.Count > 0)),
                         Times.Never());
         }
 
         [Test]
         public void should_update_info_for_changed_known_files()
         {
-            GivenAuthorFolder();
+            GivenSeriesFolder();
 
             var files = new List<string>
             {
@@ -517,7 +517,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Subject.Scan(new List<string> { _author.Path });
 
             Mocker.GetMock<IMediaFileService>()
-                .Verify(x => x.Update(It.Is<List<BookFile>>(l => l.Count == 2)),
+                .Verify(x => x.Update(It.Is<List<ComicFile>>(l => l.Count == 2)),
                         Times.Once());
         }
 
@@ -537,7 +537,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                 .With(x => x.Path = files[0])
                 .With(x => x.Modified = new DateTime(2019, 2, 1))
                 .With(x => x.Size = 100)
-                .With(x => x.Quality = new QualityModel(Quality.MOBI))
+                .With(x => x.Quality = new QualityModel(Quality.CBR))
                 .With(x => x.FileTrackInfo = new ParsedTrackInfo
                 {
                     MediaInfo = Builder<MediaInfoModel>.CreateNew().Build()
@@ -551,7 +551,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Subject.Scan(new List<string> { _author.Path });
 
             Mocker.GetMock<IMediaFileService>()
-                .Verify(x => x.Update(It.Is<List<BookFile>>(
+                .Verify(x => x.Update(It.Is<List<ComicFile>>(
                                           l => l.Count == 1  &&
                                           l[0].Path == localTrack.Path &&
                                           l[0].Modified == localTrack.Modified &&

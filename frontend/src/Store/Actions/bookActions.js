@@ -335,7 +335,7 @@ export const actionHandlers = handleThunks({
     dispatch(set({ section, isFetching: true }));
 
     const { request, abortRequest } = createAjaxRequest({
-      url: '/book',
+      url: '/issue',
       data: payload,
       traditional: true
     });
@@ -372,8 +372,8 @@ export const actionHandlers = handleThunks({
     return abortRequest;
   },
 
-  [SAVE_BOOK]: createSaveProviderHandler(section, '/book'),
-  [DELETE_BOOK]: createRemoveItemHandler(section, '/book'),
+  [SAVE_BOOK]: createSaveProviderHandler(section, '/issue'),
+  [DELETE_BOOK]: createRemoveItemHandler(section, '/issue'),
 
   [DELETE_AUTHOR_BOOKS]: function(getState, payload, dispatch) {
     const { authorId } = payload;
@@ -400,7 +400,7 @@ export const actionHandlers = handleThunks({
     }));
 
     const promise = createAjaxRequest({
-      url: `/book/${bookId}`,
+      url: `/issue/${bookId}`,
       method: 'PUT',
       data: JSON.stringify({ monitored }),
       dataType: 'json'
@@ -442,7 +442,7 @@ export const actionHandlers = handleThunks({
     ));
 
     const promise = createAjaxRequest({
-      url: '/book/monitor',
+      url: '/issue/monitor',
       method: 'PUT',
       data: JSON.stringify({ bookIds, monitored }),
       dataType: 'json'

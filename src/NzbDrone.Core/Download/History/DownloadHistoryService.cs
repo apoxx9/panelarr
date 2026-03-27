@@ -17,13 +17,13 @@ namespace NzbDrone.Core.Download.History
     }
 
     public class DownloadHistoryService : IDownloadHistoryService,
-                                          IHandle<BookGrabbedEvent>,
+                                          IHandle<IssueGrabbedEvent>,
                                           IHandle<TrackImportedEvent>,
-                                          IHandle<BookImportIncompleteEvent>,
+                                          IHandle<IssueImportIncompleteEvent>,
                                           IHandle<DownloadCompletedEvent>,
                                           IHandle<DownloadFailedEvent>,
                                           IHandle<DownloadIgnoredEvent>,
-                                          IHandle<AuthorDeletedEvent>
+                                          IHandle<SeriesDeletedEvent>
     {
         private readonly IDownloadHistoryRepository _repository;
         private readonly IHistoryService _historyService;
@@ -98,7 +98,7 @@ namespace NzbDrone.Core.Download.History
                 .FirstOrDefault(d => d.EventType == DownloadHistoryEventType.DownloadGrabbed);
         }
 
-        public void Handle(BookGrabbedEvent message)
+        public void Handle(IssueGrabbedEvent message)
         {
             // Don't store grabbed events for clients that don't download IDs
             if (message.DownloadId.IsNullOrWhiteSpace())
@@ -109,20 +109,20 @@ namespace NzbDrone.Core.Download.History
             var history = new DownloadHistory
             {
                 EventType = DownloadHistoryEventType.DownloadGrabbed,
-                AuthorId = message.Book.Author.Id,
+                SeriesId = message.Issue.Series.Id,
                 DownloadId = message.DownloadId,
-                SourceTitle = message.Book.Release.Title,
+                SourceTitle = message.Issue.Release.Title,
                 Date = DateTime.UtcNow,
-                Protocol = message.Book.Release.DownloadProtocol,
-                IndexerId = message.Book.Release.IndexerId,
+                Protocol = message.Issue.Release.DownloadProtocol,
+                IndexerId = message.Issue.Release.IndexerId,
                 DownloadClientId = message.DownloadClientId,
-                Release =  message.Book.Release
+                Release =  message.Issue.Release
             };
 
-            history.Data.Add("Indexer", message.Book.Release.Indexer);
+            history.Data.Add("Indexer", message.Issue.Release.Indexer);
             history.Data.Add("DownloadClient", message.DownloadClient);
             history.Data.Add("DownloadClientName", message.DownloadClientName);
-            history.Data.Add("CustomFormatScore", message.Book.CustomFormatScore.ToString());
+            history.Data.Add("CustomFormatScore", message.Issue.CustomFormatScore.ToString());
 
             _repository.Insert(history);
         }
@@ -152,7 +152,7 @@ namespace NzbDrone.Core.Download.History
             {
                 EventType = DownloadHistoryEventType.FileImported,
 
-                AuthorId = message.ImportedBook.Author.Value.Id,
+                SeriesId = message.ImportedBook.Series.Value.Id,
                 DownloadId = downloadId,
                 SourceTitle = message.BookInfo.Path,
                 Date = DateTime.UtcNow,
@@ -168,12 +168,12 @@ namespace NzbDrone.Core.Download.History
             _repository.Insert(history);
         }
 
-        public void Handle(BookImportIncompleteEvent message)
+        public void Handle(IssueImportIncompleteEvent message)
         {
             var history = new DownloadHistory
             {
                 EventType = DownloadHistoryEventType.DownloadImportIncomplete,
-                AuthorId = message.TrackedDownload.RemoteBook?.Author?.Id ?? 0,
+                SeriesId = message.TrackedDownload.RemoteBook?.Series?.Id ?? 0,
                 DownloadId = message.TrackedDownload.DownloadItem.DownloadId,
                 SourceTitle = message.TrackedDownload.DownloadItem.OutputPath.ToString(),
                 Date = DateTime.UtcNow,
@@ -195,7 +195,7 @@ namespace NzbDrone.Core.Download.History
             var history = new DownloadHistory
             {
                 EventType = DownloadHistoryEventType.DownloadImported,
-                AuthorId = message.AuthorId,
+                SeriesId = message.SeriesId,
                 DownloadId = downloadItem.DownloadId,
                 SourceTitle = downloadItem.Title,
                 Date = DateTime.UtcNow,
@@ -220,7 +220,7 @@ namespace NzbDrone.Core.Download.History
             var history = new DownloadHistory
             {
                 EventType = DownloadHistoryEventType.DownloadFailed,
-                AuthorId = message.AuthorId,
+                SeriesId = message.SeriesId,
                 DownloadId = message.DownloadId,
                 SourceTitle = message.SourceTitle,
                 Date = DateTime.UtcNow,
@@ -239,7 +239,7 @@ namespace NzbDrone.Core.Download.History
             var history = new DownloadHistory
             {
                 EventType = DownloadHistoryEventType.DownloadIgnored,
-                AuthorId = message.AuthorId,
+                SeriesId = message.SeriesId,
                 DownloadId = message.DownloadId,
                 SourceTitle = message.SourceTitle,
                 Date = DateTime.UtcNow,
@@ -253,9 +253,9 @@ namespace NzbDrone.Core.Download.History
             _repository.Insert(history);
         }
 
-        public void Handle(AuthorDeletedEvent message)
+        public void Handle(SeriesDeletedEvent message)
         {
-            _repository.DeleteByAuthorId(message.Author.Id);
+            _repository.DeleteBySeriesId(message.Series.Id);
         }
     }
 }

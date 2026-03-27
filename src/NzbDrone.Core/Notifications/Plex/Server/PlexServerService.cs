@@ -16,8 +16,8 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 {
     public interface IPlexServerService
     {
-        void UpdateLibrary(Author author, PlexServerSettings settings);
-        void UpdateLibrary(IEnumerable<Author> authors, PlexServerSettings settings);
+        void UpdateLibrary(Series author, PlexServerSettings settings);
+        void UpdateLibrary(IEnumerable<Series> authors, PlexServerSettings settings);
         ValidationFailure Test(PlexServerSettings settings);
     }
 
@@ -36,12 +36,12 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             _logger = logger;
         }
 
-        public void UpdateLibrary(Author author, PlexServerSettings settings)
+        public void UpdateLibrary(Series author, PlexServerSettings settings)
         {
             UpdateLibrary(new[] { author }, settings);
         }
 
-        public void UpdateLibrary(IEnumerable<Author> authors, PlexServerSettings settings)
+        public void UpdateLibrary(IEnumerable<Series> authors, PlexServerSettings settings)
         {
             try
             {
@@ -92,7 +92,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             return version;
         }
 
-        private void UpdateSections(Author author, List<PlexSection> sections, PlexServerSettings settings)
+        private void UpdateSections(Series author, List<PlexSection> sections, PlexServerSettings settings)
         {
             var rootFolderPath = _rootFolderService.GetBestRootFolderPath(author.Path);
             var authorRelativePath = rootFolderPath.GetRelativePath(author.Path);

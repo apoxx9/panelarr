@@ -6,7 +6,7 @@ using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
-namespace NzbDrone.Core.MediaFiles.BookImport.Manual
+namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
 {
     public class ManualImportItem : ModelBase
     {
@@ -18,9 +18,8 @@ namespace NzbDrone.Core.MediaFiles.BookImport.Manual
         public string Path { get; set; }
         public string Name { get; set; }
         public long Size { get; set; }
-        public Author Author { get; set; }
-        public Book Book { get; set; }
-        public Edition Edition { get; set; }
+        public Series Series { get; set; }
+        public Issue Issue { get; set; }
         public QualityModel Quality { get; set; }
         public string ReleaseGroup { get; set; }
         public string DownloadId { get; set; }

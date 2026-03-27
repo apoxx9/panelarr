@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -25,11 +24,11 @@ namespace NzbDrone.Core.Books.Calibre
 {
     public interface ICalibreProxy
     {
-        BookFile AddAndConvert(BookFile file, CalibreSettings settings);
-        void DeleteBook(BookFile book, CalibreSettings settings);
-        void DeleteBooks(List<BookFile> books, CalibreSettings settings);
+        ComicFile AddAndConvert(ComicFile file, CalibreSettings settings);
+        void DeleteBook(ComicFile issue, CalibreSettings settings);
+        void DeleteBooks(List<ComicFile> issues, CalibreSettings settings);
         void RemoveFormats(int calibreId, IEnumerable<string> formats, CalibreSettings settings);
-        void SetFields(BookFile file, CalibreSettings settings, bool updateCover = true, bool embed = false);
+        void SetFields(ComicFile file, CalibreSettings settings, bool updateCover = true, bool embed = false);
         List<string> GetAllBookFilePaths(CalibreSettings settings);
         CalibreBook GetBook(int calibreId, CalibreSettings settings);
         List<CalibreBook> GetBooks(List<int> calibreId, CalibreSettings settings);
@@ -76,26 +75,19 @@ namespace NzbDrone.Core.Books.Calibre
                 .FirstOrDefault().Value?.Path;
         }
 
-        public BookFile AddAndConvert(BookFile file, CalibreSettings settings)
+        public ComicFile AddAndConvert(ComicFile file, CalibreSettings settings)
         {
-            _logger.Trace($"Importing to calibre: {file.Path} calibre id: {file.CalibreId}");
+            _logger.Trace($"Importing to calibre: {file.Path}");
 
-            if (file.CalibreId == 0)
-            {
-                var import = AddBook(file, settings);
-                file.CalibreId = import.Id;
-            }
-            else
-            {
-                AddFormat(file, settings);
-            }
+            var import = AddBook(file, settings);
+            var calibreId = import.Id;
 
             SetFields(file, settings, true, _configService.EmbedMetadata);
 
             if (settings.OutputFormat.IsNotNullOrWhiteSpace())
             {
-                _logger.Trace($"Getting book data for {file.CalibreId}");
-                var options = GetBookData(file.CalibreId, settings);
+                _logger.Trace($"Getting issue data for {calibreId}");
+                var options = GetBookData(calibreId, settings);
                 var inputFormat = file.Quality.Quality.Name.ToUpper();
 
                 options.Conversion_options.Input_fmt = inputFormat;
@@ -119,18 +111,18 @@ namespace NzbDrone.Core.Books.Calibre
                     _logger.Trace($"Starting conversion to {format}");
 
                     _rootFolderWatchingService.ReportFileSystemChangeBeginning(Path.ChangeExtension(file.Path, format));
-                    ConvertBook(file.CalibreId, options.Conversion_options, settings);
+                    ConvertBook(calibreId, options.Conversion_options, settings);
                 }
             }
 
             return file;
         }
 
-        private CalibreImportJob AddBook(BookFile book, CalibreSettings settings)
+        private CalibreImportJob AddBook(ComicFile issue, CalibreSettings settings)
         {
             var jobid = (int)(DateTime.UtcNow.Ticks % 1000000000);
             var addDuplicates = 1;
-            var path = book.Path;
+            var path = issue.Path;
             var filename = $"$dummy{Path.GetExtension(path)}";
             var body = File.ReadAllBytes(path);
 
@@ -138,7 +130,7 @@ namespace NzbDrone.Core.Books.Calibre
 
             try
             {
-                var builder = GetBuilder($"cdb/add-book/{jobid}/{addDuplicates}/{filename}/{settings.Library}", settings);
+                var builder = GetBuilder($"cdb/add-issue/{jobid}/{addDuplicates}/{filename}/{settings.Library}", settings);
 
                 var request = builder.Build();
                 request.SetContent(body);
@@ -147,7 +139,7 @@ namespace NzbDrone.Core.Books.Calibre
 
                 if (response.Id == 0)
                 {
-                    throw new CalibreException("Calibre rejected duplicate book");
+                    throw new CalibreException("Calibre rejected duplicate issue");
                 }
 
                 return response;
@@ -158,27 +150,27 @@ namespace NzbDrone.Core.Books.Calibre
             }
         }
 
-        public void DeleteBook(BookFile book, CalibreSettings settings)
+        public void DeleteBook(ComicFile issue, CalibreSettings settings)
         {
-            var request = GetBuilder($"cdb/delete-books/{book.CalibreId}/{settings.Library}", settings).Build();
+            // Calibre integration not used for comics - no-op
+        }
+
+        public void DeleteBooks(List<ComicFile> issues, CalibreSettings settings)
+        {
+            // Calibre integration not used for comics - no-op
+            var idString = string.Empty;
+            var request = GetBuilder($"cdb/delete-issues/{idString}/{settings.Library}", settings).Build();
             _httpClient.Post(request);
         }
 
-        public void DeleteBooks(List<BookFile> books, CalibreSettings settings)
-        {
-            var idString = books.Where(x => x.CalibreId != 0).Select(x => x.CalibreId).ConcatToString(",");
-            var request = GetBuilder($"cdb/delete-books/{idString}/{settings.Library}", settings).Build();
-            _httpClient.Post(request);
-        }
-
-        private void AddFormat(BookFile file, CalibreSettings settings)
+        private void AddFormat(ComicFile file, int calibreId, CalibreSettings settings)
         {
             var format = Path.GetExtension(file.Path);
             var bookData = Convert.ToBase64String(File.ReadAllBytes(file.Path));
 
             var payload = new CalibreChangesPayload
             {
-                LoadedBookIds = new List<int> { file.CalibreId },
+                LoadedBookIds = new List<int> { calibreId },
                 Changes = new CalibreChanges
                 {
                     AddedFormats = new List<CalibreAddFormat>
@@ -192,7 +184,7 @@ namespace NzbDrone.Core.Books.Calibre
                 }
             };
 
-            ExecuteSetFields(file.CalibreId, payload, settings);
+            ExecuteSetFields(calibreId, payload, settings);
         }
 
         public void RemoveFormats(int calibreId, IEnumerable<string> formats, CalibreSettings settings)
@@ -209,94 +201,10 @@ namespace NzbDrone.Core.Books.Calibre
             ExecuteSetFields(calibreId, payload, settings);
         }
 
-        public void SetFields(BookFile file, CalibreSettings settings, bool updateCover = true, bool embed = false)
+        public void SetFields(ComicFile file, CalibreSettings settings, bool updateCover = true, bool embed = false)
         {
-            var edition = file.Edition.Value;
-            var book = edition.Book.Value;
-            var serieslink = book.SeriesLinks.Value.OrderBy(x => x.SeriesPosition).FirstOrDefault(x => x.Series.Value.Title.IsNotNullOrWhiteSpace());
-
-            var series = serieslink?.Series.Value;
-            double? seriesIndex = null;
-            if (double.TryParse(serieslink?.Position, out var index))
-            {
-                _logger.Trace("Parsed '{0}' as '{1}'", serieslink.Position, index);
-                seriesIndex = index;
-            }
-
-            _logger.Trace("Book: {0} Series: {1}, Position: {2}", book, series?.Title, seriesIndex);
-
-            var cover = edition.Images.FirstOrDefault(x => x.CoverType == MediaCoverTypes.Cover);
-            string image = null;
-            if (cover != null)
-            {
-                var imageFile = _mediaCoverService.GetCoverPath(edition.BookId, MediaCoverEntity.Book, cover.CoverType, cover.Extension, null);
-
-                if (File.Exists(imageFile))
-                {
-                    var imageData = File.ReadAllBytes(imageFile);
-                    if (CalibreImageValidator.IsValidImage(imageData))
-                    {
-                        image = Convert.ToBase64String(imageData);
-                    }
-                }
-            }
-
-            var textInfo = CultureInfo.InvariantCulture.TextInfo;
-            var genres = book.Genres.Select(x => textInfo.ToTitleCase(x.Replace('-', ' '))).ToList();
-
-            var payload = new CalibreChangesPayload
-            {
-                LoadedBookIds = new List<int> { file.CalibreId },
-                Changes = new CalibreChanges
-                {
-                    Title = edition.Title,
-                    Authors = new List<string> { file.Author.Value.Name },
-                    Cover = updateCover ? image : null,
-                    PubDate = book.ReleaseDate,
-                    Publisher = edition.Publisher,
-                    Languages = edition.Language.CanonicalizeLanguage(),
-                    Tags = genres,
-                    Comments = edition.Overview,
-                    Rating = (int)(edition.Ratings.Value * 2),
-                    Identifiers = new Dictionary<string, string>
-                    {
-                        { "isbn", edition.Isbn13 },
-                        { "asin", edition.Asin },
-                        { "goodreads", edition.ForeignEditionId }
-                    },
-                    Series = series?.Title,
-                    SeriesIndex = seriesIndex
-                }
-            };
-
-            ExecuteSetFields(file.CalibreId, payload, settings);
-
-            // updating the calibre metadata may have renamed the file, so track that
-            var updated = GetBook(file.CalibreId, settings);
-
-            var updatedPath = GetOriginalFormat(updated.Formats);
-
-            _logger.Trace("File path from Calibre: '{0}'", updatedPath);
-
-            if (updatedPath.IsNotNullOrWhiteSpace() && updatedPath != file.Path)
-            {
-                _rootFolderWatchingService.ReportFileSystemChangeBeginning(updatedPath);
-                file.Path = updatedPath;
-            }
-
-            var fileInfo = new FileInfo(file.Path);
-            file.Size = fileInfo.Length;
-            file.Modified = fileInfo.LastWriteTimeUtc;
-
-            if (file.Id > 0)
-            {
-                _mediaFileService.Update(file);
-            }
-
-            if (embed)
-            {
-                EmbedMetadata(file, settings);
-            }
+            // Calibre integration is not used for comics - no-op
+            _logger.Trace("SetFields called for {0} - Calibre integration not active for comics", file.Path);
         }
 
         private void ExecuteSetFields(int id, CalibreChangesPayload payload, CalibreSettings settings)
@@ -312,7 +220,7 @@ namespace NzbDrone.Core.Books.Calibre
             _httpClient.Execute(request);
         }
 
-        private void EmbedMetadata(BookFile file, CalibreSettings settings)
+        private void EmbedMetadata(ComicFile file, int calibreId, CalibreSettings settings)
         {
             _rootFolderWatchingService.ReportFileSystemChangeBeginning(file.Path);
 
@@ -322,13 +230,13 @@ namespace NzbDrone.Core.Books.Calibre
                 .SetHeader("Content-Type", "application/json")
                 .Build();
 
-            request.SetContent($"[{file.CalibreId}, null]");
+            request.SetContent($"[{calibreId}, null]");
             _httpClient.Execute(request);
 
             PollEmbedStatus(file, settings);
         }
 
-        private void PollEmbedStatus(BookFile file, CalibreSettings settings)
+        private void PollEmbedStatus(ComicFile file, CalibreSettings settings)
         {
             var previous = new FileInfo(file.Path);
             Thread.Sleep(100);
@@ -363,7 +271,7 @@ namespace NzbDrone.Core.Books.Calibre
         {
             try
             {
-                var request = GetBuilder($"conversion/book-data/{calibreId}", settings)
+                var request = GetBuilder($"conversion/issue-data/{calibreId}", settings)
                     .AddQueryParam("library_id", settings.Library)
                     .Build();
 
@@ -401,17 +309,17 @@ namespace NzbDrone.Core.Books.Calibre
         {
             try
             {
-                var builder = GetBuilder($"ajax/book/{calibreId}/{settings.Library}", settings);
+                var builder = GetBuilder($"ajax/issue/{calibreId}/{settings.Library}", settings);
 
                 var request = builder.Build();
-                var book = _httpClient.Get<CalibreBook>(request).Resource;
+                var issue = _httpClient.Get<CalibreBook>(request).Resource;
 
-                foreach (var format in book.Formats.Values)
+                foreach (var format in issue.Formats.Values)
                 {
                     format.Path = _pathMapper.RemapRemoteToLocal(settings.Host, new OsPath(format.Path)).FullPath;
                 }
 
-                return book;
+                return issue;
             }
             catch (HttpException ex)
             {
@@ -421,7 +329,7 @@ namespace NzbDrone.Core.Books.Calibre
 
         public List<CalibreBook> GetBooks(List<int> calibreIds, CalibreSettings settings)
         {
-            var builder = GetBuilder($"ajax/books/{settings.Library}", settings);
+            var builder = GetBuilder($"ajax/issues/{settings.Library}", settings);
             builder.LogResponseContent = false;
             builder.AddQueryParam("ids", calibreIds.ConcatToString(","));
 
@@ -432,9 +340,9 @@ namespace NzbDrone.Core.Books.Calibre
                 var response = _httpClient.Get<Dictionary<int, CalibreBook>>(request);
                 var result = response.Resource.Values.ToList();
 
-                foreach (var book in result)
+                foreach (var issue in result)
                 {
-                    foreach (var format in book.Formats.Values)
+                    foreach (var format in issue.Formats.Values)
                     {
                         format.Path = _pathMapper.RemapRemoteToLocal(settings.Host, new OsPath(format.Path)).FullPath;
                     }
@@ -457,7 +365,7 @@ namespace NzbDrone.Core.Books.Calibre
 
             while (offset < ids.Count)
             {
-                var builder = GetBuilder($"ajax/books/{settings.Library}", settings);
+                var builder = GetBuilder($"ajax/issues/{settings.Library}", settings);
                 builder.LogResponseContent = false;
                 builder.AddQueryParam("ids", ids.Skip(offset).Take(PAGE_SIZE).ConcatToString(","));
 
@@ -465,9 +373,9 @@ namespace NzbDrone.Core.Books.Calibre
                 try
                 {
                     var response = _httpClient.Get<Dictionary<int, CalibreBook>>(request);
-                    foreach (var book in response.Resource.Values)
+                    foreach (var issue in response.Resource.Values)
                     {
-                        var remotePath = GetOriginalFormat(book?.Formats);
+                        var remotePath = GetOriginalFormat(issue?.Formats);
 
                         if (remotePath == null)
                         {
@@ -477,7 +385,7 @@ namespace NzbDrone.Core.Books.Calibre
                         var localPath = _pathMapper.RemapRemoteToLocal(settings.Host, new OsPath(remotePath)).FullPath;
                         result.Add(localPath);
 
-                        _bookCache.Set(localPath, book);
+                        _bookCache.Set(localPath, issue);
                     }
                 }
                 catch (HttpException ex)
@@ -502,13 +410,13 @@ namespace NzbDrone.Core.Books.Calibre
             while (true)
             {
                 var result = GetPaged<CalibreCategory>(builder, PAGE_SIZE, offset);
-                if (!result.Resource.BookIds.Any())
+                if (!result.Resource.IssueIds.Any())
                 {
                     break;
                 }
 
                 offset += PAGE_SIZE;
-                ids.AddRange(result.Resource.BookIds);
+                ids.AddRange(result.Resource.IssueIds);
             }
 
             return ids;

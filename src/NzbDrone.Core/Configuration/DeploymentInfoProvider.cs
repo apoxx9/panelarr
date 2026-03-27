@@ -11,7 +11,7 @@ namespace NzbDrone.Core.Configuration
     public interface IDeploymentInfoProvider
     {
         string PackageVersion { get; }
-        string PackageAuthor { get; }
+        string PackageSeries { get; }
         string PackageGlobalMessage { get; }
         string PackageBranch { get; }
         UpdateMechanism PackageUpdateMechanism { get; }
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Configuration
                 var data = diskProvider.ReadAllText(packageInfoPath);
 
                 PackageVersion = ReadValue(data, "PackageVersion");
-                PackageAuthor = ReadValue(data, "PackageAuthor");
+                PackageSeries = ReadValue(data, "PackageSeries");
                 PackageGlobalMessage = ReadValue(data, "PackageGlobalMessage");
                 PackageUpdateMechanism = ReadEnumValue(data, "UpdateMethod", UpdateMechanism.BuiltIn);
                 PackageUpdateMechanismMessage = ReadValue(data, "UpdateMethodMessage");
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Configuration
         }
 
         public string PackageVersion { get; private set; }
-        public string PackageAuthor { get; private set; }
+        public string PackageSeries { get; private set; }
         public string PackageGlobalMessage { get; private set; }
         public string PackageBranch { get; private set; }
         public UpdateMechanism PackageUpdateMechanism { get; private set; }
