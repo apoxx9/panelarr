@@ -1,37 +1,27 @@
-# Active Story: Black Screen Bug (Session 4 Priority 1)
+# Active Story: Comic Reader UX Audit Fixes (Session 5)
 
-## Status: BLOCKED — Frontend renders blank page
+## Status: READY — Prioritized cleanup backlog
 
-The app backend is fully functional but the frontend renders a blank/black screen when loaded at `http://localhost:8787`. This is the immediate blocker before any further feature work or testing can proceed.
+Residual book/audiobook UX artifacts that leaked through from the Readarr fork. These need to be scrubbed so the UI reads as a native comic manager.
 
-## Problem
+---
 
-After the Session 3 search UI redesign, the React app crashes at runtime. The JS bundle builds clean (`npm run build` succeeds with no errors), all API endpoints return correct data, but the browser shows a blank page.
+## Critical
 
-## Diagnosis Steps
+1. **Naming tokens show audio metadata** — MediaInfo AudioCodec, AudioBitrate, AudioChannels, AudioBitsPerSample, AudioSampleRate tokens still appear in the naming config UI. Remove them entirely.
+2. **Quality examples show AZW3/MP3** — Quality profile examples reference ebook/audiobook formats. Change to CBZ/CBR.
+3. **Full Calibre integration in Root Folder modal** — Calibre library path, host, port, username, password fields show in the Add Root Folder modal. Hide or remove.
+4. **Calibre Metadata section in Settings** — Dedicated Calibre settings section still present. Remove.
 
-1. Kill all instances: `pkill -9 -f "NzbDrone|panelarr"`
-2. Start the app: `cd /Users/lorenzonunez-estevez/Projects/panelarr/src && dotnet run --project NzbDrone.Console -p:EnableSourceLink=false`
-3. Open `http://localhost:8787` in browser
-4. Open DevTools Console (Cmd+Option+J on Mac)
-5. The console error will identify the crashing component
+## High
 
-## Likely Cause
+5. **Edition concept in Interactive Import** — Edition selection/display still appears in the manual/interactive import flow. Hide or remove.
+6. **ISBN/ASIN references** — ISBN/ASIN appear in the search input placeholder text and in the metadata profile configuration. Remove.
+7. **Audio tagging translations** — Translation keys related to audio tagging (e.g. AudioTagging, WriteAudioTags) are still present. Clean up.
 
-The search UI redesign touched these files — one or more likely has a React render error (bad import, undefined prop, missing component):
-- `frontend/src/Search/AddNewItem.js`
-- `frontend/src/Search/Series/AddNewSeriesSearchResult.js`
-- `frontend/src/Search/Issue/AddNewIssueSearchResult.js`
-- Related CSS and type definition files
+## Medium
 
-## After Fixing
-
-Once the black screen is resolved:
-- Test series add flow via the UI
-- Test remaining Goodreads code paths that need rewiring
-- Verify Metron connectivity (currently down, ComicVine fallback works)
-- Stage and commit all Session 3 changes (194 uncommitted files)
-
-## Backlog Context
-- Phases P1-P3: COMPLETE
-- Next feature: F-01 (Story Arcs) — do not start until runtime is stable
+8. **"Issueshelf" terminology** — Rename to "Pull List" or "Collection" throughout the UI.
+9. **Metadata Profile poorly explained** — The metadata profile section lacks clear explanation of what it controls for comics. Improve copy/tooltips.
+10. **"Skip Part Issues and Sets" toggle** — Rephrase label and description to make sense for comics (not audiobook box sets).
+11. **{Edition Year} naming token** — Still available in the naming token picker. Remove.
