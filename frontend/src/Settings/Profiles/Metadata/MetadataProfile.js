@@ -95,7 +95,7 @@ class MetadataProfile extends Component {
           {
             minPopularity ?
               <Label kind={kinds.DEFAULT}>
-                {translate('MinimumPopularity')}: {minPopularity}
+                {translate('MinimumRating')}: {minPopularity}
               </Label> :
               null
           }

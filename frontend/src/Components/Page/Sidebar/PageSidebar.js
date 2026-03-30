@@ -23,11 +23,11 @@ const links = [
     iconName: icons.SERIES_CONTINUING,
     title: () => translate('Library'),
     to: '/',
-    alias: '/seriess',
+    alias: '/library',
     children: [
       {
         title: () => translate('Series'),
-        to: '/seriess'
+        to: '/library'
       },
       {
         title: () => translate('Issues'),

@@ -227,6 +227,19 @@ class AddNewSeriesSearchResult extends Component {
           </div>
 
           <div className={styles.icons}>
+            {
+              !isExistingSeries &&
+                <Link
+                  className={styles.addButton}
+                  onPress={this.onPress}
+                >
+                  <Icon
+                    name={icons.ADD}
+                    size={18}
+                  />
+                </Link>
+            }
+
             <Link
               className={styles.externalLink}
               to={externalLink}

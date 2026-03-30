@@ -73,7 +73,7 @@ function AppRoutes(props) {
       }
 
       <Route
-        path="/seriess"
+        path="/library"
         component={SeriesIndexConnector}
       />
 

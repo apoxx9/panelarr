@@ -80,14 +80,14 @@ function EditMetadataProfileModalContent(props) {
 
               <FormGroup>
                 <FormLabel>
-                  {translate('MinimumPopularity')}
+                  {translate('MinimumRating')}
                 </FormLabel>
 
                 <FormInputGroup
                   type={inputTypes.NUMBER}
                   name="minPopularity"
                   {...minPopularity}
-                  helpText={translate('MinPopularityHelpText')}
+                  helpText={translate('MinRatingHelpText')}
                   isFloat={true}
                   min={0}
                   onChange={onInputChange}

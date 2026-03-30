@@ -45,7 +45,8 @@ namespace NzbDrone.Core.Notifications.Prowl
             {
                 if (ex.Response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    _logger.Error(ex, "Apikey is invalid: {0}", settings.ApiKey);
+                    var maskedKey = settings.ApiKey?.Substring(0, Math.Min(4, settings.ApiKey?.Length ?? 0)) + "...";
+                    _logger.Error(ex, "Apikey is invalid: {0}", maskedKey);
                     throw new ProwlException("Apikey is invalid", ex);
                 }
 

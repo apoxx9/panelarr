@@ -660,6 +660,8 @@
   "MinFormatScoreHelpText": "Minimum custom format score allowed to download",
   "MinPagesHelpText": "Ignore issues with fewer pages than this",
   "MinPopularityHelpText": "Popularity is average rating * number of votes",
+  "MinRatingHelpText": "Minimum rating score required for issues to be included",
+  "MinimumRating": "Minimum Rating",
   "MinimumAge": "Minimum Age",
   "MinimumAgeHelpText": "Usenet only: Minimum age in minutes of NZBs before they are grabbed. Use this to give new releases time to propagate to your usenet provider.",
   "MinimumCustomFormatScore": "Minimum Custom Format Score",

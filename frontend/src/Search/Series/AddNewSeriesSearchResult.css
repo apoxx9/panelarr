@@ -193,6 +193,18 @@
   margin-left: 12px;
 }
 
+.addButton {
+  composes: link from '~Components/Link/Link.css';
+
+  color: #37bc9b;
+  transition: color 150ms;
+  pointer-events: all;
+
+  &:hover {
+    color: #2e9e82;
+  }
+}
+
 .externalLink {
   composes: link from '~Components/Link/Link.css';
 

@@ -33,7 +33,8 @@ namespace NzbDrone.Core.Organizer
                 Metadata = new SeriesMetadata
                 {
                     Name = "The Series Name",
-                    Disambiguation = "US Series"
+                    Disambiguation = "US Series",
+                    Year = 2024
                 }
             };
 
