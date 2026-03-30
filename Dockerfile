@@ -6,7 +6,7 @@ ARG TARGETPLATFORM
 ARG TARGETARCH
 
 # ── Build stage ─────────────────────────────────────────────────────────────────
-FROM --platform=${BUILDPLATFORM:-linux/amd64} mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM --platform=${BUILDPLATFORM:-linux/amd64} mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 ARG TARGETARCH
 
@@ -28,7 +28,7 @@ RUN dotnet restore ./src/Panelarr.sln && \
         --no-restore
 
 # ── Runtime image ────────────────────────────────────────────────────────────────
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 
 ARG PUID=1000
 ARG PGID=1000
