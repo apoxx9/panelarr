@@ -32,7 +32,7 @@ namespace NzbDrone.Core.Books
     {
         private readonly IProvideSeriesInfo _authorInfo;
         private readonly ISeriesService _authorService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IMetadataProfileService _metadataProfileService;
         private readonly IRefreshBookService _refreshBookService;
         private readonly IRefreshSeriesGroupService _refreshSeriesGroupService;
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Books
         public RefreshSeriesService(IProvideSeriesInfo authorInfo,
                                     ISeriesService authorService,
                                     ISeriesMetadataService authorMetadataService,
-                                    IBookService bookService,
+                                    IIssueService bookService,
                                     IMetadataProfileService metadataProfileService,
                                     IRefreshBookService refreshBookService,
                                     IRefreshSeriesGroupService refreshSeriesGroupService,
@@ -195,7 +195,7 @@ namespace NzbDrone.Core.Books
             }
 
             // move any issues over to the new author and remove the local author
-            var issues = _bookService.GetBooksBySeries(local.Id);
+            var issues = _bookService.GetIssuesBySeries(local.Id);
             issues.ForEach(x => x.SeriesMetadataId = target.SeriesMetadataId);
             _bookService.UpdateMany(issues);
             _authorService.DeleteSeries(local.Id, false);

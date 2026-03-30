@@ -41,7 +41,7 @@
   composes: link from '~Components/Link/Link.css';
 
   width: 30px;
-  color: var(--themeYellow);
+  color: var(--themePurple);
   text-align: center;
   line-height: 60px;
 

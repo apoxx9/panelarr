@@ -12,23 +12,23 @@ using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.MediaFiles
 {
-    public interface IUpdateBookFileService
+    public interface IUpdateComicFileService
     {
         void ChangeFileDateForFile(ComicFile comicFile, Series author, Issue issue);
     }
 
-    public class UpdateComicFileService : IUpdateBookFileService,
+    public class UpdateComicFileService : IUpdateComicFileService,
                                             IHandle<SeriesScannedEvent>
     {
         private readonly IDiskProvider _diskProvider;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IConfigService _configService;
         private readonly Logger _logger;
         private static readonly DateTime EpochTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public UpdateComicFileService(IDiskProvider diskProvider,
                                       IConfigService configService,
-                                      IBookService bookService,
+                                      IIssueService bookService,
                                       Logger logger)
         {
             _diskProvider = diskProvider;

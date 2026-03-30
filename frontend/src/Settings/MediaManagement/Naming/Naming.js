@@ -210,7 +210,7 @@ class Naming extends Component {
                   buttons={<FormInputButton onPress={this.onSeriesFolderNamingModalOpenClick}>?</FormInputButton>}
                   onChange={onInputChange}
                   {...settings.seriesFolderFormat}
-                  helpTexts={['Used when adding a new series or moving an series via the series editor', ...seriesFolderFormatHelpTexts]}
+                  helpTexts={['Used when adding a new series or moving a series via the series editor', ...seriesFolderFormatHelpTexts]}
                   errors={[...seriesFolderFormatErrors, ...settings.seriesFolderFormat.errors]}
                 />
               </FormGroup>

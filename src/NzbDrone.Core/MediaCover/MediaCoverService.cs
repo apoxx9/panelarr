@@ -33,7 +33,7 @@ namespace NzbDrone.Core.MediaCover
 
         private readonly IMediaCoverProxy _mediaCoverProxy;
         private readonly IImageResizer _resizer;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IHttpClient _httpClient;
         private readonly IDiskProvider _diskProvider;
         private readonly ICoverExistsSpecification _coverExistsSpecification;
@@ -49,7 +49,7 @@ namespace NzbDrone.Core.MediaCover
 
         public MediaCoverService(IMediaCoverProxy mediaCoverProxy,
                                  IImageResizer resizer,
-                                 IBookService bookService,
+                                 IIssueService bookService,
                                  IHttpClient httpClient,
                                  IDiskProvider diskProvider,
                                  IAppFolderInfo appFolderInfo,
@@ -362,7 +362,7 @@ namespace NzbDrone.Core.MediaCover
         {
             EnsureSeriesCovers(message.Series);
 
-            var issues = _bookService.GetBooksBySeries(message.Series.Id);
+            var issues = _bookService.GetIssuesBySeries(message.Series.Id);
             foreach (var issue in issues)
             {
                 EnsureBookCovers(issue);

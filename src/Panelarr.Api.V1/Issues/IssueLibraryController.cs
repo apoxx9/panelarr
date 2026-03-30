@@ -20,12 +20,12 @@ namespace Panelarr.Api.V1.Books
     [V1ApiController("issue")]
     public class IssueLibraryController : Controller
     {
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly ISeriesBookLinkService _seriesBookLinkService;
         private readonly ISeriesStatisticsService _seriesStatisticsService;
         private readonly IMapCoversToLocal _coverMapper;
 
-        public IssueLibraryController(IBookService bookService,
+        public IssueLibraryController(IIssueService bookService,
                                       ISeriesBookLinkService seriesBookLinkService,
                                       ISeriesStatisticsService seriesStatisticsService,
                                       IMapCoversToLocal coverMapper)

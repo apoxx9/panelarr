@@ -10,24 +10,24 @@ using NzbDrone.Core.MetadataSource;
 
 namespace NzbDrone.Core.Books
 {
-    public interface IAddBookService
+    public interface IAddIssueService
     {
-        Issue AddBook(Issue issue, bool doRefresh = true);
-        List<Issue> AddBooks(List<Issue> issues, bool doRefresh = true);
+        Issue AddIssue(Issue issue, bool doRefresh = true);
+        List<Issue> AddIssues(List<Issue> issues, bool doRefresh = true);
     }
 
-    public class AddBookService : IAddBookService
+    public class AddIssueService : IAddIssueService
     {
         private readonly ISeriesService _authorService;
         private readonly IAddSeriesService _addSeriesService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IProvideBookInfo _bookInfo;
         private readonly IImportListExclusionService _importListExclusionService;
         private readonly Logger _logger;
 
-        public AddBookService(ISeriesService authorService,
+        public AddIssueService(ISeriesService authorService,
                                IAddSeriesService addSeriesService,
-                               IBookService bookService,
+                               IIssueService bookService,
                                IProvideBookInfo bookInfo,
                                IImportListExclusionService importListExclusionService,
                                Logger logger)
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Books
             _logger = logger;
         }
 
-        public Issue AddBook(Issue issue, bool doRefresh = true)
+        public Issue AddIssue(Issue issue, bool doRefresh = true)
         {
             _logger.Debug($"Adding issue {issue}");
 
@@ -73,12 +73,12 @@ namespace NzbDrone.Core.Books
 
             issue.Series = dbSeries;
             issue.SeriesMetadataId = dbSeries.SeriesMetadataId;
-            _bookService.AddBook(issue, doRefresh);
+            _bookService.AddIssue(issue, doRefresh);
 
             return issue;
         }
 
-        public List<Issue> AddBooks(List<Issue> issues, bool doRefresh = true)
+        public List<Issue> AddIssues(List<Issue> issues, bool doRefresh = true)
         {
             var added = DateTime.UtcNow;
             var addedBooks = new List<Issue>();
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.Books
                 a.Added = added;
                 try
                 {
-                    addedBooks.Add(AddBook(a, doRefresh));
+                    addedBooks.Add(AddIssue(a, doRefresh));
                 }
                 catch (Exception ex)
                 {

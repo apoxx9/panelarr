@@ -16,14 +16,14 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
 
         private readonly IComicInfoGenerator _generator;
         private readonly IMetronInfoGenerator _metronInfoGenerator;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IPublisherService _publisherService;
         private readonly Logger _logger;
 
         public ComicInfoEmbedService(
             IComicInfoGenerator generator,
             IMetronInfoGenerator metronInfoGenerator,
-            IBookService bookService,
+            IIssueService bookService,
             IPublisherService publisherService,
             Logger logger)
         {
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                 return;
             }
 
-            var issue = comicFile.Issue?.Value ?? _bookService.GetBook(comicFile.IssueId);
+            var issue = comicFile.Issue?.Value ?? _bookService.GetIssue(comicFile.IssueId);
             if (issue == null)
             {
                 _logger.Warn("Issue not found for ComicFile {0}, skipping ComicInfo.xml embedding", comicFile.Id);

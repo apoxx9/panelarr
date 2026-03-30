@@ -5,7 +5,7 @@
 }
 
 .isActiveItem {
-  border-left: 3px solid var(--themeAlternateYellow);
+  border-left: 3px solid var(--themeAlternatePurple);
 }
 
 .link {
@@ -15,7 +15,7 @@
 
   &:hover,
   &:focus {
-    color: var(--themeYellow);
+    color: var(--themePurple);
     text-decoration: none;
   }
 }
@@ -27,7 +27,7 @@
 }
 
 .isActiveLink {
-  color: var(--themeAlternateYellow);
+  color: var(--themeAlternatePurple);
 }
 
 .isActiveParentLink {

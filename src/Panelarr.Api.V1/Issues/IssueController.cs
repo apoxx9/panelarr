@@ -32,12 +32,12 @@ namespace Panelarr.Api.V1.Books
         IHandle<TrackImportedEvent>,
         IHandle<ComicFileDeletedEvent>
     {
-        protected readonly ISeriesService _authorService;
-        protected readonly IAddBookService _addBookService;
+        protected readonly ISeriesService _seriesService;
+        protected readonly IAddIssueService _addBookService;
 
         public IssueController(ISeriesService authorService,
-                          IBookService bookService,
-                          IAddBookService addBookService,
+                          IIssueService bookService,
+                          IAddIssueService addBookService,
                           ISeriesBookLinkService seriesBookLinkService,
                           ISeriesStatisticsService authorStatisticsService,
                           IMapCoversToLocal coverMapper,
@@ -48,7 +48,7 @@ namespace Panelarr.Api.V1.Books
 
         : base(bookService, seriesBookLinkService, authorStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
         {
-            _authorService = authorService;
+            _seriesService = authorService;
             _addBookService = addBookService;
 
             PostValidator.RuleFor(s => s.ForeignIssueId).NotEmpty();
@@ -65,8 +65,8 @@ namespace Panelarr.Api.V1.Books
         {
             if (!seriesId.HasValue && !issueIds.Any() && titleSlug.IsNullOrWhiteSpace())
             {
-                var metadataTask = Task.Run(() => _authorService.GetAllSeries());
-                var issues = _bookService.GetAllBooks();
+                var metadataTask = Task.Run(() => _seriesService.GetAllSeries());
+                var issues = _bookService.GetAllIssues();
 
                 var seriesDict = metadataTask.GetAwaiter().GetResult().ToDictionary(x => x.SeriesMetadataId);
 
@@ -80,9 +80,9 @@ namespace Panelarr.Api.V1.Books
 
             if (seriesId.HasValue)
             {
-                var issues = _bookService.GetBooksBySeries(seriesId.Value);
+                var issues = _bookService.GetIssuesBySeries(seriesId.Value);
 
-                var series = _authorService.GetSeries(seriesId.Value);
+                var series = _seriesService.GetSeries(seriesId.Value);
 
                 foreach (var issue in issues)
                 {
@@ -103,7 +103,7 @@ namespace Panelarr.Api.V1.Books
 
                 if (includeAllSeriesBooks)
                 {
-                    return MapToResource(_bookService.GetBooksBySeries(issue.SeriesId), false);
+                    return MapToResource(_bookService.GetIssuesBySeries(issue.SeriesId), false);
                 }
                 else
                 {
@@ -111,13 +111,13 @@ namespace Panelarr.Api.V1.Books
                 }
             }
 
-            return MapToResource(_bookService.GetBooks(issueIds), false);
+            return MapToResource(_bookService.GetIssues(issueIds), false);
         }
 
         [HttpGet("{id:int}/overview")]
         public object Overview(int id)
         {
-            var issue = _bookService.GetBook(id);
+            var issue = _bookService.GetIssue(id);
             return new
             {
                 id,
@@ -128,7 +128,7 @@ namespace Panelarr.Api.V1.Books
         [RestPostById]
         public ActionResult<IssueResource> AddBook(IssueResource bookResource)
         {
-            var issue = _addBookService.AddBook(bookResource.ToModel());
+            var issue = _addBookService.AddIssue(bookResource.ToModel());
 
             return Created(issue.Id);
         }
@@ -136,11 +136,11 @@ namespace Panelarr.Api.V1.Books
         [RestPutById]
         public ActionResult<IssueResource> UpdateBook(IssueResource bookResource)
         {
-            var issue = _bookService.GetBook(bookResource.Id);
+            var issue = _bookService.GetIssue(bookResource.Id);
 
             var model = bookResource.ToModel(issue);
 
-            _bookService.UpdateBook(model);
+            _bookService.UpdateIssue(model);
 
             BroadcastResourceChange(ModelAction.Updated, model.Id);
 
@@ -150,7 +150,7 @@ namespace Panelarr.Api.V1.Books
         [RestDeleteById]
         public void DeleteBook(int id, bool deleteFiles = false, bool addImportListExclusion = false)
         {
-            _bookService.DeleteBook(id, deleteFiles, addImportListExclusion);
+            _bookService.DeleteIssue(id, deleteFiles, addImportListExclusion);
         }
 
         [NonAction]

@@ -178,7 +178,7 @@ namespace NzbDrone.Core.Organizer
 
                 if (token.StartsWith("{Issue", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    basicNamingConfig.IncludeBookTitle = true;
+                    basicNamingConfig.IncludeIssueTitle = true;
                 }
 
                 if (token.StartsWith("{Quality", StringComparison.InvariantCultureIgnoreCase))

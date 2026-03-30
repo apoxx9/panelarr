@@ -10,26 +10,26 @@ using NzbDrone.Core.Parser;
 
 namespace NzbDrone.Core.Books
 {
-    public interface IBookService
+    public interface IIssueService
     {
-        Issue GetBook(int bookId);
-        List<Issue> GetBooks(IEnumerable<int> bookIds);
-        List<Issue> GetBooksBySeries(int authorId);
+        Issue GetIssue(int bookId);
+        List<Issue> GetIssues(IEnumerable<int> bookIds);
+        List<Issue> GetIssuesBySeries(int authorId);
         List<Issue> GetNextBooksBySeriesMetadataId(IEnumerable<int> authorMetadataIds);
         List<Issue> GetLastBooksBySeriesMetadataId(IEnumerable<int> authorMetadataIds);
-        List<Issue> GetBooksBySeriesMetadataId(int authorMetadataId);
+        List<Issue> GetIssuesBySeriesMetadataId(int authorMetadataId);
         List<Issue> GetBooksForRefresh(int authorMetadataId, List<string> foreignIds);
         List<Issue> GetBooksByFileIds(IEnumerable<int> fileIds);
-        Issue AddBook(Issue newBook, bool doRefresh = true);
+        Issue AddIssue(Issue newBook, bool doRefresh = true);
         Issue FindById(string foreignId);
         Issue FindBySlug(string titleSlug);
         Issue FindByTitle(int authorMetadataId, string title);
         Issue FindByTitleInexact(int authorMetadataId, string title);
         List<Issue> GetCandidates(int authorMetadataId, string title);
-        void DeleteBook(int bookId, bool deleteFiles, bool addImportListExclusion = false);
-        List<Issue> GetAllBooks();
-        Issue UpdateBook(Issue issue);
-        void SetBookMonitored(int bookId, bool monitored);
+        void DeleteIssue(int bookId, bool deleteFiles, bool addImportListExclusion = false);
+        List<Issue> GetAllIssues();
+        Issue UpdateIssue(Issue issue);
+        void SetIssueMonitored(int bookId, bool monitored);
         void SetMonitored(IEnumerable<int> ids, bool monitored);
         void UpdateLastSearchTime(List<Issue> issues);
         PagingSpec<Issue> IssuesWithoutFiles(PagingSpec<Issue> pagingSpec);
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Books
         List<Issue> GetSeriesBooksWithFiles(Series author);
     }
 
-    public class IssueService : IBookService,
+    public class IssueService : IIssueService,
                                 IHandle<SeriesDeletedEvent>
     {
         private readonly IBookRepository _bookRepository;
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Books
             _logger = logger;
         }
 
-        public Issue AddBook(Issue newBook, bool doRefresh = true)
+        public Issue AddIssue(Issue newBook, bool doRefresh = true)
         {
             if (newBook.SeriesMetadataId == 0)
             {
@@ -67,12 +67,12 @@ namespace NzbDrone.Core.Books
 
             _bookRepository.Upsert(newBook);
 
-            _eventAggregator.PublishEvent(new IssueAddedEvent(GetBook(newBook.Id), doRefresh));
+            _eventAggregator.PublishEvent(new IssueAddedEvent(GetIssue(newBook.Id), doRefresh));
 
             return newBook;
         }
 
-        public void DeleteBook(int bookId, bool deleteFiles, bool addImportListExclusion = false)
+        public void DeleteIssue(int bookId, bool deleteFiles, bool addImportListExclusion = false)
         {
             var issue = _bookRepository.Get(bookId);
             issue.Series.LazyLoad();
@@ -115,7 +115,7 @@ namespace NzbDrone.Core.Books
 
         public Issue FindByTitleInexact(int authorMetadataId, string title)
         {
-            var issues = GetBooksBySeriesMetadataId(authorMetadataId);
+            var issues = GetIssuesBySeriesMetadataId(authorMetadataId);
 
             foreach (var func in IssueScoringFunctions(title, title.CleanSeriesName()))
             {
@@ -131,7 +131,7 @@ namespace NzbDrone.Core.Books
 
         public List<Issue> GetCandidates(int authorMetadataId, string title)
         {
-            var issues = GetBooksBySeriesMetadataId(authorMetadataId);
+            var issues = GetIssuesBySeriesMetadataId(authorMetadataId);
             var output = new List<Issue>();
 
             foreach (var func in IssueScoringFunctions(title, title.CleanSeriesName()))
@@ -162,22 +162,22 @@ namespace NzbDrone.Core.Books
                 .ToList();
         }
 
-        public List<Issue> GetAllBooks()
+        public List<Issue> GetAllIssues()
         {
             return _bookRepository.All().ToList();
         }
 
-        public Issue GetBook(int bookId)
+        public Issue GetIssue(int bookId)
         {
             return _bookRepository.Get(bookId);
         }
 
-        public List<Issue> GetBooks(IEnumerable<int> bookIds)
+        public List<Issue> GetIssues(IEnumerable<int> bookIds)
         {
             return _bookRepository.Get(bookIds).ToList();
         }
 
-        public List<Issue> GetBooksBySeries(int authorId)
+        public List<Issue> GetIssuesBySeries(int authorId)
         {
             return _bookRepository.GetBooks(authorId).ToList();
         }
@@ -192,9 +192,9 @@ namespace NzbDrone.Core.Books
             return _bookRepository.GetLastBooks(authorMetadataIds).ToList();
         }
 
-        public List<Issue> GetBooksBySeriesMetadataId(int authorMetadataId)
+        public List<Issue> GetIssuesBySeriesMetadataId(int authorMetadataId)
         {
-            return _bookRepository.GetBooksBySeriesMetadataId(authorMetadataId).ToList();
+            return _bookRepository.GetIssuesBySeriesMetadataId(authorMetadataId).ToList();
         }
 
         public List<Issue> GetBooksForRefresh(int authorMetadataId, List<string> foreignIds)
@@ -263,9 +263,9 @@ namespace NzbDrone.Core.Books
             }
         }
 
-        public Issue UpdateBook(Issue issue)
+        public Issue UpdateIssue(Issue issue)
         {
-            var storedBook = GetBook(issue.Id);
+            var storedBook = GetIssue(issue.Id);
             var updatedBook = _bookRepository.Update(issue);
 
             _eventAggregator.PublishEvent(new IssueEditedEvent(updatedBook, storedBook));
@@ -273,7 +273,7 @@ namespace NzbDrone.Core.Books
             return updatedBook;
         }
 
-        public void SetBookMonitored(int bookId, bool monitored)
+        public void SetIssueMonitored(int bookId, bool monitored)
         {
             var issue = _bookRepository.Get(bookId);
             _bookRepository.SetMonitoredFlat(issue, monitored);
@@ -302,7 +302,7 @@ namespace NzbDrone.Core.Books
 
         public void Handle(SeriesDeletedEvent message)
         {
-            var issues = GetBooksBySeriesMetadataId(message.Series.SeriesMetadataId);
+            var issues = GetIssuesBySeriesMetadataId(message.Series.SeriesMetadataId);
             DeleteMany(issues);
         }
     }

@@ -5668,7 +5668,7 @@
             }
           },
           {
-            "name": "includeBookTitle",
+            "name": "includeIssueTitle",
             "in": "query",
             "schema": {
               "type": "boolean"
@@ -11425,26 +11425,6 @@
           "id": {
             "type": "integer",
             "format": "int32"
-          },
-          "audioChannels": {
-            "type": "number",
-            "format": "double"
-          },
-          "audioBitRate": {
-            "type": "string",
-            "nullable": true
-          },
-          "audioCodec": {
-            "type": "string",
-            "nullable": true
-          },
-          "audioBits": {
-            "type": "string",
-            "nullable": true
-          },
-          "audioSampleRate": {
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -11456,7 +11436,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "autoUnmonitorPreviouslyDownloadedBooks": {
+          "autoUnmonitorPreviouslyDownloadedIssues": {
             "type": "boolean"
           },
           "recycleBin": {
@@ -11766,7 +11746,7 @@
           "includeAuthorName": {
             "type": "boolean"
           },
-          "includeBookTitle": {
+          "includeIssueTitle": {
             "type": "boolean"
           },
           "includeQuality": {

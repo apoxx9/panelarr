@@ -32,12 +32,12 @@ namespace NzbDrone.Core.Parser
     public class ParsingService : IParsingService
     {
         private readonly ISeriesService _authorService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IMediaFileService _mediaFileService;
         private readonly Logger _logger;
 
         public ParsingService(ISeriesService authorService,
-                              IBookService bookService,
+                              IIssueService bookService,
                               IMediaFileService mediaFileService,
                               Logger logger)
         {
@@ -117,7 +117,7 @@ namespace NzbDrone.Core.Parser
                         false);
                 }
 
-                return _bookService.GetBooksBySeries(author.Id);
+                return _bookService.GetIssuesBySeries(author.Id);
             }
 
             if (searchCriteria != null)
@@ -156,7 +156,7 @@ namespace NzbDrone.Core.Parser
             {
                 ParsedIssueInfo = parsedBookInfo,
                 Series = _authorService.GetSeries(authorId),
-                Books = _bookService.GetBooks(bookIds)
+                Books = _bookService.GetIssues(bookIds)
             };
         }
 
@@ -242,7 +242,7 @@ namespace NzbDrone.Core.Parser
                 .DistinctBy(s => s.IssueId)
                 .ToList();
 
-            return tracksInBook.Count == 1 ? _bookService.GetBook(tracksInBook.First().IssueId) : null;
+            return tracksInBook.Count == 1 ? _bookService.GetIssue(tracksInBook.First().IssueId) : null;
         }
 
         public Series GetSeriesForComicRelease(ParsedComicInfo parsedComicInfo, SearchCriteriaBase searchCriteria = null)
@@ -293,7 +293,7 @@ namespace NzbDrone.Core.Parser
                     }
                 }
 
-                var allIssues = _bookService.GetBooksBySeries(series.Id);
+                var allIssues = _bookService.GetIssuesBySeries(series.Id);
                 var matched = allIssues.Where(i => (float)i.IssueNumber == issueNum).ToList();
 
                 if (matched.Any())

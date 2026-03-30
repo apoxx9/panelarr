@@ -12,12 +12,12 @@ namespace NzbDrone.Core.Download
     public class RedownloadFailedDownloadService : IHandle<DownloadFailedEvent>
     {
         private readonly IConfigService _configService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IManageCommandQueue _commandQueueManager;
         private readonly Logger _logger;
 
         public RedownloadFailedDownloadService(IConfigService configService,
-                                               IBookService bookService,
+                                               IIssueService bookService,
                                                IManageCommandQueue commandQueueManager,
                                                Logger logger)
         {
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Download
                 return;
             }
 
-            var booksInSeries = _bookService.GetBooksBySeries(message.SeriesId);
+            var booksInSeries = _bookService.GetIssuesBySeries(message.SeriesId);
 
             if (message.IssueIds.Count == booksInSeries.Count)
             {

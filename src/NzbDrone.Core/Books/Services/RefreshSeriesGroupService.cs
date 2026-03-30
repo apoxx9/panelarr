@@ -13,13 +13,13 @@ namespace NzbDrone.Core.Books
 
     public class RefreshSeriesGroupService : RefreshEntityServiceBase<SeriesGroup, SeriesGroupLink>, IRefreshSeriesGroupService
     {
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly ISeriesGroupService _seriesService;
         private readonly ISeriesBookLinkService _linkService;
         private readonly IRefreshSeriesBookLinkService _refreshLinkService;
         private readonly Logger _logger;
 
-        public RefreshSeriesGroupService(IBookService bookService,
+        public RefreshSeriesGroupService(IIssueService bookService,
                                     ISeriesGroupService seriesService,
                                     ISeriesBookLinkService linkService,
                                     IRefreshSeriesBookLinkService refreshLinkService,
@@ -135,7 +135,7 @@ namespace NzbDrone.Core.Books
             var existingByForeignId = _seriesService.FindById(remoteSeries.Select(x => x.ForeignSeriesId).ToList());
             var existing = existingByMetadata.Concat(existingByForeignId).GroupBy(x => x.ForeignSeriesId).Select(x => x.First()).ToList();
 
-            var issues = _bookService.GetBooksBySeriesMetadataId(authorMetadataId);
+            var issues = _bookService.GetIssuesBySeriesMetadataId(authorMetadataId);
             var bookDict = issues.ToDictionary(x => x.ForeignIssueId);
             var links = new List<SeriesGroupLink>();
 

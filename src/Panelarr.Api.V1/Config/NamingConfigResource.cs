@@ -12,7 +12,7 @@ namespace Panelarr.Api.V1.Config
         public string TPBFormat { get; set; }
         public string SeriesFolderFormat { get; set; }
         public bool IncludeSeriesName { get; set; }
-        public bool IncludeBookTitle { get; set; }
+        public bool IncludeIssueTitle { get; set; }
         public bool IncludeQuality { get; set; }
         public bool ReplaceSpaces { get; set; }
         public string Separator { get; set; }

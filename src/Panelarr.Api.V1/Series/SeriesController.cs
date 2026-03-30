@@ -35,8 +35,8 @@ namespace Panelarr.Api.V1.Series
                                 IHandle<SeriesRenamedEvent>,
                                 IHandle<MediaCoversUpdatedEvent>
     {
-        private readonly ISeriesService _authorService;
-        private readonly IBookService _bookService;
+        private readonly ISeriesService _seriesService;
+        private readonly IIssueService _bookService;
         private readonly IAddSeriesService _addSeriesService;
         private readonly ISeriesStatisticsService _authorStatisticsService;
         private readonly IMapCoversToLocal _coverMapper;
@@ -46,7 +46,7 @@ namespace Panelarr.Api.V1.Series
 
         public SeriesController(IBroadcastSignalRMessage signalRBroadcaster,
                             ISeriesService authorService,
-                            IBookService bookService,
+                            IIssueService bookService,
                             IAddSeriesService addSeriesService,
                             ISeriesStatisticsService authorStatisticsService,
                             IMapCoversToLocal coverMapper,
@@ -65,7 +65,7 @@ namespace Panelarr.Api.V1.Series
                             SeriesFolderAsRootFolderValidator authorFolderAsRootFolderValidator)
             : base(signalRBroadcaster)
         {
-            _authorService = authorService;
+            _seriesService = authorService;
             _bookService = bookService;
             _addSeriesService = addSeriesService;
             _authorStatisticsService = authorStatisticsService;
@@ -103,7 +103,7 @@ namespace Panelarr.Api.V1.Series
 
         protected override SeriesResource GetResourceById(int id)
         {
-            var series = _authorService.GetSeries(id);
+            var series = _seriesService.GetSeries(id);
             return GetSeriesResource(series);
         }
 
@@ -128,7 +128,7 @@ namespace Panelarr.Api.V1.Series
         public List<SeriesResource> AllSeriess(int? seriesGroupId = null)
         {
             var seriesStats = _authorStatisticsService.SeriesStatistics();
-            var allSeries = _authorService.GetAllSeries();
+            var allSeries = _seriesService.GetAllSeries();
 
             if (seriesGroupId.HasValue)
             {
@@ -168,7 +168,7 @@ namespace Panelarr.Api.V1.Series
         [RestPutById]
         public ActionResult<SeriesResource> UpdateSeries(SeriesResource seriesResource, bool moveFiles = false)
         {
-            var series = _authorService.GetSeries(seriesResource.Id);
+            var series = _seriesService.GetSeries(seriesResource.Id);
 
             if (moveFiles)
             {
@@ -186,7 +186,7 @@ namespace Panelarr.Api.V1.Series
 
             var model = seriesResource.ToModel(series);
 
-            _authorService.UpdateSeries(model);
+            _seriesService.UpdateSeries(model);
 
             BroadcastResourceChange(ModelAction.Updated, seriesResource);
 
@@ -196,7 +196,7 @@ namespace Panelarr.Api.V1.Series
         [RestDeleteById]
         public void DeleteSeries(int id, bool deleteFiles = false, bool addImportListExclusion = false)
         {
-            _authorService.DeleteSeries(id, deleteFiles, addImportListExclusion);
+            _seriesService.DeleteSeries(id, deleteFiles, addImportListExclusion);
         }
 
         private void MapCoversToLocal(params SeriesResource[] seriesList)

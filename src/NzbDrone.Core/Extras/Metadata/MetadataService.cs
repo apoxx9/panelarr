@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Extras.Metadata
         private readonly IHttpClient _httpClient;
         private readonly IMediaFileAttributeService _mediaFileAttributeService;
         private readonly IMetadataFileService _metadataFileService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly Logger _logger;
 
         public MetadataService(IConfigService configService,
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Extras.Metadata
                                IHttpClient httpClient,
                                IMediaFileAttributeService mediaFileAttributeService,
                                IMetadataFileService metadataFileService,
-                               IBookService bookService,
+                               IIssueService bookService,
                                Logger logger)
             : base(configService, diskProvider, diskTransferService, logger)
         {

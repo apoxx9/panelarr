@@ -18,14 +18,14 @@ namespace NzbDrone.Core.IndexerSearch
                                IExecute<CutoffUnmetBookSearchCommand>
     {
         private readonly ISearchForReleases _releaseSearchService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IBookCutoffService _bookCutoffService;
         private readonly IQueueService _queueService;
         private readonly IProcessDownloadDecisions _processDownloadDecisions;
         private readonly Logger _logger;
 
         public IssueSearchService(ISearchForReleases releaseSearchService,
-            IBookService bookService,
+            IIssueService bookService,
             IBookCutoffService bookCutoffService,
             IQueueService queueService,
             IProcessDownloadDecisions processDownloadDecisions,

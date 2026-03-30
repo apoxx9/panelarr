@@ -78,10 +78,10 @@ namespace NzbDrone.Core.Configuration
             return _repository.Get(key.ToLower()) != null;
         }
 
-        public bool AutoUnmonitorPreviouslyDownloadedBooks
+        public bool AutoUnmonitorPreviouslyDownloadedIssues
         {
-            get { return GetValueBoolean("AutoUnmonitorPreviouslyDownloadedBooks"); }
-            set { SetValue("AutoUnmonitorPreviouslyDownloadedBooks", value); }
+            get { return GetValueBoolean("AutoUnmonitorPreviouslyDownloadedIssues"); }
+            set { SetValue("AutoUnmonitorPreviouslyDownloadedIssues", value); }
         }
 
         public int Retention

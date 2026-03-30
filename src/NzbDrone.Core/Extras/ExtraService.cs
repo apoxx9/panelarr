@@ -26,14 +26,14 @@ namespace NzbDrone.Core.Extras
                                 IHandle<SeriesRenamedEvent>
     {
         private readonly IMediaFileService _mediaFileService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IDiskProvider _diskProvider;
         private readonly IConfigService _configService;
         private readonly List<IManageExtraFiles> _extraFileManagers;
         private readonly Logger _logger;
 
         public ExtraService(IMediaFileService mediaFileService,
-                            IBookService bookService,
+                            IIssueService bookService,
                             IDiskProvider diskProvider,
                             IConfigService configService,
                             IEnumerable<IManageExtraFiles> extraFileManagers,
@@ -142,7 +142,7 @@ namespace NzbDrone.Core.Extras
         public void Handle(TrackFolderCreatedEvent message)
         {
             var author = message.Series;
-            var issue = _bookService.GetBook(message.ComicFile.IssueId);
+            var issue = _bookService.GetIssue(message.ComicFile.IssueId);
 
             foreach (var extraFileManager in _extraFileManagers)
             {

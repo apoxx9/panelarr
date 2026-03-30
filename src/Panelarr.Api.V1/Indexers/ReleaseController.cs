@@ -29,7 +29,7 @@ namespace Panelarr.Api.V1.Indexers
         private readonly IPrioritizeDownloadDecision _prioritizeDownloadDecision;
         private readonly IDownloadService _downloadService;
         private readonly ISeriesService _authorService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IParsingService _parsingService;
         private readonly Logger _logger;
 
@@ -41,7 +41,7 @@ namespace Panelarr.Api.V1.Indexers
                              IPrioritizeDownloadDecision prioritizeDownloadDecision,
                              IDownloadService downloadService,
                              ISeriesService authorService,
-                             IBookService bookService,
+                             IIssueService bookService,
                              IParsingService parsingService,
                              ICacheManager cacheManager,
                              Logger logger)
@@ -82,7 +82,7 @@ namespace Panelarr.Api.V1.Indexers
                 {
                     if (release.IssueId.HasValue)
                     {
-                        var issue = _bookService.GetBook(release.IssueId.Value);
+                        var issue = _bookService.GetIssue(release.IssueId.Value);
 
                         remoteBook.Series = _authorService.GetSeries(issue.SeriesId);
                         remoteBook.Books = new List<Issue> { issue };
@@ -111,7 +111,7 @@ namespace Panelarr.Api.V1.Indexers
 
                     if (issues.Empty() && release.IssueId.HasValue)
                     {
-                        var issue = _bookService.GetBook(release.IssueId.Value);
+                        var issue = _bookService.GetIssue(release.IssueId.Value);
 
                         issues = new List<Issue> { issue };
                     }

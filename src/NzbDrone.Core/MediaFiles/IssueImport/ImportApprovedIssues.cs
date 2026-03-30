@@ -37,7 +37,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
         private readonly IMetadataTagService _metadataTagService;
         private readonly ISeriesService _authorService;
         private readonly IAddSeriesService _addSeriesService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IRootFolderService _rootFolderService;
         private readonly IRecycleBinProvider _recycleBinProvider;
         private readonly IExtraService _extraService;
@@ -52,7 +52,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                                    IMetadataTagService metadataTagService,
                                    ISeriesService authorService,
                                    IAddSeriesService addSeriesService,
-                                   IBookService bookService,
+                                   IIssueService bookService,
                                    IRootFolderService rootFolderService,
                                    IRecycleBinProvider recycleBinProvider,
                                    IExtraService extraService,

@@ -12,12 +12,12 @@ namespace Panelarr.Api.V1.Series
     public class LibraryStatsController : Controller
     {
         private readonly ISeriesService _seriesService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IMediaFileService _mediaFileService;
         private readonly ISeriesStatisticsService _seriesStatisticsService;
 
         public LibraryStatsController(ISeriesService seriesService,
-                                      IBookService bookService,
+                                      IIssueService bookService,
                                       IMediaFileService mediaFileService,
                                       ISeriesStatisticsService seriesStatisticsService)
         {

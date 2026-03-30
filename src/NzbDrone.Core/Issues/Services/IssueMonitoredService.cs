@@ -13,10 +13,10 @@ namespace NzbDrone.Core.Books
     public class IssueMonitoredService : IBookMonitoredService
     {
         private readonly ISeriesService _authorService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly Logger _logger;
 
-        public IssueMonitoredService(ISeriesService authorService, IBookService bookService, Logger logger)
+        public IssueMonitoredService(ISeriesService authorService, IIssueService bookService, Logger logger)
         {
             _authorService = authorService;
             _bookService = bookService;
@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Books
             {
                 _logger.Debug("[{0}] Setting issue monitored status.", author.Name);
 
-                var issues = _bookService.GetBooksBySeries(author.Id);
+                var issues = _bookService.GetIssuesBySeries(author.Id);
 
                 var booksWithFiles = _bookService.GetSeriesBooksWithFiles(author);
 
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Books
                 // Use individual update to ensure updates are sent to frontend
                 foreach (var issue in issues)
                 {
-                    _bookService.UpdateBook(issue);
+                    _bookService.UpdateIssue(issue);
                 }
             }
 

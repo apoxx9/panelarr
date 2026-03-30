@@ -30,7 +30,7 @@ namespace Panelarr.Api.V1.Config
         public static void AddToResource(this BasicNamingConfig basicNamingConfig, NamingConfigResource resource)
         {
             resource.IncludeSeriesName = basicNamingConfig.IncludeSeriesName;
-            resource.IncludeBookTitle = basicNamingConfig.IncludeBookTitle;
+            resource.IncludeIssueTitle = basicNamingConfig.IncludeIssueTitle;
             resource.IncludeQuality = basicNamingConfig.IncludeQuality;
             resource.ReplaceSpaces = basicNamingConfig.ReplaceSpaces;
             resource.Separator = basicNamingConfig.Separator;

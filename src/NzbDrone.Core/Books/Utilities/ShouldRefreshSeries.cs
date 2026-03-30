@@ -11,10 +11,10 @@ namespace NzbDrone.Core.Books
 
     public class ShouldRefreshSeries : ICheckIfSeriesShouldBeRefreshed
     {
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly Logger _logger;
 
-        public ShouldRefreshSeries(IBookService bookService, Logger logger)
+        public ShouldRefreshSeries(IIssueService bookService, Logger logger)
         {
             _bookService = bookService;
             _logger = logger;
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Books
                 return true;
             }
 
-            var lastBook = _bookService.GetBooksBySeries(author.Id).MaxBy(e => e.ReleaseDate);
+            var lastBook = _bookService.GetIssuesBySeries(author.Id).MaxBy(e => e.ReleaseDate);
 
             if (lastBook != null && lastBook.ReleaseDate > DateTime.UtcNow.AddDays(-30))
             {

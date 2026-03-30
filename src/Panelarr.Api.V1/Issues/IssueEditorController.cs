@@ -8,10 +8,10 @@ namespace Panelarr.Api.V1.Books
     [V1ApiController("issue/editor")]
     public class IssueEditorController : Controller
     {
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IManageCommandQueue _commandQueueManager;
 
-        public IssueEditorController(IBookService bookService, IManageCommandQueue commandQueueManager)
+        public IssueEditorController(IIssueService bookService, IManageCommandQueue commandQueueManager)
         {
             _bookService = bookService;
             _commandQueueManager = commandQueueManager;
@@ -20,7 +20,7 @@ namespace Panelarr.Api.V1.Books
         [HttpPut]
         public IActionResult SaveAll([FromBody] IssueEditorResource resource)
         {
-            var booksToUpdate = _bookService.GetBooks(resource.IssueIds);
+            var booksToUpdate = _bookService.GetIssues(resource.IssueIds);
 
             foreach (var issue in booksToUpdate)
             {
@@ -39,7 +39,7 @@ namespace Panelarr.Api.V1.Books
         {
             foreach (var bookId in resource.IssueIds)
             {
-                _bookService.DeleteBook(bookId, resource.DeleteFiles ?? false, resource.AddImportListExclusion ?? false);
+                _bookService.DeleteIssue(bookId, resource.DeleteFiles ?? false, resource.AddImportListExclusion ?? false);
             }
         }
     }

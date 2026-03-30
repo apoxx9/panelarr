@@ -17,7 +17,7 @@ namespace Panelarr.Api.V1.Wanted
         private readonly IBookCutoffService _bookCutoffService;
 
         public CutoffController(IBookCutoffService bookCutoffService,
-                            IBookService bookService,
+                            IIssueService bookService,
                             ISeriesBookLinkService seriesBookLinkService,
                             ISeriesStatisticsService authorStatisticsService,
                             IMapCoversToLocal coverMapper,

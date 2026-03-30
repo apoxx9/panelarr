@@ -9,10 +9,10 @@ namespace Panelarr.Api.V1.Books
     [V1ApiController("issue/{issueId:int}/override")]
     public class IssueOverrideController : Controller
     {
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IMetadataOverrideService _metadataOverrideService;
 
-        public IssueOverrideController(IBookService bookService,
+        public IssueOverrideController(IIssueService bookService,
                                        IMetadataOverrideService metadataOverrideService)
         {
             _bookService = bookService;

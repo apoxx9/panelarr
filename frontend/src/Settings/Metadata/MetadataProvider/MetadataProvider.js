@@ -12,33 +12,6 @@ import { inputTypes, kinds } from 'Helpers/Props';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import translate from 'Utilities/String/translate';
 
-const writeAudioTagOptions = [
-  {
-    key: 'no',
-    get value() {
-      return translate('WriteTagsNo');
-    }
-  },
-  {
-    key: 'sync',
-    get value() {
-      return translate('WriteTagsSync');
-    }
-  },
-  {
-    key: 'allFiles',
-    get value() {
-      return translate('WriteTagsAll');
-    }
-  },
-  {
-    key: 'newFiles',
-    get value() {
-      return translate('WriteTagsNew');
-    }
-  }
-];
-
 const writeIssueTagOptions = [
   {
     key: 'sync',
@@ -338,34 +311,6 @@ class MetadataProvider extends Component {
 
               </FieldSet>
 
-              <FieldSet legend={translate('AudioFileMetadata')}>
-                <FormGroup>
-                  <FormLabel>{translate('WriteAudioTags')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.SELECT}
-                    name="writeAudioTags"
-                    helpTextWarning={translate('WriteIssueTagsHelpTextWarning')}
-                    helpLink="https://wiki.servarr.com/panelarr/settings#write-metadata-to-audio-files"
-                    values={writeAudioTagOptions}
-                    onChange={onInputChange}
-                    {...settings.writeAudioTags}
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <FormLabel>{translate('WriteAudioTagsScrub')}</FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.CHECK}
-                    name="scrubAudioTags"
-                    helpTextWarning={translate('WriteAudioTagsScrubHelp')}
-                    onChange={onInputChange}
-                    {...settings.scrubAudioTags}
-                  />
-                </FormGroup>
-
-              </FieldSet>
             </Form>
         }
       </div>

@@ -14,13 +14,13 @@ namespace Panelarr.Api.V1.ManualImport
     public class ManualImportController : Controller
     {
         private readonly ISeriesService _authorService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IManualImportService _manualImportService;
         private readonly Logger _logger;
 
         public ManualImportController(IManualImportService manualImportService,
                                   ISeriesService authorService,
-                                  IBookService bookService,
+                                  IIssueService bookService,
                                   Logger logger)
         {
             _authorService = authorService;
@@ -73,7 +73,7 @@ namespace Panelarr.Api.V1.ManualImport
                     Path = resource.Path,
                     Name = resource.Name,
                     Series = resource.SeriesId.HasValue ? _authorService.GetSeries(resource.SeriesId.Value) : null,
-                    Issue = resource.IssueId.HasValue ? _bookService.GetBook(resource.IssueId.Value) : null,                    Quality = resource.Quality,
+                    Issue = resource.IssueId.HasValue ? _bookService.GetIssue(resource.IssueId.Value) : null,                    Quality = resource.Quality,
                     ReleaseGroup = resource.ReleaseGroup,
                     IndexerFlags = resource.IndexerFlags,
                     DownloadId = resource.DownloadId,

@@ -12,7 +12,6 @@ using NzbDrone.Core.IndexerSearch;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.MetadataSource;
-using NzbDrone.Core.MetadataSource.Goodreads;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.ImportLists
@@ -22,13 +21,13 @@ namespace NzbDrone.Core.ImportLists
         private readonly IImportListFactory _importListFactory;
         private readonly IImportListExclusionService _importListExclusionService;
         private readonly IFetchAndParseImportList _listFetcherAndParser;
-        private readonly IGoodreadsProxy _goodreadsProxy;
-        private readonly IGoodreadsSearchProxy _goodreadsSearchProxy;
         private readonly IProvideBookInfo _bookInfoProxy;
+        private readonly ISearchForNewBook _searchProxy;
+        private readonly ISearchForNewSeries _searchSeriesProxy;
         private readonly ISeriesService _authorService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IAddSeriesService _addSeriesService;
-        private readonly IAddBookService _addBookService;
+        private readonly IAddIssueService _addBookService;
         private readonly IEventAggregator _eventAggregator;
         private readonly IManageCommandQueue _commandQueueManager;
         private readonly Logger _logger;
@@ -36,13 +35,13 @@ namespace NzbDrone.Core.ImportLists
         public ImportListSyncService(IImportListFactory importListFactory,
                                      IImportListExclusionService importListExclusionService,
                                      IFetchAndParseImportList listFetcherAndParser,
-                                     IGoodreadsProxy goodreadsProxy,
-                                     IGoodreadsSearchProxy goodreadsSearchProxy,
                                      IProvideBookInfo bookInfoProxy,
+                                     ISearchForNewBook searchProxy,
+                                     ISearchForNewSeries searchSeriesProxy,
                                      ISeriesService authorService,
-                                     IBookService bookService,
+                                     IIssueService bookService,
                                      IAddSeriesService addSeriesService,
-                                     IAddBookService addBookService,
+                                     IAddIssueService addBookService,
                                      IEventAggregator eventAggregator,
                                      IManageCommandQueue commandQueueManager,
                                      Logger logger)
@@ -50,9 +49,9 @@ namespace NzbDrone.Core.ImportLists
             _importListFactory = importListFactory;
             _importListExclusionService = importListExclusionService;
             _listFetcherAndParser = listFetcherAndParser;
-            _goodreadsProxy = goodreadsProxy;
-            _goodreadsSearchProxy = goodreadsSearchProxy;
             _bookInfoProxy = bookInfoProxy;
+            _searchProxy = searchProxy;
+            _searchSeriesProxy = searchSeriesProxy;
             _authorService = authorService;
             _bookService = bookService;
             _addSeriesService = addSeriesService;
@@ -135,7 +134,7 @@ namespace NzbDrone.Core.ImportLists
             }
 
             var addedSeries = _addSeriesService.AddSeries(authorsToAdd, false);
-            var addedBooks = _addBookService.AddBooks(booksToAdd, false);
+            var addedBooks = _addBookService.AddIssues(booksToAdd, false);
 
             var message = string.Format($"Import List Sync Completed. Items found: {items.Count}, Series added: {authorsToAdd.Count}, Books added: {booksToAdd.Count}");
 
@@ -157,18 +156,34 @@ namespace NzbDrone.Core.ImportLists
                 return;
             }
 
-            if (report.EditionGoodreadsId.IsNotNullOrWhiteSpace() && int.TryParse(report.EditionGoodreadsId, out var goodreadsId))
+            if (report.IssueGoodreadsId.IsNotNullOrWhiteSpace())
             {
                 try
                 {
-                    var remoteBook = _goodreadsProxy.GetBookInfo(report.EditionGoodreadsId);
+                    var mappedBook = _bookInfoProxy.GetBookInfo(report.IssueGoodreadsId);
 
-                    _logger.Trace($"Mapped {report.EditionGoodreadsId} to [{remoteBook.ForeignIssueId}] {remoteBook.Title}");
+                    report.IssueGoodreadsId = mappedBook.Item2.ForeignIssueId;
+                    report.Issue = mappedBook.Item2.Title;
+                    report.SeriesGoodreadsId = mappedBook.Item3.First().ForeignSeriesId;
+                }
+                catch (IssueNotFoundException)
+                {
+                    _logger.Debug($"Nothing found for issue [{report.IssueGoodreadsId}]");
+                    report.IssueGoodreadsId = null;
+                }
+            }
+            else if (report.EditionGoodreadsId.IsNotNullOrWhiteSpace())
+            {
+                try
+                {
+                    var mappedBook = _bookInfoProxy.GetBookInfo(report.EditionGoodreadsId);
 
-                    report.IssueGoodreadsId = remoteBook.ForeignIssueId;
-                    report.Issue = remoteBook.Title;
-                    report.Series ??= remoteBook.SeriesMetadata.Value.Name;
-                    report.SeriesGoodreadsId ??= remoteBook.SeriesMetadata.Value.ForeignSeriesId;
+                    _logger.Trace($"Mapped {report.EditionGoodreadsId} to [{mappedBook.Item2.ForeignIssueId}] {mappedBook.Item2.Title}");
+
+                    report.IssueGoodreadsId = mappedBook.Item2.ForeignIssueId;
+                    report.Issue = mappedBook.Item2.Title;
+                    report.Series ??= mappedBook.Item3.First().Name;
+                    report.SeriesGoodreadsId ??= mappedBook.Item3.First().ForeignSeriesId;
                 }
                 catch (IssueNotFoundException)
                 {
@@ -176,17 +191,10 @@ namespace NzbDrone.Core.ImportLists
                     report.EditionGoodreadsId = null;
                 }
             }
-            else if (report.IssueGoodreadsId.IsNotNullOrWhiteSpace())
-            {
-                var mappedBook = _bookInfoProxy.GetBookInfo(report.IssueGoodreadsId);
-
-                report.IssueGoodreadsId = mappedBook.Item2.ForeignIssueId;
-                report.Issue = mappedBook.Item2.Title;
-                report.SeriesGoodreadsId = mappedBook.Item3.First().ForeignSeriesId;
-            }
             else
             {
-                var mappedBook = _goodreadsSearchProxy.Search($"{report.Issue} {report.Series}").FirstOrDefault();
+                var searchTerm = $"{report.Issue} {report.Series}";
+                var mappedBook = _searchProxy.SearchForNewBook(searchTerm, null, false).FirstOrDefault();
 
                 if (mappedBook == null)
                 {
@@ -194,13 +202,12 @@ namespace NzbDrone.Core.ImportLists
                     return;
                 }
 
-                _logger.Trace($"Mapped Issue {report.Issue} by Series {report.Series} to [{mappedBook.WorkId}] {mappedBook.IssueTitleBare}");
+                _logger.Trace($"Mapped Issue {report.Issue} by Series {report.Series} to [{mappedBook.ForeignIssueId}] {mappedBook.Title}");
 
-                report.IssueGoodreadsId = mappedBook.WorkId.ToString();
-                report.Issue = mappedBook.IssueTitleBare;
-                report.Series ??= mappedBook.Series.Name;
-                report.SeriesGoodreadsId ??= mappedBook.Series.Id.ToString();
-                report.EditionGoodreadsId = mappedBook.IssueId.ToString();
+                report.IssueGoodreadsId = mappedBook.ForeignIssueId;
+                report.Issue = mappedBook.Title;
+                report.Series ??= mappedBook.SeriesMetadata?.Value?.Name;
+                report.SeriesGoodreadsId ??= mappedBook.SeriesMetadata?.Value?.ForeignSeriesId;
             }
         }
 
@@ -235,7 +242,7 @@ namespace NzbDrone.Core.ImportLists
                 {
                     if (!existingBook.Monitored)
                     {
-                        _bookService.SetBookMonitored(existingBook.Id, true);
+                        _bookService.SetIssueMonitored(existingBook.Id, true);
 
                         if (importList.ShouldMonitor == ImportListMonitorType.SpecificBook)
                         {
@@ -321,18 +328,18 @@ namespace NzbDrone.Core.ImportLists
 
         private void MapSeriesReport(ImportListItemInfo report)
         {
-            var mappedBook = _goodreadsSearchProxy.Search(report.Series).FirstOrDefault();
+            var mappedSeries = _searchSeriesProxy.SearchForNewSeries(report.Series).FirstOrDefault();
 
-            if (mappedBook == null)
+            if (mappedSeries == null)
             {
                 _logger.Trace($"Nothing found for {report.Series}");
                 return;
             }
 
-            _logger.Trace($"Mapped {report.Series} to [{mappedBook.Series.Name}]");
+            _logger.Trace($"Mapped {report.Series} to [{mappedSeries.Name}]");
 
-            report.Series = mappedBook.Series.Name;
-            report.SeriesGoodreadsId = mappedBook.Series.Id.ToString();
+            report.Series = mappedSeries.Name;
+            report.SeriesGoodreadsId = mappedSeries.ForeignSeriesId;
         }
 
         private Series ProcessSeriesReport(ImportListDefinition importList, ImportListItemInfo report, List<ImportListExclusion> listExclusions, List<Series> authorsToAdd)

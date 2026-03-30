@@ -37,7 +37,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
         private readonly IDiskScanService _diskScanService;
         private readonly IMakeImportDecision _importDecisionMaker;
         private readonly ISeriesService _authorService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IMetadataTagService _metadataTagService;
         private readonly IImportApprovedBooks _importApprovedBooks;
         private readonly ICustomFormatCalculationService _formatCalculator;
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                                    IDiskScanService diskScanService,
                                    IMakeImportDecision importDecisionMaker,
                                    ISeriesService authorService,
-                                   IBookService bookService,
+                                   IIssueService bookService,
                                    IMetadataTagService metadataTagService,
                                    IImportApprovedBooks importApprovedBooks,
                                    ICustomFormatCalculationService formatCalculator,
@@ -305,7 +305,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                     _logger.ProgressTrace("Processing file {0} of {1}", fileCount + 1, message.Files.Count);
 
                     var author = _authorService.GetSeries(file.SeriesId);
-                    var issue = _bookService.GetBook(file.IssueId);
+                    var issue = _bookService.GetIssue(file.IssueId);
 
                     var fileRootFolder = _rootFolderService.GetBestRootFolder(file.Path);
                     var fileInfo = _diskProvider.GetFileInfo(file.Path);

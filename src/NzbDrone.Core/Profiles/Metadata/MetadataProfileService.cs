@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Profiles.Metadata
 
         private readonly IMetadataProfileRepository _profileRepository;
         private readonly ISeriesService _authorService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IMediaFileService _mediaFileService;
         private readonly IImportListFactory _importListFactory;
         private readonly IRootFolderService _rootFolderService;
@@ -44,7 +44,7 @@ namespace NzbDrone.Core.Profiles.Metadata
 
         public MetadataProfileService(IMetadataProfileRepository profileRepository,
                                       ISeriesService authorService,
-                                      IBookService bookService,
+                                      IIssueService bookService,
                                       IMediaFileService mediaFileService,
                                       IImportListFactory importListFactory,
                                       IRootFolderService rootFolderService,
@@ -117,7 +117,7 @@ namespace NzbDrone.Core.Profiles.Metadata
             var localBooks = new List<Issue>();
             if (dbSeries != null)
             {
-                localBooks = _bookService.GetBooksBySeriesMetadataId(dbSeries.SeriesMetadataId);
+                localBooks = _bookService.GetIssuesBySeriesMetadataId(dbSeries.SeriesMetadataId);
             }
 
             var localFiles = _mediaFileService.GetFilesBySeries(dbSeries?.Id ?? 0);

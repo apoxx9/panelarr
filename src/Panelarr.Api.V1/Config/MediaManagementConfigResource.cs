@@ -7,7 +7,7 @@ namespace Panelarr.Api.V1.Config
 {
     public class MediaManagementConfigResource : RestResource
     {
-        public bool AutoUnmonitorPreviouslyDownloadedBooks { get; set; }
+        public bool AutoUnmonitorPreviouslyDownloadedIssues { get; set; }
         public string RecycleBin { get; set; }
         public int RecycleBinCleanupDays { get; set; }
         public ProperDownloadTypes DownloadPropersAndRepacks { get; set; }
@@ -35,7 +35,7 @@ namespace Panelarr.Api.V1.Config
         {
             return new MediaManagementConfigResource
             {
-                AutoUnmonitorPreviouslyDownloadedBooks = model.AutoUnmonitorPreviouslyDownloadedBooks,
+                AutoUnmonitorPreviouslyDownloadedIssues = model.AutoUnmonitorPreviouslyDownloadedIssues,
                 RecycleBin = model.RecycleBin,
                 RecycleBinCleanupDays = model.RecycleBinCleanupDays,
                 DownloadPropersAndRepacks = model.DownloadPropersAndRepacks,

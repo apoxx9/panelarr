@@ -4,7 +4,6 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.MetadataSource;
-using NzbDrone.Core.MetadataSource.Goodreads;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
@@ -19,13 +18,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
     {
         private readonly ISearchForNewBook _bookSearchService;
         private readonly ISeriesService _authorService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IMediaFileService _mediaFileService;
         private readonly Logger _logger;
 
         public CandidateService(ISearchForNewBook bookSearchService,
                                 ISeriesService authorService,
-                                IBookService bookService,
+                                IIssueService bookService,
                                 IMediaFileService mediaFileService,
                                 Logger logger)
         {
@@ -48,18 +47,6 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             Issue tagMbidRelease = null;
             List<CandidateEdition> tagCandidate = null;
 
-            // TODO: select by ISBN?
-            // var releaseIds = localEdition.LocalTracks.Select(x => x.FileTrackInfo.ReleaseMBId).Distinct().ToList();
-            // if (releaseIds.Count == 1 && releaseIds[0].IsNotNullOrWhiteSpace())
-            // {
-            //     _logger.Debug("Selecting release from consensus ForeignReleaseId [{0}]", releaseIds[0]);
-            //     tagMbidRelease = _releaseService.GetReleaseByForeignReleaseId(releaseIds[0], true);
-
-            //     if (tagMbidRelease != null)
-            //     {
-            //         tagCandidate = GetDbCandidatesByRelease(new List<IssueRelease> { tagMbidRelease }, includeExisting);
-            //     }
-            // }
             if (idOverrides?.Issue != null)
             {
                 // use the release from file tags if it exists and agrees with the specified issue
@@ -183,87 +170,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
         public IEnumerable<CandidateEdition> GetRemoteCandidates(LocalEdition localEdition, IdentificationOverrides idOverrides)
         {
-            // TODO handle edition override
-
             // Gets candidate issue releases from the metadata server.
             // Will eventually need adding locally if we find a match
             List<Issue> remoteBooks;
             var seenCandidates = new HashSet<string>();
 
-            var isbns = localEdition.LocalBooks.Select(x => x.FileTrackInfo.Isbn).Distinct().ToList();
-            var asins = localEdition.LocalBooks.Select(x => x.FileTrackInfo.Asin).Distinct().ToList();
-            var goodreads = localEdition.LocalBooks.Select(x => x.FileTrackInfo.GoodreadsId).Distinct().ToList();
-
-            // grab possibilities for all the IDs present
-            if (isbns.Count == 1 && isbns[0].IsNotNullOrWhiteSpace())
-            {
-                _logger.Trace($"Searching by isbn {isbns[0]}");
-
-                try
-                {
-                    remoteBooks = _bookSearchService.SearchByIsbn(isbns[0]);
-                }
-                catch (GoodreadsException e)
-                {
-                    _logger.Info(e, "Skipping ISBN search due to Goodreads Error");
-                    remoteBooks = new List<Issue>();
-                }
-
-                foreach (var candidate in ToCandidates(remoteBooks, seenCandidates, idOverrides))
-                {
-                    yield return candidate;
-                }
-            }
-
-            if (asins.Count == 1 &&
-                asins[0].IsNotNullOrWhiteSpace() &&
-                asins[0].Length == 10)
-            {
-                _logger.Trace($"Searching by asin {asins[0]}");
-
-                try
-                {
-                    remoteBooks = _bookSearchService.SearchByAsin(asins[0]);
-                }
-                catch (GoodreadsException e)
-                {
-                    _logger.Info(e, "Skipping ASIN search due to Goodreads Error");
-                    remoteBooks = new List<Issue>();
-                }
-
-                foreach (var candidate in ToCandidates(remoteBooks, seenCandidates, idOverrides))
-                {
-                    yield return candidate;
-                }
-            }
-
-            if (goodreads.Count == 1 &&
-                goodreads[0].IsNotNullOrWhiteSpace())
-            {
-                if (int.TryParse(goodreads[0], out var id))
-                {
-                    _logger.Trace($"Searching by goodreads id {id}");
-
-                    try
-                    {
-                        remoteBooks = _bookSearchService.SearchByGoodreadsBookId(id, true);
-                    }
-                    catch (GoodreadsException e)
-                    {
-                        _logger.Info(e, "Skipping Goodreads ID search due to Goodreads Error");
-                        remoteBooks = new List<Issue>();
-                    }
-
-                    foreach (var candidate in ToCandidates(remoteBooks, seenCandidates, idOverrides))
-                    {
-                        yield return candidate;
-                    }
-                }
-            }
-
-            // If we got an id result, or any overrides are set, stop
-            if (seenCandidates.Any() ||
-                idOverrides?.Issue != null ||
+            // If any overrides are set, stop
+            if (idOverrides?.Issue != null ||
                 idOverrides?.Series != null)
             {
                 yield break;
@@ -302,9 +215,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 {
                     remoteBooks = _bookSearchService.SearchForNewBook(bookTag, authorTag);
                 }
-                catch (GoodreadsException e)
+                catch (System.Exception e)
                 {
-                    _logger.Info(e, "Skipping author/title search due to Goodreads Error");
+                    _logger.Info(e, "Skipping author/title search due to error");
                     remoteBooks = new List<Issue>();
                 }
 
@@ -325,9 +238,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             {
                 remoteBooks = _bookSearchService.SearchForNewBook(bookTag, null);
             }
-            catch (GoodreadsException e)
+            catch (System.Exception e)
             {
-                _logger.Info(e, "Skipping issue title search due to Goodreads Error");
+                _logger.Info(e, "Skipping issue title search due to error");
                 remoteBooks = new List<Issue>();
             }
 
@@ -343,9 +256,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 {
                     remoteBooks = _bookSearchService.SearchForNewBook(a, null);
                 }
-                catch (GoodreadsException e)
+                catch (System.Exception e)
                 {
-                    _logger.Info(e, "Skipping author search due to Goodreads Error");
+                    _logger.Info(e, "Skipping author search due to error");
                     remoteBooks = new List<Issue>();
                 }
 

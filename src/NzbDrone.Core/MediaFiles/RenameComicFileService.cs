@@ -25,7 +25,7 @@ namespace NzbDrone.Core.MediaFiles
     {
         private readonly ISeriesService _authorService;
         private readonly IMediaFileService _mediaFileService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IMoveBookFiles _bookFileMover;
         private readonly IEventAggregator _eventAggregator;
         private readonly IBuildFileNames _filenameBuilder;
@@ -34,7 +34,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public RenameComicFileService(ISeriesService authorService,
                                         IMediaFileService mediaFileService,
-                                        IBookService bookService,
+                                        IIssueService bookService,
                                         IMoveBookFiles bookFileMover,
                                         IEventAggregator eventAggregator,
                                         IBuildFileNames filenameBuilder,

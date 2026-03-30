@@ -7,7 +7,6 @@ using NzbDrone.Core.Books;
 using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.ImportLists.Exclusions;
 using NzbDrone.Core.MetadataSource;
-using NzbDrone.Core.MetadataSource.Goodreads;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
@@ -33,17 +32,13 @@ namespace NzbDrone.Core.Test.ImportListTests
                 .Setup(v => v.Fetch())
                 .Returns(_importListReports);
 
-            Mocker.GetMock<IGoodreadsSearchProxy>()
-                .Setup(v => v.Search(It.IsAny<string>()))
-                .Returns(new List<SearchJsonResource>());
+            Mocker.GetMock<ISearchForNewBook>()
+                .Setup(v => v.SearchForNewBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Returns(new List<Issue>());
 
-            Mocker.GetMock<IGoodreadsProxy>()
-                .Setup(v => v.GetBookInfo(It.IsAny<string>(), true))
-                .Returns<string, bool>((id, useCache) => Builder<Issue>
-                .CreateNew()
-                .With(b => b.SeriesMetadata = Builder<SeriesMetadata>.CreateNew().Build())
-                .With(b => b.ForeignIssueId = "4321")
-                .Build());
+            Mocker.GetMock<ISearchForNewSeries>()
+                .Setup(v => v.SearchForNewSeries(It.IsAny<string>()))
+                .Returns(new List<Series>());
 
             Mocker.GetMock<IImportListFactory>()
                 .Setup(v => v.Get(It.IsAny<int>()))
@@ -150,8 +145,8 @@ namespace NzbDrone.Core.Test.ImportListTests
         {
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<IGoodreadsSearchProxy>()
-                .Verify(v => v.Search(It.IsAny<string>()), Times.Once());
+            Mocker.GetMock<ISearchForNewSeries>()
+                .Verify(v => v.SearchForNewSeries(It.IsAny<string>()), Times.Once());
         }
 
         [Test]
@@ -170,8 +165,8 @@ namespace NzbDrone.Core.Test.ImportListTests
             WithBook();
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<IGoodreadsSearchProxy>()
-                .Verify(v => v.Search(It.IsAny<string>()), Times.Once());
+            Mocker.GetMock<ISearchForNewBook>()
+                .Verify(v => v.SearchForNewBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -181,8 +176,8 @@ namespace NzbDrone.Core.Test.ImportListTests
             WithBookId();
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<IGoodreadsSearchProxy>()
-                .Verify(v => v.Search(It.IsAny<string>()), Times.Never());
+            Mocker.GetMock<ISearchForNewBook>()
+                .Verify(v => v.SearchForNewBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test]
@@ -193,11 +188,11 @@ namespace NzbDrone.Core.Test.ImportListTests
             WithBookId();
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<IGoodreadsSearchProxy>()
-                .Verify(v => v.Search(It.IsAny<string>()), Times.Never());
+            Mocker.GetMock<ISearchForNewBook>()
+                .Verify(v => v.SearchForNewBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
 
-            Mocker.GetMock<IGoodreadsSearchProxy>()
-                .Verify(v => v.Search(It.IsAny<string>()), Times.Never());
+            Mocker.GetMock<ISearchForNewSeries>()
+                .Verify(v => v.SearchForNewSeries(It.IsAny<string>()), Times.Never());
         }
 
         [Test]

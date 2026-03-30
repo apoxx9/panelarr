@@ -1,4 +1,4 @@
-const panelarrYellow = '#f5c518';
+const panelarrPurple = '#7B4F9B';
 const darkGray = '#888';
 const gray = '#adadad';
 const black = '#000';
@@ -22,10 +22,10 @@ module.exports = {
   successColor: '#27c24c',
   dangerColor: '#f05050',
   warningColor: '#ffa500',
-  infoColor: panelarrYellow,
+  infoColor: panelarrPurple,
   purple,
   pink,
-  panelarrYellow,
+  panelarrPurple,
   helpTextColor: '#909293',
   darkGray,
   gray,
@@ -33,11 +33,11 @@ module.exports = {
 
   // Theme Colors
 
-  themeYellow: panelarrYellow,
-  themeAlternateYellow: '#d4a80f',
-  themeDarkYellow: '#a17e00',
+  themePurple: panelarrPurple,
+  themeAlternatePurple: '#6A3D89',
+  themeDarkPurple: '#5A2D79',
   themeDarkColor: '#353535',
-  themeLightColor: '#b8920e',
+  themeLightColor: '#9B6FBB',
   pageBackground: '#f5f7fa',
   pageFooterBackgroud: '#f1f1f1',
 
@@ -56,7 +56,7 @@ module.exports = {
   linkHoverColor: '#1b72e2',
 
   // Header
-  pageHeaderBackgroundColor: panelarrYellow,
+  pageHeaderBackgroundColor: panelarrPurple,
 
   // Sidebar
 
@@ -66,8 +66,8 @@ module.exports = {
 
   // Toolbar
   toolbarColor: '#e1e2e3',
-  toolbarBackgroundColor: '#d4a80f',
-  toolbarMenuItemBackgroundColor: '#a17e00',
+  toolbarBackgroundColor: '#6A3D89',
+  toolbarMenuItemBackgroundColor: '#5A2D79',
   toolbarMenuItemHoverBackgroundColor: '#353535',
   toolbarLabelColor: '#e1e2e3',
 
@@ -133,8 +133,8 @@ module.exports = {
   //
   // Toolbar
 
-  toobarButtonHoverColor: '#f5c518',
-  toobarButtonSelectedColor: '#f5c518',
+  toobarButtonHoverColor: '#fff',
+  toobarButtonSelectedColor: '#fff',
 
   //
   // Scroller

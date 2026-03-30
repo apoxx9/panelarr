@@ -6,10 +6,10 @@ namespace NzbDrone.Core.Books.Handlers
 {
     public class AutoUnmonitorAfterDownloadHandler : IHandle<IssueImportedEvent>
     {
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly Logger _logger;
 
-        public AutoUnmonitorAfterDownloadHandler(IBookService bookService, Logger logger)
+        public AutoUnmonitorAfterDownloadHandler(IIssueService bookService, Logger logger)
         {
             _bookService = bookService;
             _logger = logger;
@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Books.Handlers
             _logger.Debug("Auto-unmonitoring issue {0} after download (Series: {1})", issue.Title, series.Name);
 
             issue.Monitored = false;
-            _bookService.UpdateBook(issue);
+            _bookService.UpdateIssue(issue);
         }
     }
 }

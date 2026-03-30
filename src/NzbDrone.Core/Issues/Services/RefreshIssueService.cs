@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Books
         IExecute<RefreshBookCommand>,
         IExecute<BulkRefreshBookCommand>
     {
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly ISeriesService _authorService;
         private readonly IRootFolderService _rootFolderService;
         private readonly IAddSeriesService _addSeriesService;
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Books
         private readonly IMapCoversToLocal _mediaCoverService;
         private readonly Logger _logger;
 
-        public RefreshBookService(IBookService bookService,
+        public RefreshBookService(IIssueService bookService,
                                   ISeriesService authorService,
                                   IRootFolderService rootFolderService,
                                   IAddSeriesService addSeriesService,
@@ -225,7 +225,7 @@ namespace NzbDrone.Core.Books
 
         protected override void DeleteEntity(Issue local, bool deleteFiles)
         {
-            _bookService.DeleteBook(local.Id, deleteFiles);
+            _bookService.DeleteIssue(local.Id, deleteFiles);
         }
 
         protected override List<object> GetRemoteChildren(Issue local, Issue remote)
@@ -263,7 +263,7 @@ namespace NzbDrone.Core.Books
         protected override void PublishEntityUpdatedEvent(Issue entity)
         {
             // Fetch fresh from DB so all lazy loads are available
-            _eventAggregator.PublishEvent(new IssueUpdatedEvent(_bookService.GetBook(entity.Id)));
+            _eventAggregator.PublishEvent(new IssueUpdatedEvent(_bookService.GetIssue(entity.Id)));
         }
 
         public bool RefreshBookInfo(List<Issue> issues, List<Issue> remoteBooks, Series remoteData, bool forceBookRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
@@ -299,7 +299,7 @@ namespace NzbDrone.Core.Books
 
         public void Execute(BulkRefreshBookCommand message)
         {
-            var issues = _bookService.GetBooks(message.IssueIds);
+            var issues = _bookService.GetIssues(message.IssueIds);
 
             foreach (var issue in issues)
             {
@@ -311,7 +311,7 @@ namespace NzbDrone.Core.Books
         {
             if (message.IssueId.HasValue)
             {
-                var issue = _bookService.GetBook(message.IssueId.Value);
+                var issue = _bookService.GetIssue(message.IssueId.Value);
 
                 RefreshBookInfo(issue);
             }

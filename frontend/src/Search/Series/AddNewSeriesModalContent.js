@@ -9,6 +9,7 @@ import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import { kinds } from 'Helpers/Props';
+import stripHtml from 'Utilities/String/stripHtml';
 import translate from 'Utilities/String/translate';
 import AddSeriesOptionsForm from '../Common/AddSeriesOptionsForm.js';
 import styles from './AddNewSeriesModalContent.css';
@@ -88,7 +89,7 @@ class AddNewSeriesModalContent extends Component {
                     <TextTruncate
                       truncateText="…"
                       line={8}
-                      text={overview}
+                      text={stripHtml(overview)}
                     />
                   </div> :
                   null

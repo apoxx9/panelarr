@@ -22,8 +22,8 @@ namespace NzbDrone.Core.MediaFiles
 
     public class ComicFileMovingService : IMoveBookFiles
     {
-        private readonly IBookService _bookService;
-        private readonly IUpdateBookFileService _updateBookFileService;
+        private readonly IIssueService _bookService;
+        private readonly IUpdateComicFileService _updateBookFileService;
         private readonly IBuildFileNames _buildFileNames;
         private readonly IDiskTransferService _diskTransferService;
         private readonly IDiskProvider _diskProvider;
@@ -33,8 +33,8 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IConfigService _configService;
         private readonly Logger _logger;
 
-        public ComicFileMovingService(IBookService bookService,
-                                      IUpdateBookFileService updateBookFileService,
+        public ComicFileMovingService(IIssueService bookService,
+                                      IUpdateComicFileService updateBookFileService,
                                       IBuildFileNames buildFileNames,
                                       IDiskTransferService diskTransferService,
                                       IDiskProvider diskProvider,
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public ComicFile MoveBookFile(ComicFile comicFile, Series author)
         {
-            var issue = _bookService.GetBook(comicFile.IssueId);
+            var issue = _bookService.GetIssue(comicFile.IssueId);
             var newFileName = _buildFileNames.BuildBookFileName(author, issue, comicFile);
             var filePath = _buildFileNames.BuildBookFilePath(author, issue, newFileName, Path.GetExtension(comicFile.Path));
 

@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Configuration
         bool AutoRedownloadFailedFromInteractiveSearch { get; set; }
 
         //Media Management
-        bool AutoUnmonitorPreviouslyDownloadedBooks { get; set; }
+        bool AutoUnmonitorPreviouslyDownloadedIssues { get; set; }
         string RecycleBin { get; set; }
         int RecycleBinCleanupDays { get; set; }
         ProperDownloadTypes DownloadPropersAndRepacks { get; set; }

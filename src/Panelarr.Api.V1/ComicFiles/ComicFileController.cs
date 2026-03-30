@@ -28,7 +28,7 @@ namespace Panelarr.Api.V1.ComicFiles
         private readonly IDeleteMediaFiles _mediaFileDeletionService;
         private readonly IMetadataTagService _metadataTagService;
         private readonly ISeriesService _authorService;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IUpgradableSpecification _upgradableSpecification;
 
         public ComicFileController(IBroadcastSignalRMessage signalRBroadcaster,
@@ -36,7 +36,7 @@ namespace Panelarr.Api.V1.ComicFiles
                                IDeleteMediaFiles mediaFileDeletionService,
                                IMetadataTagService metadataTagService,
                                ISeriesService authorService,
-                               IBookService bookService,
+                               IIssueService bookService,
                                IUpgradableSpecification upgradableSpecification)
             : base(signalRBroadcaster)
         {
@@ -93,7 +93,7 @@ namespace Panelarr.Api.V1.ComicFiles
                 var result = new List<ComicFileResource>();
                 foreach (var issueId in issueIds)
                 {
-                    var issue = _bookService.GetBook(issueId);
+                    var issue = _bookService.GetIssue(issueId);
                     var bookSeries = _authorService.GetSeries(issue.SeriesId);
                     result.AddRange(_mediaFileService.GetFilesByBook(issue.Id).ConvertAll(f => f.ToResource(bookSeries, _upgradableSpecification)));
                 }

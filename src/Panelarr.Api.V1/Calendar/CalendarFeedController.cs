@@ -16,11 +16,11 @@ namespace Panelarr.Api.V1.Calendar
     [V1FeedController("calendar")]
     public class CalendarFeedController : Controller
     {
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly ISeriesService _authorService;
         private readonly ITagService _tagService;
 
-        public CalendarFeedController(IBookService bookService, ISeriesService authorService, ITagService tagService)
+        public CalendarFeedController(IIssueService bookService, ISeriesService authorService, ITagService tagService)
         {
             _bookService = bookService;
             _authorService = authorService;
@@ -40,6 +40,7 @@ namespace Panelarr.Api.V1.Calendar
             }
 
             var issues = _bookService.IssuesBetweenDates(start, end, unmonitored);
+            var allSeries = _authorService.GetAllSeries().ToDictionary(s => s.Id);
             var calendar = new Ical.Net.Calendar
             {
                 ProductId = "-//panelarr.com//Panelarr//EN"
@@ -51,7 +52,10 @@ namespace Panelarr.Api.V1.Calendar
 
             foreach (var issue in issues.OrderBy(v => v.ReleaseDate.Value))
             {
-                var author = _authorService.GetSeries(issue.SeriesId); // Temp fix TODO: Figure out why Issue.Series is not populated during IssuesBetweenDates Query
+                if (!allSeries.TryGetValue(issue.SeriesId, out var author))
+                {
+                    continue;
+                }
 
                 if (tags.Any() && tags.None(author.Tags.Contains))
                 {

@@ -57,7 +57,7 @@ class PageHeader extends Component {
           >
             <img
               className={styles.logo}
-              src={`${window.Panelarr.urlBase}/Content/Images/logo.svg`}
+              src={`${window.Panelarr.urlBase}/Content/Images/logo.png`}
               alt="Panelarr Logo"
             />
           </Link>

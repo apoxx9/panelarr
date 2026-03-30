@@ -250,7 +250,7 @@ function EditRootFolderModalContent(props) {
                     helpText={translate('IsCalibreLibraryHelpText')}
                     {...isCalibreLibrary}
                     onChange={onInputChange}
-                    helpLink={'https://manual.calibre-eissue.com/server.html'}
+                    helpLink={'https://manual.calibre-ebook.com/server.html'}
                   />
                 </FormGroup>
 
@@ -355,7 +355,7 @@ function EditRootFolderModalContent(props) {
                               />
                             }
                             title={translate('CalibreOutputFormat')}
-                            body={'Specify the output format.  Options are: MOBI, EPUB, AZW3, DOCX, FB2, HTMLZ, LIT, LRF, PDB, PDF, PMLZ, RB, RTF, SNB, TCR, TXT, TXTZ, ZIP'}
+                            body={'Specify the output format.  Options are: CBR, CBZ, CB7, PDF, EPUB'}
                             position={tooltipPositions.RIGHT}
                           />
                         </FormLabel>

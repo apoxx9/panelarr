@@ -16,7 +16,7 @@ namespace Panelarr.Api.V1.Calendar
     [V1ApiController]
     public class CalendarController : IssueControllerWithSignalR
     {
-        public CalendarController(IBookService bookService,
+        public CalendarController(IIssueService bookService,
                               ISeriesBookLinkService seriesBookLinkService,
                               ISeriesStatisticsService authorStatisticsService,
                               IMapCoversToLocal coverMapper,

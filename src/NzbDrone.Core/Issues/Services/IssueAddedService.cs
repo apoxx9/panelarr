@@ -19,13 +19,13 @@ namespace NzbDrone.Core.Books
     public class IssueAddedService : IHandle<BookInfoRefreshedEvent>, IBookAddedService
     {
         private readonly IManageCommandQueue _commandQueueManager;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly Logger _logger;
         private readonly ICached<List<int>> _addedBooksCache;
 
         public IssueAddedService(ICacheManager cacheManager,
                                    IManageCommandQueue commandQueueManager,
-                                   IBookService bookService,
+                                   IIssueService bookService,
                                    Logger logger)
         {
             _commandQueueManager = commandQueueManager;
@@ -36,7 +36,7 @@ namespace NzbDrone.Core.Books
 
         public void SearchForRecentlyAdded(int authorId)
         {
-            var allBooks = _bookService.GetBooksBySeries(authorId);
+            var allBooks = _bookService.GetIssuesBySeries(authorId);
             var toSearch = allBooks.Where(x => x.AddOptions.SearchForNewBook).ToList();
 
             if (toSearch.Any())

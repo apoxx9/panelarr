@@ -14,10 +14,10 @@ namespace Panelarr.Api.V1.Books
     [V1ApiController("issue")]
     public class IssueBulkController : Controller
     {
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly IManageCommandQueue _commandQueueManager;
 
-        public IssueBulkController(IBookService bookService, IManageCommandQueue commandQueueManager)
+        public IssueBulkController(IIssueService bookService, IManageCommandQueue commandQueueManager)
         {
             _bookService = bookService;
             _commandQueueManager = commandQueueManager;
@@ -37,7 +37,7 @@ namespace Panelarr.Api.V1.Books
         {
             foreach (var issueId in resource.IssueIds)
             {
-                _bookService.DeleteBook(issueId, resource.DeleteFiles);
+                _bookService.DeleteIssue(issueId, resource.DeleteFiles);
             }
 
             return Ok();

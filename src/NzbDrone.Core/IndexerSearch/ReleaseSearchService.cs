@@ -22,13 +22,13 @@ namespace NzbDrone.Core.IndexerSearch
     public class ReleaseSearchService : ISearchForReleases
     {
         private readonly IIndexerFactory _indexerFactory;
-        private readonly IBookService _bookService;
+        private readonly IIssueService _bookService;
         private readonly ISeriesService _authorService;
         private readonly IMakeDownloadDecision _makeDownloadDecision;
         private readonly Logger _logger;
 
         public ReleaseSearchService(IIndexerFactory indexerFactory,
-                                IBookService bookService,
+                                IIssueService bookService,
                                 ISeriesService authorService,
                                 IMakeDownloadDecision makeDownloadDecision,
                                 Logger logger)
@@ -44,7 +44,7 @@ namespace NzbDrone.Core.IndexerSearch
         {
             var downloadDecisions = new List<DownloadDecision>();
 
-            var issue = _bookService.GetBook(bookId);
+            var issue = _bookService.GetIssue(bookId);
 
             var decisions = await IssueSearch(issue, missingOnly, userInvokedSearch, interactiveSearch);
             downloadDecisions.AddRange(decisions);
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.IndexerSearch
         public async Task<List<DownloadDecision>> SeriesSearch(Series author, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
         {
             var searchSpec = Get<SeriesSearchCriteria>(author, userInvokedSearch, interactiveSearch);
-            var issues = _bookService.GetBooksBySeries(author.Id);
+            var issues = _bookService.GetIssuesBySeries(author.Id);
 
             issues = issues.Where(a => a.Monitored).ToList();
 

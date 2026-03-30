@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Books
         List<Issue> GetBooks(int authorId);
         List<Issue> GetLastBooks(IEnumerable<int> authorMetadataIds);
         List<Issue> GetNextBooks(IEnumerable<int> authorMetadataIds);
-        List<Issue> GetBooksBySeriesMetadataId(int authorMetadataId);
+        List<Issue> GetIssuesBySeriesMetadataId(int authorMetadataId);
         List<Issue> GetBooksForRefresh(int authorMetadataId, List<string> foreignIds);
         List<Issue> GetBooksByFileIds(IEnumerable<int> fileIds);
         Issue FindByTitle(int authorMetadataId, string title);
@@ -75,7 +75,7 @@ namespace NzbDrone.Core.Books
             return Query(outer);
         }
 
-        public List<Issue> GetBooksBySeriesMetadataId(int authorMetadataId)
+        public List<Issue> GetIssuesBySeriesMetadataId(int authorMetadataId)
         {
             return Query(s => s.SeriesMetadataId == authorMetadataId);
         }

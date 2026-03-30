@@ -5,8 +5,6 @@ import DescriptionList from 'Components/DescriptionList/DescriptionList';
 import DescriptionListItem from 'Components/DescriptionList/DescriptionListItem';
 import DescriptionListItemDescription from 'Components/DescriptionList/DescriptionListItemDescription';
 import DescriptionListItemTitle from 'Components/DescriptionList/DescriptionListItemTitle';
-import Link from 'Components/Link/Link';
-import stripHtml from 'Utilities/String/stripHtml';
 import translate from 'Utilities/String/translate';
 import styles from './FileDetails.css';
 
@@ -50,177 +48,25 @@ function FileDetails(props) {
               />
           }
           {
-            audioTags.title !== undefined &&
+            audioTags.quality !== undefined &&
               <DescriptionListItem
-                title={translate('TrackTitle')}
-                data={audioTags.title}
+                title={translate('Quality')}
+                data={audioTags.quality}
               />
           }
           {
-            audioTags.trackNumbers[0] > 0 &&
+            audioTags.size !== undefined &&
               <DescriptionListItem
-                title={translate('TrackNumber')}
-                data={audioTags.trackNumbers[0]}
+                title={translate('Size')}
+                data={audioTags.size}
               />
           }
           {
-            audioTags.discNumber > 0 &&
+            audioTags.dateAdded !== undefined &&
               <DescriptionListItem
-                title={translate('DiscNumber')}
-                data={audioTags.discNumber}
+                title={translate('DateAdded')}
+                data={audioTags.dateAdded}
               />
-          }
-          {
-            audioTags.discCount > 0 &&
-              <DescriptionListItem
-                title={translate('DiscCount')}
-                data={audioTags.discCount}
-              />
-          }
-          {
-            audioTags.issueTitle !== undefined &&
-              <DescriptionListItem
-                title={translate('Issue')}
-                data={audioTags.issueTitle}
-              />
-          }
-          {
-            audioTags.seriesTitle !== undefined &&
-              <DescriptionListItem
-                title={translate('Series')}
-                data={audioTags.seriesTitle}
-              />
-          }
-          {
-            audioTags.seriesTitle !== undefined &&
-              <DescriptionListItem
-                title={translate('Series')}
-                data={audioTags.seriesTitle}
-              />
-          }
-          {
-            audioTags.seriesIndex !== undefined &&
-              <DescriptionListItem
-                title={translate('SeriesNumber')}
-                data={audioTags.seriesIndex}
-              />
-          }
-          {
-            audioTags.country !== undefined &&
-              <DescriptionListItem
-                title={translate('Country')}
-                data={audioTags.country.name}
-              />
-          }
-          {
-            audioTags.language !== undefined && audioTags.language !== 'UND' &&
-              <DescriptionListItem
-                title={translate('Language')}
-                data={audioTags.language}
-              />
-          }
-          {
-            audioTags.year > 0 &&
-              <DescriptionListItem
-                title={translate('Year')}
-                data={audioTags.year}
-              />
-          }
-          {
-            audioTags.label !== undefined &&
-              <DescriptionListItem
-                title={translate('Label')}
-                data={audioTags.label}
-              />
-          }
-          {
-            audioTags.publisher !== undefined &&
-              <DescriptionListItem
-                title={translate('Publisher')}
-                data={audioTags.publisher}
-              />
-          }
-          {
-            audioTags.catalogNumber !== undefined &&
-              <DescriptionListItem
-                title={translate('CatalogNumber')}
-                data={audioTags.catalogNumber}
-              />
-          }
-          {
-            audioTags.disambiguation !== undefined &&
-              <DescriptionListItem
-                title={translate('Overview')}
-                data={stripHtml(audioTags.disambiguation)}
-              />
-          }
-          {
-            audioTags.isbn !== undefined &&
-              <DescriptionListItem
-                title={translate('ISBN')}
-                data={audioTags.isbn}
-              />
-          }
-          {
-            audioTags.asin !== undefined &&
-              <DescriptionListItem
-                title={translate('ASIN')}
-                data={audioTags.asin}
-              />
-          }       {
-            audioTags.seriesMBId !== undefined &&
-              <Link
-                to={`https://musicbrainz.org/series/${audioTags.seriesMBId}`}
-              >
-                <DescriptionListItem
-                  title={translate('MusicBrainzSeriesID')}
-                  data={audioTags.seriesMBId}
-                />
-              </Link>
-          }
-          {
-            audioTags.issueMBId !== undefined &&
-              <Link
-                to={`https://musicbrainz.org/release-group/${audioTags.issueMBId}`}
-              >
-                <DescriptionListItem
-                  title={translate('MusicBrainzIssueID')}
-                  data={audioTags.issueMBId}
-                />
-              </Link>
-          }
-          {
-            audioTags.releaseMBId !== undefined &&
-              <Link
-                to={`https://musicbrainz.org/release/${audioTags.releaseMBId}`}
-              >
-                <DescriptionListItem
-                  title={translate('MusicBrainzReleaseID')}
-                  data={audioTags.releaseMBId}
-                />
-              </Link>
-          }
-          {
-            audioTags.recordingMBId !== undefined &&
-              <Link
-                to={`https://musicbrainz.org/recording/${audioTags.recordingMBId}`}
-              >
-                <DescriptionListItem
-                  title={translate('MusicBrainzRecordingID')}
-                  data={audioTags.recordingMBId}
-                />
-              </Link>
-          }
-          {
-            audioTags.trackMBId !== undefined &&
-              <Link
-                to={`https://musicbrainz.org/track/${audioTags.trackMBId}`}
-              >
-                <DescriptionListItem
-                  title={translate('MusicBrainzTrackID')}
-                  data={audioTags.trackMBId}
-                />
-              </Link>
           }
           {
             !!rejections && rejections.length > 0 &&

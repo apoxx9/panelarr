@@ -1,10 +1,10 @@
+using System;
 using System.Collections.Generic;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.MediaFiles.IssueImport.Identification;
 using NzbDrone.Core.MetadataSource;
-using NzbDrone.Core.MetadataSource.Goodreads;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
@@ -14,11 +14,11 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
     public class CandidateServiceFixture : CoreTest<CandidateService>
     {
         [Test]
-        public void should_not_throw_on_goodreads_exception()
+        public void should_not_throw_on_search_exception()
         {
             Mocker.GetMock<ISearchForNewBook>()
                 .Setup(s => s.SearchForNewBook(It.IsAny<string>(), It.IsAny<string>(), true))
-                .Throws(new GoodreadsException("Bad search"));
+                .Throws(new Exception("Bad search"));
 
             var edition = new LocalEdition
             {

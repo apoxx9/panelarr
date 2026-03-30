@@ -12,13 +12,13 @@ namespace Panelarr.Api.V1.Books
 {
     public abstract class IssueControllerWithSignalR : RestControllerWithSignalR<IssueResource, Issue>
     {
-        protected readonly IBookService _bookService;
+        protected readonly IIssueService _bookService;
         protected readonly ISeriesBookLinkService _seriesBookLinkService;
         protected readonly ISeriesStatisticsService _authorStatisticsService;
         protected readonly IUpgradableSpecification _qualityUpgradableSpecification;
         protected readonly IMapCoversToLocal _coverMapper;
 
-        protected IssueControllerWithSignalR(IBookService bookService,
+        protected IssueControllerWithSignalR(IIssueService bookService,
                                         ISeriesBookLinkService seriesBookLinkService,
                                         ISeriesStatisticsService authorStatisticsService,
                                         IMapCoversToLocal coverMapper,
@@ -35,14 +35,14 @@ namespace Panelarr.Api.V1.Books
 
         protected override IssueResource GetResourceById(int id)
         {
-            var issue = _bookService.GetBook(id);
+            var issue = _bookService.GetIssue(id);
             var resource = MapToResource(issue, true);
             return resource;
         }
 
         protected override IssueResource GetResourceByIdForBroadcast(int id)
         {
-            var issue = _bookService.GetBook(id);
+            var issue = _bookService.GetIssue(id);
             var resource = MapToResource(issue, false);
             return resource;
         }

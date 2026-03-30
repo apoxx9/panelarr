@@ -1,4 +1,3 @@
-using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using Panelarr.Http.REST;
 
@@ -6,11 +5,6 @@ namespace Panelarr.Api.V1.ComicFiles
 {
     public class MediaInfoResource : RestResource
     {
-        public decimal AudioChannels { get; set; }
-        public string AudioBitRate { get; set; }
-        public string AudioCodec { get; set; }
-        public string AudioBits { get; set; }
-        public string AudioSampleRate { get; set; }
     }
 
     public static class MediaInfoResourceMapper
@@ -22,14 +16,7 @@ namespace Panelarr.Api.V1.ComicFiles
                 return null;
             }
 
-            return new MediaInfoResource
-            {
-                AudioChannels = MediaInfoFormatter.FormatAudioChannels(model),
-                AudioCodec = MediaInfoFormatter.FormatAudioCodec(model),
-                AudioBitRate = MediaInfoFormatter.FormatAudioBitrate(model),
-                AudioBits = MediaInfoFormatter.FormatAudioBitsPerSample(model),
-                AudioSampleRate = MediaInfoFormatter.FormatAudioSampleRate(model)
-            };
+            return new MediaInfoResource();
         }
     }
 }
