@@ -60,6 +60,12 @@ namespace Panelarr.Api.V1.Search
                         }
                     }
 
+                    // For search results not yet in DB, ensure statistics exists
+                    if (resource.Series.Statistics == null)
+                    {
+                        resource.Series.Statistics = new SeriesStatisticsResource();
+                    }
+
                     try
                     {
                         resource.Series.Folder = _fileNameBuilder.GetSeriesFolder(series);

@@ -109,8 +109,8 @@ export default {
         selectedSchema.onSeriesAdded = selectedSchema.supportsOnSeriesAdded;
         selectedSchema.onSeriesDelete = selectedSchema.supportsOnSeriesDelete;
         selectedSchema.onIssueDelete = selectedSchema.supportsOnIssueDelete;
-        selectedSchema.onIssueFileDelete = selectedSchema.supportsOnIssueFileDelete;
-        selectedSchema.onIssueFileDeleteForUpgrade = selectedSchema.supportsOnIssueFileDeleteForUpgrade;
+        selectedSchema.onComicFileDelete = selectedSchema.supportsOnComicFileDelete;
+        selectedSchema.onComicFileDeleteForUpgrade = selectedSchema.supportsOnComicFileDeleteForUpgrade;
         selectedSchema.onHealthIssue = selectedSchema.supportsOnHealthIssue;
         selectedSchema.onDownloadFailure = selectedSchema.supportsOnDownloadFailure;
         selectedSchema.onImportFailure = selectedSchema.supportsOnImportFailure;

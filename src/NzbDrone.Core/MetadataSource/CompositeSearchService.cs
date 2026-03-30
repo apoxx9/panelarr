@@ -35,9 +35,35 @@ namespace NzbDrone.Core.MetadataSource
 
         public List<Series> SearchForNewSeries(string title)
         {
+            // ComicVine first — richer search data (images, publisher, issue count)
+            var comicVineApiKey = _configService.ComicVineApiKey;
+
+            if (!string.IsNullOrWhiteSpace(comicVineApiKey))
+            {
+                try
+                {
+                    _logger.Info("Searching ComicVine for: {0}", title);
+                    var cvResults = _comicVineClient.SearchSeries(title);
+
+                    if (cvResults.Any())
+                    {
+                        _logger.Debug(
+                            "ComicVine returned {0} results for: {1}",
+                            cvResults.Count,
+                            title);
+                        return MapComicVineResults(cvResults);
+                    }
+
+                    _logger.Debug("No results from ComicVine for: {0}", title);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "ComicVine search failed for: {0}", title);
+                }
+            }
+
+            // Fall back to Metron
             var metronUsername = _configService.MetronUsername;
-            List<Series> metronResults = null;
-            var metronFailed = false;
 
             if (!string.IsNullOrWhiteSpace(metronUsername))
             {
@@ -48,59 +74,24 @@ namespace NzbDrone.Core.MetadataSource
 
                     if (results.Any())
                     {
-                        _logger.Debug("Metron returned {0} results for: {1}", results.Count, title);
-                        metronResults = MapMetronResults(results);
+                        _logger.Debug(
+                            "Metron returned {0} results for: {1}",
+                            results.Count,
+                            title);
+                        return MapMetronResults(results);
                     }
-                    else
-                    {
-                        _logger.Debug("No results from Metron for: {0}", title);
-                    }
+
+                    _logger.Debug("No results from Metron for: {0}", title);
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex, "Failed to search Metron for: {0}", title);
-                    metronFailed = true;
+                    _logger.Error(ex, "Metron search failed for: {0}", title);
                 }
             }
-            else
+
+            if (string.IsNullOrWhiteSpace(comicVineApiKey) && string.IsNullOrWhiteSpace(metronUsername))
             {
-                _logger.Warn("Metron credentials not configured. Go to Settings > Metadata to set your Metron username and password.");
-            }
-
-            if (metronResults != null && metronResults.Any())
-            {
-                return metronResults;
-            }
-
-            // Fall back to ComicVine if Metron failed or returned no results
-            var comicVineApiKey = _configService.ComicVineApiKey;
-
-            if (!string.IsNullOrWhiteSpace(comicVineApiKey))
-            {
-                try
-                {
-                    _logger.Info("Falling back to ComicVine for: {0} (Metron {1})",
-                        title,
-                        metronFailed ? "failed" : "returned no results");
-
-                    var cvResults = _comicVineClient.SearchSeries(title);
-
-                    if (cvResults.Any())
-                    {
-                        _logger.Debug("ComicVine returned {0} results for: {1}", cvResults.Count, title);
-                        return MapComicVineResults(cvResults);
-                    }
-
-                    _logger.Debug("No results from ComicVine for: {0}", title);
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Failed to search ComicVine for: {0}", title);
-                }
-            }
-            else
-            {
-                _logger.Debug("ComicVine API key not configured, skipping fallback");
+                _logger.Warn("No metadata providers configured.");
             }
 
             return new List<Series>();
@@ -122,11 +113,11 @@ namespace NzbDrone.Core.MetadataSource
                     ForeignSeriesId = r.Id.ToString(),
                     Name = r.Name,
                     Year = r.YearBegan,
-                    ForeignPublisherId = r.Publisher?.Id.ToString()
+                    ForeignPublisherId = r.Publisher?.Id.ToString(),
+                    PublisherName = r.Publisher?.Name
                 };
 
                 var (metadata, series) = _mapper.MapSeries(providerSeries);
-
                 _mapper.EnrichWithDbIds(series, metadata, existingSeries);
 
                 return series;
@@ -139,17 +130,22 @@ namespace NzbDrone.Core.MetadataSource
 
             return results.Select(r =>
             {
+                var pub = r.Publisher?.Name;
+                var count = r.CountOfIssues;
+
                 var providerSeries = new Provider.ProviderSeries
                 {
                     ForeignSeriesId = "cv:" + r.Id,
                     Name = r.Name,
                     Year = int.TryParse(r.StartYear, out var y) ? y : (int?)null,
                     ForeignPublisherId = r.Publisher != null ? "cv:" + r.Publisher.Id : null,
+                    PublisherName = count > 0 ? $"{pub}|{count}" : pub,
+                    IssueCount = count,
+                    Overview = r.Deck ?? r.Description,
                     ImageUrl = r.Image?.OriginalUrl ?? r.Image?.MediumUrl
                 };
 
                 var (metadata, series) = _mapper.MapSeries(providerSeries);
-
                 _mapper.EnrichWithDbIds(series, metadata, existingSeries);
 
                 return series;

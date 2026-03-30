@@ -48,12 +48,21 @@ namespace NzbDrone.Core.MetadataSource.ComicVine.Resources
 
         [JsonProperty("count_of_issues")]
         public int CountOfIssues { get; set; }
+
+        [JsonProperty("description")]
+        public string Description { get; set; }
+
+        [JsonProperty("deck")]
+        public string Deck { get; set; }
+
+        [JsonProperty("date_last_updated")]
+        public DateTime? DateLastUpdated { get; set; }
     }
 
     public class ComicVineVolumeDetail : ComicVineVolumeSummary
     {
         [JsonProperty("description")]
-        public string Description { get; set; }
+        public new string Description { get; set; }
 
         [JsonProperty("issues")]
         public List<ComicVineIssueSummary> Issues { get; set; }

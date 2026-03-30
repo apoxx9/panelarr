@@ -74,7 +74,7 @@ class Naming extends Component {
       namingModalOptions
     } = this.state;
 
-    const renameIssues = hasSettings && settings.renameIssues.value;
+    const renameComics = hasSettings && settings.renameComics.value;
     const replaceIllegalCharacters = hasSettings && settings.replaceIllegalCharacters.value;
 
     const colonReplacementOptions = [
@@ -134,10 +134,10 @@ class Naming extends Component {
 
                 <FormInputGroup
                   type={inputTypes.CHECK}
-                  name="renameIssues"
+                  name="renameComics"
                   helpText={translate('RenameIssuesHelpText')}
                   onChange={onInputChange}
-                  {...settings.renameIssues}
+                  {...settings.renameComics}
                 />
               </FormGroup>
 
@@ -174,7 +174,7 @@ class Naming extends Component {
               }
 
               {
-                renameIssues &&
+                renameComics &&
                   <div>
                     <FormGroup size={sizes.LARGE}>
                       <FormLabel>

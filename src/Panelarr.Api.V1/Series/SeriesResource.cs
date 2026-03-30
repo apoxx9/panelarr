@@ -28,8 +28,8 @@ namespace Panelarr.Api.V1.Series
         public string Disambiguation { get; set; }
         public List<Links> Links { get; set; }
 
-        public Issue NextBook { get; set; }
-        public Issue LastBook { get; set; }
+        public Issue NextIssue { get; set; }
+        public Issue LastIssue { get; set; }
 
         public List<MediaCover> Images { get; set; }
 
@@ -52,6 +52,9 @@ namespace Panelarr.Api.V1.Series
         public DateTime Added { get; set; }
         public AddSeriesOptions AddOptions { get; set; }
         public Ratings Ratings { get; set; }
+        public int? Year { get; set; }
+        public string SeriesType { get; set; }
+        public int? VolumeNumber { get; set; }
 
         public SeriesStatisticsResource Statistics { get; set; }
     }
@@ -100,6 +103,9 @@ namespace Panelarr.Api.V1.Series
                 Added = model.Added,
                 AddOptions = model.AddOptions,
                 Ratings = model.Metadata.Value.Ratings,
+                Year = model.Metadata.Value.Year,
+                SeriesType = model.Metadata.Value.SeriesType == NzbDrone.Core.Books.SeriesType.Single ? null : model.Metadata.Value.SeriesType.ToString(),
+                VolumeNumber = model.Metadata.Value.VolumeNumber,
 
                 Statistics = new SeriesStatisticsResource()
             };

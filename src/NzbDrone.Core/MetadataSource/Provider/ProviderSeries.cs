@@ -13,6 +13,8 @@ namespace NzbDrone.Core.MetadataSource.Provider
         public string SeriesType { get; set; }
         public int? Year { get; set; }
         public string ForeignPublisherId { get; set; }
+        public string PublisherName { get; set; }
+        public int? IssueCount { get; set; }
         public List<ProviderIssue> Issues { get; set; }
         public List<string> Genres { get; set; }
         public string ImageUrl { get; set; }

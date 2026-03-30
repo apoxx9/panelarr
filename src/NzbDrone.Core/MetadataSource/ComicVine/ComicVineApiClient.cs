@@ -56,7 +56,8 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
             var request = BuildRequest("search");
             request.Url = request.Url
                 .AddQueryParam("resources", "volume")
-                .AddQueryParam("query", query);
+                .AddQueryParam("query", query)
+                .AddQueryParam("limit", "50");
 
             var response = _cachedHttpClient.Get<ComicVineResponse<List<ComicVineVolumeSummary>>>(request, false, TimeSpan.FromHours(1));
 

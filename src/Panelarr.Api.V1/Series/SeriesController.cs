@@ -214,8 +214,8 @@ namespace Panelarr.Api.V1.Series
 
             foreach (var seriesResource in seriesList)
             {
-                seriesResource.NextBook = nextBooks.FirstOrDefault(x => x.SeriesMetadataId == seriesResource.SeriesMetadataId);
-                seriesResource.LastBook = lastBooks.FirstOrDefault(x => x.SeriesMetadataId == seriesResource.SeriesMetadataId);
+                seriesResource.NextIssue = nextBooks.FirstOrDefault(x => x.SeriesMetadataId == seriesResource.SeriesMetadataId);
+                seriesResource.LastIssue = lastBooks.FirstOrDefault(x => x.SeriesMetadataId == seriesResource.SeriesMetadataId);
             }
         }
 

@@ -157,7 +157,8 @@ class SeriesIndex extends Component {
     }
 
     const characters = _.reduce(items, (acc, item) => {
-      let char = item[sortKey].charAt(0);
+      const sortValue = item[sortKey] || '';
+      let char = sortValue.charAt(0);
 
       if (!isNaN(char)) {
         char = '#';

@@ -31,9 +31,11 @@ namespace NzbDrone.Core.MetadataSource.Metron
                 Name = providerSeries.Name,
                 SortName = providerSeries.SortName ?? providerSeries.Name,
                 Overview = providerSeries.Overview,
+                Disambiguation = providerSeries.PublisherName,
                 Status = MapSeriesStatus(providerSeries.Status),
                 SeriesType = MapSeriesType(providerSeries.SeriesType),
                 Year = providerSeries.Year,
+                VolumeNumber = providerSeries.IssueCount,
                 Genres = providerSeries.Genres ?? new List<string>()
             };
 

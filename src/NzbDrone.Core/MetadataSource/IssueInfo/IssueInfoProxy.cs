@@ -218,36 +218,6 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
             }
         }
 
-        public List<object> SearchForNewEntity(string title)
-        {
-            var issues = SearchForNewBook(title, null, false);
-
-            var result = new List<object>();
-            foreach (var issue in issues)
-            {
-                var author = issue.Series.Value;
-
-                if (!result.Contains(author))
-                {
-                    result.Add(author);
-                }
-
-                result.Add(issue);
-            }
-
-            return result;
-        }
-
-        public List<Series> SearchForNewSeries(string title)
-        {
-            var issues = SearchForNewBook(title, null);
-
-            return issues
-                .Select(x => x.Series.Value)
-                .DistinctBy(x => x.ForeignSeriesId)
-                .ToList();
-        }
-
         public List<Issue> SearchForNewBook(string title, string author, bool getAllEditions = true)
         {
             var q = title.ToLower().Trim();

@@ -8,6 +8,15 @@ import translate from 'Utilities/String/translate';
 import AddNewSeriesModal from './AddNewSeriesModal';
 import styles from './AddNewSeriesSearchResult.css';
 
+function getExternalLink(foreignSeriesId) {
+  if (foreignSeriesId && foreignSeriesId.startsWith('cv:')) {
+    const cvId = foreignSeriesId.replace('cv:', '');
+    return `https://comicvine.gamespot.com/volume/4050-${cvId}/`;
+  }
+
+  return `https://metron.cloud/series/${foreignSeriesId}/`;
+}
+
 class AddNewSeriesSearchResult extends Component {
 
   //
@@ -38,7 +47,7 @@ class AddNewSeriesSearchResult extends Component {
     this.setState({ isNewAddSeriesModalOpen: false });
   };
 
-  onMBLinkPress = (event) => {
+  onExternalLinkPress = (event) => {
     event.stopPropagation();
   };
 
@@ -53,14 +62,32 @@ class AddNewSeriesSearchResult extends Component {
       year,
       disambiguation,
       status,
+      seriesType,
+      volumeNumber,
       overview,
       ratings,
       folder,
       images,
       remotePoster,
+      statistics,
       isExistingSeries,
       isSmallScreen
     } = this.props;
+
+    // Parse disambiguation: "Publisher|IssueCount" or just "Publisher"
+    let publisherName = null;
+    let providerIssueCount = 0;
+
+    if (disambiguation) {
+      const parts = disambiguation.split('|');
+      publisherName = parts[0] || null;
+      if (parts[1]) {
+        providerIssueCount = parseInt(parts[1]) || 0;
+      }
+    }
+
+    // Issue count: prefer statistics (from DB), fall back to provider data
+    const issueCount = (statistics && statistics.issueCount > 0) ? statistics.issueCount : providerIssueCount;
 
     const {
       isNewAddSeriesModalOpen
@@ -68,11 +95,21 @@ class AddNewSeriesSearchResult extends Component {
 
     const linkProps = isExistingSeries ? { to: `/series/${titleSlug}` } : { onPress: this.onPress };
 
-    // Extract year from folder name if year prop is not available
-    // Folder format is typically "Series Name (YYYY)"
+    // Extract year from folder name or series name if year prop is not available
+    // Folder format: "Series Name (YYYY)" or series name includes "(YYYY)"
     let displayYear = year;
+
     if (!displayYear && folder) {
       const match = folder.match(/\((\d{4})\)/);
+
+      if (match) {
+        displayYear = parseInt(match[1]);
+      }
+    }
+
+    if (!displayYear && seriesName) {
+      const match = seriesName.match(/\((\d{4})\)/);
+
       if (match) {
         displayYear = parseInt(match[1]);
       }
@@ -83,14 +120,24 @@ class AddNewSeriesSearchResult extends Component {
 
     // Get poster URL - prefer remotePoster, fall back to image array
     let posterUrl = remotePoster;
+
     if (!posterUrl && images && images.length > 0) {
       const posterImage = images.find((img) => img.coverType === 'poster');
+
       if (posterImage) {
         posterUrl = posterImage.remoteUrl || posterImage.url;
       }
     }
 
     const overviewText = overview ? stripHtml(overview) : null;
+    const externalLink = getExternalLink(foreignSeriesId);
+
+    // Build a clean display name: strip year from name if already shown separately
+    let displayName = seriesName;
+
+    if (displayYear && seriesName.includes(`(${displayYear})`)) {
+      displayName = seriesName.replace(`(${displayYear})`, '').trim();
+    }
 
     return (
       <div className={styles.searchResult}>
@@ -100,6 +147,17 @@ class AddNewSeriesSearchResult extends Component {
         />
 
         <div className={styles.overlay}>
+          {
+            isExistingSeries ?
+              <div className={styles.existsBadge}>
+                <Icon
+                  name={icons.CHECK_CIRCLE}
+                  size={14}
+                />
+              </div> :
+              null
+          }
+
           <div className={styles.posterContainer}>
             {
               posterUrl ?
@@ -107,46 +165,55 @@ class AddNewSeriesSearchResult extends Component {
                   className={styles.poster}
                   src={posterUrl}
                   alt={seriesName}
+                  loading="lazy"
                 /> :
                 <div className={styles.posterPlaceholder}>
-                  <Icon
-                    name={icons.MISSING}
-                    size={24}
-                  />
+                  <span className={styles.placeholderLetter}>
+                    {seriesName ? seriesName.charAt(0).toUpperCase() : '?'}
+                  </span>
                 </div>
             }
           </div>
 
           <div className={styles.content}>
-            <div className={styles.name}>
-              {seriesName}
+            <div className={styles.titleRow}>
+              <div className={styles.name}>
+                {displayName}
 
-              {
-                displayYear && (!seriesName.includes || !seriesName.includes(String(displayYear))) ?
-                  <span className={styles.year}>
-                    ({displayYear})
-                  </span> :
-                  null
-              }
+                {
+                  displayYear ?
+                    <span className={styles.year}>
+                      ({displayYear})
+                    </span> :
+                    null
+                }
 
-              {
-                !!disambiguation &&
-                  <span className={styles.year}>({disambiguation})</span>
-              }
+                {
+                  !!volumeNumber &&
+                    <span className={styles.volumeBadge}>V{volumeNumber}</span>
+                }
+              </div>
             </div>
 
             <div className={styles.metaRow}>
-              <span className={statusClass}>
-                {statusLabel}
-              </span>
+              {
+                !!publisherName &&
+                  <span className={styles.publisherBadge}>
+                    {publisherName}
+                  </span>
+              }
 
               {
-                displayYear ?
-                  <>
-                    <span className={styles.metaSeparator} />
-                    <span>{displayYear}</span>
-                  </> :
+                issueCount > 0 ?
+                  <span>{issueCount} {issueCount === 1 ? 'issue' : 'issues'}</span> :
                   null
+              }
+
+              {
+                !!seriesType &&
+                  <span className={styles.typeBadge}>
+                    {seriesType}
+                  </span>
               }
             </div>
 
@@ -160,26 +227,15 @@ class AddNewSeriesSearchResult extends Component {
           </div>
 
           <div className={styles.icons}>
-            {
-              isExistingSeries ?
-                <Icon
-                  className={styles.alreadyExistsIcon}
-                  name={icons.CHECK_CIRCLE}
-                  size={22}
-                  title={translate('AlreadyInYourLibrary')}
-                /> :
-                null
-            }
-
             <Link
-              className={styles.mbLink}
-              to={`https://metron.cloud/series/${foreignSeriesId}/`}
-              onPress={this.onMBLinkPress}
+              className={styles.externalLink}
+              to={externalLink}
+              onPress={this.onExternalLinkPress}
             >
               <Icon
-                className={styles.mbLinkIcon}
+                className={styles.externalLinkIcon}
                 name={icons.EXTERNAL_LINK}
-                size={18}
+                size={16}
               />
             </Link>
           </div>
@@ -208,11 +264,14 @@ AddNewSeriesSearchResult.propTypes = {
   year: PropTypes.number,
   disambiguation: PropTypes.string,
   status: PropTypes.string.isRequired,
+  seriesType: PropTypes.string,
+  volumeNumber: PropTypes.number,
   overview: PropTypes.string,
   ratings: PropTypes.object.isRequired,
   folder: PropTypes.string.isRequired,
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
   remotePoster: PropTypes.string,
+  statistics: PropTypes.object,
   isExistingSeries: PropTypes.bool.isRequired,
   isSmallScreen: PropTypes.bool.isRequired
 };

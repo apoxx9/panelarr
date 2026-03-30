@@ -22,8 +22,8 @@ function NotificationEventItems(props) {
     onSeriesAdded,
     onSeriesDelete,
     onIssueDelete,
-    onIssueFileDelete,
-    onIssueFileDeleteForUpgrade,
+    onComicFileDelete,
+    onComicFileDeleteForUpgrade,
     onHealthIssue,
     onDownloadFailure,
     onImportFailure,
@@ -36,7 +36,7 @@ function NotificationEventItems(props) {
     supportsOnSeriesAdded,
     supportsOnSeriesDelete,
     supportsOnIssueDelete,
-    supportsOnIssueFileDelete,
+    supportsOnComicFileDelete,
     supportsOnHealthIssue,
     includeHealthWarnings,
     supportsOnDownloadFailure,
@@ -161,10 +161,10 @@ function NotificationEventItems(props) {
           <div>
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="onIssueFileDelete"
+              name="onComicFileDelete"
               helpText={translate('OnIssueFileDeleteHelpText')}
-              isDisabled={!supportsOnIssueFileDelete.value}
-              {...onIssueFileDelete}
+              isDisabled={!supportsOnComicFileDelete.value}
+              {...onComicFileDelete}
               onChange={onInputChange}
             />
           </div>
@@ -172,10 +172,10 @@ function NotificationEventItems(props) {
           <div>
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="onIssueFileDeleteForUpgrade"
+              name="onComicFileDeleteForUpgrade"
               helpText={translate('OnIssueFileDeleteForUpgradeHelpText')}
-              isDisabled={!supportsOnIssueFileDelete.value}
-              {...onIssueFileDeleteForUpgrade}
+              isDisabled={!supportsOnComicFileDelete.value}
+              {...onComicFileDeleteForUpgrade}
               onChange={onInputChange}
             />
           </div>

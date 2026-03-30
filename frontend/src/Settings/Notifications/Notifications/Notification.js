@@ -63,8 +63,8 @@ class Notification extends Component {
       onSeriesAdded,
       onSeriesDelete,
       onIssueDelete,
-      onIssueFileDelete,
-      onIssueFileDeleteForUpgrade,
+      onComicFileDelete,
+      onComicFileDeleteForUpgrade,
       onHealthIssue,
       onDownloadFailure,
       onImportFailure,
@@ -77,8 +77,8 @@ class Notification extends Component {
       supportsOnSeriesAdded,
       supportsOnSeriesDelete,
       supportsOnIssueDelete,
-      supportsOnIssueFileDelete,
-      supportsOnIssueFileDeleteForUpgrade,
+      supportsOnComicFileDelete,
+      supportsOnComicFileDeleteForUpgrade,
       supportsOnHealthIssue,
       supportsOnDownloadFailure,
       supportsOnImportFailure,
@@ -163,7 +163,7 @@ class Notification extends Component {
         }
 
         {
-          supportsOnIssueFileDelete && onIssueFileDelete ?
+          supportsOnComicFileDelete && onComicFileDelete ?
             <Label kind={kinds.SUCCESS}>
               {translate('OnIssueFileDelete')}
             </Label> :
@@ -171,7 +171,7 @@ class Notification extends Component {
         }
 
         {
-          supportsOnIssueFileDeleteForUpgrade && onIssueFileDelete && onIssueFileDeleteForUpgrade ?
+          supportsOnComicFileDeleteForUpgrade && onComicFileDelete && onComicFileDeleteForUpgrade ?
             <Label kind={kinds.SUCCESS}>
               {translate('OnIssueFileDeleteForUpgrade')}
             </Label> :
@@ -257,8 +257,8 @@ Notification.propTypes = {
   onSeriesAdded: PropTypes.bool.isRequired,
   onSeriesDelete: PropTypes.bool.isRequired,
   onIssueDelete: PropTypes.bool.isRequired,
-  onIssueFileDelete: PropTypes.bool.isRequired,
-  onIssueFileDeleteForUpgrade: PropTypes.bool.isRequired,
+  onComicFileDelete: PropTypes.bool.isRequired,
+  onComicFileDeleteForUpgrade: PropTypes.bool.isRequired,
   onHealthIssue: PropTypes.bool.isRequired,
   onDownloadFailure: PropTypes.bool.isRequired,
   onImportFailure: PropTypes.bool.isRequired,
@@ -271,8 +271,8 @@ Notification.propTypes = {
   supportsOnSeriesAdded: PropTypes.bool.isRequired,
   supportsOnSeriesDelete: PropTypes.bool.isRequired,
   supportsOnIssueDelete: PropTypes.bool.isRequired,
-  supportsOnIssueFileDelete: PropTypes.bool.isRequired,
-  supportsOnIssueFileDeleteForUpgrade: PropTypes.bool.isRequired,
+  supportsOnComicFileDelete: PropTypes.bool.isRequired,
+  supportsOnComicFileDeleteForUpgrade: PropTypes.bool.isRequired,
   supportsOnHealthIssue: PropTypes.bool.isRequired,
   supportsOnDownloadFailure: PropTypes.bool.isRequired,
   supportsOnImportFailure: PropTypes.bool.isRequired,
