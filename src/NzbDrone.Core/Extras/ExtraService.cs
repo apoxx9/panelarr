@@ -123,7 +123,7 @@ namespace NzbDrone.Core.Extras
         {
             foreach (var extraFileManager in _extraFileManagers)
             {
-                extraFileManager.CreateAfterBookImport(author, comicFile);
+                extraFileManager.CreateAfterComicImport(author, comicFile);
             }
         }
 
@@ -146,7 +146,7 @@ namespace NzbDrone.Core.Extras
 
             foreach (var extraFileManager in _extraFileManagers)
             {
-                extraFileManager.CreateAfterBookImport(author, issue, message.SeriesFolder, message.IssueFolder);
+                extraFileManager.CreateAfterComicImport(author, issue, message.SeriesFolder, message.IssueFolder);
             }
         }
 

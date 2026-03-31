@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using NzbDrone.Core.Books;
 
-namespace Panelarr.Api.V1.Bookshelf
+namespace Panelarr.Api.V1.IssueShelf
 {
     public class IssueshelfResource
     {

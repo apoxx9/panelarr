@@ -90,7 +90,7 @@ namespace NzbDrone.Core.Extras.Metadata
             return files;
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterBookImport(Series author, ComicFile comicFile)
+        public override IEnumerable<ExtraFile> CreateAfterComicImport(Series author, ComicFile comicFile)
         {
             var files = new List<MetadataFile>();
 
@@ -104,7 +104,7 @@ namespace NzbDrone.Core.Extras.Metadata
             return files;
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterBookImport(Series author, Issue issue, string authorFolder, string bookFolder)
+        public override IEnumerable<ExtraFile> CreateAfterComicImport(Series author, Issue issue, string authorFolder, string bookFolder)
         {
             var metadataFiles = _metadataFileService.GetFilesBySeries(author.Id);
 

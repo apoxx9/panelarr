@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Core.Books;
 using Panelarr.Http;
 
-namespace Panelarr.Api.V1.Bookshelf
+namespace Panelarr.Api.V1.IssueShelf
 {
     [V1ApiController]
     public class IssueshelfController : Controller
