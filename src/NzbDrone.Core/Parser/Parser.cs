@@ -349,11 +349,11 @@ namespace NzbDrone.Core.Parser
                 var comicMatch = SimpleComicTitleRegex.Match(title);
                 if (comicMatch.Success)
                 {
-                    var seriesName = comicMatch.Groups["series"].Value.Trim();
+                    var comicSeriesName = comicMatch.Groups["series"].Value.Trim();
                     var comicResult = new ParsedIssueInfo
                     {
-                        SeriesName = seriesName,
-                        SeriesTitleInfo = GetSeriesTitleInfo(seriesName),
+                        SeriesName = comicSeriesName,
+                        SeriesTitleInfo = GetSeriesTitleInfo(comicSeriesName),
                         IssueTitle = $"#{comicMatch.Groups["issue"].Value}"
                     };
 
@@ -364,7 +364,7 @@ namespace NzbDrone.Core.Parser
                         comicResult.Quality = new QualityModel(Qualities.Quality.CBZ);
                     }
 
-                    Logger.Debug("Parsed comic title: {0} - {1} quality: {2}", seriesName, comicResult.IssueTitle, comicResult.Quality);
+                    Logger.Debug("Parsed comic title: {0} - {1} quality: {2}", comicSeriesName, comicResult.IssueTitle, comicResult.Quality);
                     return comicResult;
                 }
 

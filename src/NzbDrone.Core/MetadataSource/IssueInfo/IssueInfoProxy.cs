@@ -201,13 +201,13 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
                 var issues = new List<Issue>();
                 foreach (var result in results)
                 {
-                    var (metadata, series) = _metronMapper.MapSeries(result);
-                    if (series?.Issues?.Value != null)
+                    var (metadata, mappedSeries) = _metronMapper.MapSeries(result);
+                    if (mappedSeries?.Issues?.Value != null)
                     {
-                        foreach (var issue in series.Issues.Value)
+                        foreach (var issue in mappedSeries.Issues.Value)
                         {
                             issue.SeriesMetadata = metadata;
-                            issue.Series = series;
+                            issue.Series = mappedSeries;
                             issues.Add(issue);
                         }
                     }

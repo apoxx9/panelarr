@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
         private class PlexUpdateQueue
         {
-            public Dictionary<int, Series> Pending { get; } = new();
+            public Dictionary<int, Series> Pending { get; } = new ();
             public bool Refreshing { get; set; }
         }
 
