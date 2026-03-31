@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                 .With(s => s.SeriesLinks = new List<SeriesGroupLink>())
                 .Build();
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameIssues = true;
+            _namingConfig.RenameComics = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);

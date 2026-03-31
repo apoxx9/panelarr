@@ -2,6 +2,7 @@ using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser;
+using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.ParserTests
@@ -12,7 +13,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Standard issues
         // -------------------------------------------------------------------
-
         [TestCase("Batman 2016 001 (2016) (Digital) (Zone-Empire).cbz", "Batman", 1f, 2016)]
         [TestCase("Amazing Spider-Man v5 015 (2022) (Digital) (Shan-Empire).cbr", "Amazing Spider-Man", 15f, 2022)]
         [TestCase("Saga 066 (2024) (digital) (Son of Ultron-Empire).cbz", "Saga", 66f, 2024)]
@@ -32,7 +32,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Issue type detection
         // -------------------------------------------------------------------
-
         [Test]
         public void should_detect_annual()
         {
@@ -69,7 +68,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Limited series
         // -------------------------------------------------------------------
-
         [Test]
         public void should_parse_limited_series()
         {
@@ -83,7 +81,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Format detection
         // -------------------------------------------------------------------
-
         [TestCase("Something.cbz", ComicFormat.CBZ)]
         [TestCase("Something.cbr", ComicFormat.CBR)]
         [TestCase("Something.cb7", ComicFormat.CB7)]
@@ -101,7 +98,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Volume number extraction
         // -------------------------------------------------------------------
-
         [TestCase("Amazing Spider-Man v5 015 (2022) (Digital) (Shan-Empire).cbr", 5)]
         [TestCase("Batman TPB Vol 03 - Death of the Family (2013).cbz", 3)]
         [TestCase("The Walking Dead Vol. 01 - Days Gone Bye (2004).cbz", 1)]
@@ -116,7 +112,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Source extraction
         // -------------------------------------------------------------------
-
         [TestCase("Batman 2016 001 (2016) (Digital) (Zone-Empire).cbz", "Digital")]
         [TestCase("Saga 066 (2024) (digital) (Son of Ultron-Empire).cbz", "digital")]
         public void should_extract_source(string releaseTitle, string expectedSource)
@@ -130,7 +125,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Release group extraction
         // -------------------------------------------------------------------
-
         [TestCase("Batman 2016 001 (2016) (Digital) (Zone-Empire).cbz", "Zone-Empire")]
         [TestCase("Amazing Spider-Man v5 015 (2022) (Digital) (Shan-Empire).cbr", "Shan-Empire")]
         [TestCase("Saga 066 (2024) (digital) (Son of Ultron-Empire).cbz", "Son of Ultron-Empire")]
@@ -145,7 +139,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Year extraction
         // -------------------------------------------------------------------
-
         [TestCase("Batman 2016 001 (2016) (Digital) (Zone-Empire).cbz", 2016)]
         [TestCase("Batman - The Dark Knight Returns 01 (of 04) (1986).cbz", 1986)]
         [TestCase("100 Bullets 050 (2004).cbz", 2004)]
@@ -160,7 +153,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Null/empty input
         // -------------------------------------------------------------------
-
         [TestCase(null)]
         [TestCase("")]
         [TestCase("   ")]
@@ -174,7 +166,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Series title extraction for annuals (should strip "Annual" from title)
         // -------------------------------------------------------------------
-
         [Test]
         public void should_strip_annual_from_series_title()
         {
@@ -187,7 +178,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Series title extraction for TPBs (should strip TPB/Vol markers)
         // -------------------------------------------------------------------
-
         [Test]
         public void should_extract_series_title_for_tpb()
         {
@@ -200,7 +190,6 @@ namespace NzbDrone.Core.Test.ParserTests
         // -------------------------------------------------------------------
         // Quality is set based on format
         // -------------------------------------------------------------------
-
         [Test]
         public void should_set_quality_from_format()
         {
@@ -208,13 +197,12 @@ namespace NzbDrone.Core.Test.ParserTests
 
             result.Should().NotBeNull();
             result.Quality.Should().NotBeNull();
-            result.Quality.Quality.Should().Be(Qualities.Quality.CBZ);
+            result.Quality.Quality.Should().Be(Quality.CBZ);
         }
 
         // -------------------------------------------------------------------
         // ReleaseTitle is preserved
         // -------------------------------------------------------------------
-
         [Test]
         public void should_preserve_original_release_title()
         {

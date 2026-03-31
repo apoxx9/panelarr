@@ -24,11 +24,11 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_be_able_to_update()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameIssues = false;
+            config.RenameComics = false;
             config.StandardIssueFormat = "{Series Name} - {Issue Title}{ (PartNumber)}";
 
             var result = NamingConfig.Put(config);
-            result.RenameIssues.Should().BeFalse();
+            result.RenameComics.Should().BeFalse();
             result.StandardIssueFormat.Should().Be(config.StandardIssueFormat);
         }
 
@@ -36,7 +36,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_get_bad_request_if_standard_format_is_empty()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameIssues = true;
+            config.RenameComics = true;
             config.StandardIssueFormat = "";
 
             var errors = NamingConfig.InvalidPut(config);
@@ -47,7 +47,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_get_bad_request_if_standard_format_doesnt_contain_track_number_and_title()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameIssues = true;
+            config.RenameComics = true;
             config.StandardIssueFormat = "{track:00}";
 
             var errors = NamingConfig.InvalidPut(config);
@@ -58,7 +58,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_not_require_format_when_rename_tracks_is_false()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameIssues = false;
+            config.RenameComics = false;
             config.StandardIssueFormat = "";
 
             var errors = NamingConfig.InvalidPut(config);
@@ -69,7 +69,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_require_format_when_rename_tracks_is_true()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameIssues = true;
+            config.RenameComics = true;
             config.StandardIssueFormat = "";
 
             var errors = NamingConfig.InvalidPut(config);
@@ -80,7 +80,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_get_bad_request_if_series_folder_format_does_not_contain_series_name()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameIssues = true;
+            config.RenameComics = true;
             config.SeriesFolderFormat = "This and That";
 
             var errors = NamingConfig.InvalidPut(config);

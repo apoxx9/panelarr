@@ -46,7 +46,6 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .Build();
 
             var rootFolder = Builder<RootFolder>.CreateNew()
-                .With(r => r.IsCalibreLibrary = false)
                 .Build();
 
             _rejectedDecisions.Add(new ImportDecision<LocalIssue>(new LocalIssue(), new Rejection("Rejected!")));

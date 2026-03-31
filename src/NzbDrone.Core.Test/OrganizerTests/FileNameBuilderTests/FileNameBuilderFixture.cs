@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                 .With(s => s.SeriesLinks = seriesLink)
                 .Build();
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameIssues = true;
+            _namingConfig.RenameComics = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
@@ -415,7 +415,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [Test]
         public void use_file_name_when_sceneName_is_null()
         {
-            _namingConfig.RenameIssues = false;
+            _namingConfig.RenameComics = false;
             _trackFile.Path = "Linkin Park - 06 - Test";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
@@ -425,7 +425,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [Test]
         public void use_file_name_when_sceneName_is_not_null()
         {
-            _namingConfig.RenameIssues = false;
+            _namingConfig.RenameComics = false;
             _trackFile.Path = "Linkin Park - 06 - Test";
             _trackFile.SceneName = "SceneName";
 
@@ -436,7 +436,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [Test]
         public void use_path_when_sceneName_and_relative_path_are_null()
         {
-            _namingConfig.RenameIssues = false;
+            _namingConfig.RenameComics = false;
             _trackFile.Path = @"C:\Test\Unsorted\Series - 01 - Test";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
@@ -514,7 +514,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [Test]
         public void should_use_existing_filename_when_scene_name_is_not_available()
         {
-            _namingConfig.RenameIssues = true;
+            _namingConfig.RenameComics = true;
             _namingConfig.StandardIssueFormat = "{Original Title}";
 
             _trackFile.SceneName = null;

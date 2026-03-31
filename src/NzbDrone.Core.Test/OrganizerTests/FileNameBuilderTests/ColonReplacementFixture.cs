@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _comicFile = new ComicFile { Quality = new QualityModel(Quality.EPUB), ReleaseGroup = "PanelarrTest" };
 
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameIssues = true;
+            _namingConfig.RenameComics = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
