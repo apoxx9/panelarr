@@ -30,11 +30,11 @@ const caseOptions = [
 const fileNameTokens = [
   {
     token: '{Series Name} - {Issue Title} - {Quality Full}',
-    example: 'Series Name - Issue Title - MP3 Proper'
+    example: 'Series Name - Issue Title - CBZ Proper'
   },
   {
     token: '{Series.Name}.{Issue.Title}.{Quality.Full}',
-    example: 'Series.Name.Issue.Title.MP3'
+    example: 'Series.Name.Issue.Title.CBZ'
   },
   {
     token: '{Series Name} - {Issue Title}{ (PartNumber)}',
@@ -95,21 +95,12 @@ const issueTokens = [
 
 const releaseDateTokens = [
   { token: '{Release Year}', example: '2016' },
-  { token: '{Release YearFirst}', example: '2015' },
-  { token: '{Edition Year}', example: '2016' }
+  { token: '{Release YearFirst}', example: '2015' }
 ];
 
 const qualityTokens = [
-  { token: '{Quality Full}', example: 'AZW3 Proper' },
-  { token: '{Quality Title}', example: 'AZW3' }
-];
-
-const mediaInfoTokens = [
-  { token: '{MediaInfo AudioCodec}', example: 'MP3' },
-  { token: '{MediaInfo AudioChannels}', example: '2.0' },
-  { token: '{MediaInfo AudioBitRate}', example: '320kbps' },
-  { token: '{MediaInfo AudioBitsPerSample}', example: '24bit' },
-  { token: '{MediaInfo AudioSampleRate}', example: '44.1kHz' }
+  { token: '{Quality Full}', example: 'CBZ Proper' },
+  { token: '{Quality Title}', example: 'CBZ' }
 ];
 
 const otherTokens = [
@@ -118,7 +109,7 @@ const otherTokens = [
 ];
 
 const originalTokens = [
-  { token: '{Original Title}', example: 'Series.Name.Issue.Name.2018.AZW3-EVOLVE' },
+  { token: '{Original Title}', example: 'Series.Name.Issue.Name.2018.CBZ-EVOLVE' },
   { token: '{Original Filename}', example: '01 - issue name' }
 ];
 
@@ -337,28 +328,6 @@ class NamingModal extends Component {
                     <div className={styles.groups}>
                       {
                         qualityTokens.map(({ token, example }) => {
-                          return (
-                            <NamingOption
-                              key={token}
-                              name={name}
-                              value={value}
-                              token={token}
-                              example={example}
-                              tokenSeparator={tokenSeparator}
-                              tokenCase={tokenCase}
-                              onPress={this.onOptionPress}
-                            />
-                          );
-                        }
-                        )
-                      }
-                    </div>
-                  </FieldSet>
-
-                  <FieldSet legend={translate('MediaInfo')}>
-                    <div className={styles.groups}>
-                      {
-                        mediaInfoTokens.map(({ token, example }) => {
                           return (
                             <NamingOption
                               key={token}

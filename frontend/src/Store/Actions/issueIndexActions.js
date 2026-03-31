@@ -205,12 +205,8 @@ export const defaultState = {
       type: filterBuilderTypes.EXACT,
       valueType: filterBuilderValueTypes.BOOL
     },
-    {
-      name: 'anyEditionOk',
-      label: 'Automatic Release Switching',
-      type: filterBuilderTypes.EXACT,
-      valueType: filterBuilderValueTypes.BOOL
-    },
+
+
     {
       name: 'qualityProfileId',
       label: 'Quality Profile',

@@ -12,27 +12,6 @@ import { inputTypes, kinds } from 'Helpers/Props';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import translate from 'Utilities/String/translate';
 
-const writeIssueTagOptions = [
-  {
-    key: 'sync',
-    get value() {
-      return translate('WriteTagsSync');
-    }
-  },
-  {
-    key: 'allFiles',
-    get value() {
-      return translate('WriteTagsAll');
-    }
-  },
-  {
-    key: 'newFiles',
-    get value() {
-      return translate('WriteTagsNew');
-    }
-  }
-];
-
 class MetadataProvider extends Component {
 
   //
@@ -262,53 +241,6 @@ class MetadataProvider extends Component {
                       </Alert>
                   }
                 </div>
-              </FieldSet>
-
-              <FieldSet legend={translate('CalibreMetadata')}>
-                <FormGroup>
-                  <FormLabel>
-                    {translate('SendMetadataToCalibre')}
-                  </FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.SELECT}
-                    name="writeIssueTags"
-                    helpTextWarning={translate('WriteIssueTagsHelpTextWarning')}
-                    helpLink="https://wiki.servarr.com/panelarr/settings#write-metadata-to-issue-files"
-                    values={writeIssueTagOptions}
-                    onChange={onInputChange}
-                    {...settings.writeIssueTags}
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <FormLabel>
-                    {translate('UpdateCovers')}
-                  </FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.CHECK}
-                    name="updateCovers"
-                    helpText={translate('UpdateCoversHelpText')}
-                    onChange={onInputChange}
-                    {...settings.updateCovers}
-                  />
-                </FormGroup>
-
-                <FormGroup>
-                  <FormLabel>
-                    {translate('EmbedMetadataInIssueFiles')}
-                  </FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.CHECK}
-                    name="embedMetadata"
-                    helpText={translate('EmbedMetadataHelpText')}
-                    onChange={onInputChange}
-                    {...settings.embedMetadata}
-                  />
-                </FormGroup>
-
               </FieldSet>
 
             </Form>

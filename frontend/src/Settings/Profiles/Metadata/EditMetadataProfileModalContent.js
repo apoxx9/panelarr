@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
 import FormGroup from 'Components/Form/FormGroup';
 import FormInputGroup from 'Components/Form/FormInputGroup';
@@ -35,7 +36,7 @@ function EditMetadataProfileModalContent(props) {
     name,
     minPopularity,
     skipMissingDate,
-    skipMissingIsbn,
+
     skipPartsAndSets,
     skipSeriesSecondary,
     allowedLanguages,
@@ -65,6 +66,10 @@ function EditMetadataProfileModalContent(props) {
         {
           !isFetching && !error &&
             <Form {...otherProps}>
+              <Alert kind={kinds.INFO}>
+                Controls which issues are automatically imported from the metadata provider when adding a series.
+              </Alert>
+
               <FormGroup>
                 <FormLabel>
                   {translate('Name')}
@@ -124,25 +129,13 @@ function EditMetadataProfileModalContent(props) {
 
               <FormGroup>
                 <FormLabel>
-                  {translate('SkipIssuesWithNoISBNOrASIN')}
-                </FormLabel>
-
-                <FormInputGroup
-                  type={inputTypes.CHECK}
-                  name="skipMissingIsbn"
-                  {...skipMissingIsbn}
-                  onChange={onInputChange}
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <FormLabel>
-                  {translate('SkipPartIssuesAndSets')}
+                  {translate('SkipCollectedEditions')}
                 </FormLabel>
 
                 <FormInputGroup
                   type={inputTypes.CHECK}
                   name="skipPartsAndSets"
+                  helpText="Skip trade paperbacks, omnibus editions, and collected volumes"
                   {...skipPartsAndSets}
                   onChange={onInputChange}
                 />

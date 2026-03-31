@@ -19,7 +19,7 @@ import { align, icons, kinds, scrollDirections } from 'Helpers/Props';
 import SelectSeriesModal from 'InteractiveImport/Series/SelectSeriesModal';
 import SelectIssueModal from 'InteractiveImport/Issue/SelectIssueModal';
 import ConfirmImportModal from 'InteractiveImport/Confirmation/ConfirmImportModal';
-import SelectEditionModal from 'InteractiveImport/Edition/SelectEditionModal';
+
 import SelectIndexerFlagsModal from 'InteractiveImport/IndexerFlags/SelectIndexerFlagsModal';
 import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
 import SelectReleaseGroupModal from 'InteractiveImport/ReleaseGroup/SelectReleaseGroupModal';
@@ -110,7 +110,7 @@ const importModeOptions = [
 const SELECT = 'select';
 const SERIES = 'series';
 const ISSUE = 'issue';
-const EDITION = 'edition';
+
 const RELEASE_GROUP = 'releaseGroup';
 const QUALITY = 'quality';
 const INDEXER_FLAGS = 'indexerFlags';
@@ -317,14 +317,13 @@ class InteractiveImportModalContent extends Component {
 
     const selectedIds = this.getSelectedIds();
     const selectedItem = selectedIds.length ? _.find(items, { id: selectedIds[0] }) : null;
-    const importIdsByIssue = _.chain(items).filter((x) => x.issue).groupBy((x) => x.issue.id).mapValues((x) => x.map((y) => y.id)).value();
-    const editions = _.chain(items).filter((x) => x.issue).keyBy((x) => x.issue.id).mapValues((x) => ({ matchedEditionId: x.foreignEditionId, issue: x.issue })).values().value();
+
     const errorMessage = getErrorMessage(error, 'Unable to load manual import items');
 
     const bulkSelectOptions = [
       { key: SELECT, value: translate('SelectDropdown'), disabled: true },
       { key: ISSUE, value: translate('SelectIssue') },
-      { key: EDITION, value: translate('SelectEdition') },
+
       { key: QUALITY, value: translate('SelectQuality') },
       { key: RELEASE_GROUP, value: translate('SelectReleaseGroup') },
       { key: INDEXER_FLAGS, value: translate('SelectIndexerFlags') }
@@ -524,12 +523,6 @@ class InteractiveImportModalContent extends Component {
           onModalClose={this.onSelectModalClose}
         />
 
-        <SelectEditionModal
-          isOpen={selectModalOpen === EDITION}
-          importIdsByIssue={importIdsByIssue}
-          issues={editions}
-          onModalClose={this.onSelectModalClose}
-        />
 
         <SelectReleaseGroupModal
           isOpen={selectModalOpen === RELEASE_GROUP}
