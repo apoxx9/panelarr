@@ -27,7 +27,15 @@ const defaultFontSize = parseInt(fonts.defaultFontSize);
 const lineHeight = parseFloat(fonts.lineHeight);
 
 function getFanartUrl(images) {
-  return images.find((x) => x.coverType === 'fanart')?.url;
+  // Comics don't have fanart — use poster as blurred backdrop
+  const fanart = images.find((x) => x.coverType === 'fanart');
+  if (fanart) {
+    return fanart.url;
+  }
+
+  // Fall back to poster image (with remoteUrl as backup)
+  const poster = images.find((x) => x.coverType === 'poster');
+  return poster?.remoteUrl || poster?.url;
 }
 
 class SeriesDetailsHeader extends Component {
@@ -327,20 +335,6 @@ class SeriesDetailsHeader extends Component {
 
               }
             </div>
-            {
-              totalIssueCount > 0 ?
-                <div className={styles.progressContainer}>
-                  <ProgressBar
-                    progress={totalIssueCount > 0 ? (availableIssueCount / totalIssueCount) * 100 : 0}
-                    kind={availableIssueCount >= totalIssueCount ? kinds.SUCCESS : kinds.PRIMARY}
-                    size={sizes.MEDIUM}
-                    showText={true}
-                    text={`${availableIssueCount} of ${totalIssueCount} issues`}
-                    title={`${availableIssueCount} of ${totalIssueCount} issues downloaded`}
-                  />
-                </div> :
-                null
-            }
 
             <Measure
               onMeasure={this.onOverviewMeasure}

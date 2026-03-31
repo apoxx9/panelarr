@@ -13,13 +13,16 @@ interface CssExports {
   'metadataProfileId': string;
   'nextIssue': string;
   'path': string;
+  'publisher': string;
   'qualityProfileId': string;
   'ratings': string;
+  'seriesStatus': string;
   'sizeOnDisk': string;
   'sortName': string;
   'status': string;
   'tags': string;
   'useSceneNumbering': string;
+  'year': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

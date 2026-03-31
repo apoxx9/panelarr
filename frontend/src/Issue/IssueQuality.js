@@ -87,9 +87,7 @@ function IssueQuality(props) {
         className={className}
         kind={kind}
         title={getTooltip(title, quality, size, isMonitored, isCutoffNotMet)}
-      >
-        {quality.quality.name}
-      </Label>{revisionLabel(className, quality, showRevision)}
+      >{quality.quality.name}</Label>{revisionLabel(className, quality, showRevision)}
     </span>
   );
 }

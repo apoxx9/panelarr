@@ -33,6 +33,12 @@ export const defaultState = {
       isModifiable: false
     },
     {
+      name: 'issueNumber',
+      label: '#',
+      isSortable: true,
+      isVisible: true
+    },
+    {
       name: 'title',
       label: 'Title',
       isSortable: true,

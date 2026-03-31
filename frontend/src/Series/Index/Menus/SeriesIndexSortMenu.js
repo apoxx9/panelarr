@@ -20,57 +20,30 @@ function SeriesIndexSortMenu(props) {
     >
       <MenuContent>
         <SortMenuItem
-          name="status"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          Monitored/Status
-        </SortMenuItem>
-
-        <SortMenuItem
           name="sortName"
           sortKey={sortKey}
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          First Name
+          Comic
         </SortMenuItem>
 
         <SortMenuItem
-          name="sortNameLastFirst"
+          name="publisher"
           sortKey={sortKey}
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          Last Name
+          Publisher
         </SortMenuItem>
 
         <SortMenuItem
-          name="qualityProfileId"
+          name="year"
           sortKey={sortKey}
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          Quality Profile
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="metadataProfileId"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          Metadata Profile
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="nextIssue"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          Next Issue
+          Year
         </SortMenuItem>
 
         <SortMenuItem
@@ -83,16 +56,7 @@ function SeriesIndexSortMenu(props) {
         </SortMenuItem>
 
         <SortMenuItem
-          name="added"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          Added
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="issueCount"
+          name="issueProgress"
           sortKey={sortKey}
           sortDirection={sortDirection}
           onPress={onSortSelect}
@@ -101,21 +65,12 @@ function SeriesIndexSortMenu(props) {
         </SortMenuItem>
 
         <SortMenuItem
-          name="issueProgress"
+          name="added"
           sortKey={sortKey}
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          Issues Progress
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="path"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          Path
+          Date Added
         </SortMenuItem>
 
         <SortMenuItem

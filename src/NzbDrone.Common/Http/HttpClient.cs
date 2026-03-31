@@ -59,7 +59,9 @@ namespace NzbDrone.Common.Http
             _httpDispatcher = httpDispatcher;
             _logger = logger;
 
+#pragma warning disable SYSLIB0014 // ServicePointManager is obsolete; this is a no-op on modern HttpClient
             ServicePointManager.DefaultConnectionLimit = 12;
+#pragma warning restore SYSLIB0014
             _cookieContainerCache = cacheManager.GetCache<CookieContainer>(typeof(HttpClient));
         }
 

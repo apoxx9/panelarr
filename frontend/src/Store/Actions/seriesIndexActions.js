@@ -76,17 +76,54 @@ export const defaultState = {
       isModifiable: false
     },
     {
+      name: 'publisher',
+      label: 'Publisher',
+      isSortable: true,
+      isVisible: true
+    },
+    {
       name: 'sortName',
-      label: 'Series Name',
+      label: 'Comic',
       isSortable: true,
       isVisible: true,
       isModifiable: false
     },
     {
+      name: 'year',
+      label: 'Year',
+      isSortable: true,
+      isVisible: true
+    },
+    {
+      name: 'lastIssue',
+      label: 'Last Issue',
+      isSortable: true,
+      isVisible: true
+    },
+    {
+      name: 'added',
+      label: 'Published',
+      isSortable: true,
+      isVisible: true
+    },
+    {
+      name: 'issueProgress',
+      label: 'Issues',
+      isSortable: true,
+      isVisible: true
+    },
+    {
+      name: 'seriesStatus',
+      label: 'Status',
+      isSortable: true,
+      isVisible: false
+    },
+    {
       name: 'qualityProfileId',
       label: 'Quality Profile',
       isSortable: true,
-      isVisible: true
+      isVisible: false,
+      isHidden: true
     },
     {
       name: 'metadataProfileId',
@@ -98,25 +135,7 @@ export const defaultState = {
       name: 'nextIssue',
       label: 'Next Issue',
       isSortable: true,
-      isVisible: true
-    },
-    {
-      name: 'lastIssue',
-      label: 'Last Issue',
-      isSortable: true,
       isVisible: false
-    },
-    {
-      name: 'added',
-      label: 'Added',
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'issueProgress',
-      label: 'Issues',
-      isSortable: true,
-      isVisible: true
     },
     {
       name: 'path',
@@ -159,6 +178,14 @@ export const defaultState = {
   sortPredicates: {
     ...sortPredicates,
 
+    publisher: function(item) {
+      return item.disambiguation || '';
+    },
+
+    year: function(item) {
+      return item.year || 0;
+    },
+
     issueProgress: function(item) {
       const { statistics = {} } = item;
 
@@ -196,6 +223,10 @@ export const defaultState = {
       const { ratings = {} } = item;
 
       return ratings.value;
+    },
+
+    seriesStatus: function(item) {
+      return item.status;
     }
   },
 

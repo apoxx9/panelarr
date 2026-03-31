@@ -4,10 +4,22 @@
   flex: 0 0 60px;
 }
 
+.publisher {
+  composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
+
+  flex: 1 0 100px;
+}
+
 .sortName {
   composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
 
-  flex: 4 0 110px;
+  flex: 3 0 110px;
+}
+
+.year {
+  composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
+
+  flex: 0 0 60px;
 }
 
 .banner {
@@ -25,8 +37,13 @@
   flex: 1 0 125px;
 }
 
+.lastIssue {
+  composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
+
+  flex: 0 0 90px;
+}
+
 .nextIssue,
-.lastIssue,
 .added,
 .genres {
   composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
@@ -69,6 +86,12 @@
   composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
 
   flex: 0 0 80px;
+}
+
+.seriesStatus {
+  composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
+
+  flex: 0 0 110px;
 }
 
 .tags {

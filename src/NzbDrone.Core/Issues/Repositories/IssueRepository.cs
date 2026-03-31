@@ -46,13 +46,13 @@ namespace NzbDrone.Core.Books
             var now = DateTime.UtcNow;
 
             var inner = Builder()
-                .Select("MIN(\"Issues\".\"Id\") as id, MAX(\"Issues\".\"ReleaseDate\") as date")
+                .Select("MAX(\"Issues\".\"Id\") as id")
                 .Where<Issue>(x => authorMetadataIds.Contains(x.SeriesMetadataId) && x.ReleaseDate < now)
                 .GroupBy<Issue>(x => x.SeriesMetadataId)
                 .AddSelectTemplate(typeof(Issue));
 
             var outer = Builder()
-                .Join($"({inner.RawSql}) ids on ids.id = \"Issues\".\"Id\" and ids.date = \"Issues\".\"ReleaseDate\"")
+                .Join($"({inner.RawSql}) ids on ids.id = \"Issues\".\"Id\"")
                 .AddParameters(inner.Parameters);
 
             return Query(outer);
@@ -63,13 +63,13 @@ namespace NzbDrone.Core.Books
             var now = DateTime.UtcNow;
 
             var inner = Builder()
-                .Select("MIN(\"Issues\".\"Id\") as id, MIN(\"Issues\".\"ReleaseDate\") as date")
+                .Select("MIN(\"Issues\".\"Id\") as id")
                 .Where<Issue>(x => authorMetadataIds.Contains(x.SeriesMetadataId) && x.ReleaseDate > now)
                 .GroupBy<Issue>(x => x.SeriesMetadataId)
                 .AddSelectTemplate(typeof(Issue));
 
             var outer = Builder()
-                .Join($"({inner.RawSql}) ids on ids.id = \"Issues\".\"Id\" and ids.date = \"Issues\".\"ReleaseDate\"")
+                .Join($"({inner.RawSql}) ids on ids.id = \"Issues\".\"Id\"")
                 .AddParameters(inner.Parameters);
 
             return Query(outer);

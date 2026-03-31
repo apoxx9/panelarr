@@ -59,7 +59,9 @@ namespace NzbDrone.Host
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+#pragma warning disable ASPDEPR005 // KnownNetworks is obsolete, use KnownIPNetworks
                 options.KnownNetworks.Clear();
+#pragma warning restore ASPDEPR005
                 options.KnownProxies.Clear();
             });
 

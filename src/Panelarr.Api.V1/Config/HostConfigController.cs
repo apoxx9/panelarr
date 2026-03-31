@@ -73,7 +73,9 @@ namespace Panelarr.Api.V1.Config
             X509Certificate2 cert;
             try
             {
+#pragma warning disable SYSLIB0057 // X509Certificate2 constructor is obsolete
                 cert = new X509Certificate2(resource.SslCertPath, resource.SslCertPassword, X509KeyStorageFlags.DefaultKeySet);
+#pragma warning restore SYSLIB0057
             }
             catch
             {

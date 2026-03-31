@@ -235,11 +235,6 @@ class SeriesIndexPoster extends Component {
               </div>
           }
 
-          {showQualityProfile && !!qualityProfile?.name ? (
-            <div className={styles.title} title={translate('QualityProfile')}>
-              {qualityProfile.name}
-            </div>
-          ) : null}
 
           {
             nextAiring &&

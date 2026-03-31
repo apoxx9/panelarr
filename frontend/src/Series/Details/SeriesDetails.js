@@ -8,6 +8,7 @@ import MonitoringOptionsModal from 'Series/MonitoringOptions/MonitoringOptionsMo
 import IssueEditorFooter from 'Issue/Editor/IssueEditorFooter';
 import IssueFileEditorTable from 'IssueFile/Editor/IssueFileEditorTable';
 import Alert from 'Components/Alert';
+import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -18,7 +19,7 @@ import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
 import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
 import SwipeHeaderConnector from 'Components/Swipe/SwipeHeaderConnector';
-import { align, icons, kinds } from 'Helpers/Props';
+import { align, icons, kinds, sizes } from 'Helpers/Props';
 import InteractiveSearchFilterMenuConnector from 'InteractiveSearch/InteractiveSearchFilterMenuConnector';
 import InteractiveSearchTable from 'InteractiveSearch/InteractiveSearchTable';
 import OrganizePreviewModalConnector from 'Organize/OrganizePreviewModalConnector';
@@ -236,6 +237,7 @@ class SeriesDetails extends Component {
 
     const {
       issueFileCount = 0,
+      availableIssueCount = 0,
       totalIssueCount = 0
     } = statistics;
 
@@ -427,7 +429,12 @@ class SeriesDetails extends Component {
                       className={styles.tab}
                       selectedClassName={styles.selectedTab}
                     >
-                      {translate('IssuesTotal', [totalIssueCount])}
+                      <Label
+                        kind={availableIssueCount >= totalIssueCount && totalIssueCount > 0 ? kinds.SUCCESS : kinds.DANGER}
+                        size={sizes.LARGE}
+                      >
+                        {availableIssueCount}/{totalIssueCount}
+                      </Label>
                     </Tab>
 
                     <Tab
@@ -495,13 +502,6 @@ class SeriesDetails extends Component {
             }
           </div>
 
-          <div className={styles.metadataMessage}>
-            {translate('TooManyIssues')}
-            <Link to='/settings/profiles'> {translate('MetadataProfile')} </Link>
-            or manually
-            <Link to={`/add/search?term=${encodeURIComponent(seriesName)}`}> {translate('Search')} </Link>
-            for new items!
-          </div>
 
           <OrganizePreviewModalConnector
             isOpen={isOrganizeModalOpen}

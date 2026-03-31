@@ -4,7 +4,7 @@ import Link from 'Components/Link/Link';
 
 function IssueTitleLink({ titleSlug, title, issueNumber, disambiguation }) {
   const link = `/issue/${titleSlug}`;
-  const displayTitle = title || '\u2014';
+  const displayTitle = title || '';
 
   return (
     <Link to={link}>

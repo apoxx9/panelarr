@@ -40,15 +40,17 @@ function createMapStateToProps() {
         sortDir = 'desc';
       }
 
+      const effectiveSortKey = seriesCollectionState.sortKey === 'issue' ? 'issueNumber' : seriesCollectionState.sortKey;
+
       let sortedIssues = [];
-      if (seriesCollectionState.sortKey === 'position') {
+      if (effectiveSortKey === 'position') {
         sortedIssues = issuesInSeries.sort((a, b) => {
           const apos = positionMap[a.id] || '';
           const bpos = positionMap[b.id] || '';
           return apos.localeCompare(bpos, undefined, { numeric: true, sensivity: 'base' });
         });
       } else {
-        sortedIssues = _.orderBy(issuesInSeries, seriesCollectionState.sortKey, sortDir);
+        sortedIssues = _.orderBy(issuesInSeries, effectiveSortKey, sortDir);
       }
 
       return {

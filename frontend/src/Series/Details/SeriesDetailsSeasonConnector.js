@@ -29,7 +29,8 @@ function createMapStateToProps() {
         sortDir = 'desc';
       }
 
-      const sortedIssues = _.orderBy(issuesInGroup, issues.sortKey, sortDir);
+      const effectiveSortKey = issues.sortKey === 'issue' ? 'issueNumber' : issues.sortKey;
+      const sortedIssues = _.orderBy(issuesInGroup, effectiveSortKey, sortDir);
 
       return {
         items: sortedIssues,

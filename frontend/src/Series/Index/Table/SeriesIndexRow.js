@@ -84,6 +84,8 @@ class SeriesIndexRow extends Component {
       status,
       seriesName,
       seriesNameLastFirst,
+      disambiguation,
+      year,
       titleSlug,
       qualityProfile,
       metadataProfile,
@@ -158,6 +160,28 @@ class SeriesIndexRow extends Component {
                   status={status}
                   component={VirtualTableRowCell}
                 />
+              );
+            }
+
+            if (name === 'publisher') {
+              return (
+                <VirtualTableRowCell
+                  key={name}
+                  className={styles[name]}
+                >
+                  {disambiguation || ''}
+                </VirtualTableRowCell>
+              );
+            }
+
+            if (name === 'year') {
+              return (
+                <VirtualTableRowCell
+                  key={name}
+                  className={styles[name]}
+                >
+                  {year || ''}
+                </VirtualTableRowCell>
               );
             }
 
@@ -251,26 +275,12 @@ class SeriesIndexRow extends Component {
             }
 
             if (name === 'lastIssue') {
-              if (lastIssue) {
-                return (
-                  <VirtualTableRowCell
-                    key={name}
-                    className={styles[name]}
-                  >
-                    <IssueTitleLink
-                      title={lastIssue.title}
-                      disambiguation={lastIssue.disambiguation}
-                      titleSlug={lastIssue.titleSlug}
-                    />
-                  </VirtualTableRowCell>
-                );
-              }
               return (
                 <VirtualTableRowCell
                   key={name}
                   className={styles[name]}
                 >
-                  None
+                  {lastIssue && lastIssue.issueNumber ? `#${lastIssue.issueNumber}` : ''}
                 </VirtualTableRowCell>
               );
             }
@@ -280,7 +290,7 @@ class SeriesIndexRow extends Component {
                 <RelativeDateCellConnector
                   key={name}
                   className={styles[name]}
-                  date={added}
+                  date={lastIssue ? lastIssue.releaseDate : null}
                   component={VirtualTableRowCell}
                 />
               );
@@ -302,6 +312,17 @@ class SeriesIndexRow extends Component {
                     title={translate('SeriesProgressBarText', { issueCount, availableIssueCount, issueFileCount, totalIssueCount })}
                     width={125}
                   />
+                </VirtualTableRowCell>
+              );
+            }
+
+            if (name === 'seriesStatus') {
+              return (
+                <VirtualTableRowCell
+                  key={name}
+                  className={styles[name]}
+                >
+                  {status === 'ended' ? 'Ended' : 'Continuing'}
                 </VirtualTableRowCell>
               );
             }

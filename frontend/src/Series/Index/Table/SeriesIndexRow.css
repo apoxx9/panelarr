@@ -11,10 +11,22 @@
   flex: 0 0 60px;
 }
 
+.publisher {
+  composes: cell;
+
+  flex: 1 0 100px;
+}
+
 .sortName {
   composes: cell;
 
-  flex: 4 0 110px;
+  flex: 3 0 110px;
+}
+
+.year {
+  composes: cell;
+
+  flex: 0 0 60px;
 }
 
 .banner {
@@ -61,8 +73,13 @@
   flex: 1 0 125px;
 }
 
+.lastIssue {
+  composes: cell;
+
+  flex: 0 0 90px;
+}
+
 .nextIssue,
-.lastIssue,
 .added,
 .genres {
   composes: cell;
@@ -95,6 +112,12 @@
   composes: cell from '~Components/Table/Cells/VirtualTableRowCell.css';
 
   flex: 0 0 80px;
+}
+
+.seriesStatus {
+  composes: cell;
+
+  flex: 0 0 110px;
 }
 
 .tags {

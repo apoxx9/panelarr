@@ -130,7 +130,7 @@ class IssueRow extends Component {
                   key={name}
                   className={styles.issueNumber}
                 >
-                  {issueNumber ? `#${issueNumber}` : '\u2014'}
+                  {issueNumber || '\u2014'}
                 </TableRowCell>
               );
             }
@@ -144,7 +144,6 @@ class IssueRow extends Component {
                   <IssueTitleLink
                     titleSlug={titleSlug}
                     title={title}
-                    issueNumber={issueNumber}
                   />
                 </TableRowCell>
               );
