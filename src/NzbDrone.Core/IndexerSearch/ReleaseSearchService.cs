@@ -83,8 +83,7 @@ namespace NzbDrone.Core.IndexerSearch
             var searchSpec = Get<IssueSearchCriteria>(author, new List<Issue> { issue }, userInvokedSearch, interactiveSearch);
 
             searchSpec.IssueTitle = issue.Title;
-
-            // searchSpec.IssueIsbn = issue.Isbn13;
+            searchSpec.IssueNumber = issue.IssueNumber;
             if (issue.ReleaseDate.HasValue)
             {
                 searchSpec.IssueYear = issue.ReleaseDate.Value.Year;
