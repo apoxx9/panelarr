@@ -6,11 +6,11 @@ namespace Panelarr.Api.V1.Series
     {
         public int ComicFileCount { get; set; }
         public int IssueCount { get; set; }
-        public int AvailableBookCount { get; set; }
-        public int TotalBookCount { get; set; }
+        public int AvailableIssueCount { get; set; }
+        public int TotalIssueCount { get; set; }
         public long SizeOnDisk { get; set; }
 
-        public decimal PercentOfBooks
+        public decimal PercentOfIssues
         {
             get
             {
@@ -19,7 +19,7 @@ namespace Panelarr.Api.V1.Series
                     return 0;
                 }
 
-                return AvailableBookCount / (decimal)IssueCount * 100;
+                return AvailableIssueCount / (decimal)IssueCount * 100;
             }
         }
     }
@@ -37,8 +37,8 @@ namespace Panelarr.Api.V1.Series
             {
                 ComicFileCount = model.ComicFileCount,
                 IssueCount = model.IssueCount,
-                AvailableBookCount = model.AvailableBookCount,
-                TotalBookCount = model.TotalBookCount,
+                AvailableIssueCount = model.AvailableBookCount,
+                TotalIssueCount = model.TotalBookCount,
                 SizeOnDisk = model.SizeOnDisk
             };
         }

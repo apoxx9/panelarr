@@ -8,25 +8,16 @@ import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import IssueDetailsHeader from './IssueDetailsHeader';
 
-const selectOverview = createSelector(
-  (state) => state.editions,
-  (editions) => {
-    const monitored = editions.items.find((e) => e.monitored === true);
-    return monitored?.overview;
-  }
-);
-
 function createMapStateToProps() {
   return createSelector(
     createIssueSelector(),
-    selectOverview,
     createUISettingsSelector(),
     createDimensionsSelector(),
-    (issue, overview, uiSettings, dimensions) => {
+    (issue, uiSettings, dimensions) => {
 
       return {
         ...issue,
-        overview,
+        overview: issue?.overview || '',
         shortDateFormat: uiSettings.shortDateFormat,
         isSmallScreen: dimensions.isSmallScreen
       };

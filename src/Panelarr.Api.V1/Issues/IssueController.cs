@@ -126,7 +126,7 @@ namespace Panelarr.Api.V1.Books
         }
 
         [RestPostById]
-        public ActionResult<IssueResource> AddBook(IssueResource bookResource)
+        public ActionResult<IssueResource> AddBook([FromBody] IssueResource bookResource)
         {
             var issue = _addBookService.AddIssue(bookResource.ToModel());
 
@@ -134,7 +134,7 @@ namespace Panelarr.Api.V1.Books
         }
 
         [RestPutById]
-        public ActionResult<IssueResource> UpdateBook(IssueResource bookResource)
+        public ActionResult<IssueResource> UpdateBook([FromBody] IssueResource bookResource)
         {
             var issue = _bookService.GetIssue(bookResource.Id);
 

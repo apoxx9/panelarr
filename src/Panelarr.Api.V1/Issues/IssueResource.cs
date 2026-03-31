@@ -16,6 +16,9 @@ namespace Panelarr.Api.V1.Books
         public string Title { get; set; }
         public string SeriesTitle { get; set; }
         public string Disambiguation { get; set; }
+        public float? IssueNumber { get; set; }
+        public string IssueType { get; set; }
+        public string CoverArtUrl { get; set; }
         public int SeriesId { get; set; }
         public string ForeignIssueId { get; set; }
         public string TitleSlug { get; set; }
@@ -57,9 +60,12 @@ namespace Panelarr.Api.V1.Books
                 SeriesId = model.SeriesId,
                 ForeignIssueId = model.ForeignIssueId,
                 TitleSlug = model.TitleSlug,
+                IssueNumber = model.IssueNumber > 0 ? model.IssueNumber : (float?)null,
+                IssueType = model.IssueType != NzbDrone.Core.Books.IssueType.Standard ? model.IssueType.ToString() : null,
+                CoverArtUrl = model.CoverArtUrl,
                 Monitored = model.Monitored,
                 ReleaseDate = model.ReleaseDate,
-                PageCount = 0,
+                PageCount = model.PageCount,
                 Genres = model.Genres,
                 Title = model.Title,
                 SeriesTitle = seriesTitle,

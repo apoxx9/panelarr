@@ -57,7 +57,7 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
             request.Url = request.Url
                 .AddQueryParam("resources", "volume")
                 .AddQueryParam("query", query)
-                .AddQueryParam("limit", "50");
+                .AddQueryParam("limit", "25");
 
             var response = _cachedHttpClient.Get<ComicVineResponse<List<ComicVineVolumeSummary>>>(request, false, TimeSpan.FromHours(1));
 
@@ -84,7 +84,7 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
 
             var request = BuildRequest($"volume/4050-{id}");
             request.Url = request.Url
-                .AddQueryParam("field_list", "id,name,start_year,publisher,image,description,issues");
+                .AddQueryParam("field_list", "id,name,start_year,publisher,image,description,issues,count_of_issues");
 
             var response = _cachedHttpClient.Get<ComicVineResponse<ComicVineVolumeDetail>>(request, true, TimeSpan.FromHours(24));
 

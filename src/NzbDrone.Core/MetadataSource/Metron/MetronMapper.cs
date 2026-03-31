@@ -27,7 +27,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
             var metadata = new SeriesMetadata
             {
                 ForeignSeriesId = providerSeries.ForeignSeriesId,
-                TitleSlug = providerSeries.ForeignSeriesId,
+                TitleSlug = providerSeries.ForeignSeriesId?.Replace(":", "-"),
                 Name = providerSeries.Name,
                 SortName = providerSeries.SortName ?? providerSeries.Name,
                 Overview = providerSeries.Overview,
@@ -72,7 +72,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
             return new Issue
             {
                 ForeignIssueId = providerIssue.ForeignIssueId,
-                TitleSlug = providerIssue.ForeignIssueId,
+                TitleSlug = providerIssue.ForeignIssueId?.Replace(":", "-"),
                 Title = providerIssue.Title ?? string.Empty,
                 ReleaseDate = providerIssue.ReleaseDate,
                 SeriesMetadataId = seriesMetadataId,

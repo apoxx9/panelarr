@@ -57,15 +57,14 @@ const selectIssues = createSelector(
 );
 
 const selectSeries = createSelector(
-  createSortedSectionSelector('series', (a, b) => a.title.localeCompare(b.title)),
-  (state) => state.series,
-  (series) => {
+  (state) => state.seriess,
+  (seriess) => {
     const {
       items,
       isFetching,
       isPopulated,
       error
-    } = series;
+    } = seriess;
 
     const hasSeries = !!items.length;
 
@@ -74,7 +73,7 @@ const selectSeries = createSelector(
       isSeriesPopulated: isPopulated,
       seriesError: error,
       hasSeries,
-      series: series.items
+      series: items
     };
   }
 );

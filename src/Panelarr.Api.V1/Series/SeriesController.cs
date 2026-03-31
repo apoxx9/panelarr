@@ -158,7 +158,7 @@ namespace Panelarr.Api.V1.Series
         }
 
         [RestPostById]
-        public ActionResult<SeriesResource> AddSeries(SeriesResource seriesResource)
+        public ActionResult<SeriesResource> AddSeries([FromBody] SeriesResource seriesResource)
         {
             var series = _addSeriesService.AddSeries(seriesResource.ToModel());
 
@@ -166,7 +166,7 @@ namespace Panelarr.Api.V1.Series
         }
 
         [RestPutById]
-        public ActionResult<SeriesResource> UpdateSeries(SeriesResource seriesResource, bool moveFiles = false)
+        public ActionResult<SeriesResource> UpdateSeries([FromBody] SeriesResource seriesResource, bool moveFiles = false)
         {
             var series = _seriesService.GetSeries(seriesResource.Id);
 

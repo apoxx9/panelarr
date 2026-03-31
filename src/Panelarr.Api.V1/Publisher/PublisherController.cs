@@ -29,14 +29,14 @@ namespace Panelarr.Api.V1.Publisher
         }
 
         [RestPostById]
-        public ActionResult<PublisherResource> CreatePublisher(PublisherResource publisherResource)
+        public ActionResult<PublisherResource> CreatePublisher([FromBody] PublisherResource publisherResource)
         {
             var publisher = _publisherService.AddPublisher(publisherResource.ToModel());
             return Created(publisher.Id);
         }
 
         [RestPutById]
-        public ActionResult<PublisherResource> UpdatePublisher(PublisherResource publisherResource)
+        public ActionResult<PublisherResource> UpdatePublisher([FromBody] PublisherResource publisherResource)
         {
             var publisher = _publisherService.UpdatePublisher(publisherResource.ToModel());
             return Accepted(publisher.ToResource());

@@ -54,7 +54,7 @@ namespace Panelarr.Api.V1.Config
         }
 
         [RestPutById]
-        public ActionResult<NamingConfigResource> UpdateNamingConfig(NamingConfigResource resource)
+        public ActionResult<NamingConfigResource> UpdateNamingConfig([FromBody] NamingConfigResource resource)
         {
             var nameSpec = resource.ToModel();
             ValidateFormatResult(nameSpec);

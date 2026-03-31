@@ -22,12 +22,12 @@ namespace NzbDrone.Core.Books
 
         public SeriesGroup FindById(string foreignSeriesId)
         {
-            return Query(x => x.ForeignSeriesId == foreignSeriesId).SingleOrDefault();
+            return Query(x => x.ForeignSeriesGroupId == foreignSeriesId).SingleOrDefault();
         }
 
         public List<SeriesGroup> FindById(List<string> foreignSeriesId)
         {
-            return Query(x => foreignSeriesId.Contains(x.ForeignSeriesId));
+            return Query(x => foreignSeriesId.Contains(x.ForeignSeriesGroupId));
         }
 
         public List<SeriesGroup> GetBySeriesMetadataId(int seriesMetadataId)

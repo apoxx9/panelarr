@@ -46,7 +46,9 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
                 return null;
             }
 
-            var issues = detail.Issues ?? _client.GetIssues(id.Value);
+            // Volume detail issues only contain id/name/issue_number — always fetch
+            // full issue list from the issues endpoint to get cover_date and image
+            var issues = _client.GetIssues(id.Value);
 
             return new ProviderSeries
             {
@@ -55,7 +57,9 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
                 Overview = StripHtml(detail.Description),
                 Year = TryParseYear(detail.StartYear),
                 ForeignPublisherId = detail.Publisher != null ? "cv:" + detail.Publisher.Id : null,
-                ImageUrl = detail.Image?.MediumUrl,
+                PublisherName = detail.Publisher?.Name,
+                ImageUrl = detail.Image?.OriginalUrl ?? detail.Image?.MediumUrl,
+                IssueCount = detail.CountOfIssues > 0 ? detail.CountOfIssues : issues.Count,
                 Issues = issues.Select(MapIssue).ToList()
             };
         }
@@ -138,7 +142,7 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
                 Title = i.Name,
                 IssueNumber = TryParseIssueNumber(i.IssueNumber),
                 ReleaseDate = TryParseDate(i.CoverDate),
-                CoverUrl = i.Image?.MediumUrl
+                CoverUrl = i.Image?.OriginalUrl ?? i.Image?.MediumUrl
             };
         }
 

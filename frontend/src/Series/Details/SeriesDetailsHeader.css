@@ -50,6 +50,7 @@
 
 .titleContainer {
   display: flex;
+  align-items: center;
   margin-top: -5px;
 }
 
@@ -59,8 +60,25 @@
   line-height: 60px;
 }
 
+.year {
+  margin-left: 10px;
+  font-weight: 300;
+  font-size: 30px;
+  opacity: 0.7;
+}
+
+.publisher {
+  margin-top: 2px;
+  font-weight: 300;
+  font-size: 16px;
+  color: #aaa;
+}
+
 .toggleMonitoredContainer {
-  align-self: center;
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+  height: 60px;
 }
 
 .monitorToggleButton {
@@ -121,6 +139,12 @@
   margin-left: 8px;
   font-weight: 300;
   font-size: 17px;
+}
+
+.progressContainer {
+  margin-top: 8px;
+  width: 100%;
+  max-width: 400px;
 }
 
 .overview {

@@ -9,6 +9,7 @@ import Label from 'Components/Label';
 import Marquee from 'Components/Marquee';
 import Measure from 'Components/Measure';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
+import ProgressBar from 'Components/ProgressBar';
 import Popover from 'Components/Tooltip/Popover';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import { icons, kinds, sizes, tooltipPositions } from 'Helpers/Props';
@@ -62,6 +63,8 @@ class SeriesDetailsHeader extends Component {
       id,
       width,
       seriesName,
+      year,
+      disambiguation,
       ratings,
       path,
       statistics,
@@ -80,7 +83,9 @@ class SeriesDetailsHeader extends Component {
 
     const {
       issueFileCount,
-      sizeOnDisk
+      sizeOnDisk,
+      availableIssueCount = 0,
+      totalIssueCount = 0
     } = statistics;
 
     const {
@@ -140,6 +145,13 @@ class SeriesDetailsHeader extends Component {
 
                 <div className={styles.title} style={{ width: marqueeWidth }}>
                   <Marquee text={seriesName} />
+                  {
+                    year ?
+                      <span className={styles.year}>
+                        ({year})
+                      </span> :
+                      null
+                  }
                 </div>
 
                 {
@@ -161,14 +173,26 @@ class SeriesDetailsHeader extends Component {
               </div>
             </Measure>
 
-            <div className={styles.details}>
-              <div>
-                <HeartRating
-                  rating={ratings.value}
-                  iconSize={20}
-                />
-              </div>
-            </div>
+            {
+              disambiguation ?
+                <div className={styles.publisher}>
+                  {disambiguation}
+                </div> :
+                null
+            }
+
+            {
+              ratings.value > 0 ?
+                <div className={styles.details}>
+                  <div>
+                    <HeartRating
+                      rating={ratings.value}
+                      iconSize={20}
+                    />
+                  </div>
+                </div> :
+                null
+            }
 
             <div className={styles.detailsLabels}>
               <Label
@@ -250,30 +274,33 @@ class SeriesDetailsHeader extends Component {
                 </span>
               </Label>
 
-              <Tooltip
-                anchor={
-                  <Label
-                    className={styles.detailsLabel}
-                    size={sizes.LARGE}
-                  >
-                    <Icon
-                      name={icons.EXTERNAL_LINK}
-                      size={17}
-                    />
+              {
+                !!links.length &&
+                  <Tooltip
+                    anchor={
+                      <Label
+                        className={styles.detailsLabel}
+                        size={sizes.LARGE}
+                      >
+                        <Icon
+                          name={icons.EXTERNAL_LINK}
+                          size={17}
+                        />
 
-                    <span className={styles.links}>
-                      Links
-                    </span>
-                  </Label>
-                }
-                tooltip={
-                  <SeriesDetailsLinks
-                    links={links}
+                        <span className={styles.links}>
+                          Links
+                        </span>
+                      </Label>
+                    }
+                    tooltip={
+                      <SeriesDetailsLinks
+                        links={links}
+                      />
+                    }
+                    kind={kinds.INVERSE}
+                    position={tooltipPositions.BOTTOM}
                   />
-                }
-                kind={kinds.INVERSE}
-                position={tooltipPositions.BOTTOM}
-              />
+              }
 
               {
                 !!tags.length &&
@@ -300,6 +327,21 @@ class SeriesDetailsHeader extends Component {
 
               }
             </div>
+            {
+              totalIssueCount > 0 ?
+                <div className={styles.progressContainer}>
+                  <ProgressBar
+                    progress={totalIssueCount > 0 ? (availableIssueCount / totalIssueCount) * 100 : 0}
+                    kind={availableIssueCount >= totalIssueCount ? kinds.SUCCESS : kinds.PRIMARY}
+                    size={sizes.MEDIUM}
+                    showText={true}
+                    text={`${availableIssueCount} of ${totalIssueCount} issues`}
+                    title={`${availableIssueCount} of ${totalIssueCount} issues downloaded`}
+                  />
+                </div> :
+                null
+            }
+
             <Measure
               onMeasure={this.onOverviewMeasure}
               className={styles.overview}
@@ -320,6 +362,8 @@ SeriesDetailsHeader.propTypes = {
   id: PropTypes.number.isRequired,
   width: PropTypes.number.isRequired,
   seriesName: PropTypes.string.isRequired,
+  year: PropTypes.number,
+  disambiguation: PropTypes.string,
   ratings: PropTypes.object.isRequired,
   path: PropTypes.string.isRequired,
   statistics: PropTypes.object.isRequired,

@@ -51,7 +51,7 @@ namespace NzbDrone.Core.MetadataSource
                             "ComicVine returned {0} results for: {1}",
                             cvResults.Count,
                             title);
-                        return MapComicVineResults(cvResults);
+                        return SortByRelevance(MapComicVineResults(cvResults), title);
                     }
 
                     _logger.Debug("No results from ComicVine for: {0}", title);
@@ -78,7 +78,7 @@ namespace NzbDrone.Core.MetadataSource
                             "Metron returned {0} results for: {1}",
                             results.Count,
                             title);
-                        return MapMetronResults(results);
+                        return SortByRelevance(MapMetronResults(results), title);
                     }
 
                     _logger.Debug("No results from Metron for: {0}", title);
@@ -100,6 +100,54 @@ namespace NzbDrone.Core.MetadataSource
         public List<object> SearchForNewEntity(string title)
         {
             return SearchForNewSeries(title).Cast<object>().ToList();
+        }
+
+        private List<Series> SortByRelevance(List<Series> results, string query)
+        {
+            var queryLower = query.ToLowerInvariant().Trim();
+            var queryWords = queryLower.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            return results
+                .Select(s => new { Series = s, Score = ScoreRelevance(s.Name?.ToLowerInvariant() ?? "", queryLower, queryWords) })
+                .OrderByDescending(x => x.Score)
+                .Select(x => x.Series)
+                .ToList();
+        }
+
+        private static int ScoreRelevance(string name, string query, string[] queryWords)
+        {
+            // Exact match
+            if (name == query)
+            {
+                return 100;
+            }
+
+            // Starts with query
+            if (name.StartsWith(query))
+            {
+                return 80;
+            }
+
+            // Contains exact query as substring
+            if (name.Contains(query))
+            {
+                return 60;
+            }
+
+            // Contains all query words
+            if (queryWords.All(w => name.Contains(w)))
+            {
+                return 40;
+            }
+
+            // Contains some query words
+            var matchCount = queryWords.Count(w => name.Contains(w));
+            if (matchCount > 0)
+            {
+                return 10 + (matchCount * 10 / queryWords.Length);
+            }
+
+            return 0;
         }
 
         private List<Series> MapMetronResults(List<Metron.Resources.MetronSeriesListItem> results)

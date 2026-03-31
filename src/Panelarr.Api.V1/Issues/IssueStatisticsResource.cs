@@ -6,10 +6,10 @@ namespace Panelarr.Api.V1.Books
     {
         public int ComicFileCount { get; set; }
         public int IssueCount { get; set; }
-        public int TotalBookCount { get; set; }
+        public int TotalIssueCount { get; set; }
         public long SizeOnDisk { get; set; }
 
-        public decimal PercentOfBooks
+        public decimal PercentOfIssues
         {
             get
             {
@@ -37,7 +37,7 @@ namespace Panelarr.Api.V1.Books
                 ComicFileCount = model.ComicFileCount,
                 IssueCount = model.IssueCount,
                 SizeOnDisk = model.SizeOnDisk,
-                TotalBookCount = model.TotalBookCount
+                TotalIssueCount = model.TotalBookCount
             };
         }
     }

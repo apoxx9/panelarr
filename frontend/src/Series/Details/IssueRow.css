@@ -8,6 +8,12 @@
   width: 42px;
 }
 
+.issueNumber {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  width: 60px;
+}
+
 .position,
 .rating,
 .status {

@@ -22,7 +22,7 @@ import { align, icons, kinds } from 'Helpers/Props';
 import InteractiveSearchFilterMenuConnector from 'InteractiveSearch/InteractiveSearchFilterMenuConnector';
 import InteractiveSearchTable from 'InteractiveSearch/InteractiveSearchTable';
 import OrganizePreviewModalConnector from 'Organize/OrganizePreviewModalConnector';
-import RetagPreviewModalConnector from 'Retag/RetagPreviewModalConnector';
+// RetagPreviewModalConnector removed — not relevant for comics
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import selectAll from 'Utilities/Table/selectAll';
@@ -51,7 +51,6 @@ class SeriesDetails extends Component {
 
     this.state = {
       isOrganizeModalOpen: false,
-      isRetagModalOpen: false,
       isEditSeriesModalOpen: false,
       isDeleteSeriesModalOpen: false,
       isInteractiveImportModalOpen: false,
@@ -115,14 +114,6 @@ class SeriesDetails extends Component {
 
   onOrganizeModalClose = () => {
     this.setState({ isOrganizeModalOpen: false });
-  };
-
-  onRetagPress = () => {
-    this.setState({ isRetagModalOpen: true });
-  };
-
-  onRetagModalClose = () => {
-    this.setState({ isRetagModalOpen: false });
   };
 
   onInteractiveImportPress = () => {
@@ -250,7 +241,6 @@ class SeriesDetails extends Component {
 
     const {
       isOrganizeModalOpen,
-      isRetagModalOpen,
       isEditSeriesModalOpen,
       isDeleteSeriesModalOpen,
       isInteractiveImportModalOpen,
@@ -303,13 +293,6 @@ class SeriesDetails extends Component {
               iconName={icons.ORGANIZE}
               isDisabled={!hasIssueFiles}
               onPress={this.onOrganizePress}
-            />
-
-            <PageToolbarButton
-              label={translate('PreviewRetag')}
-              iconName={icons.RETAG}
-              isDisabled={!hasIssueFiles}
-              onPress={this.onRetagPress}
             />
 
             <PageToolbarButton
@@ -451,13 +434,6 @@ class SeriesDetails extends Component {
                       className={styles.tab}
                       selectedClassName={styles.selectedTab}
                     >
-                      {translate('SeriesTotal', [series.length])}
-                    </Tab>
-
-                    <Tab
-                      className={styles.tab}
-                      selectedClassName={styles.selectedTab}
-                    >
                       {translate('History')}
                     </Tab>
 
@@ -476,7 +452,7 @@ class SeriesDetails extends Component {
                     </Tab>
 
                     {
-                      selectedTabIndex === 3 &&
+                      selectedTabIndex === 2 &&
                         <div className={styles.filterIcon}>
                           <InteractiveSearchFilterMenuConnector
                             type="series"
@@ -495,27 +471,6 @@ class SeriesDetails extends Component {
                       onSelectedChange={this.onSelectedChange}
                       isEditorActive={isEditorActive}
                     />
-                  </TabPanel>
-
-                  <TabPanel>
-                    {
-                      isPopulated && hasSeries &&
-                        <div>
-                          {
-                            series.map((item) => {
-                              return (
-                                <SeriesDetailsSeriesConnector
-                                  key={item.id}
-                                  seriesId={item.id}
-                                  seriesId={id}
-                                  isExpanded={expandedState[item.id]}
-                                  onExpandPress={this.onExpandPress}
-                                />
-                              );
-                            })
-                          }
-                        </div>
-                    }
                   </TabPanel>
 
                   <TabPanel>
@@ -552,12 +507,6 @@ class SeriesDetails extends Component {
             isOpen={isOrganizeModalOpen}
             seriesId={id}
             onModalClose={this.onOrganizeModalClose}
-          />
-
-          <RetagPreviewModalConnector
-            isOpen={isRetagModalOpen}
-            seriesId={id}
-            onModalClose={this.onRetagModalClose}
           />
 
           <EditSeriesModalConnector

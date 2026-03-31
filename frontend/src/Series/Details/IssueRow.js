@@ -5,7 +5,7 @@ import IssueTitleLink from 'Issue/IssueTitleLink';
 import IndexerFlags from 'Issue/IndexerFlags';
 import Icon from 'Components/Icon';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
-import StarRating from 'Components/StarRating';
+
 import RelativeDateCellConnector from 'Components/Table/Cells/RelativeDateCellConnector';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
@@ -66,6 +66,7 @@ class IssueRow extends Component {
       seriesTitle,
       seriesName,
       position,
+      issueNumber,
       pageCount,
       ratings,
       isSaving,
@@ -123,6 +124,17 @@ class IssueRow extends Component {
               );
             }
 
+            if (name === 'issueNumber') {
+              return (
+                <TableRowCell
+                  key={name}
+                  className={styles.issueNumber}
+                >
+                  {issueNumber ? `#${issueNumber}` : '\u2014'}
+                </TableRowCell>
+              );
+            }
+
             if (name === 'title') {
               return (
                 <TableRowCell
@@ -132,6 +144,7 @@ class IssueRow extends Component {
                   <IssueTitleLink
                     titleSlug={titleSlug}
                     title={title}
+                    issueNumber={issueNumber}
                   />
                 </TableRowCell>
               );
@@ -159,40 +172,24 @@ class IssueRow extends Component {
               );
             }
 
-            if (name === 'rating') {
-              return (
-                <TableRowCell
-                  key={name}
-                  className={styles.rating}
-                >
-                  {
-                    <StarRating
-                      rating={ratings.value}
-                      votes={ratings.votes}
-                    />
-                  }
-                </TableRowCell>
-              );
-            }
-
             if (name === 'releaseDate') {
+              if (!releaseDate) {
+                return (
+                  <TableRowCell
+                    key={name}
+                    className={styles.releaseDate}
+                  >
+                    TBA
+                  </TableRowCell>
+                );
+              }
+
               return (
                 <RelativeDateCellConnector
                   className={styles.releaseDate}
                   key={name}
                   date={releaseDate}
                 />
-              );
-            }
-
-            if (name === 'pageCount') {
-              return (
-                <TableRowCell
-                  key={name}
-                  className={styles.pageCount}
-                >
-                  {pageCount || ''}
-                </TableRowCell>
               );
             }
 
@@ -257,6 +254,7 @@ IssueRow.propTypes = {
   seriesTitle: PropTypes.string.isRequired,
   seriesName: PropTypes.string.isRequired,
   position: PropTypes.string,
+  issueNumber: PropTypes.number,
   pageCount: PropTypes.number,
   ratings: PropTypes.object.isRequired,
   indexerFlags: PropTypes.number.isRequired,

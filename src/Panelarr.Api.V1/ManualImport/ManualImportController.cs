@@ -30,7 +30,7 @@ namespace Panelarr.Api.V1.ManualImport
         }
 
         [HttpPost]
-        public IActionResult UpdateItems(List<ManualImportUpdateResource> resource)
+        public IActionResult UpdateItems([FromBody] List<ManualImportUpdateResource> resource)
         {
             return Accepted(UpdateImportItems(resource));
         }

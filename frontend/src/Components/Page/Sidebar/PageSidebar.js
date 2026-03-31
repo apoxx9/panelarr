@@ -26,23 +26,11 @@ const links = [
     alias: '/library',
     children: [
       {
-        title: () => translate('Series'),
-        to: '/library'
-      },
-      {
-        title: () => translate('Issues'),
-        to: '/issues'
-      },
-      {
         title: () => translate('AddNew'),
         to: '/add/search'
       },
       {
-        title: () => translate('LibraryMonitor'),
-        to: '/shelf'
-      },
-      {
-        title: () => translate('UnmappedFiles'),
+        title: () => translate('LibraryImport'),
         to: '/unmapped'
       }
     ]

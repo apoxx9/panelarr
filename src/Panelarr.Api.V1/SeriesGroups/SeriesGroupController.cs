@@ -29,14 +29,14 @@ namespace Panelarr.Api.V1.SeriesGroups
         }
 
         [RestPostById]
-        public ActionResult<SeriesGroupResource> CreateSeriesGroup(SeriesGroupResource resource)
+        public ActionResult<SeriesGroupResource> CreateSeriesGroup([FromBody] SeriesGroupResource resource)
         {
             var seriesGroup = _seriesGroupService.AddSeriesGroup(resource.ToModel());
             return Created(seriesGroup.Id);
         }
 
         [RestPutById]
-        public ActionResult<SeriesGroupResource> UpdateSeriesGroup(SeriesGroupResource resource)
+        public ActionResult<SeriesGroupResource> UpdateSeriesGroup([FromBody] SeriesGroupResource resource)
         {
             var seriesGroup = _seriesGroupService.UpdateSeriesGroup(resource.ToModel());
             return Accepted(seriesGroup.ToResource());

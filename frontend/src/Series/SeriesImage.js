@@ -14,6 +14,10 @@ function getUrl(image, coverType, size) {
   }
 }
 
+function getRemoteUrl(image) {
+  return image?.remoteUrl;
+}
+
 class SeriesImage extends Component {
 
   //
@@ -36,8 +40,10 @@ class SeriesImage extends Component {
       pixelRatio,
       image,
       url: getUrl(image, coverType, pixelRatio * size),
+      remoteUrl: getRemoteUrl(image),
       isLoaded: false,
-      hasError: false
+      hasError: false,
+      triedRemote: false
     };
   }
 
@@ -67,7 +73,9 @@ class SeriesImage extends Component {
       this.setState({
         image: nextImage,
         url: getUrl(nextImage, coverType, pixelRatio * size),
-        hasError: false
+        remoteUrl: getRemoteUrl(nextImage),
+        hasError: false,
+        triedRemote: false
         // Don't reset isLoaded, as we want to immediately try to
         // show the new image, whether an image was shown previously
         // or the placeholder was shown.
@@ -89,6 +97,18 @@ class SeriesImage extends Component {
   // Listeners
 
   onError = () => {
+    const { remoteUrl, triedRemote } = this.state;
+
+    // If local URL failed and we have a remote URL, try that before giving up
+    if (!triedRemote && remoteUrl) {
+      this.setState({
+        url: remoteUrl,
+        triedRemote: true,
+        hasError: false
+      });
+      return;
+    }
+
     this.setState({
       hasError: true
     });

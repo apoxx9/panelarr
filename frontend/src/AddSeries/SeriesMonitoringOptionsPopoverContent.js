@@ -12,33 +12,13 @@ function SeriesMonitoringOptionsPopoverContent() {
       </Alert>
       <DescriptionList>
         <DescriptionListItem
-          title={translate('AllIssues')}
+          title={translate('MonitorAll')}
           data={translate('DataAllIssues')}
         />
 
         <DescriptionListItem
-          title={translate('FutureIssues')}
+          title={translate('MonitorFuture')}
           data={translate('DataFutureIssues')}
-        />
-
-        <DescriptionListItem
-          title={translate('MissingIssues')}
-          data={translate('DataMissingIssues')}
-        />
-
-        <DescriptionListItem
-          title={translate('ExistingIssues')}
-          data={translate('DataExistingIssues')}
-        />
-
-        <DescriptionListItem
-          title={translate('FirstIssue')}
-          data={translate('DataFirstIssue')}
-        />
-
-        <DescriptionListItem
-          title={translate('LatestIssue')}
-          data={translate('DataLatestIssue')}
         />
 
         <DescriptionListItem

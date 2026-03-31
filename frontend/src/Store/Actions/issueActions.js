@@ -216,6 +216,12 @@ export const defaultState = {
       isModifiable: false
     },
     {
+      name: 'issueNumber',
+      label: '#',
+      isSortable: true,
+      isVisible: true
+    },
+    {
       name: 'title',
       label: 'Title',
       isSortable: true,
@@ -230,18 +236,6 @@ export const defaultState = {
     {
       name: 'releaseDate',
       label: 'Release Date',
-      isSortable: true,
-      isVisible: true
-    },
-    {
-      name: 'pageCount',
-      label: 'Pages',
-      isSortable: true,
-      isVisible: true
-    },
-    {
-      name: 'rating',
-      label: 'Rating',
       isSortable: true,
       isVisible: true
     },

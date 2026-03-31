@@ -8,7 +8,8 @@ import * as commandNames from 'Commands/commandNames';
 import { toggleIssuesMonitored } from 'Store/Actions/issueActions';
 import { clearIssueFiles, fetchIssueFiles } from 'Store/Actions/issueFileActions';
 import { executeCommand } from 'Store/Actions/commandActions';
-import { clearEditions, fetchEditions } from 'Store/Actions/editionActions';
+// Edition concept removed for comics
+// import { clearEditions, fetchEditions } from 'Store/Actions/editionActions';
 import { cancelFetchReleases, clearReleases } from 'Store/Actions/releaseActions';
 import createAllSeriesSelector from 'Store/Selectors/createAllSeriessSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
@@ -44,12 +45,11 @@ function createMapStateToProps() {
     (state, { titleSlug }) => titleSlug,
     selectIssueFiles,
     (state) => state.issues,
-    (state) => state.editions,
     createAllSeriesSelector(),
     createCommandsSelector(),
     createUISettingsSelector(),
     createDimensionsSelector(),
-    (titleSlug, issueFiles, issues, editions, seriess, commands, uiSettings, dimensions) => {
+    (titleSlug, issueFiles, issues, seriess, commands, uiSettings, dimensions) => {
       const issue = issues.items.find((b) => b.titleSlug === titleSlug);
       const series = seriess.find((a) => a.id === issue.seriesId);
       const sortedIssues = issues.items.filter((b) => b.seriesId === issue.seriesId);
@@ -86,8 +86,8 @@ function createMapStateToProps() {
         isRenamingSeriesCommand.body.seriesIds.indexOf(series.id) > -1
       );
 
-      const isFetching = isIssueFilesFetching || editions.isFetching;
-      const isPopulated = isIssueFilesPopulated && editions.isPopulated;
+      const isFetching = isIssueFilesFetching;
+      const isPopulated = isIssueFilesPopulated;
 
       return {
         ...issue,
@@ -113,16 +113,11 @@ const mapDispatchToProps = {
   executeCommand,
   fetchIssueFiles,
   clearIssueFiles,
-  fetchEditions,
-  clearEditions,
   clearReleases,
   cancelFetchReleases,
   toggleIssuesMonitored
 };
 
-function getMonitoredEditions(props) {
-  return _.map(_.filter(props.editions, { monitored: true }), 'id').sort();
-}
 
 class IssueDetailsConnector extends Component {
 
@@ -142,7 +137,6 @@ class IssueDetailsConnector extends Component {
     if (
       (prevProps.isRenamingFiles && !isRenamingFiles) ||
       (prevProps.isRenamingSeries && !isRenamingSeries) ||
-      !_.isEqual(getMonitoredEditions(prevProps), getMonitoredEditions(this.props)) ||
       (prevProps.anyReleaseOk === false && anyReleaseOk === true)
     ) {
       this.unpopulate();
@@ -170,14 +164,12 @@ class IssueDetailsConnector extends Component {
     const issueId = this.props.id;
 
     this.props.fetchIssueFiles({ issueId });
-    this.props.fetchEditions({ issueId });
   };
 
   unpopulate = () => {
     this.props.cancelFetchReleases();
     this.props.clearReleases();
     this.props.clearIssueFiles();
-    this.props.clearEditions();
   };
 
   //
@@ -229,8 +221,6 @@ IssueDetailsConnector.propTypes = {
   titleSlug: PropTypes.string.isRequired,
   fetchIssueFiles: PropTypes.func.isRequired,
   clearIssueFiles: PropTypes.func.isRequired,
-  fetchEditions: PropTypes.func.isRequired,
-  clearEditions: PropTypes.func.isRequired,
   clearReleases: PropTypes.func.isRequired,
   cancelFetchReleases: PropTypes.func.isRequired,
   toggleIssuesMonitored: PropTypes.func.isRequired,

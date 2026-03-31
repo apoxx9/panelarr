@@ -109,7 +109,7 @@ namespace Panelarr.Api.V1.ComicFiles
         }
 
         [RestPutById]
-        public ActionResult<ComicFileResource> SetQuality(ComicFileResource bookFileResource)
+        public ActionResult<ComicFileResource> SetQuality([FromBody] ComicFileResource bookFileResource)
         {
             var comicFile = _mediaFileService.Get(bookFileResource.Id);
             comicFile.Quality = bookFileResource.Quality;

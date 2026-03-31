@@ -151,13 +151,29 @@ namespace NzbDrone.Core.MediaCover
 
                 try
                 {
-                    var serverFileHeaders = GetServerHeaders(cover.Url);
-
-                    alreadyExists = _coverExistsSpecification.AlreadyExists(serverFileHeaders.LastModified, GetContentLength(serverFileHeaders), fileName);
-
-                    if (!alreadyExists)
+                    // Try the Range header check first for servers that support it
+                    try
                     {
-                        DownloadCover(author, cover, serverFileHeaders.LastModified ?? DateTime.Now);
+                        var serverFileHeaders = GetServerHeaders(cover.Url);
+                        alreadyExists = _coverExistsSpecification.AlreadyExists(serverFileHeaders.LastModified, GetContentLength(serverFileHeaders), fileName);
+
+                        if (!alreadyExists)
+                        {
+                            DownloadCover(author, cover, serverFileHeaders.LastModified ?? DateTime.Now);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Server doesn't support Range header (e.g. ComicVine) — download directly if file doesn't exist
+                        if (!_diskProvider.FileExists(fileName) || _diskProvider.GetFileSize(fileName) == 0)
+                        {
+                            _logger.Debug("Range header check failed for {0}, downloading directly", cover.Url);
+                            DownloadCover(author, cover, DateTime.Now);
+                        }
+                        else
+                        {
+                            alreadyExists = true;
+                        }
                     }
                 }
                 catch (HttpException e)
@@ -211,13 +227,28 @@ namespace NzbDrone.Core.MediaCover
 
                 try
                 {
-                    var serverFileHeaders = GetServerHeaders(cover.Url);
-
-                    alreadyExists = _coverExistsSpecification.AlreadyExists(serverFileHeaders.LastModified, GetContentLength(serverFileHeaders), fileName);
-
-                    if (!alreadyExists)
+                    try
                     {
-                        DownloadBookCover(issue, cover, serverFileHeaders.LastModified ?? DateTime.Now);
+                        var serverFileHeaders = GetServerHeaders(cover.Url);
+                        alreadyExists = _coverExistsSpecification.AlreadyExists(serverFileHeaders.LastModified, GetContentLength(serverFileHeaders), fileName);
+
+                        if (!alreadyExists)
+                        {
+                            DownloadBookCover(issue, cover, serverFileHeaders.LastModified ?? DateTime.Now);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Server doesn't support Range header — download directly if file doesn't exist
+                        if (!_diskProvider.FileExists(fileName) || _diskProvider.GetFileSize(fileName) == 0)
+                        {
+                            _logger.Debug("Range header check failed for {0}, downloading directly", cover.Url);
+                            DownloadBookCover(issue, cover, DateTime.Now);
+                        }
+                        else
+                        {
+                            alreadyExists = true;
+                        }
                     }
                 }
                 catch (HttpException e)

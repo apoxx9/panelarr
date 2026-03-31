@@ -14,6 +14,8 @@ interface CssExports {
   'overview': string;
   'path': string;
   'poster': string;
+  'progressContainer': string;
+  'publisher': string;
   'qualityProfileName': string;
   'seriesNavigationButton': string;
   'seriesNavigationButtons': string;
@@ -24,6 +26,7 @@ interface CssExports {
   'titleContainer': string;
   'titleRow': string;
   'toggleMonitoredContainer': string;
+  'year': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

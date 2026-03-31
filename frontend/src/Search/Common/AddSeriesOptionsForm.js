@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import SeriesMetadataProfilePopoverContent from 'AddSeries/SeriesMetadataProfilePopoverContent';
 import SeriesMonitoringOptionsPopoverContent from 'AddSeries/SeriesMonitoringOptionsPopoverContent';
-import SeriesMonitorNewItemsOptionsPopoverContent from 'AddSeries/SeriesMonitorNewItemsOptionsPopoverContent';
 import Form from 'Components/Form/Form';
 import FormGroup from 'Components/Form/FormGroup';
 import FormInputGroup from 'Components/Form/FormInputGroup';
@@ -33,7 +32,6 @@ class AddSeriesOptionsForm extends Component {
     const {
       rootFolderPath,
       monitor,
-      monitorNewItems,
       qualityProfileId,
       metadataProfileId,
       includeNoneMetadataProfile,
@@ -99,31 +97,6 @@ class AddSeriesOptionsForm extends Component {
 
         <FormGroup>
           <FormLabel>
-            {translate('MonitorNewItems')}
-            <Popover
-              anchor={
-                <Icon
-                  className={styles.labelIcon}
-                  name={icons.INFO}
-                />
-              }
-              title={translate('MonitorNewItems')}
-              body={<SeriesMonitorNewItemsOptionsPopoverContent />}
-              position={tooltipPositions.RIGHT}
-            />
-          </FormLabel>
-
-          <FormInputGroup
-            type={inputTypes.MONITOR_NEW_ITEMS_SELECT}
-            name="monitorNewItems"
-            helpText={translate('MonitorNewItemsHelpText')}
-            {...monitorNewItems}
-            onChange={onInputChange}
-          />
-        </FormGroup>
-
-        <FormGroup>
-          <FormLabel>
             {translate('QualityProfile')}
           </FormLabel>
 
@@ -184,7 +157,6 @@ class AddSeriesOptionsForm extends Component {
 AddSeriesOptionsForm.propTypes = {
   rootFolderPath: PropTypes.object,
   monitor: PropTypes.object.isRequired,
-  monitorNewItems: PropTypes.object.isRequired,
   qualityProfileId: PropTypes.object,
   metadataProfileId: PropTypes.object,
   showMetadataProfile: PropTypes.bool.isRequired,
