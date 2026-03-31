@@ -14,8 +14,8 @@ namespace NzbDrone.Core.Blocklisting
 {
     public interface IBlocklistService
     {
-        bool Blocklisted(int authorId, ReleaseInfo release);
-        bool BlocklistedTorrentHash(int authorId, string hash);
+        bool Blocklisted(int seriesId, ReleaseInfo release);
+        bool BlocklistedTorrentHash(int seriesId, string hash);
         PagingSpec<Blocklist> Paged(PagingSpec<Blocklist> pagingSpec);
         void Block(RemoteIssue remoteEpisode, string message);
         void Delete(int id);
@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Blocklisting
             _blocklistRepository = blocklistRepository;
         }
 
-        public bool Blocklisted(int authorId, ReleaseInfo release)
+        public bool Blocklisted(int seriesId, ReleaseInfo release)
         {
             if (release.DownloadProtocol == DownloadProtocol.Torrent)
             {
@@ -46,24 +46,24 @@ namespace NzbDrone.Core.Blocklisting
 
                 if (torrentInfo.InfoHash.IsNotNullOrWhiteSpace())
                 {
-                    var blocklistedByTorrentInfohash = _blocklistRepository.BlocklistedByTorrentInfoHash(authorId, torrentInfo.InfoHash);
+                    var blocklistedByTorrentInfohash = _blocklistRepository.BlocklistedByTorrentInfoHash(seriesId, torrentInfo.InfoHash);
 
                     return blocklistedByTorrentInfohash.Any(b => SameTorrent(b, torrentInfo));
                 }
 
-                return _blocklistRepository.BlocklistedByTitle(authorId, release.Title)
+                return _blocklistRepository.BlocklistedByTitle(seriesId, release.Title)
                     .Where(b => b.Protocol == DownloadProtocol.Torrent)
                     .Any(b => SameTorrent(b, torrentInfo));
             }
 
-            return _blocklistRepository.BlocklistedByTitle(authorId, release.Title)
+            return _blocklistRepository.BlocklistedByTitle(seriesId, release.Title)
                 .Where(b => b.Protocol == DownloadProtocol.Usenet)
                 .Any(b => SameNzb(b, release));
         }
 
-        public bool BlocklistedTorrentHash(int authorId, string hash)
+        public bool BlocklistedTorrentHash(int seriesId, string hash)
         {
-            return _blocklistRepository.BlocklistedByTorrentInfoHash(authorId, hash).Any(b =>
+            return _blocklistRepository.BlocklistedByTorrentInfoHash(seriesId, hash).Any(b =>
                 b.TorrentInfoHash.Equals(hash, StringComparison.InvariantCultureIgnoreCase));
         }
 

@@ -19,10 +19,10 @@ namespace NzbDrone.Integration.Test.Client
             return Get<List<SeriesResource>>(request);
         }
 
-        public List<SeriesResource> Editor(SeriesEditorResource author)
+        public List<SeriesResource> Editor(SeriesEditorResource series)
         {
             var request = BuildRequest("editor");
-            request.AddJsonBody(author);
+            request.AddJsonBody(series);
             return Put<List<SeriesResource>>(request);
         }
 

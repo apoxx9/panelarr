@@ -12,9 +12,9 @@ namespace NzbDrone.Core.IndexerSearch
         {
         }
 
-        public CutoffUnmetIssueSearchCommand(int authorId)
+        public CutoffUnmetIssueSearchCommand(int seriesId)
         {
-            SeriesId = authorId;
+            SeriesId = seriesId;
         }
     }
 }

@@ -44,9 +44,9 @@ namespace NzbDrone.Core.Notifications.Email
             SendEmail(Settings, BOOK_DOWNLOADED_TITLE_BRANDED, body, false, paths);
         }
 
-        public override void OnSeriesAdded(Series author)
+        public override void OnSeriesAdded(Series series)
         {
-            var body = $"{author.Name} added to library.";
+            var body = $"{series.Name} added to library.";
 
             SendEmail(Settings, AUTHOR_ADDED_TITLE_BRANDED, body);
         }

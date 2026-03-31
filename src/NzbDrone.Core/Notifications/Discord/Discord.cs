@@ -56,13 +56,13 @@ namespace NzbDrone.Core.Notifications.Discord
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
+        public override void OnRename(Series series, List<RenamedComicFile> renamedFiles)
         {
             var attachments = new List<Embed>
             {
                 new ()
                 {
-                    Title = author.Name,
+                    Title = series.Name,
                 }
             };
 
@@ -71,19 +71,19 @@ namespace NzbDrone.Core.Notifications.Discord
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnSeriesAdded(Series author)
+        public override void OnSeriesAdded(Series series)
         {
             var attachments = new List<Embed>
             {
                 new ()
                 {
-                    Title = author.Name,
+                    Title = series.Name,
                     Fields = new List<DiscordField>()
                     {
                         new ()
                         {
                             Name = "Links",
-                            Value = string.Join(" / ", author.Metadata.Value.Links.Select(link => $"[{link.Name}]({link.Url})"))
+                            Value = string.Join(" / ", series.Metadata.Value.Links.Select(link => $"[{link.Name}]({link.Url})"))
                         }
                     },
                 }

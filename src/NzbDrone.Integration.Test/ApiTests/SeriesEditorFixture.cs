@@ -30,15 +30,15 @@ namespace NzbDrone.Integration.Test.ApiTests
         {
             GivenExistingSeries();
 
-            var author = Series.All();
+            var series = Series.All();
 
-            var authorEditor = new SeriesEditorResource
+            var seriesEditor = new SeriesEditorResource
             {
                 QualityProfileId = 2,
-                SeriesIds = author.Select(o => o.Id).ToList()
+                SeriesIds = series.Select(o => o.Id).ToList()
             };
 
-            var result = Series.Editor(authorEditor);
+            var result = Series.Editor(seriesEditor);
 
             result.Should().HaveCount(2);
             result.TrueForAll(s => s.QualityProfileId == 2).Should().BeTrue();

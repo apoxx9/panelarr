@@ -61,13 +61,13 @@ namespace NzbDrone.Core.Notifications.Webhook
             return payload;
         }
 
-        public WebhookRenamePayload BuildOnRenamePayload(Series author, List<RenamedComicFile> renamedFiles)
+        public WebhookRenamePayload BuildOnRenamePayload(Series series, List<RenamedComicFile> renamedFiles)
         {
             return new WebhookRenamePayload
             {
                 EventType = WebhookEventType.Rename,
                 InstanceName = _configFileProvider.InstanceName,
-                Series = new WebhookSeries(author),
+                Series = new WebhookSeries(series),
                 RenamedComicFiles = renamedFiles.ConvertAll(x => new WebhookRenamedComicFile(x))
             };
         }
@@ -107,13 +107,13 @@ namespace NzbDrone.Core.Notifications.Webhook
             };
         }
 
-        public WebhookSeriesAddedPayload BuildOnSeriesAdded(Series author)
+        public WebhookSeriesAddedPayload BuildOnSeriesAdded(Series series)
         {
             return new WebhookSeriesAddedPayload
             {
                 EventType = WebhookEventType.SeriesAdded,
                 InstanceName = _configFileProvider.InstanceName,
-                Series = new WebhookSeries(author)
+                Series = new WebhookSeries(series)
             };
         }
 

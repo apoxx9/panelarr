@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
     {
         private List<IFileInfo> _fileInfos;
         private LocalIssue _localTrack;
-        private Series _author;
+        private Series _series;
         private Issue _issue;
         private QualityModel _quality;
 
@@ -85,20 +85,20 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
             _fail2.Setup(c => c.IsSatisfiedBy(It.IsAny<LocalIssue>(), It.IsAny<DownloadClientItem>())).Returns(Decision.Reject("_fail2"));
             _fail3.Setup(c => c.IsSatisfiedBy(It.IsAny<LocalIssue>(), It.IsAny<DownloadClientItem>())).Returns(Decision.Reject("_fail3"));
 
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                 .With(e => e.QualityProfileId = 1)
                 .With(e => e.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() })
                 .Build();
 
             _issue = Builder<Issue>.CreateNew()
-                .With(x => x.Series = _author)
+                .With(x => x.Series = _series)
                 .Build();
 
             _quality = new QualityModel(Quality.CBR);
 
             _localTrack = new LocalIssue
             {
-                Series = _author,
+                Series = _series,
                 Quality = _quality,
                 Issue = new Issue(),
                 Path = @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV.avi".AsOsAgnostic()
@@ -106,7 +106,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
 
             _idOverrides = new IdentificationOverrides
             {
-                Series = _author
+                Series = _series
             };
 
             _idConfig = new ImportDecisionMakerConfig();

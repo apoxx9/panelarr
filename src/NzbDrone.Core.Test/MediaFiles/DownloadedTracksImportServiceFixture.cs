@@ -100,7 +100,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
-        public void should_search_for_author_using_folder_name()
+        public void should_search_for_series_using_folder_name()
         {
             Subject.ProcessRootFolder(DiskProvider.GetDirectoryInfo(_droneFactory));
 

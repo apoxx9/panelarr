@@ -28,10 +28,10 @@ namespace NzbDrone.Core.Issues
         IExecute<BulkRefreshIssueCommand>
     {
         private readonly IIssueService _issueService;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IRootFolderService _rootFolderService;
         private readonly IAddSeriesService _addSeriesService;
-        private readonly IProvideSeriesInfo _authorInfo;
+        private readonly IProvideSeriesInfo _seriesInfo;
         private readonly IProvideIssueInfo _bookInfo;
         private readonly IMediaFileService _mediaFileService;
         private readonly IHistoryService _historyService;
@@ -41,11 +41,11 @@ namespace NzbDrone.Core.Issues
         private readonly Logger _logger;
 
         public RefreshIssueService(IIssueService bookService,
-                                  ISeriesService authorService,
+                                  ISeriesService seriesService,
                                   IRootFolderService rootFolderService,
                                   IAddSeriesService addSeriesService,
-                                  ISeriesMetadataService authorMetadataService,
-                                  IProvideSeriesInfo authorInfo,
+                                  ISeriesMetadataService seriesMetadataService,
+                                  IProvideSeriesInfo seriesInfo,
                                   IProvideIssueInfo bookInfo,
                                   IMediaFileService mediaFileService,
                                   IHistoryService historyService,
@@ -53,13 +53,13 @@ namespace NzbDrone.Core.Issues
                                   ICheckIfIssueShouldBeRefreshed checkIfIssueShouldBeRefreshed,
                                   IMapCoversToLocal mediaCoverService,
                                   Logger logger)
-        : base(logger, authorMetadataService)
+        : base(logger, seriesMetadataService)
         {
             _issueService = bookService;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _rootFolderService = rootFolderService;
             _addSeriesService = addSeriesService;
-            _authorInfo = authorInfo;
+            _seriesInfo = seriesInfo;
             _bookInfo = bookInfo;
             _mediaFileService = mediaFileService;
             _historyService = historyService;
@@ -74,16 +74,16 @@ namespace NzbDrone.Core.Issues
             try
             {
                 var tuple = _bookInfo.GetIssueInfo(issue.ForeignIssueId);
-                var author = _authorInfo.GetSeriesInfo(tuple.Item1);
+                var series = _seriesInfo.GetSeriesInfo(tuple.Item1);
                 var newbook = tuple.Item2;
 
-                newbook.Series = author;
-                newbook.SeriesMetadata = author.Metadata.Value;
+                newbook.Series = series;
+                newbook.SeriesMetadata = series.Metadata.Value;
                 newbook.SeriesMetadataId = issue.SeriesMetadataId;
                 newbook.SeriesMetadata.Value.Id = issue.SeriesMetadataId;
 
-                author.Issues = new List<Issue> { newbook };
-                return author;
+                series.Issues = new List<Issue> { newbook };
+                return series;
             }
             catch (IssueNotFoundException)
             {
@@ -121,14 +121,14 @@ namespace NzbDrone.Core.Issues
 
         protected override void EnsureNewParent(Issue local, Issue remote)
         {
-            // Make sure the appropriate author exists (it could be that an issue changes parent)
-            // The authorMetadata entry will be in the db but make sure a corresponding author is too
+            // Make sure the appropriate series exists (it could be that an issue changes parent)
+            // The seriesMetadata entry will be in the db but make sure a corresponding series is too
             // so that the issue doesn't just disappear.
 
             // TODO filter by metadata id before hitting database
-            _logger.Trace($"Ensuring parent author exists [{remote.SeriesMetadata.Value.ForeignSeriesId}]");
+            _logger.Trace($"Ensuring parent series exists [{remote.SeriesMetadata.Value.ForeignSeriesId}]");
 
-            var newSeries = _authorService.FindById(remote.SeriesMetadata.Value.ForeignSeriesId);
+            var newSeries = _seriesService.FindById(remote.SeriesMetadata.Value.ForeignSeriesId);
 
             if (newSeries == null)
             {
@@ -141,7 +141,7 @@ namespace NzbDrone.Core.Issues
                     Monitored = oldSeries.Monitored,
                     Tags = oldSeries.Tags
                 };
-                _logger.Debug($"Adding missing parent author {addSeries}");
+                _logger.Debug($"Adding missing parent series {addSeries}");
                 _addSeriesService.AddSeries(addSeries);
             }
         }

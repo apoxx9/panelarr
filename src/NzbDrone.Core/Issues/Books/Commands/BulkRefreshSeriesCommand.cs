@@ -9,9 +9,9 @@ namespace NzbDrone.Core.Issues.Commands
         {
         }
 
-        public BulkRefreshSeriesCommand(List<int> authorIds, bool areNewSeries = false)
+        public BulkRefreshSeriesCommand(List<int> seriesIds, bool areNewSeries = false)
         {
-            SeriesIds = authorIds;
+            SeriesIds = seriesIds;
             AreNewSeries = areNewSeries;
         }
 

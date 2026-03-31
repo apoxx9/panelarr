@@ -30,16 +30,16 @@ namespace NzbDrone.Core.Test.QueueTests
                 .With(v => v.DownloadClientInfo = downloadClientInfo)
                 .Build();
 
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                 .Build();
 
             var issues = Builder<Issue>.CreateListOfSize(3)
                 .All()
-                .With(e => e.SeriesId = author.Id)
+                .With(e => e.SeriesId = series.Id)
                 .Build();
 
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                .With(r => r.Series = author)
+                .With(r => r.Series = series)
                 .With(r => r.Issues = new List<Issue>(issues))
                 .With(r => r.ParsedIssueInfo = new ParsedIssueInfo())
                 .Build();

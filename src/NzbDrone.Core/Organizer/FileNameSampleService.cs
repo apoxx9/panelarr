@@ -138,11 +138,11 @@ namespace NzbDrone.Core.Organizer
             return _buildFileNames.GetSeriesFolder(_standardSeries, nameSpec);
         }
 
-        private string BuildTrackSample(Series author, Issue issue, ComicFile comicFile, NamingConfig nameSpec)
+        private string BuildTrackSample(Series series, Issue issue, ComicFile comicFile, NamingConfig nameSpec)
         {
             try
             {
-                return _buildFileNames.BuildComicFileName(author, issue, comicFile, nameSpec, _customFormats);
+                return _buildFileNames.BuildComicFileName(series, issue, comicFile, nameSpec, _customFormats);
             }
             catch (NamingFormatException)
             {

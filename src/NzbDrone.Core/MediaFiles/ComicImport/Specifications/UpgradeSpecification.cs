@@ -29,7 +29,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
             var files = item.Issue?.ComicFiles?.Value;
             if (files == null || !files.Any())
             {
-                // No existing issues, skip.  This guards against new authors not having a QualityProfile.
+                // No existing issues, skip.  This guards against new allSeries not having a QualityProfile.
                 return Decision.Accept();
             }
 

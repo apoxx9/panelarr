@@ -6,24 +6,24 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
 {
     public class UpdateCleanTitleForSeries : IHousekeepingTask
     {
-        private readonly ISeriesRepository _authorRepository;
+        private readonly ISeriesRepository _seriesRepository;
 
-        public UpdateCleanTitleForSeries(ISeriesRepository authorRepository)
+        public UpdateCleanTitleForSeries(ISeriesRepository seriesRepository)
         {
-            _authorRepository = authorRepository;
+            _seriesRepository = seriesRepository;
         }
 
         public void Clean()
         {
-            var authors = _authorRepository.All().ToList();
+            var allSeries = _seriesRepository.All().ToList();
 
-            authors.ForEach(s =>
+            allSeries.ForEach(s =>
             {
                 var cleanName = s.Name.CleanSeriesName();
                 if (s.CleanName != cleanName)
                 {
                     s.CleanName = cleanName;
-                    _authorRepository.Update(s);
+                    _seriesRepository.Update(s);
                 }
             });
         }

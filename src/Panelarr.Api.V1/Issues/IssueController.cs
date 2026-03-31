@@ -35,20 +35,20 @@ namespace Panelarr.Api.V1.Issues
         protected readonly ISeriesService _seriesService;
         protected readonly IAddIssueService _addIssueService;
 
-        public IssueController(ISeriesService authorService,
+        public IssueController(ISeriesService seriesService,
                           IIssueService bookService,
                           IAddIssueService addIssueService,
                           ISeriesIssueLinkService seriesIssueLinkService,
-                          ISeriesStatisticsService authorStatisticsService,
+                          ISeriesStatisticsService seriesStatisticsService,
                           IMapCoversToLocal coverMapper,
                           IUpgradableSpecification upgradableSpecification,
                           IBroadcastSignalRMessage signalRBroadcaster,
                           QualityProfileExistsValidator qualityProfileExistsValidator,
                           MetadataProfileExistsValidator metadataProfileExistsValidator)
 
-        : base(bookService, seriesIssueLinkService, authorStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
+        : base(bookService, seriesIssueLinkService, seriesStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
         {
-            _seriesService = authorService;
+            _seriesService = seriesService;
             _addIssueService = addIssueService;
 
             PostValidator.RuleFor(s => s.ForeignIssueId).NotEmpty();

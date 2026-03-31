@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Indexers.Torznab
 
                 return capabilities.SupportedComicSearchParameters != null &&
                        capabilities.SupportedComicSearchParameters.Contains("q") &&
-                       capabilities.SupportedComicSearchParameters.Contains("author") &&
+                       capabilities.SupportedComicSearchParameters.Contains("series") &&
                        capabilities.SupportedComicSearchParameters.Contains("title");
             }
         }

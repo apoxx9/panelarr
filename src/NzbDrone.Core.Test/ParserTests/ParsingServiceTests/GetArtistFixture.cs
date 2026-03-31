@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         }
 
         [Test]
-        public void should_use_parsed_author_title()
+        public void should_use_parsed_series_title()
         {
             const string title = "30 Rock - Get Some [FLAC]";
 

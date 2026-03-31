@@ -14,7 +14,7 @@ namespace NzbDrone.Core.MediaFiles
 {
     public interface IUpdateComicFileService
     {
-        void ChangeFileDateForFile(ComicFile comicFile, Series author, Issue issue);
+        void ChangeFileDateForFile(ComicFile comicFile, Series series, Issue issue);
     }
 
     public class UpdateComicFileService : IUpdateComicFileService,
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.MediaFiles
             _logger = logger;
         }
 
-        public void ChangeFileDateForFile(ComicFile comicFile, Series author, Issue issue)
+        public void ChangeFileDateForFile(ComicFile comicFile, Series series, Issue issue)
         {
             ChangeFileDate(comicFile, issue);
         }

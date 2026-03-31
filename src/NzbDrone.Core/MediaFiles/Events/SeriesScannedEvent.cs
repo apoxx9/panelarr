@@ -7,9 +7,9 @@ namespace NzbDrone.Core.MediaFiles.Events
     {
         public Series Series { get; private set; }
 
-        public SeriesScannedEvent(Series author)
+        public SeriesScannedEvent(Series series)
         {
-            Series = author;
+            Series = series;
         }
     }
 }

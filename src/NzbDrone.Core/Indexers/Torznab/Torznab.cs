@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Indexers.Torznab
                 }
 
                 if (capabilities.SupportedComicSearchParameters != null &&
-                    new[] { "author", "title" }.All(v => capabilities.SupportedComicSearchParameters.Contains(v)))
+                    new[] { "series", "title" }.All(v => capabilities.SupportedComicSearchParameters.Contains(v)))
                 {
                     return null;
                 }

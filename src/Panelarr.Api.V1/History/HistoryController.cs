@@ -23,19 +23,19 @@ namespace Panelarr.Api.V1.History
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly IUpgradableSpecification _upgradableSpecification;
         private readonly IFailedDownloadService _failedDownloadService;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
 
         public HistoryController(IHistoryService historyService,
                              ICustomFormatCalculationService formatCalculator,
                              IUpgradableSpecification upgradableSpecification,
                              IFailedDownloadService failedDownloadService,
-                             ISeriesService authorService)
+                             ISeriesService seriesService)
         {
             _historyService = historyService;
             _formatCalculator = formatCalculator;
             _upgradableSpecification = upgradableSpecification;
             _failedDownloadService = failedDownloadService;
-            _authorService = authorService;
+            _seriesService = seriesService;
         }
 
         protected HistoryResource MapToResource(EntityHistory model, bool includeSeries, bool includeIssue)
@@ -94,13 +94,13 @@ namespace Panelarr.Api.V1.History
         [HttpGet("series")]
         public List<HistoryResource> GetSeriesHistory(int seriesId, int? issueId = null, EntityHistoryEventType? eventType = null, bool includeSeries = false, bool includeIssue = false)
         {
-            var author = _authorService.GetSeries(seriesId);
+            var series = _seriesService.GetSeries(seriesId);
 
             if (issueId.HasValue)
             {
                 return _historyService.GetByIssue(issueId.Value, eventType).Select(h =>
                 {
-                    h.Series = author;
+                    h.Series = series;
 
                     return MapToResource(h, includeSeries, includeIssue);
                 }).ToList();
@@ -108,7 +108,7 @@ namespace Panelarr.Api.V1.History
 
             return _historyService.GetBySeries(seriesId, eventType).Select(h =>
             {
-                h.Series = author;
+                h.Series = series;
 
                 return MapToResource(h, includeSeries, includeIssue);
             }).ToList();

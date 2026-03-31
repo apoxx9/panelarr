@@ -14,8 +14,8 @@ namespace NzbDrone.Core.MediaFiles
         ParsedTrackInfo ReadTags(IFileInfo file);
         void WriteTags(ComicFile trackfile, bool newDownload, bool force = false);
         void SyncTags(List<Issue> issues);
-        List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId);
-        List<RetagComicFilePreview> GetRetagPreviewsByIssue(int authorId);
+        List<RetagComicFilePreview> GetRetagPreviewsBySeries(int seriesId);
+        List<RetagComicFilePreview> GetRetagPreviewsByIssue(int seriesId);
     }
 
     public class MetadataTagService : IMetadataTagService,
@@ -58,9 +58,9 @@ namespace NzbDrone.Core.MediaFiles
             _audioTagService.SyncTags(issues);
         }
 
-        public List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId)
+        public List<RetagComicFilePreview> GetRetagPreviewsBySeries(int seriesId)
         {
-            return _audioTagService.GetRetagPreviewsBySeries(authorId);
+            return _audioTagService.GetRetagPreviewsBySeries(seriesId);
         }
 
         public List<RetagComicFilePreview> GetRetagPreviewsByIssue(int issueId)

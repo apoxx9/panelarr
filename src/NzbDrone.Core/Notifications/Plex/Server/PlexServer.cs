@@ -44,9 +44,9 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             UpdateIfEnabled(message.Series);
         }
 
-        public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
+        public override void OnRename(Series series, List<RenamedComicFile> renamedFiles)
         {
-            UpdateIfEnabled(author);
+            UpdateIfEnabled(series);
         }
 
         public override void OnIssueRetag(IssueRetagMessage message)
@@ -70,17 +70,17 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             }
         }
 
-        private void UpdateIfEnabled(Series author)
+        private void UpdateIfEnabled(Series series)
         {
             _plexTvService.Ping(Settings.AuthToken);
 
             if (Settings.UpdateLibrary)
             {
-                _logger.Debug("Scheduling library update for series {0} {1}", author.Id, author.Name);
+                _logger.Debug("Scheduling library update for series {0} {1}", series.Id, series.Name);
                 var queue = _pendingSeriesCache.Get(Settings.Host, () => new PlexUpdateQueue());
                 lock (queue)
                 {
-                    queue.Pending[author.Id] = author;
+                    queue.Pending[series.Id] = series;
                 }
             }
         }

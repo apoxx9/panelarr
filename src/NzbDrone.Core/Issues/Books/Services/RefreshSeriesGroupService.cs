@@ -8,7 +8,7 @@ namespace NzbDrone.Core.Issues
 {
     public interface IRefreshSeriesGroupService
     {
-        bool RefreshSeriesInfo(int authorMetadataId, List<SeriesGroup> remoteIssues, Series remoteData, bool forceIssueRefresh, bool forceUpdateFileTags, DateTime? lastUpdate);
+        bool RefreshSeriesInfo(int seriesMetadataId, List<SeriesGroup> remoteIssues, Series remoteData, bool forceIssueRefresh, bool forceUpdateFileTags, DateTime? lastUpdate);
     }
 
     public class RefreshSeriesGroupService : RefreshEntityServiceBase<SeriesGroup, SeriesGroupLink>, IRefreshSeriesGroupService
@@ -23,9 +23,9 @@ namespace NzbDrone.Core.Issues
                                     ISeriesGroupService seriesService,
                                     ISeriesIssueLinkService linkService,
                                     IRefreshSeriesIssueLinkService refreshLinkService,
-                                    ISeriesMetadataService authorMetadataService,
+                                    ISeriesMetadataService seriesMetadataService,
                                     Logger logger)
-        : base(logger, authorMetadataService)
+        : base(logger, seriesMetadataService)
         {
             _issueService = bookService;
             _seriesService = seriesService;
@@ -127,15 +127,15 @@ namespace NzbDrone.Core.Issues
             return _refreshLinkService.RefreshSeriesIssueLinkInfo(localChildren.Added, localChildren.Updated, localChildren.Merged, localChildren.Deleted, localChildren.UpToDate, remoteChildren, forceUpdateFileTags);
         }
 
-        public bool RefreshSeriesInfo(int authorMetadataId, List<SeriesGroup> remoteSeries, Series remoteData, bool forceIssueRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
+        public bool RefreshSeriesInfo(int seriesMetadataId, List<SeriesGroup> remoteSeries, Series remoteData, bool forceIssueRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
         {
             var updated = false;
 
-            var existingByMetadata = _seriesService.GetBySeriesMetadataId(authorMetadataId);
+            var existingByMetadata = _seriesService.GetBySeriesMetadataId(seriesMetadataId);
             var existingByForeignId = _seriesService.FindById(remoteSeries.Select(x => x.ForeignSeriesId).ToList());
             var existing = existingByMetadata.Concat(existingByForeignId).GroupBy(x => x.ForeignSeriesId).Select(x => x.First()).ToList();
 
-            var issues = _issueService.GetIssuesBySeriesMetadataId(authorMetadataId);
+            var issues = _issueService.GetIssuesBySeriesMetadataId(seriesMetadataId);
             var bookDict = issues.ToDictionary(x => x.ForeignIssueId);
             var links = new List<SeriesGroupLink>();
 

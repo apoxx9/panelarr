@@ -7,9 +7,9 @@ namespace NzbDrone.Core.Issues.Events
         public Series Series { get; private set; }
         public Series OldSeries { get; private set; }
 
-        public SeriesEditedEvent(Series author, Series oldSeries)
+        public SeriesEditedEvent(Series series, Series oldSeries)
         {
-            Series = author;
+            Series = series;
             OldSeries = oldSeries;
         }
     }

@@ -38,17 +38,17 @@ namespace Panelarr.Api.V1.Series
         private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly IAddSeriesService _addSeriesService;
-        private readonly ISeriesStatisticsService _authorStatisticsService;
+        private readonly ISeriesStatisticsService _seriesStatisticsService;
         private readonly IMapCoversToLocal _coverMapper;
         private readonly IManageCommandQueue _commandQueueManager;
         private readonly IRootFolderService _rootFolderService;
         private readonly ISeriesGroupService _seriesGroupService;
 
         public SeriesController(IBroadcastSignalRMessage signalRBroadcaster,
-                            ISeriesService authorService,
+                            ISeriesService seriesService,
                             IIssueService bookService,
                             IAddSeriesService addSeriesService,
-                            ISeriesStatisticsService authorStatisticsService,
+                            ISeriesStatisticsService seriesStatisticsService,
                             IMapCoversToLocal coverMapper,
                             IManageCommandQueue commandQueueManager,
                             IRootFolderService rootFolderService,
@@ -56,19 +56,19 @@ namespace Panelarr.Api.V1.Series
                             RecycleBinValidator recycleBinValidator,
                             RootFolderValidator rootFolderValidator,
                             MappedNetworkDriveValidator mappedNetworkDriveValidator,
-                            SeriesPathValidator authorPathValidator,
-                            SeriesExistsValidator authorExistsValidator,
-                            SeriesAncestorValidator authorAncestorValidator,
+                            SeriesPathValidator seriesPathValidator,
+                            SeriesExistsValidator seriesExistsValidator,
+                            SeriesAncestorValidator seriesAncestorValidator,
                             SystemFolderValidator systemFolderValidator,
                             QualityProfileExistsValidator qualityProfileExistsValidator,
                             MetadataProfileExistsValidator metadataProfileExistsValidator,
-                            SeriesFolderAsRootFolderValidator authorFolderAsRootFolderValidator)
+                            SeriesFolderAsRootFolderValidator seriesFolderAsRootFolderValidator)
             : base(signalRBroadcaster)
         {
-            _seriesService = authorService;
+            _seriesService = seriesService;
             _issueService = bookService;
             _addSeriesService = addSeriesService;
-            _authorStatisticsService = authorStatisticsService;
+            _seriesStatisticsService = seriesStatisticsService;
 
             _coverMapper = coverMapper;
             _commandQueueManager = commandQueueManager;
@@ -82,8 +82,8 @@ namespace Panelarr.Api.V1.Series
                            .IsValidPath()
                            .SetValidator(rootFolderValidator)
                            .SetValidator(mappedNetworkDriveValidator)
-                           .SetValidator(authorPathValidator)
-                           .SetValidator(authorAncestorValidator)
+                           .SetValidator(seriesPathValidator)
+                           .SetValidator(seriesAncestorValidator)
                            .SetValidator(recycleBinValidator)
                            .SetValidator(systemFolderValidator)
                            .When(s => !s.Path.IsNullOrWhiteSpace());
@@ -93,10 +93,10 @@ namespace Panelarr.Api.V1.Series
             PostValidator.RuleFor(s => s.Path).IsValidPath().When(s => s.RootFolderPath.IsNullOrWhiteSpace());
             PostValidator.RuleFor(s => s.RootFolderPath)
                          .IsValidPath()
-                         .SetValidator(authorFolderAsRootFolderValidator)
+                         .SetValidator(seriesFolderAsRootFolderValidator)
                          .When(s => s.Path.IsNullOrWhiteSpace());
             PostValidator.RuleFor(s => s.SeriesName).NotEmpty();
-            PostValidator.RuleFor(s => s.ForeignSeriesId).NotEmpty().SetValidator(authorExistsValidator);
+            PostValidator.RuleFor(s => s.ForeignSeriesId).NotEmpty().SetValidator(seriesExistsValidator);
 
             PutValidator.RuleFor(s => s.Path).IsValidPath();
         }
@@ -127,7 +127,7 @@ namespace Panelarr.Api.V1.Series
         [HttpGet]
         public List<SeriesResource> AllSeriess(int? seriesGroupId = null)
         {
-            var seriesStats = _authorStatisticsService.SeriesStatistics();
+            var seriesStats = _seriesStatisticsService.SeriesStatistics();
             var allSeries = _seriesService.GetAllSeries();
 
             if (seriesGroupId.HasValue)
@@ -221,7 +221,7 @@ namespace Panelarr.Api.V1.Series
 
         private void FetchAndLinkSeriesStatistics(SeriesResource resource)
         {
-            LinkSeriesStatistics(resource, _authorStatisticsService.SeriesStatistics(resource.Id));
+            LinkSeriesStatistics(resource, _seriesStatisticsService.SeriesStatistics(resource.Id));
         }
 
         private void LinkSeriesStatistics(List<SeriesResource> resources, Dictionary<int, SeriesStatistics> seriesStatistics)

@@ -13,7 +13,7 @@ namespace NzbDrone.Core.Issues
 {
     public interface IIssueAddedService
     {
-        void SearchForRecentlyAdded(int authorId);
+        void SearchForRecentlyAdded(int seriesId);
     }
 
     public class IssueAddedService : IHandle<IssueInfoRefreshedEvent>, IIssueAddedService
@@ -34,9 +34,9 @@ namespace NzbDrone.Core.Issues
             _addedIssuesCache = cacheManager.GetCache<List<int>>(GetType());
         }
 
-        public void SearchForRecentlyAdded(int authorId)
+        public void SearchForRecentlyAdded(int seriesId)
         {
-            var allIssues = _issueService.GetIssuesBySeries(authorId);
+            var allIssues = _issueService.GetIssuesBySeries(seriesId);
             var toSearch = allIssues.Where(x => x.AddOptions.SearchForNewIssue).ToList();
 
             if (toSearch.Any())
@@ -46,7 +46,7 @@ namespace NzbDrone.Core.Issues
                 _issueService.SetAddOptions(toSearch);
             }
 
-            var recentlyAddedIds = _addedIssuesCache.Find(authorId.ToString());
+            var recentlyAddedIds = _addedIssuesCache.Find(seriesId.ToString());
             if (recentlyAddedIds != null)
             {
                 toSearch.AddRange(allIssues.Where(x => recentlyAddedIds.Contains(x.Id)));
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Issues
                 _commandQueueManager.Push(new IssueSearchCommand(toSearch.Select(e => e.Id).ToList()));
             }
 
-            _addedIssuesCache.Remove(authorId.ToString());
+            _addedIssuesCache.Remove(seriesId.ToString());
         }
 
         public void Handle(IssueInfoRefreshedEvent message)

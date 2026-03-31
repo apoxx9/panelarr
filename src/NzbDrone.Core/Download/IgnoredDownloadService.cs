@@ -25,18 +25,18 @@ namespace NzbDrone.Core.Download
 
         public bool IgnoreDownload(TrackedDownload trackedDownload)
         {
-            var author = trackedDownload.RemoteIssue.Series;
+            var series = trackedDownload.RemoteIssue.Series;
             var issues = trackedDownload.RemoteIssue.Issues;
 
-            if (author == null || issues.Empty())
+            if (series == null || issues.Empty())
             {
-                _logger.Warn("Unable to ignore download for unknown author/issue");
+                _logger.Warn("Unable to ignore download for unknown series/issue");
                 return false;
             }
 
             var downloadIgnoredEvent = new DownloadIgnoredEvent
             {
-                SeriesId = author.Id,
+                SeriesId = series.Id,
                 IssueIds = issues.Select(e => e.Id).ToList(),
                 Quality = trackedDownload.RemoteIssue.ParsedIssueInfo.Quality,
                 SourceTitle = trackedDownload.DownloadItem.Title,

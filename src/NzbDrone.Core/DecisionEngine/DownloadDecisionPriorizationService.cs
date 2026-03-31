@@ -24,7 +24,7 @@ namespace NzbDrone.Core.DecisionEngine
         public List<DownloadDecision> PrioritizeDecisions(List<DownloadDecision> decisions)
         {
             return decisions.Where(c => c.RemoteIssue.DownloadAllowed)
-                            .GroupBy(c => c.RemoteIssue.Series.Id, (authorId, downloadDecisions) =>
+                            .GroupBy(c => c.RemoteIssue.Series.Id, (seriesId, downloadDecisions) =>
                                 {
                                     return downloadDecisions.OrderByDescending(decision => decision, new DownloadDecisionComparer(_configService, _delayProfileService));
                                 })

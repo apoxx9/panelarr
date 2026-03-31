@@ -19,24 +19,24 @@ namespace NzbDrone.Core.Test.MediaFiles.TrackFileMovingServiceTests
     [TestFixture]
     public class MoveTrackFileFixture : CoreTest<ComicFileMovingService>
     {
-        private Series _author;
+        private Series _series;
         private ComicFile _trackFile;
         private LocalIssue _localtrack;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                                      .With(s => s.Path = @"C:\Test\Music\Series".AsOsAgnostic())
                                      .Build();
 
             _trackFile = Builder<ComicFile>.CreateNew()
                                                .With(f => f.Path = null)
-                                               .With(f => f.Path = Path.Combine(_author.Path, @"Issue\File.mp3"))
+                                               .With(f => f.Path = Path.Combine(_series.Path, @"Issue\File.mp3"))
                                                .Build();
 
             _localtrack = Builder<LocalIssue>.CreateNew()
-                                                 .With(l => l.Series = _author)
+                                                 .With(l => l.Series = _series)
                                                  .With(l => l.Issue = Builder<Issue>.CreateNew().Build())
                                                  .Build();
 
@@ -87,7 +87,7 @@ namespace NzbDrone.Core.Test.MediaFiles.TrackFileMovingServiceTests
         }
 
         [Test]
-        public void should_notify_on_author_folder_creation()
+        public void should_notify_on_series_folder_creation()
         {
             Subject.MoveComicFile(_trackFile, _localtrack);
 
@@ -107,10 +107,10 @@ namespace NzbDrone.Core.Test.MediaFiles.TrackFileMovingServiceTests
         }
 
         [Test]
-        public void should_not_notify_if_author_folder_already_exists()
+        public void should_not_notify_if_series_folder_already_exists()
         {
             Mocker.GetMock<IDiskProvider>()
-                  .Setup(s => s.FolderExists(_author.Path))
+                  .Setup(s => s.FolderExists(_series.Path))
                   .Returns(true);
 
             Subject.MoveComicFile(_trackFile, _localtrack);

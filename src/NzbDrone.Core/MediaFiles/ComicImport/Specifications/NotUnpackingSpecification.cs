@@ -27,7 +27,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
         {
             if (item.ExistingFile)
             {
-                _logger.Debug("{0} is in author folder, skipping unpacking check", item.Path);
+                _logger.Debug("{0} is in series folder, skipping unpacking check", item.Path);
                 return Decision.Accept();
             }
 

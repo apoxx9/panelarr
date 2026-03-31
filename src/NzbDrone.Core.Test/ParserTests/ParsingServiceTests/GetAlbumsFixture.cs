@@ -18,11 +18,11 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         [Test]
         public void should_not_fail_if_search_criteria_contains_multiple_books_with_the_same_name()
         {
-            var author = Builder<Series>.CreateNew().Build();
+            var series = Builder<Series>.CreateNew().Build();
             var issues = Builder<Issue>.CreateListOfSize(2).All().With(x => x.Title = "IdenticalTitle").Build().ToList();
             var criteria = new IssueSearchCriteria
             {
-                Series = author,
+                Series = series,
                 Issues = issues
             };
 
@@ -31,10 +31,10 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
                 IssueTitle = "IdenticalTitle"
             };
 
-            Subject.GetIssues(parsed, author, criteria).Should().BeEquivalentTo(new List<Issue>());
+            Subject.GetIssues(parsed, series, criteria).Should().BeEquivalentTo(new List<Issue>());
 
             Mocker.GetMock<IIssueService>()
-                .Verify(s => s.FindByTitle(author.SeriesMetadataId, "IdenticalTitle"), Times.Once());
+                .Verify(s => s.FindByTitle(series.SeriesMetadataId, "IdenticalTitle"), Times.Once());
         }
     }
 }

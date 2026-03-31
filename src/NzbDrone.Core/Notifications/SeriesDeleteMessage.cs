@@ -14,14 +14,14 @@ namespace NzbDrone.Core.Notifications
             return Message;
         }
 
-        public SeriesDeleteMessage(Series author, bool deleteFiles)
+        public SeriesDeleteMessage(Series series, bool deleteFiles)
         {
-            Series = author;
+            Series = series;
             DeletedFiles = deleteFiles;
             DeletedFilesMessage = DeletedFiles ?
                 "Series removed and all files were deleted" :
                 "Series removed, files were not deleted";
-            Message = author.Name + " - " + DeletedFilesMessage;
+            Message = series.Name + " - " + DeletedFilesMessage;
         }
     }
 }

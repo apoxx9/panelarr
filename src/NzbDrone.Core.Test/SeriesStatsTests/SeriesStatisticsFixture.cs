@@ -15,17 +15,17 @@ namespace NzbDrone.Core.Test.SeriesStatsTests
     [TestFixture]
     public class SeriesStatisticsFixture : DbTest<SeriesStatisticsRepository, Series>
     {
-        private Series _author;
+        private Series _series;
         private Issue _issue;
         private List<ComicFile> _comicFiles;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                 .With(a => a.SeriesMetadataId = 10)
                 .BuildNew();
-            Db.Insert(_author);
+            Db.Insert(_series);
 
             _issue = Builder<Issue>.CreateNew()
                 .With(e => e.ReleaseDate = DateTime.Today.AddDays(-5))
@@ -36,7 +36,7 @@ namespace NzbDrone.Core.Test.SeriesStatsTests
             _comicFiles = Builder<ComicFile>.CreateListOfSize(2)
                 .All()
                 .With(x => x.Id = 0)
-                .With(e => e.Series = _author)
+                .With(e => e.Series = _series)
                 .With(e => e.IssueId = _issue.Id)
                 .With(e => e.Quality = new QualityModel(Quality.CBR))
                 .BuildList();
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.SeriesStatsTests
         }
 
         [Test]
-        public void should_get_stats_for_author()
+        public void should_get_stats_for_series()
         {
             var stats = Subject.SeriesStatistics();
 

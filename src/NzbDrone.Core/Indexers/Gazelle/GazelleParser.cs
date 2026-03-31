@@ -54,13 +54,13 @@ namespace NzbDrone.Core.Indexers.Gazelle
                     foreach (var torrent in result.Torrents)
                     {
                         var id = torrent.TorrentId;
-                        var author = WebUtility.HtmlDecode(result.Series);
+                        var series = WebUtility.HtmlDecode(result.Series);
                         var issue = WebUtility.HtmlDecode(result.GroupName);
 
                         torrentInfos.Add(new GazelleInfo
                         {
                             Guid = string.Format("Gazelle-{0}", id),
-                            Series = author,
+                            Series = series,
 
                             // Splice Title from info to avoid calling API again for every torrent.
                             Title = WebUtility.HtmlDecode(result.Series + " - " + result.GroupName + " (" + result.GroupYear + ") [" + torrent.Format + " " + torrent.Encoding + "]"),

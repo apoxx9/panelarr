@@ -8,9 +8,9 @@ namespace NzbDrone.Core.MediaCover
         public Series Series { get; set; }
         public Issue Issue { get; set; }
 
-        public MediaCoversUpdatedEvent(Series author)
+        public MediaCoversUpdatedEvent(Series series)
         {
-            Series = author;
+            Series = series;
         }
 
         public MediaCoversUpdatedEvent(Issue issue)

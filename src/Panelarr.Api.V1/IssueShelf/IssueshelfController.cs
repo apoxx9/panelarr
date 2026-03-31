@@ -8,12 +8,12 @@ namespace Panelarr.Api.V1.IssueShelf
     [V1ApiController]
     public class IssueshelfController : Controller
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IIssueMonitoredService _issueMonitoredService;
 
-        public IssueshelfController(ISeriesService authorService, IIssueMonitoredService bookMonitoredService)
+        public IssueshelfController(ISeriesService seriesService, IIssueMonitoredService bookMonitoredService)
         {
-            _authorService = authorService;
+            _seriesService = seriesService;
             _issueMonitoredService = bookMonitoredService;
         }
 
@@ -21,28 +21,28 @@ namespace Panelarr.Api.V1.IssueShelf
         public IActionResult UpdateAll([FromBody] IssueshelfResource request)
         {
             //Read from request
-            var authorToUpdate = _authorService.GetSeriess(request.Seriess.Select(s => s.Id));
+            var seriesToUpdate = _seriesService.GetSeriess(request.Seriess.Select(s => s.Id));
 
             foreach (var s in request.Seriess)
             {
-                var author = authorToUpdate.Single(c => c.Id == s.Id);
+                var series = seriesToUpdate.Single(c => c.Id == s.Id);
 
                 if (s.Monitored.HasValue)
                 {
-                    author.Monitored = s.Monitored.Value;
+                    series.Monitored = s.Monitored.Value;
                 }
 
                 if (request.MonitoringOptions != null && request.MonitoringOptions.Monitor == MonitorTypes.None)
                 {
-                    author.Monitored = false;
+                    series.Monitored = false;
                 }
 
                 if (request.MonitorNewItems.HasValue)
                 {
-                    author.MonitorNewItems = request.MonitorNewItems.Value;
+                    series.MonitorNewItems = request.MonitorNewItems.Value;
                 }
 
-                _issueMonitoredService.SetIssueMonitoredStatus(author, request.MonitoringOptions);
+                _issueMonitoredService.SetIssueMonitoredStatus(series, request.MonitoringOptions);
             }
 
             return Accepted(request);

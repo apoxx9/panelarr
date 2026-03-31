@@ -31,14 +31,14 @@ namespace NzbDrone.Core.Indexers.Gazelle
         public IndexerPageableRequestChain GetSearchRequests(IssueSearchCriteria searchCriteria)
         {
             var pageableRequests = new IndexerPageableRequestChain();
-            pageableRequests.Add(GetRequest(string.Format("&authorname={0}&groupname={1}", searchCriteria.SeriesQuery, searchCriteria.IssueQuery)));
+            pageableRequests.Add(GetRequest(string.Format("&seriesname={0}&groupname={1}", searchCriteria.SeriesQuery, searchCriteria.IssueQuery)));
             return pageableRequests;
         }
 
         public IndexerPageableRequestChain GetSearchRequests(SeriesSearchCriteria searchCriteria)
         {
             var pageableRequests = new IndexerPageableRequestChain();
-            pageableRequests.Add(GetRequest(string.Format("&authorname={0}", searchCriteria.SeriesQuery)));
+            pageableRequests.Add(GetRequest(string.Format("&seriesname={0}", searchCriteria.SeriesQuery)));
             return pageableRequests;
         }
 

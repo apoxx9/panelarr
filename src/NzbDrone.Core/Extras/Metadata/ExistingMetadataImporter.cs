@@ -35,18 +35,18 @@ namespace NzbDrone.Core.Extras.Metadata
 
         public override int Order => 0;
 
-        public override IEnumerable<ExtraFile> ProcessFiles(Series author, List<string> filesOnDisk, List<string> importedFiles)
+        public override IEnumerable<ExtraFile> ProcessFiles(Series series, List<string> filesOnDisk, List<string> importedFiles)
         {
-            _logger.Debug("Looking for existing metadata in {0}", author.Path);
+            _logger.Debug("Looking for existing metadata in {0}", series.Path);
 
             var metadataFiles = new List<MetadataFile>();
-            var filterResult = FilterAndClean(author, filesOnDisk, importedFiles);
+            var filterResult = FilterAndClean(series, filesOnDisk, importedFiles);
 
             foreach (var possibleMetadataFile in filterResult.FilesOnDisk)
             {
                 foreach (var consumer in _consumers)
                 {
-                    var metadata = consumer.FindMetadataFile(author, possibleMetadataFile);
+                    var metadata = consumer.FindMetadataFile(series, possibleMetadataFile);
 
                     if (metadata == null)
                     {
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Extras.Metadata
 
                     if (metadata.Type == MetadataType.IssueImage || metadata.Type == MetadataType.IssueMetadata)
                     {
-                        var localIssue = _parsingService.GetLocalIssue(possibleMetadataFile, author);
+                        var localIssue = _parsingService.GetLocalIssue(possibleMetadataFile, series);
 
                         if (localIssue == null)
                         {
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.Extras.Metadata
                         var localTrack = new LocalIssue
                         {
                             FileTrackInfo = Parser.Parser.ParseMusicPath(possibleMetadataFile),
-                            Series = author,
+                            Series = series,
                             Path = possibleMetadataFile
                         };
 

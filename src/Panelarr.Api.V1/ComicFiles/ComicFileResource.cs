@@ -59,7 +59,7 @@ namespace Panelarr.Api.V1.ComicFiles
             };
         }
 
-        public static ComicFileResource ToResource(this ComicFile model, NzbDrone.Core.Issues.Series author, IUpgradableSpecification upgradableSpecification)
+        public static ComicFileResource ToResource(this ComicFile model, NzbDrone.Core.Issues.Series series, IUpgradableSpecification upgradableSpecification)
         {
             if (model == null)
             {
@@ -70,7 +70,7 @@ namespace Panelarr.Api.V1.ComicFiles
             {
                 Id = model.Id,
 
-                SeriesId = author.Id,
+                SeriesId = series.Id,
                 IssueId = model.IssueId,
                 Path = model.Path,
                 Size = model.Size,
@@ -78,7 +78,7 @@ namespace Panelarr.Api.V1.ComicFiles
                 Quality = model.Quality,
                 QualityWeight = QualityWeight(model.Quality),
                 MediaInfo = model.MediaInfo.ToResource(),
-                QualityCutoffNotMet = upgradableSpecification.QualityCutoffNotMet(author.QualityProfile.Value, model.Quality),
+                QualityCutoffNotMet = upgradableSpecification.QualityCutoffNotMet(series.QualityProfile.Value, model.Quality),
                 IndexerFlags = (int)model.IndexerFlags
             };
         }

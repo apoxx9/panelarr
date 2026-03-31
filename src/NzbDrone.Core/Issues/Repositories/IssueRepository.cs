@@ -11,22 +11,22 @@ namespace NzbDrone.Core.Issues
 {
     public interface IIssueRepository : IBasicRepository<Issue>
     {
-        List<Issue> GetIssues(int authorId);
-        List<Issue> GetLastIssues(IEnumerable<int> authorMetadataIds);
-        List<Issue> GetNextIssues(IEnumerable<int> authorMetadataIds);
-        List<Issue> GetIssuesBySeriesMetadataId(int authorMetadataId);
-        List<Issue> GetIssuesForRefresh(int authorMetadataId, List<string> foreignIds);
+        List<Issue> GetIssues(int seriesId);
+        List<Issue> GetLastIssues(IEnumerable<int> seriesMetadataIds);
+        List<Issue> GetNextIssues(IEnumerable<int> seriesMetadataIds);
+        List<Issue> GetIssuesBySeriesMetadataId(int seriesMetadataId);
+        List<Issue> GetIssuesForRefresh(int seriesMetadataId, List<string> foreignIds);
         List<Issue> GetIssuesByFileIds(IEnumerable<int> fileIds);
-        Issue FindByTitle(int authorMetadataId, string title);
+        Issue FindByTitle(int seriesMetadataId, string title);
         Issue FindById(string foreignIssueId);
         Issue FindBySlug(string titleSlug);
         PagingSpec<Issue> IssuesWithoutFiles(PagingSpec<Issue> pagingSpec);
         PagingSpec<Issue> IssuesWhereCutoffUnmet(PagingSpec<Issue> pagingSpec, List<QualitiesBelowCutoff> qualitiesBelowCutoff);
         List<Issue> IssuesBetweenDates(DateTime startDate, DateTime endDate, bool includeUnmonitored);
-        List<Issue> SeriesIssuesBetweenDates(Series author, DateTime startDate, DateTime endDate, bool includeUnmonitored);
+        List<Issue> SeriesIssuesBetweenDates(Series series, DateTime startDate, DateTime endDate, bool includeUnmonitored);
         void SetMonitoredFlat(Issue issue, bool monitored);
         void SetMonitored(IEnumerable<int> ids, bool monitored);
-        List<Issue> GetSeriesIssuesWithFiles(Series author);
+        List<Issue> GetSeriesIssuesWithFiles(Series series);
     }
 
     public class IssueRepository : BasicRepository<Issue>, IIssueRepository
@@ -36,18 +36,18 @@ namespace NzbDrone.Core.Issues
         {
         }
 
-        public List<Issue> GetIssues(int authorId)
+        public List<Issue> GetIssues(int seriesId)
         {
-            return Query(Builder().Join<Issue, Series>((l, r) => l.SeriesMetadataId == r.SeriesMetadataId).Where<Series>(a => a.Id == authorId));
+            return Query(Builder().Join<Issue, Series>((l, r) => l.SeriesMetadataId == r.SeriesMetadataId).Where<Series>(a => a.Id == seriesId));
         }
 
-        public List<Issue> GetLastIssues(IEnumerable<int> authorMetadataIds)
+        public List<Issue> GetLastIssues(IEnumerable<int> seriesMetadataIds)
         {
             var now = DateTime.UtcNow;
 
             var inner = Builder()
                 .Select("MAX(\"Issues\".\"Id\") as id")
-                .Where<Issue>(x => authorMetadataIds.Contains(x.SeriesMetadataId) && x.ReleaseDate < now)
+                .Where<Issue>(x => seriesMetadataIds.Contains(x.SeriesMetadataId) && x.ReleaseDate < now)
                 .GroupBy<Issue>(x => x.SeriesMetadataId)
                 .AddSelectTemplate(typeof(Issue));
 
@@ -58,13 +58,13 @@ namespace NzbDrone.Core.Issues
             return Query(outer);
         }
 
-        public List<Issue> GetNextIssues(IEnumerable<int> authorMetadataIds)
+        public List<Issue> GetNextIssues(IEnumerable<int> seriesMetadataIds)
         {
             var now = DateTime.UtcNow;
 
             var inner = Builder()
                 .Select("MIN(\"Issues\".\"Id\") as id")
-                .Where<Issue>(x => authorMetadataIds.Contains(x.SeriesMetadataId) && x.ReleaseDate > now)
+                .Where<Issue>(x => seriesMetadataIds.Contains(x.SeriesMetadataId) && x.ReleaseDate > now)
                 .GroupBy<Issue>(x => x.SeriesMetadataId)
                 .AddSelectTemplate(typeof(Issue));
 
@@ -75,14 +75,14 @@ namespace NzbDrone.Core.Issues
             return Query(outer);
         }
 
-        public List<Issue> GetIssuesBySeriesMetadataId(int authorMetadataId)
+        public List<Issue> GetIssuesBySeriesMetadataId(int seriesMetadataId)
         {
-            return Query(s => s.SeriesMetadataId == authorMetadataId);
+            return Query(s => s.SeriesMetadataId == seriesMetadataId);
         }
 
-        public List<Issue> GetIssuesForRefresh(int authorMetadataId, List<string> foreignIds)
+        public List<Issue> GetIssuesForRefresh(int seriesMetadataId, List<string> foreignIds)
         {
-            return Query(a => a.SeriesMetadataId == authorMetadataId || foreignIds.Contains(a.ForeignIssueId));
+            return Query(a => a.SeriesMetadataId == seriesMetadataId || foreignIds.Contains(a.ForeignIssueId));
         }
 
         public List<Issue> GetIssuesByFileIds(IEnumerable<int> fileIds)
@@ -171,11 +171,11 @@ namespace NzbDrone.Core.Issues
             return Query(builder);
         }
 
-        public List<Issue> SeriesIssuesBetweenDates(Series author, DateTime startDate, DateTime endDate, bool includeUnmonitored)
+        public List<Issue> SeriesIssuesBetweenDates(Series series, DateTime startDate, DateTime endDate, bool includeUnmonitored)
         {
             var builder = Builder().Where<Issue>(rg => rg.ReleaseDate >= startDate &&
                                                  rg.ReleaseDate <= endDate &&
-                                                 rg.SeriesMetadataId == author.SeriesMetadataId);
+                                                 rg.SeriesMetadataId == series.SeriesMetadataId);
 
             if (!includeUnmonitored)
             {
@@ -201,7 +201,7 @@ namespace NzbDrone.Core.Issues
             SetFields(issues, p => p.Monitored);
         }
 
-        public Issue FindByTitle(int authorMetadataId, string title)
+        public Issue FindByTitle(int seriesMetadataId, string title)
         {
             var cleanTitle = Parser.Parser.CleanSeriesName(title);
 
@@ -210,15 +210,15 @@ namespace NzbDrone.Core.Issues
                 cleanTitle = title;
             }
 
-            return Query(s => (s.CleanTitle == cleanTitle || s.Title == title) && s.SeriesMetadataId == authorMetadataId)
+            return Query(s => (s.CleanTitle == cleanTitle || s.Title == title) && s.SeriesMetadataId == seriesMetadataId)
                 .ExclusiveOrDefault();
         }
 
-        public List<Issue> GetSeriesIssuesWithFiles(Series author)
+        public List<Issue> GetSeriesIssuesWithFiles(Series series)
         {
             return Query(Builder()
                          .Join<Issue, ComicFile>((b, f) => b.Id == f.IssueId)
-                         .Where<Issue>(x => x.SeriesMetadataId == author.SeriesMetadataId)
+                         .Where<Issue>(x => x.SeriesMetadataId == series.SeriesMetadataId)
                          .Where<Issue>(e => e.Monitored == true));
         }
     }

@@ -79,8 +79,8 @@ namespace Panelarr.Api.V1.Issues
 
             if (includeSeries)
             {
-                var author = issue.Series.Value;
-                resource.Series = author.ToResource();
+                var series = issue.Series.Value;
+                resource.Series = series.ToResource();
             }
 
             _coverMapper.ConvertToLocalUrls(resource.Id, MediaCoverEntity.Issue, resource.Images);
@@ -110,20 +110,20 @@ namespace Panelarr.Api.V1.Issues
 
             if (includeSeries)
             {
-                var authorDict = new Dictionary<int, NzbDrone.Core.Issues.Series>();
+                var seriesDict = new Dictionary<int, NzbDrone.Core.Issues.Series>();
                 for (var i = 0; i < issues.Count; i++)
                 {
                     var issue = issues[i];
                     var resource = result[i];
-                    var author = authorDict.GetValueOrDefault(issues[i].SeriesMetadataId) ?? issue.Series?.Value;
-                    authorDict[author.SeriesMetadataId] = author;
+                    var series = seriesDict.GetValueOrDefault(issues[i].SeriesMetadataId) ?? issue.Series?.Value;
+                    seriesDict[series.SeriesMetadataId] = series;
 
-                    resource.Series = author.ToResource();
+                    resource.Series = series.ToResource();
                 }
             }
 
-            var authorStats = _seriesStatisticsService.SeriesStatistics();
-            var bookStatsDict = authorStats.SelectMany(x => x.IssueStatistics).ToDictionary(x => x.IssueId);
+            var seriesStats = _seriesStatisticsService.SeriesStatistics();
+            var bookStatsDict = seriesStats.SelectMany(x => x.IssueStatistics).ToDictionary(x => x.IssueId);
 
             foreach (var issueResource in result)
             {

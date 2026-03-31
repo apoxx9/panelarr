@@ -36,14 +36,14 @@ namespace NzbDrone.Core.Notifications.Subsonic
             Update();
         }
 
-        public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
+        public override void OnRename(Series series, List<RenamedComicFile> renamedFiles)
         {
             Update();
         }
 
-        public override void OnSeriesAdded(Series author)
+        public override void OnSeriesAdded(Series series)
         {
-            Notify(Settings, AUTHOR_ADDED_TITLE_BRANDED, author.Name);
+            Notify(Settings, AUTHOR_ADDED_TITLE_BRANDED, series.Name);
         }
 
         public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)

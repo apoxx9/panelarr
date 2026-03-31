@@ -157,8 +157,8 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
 
             foreach (var release in releases)
             {
-                // make sure the appropriate quality profile is set for the release author
-                // in case it's a new author
+                // make sure the appropriate quality profile is set for the release series
+                // in case it's a new series
                 EnsureData(release);
                 release.NewDownload = config.NewDownload;
 
@@ -187,9 +187,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                 var rootFolder = _rootFolderService.GetBestRootFolder(edition.LocalIssues.First().Path);
                 var qualityProfile = _qualityProfileService.Get(rootFolder.DefaultQualityProfileId);
 
-                var author = edition.Issue.Series.Value;
-                author.QualityProfileId = qualityProfile.Id;
-                author.QualityProfile = qualityProfile;
+                var series = edition.Issue.Series.Value;
+                series.QualityProfileId = qualityProfile.Id;
+                series.QualityProfile = qualityProfile;
             }
         }
 

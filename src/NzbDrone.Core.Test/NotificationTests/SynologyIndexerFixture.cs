@@ -14,21 +14,21 @@ namespace NzbDrone.Core.Test.NotificationTests
     [TestFixture]
     public class SynologyIndexerFixture : CoreTest<SynologyIndexer>
     {
-        private Series _author;
+        private Series _series;
         private IssueDownloadMessage _upgrade;
         private string _rootPath = @"C:\Test\".AsOsAgnostic();
 
         [SetUp]
         public void SetUp()
         {
-            _author = new Series()
+            _series = new Series()
             {
                 Path = _rootPath,
             };
 
             _upgrade = new IssueDownloadMessage()
             {
-                Series = _author,
+                Series = _series,
 
                 ComicFiles = new List<ComicFile>
                 {
@@ -65,10 +65,10 @@ namespace NzbDrone.Core.Test.NotificationTests
         {
             (Subject.Definition.Settings as SynologyIndexerSettings).UpdateLibrary = false;
 
-            Subject.OnRename(_author, new List<RenamedComicFile>());
+            Subject.OnRename(_series, new List<RenamedComicFile>());
 
             Mocker.GetMock<ISynologyIndexerProxy>()
-                .Verify(v => v.UpdateFolder(_author.Path), Times.Never());
+                .Verify(v => v.UpdateFolder(_series.Path), Times.Never());
         }
 
         [Test]
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Test.NotificationTests
         [Test]
         public void should_update_entire_series_folder_on_rename()
         {
-            Subject.OnRename(_author, new List<RenamedComicFile>());
+            Subject.OnRename(_series, new List<RenamedComicFile>());
 
             Mocker.GetMock<ISynologyIndexerProxy>()
                 .Verify(v => v.UpdateFolder(@"C:\Test\".AsOsAgnostic()), Times.Once());

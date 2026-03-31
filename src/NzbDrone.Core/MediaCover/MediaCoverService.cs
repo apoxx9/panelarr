@@ -125,9 +125,9 @@ namespace NzbDrone.Core.MediaCover
             }
         }
 
-        private string GetSeriesCoverPath(int authorId)
+        private string GetSeriesCoverPath(int seriesId)
         {
-            return Path.Combine(_coverRootFolder, authorId.ToString());
+            return Path.Combine(_coverRootFolder, seriesId.ToString());
         }
 
         private string GetIssueCoverPath(int issueId)
@@ -135,18 +135,18 @@ namespace NzbDrone.Core.MediaCover
             return Path.Combine(_coverRootFolder, "Comics", issueId.ToString());
         }
 
-        private void EnsureSeriesCovers(Series author)
+        private void EnsureSeriesCovers(Series series)
         {
             var toResize = new List<Tuple<MediaCover, bool>>();
 
-            foreach (var cover in author.Metadata.Value.Images)
+            foreach (var cover in series.Metadata.Value.Images)
             {
                 if (cover.CoverType == MediaCoverTypes.Unknown)
                 {
                     continue;
                 }
 
-                var fileName = GetCoverPath(author.Id, MediaCoverEntity.Series, cover.CoverType, cover.Extension);
+                var fileName = GetCoverPath(series.Id, MediaCoverEntity.Series, cover.CoverType, cover.Extension);
                 var alreadyExists = false;
 
                 try
@@ -159,7 +159,7 @@ namespace NzbDrone.Core.MediaCover
 
                         if (!alreadyExists)
                         {
-                            DownloadCover(author, cover, serverFileHeaders.LastModified ?? DateTime.Now);
+                            DownloadCover(series, cover, serverFileHeaders.LastModified ?? DateTime.Now);
                         }
                     }
                     catch (Exception)
@@ -168,7 +168,7 @@ namespace NzbDrone.Core.MediaCover
                         if (!_diskProvider.FileExists(fileName) || _diskProvider.GetFileSize(fileName) == 0)
                         {
                             _logger.Debug("Range header check failed for {0}, downloading directly", cover.Url);
-                            DownloadCover(author, cover, DateTime.Now);
+                            DownloadCover(series, cover, DateTime.Now);
                         }
                         else
                         {
@@ -178,15 +178,15 @@ namespace NzbDrone.Core.MediaCover
                 }
                 catch (HttpException e)
                 {
-                    _logger.Warn("Couldn't download media cover for {0}. {1}", author, e.Message);
+                    _logger.Warn("Couldn't download media cover for {0}. {1}", series, e.Message);
                 }
                 catch (WebException e)
                 {
-                    _logger.Warn("Couldn't download media cover for {0}. {1}", author, e.Message);
+                    _logger.Warn("Couldn't download media cover for {0}. {1}", series, e.Message);
                 }
                 catch (Exception e)
                 {
-                    _logger.Error(e, "Couldn't download media cover for {0}", author);
+                    _logger.Error(e, "Couldn't download media cover for {0}", series);
                 }
 
                 toResize.Add(Tuple.Create(cover, alreadyExists));
@@ -198,7 +198,7 @@ namespace NzbDrone.Core.MediaCover
 
                 foreach (var tuple in toResize)
                 {
-                    EnsureResizedCovers(author, tuple.Item1, !tuple.Item2);
+                    EnsureResizedCovers(series, tuple.Item1, !tuple.Item2);
                 }
             }
             finally
@@ -266,11 +266,11 @@ namespace NzbDrone.Core.MediaCover
             }
         }
 
-        private void DownloadCover(Series author, MediaCover cover, DateTime lastModified)
+        private void DownloadCover(Series series, MediaCover cover, DateTime lastModified)
         {
-            var fileName = GetCoverPath(author.Id, MediaCoverEntity.Series, cover.CoverType, cover.Extension);
+            var fileName = GetCoverPath(series.Id, MediaCoverEntity.Series, cover.CoverType, cover.Extension);
 
-            _logger.Info("Downloading {0} for {1} {2}", cover.CoverType, author, cover.Url);
+            _logger.Info("Downloading {0} for {1} {2}", cover.CoverType, series, cover.Url);
             _httpClient.DownloadFile(cover.Url, fileName, USER_AGENT);
 
             try
@@ -279,7 +279,7 @@ namespace NzbDrone.Core.MediaCover
             }
             catch (Exception ex)
             {
-                _logger.Debug(ex, "Unable to set modified date for {0} image for author {1}", cover.CoverType, author);
+                _logger.Debug(ex, "Unable to set modified date for {0} image for series {1}", cover.CoverType, series);
             }
         }
 
@@ -300,18 +300,18 @@ namespace NzbDrone.Core.MediaCover
             }
         }
 
-        private void EnsureResizedCovers(Series author, MediaCover cover, bool forceResize, Issue issue = null)
+        private void EnsureResizedCovers(Series series, MediaCover cover, bool forceResize, Issue issue = null)
         {
             var heights = GetDefaultHeights(cover.CoverType);
 
             foreach (var height in heights)
             {
-                var mainFileName = GetCoverPath(author.Id, MediaCoverEntity.Series, cover.CoverType, cover.Extension);
-                var resizeFileName = GetCoverPath(author.Id, MediaCoverEntity.Series, cover.CoverType, cover.Extension, height);
+                var mainFileName = GetCoverPath(series.Id, MediaCoverEntity.Series, cover.CoverType, cover.Extension);
+                var resizeFileName = GetCoverPath(series.Id, MediaCoverEntity.Series, cover.CoverType, cover.Extension, height);
 
                 if (forceResize || !_diskProvider.FileExists(resizeFileName) || _diskProvider.GetFileSize(resizeFileName) == 0)
                 {
-                    _logger.Debug("Resizing {0}-{1} for {2}", cover.CoverType, height, author);
+                    _logger.Debug("Resizing {0}-{1} for {2}", cover.CoverType, height, series);
 
                     try
                     {
@@ -319,7 +319,7 @@ namespace NzbDrone.Core.MediaCover
                     }
                     catch
                     {
-                        _logger.Debug("Couldn't resize media cover {0}-{1} for author {2}, using full size image instead.", cover.CoverType, height, author);
+                        _logger.Debug("Couldn't resize media cover {0}-{1} for series {2}, using full size image instead.", cover.CoverType, height, series);
                     }
                 }
             }

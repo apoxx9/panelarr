@@ -12,12 +12,12 @@ namespace NzbDrone.Core.MediaFiles.Events
         public Dictionary<string, Tuple<string, string>> Diff { get; private set; }
         public bool Scrubbed { get; private set; }
 
-        public ComicFileRetaggedEvent(Series author,
+        public ComicFileRetaggedEvent(Series series,
                                       ComicFile comicFile,
                                       Dictionary<string, Tuple<string, string>> diff,
                                       bool scrubbed)
         {
-            Series = author;
+            Series = series;
             ComicFile = comicFile;
             Diff = diff;
             Scrubbed = scrubbed;

@@ -79,15 +79,15 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads
             Assert.Throws<IssueNotFoundException>(() => Subject.GetIssueInfo("1"));
         }
 
-        private void ValidateSeries(Series author)
+        private void ValidateSeries(Series series)
         {
-            author.Should().NotBeNull();
-            author.Name.Should().NotBeNullOrWhiteSpace();
-            author.CleanName.Should().Be(Parser.Parser.CleanSeriesName(author.Name));
-            author.Metadata.Value.TitleSlug.Should().NotBeNullOrWhiteSpace();
-            author.Metadata.Value.Overview.Should().NotBeNullOrWhiteSpace();
-            author.Metadata.Value.Images.Should().NotBeEmpty();
-            author.ForeignSeriesId.Should().NotBeNullOrWhiteSpace();
+            series.Should().NotBeNull();
+            series.Name.Should().NotBeNullOrWhiteSpace();
+            series.CleanName.Should().Be(Parser.Parser.CleanSeriesName(series.Name));
+            series.Metadata.Value.TitleSlug.Should().NotBeNullOrWhiteSpace();
+            series.Metadata.Value.Overview.Should().NotBeNullOrWhiteSpace();
+            series.Metadata.Value.Images.Should().NotBeEmpty();
+            series.ForeignSeriesId.Should().NotBeNullOrWhiteSpace();
         }
 
         private void ValidateIssues(List<Issue> issues, bool idOnly = false)

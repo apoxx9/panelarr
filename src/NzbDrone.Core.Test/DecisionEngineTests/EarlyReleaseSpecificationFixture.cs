@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     [TestFixture]
     public class EarlyReleaseSpecificationFixture : TestBase<EarlyReleaseSpecification>
     {
-        private Series _author;
+        private Series _series;
         private Issue _issue1;
         private Issue _issue2;
         private RemoteIssue _remoteIssue;
@@ -26,13 +26,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Series>.CreateNew().With(s => s.Id = 1).Build();
+            _series = Builder<Series>.CreateNew().With(s => s.Id = 1).Build();
             _issue1 = Builder<Issue>.CreateNew().With(s => s.ReleaseDate = DateTime.Today).Build();
             _issue2 = Builder<Issue>.CreateNew().With(s => s.ReleaseDate = DateTime.Today).Build();
 
             _remoteIssue = new RemoteIssue
             {
-                Series = _author,
+                Series = _series,
                 Issues = new List<Issue> { _issue1 },
                 Release = new TorrentInfo
                 {

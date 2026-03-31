@@ -46,9 +46,9 @@ namespace NzbDrone.Core.CustomFormats
             return ParseCustomFormat(input);
         }
 
-        public List<CustomFormat> ParseCustomFormat(ComicFile comicFile, Series author)
+        public List<CustomFormat> ParseCustomFormat(ComicFile comicFile, Series series)
         {
-            return ParseCustomFormat(comicFile, author, _formatService.All());
+            return ParseCustomFormat(comicFile, series, _formatService.All());
         }
 
         public List<CustomFormat> ParseCustomFormat(ComicFile comicFile)
@@ -56,13 +56,13 @@ namespace NzbDrone.Core.CustomFormats
             return ParseCustomFormat(comicFile, comicFile.Series.Value, _formatService.All());
         }
 
-        public List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Series author)
+        public List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Series series)
         {
             var parsed = Parser.Parser.ParseIssueTitle(blocklist.SourceTitle);
 
             var bookInfo = new ParsedIssueInfo
             {
-                SeriesName = author.Name,
+                SeriesName = series.Name,
                 ReleaseTitle = parsed?.ReleaseTitle ?? blocklist.SourceTitle,
                 Quality = blocklist.Quality,
                 ReleaseGroup = parsed?.ReleaseGroup
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.CustomFormats
             var input = new CustomFormatInput
             {
                 IssueInfo = bookInfo,
-                Series = author,
+                Series = series,
                 Size = blocklist.Size ?? 0,
                 IndexerFlags = blocklist.IndexerFlags
             };
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.CustomFormats
             return ParseCustomFormat(input);
         }
 
-        public List<CustomFormat> ParseCustomFormat(EntityHistory history, Series author)
+        public List<CustomFormat> ParseCustomFormat(EntityHistory history, Series series)
         {
             var parsed = Parser.Parser.ParseIssueTitle(history.SourceTitle);
 
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.CustomFormats
 
             var bookInfo = new ParsedIssueInfo
             {
-                SeriesName = author.Name,
+                SeriesName = series.Name,
                 ReleaseTitle = parsed?.ReleaseTitle ?? history.SourceTitle,
                 Quality = history.Quality,
                 ReleaseGroup = parsed?.ReleaseGroup,
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.CustomFormats
             var input = new CustomFormatInput
             {
                 IssueInfo = bookInfo,
-                Series = author,
+                Series = series,
                 Size = size,
                 IndexerFlags = indexerFlags
             };
@@ -154,7 +154,7 @@ namespace NzbDrone.Core.CustomFormats
             return matches.OrderBy(x => x.Name).ToList();
         }
 
-        private List<CustomFormat> ParseCustomFormat(ComicFile comicFile, Series author, List<CustomFormat> allCustomFormats)
+        private List<CustomFormat> ParseCustomFormat(ComicFile comicFile, Series series, List<CustomFormat> allCustomFormats)
         {
             var releaseTitle = string.Empty;
 
@@ -176,7 +176,7 @@ namespace NzbDrone.Core.CustomFormats
 
             var bookInfo = new ParsedIssueInfo
             {
-                SeriesName = author.Name,
+                SeriesName = series.Name,
                 ReleaseTitle = releaseTitle,
                 Quality = comicFile.Quality,
                 ReleaseGroup = comicFile.ReleaseGroup
@@ -185,7 +185,7 @@ namespace NzbDrone.Core.CustomFormats
             var input = new CustomFormatInput
             {
                 IssueInfo = bookInfo,
-                Series = author,
+                Series = series,
                 Size = comicFile.Size,
                 IndexerFlags = comicFile.IndexerFlags,
                 Filename = Path.GetFileName(comicFile.Path)

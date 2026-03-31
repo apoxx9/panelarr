@@ -25,7 +25,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
 {
     public interface IManualImportService
     {
-        List<ManualImportItem> GetMediaFiles(string path, string downloadId, Series author, FilterFilesType filter, bool replaceExistingFiles);
+        List<ManualImportItem> GetMediaFiles(string path, string downloadId, Series series, FilterFilesType filter, bool replaceExistingFiles);
         List<ManualImportItem> UpdateItems(List<ManualImportItem> item);
     }
 
@@ -36,7 +36,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
         private readonly IRootFolderService _rootFolderService;
         private readonly IDiskScanService _diskScanService;
         private readonly IMakeImportDecision _importDecisionMaker;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly IMetadataTagService _metadataTagService;
         private readonly IImportApprovedIssues _importApprovedIssues;
@@ -52,7 +52,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                                    IRootFolderService rootFolderService,
                                    IDiskScanService diskScanService,
                                    IMakeImportDecision importDecisionMaker,
-                                   ISeriesService authorService,
+                                   ISeriesService seriesService,
                                    IIssueService bookService,
                                    IMetadataTagService metadataTagService,
                                    IImportApprovedIssues importApprovedIssues,
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
             _rootFolderService = rootFolderService;
             _diskScanService = diskScanService;
             _importDecisionMaker = importDecisionMaker;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _issueService = bookService;
             _metadataTagService = metadataTagService;
             _importApprovedIssues = importApprovedIssues;
@@ -80,7 +80,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
             _logger = logger;
         }
 
-        public List<ManualImportItem> GetMediaFiles(string path, string downloadId, Series author, FilterFilesType filter, bool replaceExistingFiles)
+        public List<ManualImportItem> GetMediaFiles(string path, string downloadId, Series series, FilterFilesType filter, bool replaceExistingFiles)
         {
             if (downloadId.IsNotNullOrWhiteSpace())
             {
@@ -124,30 +124,30 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                 return new List<ManualImportItem> { result };
             }
 
-            return ProcessFolder(path, downloadId, author, filter, replaceExistingFiles);
+            return ProcessFolder(path, downloadId, series, filter, replaceExistingFiles);
         }
 
-        private List<ManualImportItem> ProcessFolder(string folder, string downloadId, Series author, FilterFilesType filter, bool replaceExistingFiles)
+        private List<ManualImportItem> ProcessFolder(string folder, string downloadId, Series series, FilterFilesType filter, bool replaceExistingFiles)
         {
             DownloadClientItem downloadClientItem = null;
             var directoryInfo = new DirectoryInfo(folder);
-            author = author ?? _parsingService.GetSeries(directoryInfo.Name);
+            series = series ?? _parsingService.GetSeries(directoryInfo.Name);
 
             if (downloadId.IsNotNullOrWhiteSpace())
             {
                 var trackedDownload = _trackedDownloadService.Find(downloadId);
                 downloadClientItem = trackedDownload?.DownloadItem;
 
-                if (author == null)
+                if (series == null)
                 {
-                    author = trackedDownload?.RemoteIssue?.Series;
+                    series = trackedDownload?.RemoteIssue?.Series;
                 }
             }
 
-            var authorFiles = _diskScanService.GetComicFiles(folder).ToList();
+            var seriesFiles = _diskScanService.GetComicFiles(folder).ToList();
             var idOverrides = new IdentificationOverrides
             {
-                Series = author
+                Series = series
             };
             var itemInfo = new ImportDecisionMakerInfo
             {
@@ -164,10 +164,10 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                 KeepAllEditions = true
             };
 
-            var decisions = _importDecisionMaker.GetImportDecisions(authorFiles, idOverrides, itemInfo, config);
+            var decisions = _importDecisionMaker.GetImportDecisions(seriesFiles, idOverrides, itemInfo, config);
 
             // paths will be different for new and old files which is why we need to map separately
-            var newFiles = authorFiles.Join(decisions,
+            var newFiles = seriesFiles.Join(decisions,
                                             f => f.FullName,
                                             d => d.Item.Path,
                                             (f, d) => new { File = f, Decision = d },
@@ -304,7 +304,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                 {
                     _logger.ProgressTrace("Processing file {0} of {1}", fileCount + 1, message.Files.Count);
 
-                    var author = _authorService.GetSeries(file.SeriesId);
+                    var series = _seriesService.GetSeries(file.SeriesId);
                     var issue = _issueService.GetIssue(file.IssueId);
 
                     var fileRootFolder = _rootFolderService.GetBestRootFolder(file.Path);
@@ -322,15 +322,15 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                         Modified = fileInfo.LastWriteTimeUtc,
                         Quality = file.Quality,
                         IndexerFlags = (IndexerFlags)file.IndexerFlags,
-                        Series = author,
+                        Series = series,
                         Issue = issue
                     };
 
                     var importDecision = new ImportDecision<LocalIssue>(localTrack);
-                    if (_rootFolderService.GetBestRootFolder(author.Path) == null)
+                    if (_rootFolderService.GetBestRootFolder(series.Path) == null)
                     {
-                        _logger.Warn($"Destination author folder {author.Path} not in a Root Folder, skipping import");
-                        importDecision.Reject(new Rejection($"Destination author folder {author.Path} is not in a Root Folder"));
+                        _logger.Warn($"Destination series folder {series.Path} not in a Root Folder, skipping import");
+                        importDecision.Reject(new Rejection($"Destination series folder {series.Path} is not in a Root Folder"));
                     }
 
                     bookImportDecisions.Add(importDecision);

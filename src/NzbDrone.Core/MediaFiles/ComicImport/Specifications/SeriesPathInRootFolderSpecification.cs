@@ -22,11 +22,11 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
 
         public Decision IsSatisfiedBy(LocalEdition item, DownloadClientItem downloadClientItem)
         {
-            // Prevent imports to authors that are no longer inside a root folder Panelarr manages
-            var author = item.Issue?.Series.Value;
+            // Prevent imports to allSeries that are no longer inside a root folder Panelarr manages
+            var series = item.Issue?.Series.Value;
 
-            // a new author will have empty path, and will end up having path assinged based on file location
-            var pathToCheck = author.Path.IsNotNullOrWhiteSpace() ? author.Path : item.LocalIssues.First().Path.GetParentPath();
+            // a new series will have empty path, and will end up having path assinged based on file location
+            var pathToCheck = series.Path.IsNotNullOrWhiteSpace() ? series.Path : item.LocalIssues.First().Path.GetParentPath();
 
             if (_rootFolderService.GetBestRootFolder(pathToCheck) == null)
             {

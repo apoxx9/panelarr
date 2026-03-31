@@ -13,13 +13,13 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     [TestFixture]
     public class SeriesNameFirstCharacterFixture : CoreTest<FileNameBuilder>
     {
-        private Series _author;
+        private Series _series;
         private NamingConfig _namingConfig;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Series>
+            _series = Builder<Series>
                     .CreateNew()
                     .Build();
 
@@ -39,19 +39,19 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("30 Rock", "3", "30 Rock")]
         public void should_get_expected_folder_name_back(string title, string parent, string child)
         {
-            _author.Name = title;
+            _series.Name = title;
             _namingConfig.SeriesFolderFormat = "{Series NameFirstCharacter}\\{Series Name}";
 
-            Subject.GetSeriesFolder(_author).Should().Be(Path.Combine(parent, child));
+            Subject.GetSeriesFolder(_series).Should().Be(Path.Combine(parent, child));
         }
 
         [Test]
         public void should_be_able_to_use_lower_case_first_character()
         {
-            _author.Name = "Westworld";
-            _namingConfig.SeriesFolderFormat = "{author namefirstcharacter}\\{author name}";
+            _series.Name = "Westworld";
+            _namingConfig.SeriesFolderFormat = "{series namefirstcharacter}\\{series name}";
 
-            Subject.GetSeriesFolder(_author).Should().Be(Path.Combine("w", "westworld"));
+            Subject.GetSeriesFolder(_series).Should().Be(Path.Combine("w", "westworld"));
         }
     }
 }

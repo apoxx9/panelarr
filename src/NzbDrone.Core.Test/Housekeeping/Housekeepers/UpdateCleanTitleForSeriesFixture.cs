@@ -13,14 +13,14 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_update_clean_title()
         {
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                                         .With(s => s.Name = "Full Name")
                                         .With(s => s.CleanName = "unclean")
                                         .Build();
 
             Mocker.GetMock<ISeriesRepository>()
                  .Setup(s => s.All())
-                 .Returns(new[] { author });
+                 .Returns(new[] { series });
 
             Subject.Clean();
 
@@ -31,14 +31,14 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_update_unchanged_title()
         {
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                                         .With(s => s.Name = "Full Name")
                                         .With(s => s.CleanName = "fullname")
                                         .Build();
 
             Mocker.GetMock<ISeriesRepository>()
                  .Setup(s => s.All())
-                 .Returns(new[] { author });
+                 .Returns(new[] { series });
 
             Subject.Clean();
 

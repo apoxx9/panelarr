@@ -65,27 +65,27 @@ namespace NzbDrone.Core.MediaFiles
                 Title = tag.Title ?? tag.TitleSort;
                 Performers = tag.Performers ?? tag.PerformersSort;
 
-                var authors = new List<string>();
+                var allSeries = new List<string>();
 
                 if (tag.AlbumArtists?.Any() ?? false)
                 {
-                    authors.AddRange(tag.AlbumArtists);
+                    allSeries.AddRange(tag.AlbumArtists);
                 }
                 else if (tag.AlbumArtistsSort?.Any() ?? false)
                 {
-                    authors.AddRange(tag.AlbumArtistsSort);
+                    allSeries.AddRange(tag.AlbumArtistsSort);
                 }
 
                 if (tag.Performers?.Any() ?? false)
                 {
-                    authors.AddRange(tag.Performers);
+                    allSeries.AddRange(tag.Performers);
                 }
                 else if (tag.PerformersSort?.Any() ?? false)
                 {
-                    authors.AddRange(tag.PerformersSort);
+                    allSeries.AddRange(tag.PerformersSort);
                 }
 
-                IssueSeriess = authors.Distinct().ToArray();
+                IssueSeriess = allSeries.Distinct().ToArray();
                 Track = tag.Track;
                 TrackCount = tag.TrackCount;
                 Issue = tag.Album ?? tag.AlbumSort;
@@ -527,16 +527,16 @@ namespace NzbDrone.Core.MediaFiles
                 };
             }
 
-            var authors = tag.IssueSeriess.Where(x => x.IsNotNullOrWhiteSpace()).ToList();
-            if (!authors.Any())
+            var allSeries = tag.IssueSeriess.Where(x => x.IsNotNullOrWhiteSpace()).ToList();
+            if (!allSeries.Any())
             {
-                authors.AddRange(tag.Performers.Where(x => x.IsNotNullOrWhiteSpace()));
+                allSeries.AddRange(tag.Performers.Where(x => x.IsNotNullOrWhiteSpace()));
             }
 
             return new ParsedTrackInfo
             {
                 IssueTitle = tag.Issue.IsNotNullOrWhiteSpace() ? tag.Issue : tag.Title,
-                Seriess = authors,
+                Seriess = allSeries,
                 DiscNumber = (int)tag.Disc,
                 DiscCount = (int)tag.DiscCount,
                 Year = tag.Year,

@@ -12,45 +12,45 @@ namespace Panelarr.Api.V1.Series
     [V1ApiController("series/editor")]
     public class SeriesEditorController : Controller
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IManageCommandQueue _commandQueueManager;
 
-        public SeriesEditorController(ISeriesService authorService, IManageCommandQueue commandQueueManager)
+        public SeriesEditorController(ISeriesService seriesService, IManageCommandQueue commandQueueManager)
         {
-            _authorService = authorService;
+            _seriesService = seriesService;
             _commandQueueManager = commandQueueManager;
         }
 
         [HttpPut]
         public IActionResult SaveAll([FromBody] SeriesEditorResource resource)
         {
-            var authorsToUpdate = _authorService.GetSeriess(resource.SeriesIds);
-            var authorsToMove = new List<BulkMoveSeries>();
+            var seriesToUpdate = _seriesService.GetSeriess(resource.SeriesIds);
+            var seriesToMove = new List<BulkMoveSeries>();
 
-            foreach (var author in authorsToUpdate)
+            foreach (var series in seriesToUpdate)
             {
                 if (resource.Monitored.HasValue)
                 {
-                    author.Monitored = resource.Monitored.Value;
+                    series.Monitored = resource.Monitored.Value;
                 }
 
                 if (resource.MonitorNewItems.HasValue)
                 {
-                    author.MonitorNewItems = resource.MonitorNewItems.Value;
+                    series.MonitorNewItems = resource.MonitorNewItems.Value;
                 }
 
                 if (resource.QualityProfileId.HasValue)
                 {
-                    author.QualityProfileId = resource.QualityProfileId.Value;
+                    series.QualityProfileId = resource.QualityProfileId.Value;
                 }
 
                 if (resource.RootFolderPath.IsNotNullOrWhiteSpace())
                 {
-                    author.RootFolderPath = resource.RootFolderPath;
-                    authorsToMove.Add(new BulkMoveSeries
+                    series.RootFolderPath = resource.RootFolderPath;
+                    seriesToMove.Add(new BulkMoveSeries
                     {
-                        SeriesId = author.Id,
-                        SourcePath = author.Path
+                        SeriesId = series.Id,
+                        SourcePath = series.Path
                     });
                 }
 
@@ -62,36 +62,36 @@ namespace Panelarr.Api.V1.Series
                     switch (applyTags)
                     {
                         case ApplyTags.Add:
-                            newTags.ForEach(t => author.Tags.Add(t));
+                            newTags.ForEach(t => series.Tags.Add(t));
                             break;
                         case ApplyTags.Remove:
-                            newTags.ForEach(t => author.Tags.Remove(t));
+                            newTags.ForEach(t => series.Tags.Remove(t));
                             break;
                         case ApplyTags.Replace:
-                            author.Tags = new HashSet<int>(newTags);
+                            series.Tags = new HashSet<int>(newTags);
                             break;
                     }
                 }
             }
 
-            if (resource.MoveFiles && authorsToMove.Any())
+            if (resource.MoveFiles && seriesToMove.Any())
             {
                 _commandQueueManager.Push(new BulkMoveSeriesCommand
                 {
                     DestinationRootFolder = resource.RootFolderPath,
-                    Series = authorsToMove
+                    Series = seriesToMove
                 });
             }
 
-            return Accepted(_authorService.UpdateSeriess(authorsToUpdate, !resource.MoveFiles).ToResource());
+            return Accepted(_seriesService.UpdateSeriess(seriesToUpdate, !resource.MoveFiles).ToResource());
         }
 
         [HttpDelete]
         public object DeleteSeries([FromBody] SeriesEditorResource resource)
         {
-            foreach (var authorId in resource.SeriesIds)
+            foreach (var seriesId in resource.SeriesIds)
             {
-                _authorService.DeleteSeries(authorId, false);
+                _seriesService.DeleteSeries(seriesId, false);
             }
 
             return new { };

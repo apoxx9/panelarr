@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
 
     public class FileNameBuilderFixture : CoreTest<FileNameBuilder>
     {
-        private Series _author;
+        private Series _series;
         private Issue _issue;
         private ComicFile _trackFile;
         private NamingConfig _namingConfig;
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Series>
+            _series = Builder<Series>
                     .CreateNew()
                     .With(s => s.Name = "Linkin Park")
                     .With(s => s.Metadata = new SeriesMetadata
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _issue = Builder<Issue>
                 .CreateNew()
                 .With(s => s.Title = "Hybrid Theory")
-                .With(s => s.SeriesMetadata = _author.Metadata.Value)
+                .With(s => s.SeriesMetadata = _series.Metadata.Value)
                 .With(s => s.SeriesLinks = seriesLink)
                 .Build();
             _namingConfig = NamingConfig.Default;
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Series Name}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Linkin Park");
         }
 
@@ -106,7 +106,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Series_Name}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Linkin_Park");
         }
 
@@ -115,7 +115,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Series.Name}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Linkin.Park");
         }
 
@@ -124,7 +124,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Series-Name}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Linkin-Park");
         }
 
@@ -133,7 +133,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{AUTHOR NAME}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("LINKIN PARK");
         }
 
@@ -142,16 +142,16 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{aUtHoR-nAmE}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
-                   .Should().Be(_author.Name.Replace(' ', '-'));
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
+                   .Should().Be(_series.Name.Replace(' ', '-'));
         }
 
         [Test]
-        public void should_replace_author_name_with_all_lower_case()
+        public void should_replace_series_name_with_all_lower_case()
         {
-            _namingConfig.StandardIssueFormat = "{author name}";
+            _namingConfig.StandardIssueFormat = "{series name}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("linkin park");
         }
 
@@ -159,9 +159,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         public void should_cleanup_Series_Name()
         {
             _namingConfig.StandardIssueFormat = "{Series.CleanName}";
-            _author.Name = "Linkin Park (1997)";
+            _series.Name = "Linkin Park (1997)";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Linkin.Park.1997");
         }
 
@@ -170,7 +170,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Series Disambiguation}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("US Rock Band");
         }
 
@@ -179,7 +179,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Issue Title}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Hybrid Theory");
         }
 
@@ -188,7 +188,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Issue Disambiguation}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                 .Should().Be("The Best Issue");
         }
 
@@ -197,7 +197,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Issue_Title}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Hybrid_Theory");
         }
 
@@ -206,7 +206,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Issue.Title}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Hybrid.Theory");
         }
 
@@ -215,7 +215,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Issue-Title}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Hybrid-Theory");
         }
 
@@ -224,7 +224,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{BOOK TITLE}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("HYBRID THEORY");
         }
 
@@ -233,7 +233,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{bOoK-tItLE}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(_issue.Title.Replace(' ', '-'));
         }
 
@@ -242,7 +242,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{issue title}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("hybrid theory");
         }
 
@@ -250,9 +250,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         public void should_cleanup_Issue_Title()
         {
             _namingConfig.StandardIssueFormat = "{Series.CleanName}";
-            _author.Name = "Hybrid Theory (2000)";
+            _series.Name = "Hybrid Theory (2000)";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Hybrid.Theory.2000");
         }
 
@@ -261,7 +261,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Issue SeriesGroup}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                 .Should().Be("SeriesGroup Title");
         }
 
@@ -270,7 +270,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Issue SeriesPosition}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                 .Should().Be("1-2");
         }
 
@@ -279,7 +279,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Issue SeriesTitle}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                 .Should().Be("SeriesGroup Title #1-2");
         }
 
@@ -290,7 +290,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile.PartCount = 2;
             _trackFile.Part = 1;
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                 .Should().Be("(1)");
         }
 
@@ -301,7 +301,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile.PartCount = 2;
             _trackFile.Part = 1;
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                 .Should().Be("(pt1)");
         }
 
@@ -312,7 +312,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile.PartCount = 2;
             _trackFile.Part = 1;
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                 .Should().Be("(pt01)");
         }
 
@@ -323,7 +323,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile.PartCount = 2;
             _trackFile.Part = 1;
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                 .Should().Be("(pt01 of 02)");
         }
 
@@ -334,7 +334,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile.PartCount = 1;
             _trackFile.Part = 1;
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                 .Should().Be("");
         }
 
@@ -345,7 +345,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile.Part = 1;
             _trackFile.PartCount = 2;
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                 .Should().Be("Hybrid Theory (1) - Linkin Park");
         }
 
@@ -354,7 +354,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Quality Title}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("MP3");
         }
 
@@ -363,7 +363,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{MediaInfo AudioCodec}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("FLAC");
         }
 
@@ -372,7 +372,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{MediaInfo AudioBitRate}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("320 kbps");
         }
 
@@ -381,7 +381,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{MediaInfo AudioChannels}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("2.0");
         }
 
@@ -390,7 +390,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{MediaInfo AudioBitsPerSample}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("16bit");
         }
 
@@ -399,7 +399,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{MediaInfo AudioSampleRate}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("44.1kHz");
         }
 
@@ -408,7 +408,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Series Name} - {Issue Title} - [{Quality Title}]";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Linkin Park - Hybrid Theory - [MP3]");
         }
 
@@ -418,7 +418,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.RenameIssues = false;
             _trackFile.Path = "Linkin Park - 06 - Test";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(Path.GetFileNameWithoutExtension(_trackFile.Path));
         }
 
@@ -429,7 +429,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile.Path = "Linkin Park - 06 - Test";
             _trackFile.SceneName = "SceneName";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(Path.GetFileNameWithoutExtension(_trackFile.Path));
         }
 
@@ -439,7 +439,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.RenameIssues = false;
             _trackFile.Path = @"C:\Test\Unsorted\Series - 01 - Test";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(Path.GetFileNameWithoutExtension(_trackFile.Path));
         }
 
@@ -448,20 +448,20 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Release Group}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(_trackFile.ReleaseGroup);
         }
 
         [Test]
         public void should_be_able_to_use_original_title()
         {
-            _author.Name = "Linkin Park";
+            _series.Name = "Linkin Park";
             _namingConfig.StandardIssueFormat = "{Series Name} - {Original Title}";
 
             _trackFile.SceneName = "Linkin.Park.Meteora.320-LOL";
             _trackFile.Path = "30 Rock - 01 - Test";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Linkin Park - Linkin.Park.Meteora.320-LOL");
         }
 
@@ -488,7 +488,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Series.Name}{_Issue.Title_}{Quality.Title}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Linkin.Park_Hybrid.Theory_MP3");
         }
 
@@ -497,17 +497,17 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Series.Name}{_Issue.Title_}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Linkin.Park_Hybrid.Theory");
         }
 
         [Test]
         public void should_remove_duplicate_non_word_characters()
         {
-            _author.Name = "Venture Bros.";
+            _series.Name = "Venture Bros.";
             _namingConfig.StandardIssueFormat = "{Series.Name}.{Issue.Title}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Venture.Bros.Hybrid.Theory");
         }
 
@@ -520,20 +520,20 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile.SceneName = null;
             _trackFile.Path = "existing.file.mkv";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(Path.GetFileNameWithoutExtension(_trackFile.Path));
         }
 
         [Test]
         public void should_be_able_to_use_only_original_title()
         {
-            _author.Name = "30 Rock";
+            _series.Name = "30 Rock";
             _namingConfig.StandardIssueFormat = "{Original Title}";
 
             _trackFile.SceneName = "30.Rock.S01E01.xvid-LOL";
             _trackFile.Path = "30 Rock - S01E01 - Test";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("30.Rock.S01E01.xvid-LOL");
         }
 
@@ -542,7 +542,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Quality Title} {Quality Proper}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("MP3");
         }
 
@@ -551,7 +551,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Series Name} - {Issue Title} [{Quality Title}] {[Quality Proper]}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Linkin Park - Hybrid Theory [MP3]");
         }
 
@@ -560,7 +560,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Series Name} - {Issue Title} [{Quality Full}]";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Linkin Park - Hybrid Theory [MP3]");
         }
 
@@ -572,7 +572,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}", separator);
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("MP3");
         }
 
@@ -584,33 +584,33 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}{0}{{Issue{0}Title}}", separator);
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(string.Format("MP3{0}Hybrid{0}Theory", separator));
         }
 
         [Test]
         public void should_be_able_to_use_original_filename()
         {
-            _author.Name = "30 Rock";
+            _series.Name = "30 Rock";
             _namingConfig.StandardIssueFormat = "{Series Name} - {Original Filename}";
 
             _trackFile.SceneName = "30.Rock.S01E01.xvid-LOL";
             _trackFile.Path = "30 Rock - S01E01 - Test";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("30 Rock - 30 Rock - S01E01 - Test");
         }
 
         [Test]
         public void should_be_able_to_use_original_filename_only()
         {
-            _author.Name = "30 Rock";
+            _series.Name = "30 Rock";
             _namingConfig.StandardIssueFormat = "{Original Filename}";
 
             _trackFile.SceneName = "30.Rock.S01E01.xvid-LOL";
             _trackFile.Path = "30 Rock - S01E01 - Test";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("30 Rock - S01E01 - Test");
         }
 
@@ -620,7 +620,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile.ReleaseGroup = null;
             _namingConfig.StandardIssueFormat = "{Release Group}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("Panelarr");
         }
 
@@ -632,7 +632,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile.ReleaseGroup = null;
             _namingConfig.StandardIssueFormat = pattern;
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(expectedFileName);
         }
 
@@ -644,7 +644,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile.ReleaseGroup = releaseGroup;
             _namingConfig.StandardIssueFormat = "{Release Group}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(releaseGroup);
         }
     }

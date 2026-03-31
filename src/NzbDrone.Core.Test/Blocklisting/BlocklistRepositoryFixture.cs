@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Test.Blocklisting
                 SeriesId = 12345,
                 IssueIds = new List<int> { 1 },
                 Quality = new QualityModel(Quality.CBZ_HD),
-                SourceTitle = "author.name.issue.title",
+                SourceTitle = "series.name.issue.title",
                 Date = DateTime.UtcNow
             };
         }

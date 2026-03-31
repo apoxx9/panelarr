@@ -13,17 +13,17 @@ namespace Panelarr.Api.V1.ManualImport
     [V1ApiController]
     public class ManualImportController : Controller
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly IManualImportService _manualImportService;
         private readonly Logger _logger;
 
         public ManualImportController(IManualImportService manualImportService,
-                                  ISeriesService authorService,
+                                  ISeriesService seriesService,
                                   IIssueService bookService,
                                   Logger logger)
         {
-            _authorService = authorService;
+            _seriesService = seriesService;
             _issueService = bookService;
             _manualImportService = manualImportService;
             _logger = logger;
@@ -38,16 +38,16 @@ namespace Panelarr.Api.V1.ManualImport
         [HttpGet]
         public List<ManualImportResource> GetMediaFiles(string folder, string downloadId, int? seriesId, bool filterExistingFiles = true, bool replaceExistingFiles = true)
         {
-            NzbDrone.Core.Issues.Series author = null;
+            NzbDrone.Core.Issues.Series series = null;
 
             if (seriesId > 0)
             {
-                author = _authorService.GetSeries(seriesId.Value);
+                series = _seriesService.GetSeries(seriesId.Value);
             }
 
             var filter = filterExistingFiles ? FilterFilesType.Matched : FilterFilesType.None;
 
-            return _manualImportService.GetMediaFiles(folder, downloadId, author, filter, replaceExistingFiles).ToResource().Select(AddQualityWeight).ToList();
+            return _manualImportService.GetMediaFiles(folder, downloadId, series, filter, replaceExistingFiles).ToResource().Select(AddQualityWeight).ToList();
         }
 
         private ManualImportResource AddQualityWeight(ManualImportResource item)
@@ -72,7 +72,7 @@ namespace Panelarr.Api.V1.ManualImport
                     Id = resource.Id,
                     Path = resource.Path,
                     Name = resource.Name,
-                    Series = resource.SeriesId.HasValue ? _authorService.GetSeries(resource.SeriesId.Value) : null,
+                    Series = resource.SeriesId.HasValue ? _seriesService.GetSeries(resource.SeriesId.Value) : null,
                     Issue = resource.IssueId.HasValue ? _issueService.GetIssue(resource.IssueId.Value) : null,
                     Quality = resource.Quality,
                     ReleaseGroup = resource.ReleaseGroup,

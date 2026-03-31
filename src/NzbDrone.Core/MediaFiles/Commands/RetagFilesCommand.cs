@@ -17,9 +17,9 @@ namespace NzbDrone.Core.MediaFiles.Commands
         {
         }
 
-        public RetagFilesCommand(int authorId, List<int> files)
+        public RetagFilesCommand(int seriesId, List<int> files)
         {
-            SeriesId = authorId;
+            SeriesId = seriesId;
             Files = files;
         }
     }

@@ -18,11 +18,11 @@ namespace Panelarr.Api.V1.Calendar
     {
         public CalendarController(IIssueService bookService,
                               ISeriesIssueLinkService seriesIssueLinkService,
-                              ISeriesStatisticsService authorStatisticsService,
+                              ISeriesStatisticsService seriesStatisticsService,
                               IMapCoversToLocal coverMapper,
                               IUpgradableSpecification upgradableSpecification,
                               IBroadcastSignalRMessage signalRBroadcaster)
-        : base(bookService, seriesIssueLinkService, authorStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
+        : base(bookService, seriesIssueLinkService, seriesStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
         {
         }
 

@@ -9,8 +9,8 @@ namespace NzbDrone.Core.Issues
         List<SeriesGroup> GetAllSeriesGroups();
         SeriesGroup FindById(string foreignSeriesId);
         List<SeriesGroup> FindById(List<string> foreignSeriesId);
-        List<SeriesGroup> GetBySeriesMetadataId(int authorMetadataId);
-        List<SeriesGroup> GetBySeriesId(int authorId);
+        List<SeriesGroup> GetBySeriesMetadataId(int seriesMetadataId);
+        List<SeriesGroup> GetBySeriesId(int seriesId);
         SeriesGroup AddSeriesGroup(SeriesGroup seriesGroup);
         SeriesGroup UpdateSeriesGroup(SeriesGroup seriesGroup);
         void Delete(int seriesId);
@@ -47,14 +47,14 @@ namespace NzbDrone.Core.Issues
             return _seriesRepository.FindById(foreignSeriesId);
         }
 
-        public List<SeriesGroup> GetBySeriesMetadataId(int authorMetadataId)
+        public List<SeriesGroup> GetBySeriesMetadataId(int seriesMetadataId)
         {
-            return _seriesRepository.GetBySeriesMetadataId(authorMetadataId);
+            return _seriesRepository.GetBySeriesMetadataId(seriesMetadataId);
         }
 
-        public List<SeriesGroup> GetBySeriesId(int authorId)
+        public List<SeriesGroup> GetBySeriesId(int seriesId)
         {
-            return _seriesRepository.GetBySeriesId(authorId);
+            return _seriesRepository.GetBySeriesId(seriesId);
         }
 
         public SeriesGroup AddSeriesGroup(SeriesGroup seriesGroup)

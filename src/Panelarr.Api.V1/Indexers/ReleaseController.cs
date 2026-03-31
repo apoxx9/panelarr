@@ -167,11 +167,11 @@ namespace Panelarr.Api.V1.Indexers
             }
         }
 
-        private async Task<List<ReleaseResource>> GetSeriesReleases(int authorId)
+        private async Task<List<ReleaseResource>> GetSeriesReleases(int seriesId)
         {
             try
             {
-                var decisions = await _releaseSearchService.SeriesSearch(authorId, false, true, true);
+                var decisions = await _releaseSearchService.SeriesSearch(seriesId, false, true, true);
                 var prioritizedDecisions = _prioritizeDownloadDecision.PrioritizeDecisions(decisions);
 
                 return MapDecisions(prioritizedDecisions);

@@ -119,51 +119,51 @@ namespace NzbDrone.Core.Extras
             }
         }
 
-        private void CreateAfterImport(Series author, ComicFile comicFile)
+        private void CreateAfterImport(Series series, ComicFile comicFile)
         {
             foreach (var extraFileManager in _extraFileManagers)
             {
-                extraFileManager.CreateAfterComicImport(author, comicFile);
+                extraFileManager.CreateAfterComicImport(series, comicFile);
             }
         }
 
         public void Handle(MediaCoversUpdatedEvent message)
         {
-            var author = message.Series;
+            var series = message.Series;
 
-            var comicFiles = GetComicFiles(author.Id);
+            var comicFiles = GetComicFiles(series.Id);
 
             foreach (var extraFileManager in _extraFileManagers)
             {
-                extraFileManager.CreateAfterSeriesScan(author, comicFiles);
+                extraFileManager.CreateAfterSeriesScan(series, comicFiles);
             }
         }
 
         public void Handle(TrackFolderCreatedEvent message)
         {
-            var author = message.Series;
+            var series = message.Series;
             var issue = _issueService.GetIssue(message.ComicFile.IssueId);
 
             foreach (var extraFileManager in _extraFileManagers)
             {
-                extraFileManager.CreateAfterComicImport(author, issue, message.SeriesFolder, message.IssueFolder);
+                extraFileManager.CreateAfterComicImport(series, issue, message.SeriesFolder, message.IssueFolder);
             }
         }
 
         public void Handle(SeriesRenamedEvent message)
         {
-            var author = message.Series;
-            var comicFiles = GetComicFiles(author.Id);
+            var series = message.Series;
+            var comicFiles = GetComicFiles(series.Id);
 
             foreach (var extraFileManager in _extraFileManagers)
             {
-                extraFileManager.MoveFilesAfterRename(author, comicFiles);
+                extraFileManager.MoveFilesAfterRename(series, comicFiles);
             }
         }
 
-        private List<ComicFile> GetComicFiles(int authorId)
+        private List<ComicFile> GetComicFiles(int seriesId)
         {
-            return _mediaFileService.GetFilesBySeries(authorId);
+            return _mediaFileService.GetFilesBySeries(seriesId);
         }
     }
 }

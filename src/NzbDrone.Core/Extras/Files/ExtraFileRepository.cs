@@ -8,13 +8,13 @@ namespace NzbDrone.Core.Extras.Files
     public interface IExtraFileRepository<TExtraFile> : IBasicRepository<TExtraFile>
         where TExtraFile : ExtraFile, new()
     {
-        void DeleteForSeries(int authorId);
-        void DeleteForIssue(int authorId, int issueId);
+        void DeleteForSeries(int seriesId);
+        void DeleteForIssue(int seriesId, int issueId);
         void DeleteForComicFile(int comicFileId);
-        List<TExtraFile> GetFilesBySeries(int authorId);
-        List<TExtraFile> GetFilesByIssue(int authorId, int issueId);
+        List<TExtraFile> GetFilesBySeries(int seriesId);
+        List<TExtraFile> GetFilesByIssue(int seriesId, int issueId);
         List<TExtraFile> GetFilesByComicFile(int comicFileId);
-        TExtraFile FindByPath(int authorId, string path);
+        TExtraFile FindByPath(int seriesId, string path);
     }
 
     public class ExtraFileRepository<TExtraFile> : BasicRepository<TExtraFile>, IExtraFileRepository<TExtraFile>
@@ -25,14 +25,14 @@ namespace NzbDrone.Core.Extras.Files
         {
         }
 
-        public void DeleteForSeries(int authorId)
+        public void DeleteForSeries(int seriesId)
         {
-            Delete(c => c.SeriesId == authorId);
+            Delete(c => c.SeriesId == seriesId);
         }
 
-        public void DeleteForIssue(int authorId, int issueId)
+        public void DeleteForIssue(int seriesId, int issueId)
         {
-            Delete(c => c.SeriesId == authorId && c.IssueId == issueId);
+            Delete(c => c.SeriesId == seriesId && c.IssueId == issueId);
         }
 
         public void DeleteForComicFile(int comicFileId)
@@ -40,14 +40,14 @@ namespace NzbDrone.Core.Extras.Files
             Delete(c => c.ComicFileId == comicFileId);
         }
 
-        public List<TExtraFile> GetFilesBySeries(int authorId)
+        public List<TExtraFile> GetFilesBySeries(int seriesId)
         {
-            return Query(c => c.SeriesId == authorId);
+            return Query(c => c.SeriesId == seriesId);
         }
 
-        public List<TExtraFile> GetFilesByIssue(int authorId, int issueId)
+        public List<TExtraFile> GetFilesByIssue(int seriesId, int issueId)
         {
-            return Query(c => c.SeriesId == authorId && c.IssueId == issueId);
+            return Query(c => c.SeriesId == seriesId && c.IssueId == issueId);
         }
 
         public List<TExtraFile> GetFilesByComicFile(int comicFileId)
@@ -55,9 +55,9 @@ namespace NzbDrone.Core.Extras.Files
             return Query(c => c.ComicFileId == comicFileId);
         }
 
-        public TExtraFile FindByPath(int authorId, string path)
+        public TExtraFile FindByPath(int seriesId, string path)
         {
-            return Query(c => c.SeriesId == authorId && c.RelativePath == path).SingleOrDefault();
+            return Query(c => c.SeriesId == seriesId && c.RelativePath == path).SingleOrDefault();
         }
     }
 }

@@ -31,9 +31,9 @@ namespace NzbDrone.Integration.Test.Client
             return Get<PagingResource<IssueResource>>(request);
         }
 
-        public List<IssueResource> GetIssuesInSeries(int authorId)
+        public List<IssueResource> GetIssuesInSeries(int seriesId)
         {
-            var request = BuildRequest("?authorId=" + authorId.ToString());
+            var request = BuildRequest("?seriesId=" + seriesId.ToString());
             return Get<List<IssueResource>>(request);
         }
     }

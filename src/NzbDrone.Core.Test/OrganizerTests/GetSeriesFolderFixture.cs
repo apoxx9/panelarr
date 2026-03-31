@@ -27,13 +27,13 @@ namespace NzbDrone.Core.Test.OrganizerTests
         [TestCase("In the Woods...", "{Series.Name}", "In.the.Woods")]
         [TestCase("3OH!3", "{Series.Name}", "3OH!3")]
         [TestCase("Avenged Sevenfold", ".{Series.Name}.", "Avenged.Sevenfold")]
-        public void should_use_authorFolderFormat_to_build_folder_name(string authorName, string format, string expected)
+        public void should_use_seriesFolderFormat_to_build_folder_name(string seriesName, string format, string expected)
         {
             _namingConfig.SeriesFolderFormat = format;
 
-            var author = new Series { Name = authorName };
+            var series = new Series { Name = seriesName };
 
-            Subject.GetSeriesFolder(author).Should().Be(expected);
+            Subject.GetSeriesFolder(series).Should().Be(expected);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace NzbDrone.Core.MediaFiles
     public interface IDownloadedIssuesImportService
     {
         List<ImportResult> ProcessRootFolder(IDirectoryInfo directoryInfo);
-        List<ImportResult> ProcessPath(string path, ImportMode importMode = ImportMode.Auto, Series author = null, DownloadClientItem downloadClientItem = null);
+        List<ImportResult> ProcessPath(string path, ImportMode importMode = ImportMode.Auto, Series series = null, DownloadClientItem downloadClientItem = null);
         bool ShouldDeleteFolder(IDirectoryInfo directoryInfo);
     }
 
@@ -28,7 +28,7 @@ namespace NzbDrone.Core.MediaFiles
     {
         private readonly IDiskProvider _diskProvider;
         private readonly IDiskScanService _diskScanService;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IParsingService _parsingService;
         private readonly IMakeImportDecision _importDecisionMaker;
         private readonly IImportApprovedIssues _importApprovedTracks;
@@ -38,7 +38,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public DownloadedIssuesImportService(IDiskProvider diskProvider,
                                              IDiskScanService diskScanService,
-                                             ISeriesService authorService,
+                                             ISeriesService seriesService,
                                              IParsingService parsingService,
                                              IMakeImportDecision importDecisionMaker,
                                              IImportApprovedIssues importApprovedTracks,
@@ -48,7 +48,7 @@ namespace NzbDrone.Core.MediaFiles
         {
             _diskProvider = diskProvider;
             _diskScanService = diskScanService;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _parsingService = parsingService;
             _importDecisionMaker = importDecisionMaker;
             _importApprovedTracks = importApprovedTracks;
@@ -76,7 +76,7 @@ namespace NzbDrone.Core.MediaFiles
             return results;
         }
 
-        public List<ImportResult> ProcessPath(string path, ImportMode importMode = ImportMode.Auto, Series author = null, DownloadClientItem downloadClientItem = null)
+        public List<ImportResult> ProcessPath(string path, ImportMode importMode = ImportMode.Auto, Series series = null, DownloadClientItem downloadClientItem = null)
         {
             _logger.Debug("Processing path: {0}", path);
 
@@ -84,24 +84,24 @@ namespace NzbDrone.Core.MediaFiles
             {
                 var directoryInfo = _diskProvider.GetDirectoryInfo(path);
 
-                if (author == null)
+                if (series == null)
                 {
                     return ProcessFolder(directoryInfo, importMode, downloadClientItem);
                 }
 
-                return ProcessFolder(directoryInfo, importMode, author, downloadClientItem);
+                return ProcessFolder(directoryInfo, importMode, series, downloadClientItem);
             }
 
             if (_diskProvider.FileExists(path))
             {
                 var fileInfo = _diskProvider.GetFileInfo(path);
 
-                if (author == null)
+                if (series == null)
                 {
                     return ProcessFile(fileInfo, importMode, downloadClientItem);
                 }
 
-                return ProcessFile(fileInfo, importMode, author, downloadClientItem);
+                return ProcessFile(fileInfo, importMode, series, downloadClientItem);
             }
 
             LogInaccessiblePathError(path);
@@ -156,16 +156,16 @@ namespace NzbDrone.Core.MediaFiles
         private List<ImportResult> ProcessFolder(IDirectoryInfo directoryInfo, ImportMode importMode, DownloadClientItem downloadClientItem)
         {
             var cleanedUpName = GetCleanedUpFolderName(directoryInfo.Name);
-            var author = _parsingService.GetSeries(cleanedUpName);
+            var series = _parsingService.GetSeries(cleanedUpName);
 
-            return ProcessFolder(directoryInfo, importMode, author, downloadClientItem);
+            return ProcessFolder(directoryInfo, importMode, series, downloadClientItem);
         }
 
-        private List<ImportResult> ProcessFolder(IDirectoryInfo directoryInfo, ImportMode importMode, Series author, DownloadClientItem downloadClientItem)
+        private List<ImportResult> ProcessFolder(IDirectoryInfo directoryInfo, ImportMode importMode, Series series, DownloadClientItem downloadClientItem)
         {
-            if (_authorService.SeriesPathExists(directoryInfo.FullName))
+            if (_seriesService.SeriesPathExists(directoryInfo.FullName))
             {
-                _logger.Warn("Unable to process folder that is mapped to an existing author");
+                _logger.Warn("Unable to process folder that is mapped to an existing series");
                 return new List<ImportResult>();
             }
 
@@ -209,7 +209,7 @@ namespace NzbDrone.Core.MediaFiles
 
             var idOverrides = new IdentificationOverrides
             {
-                Series = author
+                Series = series
             };
             var idInfo = new ImportDecisionMakerInfo
             {
@@ -254,9 +254,9 @@ namespace NzbDrone.Core.MediaFiles
 
         private List<ImportResult> ProcessFile(IFileInfo fileInfo, ImportMode importMode, DownloadClientItem downloadClientItem)
         {
-            var author = _parsingService.GetSeries(Path.GetFileNameWithoutExtension(fileInfo.Name));
+            var series = _parsingService.GetSeries(Path.GetFileNameWithoutExtension(fileInfo.Name));
 
-            if (author == null)
+            if (series == null)
             {
                 _logger.Debug("Unknown Series for file: {0}", fileInfo.Name);
 
@@ -266,10 +266,10 @@ namespace NzbDrone.Core.MediaFiles
                        };
             }
 
-            return ProcessFile(fileInfo, importMode, author, downloadClientItem);
+            return ProcessFile(fileInfo, importMode, series, downloadClientItem);
         }
 
-        private List<ImportResult> ProcessFile(IFileInfo fileInfo, ImportMode importMode, Series author, DownloadClientItem downloadClientItem)
+        private List<ImportResult> ProcessFile(IFileInfo fileInfo, ImportMode importMode, Series series, DownloadClientItem downloadClientItem)
         {
             if (Path.GetFileNameWithoutExtension(fileInfo.Name).StartsWith("._"))
             {
@@ -294,7 +294,7 @@ namespace NzbDrone.Core.MediaFiles
 
             var idOverrides = new IdentificationOverrides
             {
-                Series = author
+                Series = series
             };
             var idInfo = new ImportDecisionMakerInfo
             {

@@ -27,17 +27,17 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         {
             var dist = new Distance();
 
-            // the most common list of authors reported by a file
+            // the most common list of allSeries reported by a file
             var fileSeries = localTracks.Select(x => x.FileTrackInfo.Seriess.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
                 .GroupBy(x => x.ConcatToString())
                 .OrderByDescending(x => x.Count())
                 .First()
                 .First();
 
-            var authors = GetSeriesVariants(fileSeries);
+            var allSeries = GetSeriesVariants(fileSeries);
 
-            dist.AddString("author", authors, issue.SeriesMetadata.Value.Name);
-            Logger.Trace("author: '{0}' vs '{1}'; {2}", authors.ConcatToString("' or '"), issue.SeriesMetadata.Value.Name, dist.NormalizedDistance());
+            dist.AddString("series", allSeries, issue.SeriesMetadata.Value.Name);
+            Logger.Trace("series: '{0}' vs '{1}'; {2}", allSeries.ConcatToString("' or '"), issue.SeriesMetadata.Value.Name, dist.NormalizedDistance());
 
             var title = localTracks.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
             var titleOptions = new List<string> { issue.Title };
@@ -96,26 +96,26 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
         public static List<string> GetSeriesVariants(List<string> fileSeries)
         {
-            var authors = new List<string>(fileSeries);
+            var allSeries = new List<string>(fileSeries);
 
             if (fileSeries.Count == 1)
             {
-                authors.AddRange(SplitSeries(fileSeries[0]));
+                allSeries.AddRange(SplitSeries(fileSeries[0]));
             }
 
-            foreach (var author in fileSeries)
+            foreach (var series in fileSeries)
             {
-                if (author.Contains(','))
+                if (series.Contains(','))
                 {
-                    var split = author.Split(',', 2).Select(x => x.Trim());
+                    var split = series.Split(',', 2).Select(x => x.Trim());
                     if (!split.First().Contains(' '))
                     {
-                        authors.Add(split.Reverse().ConcatToString(" "));
+                        allSeries.Add(split.Reverse().ConcatToString(" "));
                     }
                 }
             }
 
-            return authors;
+            return allSeries;
         }
 
         private static List<string> SplitSeries(string input)

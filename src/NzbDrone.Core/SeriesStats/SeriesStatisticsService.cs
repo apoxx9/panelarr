@@ -11,7 +11,7 @@ namespace NzbDrone.Core.SeriesStats
     public interface ISeriesStatisticsService
     {
         List<SeriesStatistics> SeriesStatistics();
-        SeriesStatistics SeriesStatistics(int authorId);
+        SeriesStatistics SeriesStatistics(int seriesId);
     }
 
     public class SeriesStatisticsService : ISeriesStatisticsService,
@@ -25,26 +25,26 @@ namespace NzbDrone.Core.SeriesStats
         IHandle<IssueUpdatedEvent>,
         IHandle<ComicFileDeletedEvent>
     {
-        private readonly ISeriesStatisticsRepository _authorStatisticsRepository;
+        private readonly ISeriesStatisticsRepository _seriesStatisticsRepository;
         private readonly ICached<List<IssueStatistics>> _cache;
 
-        public SeriesStatisticsService(ISeriesStatisticsRepository authorStatisticsRepository,
+        public SeriesStatisticsService(ISeriesStatisticsRepository seriesStatisticsRepository,
                                        ICacheManager cacheManager)
         {
-            _authorStatisticsRepository = authorStatisticsRepository;
+            _seriesStatisticsRepository = seriesStatisticsRepository;
             _cache = cacheManager.GetCache<List<IssueStatistics>>(GetType());
         }
 
         public List<SeriesStatistics> SeriesStatistics()
         {
-            var bookStatistics = _cache.Get("AllSeries", () => _authorStatisticsRepository.SeriesStatistics());
+            var bookStatistics = _cache.Get("AllSeries", () => _seriesStatisticsRepository.SeriesStatistics());
 
             return bookStatistics.GroupBy(s => s.SeriesId).Select(s => MapSeriesStatistics(s.ToList())).ToList();
         }
 
-        public SeriesStatistics SeriesStatistics(int authorId)
+        public SeriesStatistics SeriesStatistics(int seriesId)
         {
-            var stats = _cache.Get(authorId.ToString(), () => _authorStatisticsRepository.SeriesStatistics(authorId));
+            var stats = _cache.Get(seriesId.ToString(), () => _seriesStatisticsRepository.SeriesStatistics(seriesId));
 
             if (stats == null || stats.Count == 0)
             {
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.SeriesStats
 
         private SeriesStatistics MapSeriesStatistics(List<IssueStatistics> bookStatistics)
         {
-            var authorStatistics = new SeriesStatistics
+            var seriesStatistics = new SeriesStatistics
             {
                 SeriesId = bookStatistics.First().SeriesId,
                 ComicFileCount = bookStatistics.Sum(s => s.ComicFileCount),
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.SeriesStats
                 IssueStatistics = bookStatistics
             };
 
-            return authorStatistics;
+            return seriesStatistics;
         }
 
         [EventHandleOrder(EventHandleOrder.First)]
@@ -131,10 +131,10 @@ namespace NzbDrone.Core.SeriesStats
         {
             _cache.Remove("AllSeries");
 
-            var authorId = message.ComicFile.Series?.Value?.Id.ToString();
-            if (authorId != null)
+            var seriesId = message.ComicFile.Series?.Value?.Id.ToString();
+            if (seriesId != null)
             {
-                _cache.Remove(authorId);
+                _cache.Remove(seriesId);
             }
         }
     }

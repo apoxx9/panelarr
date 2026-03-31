@@ -14,18 +14,18 @@ namespace NzbDrone.Core.Issues
     {
         Issue GetIssue(int issueId);
         List<Issue> GetIssues(IEnumerable<int> bookIds);
-        List<Issue> GetIssuesBySeries(int authorId);
-        List<Issue> GetNextIssuesBySeriesMetadataId(IEnumerable<int> authorMetadataIds);
-        List<Issue> GetLastIssuesBySeriesMetadataId(IEnumerable<int> authorMetadataIds);
-        List<Issue> GetIssuesBySeriesMetadataId(int authorMetadataId);
-        List<Issue> GetIssuesForRefresh(int authorMetadataId, List<string> foreignIds);
+        List<Issue> GetIssuesBySeries(int seriesId);
+        List<Issue> GetNextIssuesBySeriesMetadataId(IEnumerable<int> seriesMetadataIds);
+        List<Issue> GetLastIssuesBySeriesMetadataId(IEnumerable<int> seriesMetadataIds);
+        List<Issue> GetIssuesBySeriesMetadataId(int seriesMetadataId);
+        List<Issue> GetIssuesForRefresh(int seriesMetadataId, List<string> foreignIds);
         List<Issue> GetIssuesByFileIds(IEnumerable<int> fileIds);
         Issue AddIssue(Issue newIssue, bool doRefresh = true);
         Issue FindById(string foreignId);
         Issue FindBySlug(string titleSlug);
-        Issue FindByTitle(int authorMetadataId, string title);
-        Issue FindByTitleInexact(int authorMetadataId, string title);
-        List<Issue> GetCandidates(int authorMetadataId, string title);
+        Issue FindByTitle(int seriesMetadataId, string title);
+        Issue FindByTitleInexact(int seriesMetadataId, string title);
+        List<Issue> GetCandidates(int seriesMetadataId, string title);
         void DeleteIssue(int issueId, bool deleteFiles, bool addImportListExclusion = false);
         List<Issue> GetAllIssues();
         Issue UpdateIssue(Issue issue);
@@ -34,12 +34,12 @@ namespace NzbDrone.Core.Issues
         void UpdateLastSearchTime(List<Issue> issues);
         PagingSpec<Issue> IssuesWithoutFiles(PagingSpec<Issue> pagingSpec);
         List<Issue> IssuesBetweenDates(DateTime start, DateTime end, bool includeUnmonitored);
-        List<Issue> SeriesIssuesBetweenDates(Series author, DateTime start, DateTime end, bool includeUnmonitored);
+        List<Issue> SeriesIssuesBetweenDates(Series series, DateTime start, DateTime end, bool includeUnmonitored);
         void InsertMany(List<Issue> issues);
         void UpdateMany(List<Issue> issues);
         void DeleteMany(List<Issue> issues);
         void SetAddOptions(IEnumerable<Issue> issues);
-        List<Issue> GetSeriesIssuesWithFiles(Series author);
+        List<Issue> GetSeriesIssuesWithFiles(Series series);
     }
 
     public class IssueService : IIssueService,
@@ -90,9 +90,9 @@ namespace NzbDrone.Core.Issues
             return _issueRepository.FindBySlug(titleSlug);
         }
 
-        public Issue FindByTitle(int authorMetadataId, string title)
+        public Issue FindByTitle(int seriesMetadataId, string title)
         {
-            return _issueRepository.FindByTitle(authorMetadataId, title);
+            return _issueRepository.FindByTitle(seriesMetadataId, title);
         }
 
         private List<Tuple<Func<Issue, string, double>, string>> IssueScoringFunctions(string title, string cleanTitle)
@@ -113,9 +113,9 @@ namespace NzbDrone.Core.Issues
             return scoringFunctions;
         }
 
-        public Issue FindByTitleInexact(int authorMetadataId, string title)
+        public Issue FindByTitleInexact(int seriesMetadataId, string title)
         {
-            var issues = GetIssuesBySeriesMetadataId(authorMetadataId);
+            var issues = GetIssuesBySeriesMetadataId(seriesMetadataId);
 
             foreach (var func in IssueScoringFunctions(title, title.CleanSeriesName()))
             {
@@ -129,9 +129,9 @@ namespace NzbDrone.Core.Issues
             return null;
         }
 
-        public List<Issue> GetCandidates(int authorMetadataId, string title)
+        public List<Issue> GetCandidates(int seriesMetadataId, string title)
         {
-            var issues = GetIssuesBySeriesMetadataId(authorMetadataId);
+            var issues = GetIssuesBySeriesMetadataId(seriesMetadataId);
             var output = new List<Issue>();
 
             foreach (var func in IssueScoringFunctions(title, title.CleanSeriesName()))
@@ -177,29 +177,29 @@ namespace NzbDrone.Core.Issues
             return _issueRepository.Get(bookIds).ToList();
         }
 
-        public List<Issue> GetIssuesBySeries(int authorId)
+        public List<Issue> GetIssuesBySeries(int seriesId)
         {
-            return _issueRepository.GetIssues(authorId).ToList();
+            return _issueRepository.GetIssues(seriesId).ToList();
         }
 
-        public List<Issue> GetNextIssuesBySeriesMetadataId(IEnumerable<int> authorMetadataIds)
+        public List<Issue> GetNextIssuesBySeriesMetadataId(IEnumerable<int> seriesMetadataIds)
         {
-            return _issueRepository.GetNextIssues(authorMetadataIds).ToList();
+            return _issueRepository.GetNextIssues(seriesMetadataIds).ToList();
         }
 
-        public List<Issue> GetLastIssuesBySeriesMetadataId(IEnumerable<int> authorMetadataIds)
+        public List<Issue> GetLastIssuesBySeriesMetadataId(IEnumerable<int> seriesMetadataIds)
         {
-            return _issueRepository.GetLastIssues(authorMetadataIds).ToList();
+            return _issueRepository.GetLastIssues(seriesMetadataIds).ToList();
         }
 
-        public List<Issue> GetIssuesBySeriesMetadataId(int authorMetadataId)
+        public List<Issue> GetIssuesBySeriesMetadataId(int seriesMetadataId)
         {
-            return _issueRepository.GetIssuesBySeriesMetadataId(authorMetadataId).ToList();
+            return _issueRepository.GetIssuesBySeriesMetadataId(seriesMetadataId).ToList();
         }
 
-        public List<Issue> GetIssuesForRefresh(int authorMetadataId, List<string> foreignIds)
+        public List<Issue> GetIssuesForRefresh(int seriesMetadataId, List<string> foreignIds)
         {
-            return _issueRepository.GetIssuesForRefresh(authorMetadataId, foreignIds);
+            return _issueRepository.GetIssuesForRefresh(seriesMetadataId, foreignIds);
         }
 
         public List<Issue> GetIssuesByFileIds(IEnumerable<int> fileIds)
@@ -226,16 +226,16 @@ namespace NzbDrone.Core.Issues
             return issues;
         }
 
-        public List<Issue> SeriesIssuesBetweenDates(Series author, DateTime start, DateTime end, bool includeUnmonitored)
+        public List<Issue> SeriesIssuesBetweenDates(Series series, DateTime start, DateTime end, bool includeUnmonitored)
         {
-            var issues = _issueRepository.SeriesIssuesBetweenDates(author, start.ToUniversalTime(), end.ToUniversalTime(), includeUnmonitored);
+            var issues = _issueRepository.SeriesIssuesBetweenDates(series, start.ToUniversalTime(), end.ToUniversalTime(), includeUnmonitored);
 
             return issues;
         }
 
-        public List<Issue> GetSeriesIssuesWithFiles(Series author)
+        public List<Issue> GetSeriesIssuesWithFiles(Series series)
         {
-            return _issueRepository.GetSeriesIssuesWithFiles(author);
+            return _issueRepository.GetSeriesIssuesWithFiles(series);
         }
 
         public void InsertMany(List<Issue> issues)
@@ -278,7 +278,7 @@ namespace NzbDrone.Core.Issues
             var issue = _issueRepository.Get(issueId);
             _issueRepository.SetMonitoredFlat(issue, monitored);
 
-            // publish issue edited event so author stats update
+            // publish issue edited event so series stats update
             _eventAggregator.PublishEvent(new IssueEditedEvent(issue, issue));
 
             _logger.Debug("Monitored flag for Issue:{0} was set to {1}", issueId, monitored);
@@ -288,7 +288,7 @@ namespace NzbDrone.Core.Issues
         {
             _issueRepository.SetMonitored(ids, monitored);
 
-            // publish issue edited event so author stats update
+            // publish issue edited event so series stats update
             foreach (var issue in _issueRepository.Get(ids))
             {
                 _eventAggregator.PublishEvent(new IssueEditedEvent(issue, issue));

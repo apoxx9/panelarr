@@ -38,12 +38,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                                       .With(d => d.PreferredProtocol = DownloadProtocol.Usenet)
                                       .Build();
 
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                                         .With(s => s.QualityProfile = _profile)
                                         .Build();
 
             _remoteIssue = Builder<RemoteIssue>.CreateNew()
-                                                   .With(r => r.Series = author)
+                                                   .With(r => r.Series = series)
                                                    .Build();
 
             _profile.Items = new List<QualityProfileQualityItem>();

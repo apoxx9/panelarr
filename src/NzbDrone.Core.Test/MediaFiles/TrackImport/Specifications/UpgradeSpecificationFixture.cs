@@ -8,14 +8,14 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
     public class UpgradeSpecificationFixture : CoreTest<UpgradeSpecification>
     {
         /*
-        private Series _author;
+        private Series _series;
         private Issue _issue;
         private LocalTrack _localTrack;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                                      .With(e => e.QualityProfile = new QualityProfile
                                      {
                                          Items = Qualities.QualityFixture.GetDefaultQualities(),
@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
             {
                 Path = @"C:\Test\Imagine Dragons\Imagine.Dragons.Song.1.mp3",
                 Quality = new QualityModel(Quality.CBR, new Revision(version: 1)),
-                Series = _author,
+                Series = _series,
                 Issue = _issue
             };
         }

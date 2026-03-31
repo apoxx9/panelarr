@@ -77,7 +77,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         }
 
         [Test]
-        public void should_get_bad_request_if_author_folder_format_does_not_contain_author_name()
+        public void should_get_bad_request_if_series_folder_format_does_not_contain_series_name()
         {
             var config = NamingConfig.GetSingle();
             config.RenameIssues = true;

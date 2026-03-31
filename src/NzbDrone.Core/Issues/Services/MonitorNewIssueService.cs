@@ -7,7 +7,7 @@ namespace NzbDrone.Core.Issues
 {
     public interface IMonitorNewIssueService
     {
-        bool ShouldMonitorNewIssue(Issue addedIssue, List<Issue> existingIssues, NewItemMonitorTypes author);
+        bool ShouldMonitorNewIssue(Issue addedIssue, List<Issue> existingIssues, NewItemMonitorTypes series);
     }
 
     public class MonitorNewIssueService : IMonitorNewIssueService

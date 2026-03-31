@@ -13,12 +13,12 @@ namespace NzbDrone.Core.Notifications.Webhook
         {
         }
 
-        public WebhookSeries(Series author)
+        public WebhookSeries(Series series)
         {
-            Id = author.Id;
-            Name = author.Name;
-            Path = author.Path;
-            ForeignSeriesId = author.Metadata.Value.ForeignSeriesId;
+            Id = series.Id;
+            Name = series.Name;
+            Path = series.Path;
+            ForeignSeriesId = series.Metadata.Value.ForeignSeriesId;
         }
     }
 }

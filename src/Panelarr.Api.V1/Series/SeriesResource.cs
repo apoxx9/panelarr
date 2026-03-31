@@ -96,7 +96,7 @@ namespace Panelarr.Api.V1.Series
                 ForeignSeriesId = model.Metadata.Value.ForeignSeriesId,
                 TitleSlug = model.Metadata.Value.TitleSlug,
 
-                // Root folder path is now calculated from the author path
+                // Root folder path is now calculated from the series path
                 // RootFolderPath = model.RootFolderPath,
                 Genres = model.Metadata.Value.Genres,
                 Tags = model.Tags,
@@ -152,18 +152,18 @@ namespace Panelarr.Api.V1.Series
             };
         }
 
-        public static NzbDrone.Core.Issues.Series ToModel(this SeriesResource resource, NzbDrone.Core.Issues.Series author)
+        public static NzbDrone.Core.Issues.Series ToModel(this SeriesResource resource, NzbDrone.Core.Issues.Series series)
         {
             var updatedSeries = resource.ToModel();
 
-            author.ApplyChanges(updatedSeries);
+            series.ApplyChanges(updatedSeries);
 
-            return author;
+            return series;
         }
 
-        public static List<SeriesResource> ToResource(this IEnumerable<NzbDrone.Core.Issues.Series> author)
+        public static List<SeriesResource> ToResource(this IEnumerable<NzbDrone.Core.Issues.Series> series)
         {
-            return author.Select(ToResource).ToList();
+            return series.Select(ToResource).ToList();
         }
 
         public static List<NzbDrone.Core.Issues.Series> ToModel(this IEnumerable<SeriesResource> resources)

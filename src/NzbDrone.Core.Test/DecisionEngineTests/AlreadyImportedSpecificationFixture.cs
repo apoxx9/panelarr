@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         private const int FIRST_ALBUM_ID = 1;
         private const string TITLE = "Some.Series-Some.Issue-2018-320kbps-CD-Panelarr";
 
-        private Series _author;
+        private Series _series;
         private QualityModel _mp3;
         private QualityModel _flac;
         private RemoteIssue _remoteIssue;
@@ -41,7 +41,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                         }
                                     };
 
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                                      .Build();
 
             _firstFile = new ComicFile { Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 2)), DateAdded = DateTime.Now };
@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _remoteIssue = new RemoteIssue
             {
-                Series = _author,
+                Series = _series,
                 ParsedIssueInfo = new ParsedIssueInfo { Quality = _mp3 },
                 Issues = singleIssueList,
                 Release = Builder<ReleaseInfo>.CreateNew()

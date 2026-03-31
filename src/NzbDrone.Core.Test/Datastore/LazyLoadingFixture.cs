@@ -32,14 +32,14 @@ namespace NzbDrone.Core.Test.Datastore
                 .Build();
             Db.Insert(metadata);
 
-            var author = Builder<Series>.CreateListOfSize(1)
+            var series = Builder<Series>.CreateListOfSize(1)
                 .All()
                 .With(v => v.Id = 0)
                 .With(v => v.QualityProfileId = profile.Id)
                 .With(v => v.SeriesMetadataId = metadata.Id)
                 .BuildListOfNew();
 
-            Db.InsertMany(author);
+            Db.InsertMany(series);
 
             var issues = Builder<Issue>.CreateListOfSize(3)
                 .All()
@@ -96,7 +96,7 @@ namespace NzbDrone.Core.Test.Datastore
             var files = MediaFileRepository.Query(db,
                                                   new SqlBuilder(db.DatabaseType)
                                                   .Join<ComicFile, Issue>((t, b) => t.IssueId == b.Id)
-                                                  .Join<Issue, Series>((issue, author) => issue.SeriesMetadataId == author.SeriesMetadataId)
+                                                  .Join<Issue, Series>((issue, series) => issue.SeriesMetadataId == series.SeriesMetadataId)
                                                   .Join<Series, SeriesMetadata>((a, m) => a.SeriesMetadataId == m.Id));
 
             Assert.IsNotEmpty(files);

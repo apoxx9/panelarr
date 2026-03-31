@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
     [TestFixture]
     public class IdentificationServiceFixture : DbTest
     {
-        private SeriesService _authorService;
+        private SeriesService _seriesService;
         private AddSeriesService _addSeriesService;
         private RefreshSeriesService _refreshSeriesService;
 
@@ -49,8 +49,8 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             Mocker.GetMock<IMetadataProfileService>().Setup(x => x.Exists(It.IsAny<int>())).Returns(true);
 
-            _authorService = Mocker.Resolve<SeriesService>();
-            Mocker.SetConstant<ISeriesService>(_authorService);
+            _seriesService = Mocker.Resolve<SeriesService>();
+            Mocker.SetConstant<ISeriesService>(_seriesService);
             Mocker.SetConstant<ISeriesMetadataService>(Mocker.Resolve<SeriesMetadataService>());
             Mocker.SetConstant<IIssueService>(Mocker.Resolve<IssueService>());
             Mocker.SetConstant<IImportListExclusionService>(Mocker.Resolve<ImportListExclusionService>());
@@ -86,15 +86,15 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             Mocker.GetMock<IMetadataProfileService>().Setup(x => x.Get(profile.Id)).Returns(profile);
         }
 
-        private List<Series> GivenSeriess(List<SeriesTestCase> authors)
+        private List<Series> GivenSeriess(List<SeriesTestCase> allSeries)
         {
             var outp = new List<Series>();
-            for (var i = 0; i < authors.Count; i++)
+            for (var i = 0; i < allSeries.Count; i++)
             {
-                var meta = authors[i].MetadataProfile;
+                var meta = allSeries[i].MetadataProfile;
                 meta.Id = i + 1;
                 GivenMetadataProfile(meta);
-                outp.Add(GivenSeries(authors[i].Series, meta.Id));
+                outp.Add(GivenSeries(allSeries[i].Series, meta.Id));
             }
 
             return outp;
@@ -102,7 +102,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
         private Series GivenSeries(string foreignSeriesId, int metadataProfileId)
         {
-            var author = _addSeriesService.AddSeries(new Series
+            var series = _addSeriesService.AddSeries(new Series
             {
                 Metadata = new SeriesMetadata
                 {
@@ -113,13 +113,13 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var command = new RefreshSeriesCommand
             {
-                SeriesId = author.Id,
+                SeriesId = series.Id,
                 Trigger = CommandTrigger.Unspecified
             };
 
             _refreshSeriesService.Execute(command);
 
-            return _authorService.FindById(foreignSeriesId);
+            return _seriesService.FindById(foreignSeriesId);
         }
 
         public static class IdTestCaseFactory
@@ -156,8 +156,8 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             var path = Path.Combine(TestContext.CurrentContext.TestDirectory, "Files", "Identification", file);
             var testcase = JsonConvert.DeserializeObject<IdTestCase>(File.ReadAllText(path));
 
-            var authors = GivenSeriess(testcase.LibrarySeriess);
-            var specifiedSeries = authors.SingleOrDefault(x => x.Metadata.Value.ForeignSeriesId == testcase.Series);
+            var allSeries = GivenSeriess(testcase.LibrarySeriess);
+            var specifiedSeries = allSeries.SingleOrDefault(x => x.Metadata.Value.ForeignSeriesId == testcase.Series);
             var idOverrides = new IdentificationOverrides { Series = specifiedSeries };
 
             var tracks = testcase.Tracks.Select(x => new LocalIssue

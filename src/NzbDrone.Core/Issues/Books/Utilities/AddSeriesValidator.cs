@@ -14,8 +14,8 @@ namespace NzbDrone.Core.Issues
     {
         public AddSeriesValidator(RootFolderValidator rootFolderValidator,
                                   RecycleBinValidator recycleBinValidator,
-                                  SeriesPathValidator authorPathValidator,
-                                  SeriesAncestorValidator authorAncestorValidator,
+                                  SeriesPathValidator seriesPathValidator,
+                                  SeriesAncestorValidator seriesAncestorValidator,
                                   QualityProfileExistsValidator qualityProfileExistsValidator,
                                   MetadataProfileExistsValidator metadataProfileExistsValidator)
         {
@@ -23,8 +23,8 @@ namespace NzbDrone.Core.Issues
                                 .IsValidPath()
                                 .SetValidator(rootFolderValidator)
                                 .SetValidator(recycleBinValidator)
-                                .SetValidator(authorPathValidator)
-                                .SetValidator(authorAncestorValidator);
+                                .SetValidator(seriesPathValidator)
+                                .SetValidator(seriesAncestorValidator);
 
             RuleFor(c => c.QualityProfileId).SetValidator(qualityProfileExistsValidator);
 

@@ -9,8 +9,8 @@ namespace NzbDrone.Core.Issues
     {
         SeriesGroup FindById(string foreignSeriesId);
         List<SeriesGroup> FindById(List<string> foreignSeriesId);
-        List<SeriesGroup> GetBySeriesMetadataId(int authorMetadataId);
-        List<SeriesGroup> GetBySeriesId(int authorId);
+        List<SeriesGroup> GetBySeriesMetadataId(int seriesMetadataId);
+        List<SeriesGroup> GetBySeriesId(int seriesId);
     }
 
     public class SeriesGroupRepository : BasicRepository<SeriesGroup>, ISeriesGroupRepository

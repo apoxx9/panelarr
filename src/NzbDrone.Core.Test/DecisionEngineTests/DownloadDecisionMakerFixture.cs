@@ -164,7 +164,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_not_attempt_to_map_book_if_author_title_is_blank()
+        public void should_not_attempt_to_map_book_if_series_title_is_blank()
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
             _reports[0].Title = "2013 - Night Visions";
@@ -186,7 +186,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenSpecifications(_pass1, _pass2, _pass3);
             _reports[0].Title = "1937 - Snow White and the Seven Dwarves";
 
-            var author = new Series { Name = "Some Series" };
+            var series = new Series { Name = "Some Series" };
             var issues = new List<Issue>
             {
                 new Issue
@@ -195,7 +195,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 }
             };
 
-            Subject.GetSearchDecision(_reports, new IssueSearchCriteria { Series = author, Issues = issues }).ToList();
+            Subject.GetSearchDecision(_reports, new IssueSearchCriteria { Series = series, Issues = issues }).ToList();
 
             Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
 
@@ -255,12 +255,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_only_include_reports_for_requested_books()
         {
-            var author = Builder<Series>.CreateNew().Build();
+            var series = Builder<Series>.CreateNew().Build();
 
             var issues = Builder<Issue>.CreateListOfSize(2)
                 .All()
-                .With(v => v.SeriesId, author.Id)
-                .With(v => v.Series, new LazyLoaded<Series>(author))
+                .With(v => v.SeriesId, series.Id)
+                .With(v => v.Series, new LazyLoaded<Series>(series))
                 .BuildList();
 
             var criteria = new SeriesSearchCriteria { Issues = issues.Take(1).ToList() };
@@ -268,7 +268,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             var reports = issues.Select(v =>
                 new ReleaseInfo()
                 {
-                    Title = string.Format("{0}-{1}[FLAC][2017][DRONE]", author.Name, v.Title)
+                    Title = string.Format("{0}-{1}[FLAC][2017][DRONE]", series.Name, v.Title)
                 }).ToList();
 
             Mocker.GetMock<IParsingService>()
@@ -278,7 +278,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                     {
                         DownloadAllowed = true,
                         ParsedIssueInfo = p,
-                        Series = author,
+                        Series = series,
                         Issues = issues.Where(v => v.Title == p.IssueTitle).ToList()
                     });
 

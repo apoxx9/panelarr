@@ -13,7 +13,7 @@ namespace NzbDrone.Core.Test.MediaFiles
     [TestFixture]
     public class MediaFileRepositoryFixture : DbTest<MediaFileRepository, ComicFile>
     {
-        private Series _author;
+        private Series _series;
         private Issue _issue;
 
         [SetUp]
@@ -24,15 +24,15 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .Build();
             Db.Insert(meta);
 
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                 .With(a => a.SeriesMetadataId = meta.Id)
                 .With(a => a.Id = 0)
                 .Build();
-            Db.Insert(_author);
+            Db.Insert(_series);
 
             _issue = Builder<Issue>.CreateNew()
                 .With(a => a.Id = 0)
-                .With(a => a.SeriesMetadataId = _author.SeriesMetadataId)
+                .With(a => a.SeriesMetadataId = _series.SeriesMetadataId)
                 .Build();
             Db.Insert(_issue);
 
@@ -56,9 +56,9 @@ namespace NzbDrone.Core.Test.MediaFiles
         public void get_files_by_author()
         {
             VerifyData();
-            var authorFiles = Subject.GetFilesBySeries(_author.Id);
+            var seriesFiles = Subject.GetFilesBySeries(_series.Id);
 
-            authorFiles.Should().OnlyContain(c => c.Series.Value.Id == _author.Id);
+            seriesFiles.Should().OnlyContain(c => c.Series.Value.Id == _series.Id);
         }
 
         [Test]

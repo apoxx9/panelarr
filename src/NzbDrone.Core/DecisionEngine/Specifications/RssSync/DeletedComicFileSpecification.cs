@@ -63,7 +63,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
             return Decision.Accept();
         }
 
-        private bool IsTrackFileMissing(Series author, ComicFile comicFile)
+        private bool IsTrackFileMissing(Series series, ComicFile comicFile)
         {
             return !_diskProvider.FileExists(comicFile.Path);
         }

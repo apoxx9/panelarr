@@ -123,7 +123,7 @@ namespace NzbDrone.Core.DecisionEngine
                         {
                             decision = new DownloadDecision(remoteIssue, new Rejection("Unknown Series"));
 
-                            // shove in the searched author in case of forced download in interactive search
+                            // shove in the searched series in case of forced download in interactive search
                             if (searchCriteria != null)
                             {
                                 remoteIssue.Series = searchCriteria.Series;

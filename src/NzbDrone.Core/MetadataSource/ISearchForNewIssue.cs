@@ -5,6 +5,6 @@ namespace NzbDrone.Core.MetadataSource
 {
     public interface ISearchForNewIssue
     {
-        List<Issue> SearchForNewIssue(string title, string author, bool getAllEditions = true);
+        List<Issue> SearchForNewIssue(string title, string series, bool getAllEditions = true);
     }
 }

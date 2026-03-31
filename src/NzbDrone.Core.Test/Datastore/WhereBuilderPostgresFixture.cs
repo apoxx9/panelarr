@@ -54,12 +54,12 @@ namespace NzbDrone.Core.Test.Datastore
         [Test]
         public void postgres_where_equal_property()
         {
-            var author = new Series { Id = 10 };
-            _subject = Where(x => x.Id == author.Id);
+            var series = new Series { Id = 10 };
+            _subject = Where(x => x.Id == series.Id);
 
             _subject.Parameters.ParameterNames.Should().HaveCount(1);
             _subject.ToString().Should().Be($"(\"Seriess\".\"Id\" = @Clause1_P1)");
-            _subject.Parameters.Get<int>("Clause1_P1").Should().Be(author.Id);
+            _subject.Parameters.Get<int>("Clause1_P1").Should().Be(series.Id);
         }
 
         [Test]
@@ -108,8 +108,8 @@ namespace NzbDrone.Core.Test.Datastore
         [Test]
         public void postgres_where_equal_null_property()
         {
-            var author = new Series { CleanName = null };
-            _subject = Where(x => x.CleanName == author.CleanName);
+            var series = new Series { CleanName = null };
+            _subject = Where(x => x.CleanName == series.CleanName);
 
             _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" IS NULL)");
         }

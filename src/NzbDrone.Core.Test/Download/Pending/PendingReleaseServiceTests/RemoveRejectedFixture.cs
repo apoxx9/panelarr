@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
     public class RemoveRejectedFixture : CoreTest<PendingReleaseService>
     {
         private DownloadDecision _temporarilyRejected;
-        private Series _author;
+        private Series _series;
         private Issue _issue;
         private QualityProfile _profile;
         private ReleaseInfo _release;
@@ -32,7 +32,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                                      .Build();
 
             _issue = Builder<Issue>.CreateNew()
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
                                    },
             };
 
-            _author.QualityProfile = new LazyLoaded<QualityProfile>(_profile);
+            _series.QualityProfile = new LazyLoaded<QualityProfile>(_profile);
 
             _release = Builder<ReleaseInfo>.CreateNew().Build();
 
@@ -59,7 +59,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
 
             _remoteIssue = new RemoteIssue();
             _remoteIssue.Issues = new List<Issue> { _issue };
-            _remoteIssue.Series = _author;
+            _remoteIssue.Series = _series;
             _remoteIssue.ParsedIssueInfo = _parsedIssueInfo;
             _remoteIssue.Release = _release;
 
@@ -71,14 +71,14 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
 
             Mocker.GetMock<ISeriesService>()
                   .Setup(s => s.GetSeries(It.IsAny<int>()))
-                  .Returns(_author);
+                  .Returns(_series);
 
             Mocker.GetMock<ISeriesService>()
                   .Setup(s => s.GetSeriess(It.IsAny<IEnumerable<int>>()))
-                  .Returns(new List<Series> { _author });
+                  .Returns(new List<Series> { _series });
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetIssues(It.IsAny<ParsedIssueInfo>(), _author, null))
+                  .Setup(s => s.GetIssues(It.IsAny<ParsedIssueInfo>(), _series, null))
                   .Returns(new List<Issue> { _issue });
 
             Mocker.GetMock<IPrioritizeDownloadDecision>()
@@ -94,7 +94,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
 
             var heldReleases = Builder<PendingRelease>.CreateListOfSize(1)
                                                    .All()
-                                                   .With(h => h.SeriesId = _author.Id)
+                                                   .With(h => h.SeriesId = _series.Id)
                                                    .With(h => h.Title = title)
                                                    .With(h => h.Release = release)
                                                    .Build();

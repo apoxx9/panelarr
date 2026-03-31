@@ -30,14 +30,14 @@ namespace NzbDrone.Core.Notifications.Webhook
             _proxy.SendWebhook(BuildOnReleaseImportPayload(message), Settings);
         }
 
-        public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
+        public override void OnRename(Series series, List<RenamedComicFile> renamedFiles)
         {
-            _proxy.SendWebhook(BuildOnRenamePayload(author, renamedFiles), Settings);
+            _proxy.SendWebhook(BuildOnRenamePayload(series, renamedFiles), Settings);
         }
 
-        public override void OnSeriesAdded(Series author)
+        public override void OnSeriesAdded(Series series)
         {
-            _proxy.SendWebhook(BuildOnSeriesAdded(author), Settings);
+            _proxy.SendWebhook(BuildOnSeriesAdded(series), Settings);
         }
 
         public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)

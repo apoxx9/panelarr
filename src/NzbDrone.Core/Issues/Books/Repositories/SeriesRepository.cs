@@ -14,8 +14,8 @@ namespace NzbDrone.Core.Issues
         Series FindById(string foreignSeriesId);
         Dictionary<int, string> AllSeriesPaths();
         Dictionary<int, List<int>> AllSeriesTags();
-        Series GetSeriesByMetadataId(int authorMetadataId);
-        List<Series> GetSeriessByMetadataId(IEnumerable<int> authorMetadataId);
+        Series GetSeriesByMetadataId(int seriesMetadataId);
+        List<Series> GetSeriessByMetadataId(IEnumerable<int> seriesMetadataId);
     }
 
     public class SeriesRepository : BasicRepository<Series>, ISeriesRepository
@@ -33,10 +33,10 @@ namespace NzbDrone.Core.Issues
 
         public static IEnumerable<Series> Query(IDatabase database, SqlBuilder builder)
         {
-            return database.QueryJoined<Series, SeriesMetadata>(builder, (author, metadata) =>
+            return database.QueryJoined<Series, SeriesMetadata>(builder, (series, metadata) =>
                     {
-                        author.Metadata = metadata;
-                        return author;
+                        series.Metadata = metadata;
+                        return series;
                     });
         }
 
@@ -75,14 +75,14 @@ namespace NzbDrone.Core.Issues
             }
         }
 
-        public Series GetSeriesByMetadataId(int authorMetadataId)
+        public Series GetSeriesByMetadataId(int seriesMetadataId)
         {
-            return Query(s => s.SeriesMetadataId == authorMetadataId).SingleOrDefault();
+            return Query(s => s.SeriesMetadataId == seriesMetadataId).SingleOrDefault();
         }
 
-        public List<Series> GetSeriessByMetadataId(IEnumerable<int> authorMetadataIds)
+        public List<Series> GetSeriessByMetadataId(IEnumerable<int> seriesMetadataIds)
         {
-            return Query(s => authorMetadataIds.Contains(s.SeriesMetadataId));
+            return Query(s => seriesMetadataIds.Contains(s.SeriesMetadataId));
         }
     }
 }

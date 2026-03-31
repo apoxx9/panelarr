@@ -29,9 +29,9 @@ namespace NzbDrone.Core.Notifications.Twitter
             _twitterService.SendNotification($"Imported: {message.Message}", Settings);
         }
 
-        public override void OnSeriesAdded(Series author)
+        public override void OnSeriesAdded(Series series)
         {
-            _twitterService.SendNotification($"Series added: {author.Name}", Settings);
+            _twitterService.SendNotification($"Series added: {series.Name}", Settings);
         }
 
         public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)

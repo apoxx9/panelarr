@@ -27,29 +27,29 @@ namespace NzbDrone.Core.Extras.Metadata
             return new ValidationResult();
         }
 
-        public virtual string GetFilenameAfterMove(Series author, ComicFile comicFile, MetadataFile metadataFile)
+        public virtual string GetFilenameAfterMove(Series series, ComicFile comicFile, MetadataFile metadataFile)
         {
-            var existingFilename = Path.Combine(author.Path, metadataFile.RelativePath);
+            var existingFilename = Path.Combine(series.Path, metadataFile.RelativePath);
             var extension = Path.GetExtension(existingFilename).TrimStart('.');
             var newFileName = Path.ChangeExtension(comicFile.Path, extension);
 
             return newFileName;
         }
 
-        public virtual string GetFilenameAfterMove(Series author, string bookPath, MetadataFile metadataFile)
+        public virtual string GetFilenameAfterMove(Series series, string bookPath, MetadataFile metadataFile)
         {
             var existingFilename = Path.GetFileName(metadataFile.RelativePath);
-            var newFileName = Path.Combine(author.Path, bookPath, existingFilename);
+            var newFileName = Path.Combine(series.Path, bookPath, existingFilename);
 
             return newFileName;
         }
 
-        public abstract MetadataFile FindMetadataFile(Series author, string path);
+        public abstract MetadataFile FindMetadataFile(Series series, string path);
 
-        public abstract MetadataFileResult SeriesMetadata(Series author);
-        public abstract MetadataFileResult IssueMetadata(Series author, ComicFile comicFile);
-        public abstract List<ImageFileResult> SeriesImages(Series author);
-        public abstract List<ImageFileResult> IssueImages(Series author, ComicFile comicFile);
+        public abstract MetadataFileResult SeriesMetadata(Series series);
+        public abstract MetadataFileResult IssueMetadata(Series series, ComicFile comicFile);
+        public abstract List<ImageFileResult> SeriesImages(Series series);
+        public abstract List<ImageFileResult> IssueImages(Series series, ComicFile comicFile);
 
         public virtual object RequestAction(string action, IDictionary<string, string> query)
         {

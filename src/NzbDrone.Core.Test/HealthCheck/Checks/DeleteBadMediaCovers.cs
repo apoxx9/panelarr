@@ -20,12 +20,12 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
     public class DeleteBadMediaCoversFixture : CoreTest<DeleteBadMediaCovers>
     {
         private List<MetadataFile> _metadata;
-        private List<Series> _author;
+        private List<Series> _series;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Series>.CreateListOfSize(1)
+            _series = Builder<Series>.CreateListOfSize(1)
                 .All()
                 .With(c => c.Path = "C:\\Music\\".AsOsAgnostic())
                 .Build().ToList();
@@ -35,10 +35,10 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
 
             Mocker.GetMock<ISeriesService>()
                 .Setup(c => c.AllSeriesPaths())
-                .Returns(_author.ToDictionary(x => x.Id, x => x.Path));
+                .Returns(_series.ToDictionary(x => x.Id, x => x.Path));
 
             Mocker.GetMock<IMetadataFileService>()
-                .Setup(c => c.GetFilesBySeries(_author.First().Id))
+                .Setup(c => c.GetFilesBySeries(_series.First().Id))
                 .Returns(_metadata);
 
             Mocker.GetMock<IConfigService>().SetupGet(c => c.CleanupMetadataImages).Returns(true);

@@ -15,9 +15,9 @@ namespace NzbDrone.Core.MediaFiles.Commands
         {
         }
 
-        public RenameFilesCommand(int authorId, List<int> files)
+        public RenameFilesCommand(int seriesId, List<int> files)
         {
-            SeriesId = authorId;
+            SeriesId = seriesId;
             Files = files;
         }
     }

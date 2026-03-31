@@ -29,14 +29,14 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_delete_unorphaned_blocklist_items()
         {
-            var author = Builder<Series>.CreateNew().BuildNew();
+            var series = Builder<Series>.CreateNew().BuildNew();
 
-            Db.Insert(author);
+            Db.Insert(series);
 
             var blocklist = Builder<Blocklist>.CreateNew()
                                               .With(h => h.IssueIds = new List<int>())
                                               .With(h => h.Quality = new QualityModel())
-                                              .With(b => b.SeriesId = author.Id)
+                                              .With(b => b.SeriesId = series.Id)
                                               .BuildNew();
 
             Db.Insert(blocklist);

@@ -29,24 +29,24 @@ namespace NzbDrone.Core.Extras.Others
 
         public override int Order => 2;
 
-        public override IEnumerable<ExtraFile> CreateAfterSeriesScan(Series author, List<ComicFile> comicFiles)
+        public override IEnumerable<ExtraFile> CreateAfterSeriesScan(Series series, List<ComicFile> comicFiles)
         {
             return Enumerable.Empty<ExtraFile>();
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterComicImport(Series author, ComicFile comicFile)
+        public override IEnumerable<ExtraFile> CreateAfterComicImport(Series series, ComicFile comicFile)
         {
             return Enumerable.Empty<ExtraFile>();
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterComicImport(Series author, Issue issue, string authorFolder, string bookFolder)
+        public override IEnumerable<ExtraFile> CreateAfterComicImport(Series series, Issue issue, string seriesFolder, string bookFolder)
         {
             return Enumerable.Empty<ExtraFile>();
         }
 
-        public override IEnumerable<ExtraFile> MoveFilesAfterRename(Series author, List<ComicFile> comicFiles)
+        public override IEnumerable<ExtraFile> MoveFilesAfterRename(Series series, List<ComicFile> comicFiles)
         {
-            var extraFiles = _otherExtraFileService.GetFilesBySeries(author.Id);
+            var extraFiles = _otherExtraFileService.GetFilesBySeries(series.Id);
             var movedFiles = new List<OtherExtraFile>();
 
             foreach (var comicFile in comicFiles)
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Extras.Others
 
                 foreach (var extraFile in extraFilesForTrackFile)
                 {
-                    movedFiles.AddIfNotNull(MoveFile(author, comicFile, extraFile));
+                    movedFiles.AddIfNotNull(MoveFile(series, comicFile, extraFile));
                 }
             }
 
@@ -64,9 +64,9 @@ namespace NzbDrone.Core.Extras.Others
             return movedFiles;
         }
 
-        public override ExtraFile Import(Series author, ComicFile comicFile, string path, string extension, bool readOnly)
+        public override ExtraFile Import(Series series, ComicFile comicFile, string path, string extension, bool readOnly)
         {
-            var extraFile = ImportFile(author, comicFile, path, readOnly, extension, null);
+            var extraFile = ImportFile(series, comicFile, path, readOnly, extension, null);
 
             _mediaFileAttributeService.SetFilePermissions(path);
             _otherExtraFileService.Upsert(extraFile);

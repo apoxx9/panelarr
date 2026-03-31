@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
     public class ReleaseSearchServiceFixture : CoreTest<ReleaseSearchService>
     {
         private Mock<IIndexer> _mockIndexer;
-        private Series _author;
+        private Series _series;
         private Issue _firstIssue;
 
         [SetUp]
@@ -35,16 +35,16 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
                 .Setup(s => s.GetSearchDecision(It.IsAny<List<Parser.Model.ReleaseInfo>>(), It.IsAny<SearchCriteriaBase>()))
                 .Returns(new List<DownloadDecision>());
 
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                 .With(v => v.Monitored = true)
                 .Build();
             _firstIssue = Builder<Issue>.CreateNew()
-                .With(e => e.Series = _author)
+                .With(e => e.Series = _series)
                 .Build();
 
             Mocker.GetMock<ISeriesService>()
-                .Setup(v => v.GetSeries(_author.Id))
-                .Returns(_author);
+                .Setup(v => v.GetSeries(_series.Id))
+                .Returns(_series);
         }
 
         private List<SearchCriteriaBase> WatchForSearchCriteria()
@@ -84,14 +84,14 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
                 Id = 1
             });
 
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                 .With(v => v.Monitored = true)
                 .With(v => v.Tags = new HashSet<int> { 3 })
                 .Build();
 
             Mocker.GetMock<ISeriesService>()
-                .Setup(v => v.GetSeries(_author.Id))
-                .Returns(_author);
+                .Setup(v => v.GetSeries(_series.Id))
+                .Returns(_series);
 
             var allCriteria = WatchForSearchCriteria();
 
@@ -111,14 +111,14 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
                 Tags = new HashSet<int> { 1, 2, 3 }
             });
 
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                 .With(v => v.Monitored = true)
                 .With(v => v.Tags = new HashSet<int> { 3, 4, 5 })
                 .Build();
 
             Mocker.GetMock<ISeriesService>()
-                .Setup(v => v.GetSeries(_author.Id))
-                .Returns(_author);
+                .Setup(v => v.GetSeries(_series.Id))
+                .Returns(_series);
 
             var allCriteria = WatchForSearchCriteria();
 
@@ -138,14 +138,14 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
                 Tags = new HashSet<int> { 1, 2, 3 }
             });
 
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                 .With(v => v.Monitored = true)
                 .With(v => v.Tags = new HashSet<int> { 4, 5, 6 })
                 .Build();
 
             Mocker.GetMock<ISeriesService>()
-                .Setup(v => v.GetSeries(_author.Id))
-                .Returns(_author);
+                .Setup(v => v.GetSeries(_series.Id))
+                .Returns(_series);
 
             var allCriteria = WatchForSearchCriteria();
 

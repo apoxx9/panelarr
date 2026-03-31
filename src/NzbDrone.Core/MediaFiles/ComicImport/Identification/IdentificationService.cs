@@ -70,7 +70,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         public List<LocalEdition> Identify(List<LocalIssue> localTracks, IdentificationOverrides idOverrides, ImportDecisionMakerConfig config)
         {
             // 1 group localTracks so that we think they represent a single release
-            // 2 get candidates given specified author, issue and release.  Candidates can include extra files already on disk.
+            // 2 get candidates given specified series, issue and release.  Candidates can include extra files already on disk.
             // 3 find best candidate
             var watch = System.Diagnostics.Stopwatch.StartNew();
 

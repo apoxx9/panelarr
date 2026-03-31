@@ -173,11 +173,11 @@ namespace NzbDrone.Core.Indexers.Newznab
 
         protected virtual string GetSeries(XElement item)
         {
-            var authorString = TryGetNewznabAttribute(item, "author");
+            var seriesString = TryGetNewznabAttribute(item, "series");
 
-            if (!authorString.IsNullOrWhiteSpace())
+            if (!seriesString.IsNullOrWhiteSpace())
             {
-                return authorString;
+                return seriesString;
             }
 
             return "";

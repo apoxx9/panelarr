@@ -13,9 +13,9 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         public void should_reverse_single_reversed_author()
         {
             var input = new List<string> { "Last, First" };
-            var authors = DistanceCalculator.GetSeriesVariants(input);
+            var allSeries = DistanceCalculator.GetSeriesVariants(input);
 
-            authors.Should().Contain("First Last");
+            allSeries.Should().Contain("First Last");
         }
 
         [Test]
@@ -27,23 +27,23 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
                 "Last2, First2"
             };
 
-            var authors = DistanceCalculator.GetSeriesVariants(input);
+            var allSeries = DistanceCalculator.GetSeriesVariants(input);
 
-            authors.Should().HaveCount(4);
-            authors.Should().Contain("First Last");
-            authors.Should().Contain("First2 Last2");
-            authors.Should().Contain("Last, First");
-            authors.Should().Contain("Last2, First2");
+            allSeries.Should().HaveCount(4);
+            allSeries.Should().Contain("First Last");
+            allSeries.Should().Contain("First2 Last2");
+            allSeries.Should().Contain("Last, First");
+            allSeries.Should().Contain("Last2, First2");
         }
 
         [Test]
-        public void should_not_reverse_single_author()
+        public void should_not_reverse_single_series()
         {
             var input = new List<string> { "First Last" };
-            var authors = DistanceCalculator.GetSeriesVariants(input);
+            var allSeries = DistanceCalculator.GetSeriesVariants(input);
 
-            authors.Should().HaveCount(1);
-            authors.Should().Contain("First Last");
+            allSeries.Should().HaveCount(1);
+            allSeries.Should().Contain("First Last");
         }
 
         [TestCase("First1 Last1, First2 Last2", "First1 Last1", "First2 Last2")]
@@ -51,15 +51,15 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         [TestCase("First1 Last1 & First2 Last2", "First1 Last1", "First2 Last2")]
         [TestCase("First1 Last1 / First2 Last2", "First1 Last1", "First2 Last2")]
         [TestCase("First1 Last1 and First2 Last2", "First1 Last1", "First2 Last2")]
-        public void should_split_concatenated_author(string inputString, string first, string second)
+        public void should_split_concatenated_series(string inputString, string first, string second)
         {
             var input = new List<string> { inputString };
-            var authors = DistanceCalculator.GetSeriesVariants(input);
+            var allSeries = DistanceCalculator.GetSeriesVariants(input);
 
-            authors.Should().Contain(inputString);
-            authors.Should().Contain(first);
-            authors.Should().Contain(second);
-            authors.Should().HaveCount(3);
+            allSeries.Should().Contain(inputString);
+            allSeries.Should().Contain(first);
+            allSeries.Should().Contain(second);
+            allSeries.Should().HaveCount(3);
         }
 
         [Test]
@@ -67,13 +67,13 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         {
             var inputString = "First Last, First2 Last2 & First3 Last3";
             var input = new List<string> { inputString };
-            var authors = DistanceCalculator.GetSeriesVariants(input);
+            var allSeries = DistanceCalculator.GetSeriesVariants(input);
 
-            authors.Should().Contain(inputString);
-            authors.Should().Contain("First Last");
-            authors.Should().Contain("First2 Last2");
-            authors.Should().Contain("First3 Last3");
-            authors.Should().HaveCount(4);
+            allSeries.Should().Contain(inputString);
+            allSeries.Should().Contain("First Last");
+            allSeries.Should().Contain("First2 Last2");
+            allSeries.Should().Contain("First3 Last3");
+            allSeries.Should().HaveCount(4);
         }
 
         [Test]
@@ -85,11 +85,11 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
                 "Second Third, Fourth Fifth"
             };
 
-            var authors = DistanceCalculator.GetSeriesVariants(input);
+            var allSeries = DistanceCalculator.GetSeriesVariants(input);
 
-            authors.Should().HaveCount(2);
-            authors.Should().Contain("First Last");
-            authors.Should().Contain("Second Third, Fourth Fifth");
+            allSeries.Should().HaveCount(2);
+            allSeries.Should().Contain("First Last");
+            allSeries.Should().Contain("Second Third, Fourth Fifth");
         }
     }
 }

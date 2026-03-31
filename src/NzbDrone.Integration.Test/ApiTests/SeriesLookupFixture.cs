@@ -11,19 +11,19 @@ namespace NzbDrone.Integration.Test.ApiTests
         [TestCase("Philip W. Errington", "Philip W. Errington")]
         public void lookup_new_author_by_name(string term, string name)
         {
-            var author = Series.Lookup(term);
+            var series = Series.Lookup(term);
 
-            author.Should().NotBeEmpty();
-            author.Should().Contain(c => c.SeriesName == name);
+            series.Should().NotBeEmpty();
+            series.Should().Contain(c => c.SeriesName == name);
         }
 
         [Test]
         public void lookup_new_author_by_goodreads_book_id()
         {
-            var author = Series.Lookup("edition:2");
+            var series = Series.Lookup("edition:2");
 
-            author.Should().NotBeEmpty();
-            author.Should().Contain(c => c.SeriesName == "J.K. Rowling");
+            series.Should().NotBeEmpty();
+            series.Should().Contain(c => c.SeriesName == "J.K. Rowling");
         }
     }
 }

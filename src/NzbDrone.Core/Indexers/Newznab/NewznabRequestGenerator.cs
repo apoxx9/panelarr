@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             {
                 AddComicPageableRequests(pageableRequests,
                     searchCriteria,
-                    $"&author={NewsnabifyTitle(searchCriteria.SeriesQuery)}&title={NewsnabifyTitle(searchCriteria.IssueQuery)}");
+                    $"&series={NewsnabifyTitle(searchCriteria.SeriesQuery)}&title={NewsnabifyTitle(searchCriteria.IssueQuery)}");
 
                 AddComicPageableRequests(pageableRequests,
                     searchCriteria,
@@ -101,7 +101,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             {
                 AddComicPageableRequests(pageableRequests,
                     searchCriteria,
-                    $"&author={NewsnabifyTitle(searchCriteria.SeriesQuery)}");
+                    $"&series={NewsnabifyTitle(searchCriteria.SeriesQuery)}");
             }
 
             if (SupportsSearch)

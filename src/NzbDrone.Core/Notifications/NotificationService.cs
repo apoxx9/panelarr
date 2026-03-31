@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Notifications
             _logger = logger;
         }
 
-        private string GetMessage(Series author, List<Issue> issues, QualityModel quality)
+        private string GetMessage(Series series, List<Issue> issues, QualityModel quality)
         {
             var qualityString = quality.Quality.ToString();
 
@@ -61,12 +61,12 @@ namespace NzbDrone.Core.Notifications
             });
 
             return string.Format("Grabbed: {0} {1} [{2}]",
-                                    author.Name,
+                                    series.Name,
                                     string.Join(" + ", issueDescriptions),
                                     qualityString);
         }
 
-        private string GetIssueDownloadMessage(Series author, Issue issue, List<ComicFile> tracks)
+        private string GetIssueDownloadMessage(Series series, Issue issue, List<ComicFile> tracks)
         {
             // Comic import format: "Imported: {Series} #{IssueNumber} - {Title} [{Quality}]"
             var quality = tracks.FirstOrDefault()?.Quality?.Quality?.ToString() ?? "Unknown";
@@ -76,7 +76,7 @@ namespace NzbDrone.Core.Notifications
                 : $" - {issue.Title}";
 
             return string.Format("Imported: {0} #{1}{2} [{3}]",
-                author.Name,
+                series.Name,
                 issueNum,
                 title,
                 quality);
@@ -94,14 +94,14 @@ namespace NzbDrone.Core.Notifications
             return text.IsNullOrWhiteSpace() ? "<missing>" : text;
         }
 
-        private string GetTrackRetagMessage(Series author, ComicFile comicFile, Dictionary<string, Tuple<string, string>> diff)
+        private string GetTrackRetagMessage(Series series, ComicFile comicFile, Dictionary<string, Tuple<string, string>> diff)
         {
             return string.Format("{0}:\n{1}",
                                  comicFile.Path,
                                  string.Join("\n", diff.Select(x => $"{x.Key}: {FormatMissing(x.Value.Item1)} → {FormatMissing(x.Value.Item2)}")));
         }
 
-        private bool ShouldHandleSeries(ProviderDefinition definition, Series author)
+        private bool ShouldHandleSeries(ProviderDefinition definition, Series series)
         {
             if (definition.Tags.Empty())
             {
@@ -109,14 +109,14 @@ namespace NzbDrone.Core.Notifications
                 return true;
             }
 
-            if (definition.Tags.Intersect(author.Tags).Any())
+            if (definition.Tags.Intersect(series.Tags).Any())
             {
                 _logger.Debug("Notification and series have one or more intersecting tags.");
                 return true;
             }
 
             //TODO: this message could be more clear
-            _logger.Debug("{0} does not have any intersecting tags with {1}. Notification will not be sent.", definition.Name, author.Name);
+            _logger.Debug("{0} does not have any intersecting tags with {1}. Notification will not be sent.", definition.Name, series.Name);
             return false;
         }
 

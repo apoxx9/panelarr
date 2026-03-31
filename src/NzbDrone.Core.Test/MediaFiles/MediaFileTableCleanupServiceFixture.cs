@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Test.MediaFiles
     {
         private readonly string _DELETED_PATH = @"c:\ANY FILE STARTING WITH THIS PATH IS CONSIDERED DELETED!".AsOsAgnostic();
         private List<Issue> _tracks;
-        private Series _author;
+        private Series _series;
 
         [SetUp]
         public void SetUp()
@@ -24,7 +24,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                   .Build()
                   .ToList();
 
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                                      .With(s => s.Path = @"C:\Test\Music\Series".AsOsAgnostic())
                                      .Build();
         }
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             GivenTrackFiles(trackFiles);
 
-            Subject.Clean(_author.Path, FilesOnDisk(trackFiles));
+            Subject.Clean(_series.Path, FilesOnDisk(trackFiles));
 
             Mocker.GetMock<IMediaFileService>()
                 .Verify(c => c.DeleteMany(It.Is<List<ComicFile>>(x => x.Count == 0), DeleteMediaFileReason.MissingFromDisk), Times.Once());
@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             GivenTrackFiles(trackFiles);
 
-            Subject.Clean(_author.Path, FilesOnDisk(trackFiles.Where(e => !e.Path.StartsWith(_DELETED_PATH))));
+            Subject.Clean(_series.Path, FilesOnDisk(trackFiles.Where(e => !e.Path.StartsWith(_DELETED_PATH))));
 
             Mocker.GetMock<IMediaFileService>()
                 .Verify(c => c.DeleteMany(It.Is<List<ComicFile>>(e => e.Count == 2 && e.All(y => y.Path.StartsWith(_DELETED_PATH))), DeleteMediaFileReason.MissingFromDisk), Times.Once());
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             GivenTrackFiles(trackFiles);
 
-            Subject.Clean(_author.Path, new List<string>());
+            Subject.Clean(_series.Path, new List<string>());
         }
 
         [Test]
@@ -102,7 +102,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             GivenTrackFiles(trackFiles);
 
-            Subject.Clean(_author.Path, FilesOnDisk(trackFiles));
+            Subject.Clean(_series.Path, FilesOnDisk(trackFiles));
         }
     }
 }

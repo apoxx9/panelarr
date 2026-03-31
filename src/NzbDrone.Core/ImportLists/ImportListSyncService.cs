@@ -24,7 +24,7 @@ namespace NzbDrone.Core.ImportLists
         private readonly IProvideIssueInfo _bookInfoProxy;
         private readonly ISearchForNewIssue _searchProxy;
         private readonly ISearchForNewSeries _searchSeriesProxy;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly IAddSeriesService _addSeriesService;
         private readonly IAddIssueService _addIssueService;
@@ -38,7 +38,7 @@ namespace NzbDrone.Core.ImportLists
                                      IProvideIssueInfo bookInfoProxy,
                                      ISearchForNewIssue searchProxy,
                                      ISearchForNewSeries searchSeriesProxy,
-                                     ISeriesService authorService,
+                                     ISeriesService seriesService,
                                      IIssueService bookService,
                                      IAddSeriesService addSeriesService,
                                      IAddIssueService addIssueService,
@@ -52,7 +52,7 @@ namespace NzbDrone.Core.ImportLists
             _bookInfoProxy = bookInfoProxy;
             _searchProxy = searchProxy;
             _searchSeriesProxy = searchSeriesProxy;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _issueService = bookService;
             _addSeriesService = addSeriesService;
             _addIssueService = addIssueService;
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.ImportLists
         private List<Issue> ProcessListItems(List<ImportListItemInfo> items)
         {
             var processed = new List<Issue>();
-            var authorsToAdd = new List<Series>();
+            var seriesToAdd = new List<Series>();
             var booksToAdd = new List<Issue>();
 
             if (items.Count == 0)
@@ -120,7 +120,7 @@ namespace NzbDrone.Core.ImportLists
                         MapIssueReport(report);
                     }
 
-                    ProcessIssueReport(importList, report, listExclusions, booksToAdd, authorsToAdd);
+                    ProcessIssueReport(importList, report, listExclusions, booksToAdd, seriesToAdd);
                 }
                 else if (report.Series.IsNotNullOrWhiteSpace() || report.ForeignSeriesId.IsNotNullOrWhiteSpace())
                 {
@@ -129,14 +129,14 @@ namespace NzbDrone.Core.ImportLists
                         MapSeriesReport(report);
                     }
 
-                    ProcessSeriesReport(importList, report, listExclusions, authorsToAdd);
+                    ProcessSeriesReport(importList, report, listExclusions, seriesToAdd);
                 }
             }
 
-            var addedSeries = _addSeriesService.AddSeries(authorsToAdd, false);
+            var addedSeries = _addSeriesService.AddSeries(seriesToAdd, false);
             var addedIssues = _addIssueService.AddIssues(booksToAdd, false);
 
-            var message = string.Format($"Import List Sync Completed. Items found: {items.Count}, Series added: {authorsToAdd.Count}, Issues added: {booksToAdd.Count}");
+            var message = string.Format($"Import List Sync Completed. Items found: {items.Count}, Series added: {seriesToAdd.Count}, Issues added: {booksToAdd.Count}");
 
             _logger.ProgressInfo(message);
 
@@ -211,7 +211,7 @@ namespace NzbDrone.Core.ImportLists
             }
         }
 
-        private void ProcessIssueReport(ImportListDefinition importList, ImportListItemInfo report, List<ImportListExclusion> listExclusions, List<Issue> booksToAdd, List<Series> authorsToAdd)
+        private void ProcessIssueReport(ImportListDefinition importList, ImportListItemInfo report, List<ImportListExclusion> listExclusions, List<Issue> booksToAdd, List<Series> seriesToAdd)
         {
             // Check to see if issue in DB
             var existingIssue = _issueService.FindById(report.ForeignIssueId);
@@ -219,7 +219,7 @@ namespace NzbDrone.Core.ImportLists
             // Check to see if issue excluded
             var excludedIssue = listExclusions.SingleOrDefault(s => s.ForeignId == report.ForeignIssueId);
 
-            // Check to see if author excluded
+            // Check to see if series excluded
             var excludedSeries = listExclusions.SingleOrDefault(s => s.ForeignId == report.ForeignSeriesId);
 
             if (excludedIssue != null)
@@ -230,7 +230,7 @@ namespace NzbDrone.Core.ImportLists
 
             if (excludedSeries != null)
             {
-                _logger.Debug("{0} [{1}] Rejected due to list exclusion for parent author", report.ForeignEditionId, report.Issue);
+                _logger.Debug("{0} [{1}] Rejected due to list exclusion for parent series", report.ForeignEditionId, report.Issue);
                 return;
             }
 
@@ -266,7 +266,7 @@ namespace NzbDrone.Core.ImportLists
                     {
                         doSearch = true;
                         existingSeries.Monitored = true;
-                        _authorService.UpdateSeries(existingSeries);
+                        _seriesService.UpdateSeries(existingSeries);
                     }
 
                     if (doSearch)
@@ -300,7 +300,7 @@ namespace NzbDrone.Core.ImportLists
 
                 if (report.ForeignSeriesId != null && report.Series != null)
                 {
-                    toAddSeries = ProcessSeriesReport(importList, report, listExclusions, authorsToAdd);
+                    toAddSeries = ProcessSeriesReport(importList, report, listExclusions, seriesToAdd);
                 }
 
                 var toAdd = new Issue
@@ -310,15 +310,15 @@ namespace NzbDrone.Core.ImportLists
                     Series = toAddSeries,
                     AddOptions = new AddIssueOptions
                     {
-                        // Only search for new issue for existing authors
-                        // New author searches are triggered by SearchForMissingIssues
+                        // Only search for new issue for existing allSeries
+                        // New series searches are triggered by SearchForMissingIssues
                         SearchForNewIssue = importList.ShouldSearch && toAddSeries.Id > 0
                     }
                 };
 
                 if (importList.ShouldMonitor == ImportListMonitorType.SpecificIssue && toAddSeries.AddOptions != null)
                 {
-                    Debug.Assert(toAddSeries.Id == 0, "new author added but ID is not 0");
+                    Debug.Assert(toAddSeries.Id == 0, "new series added but ID is not 0");
                     toAddSeries.AddOptions.IssuesToMonitor.Add(toAdd.ForeignIssueId);
                 }
 
@@ -342,21 +342,21 @@ namespace NzbDrone.Core.ImportLists
             report.ForeignSeriesId = mappedSeries.ForeignSeriesId;
         }
 
-        private Series ProcessSeriesReport(ImportListDefinition importList, ImportListItemInfo report, List<ImportListExclusion> listExclusions, List<Series> authorsToAdd)
+        private Series ProcessSeriesReport(ImportListDefinition importList, ImportListItemInfo report, List<ImportListExclusion> listExclusions, List<Series> seriesToAdd)
         {
             if (report.ForeignSeriesId == null)
             {
                 return null;
             }
 
-            // Check to see if author in DB
-            var existingSeries = _authorService.FindById(report.ForeignSeriesId);
+            // Check to see if series in DB
+            var existingSeries = _seriesService.FindById(report.ForeignSeriesId);
 
-            // Check to see if author excluded
+            // Check to see if series excluded
             var excludedSeries = listExclusions.SingleOrDefault(s => s.ForeignId == report.ForeignSeriesId);
 
-            // Check to see if author in import
-            var existingImportSeries = authorsToAdd.Find(i => i.ForeignSeriesId == report.ForeignSeriesId);
+            // Check to see if series in import
+            var existingImportSeries = seriesToAdd.Find(i => i.ForeignSeriesId == report.ForeignSeriesId);
 
             if (excludedSeries != null)
             {
@@ -371,7 +371,7 @@ namespace NzbDrone.Core.ImportLists
                 if (importList.ShouldMonitorExisting && !existingSeries.Monitored)
                 {
                     existingSeries.Monitored = true;
-                    _authorService.UpdateSeries(existingSeries);
+                    _seriesService.UpdateSeries(existingSeries);
                 }
 
                 return existingSeries;
@@ -406,7 +406,7 @@ namespace NzbDrone.Core.ImportLists
                 }
             };
 
-            authorsToAdd.Add(toAdd);
+            seriesToAdd.Add(toAdd);
 
             return toAdd;
         }

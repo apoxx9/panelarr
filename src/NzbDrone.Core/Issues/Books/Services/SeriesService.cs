@@ -12,9 +12,9 @@ namespace NzbDrone.Core.Issues
 {
     public interface ISeriesService
     {
-        Series GetSeries(int authorId);
-        Series GetSeriesByMetadataId(int authorMetadataId);
-        List<Series> GetSeriess(IEnumerable<int> authorIds);
+        Series GetSeries(int seriesId);
+        Series GetSeriesByMetadataId(int seriesMetadataId);
+        List<Series> GetSeriess(IEnumerable<int> seriesIds);
         Series AddSeries(Series newSeries, bool doRefresh);
         List<Series> AddSeries(List<Series> newSeriesList, bool doRefresh);
         Series FindById(string foreignSeriesId);
@@ -22,42 +22,42 @@ namespace NzbDrone.Core.Issues
         Series FindByNameInexact(string title);
         List<Series> GetCandidates(string title);
         List<Series> GetReportCandidates(string reportTitle);
-        void DeleteSeries(int authorId, bool deleteFiles, bool addImportListExclusion = false);
+        void DeleteSeries(int seriesId, bool deleteFiles, bool addImportListExclusion = false);
         List<Series> GetAllSeries();
         Dictionary<int, List<int>> GetAllSeriesTags();
         List<Series> AllForTag(int tagId);
-        Series UpdateSeries(Series author);
-        List<Series> UpdateSeriess(List<Series> authors, bool useExistingRelativeFolder);
+        Series UpdateSeries(Series series);
+        List<Series> UpdateSeriess(List<Series> allSeries, bool useExistingRelativeFolder);
         Dictionary<int, string> AllSeriesPaths();
         bool SeriesPathExists(string folder);
-        void RemoveAddOptions(Series author);
+        void RemoveAddOptions(Series series);
     }
 
     public class SeriesService : ISeriesService
     {
-        private readonly ISeriesRepository _authorRepository;
+        private readonly ISeriesRepository _seriesRepository;
         private readonly IEventAggregator _eventAggregator;
-        private readonly IBuildSeriesPaths _authorPathBuilder;
+        private readonly IBuildSeriesPaths _seriesPathBuilder;
         private readonly Logger _logger;
         private readonly ICached<List<Series>> _cache;
 
-        public SeriesService(ISeriesRepository authorRepository,
+        public SeriesService(ISeriesRepository seriesRepository,
                              IEventAggregator eventAggregator,
-                             IBuildSeriesPaths authorPathBuilder,
+                             IBuildSeriesPaths seriesPathBuilder,
                              ICacheManager cacheManager,
                              Logger logger)
         {
-            _authorRepository = authorRepository;
+            _seriesRepository = seriesRepository;
             _eventAggregator = eventAggregator;
-            _authorPathBuilder = authorPathBuilder;
-            _cache = cacheManager.GetRollingCache<List<Series>>(GetType(), "authorcache", TimeSpan.FromSeconds(30));
+            _seriesPathBuilder = seriesPathBuilder;
+            _cache = cacheManager.GetRollingCache<List<Series>>(GetType(), "seriescache", TimeSpan.FromSeconds(30));
             _logger = logger;
         }
 
         public Series AddSeries(Series newSeries, bool doRefresh)
         {
             _cache.Clear();
-            _authorRepository.Insert(newSeries);
+            _seriesRepository.Insert(newSeries);
             _eventAggregator.PublishEvent(new SeriesAddedEvent(GetSeries(newSeries.Id), doRefresh));
 
             return newSeries;
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.Issues
         public List<Series> AddSeries(List<Series> newSeriesList, bool doRefresh)
         {
             _cache.Clear();
-            _authorRepository.InsertMany(newSeriesList);
+            _seriesRepository.InsertMany(newSeriesList);
             _eventAggregator.PublishEvent(new SeriesImportedEvent(newSeriesList.Select(s => s.Id).ToList(), doRefresh));
 
             return newSeriesList;
@@ -74,25 +74,25 @@ namespace NzbDrone.Core.Issues
 
         public bool SeriesPathExists(string folder)
         {
-            return _authorRepository.SeriesPathExists(folder);
+            return _seriesRepository.SeriesPathExists(folder);
         }
 
-        public void DeleteSeries(int authorId, bool deleteFiles, bool addImportListExclusion = false)
+        public void DeleteSeries(int seriesId, bool deleteFiles, bool addImportListExclusion = false)
         {
             _cache.Clear();
-            var author = _authorRepository.Get(authorId);
-            _authorRepository.Delete(authorId);
-            _eventAggregator.PublishEvent(new SeriesDeletedEvent(author, deleteFiles, addImportListExclusion));
+            var series = _seriesRepository.Get(seriesId);
+            _seriesRepository.Delete(seriesId);
+            _eventAggregator.PublishEvent(new SeriesDeletedEvent(series, deleteFiles, addImportListExclusion));
         }
 
         public Series FindById(string foreignSeriesId)
         {
-            return _authorRepository.FindById(foreignSeriesId);
+            return _seriesRepository.FindById(foreignSeriesId);
         }
 
         public Series FindByName(string title)
         {
-            return _authorRepository.FindByName(title.CleanSeriesName());
+            return _seriesRepository.FindByName(title.CleanSeriesName());
         }
 
         public List<Tuple<Func<Series, string, double>, string>> SeriesScoringFunctions(string title, string cleanTitle)
@@ -108,11 +108,11 @@ namespace NzbDrone.Core.Issues
 
         public Series FindByNameInexact(string title)
         {
-            var authors = GetAllSeries();
+            var allSeries = GetAllSeries();
 
             foreach (var func in SeriesScoringFunctions(title, title.CleanSeriesName()))
             {
-                var results = FindByStringInexact(authors, func.Item1, func.Item2);
+                var results = FindByStringInexact(allSeries, func.Item1, func.Item2);
                 if (results.Count == 1)
                 {
                     return results[0];
@@ -124,12 +124,12 @@ namespace NzbDrone.Core.Issues
 
         public List<Series> GetCandidates(string title)
         {
-            var authors = GetAllSeries();
+            var allSeries = GetAllSeries();
             var output = new List<Series>();
 
             foreach (var func in SeriesScoringFunctions(title, title.CleanSeriesName()))
             {
-                output.AddRange(FindByStringInexact(authors, func.Item1, func.Item2));
+                output.AddRange(FindByStringInexact(allSeries, func.Item1, func.Item2));
             }
 
             return output.DistinctBy(x => x.Id).ToList();
@@ -148,23 +148,23 @@ namespace NzbDrone.Core.Issues
 
         public List<Series> GetReportCandidates(string reportTitle)
         {
-            var authors = GetAllSeries();
+            var allSeries = GetAllSeries();
             var output = new List<Series>();
 
             foreach (var func in ReportSeriesScoringFunctions(reportTitle, reportTitle.CleanSeriesName()))
             {
-                output.AddRange(FindByStringInexact(authors, func.Item1, func.Item2));
+                output.AddRange(FindByStringInexact(allSeries, func.Item1, func.Item2));
             }
 
             return output.DistinctBy(x => x.Id).ToList();
         }
 
-        private List<Series> FindByStringInexact(List<Series> authors, Func<Series, string, double> scoreFunction, string title)
+        private List<Series> FindByStringInexact(List<Series> allSeries, Func<Series, string, double> scoreFunction, string title)
         {
             const double fuzzThreshold = 0.8;
             const double fuzzGap = 0.2;
 
-            var sortedSeries = authors.Select(s => new
+            var sortedSeries = allSeries.Select(s => new
             {
                 MatchProb = scoreFunction(s, title),
                 Series = s
@@ -181,17 +181,17 @@ namespace NzbDrone.Core.Issues
 
         public List<Series> GetAllSeries()
         {
-            return _cache.Get("GetAllSeries", () => _authorRepository.All().ToList(), TimeSpan.FromSeconds(30));
+            return _cache.Get("GetAllSeries", () => _seriesRepository.All().ToList(), TimeSpan.FromSeconds(30));
         }
 
         public Dictionary<int, List<int>> GetAllSeriesTags()
         {
-            return _authorRepository.AllSeriesTags();
+            return _seriesRepository.AllSeriesTags();
         }
 
         public Dictionary<int, string> AllSeriesPaths()
         {
-            return _authorRepository.AllSeriesPaths();
+            return _seriesRepository.AllSeriesPaths();
         }
 
         public List<Series> AllForTag(int tagId)
@@ -200,53 +200,53 @@ namespace NzbDrone.Core.Issues
                                  .ToList();
         }
 
-        public Series GetSeries(int authorId)
+        public Series GetSeries(int seriesId)
         {
-            return _authorRepository.Get(authorId);
+            return _seriesRepository.Get(seriesId);
         }
 
-        public Series GetSeriesByMetadataId(int authorMetadataId)
+        public Series GetSeriesByMetadataId(int seriesMetadataId)
         {
-            return _authorRepository.GetSeriesByMetadataId(authorMetadataId);
+            return _seriesRepository.GetSeriesByMetadataId(seriesMetadataId);
         }
 
-        public List<Series> GetSeriess(IEnumerable<int> authorIds)
+        public List<Series> GetSeriess(IEnumerable<int> seriesIds)
         {
-            return _authorRepository.Get(authorIds).ToList();
+            return _seriesRepository.Get(seriesIds).ToList();
         }
 
-        public void RemoveAddOptions(Series author)
+        public void RemoveAddOptions(Series series)
         {
-            _authorRepository.SetFields(author, s => s.AddOptions);
+            _seriesRepository.SetFields(series, s => s.AddOptions);
         }
 
-        public Series UpdateSeries(Series author)
+        public Series UpdateSeries(Series series)
         {
             _cache.Clear();
 
-            var storedSeries = GetSeries(author.Id);
+            var storedSeries = GetSeries(series.Id);
 
-            // Never update AddOptions when updating an author, keep it the same as the existing stored author.
-            author.AddOptions = storedSeries.AddOptions;
+            // Never update AddOptions when updating an series, keep it the same as the existing stored series.
+            series.AddOptions = storedSeries.AddOptions;
 
-            var updatedSeries = _authorRepository.Update(author);
+            var updatedSeries = _seriesRepository.Update(series);
             _eventAggregator.PublishEvent(new SeriesEditedEvent(updatedSeries, storedSeries));
 
             return updatedSeries;
         }
 
-        public List<Series> UpdateSeriess(List<Series> author, bool useExistingRelativeFolder)
+        public List<Series> UpdateSeriess(List<Series> series, bool useExistingRelativeFolder)
         {
             _cache.Clear();
-            _logger.Debug("Updating {0} series", author.Count);
+            _logger.Debug("Updating {0} series", series.Count);
 
-            foreach (var s in author)
+            foreach (var s in series)
             {
                 _logger.Trace("Updating: {0}", s.Name);
 
                 if (!s.RootFolderPath.IsNullOrWhiteSpace())
                 {
-                    s.Path = _authorPathBuilder.BuildPath(s, useExistingRelativeFolder);
+                    s.Path = _seriesPathBuilder.BuildPath(s, useExistingRelativeFolder);
 
                     _logger.Trace("Changing path for {0} to {1}", s.Name, s.Path);
                 }
@@ -256,10 +256,10 @@ namespace NzbDrone.Core.Issues
                 }
             }
 
-            _authorRepository.UpdateMany(author);
-            _logger.Debug("{0} series updated", author.Count);
+            _seriesRepository.UpdateMany(series);
+            _logger.Debug("{0} series updated", series.Count);
 
-            return author;
+            return series;
         }
     }
 }

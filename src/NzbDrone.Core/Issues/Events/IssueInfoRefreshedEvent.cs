@@ -12,9 +12,9 @@ namespace NzbDrone.Core.Issues.Events
         public ReadOnlyCollection<Issue> Updated { get; private set; }
         public ReadOnlyCollection<Issue> Removed { get; private set; }
 
-        public IssueInfoRefreshedEvent(Series author, IList<Issue> added, IList<Issue> updated, IList<Issue> removed)
+        public IssueInfoRefreshedEvent(Series series, IList<Issue> added, IList<Issue> updated, IList<Issue> removed)
         {
-            Series = author;
+            Series = series;
             Added = new ReadOnlyCollection<Issue>(added);
             Updated = new ReadOnlyCollection<Issue>(updated);
             Removed = new ReadOnlyCollection<Issue>(removed);

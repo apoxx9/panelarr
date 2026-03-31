@@ -7,31 +7,31 @@ namespace NzbDrone.Core.Issues
 {
     public interface IIssueMonitoredService
     {
-        void SetIssueMonitoredStatus(Series author, MonitoringOptions monitoringOptions);
+        void SetIssueMonitoredStatus(Series series, MonitoringOptions monitoringOptions);
     }
 
     public class IssueMonitoredService : IIssueMonitoredService
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly Logger _logger;
 
-        public IssueMonitoredService(ISeriesService authorService, IIssueService bookService, Logger logger)
+        public IssueMonitoredService(ISeriesService seriesService, IIssueService bookService, Logger logger)
         {
-            _authorService = authorService;
+            _seriesService = seriesService;
             _issueService = bookService;
             _logger = logger;
         }
 
-        public void SetIssueMonitoredStatus(Series author, MonitoringOptions monitoringOptions)
+        public void SetIssueMonitoredStatus(Series series, MonitoringOptions monitoringOptions)
         {
             if (monitoringOptions != null)
             {
-                _logger.Debug("[{0}] Setting issue monitored status.", author.Name);
+                _logger.Debug("[{0}] Setting issue monitored status.", series.Name);
 
-                var issues = _issueService.GetIssuesBySeries(author.Id);
+                var issues = _issueService.GetIssuesBySeries(series.Id);
 
-                var booksWithFiles = _issueService.GetSeriesIssuesWithFiles(author);
+                var booksWithFiles = _issueService.GetSeriesIssuesWithFiles(series);
 
                 var booksWithoutFiles = issues.Where(c => !booksWithFiles.Select(e => e.Id).Contains(c.Id) && c.ReleaseDate <= DateTime.UtcNow).ToList();
 
@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Issues
                 }
             }
 
-            _authorService.UpdateSeries(author);
+            _seriesService.UpdateSeries(series);
         }
 
         private void ToggleIssuesMonitoredState(IEnumerable<Issue> issues, bool monitored)

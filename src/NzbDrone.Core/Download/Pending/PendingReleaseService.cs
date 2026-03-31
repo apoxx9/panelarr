@@ -25,11 +25,11 @@ namespace NzbDrone.Core.Download.Pending
         void Add(DownloadDecision decision, PendingReleaseReason reason);
         void AddMany(List<Tuple<DownloadDecision, PendingReleaseReason>> decisions);
         List<ReleaseInfo> GetPending();
-        List<RemoteIssue> GetPendingRemoteIssues(int authorId);
+        List<RemoteIssue> GetPendingRemoteIssues(int seriesId);
         List<Queue.Queue> GetPendingQueue();
         Queue.Queue FindPendingQueueItem(int queueId);
         void RemovePendingQueueItems(int queueId);
-        RemoteIssue OldestPendingRelease(int authorId, int[] bookIds);
+        RemoteIssue OldestPendingRelease(int seriesId, int[] bookIds);
     }
 
     public class PendingReleaseService : IPendingReleaseService,
@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Download.Pending
     {
         private readonly IIndexerStatusService _indexerStatusService;
         private readonly IPendingReleaseRepository _repository;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IParsingService _parsingService;
         private readonly IDelayProfileService _delayProfileService;
         private readonly ITaskManager _taskManager;
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Download.Pending
 
         public PendingReleaseService(IIndexerStatusService indexerStatusService,
                                     IPendingReleaseRepository repository,
-                                    ISeriesService authorService,
+                                    ISeriesService seriesService,
                                     IParsingService parsingService,
                                     IDelayProfileService delayProfileService,
                                     ITaskManager taskManager,
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Download.Pending
         {
             _indexerStatusService = indexerStatusService;
             _repository = repository;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _parsingService = parsingService;
             _delayProfileService = delayProfileService;
             _taskManager = taskManager;
@@ -87,15 +87,15 @@ namespace NzbDrone.Core.Download.Pending
 
         public void AddMany(List<Tuple<DownloadDecision, PendingReleaseReason>> decisions)
         {
-            foreach (var authorDecisions in decisions.GroupBy(v => v.Item1.RemoteIssue.Series.Id))
+            foreach (var seriesDecisions in decisions.GroupBy(v => v.Item1.RemoteIssue.Series.Id))
             {
-                var author = authorDecisions.First().Item1.RemoteIssue.Series;
-                var alreadyPending = _repository.AllBySeriesId(author.Id);
+                var series = seriesDecisions.First().Item1.RemoteIssue.Series;
+                var alreadyPending = _repository.AllBySeriesId(series.Id);
 
-                alreadyPending = IncludeRemoteIssues(alreadyPending, authorDecisions.ToDictionaryIgnoreDuplicates(v => v.Item1.RemoteIssue.Release.Title, v => v.Item1.RemoteIssue));
+                alreadyPending = IncludeRemoteIssues(alreadyPending, seriesDecisions.ToDictionaryIgnoreDuplicates(v => v.Item1.RemoteIssue.Release.Title, v => v.Item1.RemoteIssue));
                 var alreadyPendingByIssue = CreateIssueLookup(alreadyPending);
 
-                foreach (var pair in authorDecisions)
+                foreach (var pair in seriesDecisions)
                 {
                     var decision = pair.Item1;
                     var reason = pair.Item2;
@@ -169,9 +169,9 @@ namespace NzbDrone.Core.Download.Pending
             return releases;
         }
 
-        public List<RemoteIssue> GetPendingRemoteIssues(int authorId)
+        public List<RemoteIssue> GetPendingRemoteIssues(int seriesId)
         {
-            return IncludeRemoteIssues(_repository.AllBySeriesId(authorId)).Select(v => v.RemoteIssue).ToList();
+            return IncludeRemoteIssues(_repository.AllBySeriesId(seriesId)).Select(v => v.RemoteIssue).ToList();
         }
 
         public List<Queue.Queue> GetPendingQueue()
@@ -238,9 +238,9 @@ namespace NzbDrone.Core.Download.Pending
             //Return best quality release for each issue
             var deduped = queued.GroupBy(q => q.Issue.Id).Select(g =>
             {
-                var author = g.First().Series;
+                var series = g.First().Series;
 
-                return g.OrderByDescending(e => e.Quality, new QualityModelComparer(author.QualityProfile))
+                return g.OrderByDescending(e => e.Quality, new QualityModelComparer(series.QualityProfile))
                         .ThenBy(q => PrioritizeDownloadProtocol(q.Series, q.Protocol))
                         .First();
             });
@@ -256,19 +256,19 @@ namespace NzbDrone.Core.Download.Pending
         public void RemovePendingQueueItems(int queueId)
         {
             var targetItem = FindPendingRelease(queueId);
-            var authorReleases = _repository.AllBySeriesId(targetItem.SeriesId);
+            var seriesReleases = _repository.AllBySeriesId(targetItem.SeriesId);
 
-            var releasesToRemove = authorReleases.Where(
+            var releasesToRemove = seriesReleases.Where(
                 c => c.ParsedIssueInfo.IssueTitle == targetItem.ParsedIssueInfo.IssueTitle);
 
             _repository.DeleteMany(releasesToRemove.Select(c => c.Id));
         }
 
-        public RemoteIssue OldestPendingRelease(int authorId, int[] bookIds)
+        public RemoteIssue OldestPendingRelease(int seriesId, int[] bookIds)
         {
-            var authorReleases = GetPendingReleases(authorId);
+            var seriesReleases = GetPendingReleases(seriesId);
 
-            return authorReleases.Select(r => r.RemoteIssue)
+            return seriesReleases.Select(r => r.RemoteIssue)
                                  .Where(r => r.Issues.Select(e => e.Id).Intersect(bookIds).Any())
                                  .MaxBy(p => p.Release.AgeHours);
         }
@@ -292,39 +292,39 @@ namespace NzbDrone.Core.Download.Pending
             return IncludeRemoteIssues(_repository.All().ToList());
         }
 
-        private List<PendingRelease> GetPendingReleases(int authorId)
+        private List<PendingRelease> GetPendingReleases(int seriesId)
         {
-            return IncludeRemoteIssues(_repository.AllBySeriesId(authorId).ToList());
+            return IncludeRemoteIssues(_repository.AllBySeriesId(seriesId).ToList());
         }
 
         private List<PendingRelease> IncludeRemoteIssues(List<PendingRelease> releases, Dictionary<string, RemoteIssue> knownRemoteIssues = null)
         {
             var result = new List<PendingRelease>();
 
-            var authorMap = new Dictionary<int, Series>();
+            var seriesMap = new Dictionary<int, Series>();
 
             if (knownRemoteIssues != null)
             {
-                foreach (var author in knownRemoteIssues.Values.Select(v => v.Series))
+                foreach (var series in knownRemoteIssues.Values.Select(v => v.Series))
                 {
-                    if (!authorMap.ContainsKey(author.Id))
+                    if (!seriesMap.ContainsKey(series.Id))
                     {
-                        authorMap[author.Id] = author;
+                        seriesMap[series.Id] = series;
                     }
                 }
             }
 
-            foreach (var author in _authorService.GetSeriess(releases.Select(v => v.SeriesId).Distinct().Where(v => !authorMap.ContainsKey(v))))
+            foreach (var series in _seriesService.GetSeriess(releases.Select(v => v.SeriesId).Distinct().Where(v => !seriesMap.ContainsKey(v))))
             {
-                authorMap[author.Id] = author;
+                seriesMap[series.Id] = series;
             }
 
             foreach (var release in releases)
             {
-                var author = authorMap.GetValueOrDefault(release.SeriesId);
+                var series = seriesMap.GetValueOrDefault(release.SeriesId);
 
-                // Just in case the author was removed, but wasn't cleaned up yet (housekeeper will clean it up)
-                if (author == null)
+                // Just in case the series was removed, but wasn't cleaned up yet (housekeeper will clean it up)
+                if (series == null)
                 {
                     return null;
                 }
@@ -337,12 +337,12 @@ namespace NzbDrone.Core.Download.Pending
                 }
                 else
                 {
-                    issues = _parsingService.GetIssues(release.ParsedIssueInfo, author);
+                    issues = _parsingService.GetIssues(release.ParsedIssueInfo, series);
                 }
 
                 release.RemoteIssue = new RemoteIssue
                 {
-                    Series = author,
+                    Series = series,
                     Issues = issues,
                     ReleaseSource = release.AdditionalInfo?.ReleaseSource ?? ReleaseSourceType.Unknown,
                     ParsedIssueInfo = release.ParsedIssueInfo,
@@ -451,9 +451,9 @@ namespace NzbDrone.Core.Download.Pending
             return HashConverter.GetHashInt31(string.Format("pending-{0}-issue{1}", pendingRelease.Id, issue.Id));
         }
 
-        private int PrioritizeDownloadProtocol(Series author, DownloadProtocol downloadProtocol)
+        private int PrioritizeDownloadProtocol(Series series, DownloadProtocol downloadProtocol)
         {
-            var delayProfile = _delayProfileService.BestForTags(author.Tags);
+            var delayProfile = _delayProfileService.BestForTags(series.Tags);
 
             if (downloadProtocol == delayProfile.PreferredProtocol)
             {

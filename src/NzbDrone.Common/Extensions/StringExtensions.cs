@@ -277,33 +277,33 @@ namespace NzbDrone.Common.Extensions
             return new string(buf.ToArray());
         }
 
-        public static string ToLastFirst(this string author)
+        public static string ToLastFirst(this string series)
         {
             // ported from https://github.com/kovidgoyal/calibre/blob/master/src/calibre/ebooks/metadata/__init__.py
-            if (author == null)
+            if (series == null)
             {
                 return null;
             }
 
-            var sauthor = author.RemoveBracketedText().Trim();
+            var sSeriesName = series.RemoveBracketedText().Trim();
 
-            var tokens = sauthor.Split();
+            var tokens = sSeriesName.Split();
 
             if (tokens.Length < 2)
             {
-                return author;
+                return series;
             }
 
             var ltoks = tokens.Select(x => x.ToLowerInvariant()).ToHashSet();
 
             if (ltoks.Intersect(Copywords).Any())
             {
-                return author;
+                return series;
             }
 
             if (tokens.Length == 2 && SurnamePrefixes.Contains(tokens[0].ToLowerInvariant()))
             {
-                return author;
+                return series;
             }
 
             int first;
@@ -317,7 +317,7 @@ namespace NzbDrone.Common.Extensions
 
             if (first == tokens.Length)
             {
-                return author;
+                return series;
             }
 
             int last;
@@ -331,7 +331,7 @@ namespace NzbDrone.Common.Extensions
 
             if (last < first)
             {
-                return author;
+                return series;
             }
 
             var suffix = tokens.TakeLast(tokens.Length - last - 1).ConcatToString(" ");

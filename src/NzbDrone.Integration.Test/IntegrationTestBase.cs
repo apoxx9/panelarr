@@ -236,21 +236,21 @@ namespace NzbDrone.Integration.Test
             Assert.Fail("Timed on wait");
         }
 
-        public SeriesResource EnsureSeries(string authorId, string goodreadsEditionId, string authorName, bool? monitored = null)
+        public SeriesResource EnsureSeries(string seriesId, string goodreadsEditionId, string seriesName, bool? monitored = null)
         {
-            var result = Series.All().FirstOrDefault(v => v.ForeignSeriesId == authorId);
+            var result = Series.All().FirstOrDefault(v => v.ForeignSeriesId == seriesId);
 
             if (result == null)
             {
                 var lookup = Series.Lookup("edition:" + goodreadsEditionId);
-                var author = lookup.First();
-                author.QualityProfileId = 1;
-                author.Path = Path.Combine(SeriesRootFolder, author.SeriesName);
-                author.Monitored = true;
-                author.AddOptions = new Core.Issues.AddSeriesOptions();
-                Directory.CreateDirectory(author.Path);
+                var series = lookup.First();
+                series.QualityProfileId = 1;
+                series.Path = Path.Combine(SeriesRootFolder, series.SeriesName);
+                series.Monitored = true;
+                series.AddOptions = new Core.Issues.AddSeriesOptions();
+                Directory.CreateDirectory(series.Path);
 
-                result = Series.Post(author);
+                result = Series.Post(series);
                 Commands.WaitAll();
                 WaitForCompletion(() => Issues.GetIssuesInSeries(result.Id).Count > 0);
             }
@@ -292,14 +292,14 @@ namespace NzbDrone.Integration.Test
             }
         }
 
-        public void EnsureComicFile(SeriesResource author, int issueId, string foreignEditionId, Quality quality)
+        public void EnsureComicFile(SeriesResource series, int issueId, string foreignEditionId, Quality quality)
         {
-            var result = Issues.GetIssuesInSeries(author.Id).Single(v => v.Id == issueId);
+            var result = Issues.GetIssuesInSeries(series.Id).Single(v => v.Id == issueId);
 
             // if (result.ComicFile == null)
             if (true)
             {
-                var path = Path.Combine(SeriesRootFolder, author.SeriesName, "Track.mp3");
+                var path = Path.Combine(SeriesRootFolder, series.SeriesName, "Track.mp3");
 
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 File.WriteAllText(path, "Fake Track");
@@ -311,7 +311,7 @@ namespace NzbDrone.Integration.Test
                             new ManualImportFile
                             {
                                 Path = path,
-                                SeriesId = author.Id,
+                                SeriesId = series.Id,
                                 IssueId = issueId,
                                 Quality = new QualityModel(quality)
                             }
@@ -319,7 +319,7 @@ namespace NzbDrone.Integration.Test
                 });
                 Commands.WaitAll();
 
-                var track = Issues.GetIssuesInSeries(author.Id).Single(x => x.Id == issueId);
+                var track = Issues.GetIssuesInSeries(series.Id).Single(x => x.Id == issueId);
 
                 // track.ComicFileId.Should().NotBe(0);
             }

@@ -32,7 +32,7 @@ namespace NzbDrone.Core.ImportLists.Panelarr
 
         public List<PanelarrSeries> GetSeriess(PanelarrSettings settings)
         {
-            return Execute<PanelarrSeries>("/api/v1/author", settings);
+            return Execute<PanelarrSeries>("/api/v1/series", settings);
         }
 
         public List<PanelarrIssue> GetIssues(PanelarrSettings settings)

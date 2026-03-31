@@ -17,19 +17,19 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
     public class CandidateService : ICandidateService
     {
         private readonly ISearchForNewIssue _bookSearchService;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly IMediaFileService _mediaFileService;
         private readonly Logger _logger;
 
         public CandidateService(ISearchForNewIssue bookSearchService,
-                                ISeriesService authorService,
+                                ISeriesService seriesService,
                                 IIssueService bookService,
                                 IMediaFileService mediaFileService,
                                 Logger logger)
         {
             _bookSearchService = bookSearchService;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _issueService = bookService;
             _mediaFileService = mediaFileService;
             _logger = logger;
@@ -39,7 +39,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
 
-            // Generally author, issue and release are null.  But if they're not then limit candidates appropriately.
+            // Generally series, issue and release are null.  But if they're not then limit candidates appropriately.
             // We've tried to make sure that tracks are all for a single release.
             List<CandidateEdition> candidateReleases;
 
@@ -102,21 +102,21 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             };
         }
 
-        private List<CandidateEdition> GetDbCandidatesBySeries(LocalEdition localEdition, Series author, bool includeExisting)
+        private List<CandidateEdition> GetDbCandidatesBySeries(LocalEdition localEdition, Series series, bool includeExisting)
         {
-            _logger.Trace("Getting candidates for {0}", author);
+            _logger.Trace("Getting candidates for {0}", series);
             var candidateReleases = new List<CandidateEdition>();
 
             var bookTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
             if (bookTag.IsNotNullOrWhiteSpace())
             {
-                var possibleIssues = _issueService.GetCandidates(author.SeriesMetadataId, bookTag);
+                var possibleIssues = _issueService.GetCandidates(series.SeriesMetadataId, bookTag);
                 foreach (var issue in possibleIssues)
                 {
                     candidateReleases.AddRange(GetDbCandidatesByIssue(issue, includeExisting));
                 }
 
-                var possibleEditionIssues = _issueService.GetCandidates(author.SeriesMetadataId, bookTag);
+                var possibleEditionIssues = _issueService.GetCandidates(series.SeriesMetadataId, bookTag);
                 foreach (var possibleIssue in possibleEditionIssues)
                 {
                     candidateReleases.AddRange(GetDbCandidatesByIssue(possibleIssue, includeExisting));
@@ -129,32 +129,32 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         private List<CandidateEdition> GetDbCandidates(LocalEdition localEdition, bool includeExisting)
         {
             // most general version, nothing has been specified.
-            // get all plausible authors, then all plausible issues, then get releases for each of these.
+            // get all plausible allSeries, then all plausible issues, then get releases for each of these.
             var candidateReleases = new List<CandidateEdition>();
 
             // check if it looks like VA.
             if (TrackGroupingService.IsVariousSeriess(localEdition.LocalIssues))
             {
-                var va = _authorService.FindById(DistanceCalculator.VariousSeriesIds[0]);
+                var va = _seriesService.FindById(DistanceCalculator.VariousSeriesIds[0]);
                 if (va != null)
                 {
                     candidateReleases.AddRange(GetDbCandidatesBySeries(localEdition, va, includeExisting));
                 }
             }
 
-            var authorTags = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.Seriess) ?? new List<string>();
-            if (authorTags.Any())
+            var seriesTags = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.Seriess) ?? new List<string>();
+            if (seriesTags.Any())
             {
-                var variants = DistanceCalculator.GetSeriesVariants(authorTags.Where(x => x.IsNotNullOrWhiteSpace()).ToList());
+                var variants = DistanceCalculator.GetSeriesVariants(seriesTags.Where(x => x.IsNotNullOrWhiteSpace()).ToList());
 
-                foreach (var authorTag in variants)
+                foreach (var seriesTag in variants)
                 {
-                    if (authorTag.IsNotNullOrWhiteSpace())
+                    if (seriesTag.IsNotNullOrWhiteSpace())
                     {
-                        var possibleSeries = _authorService.GetCandidates(authorTag);
-                        foreach (var author in possibleSeries)
+                        var possibleSeries = _seriesService.GetCandidates(seriesTag);
+                        foreach (var series in possibleSeries)
                         {
-                            candidateReleases.AddRange(GetDbCandidatesBySeries(localEdition, author, includeExisting));
+                            candidateReleases.AddRange(GetDbCandidatesBySeries(localEdition, series, includeExisting));
                         }
                     }
                 }
@@ -177,42 +177,42 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 yield break;
             }
 
-            // fall back to author / issue name search
-            var authorTags = new List<string>();
+            // fall back to series / issue name search
+            var seriesTags = new List<string>();
 
             if (TrackGroupingService.IsVariousSeriess(localEdition.LocalIssues))
             {
-                authorTags.Add("Various Seriess");
+                seriesTags.Add("Various Seriess");
             }
             else
             {
-                // the most common list of authors reported by a file
-                var authors = localEdition.LocalIssues.Select(x => x.FileTrackInfo.Seriess.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
+                // the most common list of allSeries reported by a file
+                var allSeries = localEdition.LocalIssues.Select(x => x.FileTrackInfo.Seriess.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
                     .GroupBy(x => x.ConcatToString())
                     .OrderByDescending(x => x.Count())
                     .First()
                     .First();
-                authorTags.AddRange(authors);
+                seriesTags.AddRange(allSeries);
             }
 
             var bookTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
 
-            // If no valid author or issue tags, stop
-            if (!authorTags.Any() || bookTag.IsNullOrWhiteSpace())
+            // If no valid series or issue tags, stop
+            if (!seriesTags.Any() || bookTag.IsNullOrWhiteSpace())
             {
                 yield break;
             }
 
-            // Search by author+issue
-            foreach (var authorTag in authorTags)
+            // Search by series+issue
+            foreach (var seriesTag in seriesTags)
             {
                 try
                 {
-                    remoteIssues = _bookSearchService.SearchForNewIssue(bookTag, authorTag);
+                    remoteIssues = _bookSearchService.SearchForNewIssue(bookTag, seriesTag);
                 }
                 catch (System.Exception e)
                 {
-                    _logger.Info(e, "Skipping author/title search due to error");
+                    _logger.Info(e, "Skipping series/title search due to error");
                     remoteIssues = new List<Issue>();
                 }
 
@@ -222,7 +222,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 }
             }
 
-            // If we got an author/issue search result, stop
+            // If we got an series/issue search result, stop
             if (seenCandidates.Any())
             {
                 yield break;
@@ -244,8 +244,8 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 yield return candidate;
             }
 
-            // Search by just author
-            foreach (var a in authorTags)
+            // Search by just series
+            foreach (var a in seriesTags)
             {
                 try
                 {
@@ -253,7 +253,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 }
                 catch (System.Exception e)
                 {
-                    _logger.Info(e, "Skipping author search due to error");
+                    _logger.Info(e, "Skipping series search due to error");
                     remoteIssues = new List<Issue>();
                 }
 

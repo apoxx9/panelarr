@@ -10,8 +10,8 @@ namespace NzbDrone.Core.MediaFiles
 {
     public interface IMediaFileRepository : IBasicRepository<ComicFile>
     {
-        List<ComicFile> GetFilesBySeries(int authorId);
-        List<ComicFile> GetFilesBySeriesMetadataId(int authorMetadataId);
+        List<ComicFile> GetFilesBySeries(int seriesId);
+        List<ComicFile> GetFilesBySeriesMetadataId(int seriesMetadataId);
         List<ComicFile> GetFilesByIssue(int issueId);
         List<ComicFile> GetUnmappedFiles();
         List<ComicFile> GetFilesWithBasePath(string path);
@@ -31,38 +31,38 @@ namespace NzbDrone.Core.MediaFiles
         // always join with all the other good stuff
         protected override SqlBuilder Builder() => new SqlBuilder(_database.DatabaseType)
             .LeftJoin<ComicFile, Issue>((f, b) => f.IssueId == b.Id)
-            .LeftJoin<Issue, Series>((issue, author) => issue.SeriesMetadataId == author.SeriesMetadataId)
+            .LeftJoin<Issue, Series>((issue, series) => issue.SeriesMetadataId == series.SeriesMetadataId)
             .LeftJoin<Series, SeriesMetadata>((a, m) => a.SeriesMetadataId == m.Id);
 
         protected override List<ComicFile> Query(SqlBuilder builder) => Query(_database, builder).ToList();
 
         public static IEnumerable<ComicFile> Query(IDatabase database, SqlBuilder builder)
         {
-            return database.QueryJoined<ComicFile, Issue, Series, SeriesMetadata>(builder, (file, issue, author, metadata) => Map(file, issue, author, metadata));
+            return database.QueryJoined<ComicFile, Issue, Series, SeriesMetadata>(builder, (file, issue, series, metadata) => Map(file, issue, series, metadata));
         }
 
-        private static ComicFile Map(ComicFile file, Issue issue, Series author, SeriesMetadata metadata)
+        private static ComicFile Map(ComicFile file, Issue issue, Series series, SeriesMetadata metadata)
         {
             file.Issue = issue;
 
-            if (author != null)
+            if (series != null)
             {
-                author.Metadata = metadata;
+                series.Metadata = metadata;
             }
 
-            file.Series = author;
+            file.Series = series;
 
             return file;
         }
 
-        public List<ComicFile> GetFilesBySeries(int authorId)
+        public List<ComicFile> GetFilesBySeries(int seriesId)
         {
-            return Query(Builder().Where<Series>(a => a.Id == authorId));
+            return Query(Builder().Where<Series>(a => a.Id == seriesId));
         }
 
-        public List<ComicFile> GetFilesBySeriesMetadataId(int authorMetadataId)
+        public List<ComicFile> GetFilesBySeriesMetadataId(int seriesMetadataId)
         {
-            return Query(Builder().Where<Issue>(b => b.SeriesMetadataId == authorMetadataId));
+            return Query(Builder().Where<Issue>(b => b.SeriesMetadataId == seriesMetadataId));
         }
 
         public List<ComicFile> GetFilesByIssue(int issueId)

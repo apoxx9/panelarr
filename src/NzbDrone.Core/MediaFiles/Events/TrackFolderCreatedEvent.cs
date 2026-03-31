@@ -11,9 +11,9 @@ namespace NzbDrone.Core.MediaFiles.Events
         public string IssueFolder { get; set; }
         public string TrackFolder { get; set; }
 
-        public TrackFolderCreatedEvent(Series author, ComicFile comicFile)
+        public TrackFolderCreatedEvent(Series series, ComicFile comicFile)
         {
-            Series = author;
+            Series = series;
             ComicFile = comicFile;
         }
     }

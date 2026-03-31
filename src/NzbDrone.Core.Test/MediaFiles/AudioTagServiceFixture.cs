@@ -311,17 +311,17 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
         private ComicFile GivenPopulatedTrackfile(int mediumOffset)
         {
             var meta = Builder<SeriesMetadata>.CreateNew().Build();
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                 .With(x => x.Metadata = meta)
                 .Build();
 
             var issue = Builder<Issue>.CreateNew()
-                .With(x => x.Series = author)
+                .With(x => x.Series = series)
                 .Build();
 
             var file = Builder<ComicFile>.CreateNew()
                 .With(x => x.Issue = issue)
-                .With(x => x.Series = author)
+                .With(x => x.Series = series)
                 .Build();
 
             return file;

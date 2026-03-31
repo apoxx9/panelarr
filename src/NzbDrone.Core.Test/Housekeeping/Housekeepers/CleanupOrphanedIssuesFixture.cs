@@ -24,21 +24,21 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_delete_unorphaned_books()
         {
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                 .With(e => e.Metadata = new SeriesMetadata { Id = 1 })
                 .BuildNew();
 
-            Db.Insert(author);
+            Db.Insert(series);
 
             var issues = Builder<Issue>.CreateListOfSize(2)
                 .TheFirst(1)
-                .With(e => e.SeriesMetadataId = author.Metadata.Value.Id)
+                .With(e => e.SeriesMetadataId = series.Metadata.Value.Id)
                 .BuildListOfNew();
 
             Db.InsertMany(issues);
             Subject.Clean();
             AllStoredModels.Should().HaveCount(1);
-            AllStoredModels.Should().Contain(e => e.SeriesMetadataId == author.Metadata.Value.Id);
+            AllStoredModels.Should().Contain(e => e.SeriesMetadataId == series.Metadata.Value.Id);
         }
     }
 }

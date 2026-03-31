@@ -30,8 +30,8 @@ namespace NzbDrone.Core.Issues
         IExecute<RefreshSeriesCommand>,
         IExecute<BulkRefreshSeriesCommand>
     {
-        private readonly IProvideSeriesInfo _authorInfo;
-        private readonly ISeriesService _authorService;
+        private readonly IProvideSeriesInfo _seriesInfo;
+        private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly IMetadataProfileService _metadataProfileService;
         private readonly IRefreshIssueService _refreshIssueService;
@@ -47,9 +47,9 @@ namespace NzbDrone.Core.Issues
         private readonly IImportListExclusionService _importListExclusionService;
         private readonly Logger _logger;
 
-        public RefreshSeriesService(IProvideSeriesInfo authorInfo,
-                                    ISeriesService authorService,
-                                    ISeriesMetadataService authorMetadataService,
+        public RefreshSeriesService(IProvideSeriesInfo seriesInfo,
+                                    ISeriesService seriesService,
+                                    ISeriesMetadataService seriesMetadataService,
                                     IIssueService bookService,
                                     IMetadataProfileService metadataProfileService,
                                     IRefreshIssueService refreshIssueService,
@@ -64,10 +64,10 @@ namespace NzbDrone.Core.Issues
                                     IConfigService configService,
                                     IImportListExclusionService importListExclusionService,
                                     Logger logger)
-        : base(logger, authorMetadataService)
+        : base(logger, seriesMetadataService)
         {
-            _authorInfo = authorInfo;
-            _authorService = authorService;
+            _seriesInfo = seriesInfo;
+            _seriesService = seriesService;
             _issueService = bookService;
             _metadataProfileService = metadataProfileService;
             _refreshIssueService = refreshIssueService;
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.Issues
         {
             try
             {
-                return _authorInfo.GetSeriesInfo(foreignId);
+                return _seriesInfo.GetSeriesInfo(foreignId);
             }
             catch (SeriesNotFoundException)
             {
@@ -173,7 +173,7 @@ namespace NzbDrone.Core.Issues
             // Do the standard update
             UpdateEntity(local, remote);
 
-            // We know we need to update tags as author id has changed
+            // We know we need to update tags as series id has changed
             return UpdateResult.UpdateTags;
         }
 
@@ -194,34 +194,34 @@ namespace NzbDrone.Core.Issues
                 }
             }
 
-            // move any issues over to the new author and remove the local author
+            // move any issues over to the new series and remove the local series
             var issues = _issueService.GetIssuesBySeries(local.Id);
             issues.ForEach(x => x.SeriesMetadataId = target.SeriesMetadataId);
             _issueService.UpdateMany(issues);
-            _authorService.DeleteSeries(local.Id, false);
+            _seriesService.DeleteSeries(local.Id, false);
 
             // Update history entries to new id
             var items = _historyService.GetBySeries(local.Id, null);
             items.ForEach(x => x.SeriesId = target.Id);
             _historyService.UpdateMany(items);
 
-            // We know we need to update tags as author id has changed
+            // We know we need to update tags as series id has changed
             return UpdateResult.UpdateTags;
         }
 
         protected override Series GetEntityByForeignId(Series local)
         {
-            return _authorService.FindById(local.ForeignSeriesId);
+            return _seriesService.FindById(local.ForeignSeriesId);
         }
 
         protected override void SaveEntity(Series local)
         {
-            _authorService.UpdateSeries(local);
+            _seriesService.UpdateSeries(local);
         }
 
         protected override void DeleteEntity(Series local, bool deleteFiles)
         {
-            _authorService.DeleteSeries(local.Id, deleteFiles);
+            _seriesService.DeleteSeries(local.Id, deleteFiles);
         }
 
         protected override List<Issue> GetRemoteChildren(Series local, Series remote)
@@ -312,7 +312,7 @@ namespace NzbDrone.Core.Issues
             _eventAggregator.PublishEvent(new IssueInfoRefreshedEvent(entity, newChildren, updateChildren, deleteChildren));
         }
 
-        private void Rescan(List<int> authorIds, bool isNew, CommandTrigger trigger, bool infoUpdated)
+        private void Rescan(List<int> seriesIds, bool isNew, CommandTrigger trigger, bool infoUpdated)
         {
             var rescanAfterRefresh = _configService.RescanAfterRefresh;
             var shouldRescan = true;
@@ -341,32 +341,32 @@ namespace NzbDrone.Core.Issues
             if (shouldRescan)
             {
                 // some metadata has updated so rescan unmatched
-                // (but don't add new authors to reduce repeated searches against api)
+                // (but don't add new allSeries to reduce repeated searches against api)
                 var folders = _rootFolderService.All().Select(x => x.Path).ToList();
 
-                _commandQueueManager.Push(new RescanFoldersCommand(folders, FilterFilesType.Matched, false, authorIds));
+                _commandQueueManager.Push(new RescanFoldersCommand(folders, FilterFilesType.Matched, false, seriesIds));
             }
         }
 
-        private void RefreshSelectedSeries(List<int> authorIds, bool isNew, CommandTrigger trigger)
+        private void RefreshSelectedSeries(List<int> seriesIds, bool isNew, CommandTrigger trigger)
         {
             var updated = false;
-            var authors = _authorService.GetSeriess(authorIds);
+            var allSeries = _seriesService.GetSeriess(seriesIds);
 
-            foreach (var author in authors)
+            foreach (var series in allSeries)
             {
                 try
                 {
-                    var data = GetSkyhookData(author.ForeignSeriesId);
-                    updated |= RefreshEntityInfo(author, null, data, true, false, null);
+                    var data = GetSkyhookData(series.ForeignSeriesId);
+                    updated |= RefreshEntityInfo(series, null, data, true, false, null);
                 }
                 catch (Exception e)
                 {
-                    _logger.Error(e, "Couldn't refresh info for {0}", author);
+                    _logger.Error(e, "Couldn't refresh info for {0}", series);
                 }
             }
 
-            Rescan(authorIds, isNew, trigger, updated);
+            Rescan(seriesIds, isNew, trigger, updated);
         }
 
         public void Execute(BulkRefreshSeriesCommand message)
@@ -386,42 +386,42 @@ namespace NzbDrone.Core.Issues
             else
             {
                 var updated = false;
-                var authors = _authorService.GetAllSeries().OrderBy(c => c.Name).ToList();
-                var authorIds = authors.Select(x => x.Id).ToList();
+                var allSeries = _seriesService.GetAllSeries().OrderBy(c => c.Name).ToList();
+                var seriesIds = allSeries.Select(x => x.Id).ToList();
 
                 var updatedSeries = new HashSet<string>();
 
                 if (message.LastExecutionTime.HasValue && message.LastExecutionTime.Value.AddDays(14) > DateTime.UtcNow)
                 {
-                    updatedSeries = _authorInfo.GetChangedSeries(message.LastStartTime.Value);
+                    updatedSeries = _seriesInfo.GetChangedSeries(message.LastStartTime.Value);
                 }
 
-                foreach (var author in authors)
+                foreach (var series in allSeries)
                 {
                     var manualTrigger = message.Trigger == CommandTrigger.Manual;
 
-                    if ((updatedSeries == null && _checkIfSeriesShouldBeRefreshed.ShouldRefresh(author)) ||
-                        (updatedSeries != null && updatedSeries.Contains(author.ForeignSeriesId)) ||
+                    if ((updatedSeries == null && _checkIfSeriesShouldBeRefreshed.ShouldRefresh(series)) ||
+                        (updatedSeries != null && updatedSeries.Contains(series.ForeignSeriesId)) ||
                         manualTrigger)
                     {
                         try
                         {
-                            LogProgress(author);
-                            var data = GetSkyhookData(author.ForeignSeriesId);
-                            updated |= RefreshEntityInfo(author, null, data, manualTrigger, false, message.LastStartTime);
+                            LogProgress(series);
+                            var data = GetSkyhookData(series.ForeignSeriesId);
+                            updated |= RefreshEntityInfo(series, null, data, manualTrigger, false, message.LastStartTime);
                         }
                         catch (Exception e)
                         {
-                            _logger.Error(e, "Couldn't refresh info for {0}", author);
+                            _logger.Error(e, "Couldn't refresh info for {0}", series);
                         }
                     }
                     else
                     {
-                        _logger.Info("Skipping refresh of series: {0}", author.Name);
+                        _logger.Info("Skipping refresh of series: {0}", series.Name);
                     }
                 }
 
-                Rescan(authorIds, isNew, trigger, updated);
+                Rescan(seriesIds, isNew, trigger, updated);
             }
         }
     }

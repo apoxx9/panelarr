@@ -59,12 +59,12 @@ namespace NzbDrone.Core.Test.NotificationTests
                 TestLogger.Info("OnDownload was called");
             }
 
-            public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
+            public override void OnRename(Series series, List<RenamedComicFile> renamedFiles)
             {
                 TestLogger.Info("OnRename was called");
             }
 
-            public override void OnSeriesAdded(Series author)
+            public override void OnSeriesAdded(Series series)
             {
                 TestLogger.Info("OnSeriesAdded was called");
             }
@@ -84,7 +84,7 @@ namespace NzbDrone.Core.Test.NotificationTests
                 TestLogger.Info("OnComicFileDelete was called");
             }
 
-            public override void OnHealthIssue(NzbDrone.Core.HealthCheck.HealthCheck author)
+            public override void OnHealthIssue(NzbDrone.Core.HealthCheck.HealthCheck series)
             {
                 TestLogger.Info("OnHealthIssue was called");
             }

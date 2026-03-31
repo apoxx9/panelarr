@@ -24,7 +24,7 @@ namespace NzbDrone.Core.Test.OrganizerTests
         }
 
         [Test]
-        public void should_clean_book_folder_when_it_contains_illegal_characters_in_book_or_author_title()
+        public void should_clean_book_folder_when_it_contains_illegal_characters_in_book_or_series_title()
         {
             var filename = @"bookfile";
             var expectedPath = @"C:\Test\Fake- The Series\Fake- The Issue\bookfile.mobi";

@@ -52,14 +52,14 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Ignore("Disabled since no usenet indexers seem to support it")]
         public void should_search_by_author_and_book_if_supported()
         {
-            _capabilities.SupportedComicSearchParameters = new[] { "q", "author", "title" };
+            _capabilities.SupportedComicSearchParameters = new[] { "q", "series", "title" };
 
             var results = Subject.GetSearchRequests(_singleIssueSearchCriteria);
             results.GetTier(0).Should().HaveCount(1);
 
             var page = results.GetAllTiers().First().First();
 
-            page.Url.Query.Should().Contain("author=Alien%20Ant%20Farm");
+            page.Url.Query.Should().Contain("series=Alien%20Ant%20Farm");
             page.Url.Query.Should().Contain("title=TruANT");
         }
 
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Ignore("TODO: add raw search support")]
         public void should_encode_raw_title()
         {
-            _capabilities.SupportedComicSearchParameters = new[] { "q", "author", "title" };
+            _capabilities.SupportedComicSearchParameters = new[] { "q", "series", "title" };
 
             // _capabilities.IssueTextSearchEngine = "raw";
             _singleIssueSearchCriteria.IssueTitle = "Daisy Jones & The Six";
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_use_clean_title_and_encode()
         {
-            _capabilities.SupportedComicSearchParameters = new[] { "q", "author", "title" };
+            _capabilities.SupportedComicSearchParameters = new[] { "q", "series", "title" };
 
             // _capabilities.IssueTextSearchEngine = "sphinx";
             _singleIssueSearchCriteria.IssueTitle = "Daisy Jones & The Six";

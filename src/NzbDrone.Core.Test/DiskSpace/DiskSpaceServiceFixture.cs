@@ -54,11 +54,11 @@ namespace NzbDrone.Core.Test.DiskSpace
             GivenSeries();
         }
 
-        private void GivenSeries(params Series[] author)
+        private void GivenSeries(params Series[] series)
         {
             Mocker.GetMock<ISeriesService>()
                   .Setup(v => v.GetAllSeries())
-                  .Returns(author.ToList());
+                  .Returns(series.ToList());
         }
 
         private void GivenExistingFolder(string folder)
@@ -69,7 +69,7 @@ namespace NzbDrone.Core.Test.DiskSpace
         }
 
         [Test]
-        public void should_check_diskspace_for_author_folders()
+        public void should_check_diskspace_for_series_folders()
         {
             GivenSeries(new Series { Path = _authorFolder1 });
 

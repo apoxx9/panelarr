@@ -16,26 +16,26 @@ namespace NzbDrone.Core.IndexerSearch
     public interface ISearchForReleases
     {
         Task<List<DownloadDecision>> IssueSearch(int issueId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch);
-        Task<List<DownloadDecision>> SeriesSearch(int authorId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch);
+        Task<List<DownloadDecision>> SeriesSearch(int seriesId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch);
     }
 
     public class ReleaseSearchService : ISearchForReleases
     {
         private readonly IIndexerFactory _indexerFactory;
         private readonly IIssueService _issueService;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IMakeDownloadDecision _makeDownloadDecision;
         private readonly Logger _logger;
 
         public ReleaseSearchService(IIndexerFactory indexerFactory,
                                 IIssueService bookService,
-                                ISeriesService authorService,
+                                ISeriesService seriesService,
                                 IMakeDownloadDecision makeDownloadDecision,
                                 Logger logger)
         {
             _indexerFactory = indexerFactory;
             _issueService = bookService;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _makeDownloadDecision = makeDownloadDecision;
             _logger = logger;
         }
@@ -52,22 +52,22 @@ namespace NzbDrone.Core.IndexerSearch
             return DeDupeDecisions(downloadDecisions);
         }
 
-        public async Task<List<DownloadDecision>> SeriesSearch(int authorId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
+        public async Task<List<DownloadDecision>> SeriesSearch(int seriesId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
         {
             var downloadDecisions = new List<DownloadDecision>();
 
-            var author = _authorService.GetSeries(authorId);
+            var series = _seriesService.GetSeries(seriesId);
 
-            var decisions = await SeriesSearch(author, missingOnly, userInvokedSearch, interactiveSearch);
+            var decisions = await SeriesSearch(series, missingOnly, userInvokedSearch, interactiveSearch);
             downloadDecisions.AddRange(decisions);
 
             return DeDupeDecisions(downloadDecisions);
         }
 
-        public async Task<List<DownloadDecision>> SeriesSearch(Series author, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
+        public async Task<List<DownloadDecision>> SeriesSearch(Series series, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
         {
-            var searchSpec = Get<SeriesSearchCriteria>(author, userInvokedSearch, interactiveSearch);
-            var issues = _issueService.GetIssuesBySeries(author.Id);
+            var searchSpec = Get<SeriesSearchCriteria>(series, userInvokedSearch, interactiveSearch);
+            var issues = _issueService.GetIssuesBySeries(series.Id);
 
             issues = issues.Where(a => a.Monitored).ToList();
 
@@ -78,9 +78,9 @@ namespace NzbDrone.Core.IndexerSearch
 
         public async Task<List<DownloadDecision>> IssueSearch(Issue issue, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
         {
-            var author = _authorService.GetSeries(issue.SeriesId);
+            var series = _seriesService.GetSeries(issue.SeriesId);
 
-            var searchSpec = Get<IssueSearchCriteria>(author, new List<Issue> { issue }, userInvokedSearch, interactiveSearch);
+            var searchSpec = Get<IssueSearchCriteria>(series, new List<Issue> { issue }, userInvokedSearch, interactiveSearch);
 
             searchSpec.IssueTitle = issue.Title;
             searchSpec.IssueNumber = issue.IssueNumber;
@@ -92,24 +92,24 @@ namespace NzbDrone.Core.IndexerSearch
             return await Dispatch(indexer => indexer.Fetch(searchSpec), searchSpec);
         }
 
-        private TSpec Get<TSpec>(Series author, List<Issue> issues, bool userInvokedSearch, bool interactiveSearch)
+        private TSpec Get<TSpec>(Series series, List<Issue> issues, bool userInvokedSearch, bool interactiveSearch)
             where TSpec : SearchCriteriaBase, new()
         {
             var spec = new TSpec();
 
             spec.Issues = issues;
-            spec.Series = author;
+            spec.Series = series;
             spec.UserInvokedSearch = userInvokedSearch;
             spec.InteractiveSearch = interactiveSearch;
 
             return spec;
         }
 
-        private static TSpec Get<TSpec>(Series author, bool userInvokedSearch, bool interactiveSearch)
+        private static TSpec Get<TSpec>(Series series, bool userInvokedSearch, bool interactiveSearch)
             where TSpec : SearchCriteriaBase, new()
         {
             var spec = new TSpec();
-            spec.Series = author;
+            spec.Series = series;
             spec.UserInvokedSearch = userInvokedSearch;
             spec.InteractiveSearch = interactiveSearch;
 

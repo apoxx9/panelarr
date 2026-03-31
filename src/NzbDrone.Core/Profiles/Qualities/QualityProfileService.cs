@@ -30,21 +30,21 @@ namespace NzbDrone.Core.Profiles.Qualities
                                          IHandle<CustomFormatDeletedEvent>
     {
         private readonly IProfileRepository _profileRepository;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IImportListFactory _importListFactory;
         private readonly ICustomFormatService _formatService;
         private readonly IRootFolderService _rootFolderService;
         private readonly Logger _logger;
 
         public QualityProfileService(IProfileRepository profileRepository,
-                                     ISeriesService authorService,
+                                     ISeriesService seriesService,
                                      IImportListFactory importListFactory,
                                      ICustomFormatService formatService,
                                      IRootFolderService rootFolderService,
                                      Logger logger)
         {
             _profileRepository = profileRepository;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _importListFactory = importListFactory;
             _rootFolderService = rootFolderService;
             _formatService = formatService;
@@ -63,7 +63,7 @@ namespace NzbDrone.Core.Profiles.Qualities
 
         public void Delete(int id)
         {
-            if (_authorService.GetAllSeries().Any(c => c.QualityProfileId == id) ||
+            if (_seriesService.GetAllSeries().Any(c => c.QualityProfileId == id) ||
                 _importListFactory.All().Any(c => c.ProfileId == id) ||
                 _rootFolderService.All().Any(c => c.DefaultQualityProfileId == id))
             {

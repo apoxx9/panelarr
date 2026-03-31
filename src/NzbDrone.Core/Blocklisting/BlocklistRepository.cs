@@ -7,9 +7,9 @@ namespace NzbDrone.Core.Blocklisting
 {
     public interface IBlocklistRepository : IBasicRepository<Blocklist>
     {
-        List<Blocklist> BlocklistedByTitle(int authorId, string sourceTitle);
-        List<Blocklist> BlocklistedByTorrentInfoHash(int authorId, string torrentInfoHash);
-        List<Blocklist> BlocklistedBySeries(int authorId);
+        List<Blocklist> BlocklistedByTitle(int seriesId, string sourceTitle);
+        List<Blocklist> BlocklistedByTorrentInfoHash(int seriesId, string torrentInfoHash);
+        List<Blocklist> BlocklistedBySeries(int seriesId);
     }
 
     public class BlocklistRepository : BasicRepository<Blocklist>, IBlocklistRepository
@@ -19,29 +19,29 @@ namespace NzbDrone.Core.Blocklisting
         {
         }
 
-        public List<Blocklist> BlocklistedByTitle(int authorId, string sourceTitle)
+        public List<Blocklist> BlocklistedByTitle(int seriesId, string sourceTitle)
         {
-            return Query(e => e.SeriesId == authorId && e.SourceTitle.Contains(sourceTitle));
+            return Query(e => e.SeriesId == seriesId && e.SourceTitle.Contains(sourceTitle));
         }
 
-        public List<Blocklist> BlocklistedByTorrentInfoHash(int authorId, string torrentInfoHash)
+        public List<Blocklist> BlocklistedByTorrentInfoHash(int seriesId, string torrentInfoHash)
         {
-            return Query(e => e.SeriesId == authorId && e.TorrentInfoHash.Contains(torrentInfoHash));
+            return Query(e => e.SeriesId == seriesId && e.TorrentInfoHash.Contains(torrentInfoHash));
         }
 
-        public List<Blocklist> BlocklistedBySeries(int authorId)
+        public List<Blocklist> BlocklistedBySeries(int seriesId)
         {
-            return Query(b => b.SeriesId == authorId);
+            return Query(b => b.SeriesId == seriesId);
         }
 
         protected override SqlBuilder PagedBuilder() => new SqlBuilder(_database.DatabaseType)
             .Join<Blocklist, Series>((b, m) => b.SeriesId == m.Id)
             .Join<Series, SeriesMetadata>((l, r) => l.SeriesMetadataId == r.Id);
         protected override IEnumerable<Blocklist> PagedQuery(SqlBuilder builder) => _database.QueryJoined<Blocklist, Series, SeriesMetadata>(builder,
-            (bl, author, metadata) =>
+            (bl, series, metadata) =>
                     {
-                        author.Metadata = metadata;
-                        bl.Series = author;
+                        series.Metadata = metadata;
+                        bl.Series = series;
                         return bl;
                     });
     }

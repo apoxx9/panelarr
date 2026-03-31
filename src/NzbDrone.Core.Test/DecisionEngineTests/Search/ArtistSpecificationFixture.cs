@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         }
 
         [Test]
-        public void should_return_true_when_author_ids_match()
+        public void should_return_true_when_series_ids_match()
         {
             _searchCriteria.Series = _author1;
 

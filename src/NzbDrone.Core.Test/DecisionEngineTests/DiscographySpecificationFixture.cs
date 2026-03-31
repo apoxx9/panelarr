@@ -20,7 +20,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [SetUp]
         public void Setup()
         {
-            var author = Builder<Series>.CreateNew().With(s => s.Id = 1234).Build();
+            var series = Builder<Series>.CreateNew().With(s => s.Id = 1234).Build();
             _remoteIssue = new RemoteIssue
             {
                 ParsedIssueInfo = new ParsedIssueInfo
@@ -30,9 +30,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 Issues = Builder<Issue>.CreateListOfSize(3)
                                            .All()
                                            .With(e => e.ReleaseDate = DateTime.UtcNow.AddDays(-8))
-                                           .With(s => s.SeriesId = author.Id)
+                                           .With(s => s.SeriesId = series.Id)
                                            .BuildList(),
-                Series = author,
+                Series = series,
                 Release = new ReleaseInfo
                 {
                     Title = "Series.Discography.1978.2005.FLAC-RlsGrp"

@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     [TestFixture]
     public class TitleTheFixture : CoreTest<FileNameBuilder>
     {
-        private Series _author;
+        private Series _series;
         private Issue _issue;
         private ComicFile _trackFile;
         private NamingConfig _namingConfig;
@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Series>
+            _series = Builder<Series>
                     .CreateNew()
                     .With(s => s.Name = "Alien Ant Farm")
                     .Build();
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _issue = Builder<Issue>
                     .CreateNew()
                     .With(s => s.Title = "Anthology")
-                    .With(s => s.SeriesMetadata = _author.Metadata.Value)
+                    .With(s => s.SeriesMetadata = _series.Metadata.Value)
                     .With(s => s.SeriesLinks = seriesLink)
                     .Build();
             _trackFile = new ComicFile { Quality = new QualityModel(Quality.CBR), ReleaseGroup = "PanelarrTest" };
@@ -75,10 +75,10 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("The Climax: I (Almost) Got Away With It (2016)", "Climax - I (Almost) Got Away With It, The (2016)")]
         public void should_get_expected_title_back(string name, string expected)
         {
-            _author.Name = name;
+            _series.Name = name;
             _namingConfig.StandardIssueFormat = "{Series NameThe}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(expected);
         }
 
@@ -88,10 +88,10 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("3%")]
         public void should_not_change_title(string name)
         {
-            _author.Name = name;
+            _series.Name = name;
             _namingConfig.StandardIssueFormat = "{Series NameThe}";
 
-            Subject.BuildComicFileName(_author, _issue, _trackFile)
+            Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(name);
         }
     }

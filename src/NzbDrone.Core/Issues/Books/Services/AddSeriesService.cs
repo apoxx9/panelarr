@@ -22,23 +22,23 @@ namespace NzbDrone.Core.Issues
 
     public class AddSeriesService : IAddSeriesService
     {
-        private readonly ISeriesService _authorService;
-        private readonly ISeriesMetadataService _authorMetadataService;
-        private readonly IProvideSeriesInfo _authorInfo;
+        private readonly ISeriesService _seriesService;
+        private readonly ISeriesMetadataService _seriesMetadataService;
+        private readonly IProvideSeriesInfo _seriesInfo;
         private readonly IBuildFileNames _fileNameBuilder;
         private readonly IAddSeriesValidator _addSeriesValidator;
         private readonly Logger _logger;
 
-        public AddSeriesService(ISeriesService authorService,
-                                ISeriesMetadataService authorMetadataService,
-                                IProvideSeriesInfo authorInfo,
+        public AddSeriesService(ISeriesService seriesService,
+                                ISeriesMetadataService seriesMetadataService,
+                                IProvideSeriesInfo seriesInfo,
                                 IBuildFileNames fileNameBuilder,
                                 IAddSeriesValidator addSeriesValidator,
                                 Logger logger)
         {
-            _authorService = authorService;
-            _authorMetadataService = authorMetadataService;
-            _authorInfo = authorInfo;
+            _seriesService = seriesService;
+            _seriesMetadataService = seriesMetadataService;
+            _seriesInfo = seriesInfo;
             _fileNameBuilder = fileNameBuilder;
             _addSeriesValidator = addSeriesValidator;
             _logger = logger;
@@ -54,26 +54,26 @@ namespace NzbDrone.Core.Issues
             _logger.Info("Adding Series {0} Path: [{1}]", newSeries, newSeries.Path);
 
             // add metadata
-            _authorMetadataService.Upsert(newSeries.Metadata.Value);
+            _seriesMetadataService.Upsert(newSeries.Metadata.Value);
             newSeries.SeriesMetadataId = newSeries.Metadata.Value.Id;
 
-            // add the author itself
-            return _authorService.AddSeries(newSeries, doRefresh);
+            // add the series itself
+            return _seriesService.AddSeries(newSeries, doRefresh);
         }
 
         public List<Series> AddSeries(List<Series> newSeriesList, bool doRefresh = true)
         {
             var added = DateTime.UtcNow;
-            var authorsToAdd = new List<Series>();
+            var seriesToAdd = new List<Series>();
 
             foreach (var s in newSeriesList)
             {
                 try
                 {
-                    var author = AddSkyhookData(s);
-                    author = SetPropertiesAndValidate(author);
-                    author.Added = added;
-                    authorsToAdd.Add(author);
+                    var series = AddSkyhookData(s);
+                    series = SetPropertiesAndValidate(series);
+                    series.Added = added;
+                    seriesToAdd.Add(series);
                 }
                 catch (Exception ex)
                 {
@@ -83,19 +83,19 @@ namespace NzbDrone.Core.Issues
             }
 
             // add metadata
-            _authorMetadataService.UpsertMany(authorsToAdd.Select(x => x.Metadata.Value).ToList());
-            authorsToAdd.ForEach(x => x.SeriesMetadataId = x.Metadata.Value.Id);
+            _seriesMetadataService.UpsertMany(seriesToAdd.Select(x => x.Metadata.Value).ToList());
+            seriesToAdd.ForEach(x => x.SeriesMetadataId = x.Metadata.Value.Id);
 
-            return _authorService.AddSeries(authorsToAdd, doRefresh);
+            return _seriesService.AddSeries(seriesToAdd, doRefresh);
         }
 
         private Series AddSkyhookData(Series newSeries)
         {
-            Series author;
+            Series series;
 
             try
             {
-                author = _authorInfo.GetSeriesInfo(newSeries.Metadata.Value.ForeignSeriesId, false);
+                series = _seriesInfo.GetSeriesInfo(newSeries.Metadata.Value.ForeignSeriesId, false);
             }
             catch (SeriesNotFoundException)
             {
@@ -103,13 +103,13 @@ namespace NzbDrone.Core.Issues
 
                 throw new ValidationException(new List<ValidationFailure>
                 {
-                    new ("ForeignSeriesId", "An author with this ID was not found", newSeries.Metadata.Value.ForeignSeriesId)
+                    new ("ForeignSeriesId", "An series with this ID was not found", newSeries.Metadata.Value.ForeignSeriesId)
                 });
             }
 
-            author.ApplyChanges(newSeries);
+            series.ApplyChanges(newSeries);
 
-            return author;
+            return series;
         }
 
         private Series SetPropertiesAndValidate(Series newSeries)
@@ -121,15 +121,15 @@ namespace NzbDrone.Core.Issues
                 path = Path.Combine(newSeries.RootFolderPath, folderName);
             }
 
-            // Disambiguate author path if it exists already
-            if (_authorService.SeriesPathExists(path))
+            // Disambiguate series path if it exists already
+            if (_seriesService.SeriesPathExists(path))
             {
                 if (newSeries.Metadata.Value.Disambiguation.IsNotNullOrWhiteSpace())
                 {
                     path += $" ({newSeries.Metadata.Value.Disambiguation})";
                 }
 
-                if (_authorService.SeriesPathExists(path))
+                if (_seriesService.SeriesPathExists(path))
                 {
                     var basepath = path;
                     var i = 0;
@@ -138,7 +138,7 @@ namespace NzbDrone.Core.Issues
                         i++;
                         path = basepath + $" ({i})";
                     }
-                    while (_authorService.SeriesPathExists(path));
+                    while (_seriesService.SeriesPathExists(path));
                 }
             }
 

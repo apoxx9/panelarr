@@ -15,30 +15,30 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
 {
     public class IssueInfoProxy : IProvideSeriesInfo, IProvideIssueInfo, ISearchForNewIssue
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly Logger _logger;
         private readonly ICached<HashSet<string>> _cache;
-        private readonly CachingService _authorCache;
+        private readonly CachingService _seriesCache;
         private readonly IMetadataProvider _metadataProvider;
         private readonly IMetronMapper _metronMapper;
 
-        public IssueInfoProxy(ISeriesService authorService,
+        public IssueInfoProxy(ISeriesService seriesService,
                              IIssueService bookService,
                              IMetadataProvider metadataProvider,
                              IMetronMapper metronMapper,
                              Logger logger,
                              ICacheManager cacheManager)
         {
-            _authorService = authorService;
+            _seriesService = seriesService;
             _issueService = bookService;
             _metadataProvider = metadataProvider;
             _metronMapper = metronMapper;
             _cache = cacheManager.GetCache<HashSet<string>>(GetType());
             _logger = logger;
 
-            _authorCache = new CachingService(new MemoryCacheProvider(new MemoryCache(new MemoryCacheOptions { SizeLimit = 10 })));
-            _authorCache.DefaultCachePolicy = new CacheDefaults
+            _seriesCache = new CachingService(new MemoryCacheProvider(new MemoryCache(new MemoryCacheOptions { SizeLimit = 10 })));
+            _seriesCache.DefaultCachePolicy = new CacheDefaults
             {
                 DefaultCacheDurationSeconds = 60
             };
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
             {
                 if (useCache)
                 {
-                    return _authorCache.GetOrAdd(foreignSeriesId,
+                    return _seriesCache.GetOrAdd(foreignSeriesId,
                         () => GetSeriesInfoFromProvider(foreignSeriesId),
                         new LazyCacheEntryOptions
                         {
@@ -118,7 +118,7 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
             series.Issues = issues;
             series.SeriesGroups = new List<SeriesGroup>();
 
-            var existingSeries = _authorService.GetAllSeries();
+            var existingSeries = _seriesService.GetAllSeries();
             _metronMapper.EnrichWithDbIds(series, metadata, existingSeries);
 
             return series;
@@ -155,9 +155,9 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
 
                 if (dbIssue != null)
                 {
-                    var author = _authorService.GetSeriesByMetadataId(dbIssue.SeriesMetadataId);
-                    seriesId = author?.ForeignSeriesId ?? foreignIssueId;
-                    seriesMetadata = author?.Metadata.Value ?? new SeriesMetadata { ForeignSeriesId = foreignIssueId };
+                    var series = _seriesService.GetSeriesByMetadataId(dbIssue.SeriesMetadataId);
+                    seriesId = series?.ForeignSeriesId ?? foreignIssueId;
+                    seriesMetadata = series?.Metadata.Value ?? new SeriesMetadata { ForeignSeriesId = foreignIssueId };
                 }
                 else
                 {
@@ -180,16 +180,16 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
             }
         }
 
-        public List<Issue> SearchForNewIssue(string title, string author, bool getAllEditions = true)
+        public List<Issue> SearchForNewIssue(string title, string series, bool getAllEditions = true)
         {
             try
             {
-                _logger.Debug("Searching for new issue: title={0}, author={1}", title, author);
+                _logger.Debug("Searching for new issue: title={0}, series={1}", title, series);
 
                 var query = title?.Trim() ?? string.Empty;
-                if (author != null)
+                if (series != null)
                 {
-                    query += " " + author;
+                    query += " " + series;
                 }
 
                 var results = _metadataProvider.SearchSeries(query.Trim());

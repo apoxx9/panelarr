@@ -20,8 +20,8 @@ namespace NzbDrone.Core.MediaFiles
         void Update(List<ComicFile> comicFiles);
         void Delete(ComicFile comicFile, DeleteMediaFileReason reason);
         void DeleteMany(List<ComicFile> comicFiles, DeleteMediaFileReason reason);
-        List<ComicFile> GetFilesBySeries(int authorId);
-        List<ComicFile> GetFilesBySeriesMetadataId(int authorMetadataId);
+        List<ComicFile> GetFilesBySeries(int seriesId);
+        List<ComicFile> GetFilesBySeriesMetadataId(int seriesMetadataId);
         List<ComicFile> GetFilesByIssue(int issueId);
         List<ComicFile> GetUnmappedFiles();
         List<IFileInfo> FilterUnchangedFiles(List<IFileInfo> files, FilterFilesType filter);
@@ -176,14 +176,14 @@ namespace NzbDrone.Core.MediaFiles
             return _mediaFileRepository.GetFileWithPath(path);
         }
 
-        public List<ComicFile> GetFilesBySeries(int authorId)
+        public List<ComicFile> GetFilesBySeries(int seriesId)
         {
-            return _mediaFileRepository.GetFilesBySeries(authorId);
+            return _mediaFileRepository.GetFilesBySeries(seriesId);
         }
 
-        public List<ComicFile> GetFilesBySeriesMetadataId(int authorMetadataId)
+        public List<ComicFile> GetFilesBySeriesMetadataId(int seriesMetadataId)
         {
-            return _mediaFileRepository.GetFilesBySeriesMetadataId(authorMetadataId);
+            return _mediaFileRepository.GetFilesBySeriesMetadataId(seriesMetadataId);
         }
 
         public List<ComicFile> GetFilesByIssue(int issueId)

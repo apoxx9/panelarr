@@ -15,7 +15,7 @@ namespace NzbDrone.Core.MediaFiles
 {
     public interface IDeleteMediaFiles
     {
-        void DeleteTrackFile(Series author, ComicFile comicFile);
+        void DeleteTrackFile(Series series, ComicFile comicFile);
         void DeleteTrackFile(ComicFile comicFile, string subfolder = "");
     }
 
@@ -28,7 +28,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IDiskProvider _diskProvider;
         private readonly IRecycleBinProvider _recycleBinProvider;
         private readonly IMediaFileService _mediaFileService;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IConfigService _configService;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
@@ -36,7 +36,7 @@ namespace NzbDrone.Core.MediaFiles
         public MediaFileDeletionService(IDiskProvider diskProvider,
                                         IRecycleBinProvider recycleBinProvider,
                                         IMediaFileService mediaFileService,
-                                        ISeriesService authorService,
+                                        ISeriesService seriesService,
                                         IConfigService configService,
                                         IEventAggregator eventAggregator,
                                         Logger logger)
@@ -44,16 +44,16 @@ namespace NzbDrone.Core.MediaFiles
             _diskProvider = diskProvider;
             _recycleBinProvider = recycleBinProvider;
             _mediaFileService = mediaFileService;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _configService = configService;
             _eventAggregator = eventAggregator;
             _logger = logger;
         }
 
-        public void DeleteTrackFile(Series author, ComicFile comicFile)
+        public void DeleteTrackFile(Series series, ComicFile comicFile)
         {
             var fullPath = comicFile.Path;
-            var rootFolder = _diskProvider.GetParentFolder(author.Path);
+            var rootFolder = _diskProvider.GetParentFolder(series.Path);
 
             if (!_diskProvider.FolderExists(rootFolder))
             {
@@ -67,14 +67,14 @@ namespace NzbDrone.Core.MediaFiles
                 throw new NzbDroneClientException(HttpStatusCode.Conflict, "Series's root folder ({0}) is empty.", rootFolder);
             }
 
-            if (_diskProvider.FolderExists(author.Path))
+            if (_diskProvider.FolderExists(series.Path))
             {
-                var subfolder = _diskProvider.GetParentFolder(author.Path).GetRelativePath(_diskProvider.GetParentFolder(fullPath));
+                var subfolder = _diskProvider.GetParentFolder(series.Path).GetRelativePath(_diskProvider.GetParentFolder(fullPath));
                 DeleteTrackFile(comicFile, subfolder);
             }
             else
             {
-                // delete from db even if the author folder is missing
+                // delete from db even if the series folder is missing
                 _mediaFileService.Delete(comicFile, DeleteMediaFileReason.Manual);
             }
         }
@@ -118,25 +118,25 @@ namespace NzbDrone.Core.MediaFiles
         {
             if (message.DeleteFiles)
             {
-                var author = message.Series;
-                var allSeries = _authorService.AllSeriesPaths();
+                var series = message.Series;
+                var allSeries = _seriesService.AllSeriesPaths();
 
                 foreach (var s in allSeries)
                 {
-                    if (s.Key == author.Id)
+                    if (s.Key == series.Id)
                     {
                         continue;
                     }
 
-                    if (author.Path.IsParentPath(s.Value))
+                    if (series.Path.IsParentPath(s.Value))
                     {
-                        _logger.Error("Series path: '{0}' is a parent of another author, not deleting files.", author.Path);
+                        _logger.Error("Series path: '{0}' is a parent of another series, not deleting files.", series.Path);
                         return;
                     }
 
-                    if (author.Path.PathEquals(s.Value))
+                    if (series.Path.PathEquals(s.Value))
                     {
-                        _logger.Error("Series path: '{0}' is the same as another author, not deleting files.", author.Path);
+                        _logger.Error("Series path: '{0}' is the same as another series, not deleting files.", series.Path);
                         return;
                     }
                 }
@@ -172,12 +172,12 @@ namespace NzbDrone.Core.MediaFiles
 
             if (_configService.DeleteEmptyFolders)
             {
-                var author = message.ComicFile.Series.Value;
+                var series = message.ComicFile.Series.Value;
                 var bookFolder = message.ComicFile.Path.GetParentPath();
 
-                if (_diskProvider.GetFiles(author.Path, true).Empty())
+                if (_diskProvider.GetFiles(series.Path, true).Empty())
                 {
-                    _diskProvider.DeleteFolder(author.Path, true);
+                    _diskProvider.DeleteFolder(series.Path, true);
                 }
                 else if (_diskProvider.GetFiles(bookFolder, true).Empty())
                 {

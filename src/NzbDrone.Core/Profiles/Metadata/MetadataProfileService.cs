@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Profiles.Metadata
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private readonly IMetadataProfileRepository _profileRepository;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly IMediaFileService _mediaFileService;
         private readonly IImportListFactory _importListFactory;
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Profiles.Metadata
         private readonly Logger _logger;
 
         public MetadataProfileService(IMetadataProfileRepository profileRepository,
-                                      ISeriesService authorService,
+                                      ISeriesService seriesService,
                                       IIssueService bookService,
                                       IMediaFileService mediaFileService,
                                       IImportListFactory importListFactory,
@@ -52,7 +52,7 @@ namespace NzbDrone.Core.Profiles.Metadata
                                       Logger logger)
         {
             _profileRepository = profileRepository;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _issueService = bookService;
             _mediaFileService = mediaFileService;
             _importListFactory = importListFactory;
@@ -112,7 +112,7 @@ namespace NzbDrone.Core.Profiles.Metadata
                 .GroupBy(x => x.Issue.Value)
                 .ToDictionary(x => x.Key, y => y.ToList());
 
-            var dbSeries = _authorService.FindById(input.ForeignSeriesId);
+            var dbSeries = _seriesService.FindById(input.ForeignSeriesId);
 
             var localIssues = new List<Issue>();
             if (dbSeries != null)

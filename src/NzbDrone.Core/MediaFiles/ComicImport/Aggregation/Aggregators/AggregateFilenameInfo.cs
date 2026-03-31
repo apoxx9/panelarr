@@ -23,24 +23,24 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
         {
             var sep1 = $@"(?<sep>[{sep}]+)";
             var sepn = @"\k<sep>";
-            var author = $@"(?<author>[{chars}]+)";
+            var series = $@"(?<series>[{chars}]+)";
             var track = $@"(?<track>\d+)";
             var title = $@"(?<title>[{chars}]+)";
             var tag = $@"(?<tag>[{chars}]+)";
 
             return new[]
             {
-                new Regex($@"^{track}{sep1}{author}{sepn}{title}{sepn}{tag}$", RegexOptions.IgnoreCase),
-                new Regex($@"^{track}{sep1}{author}{sepn}{tag}{sepn}{title}$", RegexOptions.IgnoreCase),
-                new Regex($@"^{track}{sep1}{author}{sepn}{title}$", RegexOptions.IgnoreCase),
+                new Regex($@"^{track}{sep1}{series}{sepn}{title}{sepn}{tag}$", RegexOptions.IgnoreCase),
+                new Regex($@"^{track}{sep1}{series}{sepn}{tag}{sepn}{title}$", RegexOptions.IgnoreCase),
+                new Regex($@"^{track}{sep1}{series}{sepn}{title}$", RegexOptions.IgnoreCase),
 
-                new Regex($@"^{author}{sep1}{tag}{sepn}{track}{sepn}{title}$", RegexOptions.IgnoreCase),
-                new Regex($@"^{author}{sep1}{track}{sepn}{title}{sepn}{tag}$", RegexOptions.IgnoreCase),
-                new Regex($@"^{author}{sep1}{track}{sepn}{title}$", RegexOptions.IgnoreCase),
+                new Regex($@"^{series}{sep1}{tag}{sepn}{track}{sepn}{title}$", RegexOptions.IgnoreCase),
+                new Regex($@"^{series}{sep1}{track}{sepn}{title}{sepn}{tag}$", RegexOptions.IgnoreCase),
+                new Regex($@"^{series}{sep1}{track}{sepn}{title}$", RegexOptions.IgnoreCase),
 
-                new Regex($@"^{author}{sep1}{title}{sepn}{tag}$", RegexOptions.IgnoreCase),
-                new Regex($@"^{author}{sep1}{tag}{sepn}{title}$", RegexOptions.IgnoreCase),
-                new Regex($@"^{author}{sep1}{title}$", RegexOptions.IgnoreCase),
+                new Regex($@"^{series}{sep1}{title}{sepn}{tag}$", RegexOptions.IgnoreCase),
+                new Regex($@"^{series}{sep1}{tag}{sepn}{title}$", RegexOptions.IgnoreCase),
+                new Regex($@"^{series}{sep1}{title}$", RegexOptions.IgnoreCase),
 
                 new Regex($@"^{track}{sep1}{title}$", RegexOptions.IgnoreCase),
                 new Regex($@"^{track}{sep1}{tag}{sepn}{title}$", RegexOptions.IgnoreCase),
@@ -118,44 +118,44 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
                 return;
             }
 
-            // Given both an "author" and "title" field, assume that one is
-            // *actually* the author, which must be uniform, and use the other
+            // Given both an "series" and "title" field, assume that one is
+            // *actually* the series, which must be uniform, and use the other
             // for the title. This, of course, won't work for VA issues.
             string titleField;
-            string author;
-            if (keys.Contains("author"))
+            string series;
+            if (keys.Contains("series"))
             {
-                if (EqualFields(matches.Values, "author"))
+                if (EqualFields(matches.Values, "series"))
                 {
-                    author = someMatch.Groups["author"].Value.Trim();
+                    series = someMatch.Groups["series"].Value.Trim();
                     titleField = "title";
                 }
                 else if (EqualFields(matches.Values, "title"))
                 {
-                    author = someMatch.Groups["title"].Value.Trim();
-                    titleField = "author";
+                    series = someMatch.Groups["title"].Value.Trim();
+                    titleField = "series";
                 }
                 else
                 {
-                    _logger.Trace("Abort - both author and title vary between matches");
+                    _logger.Trace("Abort - both series and title vary between matches");
 
                     // both vary, abort
                     return;
                 }
 
-                _logger.Debug("Got author from filename: {0}", author);
+                _logger.Debug("Got series from filename: {0}", series);
 
                 foreach (var track in matches.Keys)
                 {
                     if (track.FileTrackInfo.SeriesTitle.IsNullOrWhiteSpace())
                     {
-                        track.FileTrackInfo.Seriess = new List<string> { author };
+                        track.FileTrackInfo.Seriess = new List<string> { series };
                     }
                 }
             }
             else
             {
-                // no author - remaining field is the title
+                // no series - remaining field is the title
                 titleField = "title";
             }
 

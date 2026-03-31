@@ -35,7 +35,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
         private readonly IUpgradeMediaFiles _comicFileUpgrader;
         private readonly IMediaFileService _mediaFileService;
         private readonly IMetadataTagService _metadataTagService;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IAddSeriesService _addSeriesService;
         private readonly IIssueService _issueService;
         private readonly IRootFolderService _rootFolderService;
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
         public ImportApprovedIssues(IUpgradeMediaFiles comicFileUpgrader,
                                    IMediaFileService mediaFileService,
                                    IMetadataTagService metadataTagService,
-                                   ISeriesService authorService,
+                                   ISeriesService seriesService,
                                    IAddSeriesService addSeriesService,
                                    IIssueService bookService,
                                    IRootFolderService rootFolderService,
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             _comicFileUpgrader = comicFileUpgrader;
             _mediaFileService = mediaFileService;
             _metadataTagService = metadataTagService;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _addSeriesService = addSeriesService;
             _issueService = bookService;
             _rootFolderService = rootFolderService;
@@ -297,7 +297,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             importResults.AddRange(decisions.Where(c => !c.Approved)
                                             .Select(d => new ImportResult(d, d.Rejections.Select(r => r.Reason).ToArray())));
 
-            // Refresh any authors we added
+            // Refresh any allSeries we added
             if (addedSeries.Any())
             {
                 _commandQueueManager.Push(new BulkRefreshSeriesCommand(addedSeries.Select(x => x.Id).ToList(), true));
@@ -321,7 +321,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
 
             if (series.Id == 0)
             {
-                var dbSeries = _authorService.FindById(series.ForeignSeriesId);
+                var dbSeries = _seriesService.FindById(series.ForeignSeriesId);
 
                 if (dbSeries == null)
                 {
@@ -347,7 +347,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                         dbSeries = _addSeriesService.AddSeries(series, false);
 
                         // this looks redundant but is necessary to get the LazyLoads populated
-                        dbSeries = _authorService.GetSeries(dbSeries.Id);
+                        dbSeries = _seriesService.GetSeries(dbSeries.Id);
                         addedSeries.Add(dbSeries);
                     }
                     catch (Exception e)

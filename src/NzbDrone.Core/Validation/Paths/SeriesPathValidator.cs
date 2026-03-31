@@ -7,14 +7,14 @@ namespace NzbDrone.Core.Validation.Paths
 {
     public class SeriesPathValidator : PropertyValidator
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
 
-        public SeriesPathValidator(ISeriesService authorService)
+        public SeriesPathValidator(ISeriesService seriesService)
         {
-            _authorService = authorService;
+            _seriesService = seriesService;
         }
 
-        protected override string GetDefaultMessageTemplate() => "Path '{path}' is already configured for another author";
+        protected override string GetDefaultMessageTemplate() => "Path '{path}' is already configured for another series";
 
         protected override bool IsValid(PropertyValidatorContext context)
         {
@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Validation.Paths
             dynamic instance = context.ParentContext.InstanceToValidate;
             var instanceId = (int)instance.Id;
 
-            return !_authorService.AllSeriesPaths().Any(s => s.Value.PathEquals(context.PropertyValue.ToString()) && s.Key != instanceId);
+            return !_seriesService.AllSeriesPaths().Any(s => s.Value.PathEquals(context.PropertyValue.ToString()) && s.Key != instanceId);
         }
     }
 }

@@ -14,13 +14,13 @@ namespace Panelarr.Api.V1.Issues
     {
         protected readonly IIssueService _issueService;
         protected readonly ISeriesIssueLinkService _seriesIssueLinkService;
-        protected readonly ISeriesStatisticsService _authorStatisticsService;
+        protected readonly ISeriesStatisticsService _seriesStatisticsService;
         protected readonly IUpgradableSpecification _qualityUpgradableSpecification;
         protected readonly IMapCoversToLocal _coverMapper;
 
         protected IssueControllerWithSignalR(IIssueService bookService,
                                         ISeriesIssueLinkService seriesIssueLinkService,
-                                        ISeriesStatisticsService authorStatisticsService,
+                                        ISeriesStatisticsService seriesStatisticsService,
                                         IMapCoversToLocal coverMapper,
                                         IUpgradableSpecification qualityUpgradableSpecification,
                                         IBroadcastSignalRMessage signalRBroadcaster)
@@ -28,7 +28,7 @@ namespace Panelarr.Api.V1.Issues
         {
             _issueService = bookService;
             _seriesIssueLinkService = seriesIssueLinkService;
-            _authorStatisticsService = authorStatisticsService;
+            _seriesStatisticsService = seriesStatisticsService;
             _coverMapper = coverMapper;
             _qualityUpgradableSpecification = qualityUpgradableSpecification;
         }
@@ -98,7 +98,7 @@ namespace Panelarr.Api.V1.Issues
                 }
             }
 
-            var seriesStats = _authorStatisticsService.SeriesStatistics();
+            var seriesStats = _seriesStatisticsService.SeriesStatistics();
             LinkSeriesStatistics(result, seriesStats);
             MapCoversToLocal(result.ToArray());
 
@@ -107,7 +107,7 @@ namespace Panelarr.Api.V1.Issues
 
         private void FetchAndLinkIssueStatistics(IssueResource resource)
         {
-            LinkSeriesStatistics(resource, _authorStatisticsService.SeriesStatistics(resource.SeriesId));
+            LinkSeriesStatistics(resource, _seriesStatisticsService.SeriesStatistics(resource.SeriesId));
         }
 
         private void LinkSeriesStatistics(List<IssueResource> resources, List<SeriesStatistics> seriesStatistics)

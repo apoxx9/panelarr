@@ -11,8 +11,8 @@ namespace NzbDrone.Core.Notifications
 
         void OnGrab(GrabMessage grabMessage);
         void OnReleaseImport(IssueDownloadMessage message);
-        void OnRename(Series author, List<RenamedComicFile> renamedFiles);
-        void OnSeriesAdded(Series author);
+        void OnRename(Series series, List<RenamedComicFile> renamedFiles);
+        void OnSeriesAdded(Series series);
         void OnSeriesDelete(SeriesDeleteMessage deleteMessage);
         void OnIssueDelete(IssueDeleteMessage deleteMessage);
         void OnComicFileDelete(ComicFileDeleteMessage deleteMessage);

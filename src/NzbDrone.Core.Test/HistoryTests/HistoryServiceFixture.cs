@@ -41,15 +41,15 @@ namespace NzbDrone.Core.Test.HistoryTests
         [Test]
         public void should_use_file_name_for_source_title_if_scene_name_is_null()
         {
-            var author = Builder<Series>.CreateNew().Build();
+            var series = Builder<Series>.CreateNew().Build();
             var trackFile = Builder<ComicFile>.CreateNew()
                 .With(f => f.SceneName = null)
-                .With(f => f.Series = author)
+                .With(f => f.Series = series)
                 .Build();
 
             var localTrack = new LocalIssue
             {
-                Series = author,
+                Series = series,
                 Issue = new Issue(),
                 Path = @"C:\Test\Unsorted\Series.01.Hymn.mp3"
             };

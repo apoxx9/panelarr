@@ -55,13 +55,13 @@ namespace NzbDrone.Core.Notifications.Slack
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
+        public override void OnRename(Series series, List<RenamedComicFile> renamedFiles)
         {
             var attachments = new List<Attachment>
                               {
                                   new Attachment
                                   {
-                                      Title = author.Name,
+                                      Title = series.Name,
                                   }
                               };
 
@@ -70,13 +70,13 @@ namespace NzbDrone.Core.Notifications.Slack
             _proxy.SendPayload(payload, Settings);
         }
 
-        public override void OnSeriesAdded(Series author)
+        public override void OnSeriesAdded(Series series)
         {
             var attachments = new List<Attachment>
                              {
                                  new Attachment
                                  {
-                                     Title = author.Name,
+                                     Title = series.Name,
                                  }
                              };
 

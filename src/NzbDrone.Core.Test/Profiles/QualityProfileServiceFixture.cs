@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.Profiles
                                           .With(p => p.Id = 2)
                                           .Build();
 
-            var authorList = Builder<Series>.CreateListOfSize(3)
+            var seriesList = Builder<Series>.CreateListOfSize(3)
                                             .Random(1)
                                             .With(c => c.QualityProfileId = profile.Id)
                                             .Build().ToList();
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.Profiles
                 .With(f => f.DefaultQualityProfileId = 1)
                 .BuildList();
 
-            Mocker.GetMock<ISeriesService>().Setup(c => c.GetAllSeries()).Returns(authorList);
+            Mocker.GetMock<ISeriesService>().Setup(c => c.GetAllSeries()).Returns(seriesList);
             Mocker.GetMock<IImportListFactory>().Setup(c => c.All()).Returns(importLists);
             Mocker.GetMock<IRootFolderService>().Setup(c => c.All()).Returns(rootFolders);
             Mocker.GetMock<IProfileRepository>().Setup(c => c.Get(profile.Id)).Returns(profile);
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.Test.Profiles
                 .With(p => p.Id = 2)
                 .Build();
 
-            var authorList = Builder<Series>.CreateListOfSize(3)
+            var seriesList = Builder<Series>.CreateListOfSize(3)
                 .All()
                 .With(c => c.QualityProfileId = 1)
                 .Build().ToList();
@@ -100,7 +100,7 @@ namespace NzbDrone.Core.Test.Profiles
                 .With(f => f.DefaultQualityProfileId = 1)
                 .BuildList();
 
-            Mocker.GetMock<ISeriesService>().Setup(c => c.GetAllSeries()).Returns(authorList);
+            Mocker.GetMock<ISeriesService>().Setup(c => c.GetAllSeries()).Returns(seriesList);
             Mocker.GetMock<IImportListFactory>().Setup(c => c.All()).Returns(importLists);
             Mocker.GetMock<IRootFolderService>().Setup(c => c.All()).Returns(rootFolders);
             Mocker.GetMock<IProfileRepository>().Setup(c => c.Get(profile.Id)).Returns(profile);
@@ -117,7 +117,7 @@ namespace NzbDrone.Core.Test.Profiles
                 .With(p => p.Id = 2)
                 .Build();
 
-            var authorList = Builder<Series>.CreateListOfSize(3)
+            var seriesList = Builder<Series>.CreateListOfSize(3)
                 .All()
                 .With(c => c.QualityProfileId = 1)
                 .Build().ToList();
@@ -132,7 +132,7 @@ namespace NzbDrone.Core.Test.Profiles
                 .With(f => f.DefaultQualityProfileId = profile.Id)
                 .BuildList();
 
-            Mocker.GetMock<ISeriesService>().Setup(c => c.GetAllSeries()).Returns(authorList);
+            Mocker.GetMock<ISeriesService>().Setup(c => c.GetAllSeries()).Returns(seriesList);
             Mocker.GetMock<IImportListFactory>().Setup(c => c.All()).Returns(importLists);
             Mocker.GetMock<IRootFolderService>().Setup(c => c.All()).Returns(rootFolders);
             Mocker.GetMock<IProfileRepository>().Setup(c => c.Get(profile.Id)).Returns(profile);
@@ -143,9 +143,9 @@ namespace NzbDrone.Core.Test.Profiles
         }
 
         [Test]
-        public void should_delete_profile_if_not_assigned_to_author_import_list_or_root_folder()
+        public void should_delete_profile_if_not_assigned_to_series_import_list_or_root_folder()
         {
-            var authorList = Builder<Series>.CreateListOfSize(3)
+            var seriesList = Builder<Series>.CreateListOfSize(3)
                                             .All()
                                             .With(c => c.QualityProfileId = 2)
                                             .Build().ToList();
@@ -160,7 +160,7 @@ namespace NzbDrone.Core.Test.Profiles
                 .With(f => f.DefaultQualityProfileId = 2)
                 .BuildList();
 
-            Mocker.GetMock<ISeriesService>().Setup(c => c.GetAllSeries()).Returns(authorList);
+            Mocker.GetMock<ISeriesService>().Setup(c => c.GetAllSeries()).Returns(seriesList);
             Mocker.GetMock<IImportListFactory>().Setup(c => c.All()).Returns(importLists);
             Mocker.GetMock<IRootFolderService>().Setup(c => c.All()).Returns(rootFolders);
 

@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Download
 
                 if (!availableProviders.Any())
                 {
-                    throw new DownloadClientUnavailableException("No download client was found without tags or a matching author tag. Please check your settings.");
+                    throw new DownloadClientUnavailableException("No download client was found without tags or a matching series tag. Please check your settings.");
                 }
             }
 

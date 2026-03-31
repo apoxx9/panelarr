@@ -84,7 +84,7 @@ namespace Panelarr.Api.V1.Issues
                 return null;
             }
 
-            var author = resource.Series?.ToModel() ?? new NzbDrone.Core.Issues.Series();
+            var series = resource.Series?.ToModel() ?? new NzbDrone.Core.Issues.Series();
 
             return new Issue
             {
@@ -94,8 +94,8 @@ namespace Panelarr.Api.V1.Issues
                 Title = resource.Title,
                 Monitored = resource.Monitored,
                 AddOptions = resource.AddOptions,
-                Series = author,
-                SeriesMetadata = author.Metadata.Value
+                Series = series,
+                SeriesMetadata = series.Metadata.Value
             };
         }
 

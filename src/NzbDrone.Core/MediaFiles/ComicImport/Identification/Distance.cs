@@ -11,7 +11,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         private static readonly Dictionary<string, double> Weights = new Dictionary<string, double>
         {
             { "source", 2.0 },
-            { "author", 3.0 },
+            { "series", 3.0 },
             { "issue", 3.0 },
             { "isbn", 10.0 },
             { "isbn_missing", 0.1 },
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             { "missing_tracks", 0.6 },
             { "unmatched_tracks", 0.9 },
             { "track_title", 3.0 },
-            { "track_author", 2.0 },
+            { "track_series", 2.0 },
             { "track_index", 1.0 },
             { "track_length", 2.0 },
             { "recording_id", 10.0 },

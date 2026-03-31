@@ -9,9 +9,9 @@ namespace NzbDrone.Core.MediaFiles.Events
         public Series Series { get; private set; }
         public List<RenamedComicFile> RenamedFiles { get; private set; }
 
-        public SeriesRenamedEvent(Series author, List<RenamedComicFile> renamedFiles)
+        public SeriesRenamedEvent(Series series, List<RenamedComicFile> renamedFiles)
         {
-            Series = author;
+            Series = series;
             RenamedFiles = renamedFiles;
         }
     }

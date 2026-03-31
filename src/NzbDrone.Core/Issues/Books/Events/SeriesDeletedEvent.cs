@@ -8,9 +8,9 @@ namespace NzbDrone.Core.Issues.Events
         public bool DeleteFiles { get; private set; }
         public bool AddImportListExclusion { get; private set; }
 
-        public SeriesDeletedEvent(Series author, bool deleteFiles, bool addImportListExclusion)
+        public SeriesDeletedEvent(Series series, bool deleteFiles, bool addImportListExclusion)
         {
-            Series = author;
+            Series = series;
             DeleteFiles = deleteFiles;
             AddImportListExclusion = addImportListExclusion;
         }

@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
 
         private void GivenMissingRootFolder(string rootFolderPath)
         {
-            var author = Builder<Series>.CreateListOfSize(1)
+            var series = Builder<Series>.CreateListOfSize(1)
                                         .Build()
                                         .ToList();
 
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
 
             Mocker.GetMock<ISeriesService>()
                   .Setup(s => s.AllSeriesPaths())
-                  .Returns(author.ToDictionary(x => x.Id, x => x.Path));
+                  .Returns(series.ToDictionary(x => x.Id, x => x.Path));
 
             Mocker.GetMock<IImportListFactory>()
                 .Setup(s => s.All())

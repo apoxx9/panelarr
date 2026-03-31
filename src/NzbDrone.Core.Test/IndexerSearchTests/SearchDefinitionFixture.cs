@@ -10,9 +10,9 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
     {
         [TestCase("Mötley Crüe", "Motley+Crue")]
         [TestCase("방탄소년단", "방탄소년단")]
-        public void should_replace_some_special_characters_author(string author, string expected)
+        public void should_replace_some_special_characters_author(string series, string expected)
         {
-            Subject.Series = new Series { Name = author };
+            Subject.Series = new Series { Name = series };
             Subject.SeriesQuery.Should().Be(expected);
         }
 

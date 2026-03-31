@@ -17,13 +17,13 @@ namespace NzbDrone.Core.MediaFiles
 {
     public interface IRenameComicFileService
     {
-        List<RenameComicFilePreview> GetRenamePreviews(int authorId);
-        List<RenameComicFilePreview> GetRenamePreviews(int authorId, int issueId);
+        List<RenameComicFilePreview> GetRenamePreviews(int seriesId);
+        List<RenameComicFilePreview> GetRenamePreviews(int seriesId, int issueId);
     }
 
     public class RenameComicFileService : IRenameComicFileService, IExecute<RenameFilesCommand>, IExecute<RenameSeriesCommand>
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IMediaFileService _mediaFileService;
         private readonly IIssueService _issueService;
         private readonly IMoveComicFiles _comicFileMover;
@@ -32,7 +32,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IDiskProvider _diskProvider;
         private readonly Logger _logger;
 
-        public RenameComicFileService(ISeriesService authorService,
+        public RenameComicFileService(ISeriesService seriesService,
                                         IMediaFileService mediaFileService,
                                         IIssueService bookService,
                                         IMoveComicFiles comicFileMover,
@@ -41,7 +41,7 @@ namespace NzbDrone.Core.MediaFiles
                                         IDiskProvider diskProvider,
                                         Logger logger)
         {
-            _authorService = authorService;
+            _seriesService = seriesService;
             _mediaFileService = mediaFileService;
             _issueService = bookService;
             _comicFileMover = comicFileMover;
@@ -51,29 +51,29 @@ namespace NzbDrone.Core.MediaFiles
             _logger = logger;
         }
 
-        public List<RenameComicFilePreview> GetRenamePreviews(int authorId)
+        public List<RenameComicFilePreview> GetRenamePreviews(int seriesId)
         {
-            var author = _authorService.GetSeries(authorId);
-            var files = _mediaFileService.GetFilesBySeries(authorId);
+            var series = _seriesService.GetSeries(seriesId);
+            var files = _mediaFileService.GetFilesBySeries(seriesId);
 
             _logger.Trace($"got {files.Count} files");
 
-            return GetPreviews(author, files)
+            return GetPreviews(series, files)
                 .OrderByDescending(e => e.IssueId)
                 .ThenBy(e => e.ExistingPath)
                 .ToList();
         }
 
-        public List<RenameComicFilePreview> GetRenamePreviews(int authorId, int issueId)
+        public List<RenameComicFilePreview> GetRenamePreviews(int seriesId, int issueId)
         {
-            var author = _authorService.GetSeries(authorId);
+            var series = _seriesService.GetSeries(seriesId);
             var files = _mediaFileService.GetFilesByIssue(issueId);
 
-            return GetPreviews(author, files)
+            return GetPreviews(series, files)
                 .OrderBy(e => e.ExistingPath).ToList();
         }
 
-        private IEnumerable<RenameComicFilePreview> GetPreviews(Series author, List<ComicFile> files)
+        private IEnumerable<RenameComicFilePreview> GetPreviews(Series series, List<ComicFile> files)
         {
             var counts = files.GroupBy(x => x.IssueId).ToDictionary(g => g.Key, g => g.Count());
 
@@ -91,11 +91,11 @@ namespace NzbDrone.Core.MediaFiles
                     continue;
                 }
 
-                var newName = _filenameBuilder.BuildComicFileName(author, issue, file);
+                var newName = _filenameBuilder.BuildComicFileName(series, issue, file);
 
                 _logger.Trace($"got name {newName}");
 
-                var newPath = _filenameBuilder.BuildComicFilePath(author, issue, newName, Path.GetExtension(comicFilePath));
+                var newPath = _filenameBuilder.BuildComicFilePath(series, issue, newName, Path.GetExtension(comicFilePath));
 
                 _logger.Trace($"got path {newPath}");
 
@@ -103,7 +103,7 @@ namespace NzbDrone.Core.MediaFiles
                 {
                     yield return new RenameComicFilePreview
                     {
-                        SeriesId = author.Id,
+                        SeriesId = series.Id,
                         IssueId = issue.Id,
                         ComicFileId = file.Id,
                         ExistingPath = file.Path,
@@ -113,9 +113,9 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        private void RenameFiles(List<ComicFile> comicFiles, Series author)
+        private void RenameFiles(List<ComicFile> comicFiles, Series series)
         {
-            var allFiles = _mediaFileService.GetFilesBySeries(author.Id);
+            var allFiles = _mediaFileService.GetFilesBySeries(series.Id);
             var counts = allFiles.GroupBy(x => x.IssueId).ToDictionary(g => g.Key, g => g.Count());
             var renamed = new List<RenamedComicFile>();
 
@@ -127,7 +127,7 @@ namespace NzbDrone.Core.MediaFiles
                 try
                 {
                     _logger.Debug("Renaming issue file: {0}", comicFile);
-                    _comicFileMover.MoveComicFile(comicFile, author);
+                    _comicFileMover.MoveComicFile(comicFile, series);
 
                     _mediaFileService.Update(comicFile);
 
@@ -139,7 +139,7 @@ namespace NzbDrone.Core.MediaFiles
 
                     _logger.Debug("Renamed issue file: {0}", comicFile);
 
-                    _eventAggregator.PublishEvent(new ComicFileRenamedEvent(author, comicFile, previousPath));
+                    _eventAggregator.PublishEvent(new ComicFileRenamedEvent(series, comicFile, previousPath));
                 }
                 catch (FileAlreadyExistsException ex)
                 {
@@ -157,34 +157,34 @@ namespace NzbDrone.Core.MediaFiles
 
             if (renamed.Any())
             {
-                _eventAggregator.PublishEvent(new SeriesRenamedEvent(author, renamed));
+                _eventAggregator.PublishEvent(new SeriesRenamedEvent(series, renamed));
 
-                _logger.Debug("Removing Empty Subfolders from: {0}", author.Path);
-                _diskProvider.RemoveEmptySubfolders(author.Path);
+                _logger.Debug("Removing Empty Subfolders from: {0}", series.Path);
+                _diskProvider.RemoveEmptySubfolders(series.Path);
             }
         }
 
         public void Execute(RenameFilesCommand message)
         {
-            var author = _authorService.GetSeries(message.SeriesId);
+            var series = _seriesService.GetSeries(message.SeriesId);
             var comicFiles = _mediaFileService.Get(message.Files);
 
-            _logger.ProgressInfo("Renaming {0} files for {1}", comicFiles.Count, author.Name);
-            RenameFiles(comicFiles, author);
-            _logger.ProgressInfo("Selected issue files renamed for {0}", author.Name);
+            _logger.ProgressInfo("Renaming {0} files for {1}", comicFiles.Count, series.Name);
+            RenameFiles(comicFiles, series);
+            _logger.ProgressInfo("Selected issue files renamed for {0}", series.Name);
         }
 
         public void Execute(RenameSeriesCommand message)
         {
             _logger.Debug("Renaming all files for selected series");
-            var authorToRename = _authorService.GetSeriess(message.SeriesIds);
+            var seriesToRename = _seriesService.GetSeriess(message.SeriesIds);
 
-            foreach (var author in authorToRename)
+            foreach (var series in seriesToRename)
             {
-                var comicFiles = _mediaFileService.GetFilesBySeries(author.Id);
-                _logger.ProgressInfo("Renaming all files in series: {0}", author.Name);
-                RenameFiles(comicFiles, author);
-                _logger.ProgressInfo("All issue files renamed for {0}", author.Name);
+                var comicFiles = _mediaFileService.GetFilesBySeries(series.Id);
+                _logger.ProgressInfo("Renaming all files in series: {0}", series.Name);
+                RenameFiles(comicFiles, series);
+                _logger.ProgressInfo("All issue files renamed for {0}", series.Name);
             }
         }
     }

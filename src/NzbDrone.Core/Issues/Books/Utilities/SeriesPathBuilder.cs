@@ -8,7 +8,7 @@ namespace NzbDrone.Core.Issues
 {
     public interface IBuildSeriesPaths
     {
-        string BuildPath(Series author, bool useExistingRelativeFolder);
+        string BuildPath(Series series, bool useExistingRelativeFolder);
     }
 
     public class SeriesPathBuilder : IBuildSeriesPaths
@@ -22,27 +22,27 @@ namespace NzbDrone.Core.Issues
             _rootFolderService = rootFolderService;
         }
 
-        public string BuildPath(Series author, bool useExistingRelativeFolder)
+        public string BuildPath(Series series, bool useExistingRelativeFolder)
         {
-            if (author.RootFolderPath.IsNullOrWhiteSpace())
+            if (series.RootFolderPath.IsNullOrWhiteSpace())
             {
-                throw new ArgumentException("Root folder was not provided", nameof(author));
+                throw new ArgumentException("Root folder was not provided", nameof(series));
             }
 
-            if (useExistingRelativeFolder && author.Path.IsNotNullOrWhiteSpace())
+            if (useExistingRelativeFolder && series.Path.IsNotNullOrWhiteSpace())
             {
-                var relativePath = GetExistingRelativePath(author);
-                return Path.Combine(author.RootFolderPath, relativePath);
+                var relativePath = GetExistingRelativePath(series);
+                return Path.Combine(series.RootFolderPath, relativePath);
             }
 
-            return Path.Combine(author.RootFolderPath, _fileNameBuilder.GetSeriesFolder(author));
+            return Path.Combine(series.RootFolderPath, _fileNameBuilder.GetSeriesFolder(series));
         }
 
-        private string GetExistingRelativePath(Series author)
+        private string GetExistingRelativePath(Series series)
         {
-            var rootFolderPath = _rootFolderService.GetBestRootFolderPath(author.Path);
+            var rootFolderPath = _rootFolderService.GetBestRootFolderPath(series.Path);
 
-            return rootFolderPath.GetRelativePath(author.Path);
+            return rootFolderPath.GetRelativePath(series.Path);
         }
     }
 }

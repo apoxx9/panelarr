@@ -4,27 +4,27 @@ namespace NzbDrone.Core.Issues
 {
     public interface ISeriesMetadataService
     {
-        bool Upsert(SeriesMetadata author);
-        bool UpsertMany(List<SeriesMetadata> authors);
+        bool Upsert(SeriesMetadata series);
+        bool UpsertMany(List<SeriesMetadata> allSeries);
     }
 
     public class SeriesMetadataService : ISeriesMetadataService
     {
-        private readonly ISeriesMetadataRepository _authorMetadataRepository;
+        private readonly ISeriesMetadataRepository _seriesMetadataRepository;
 
-        public SeriesMetadataService(ISeriesMetadataRepository authorMetadataRepository)
+        public SeriesMetadataService(ISeriesMetadataRepository seriesMetadataRepository)
         {
-            _authorMetadataRepository = authorMetadataRepository;
+            _seriesMetadataRepository = seriesMetadataRepository;
         }
 
-        public bool Upsert(SeriesMetadata author)
+        public bool Upsert(SeriesMetadata series)
         {
-            return _authorMetadataRepository.UpsertMany(new List<SeriesMetadata> { author });
+            return _seriesMetadataRepository.UpsertMany(new List<SeriesMetadata> { series });
         }
 
-        public bool UpsertMany(List<SeriesMetadata> authors)
+        public bool UpsertMany(List<SeriesMetadata> allSeries)
         {
-            return _authorMetadataRepository.UpsertMany(authors);
+            return _seriesMetadataRepository.UpsertMany(allSeries);
         }
     }
 }

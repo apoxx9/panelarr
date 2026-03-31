@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Download
 
             if (message.IssueIds.Count == booksInSeries.Count)
             {
-                _logger.Debug("Failed download was entire author, searching again");
+                _logger.Debug("Failed download was entire series, searching again");
 
                 _commandQueueManager.Push(new SeriesSearchCommand
                 {

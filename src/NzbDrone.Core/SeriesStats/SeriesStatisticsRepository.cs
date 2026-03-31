@@ -11,7 +11,7 @@ namespace NzbDrone.Core.SeriesStats
     public interface ISeriesStatisticsRepository
     {
         List<IssueStatistics> SeriesStatistics();
-        List<IssueStatistics> SeriesStatistics(int authorId);
+        List<IssueStatistics> SeriesStatistics(int seriesId);
     }
 
     public class SeriesStatisticsRepository : ISeriesStatisticsRepository
@@ -30,9 +30,9 @@ namespace NzbDrone.Core.SeriesStats
             return Query(Builder());
         }
 
-        public List<IssueStatistics> SeriesStatistics(int authorId)
+        public List<IssueStatistics> SeriesStatistics(int seriesId)
         {
-            return Query(Builder().Where<Series>(x => x.Id == authorId));
+            return Query(Builder().Where<Series>(x => x.Id == seriesId));
         }
 
         private List<IssueStatistics> Query(SqlBuilder builder)
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.SeriesStats
                      CASE WHEN MIN(""ComicFiles"".""Id"") IS NULL THEN 0 ELSE 1 END AS ""AvailableIssueCount"",
                      CASE WHEN (""Issues"".""Monitored"" = {trueIndicator} AND (""Issues"".""ReleaseDate"" < @currentDate) OR ""Issues"".""ReleaseDate"" IS NULL) OR MIN(""ComicFiles"".""Id"") IS NOT NULL THEN 1 ELSE 0 END AS ""IssueCount"",
                      CASE WHEN MIN(""ComicFiles"".""Id"") IS NULL THEN 0 ELSE COUNT(""ComicFiles"".""Id"") END AS ""ComicFileCount""")
-            .Join<Issue, Series>((issue, author) => issue.SeriesMetadataId == author.SeriesMetadataId)
+            .Join<Issue, Series>((issue, series) => issue.SeriesMetadataId == series.SeriesMetadataId)
             .LeftJoin<Issue, ComicFile>((b, f) => b.Id == f.IssueId)
             .Where<Issue>(x => x.Monitored == true)
             .GroupBy<Series>(x => x.Id)

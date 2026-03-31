@@ -5,14 +5,14 @@ namespace NzbDrone.Core.Validation.Paths
 {
     public class SeriesExistsValidator : PropertyValidator
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
 
-        public SeriesExistsValidator(ISeriesService authorService)
+        public SeriesExistsValidator(ISeriesService seriesService)
         {
-            _authorService = authorService;
+            _seriesService = seriesService;
         }
 
-        protected override string GetDefaultMessageTemplate() => "This author has already been added";
+        protected override string GetDefaultMessageTemplate() => "This series has already been added";
 
         protected override bool IsValid(PropertyValidatorContext context)
         {
@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Validation.Paths
 
             var foreignSeriesId = context.PropertyValue.ToString();
 
-            return _authorService.FindById(foreignSeriesId) == null;
+            return _seriesService.FindById(foreignSeriesId) == null;
         }
     }
 }

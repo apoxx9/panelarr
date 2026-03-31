@@ -15,18 +15,18 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
     [TestFixture]
     public class TorrentSeedingSpecificationFixture : TestBase<TorrentSeedingSpecification>
     {
-        private Series _author;
+        private Series _series;
         private RemoteIssue _remoteIssue;
         private IndexerDefinition _indexerDefinition;
 
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Series>.CreateNew().With(s => s.Id = 1).Build();
+            _series = Builder<Series>.CreateNew().With(s => s.Id = 1).Build();
 
             _remoteIssue = new RemoteIssue
             {
-                Series = _author,
+                Series = _series,
                 Release = new TorrentInfo
                 {
                     IndexerId = 1,

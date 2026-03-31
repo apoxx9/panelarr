@@ -28,9 +28,9 @@ namespace NzbDrone.Core.Notifications.Join
             _proxy.SendNotification(BOOK_DOWNLOADED_TITLE_BRANDED, message.Message, Settings);
         }
 
-        public override void OnSeriesAdded(Series author)
+        public override void OnSeriesAdded(Series series)
         {
-            _proxy.SendNotification(AUTHOR_ADDED_TITLE_BRANDED, author.Name, Settings);
+            _proxy.SendNotification(AUTHOR_ADDED_TITLE_BRANDED, series.Name, Settings);
         }
 
         public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)

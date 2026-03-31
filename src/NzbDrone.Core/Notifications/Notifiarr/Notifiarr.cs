@@ -31,9 +31,9 @@ namespace NzbDrone.Core.Notifications.Notifiarr
             _proxy.SendNotification(BuildOnReleaseImportPayload(message), Settings);
         }
 
-        public override void OnSeriesAdded(Series author)
+        public override void OnSeriesAdded(Series series)
         {
-            _proxy.SendNotification(BuildOnSeriesAdded(author), Settings);
+            _proxy.SendNotification(BuildOnSeriesAdded(series), Settings);
         }
 
         public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)

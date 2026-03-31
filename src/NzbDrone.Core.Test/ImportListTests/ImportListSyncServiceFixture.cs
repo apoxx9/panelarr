@@ -141,7 +141,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         }
 
         [Test]
-        public void should_search_if_author_title_and_no_author_id()
+        public void should_search_if_series_title_and_no_series_id()
         {
             Subject.Execute(new ImportListSyncCommand());
 
@@ -150,7 +150,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         }
 
         [Test]
-        public void should_not_search_if_author_title_and_author_id()
+        public void should_not_search_if_series_title_and_series_id()
         {
             WithSeriesId();
             Subject.Execute(new ImportListSyncCommand());

@@ -11,9 +11,9 @@ namespace NzbDrone.Core.Issues.Commands
         {
         }
 
-        public RefreshSeriesCommand(int? authorId, bool isNewSeries = false)
+        public RefreshSeriesCommand(int? seriesId, bool isNewSeries = false)
         {
-            SeriesId = authorId;
+            SeriesId = seriesId;
             IsNewSeries = isNewSeries;
         }
 

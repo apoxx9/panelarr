@@ -22,7 +22,7 @@ namespace NzbDrone.Core.MediaFiles
         ParsedTrackInfo ReadTags(string file);
         void WriteTags(ComicFile trackfile, bool newDownload, bool force = false);
         void SyncTags(List<Issue> issues);
-        List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId);
+        List<RetagComicFilePreview> GetRetagPreviewsBySeries(int seriesId);
         List<RetagComicFilePreview> GetRetagPreviewsByIssue(int issueId);
         void RetagFiles(RetagFilesCommand message);
         void RetagSeries(RetagSeriesCommand message);
@@ -34,7 +34,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IMediaFileService _mediaFileService;
         private readonly IDiskProvider _diskProvider;
         private readonly IRootFolderWatchingService _rootFolderWatchingService;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IMapCoversToLocal _mediaCoverService;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.MediaFiles
                                IMediaFileService mediaFileService,
                                IDiskProvider diskProvider,
                                IRootFolderWatchingService rootFolderWatchingService,
-                               ISeriesService authorService,
+                               ISeriesService seriesService,
                                IMapCoversToLocal mediaCoverService,
                                IEventAggregator eventAggregator,
                                Logger logger)
@@ -52,7 +52,7 @@ namespace NzbDrone.Core.MediaFiles
             _mediaFileService = mediaFileService;
             _diskProvider = diskProvider;
             _rootFolderWatchingService = rootFolderWatchingService;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _mediaCoverService = mediaCoverService;
             _eventAggregator = eventAggregator;
             _logger = logger;
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.MediaFiles
         public AudioTag GetTrackMetadata(ComicFile trackfile)
         {
             var issue = trackfile.Issue.Value;
-            var author = issue.Series.Value;
+            var series = issue.Series.Value;
             var partCount = issue.ComicFiles.Value.Count;
 
             var fileTags = ReadAudioTag(trackfile.Path);
@@ -94,8 +94,8 @@ namespace NzbDrone.Core.MediaFiles
             return new AudioTag
             {
                 Title = issue.Title,
-                Performers = new[] { author.Name },
-                IssueSeriess = new[] { author.Name },
+                Performers = new[] { series.Name },
+                IssueSeriess = new[] { series.Name },
                 Track = (uint)trackfile.Part,
                 TrackCount = (uint)partCount,
                 Issue = issue.Title,
@@ -213,9 +213,9 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        public List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId)
+        public List<RetagComicFilePreview> GetRetagPreviewsBySeries(int seriesId)
         {
-            var files = _mediaFileService.GetFilesBySeries(authorId);
+            var files = _mediaFileService.GetFilesBySeries(seriesId);
 
             return GetPreviews(files).OrderBy(b => b.IssueId).ThenBy(b => b.Path).ToList();
         }
@@ -259,36 +259,36 @@ namespace NzbDrone.Core.MediaFiles
 
         public void RetagFiles(RetagFilesCommand message)
         {
-            var author = _authorService.GetSeries(message.SeriesId);
+            var series = _seriesService.GetSeries(message.SeriesId);
             var comicFiles = _mediaFileService.Get(message.Files);
             var audioFiles = comicFiles.Where(x => MediaFileExtensions.AudioExtensions.Contains(Path.GetExtension(x.Path))).ToList();
 
-            _logger.ProgressInfo("Re-tagging {0} audio files for {1}", audioFiles.Count, author.Name);
+            _logger.ProgressInfo("Re-tagging {0} audio files for {1}", audioFiles.Count, series.Name);
             foreach (var file in audioFiles)
             {
                 WriteTags(file, false, force: true);
             }
 
-            _logger.ProgressInfo("Selected audio files re-tagged for {0}", author.Name);
+            _logger.ProgressInfo("Selected audio files re-tagged for {0}", series.Name);
         }
 
         public void RetagSeries(RetagSeriesCommand message)
         {
-            _logger.Debug("Re-tagging all audio files for selected authors");
-            var authorToRename = _authorService.GetSeriess(message.SeriesIds);
+            _logger.Debug("Re-tagging all audio files for selected allSeries");
+            var seriesToRename = _seriesService.GetSeriess(message.SeriesIds);
 
-            foreach (var author in authorToRename)
+            foreach (var series in seriesToRename)
             {
-                var comicFiles = _mediaFileService.GetFilesBySeries(author.Id);
+                var comicFiles = _mediaFileService.GetFilesBySeries(series.Id);
                 var audioFiles = comicFiles.Where(x => MediaFileExtensions.AudioExtensions.Contains(Path.GetExtension(x.Path))).ToList();
 
-                _logger.ProgressInfo("Re-tagging all audio files for author: {0}", author.Name);
+                _logger.ProgressInfo("Re-tagging all audio files for series: {0}", series.Name);
                 foreach (var file in audioFiles)
                 {
                     WriteTags(file, false, force: true);
                 }
 
-                _logger.ProgressInfo("All audio files re-tagged for {0}", author.Name);
+                _logger.ProgressInfo("All audio files re-tagged for {0}", series.Name);
             }
         }
     }

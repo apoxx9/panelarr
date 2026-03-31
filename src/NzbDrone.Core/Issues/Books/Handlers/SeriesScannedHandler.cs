@@ -10,41 +10,41 @@ namespace NzbDrone.Core.Issues
                                         IHandle<SeriesScanSkippedEvent>
     {
         private readonly IIssueMonitoredService _issueMonitoredService;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IManageCommandQueue _commandQueueManager;
         private readonly IIssueAddedService _bookAddedService;
         private readonly Logger _logger;
 
         public SeriesScannedHandler(IIssueMonitoredService bookMonitoredService,
-                                    ISeriesService authorService,
+                                    ISeriesService seriesService,
                                     IManageCommandQueue commandQueueManager,
                                     IIssueAddedService bookAddedService,
                                     Logger logger)
         {
             _issueMonitoredService = bookMonitoredService;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _commandQueueManager = commandQueueManager;
             _bookAddedService = bookAddedService;
             _logger = logger;
         }
 
-        private void HandleScanEvents(Series author)
+        private void HandleScanEvents(Series series)
         {
-            if (author.AddOptions != null)
+            if (series.AddOptions != null)
             {
-                _logger.Info("[{0}] was recently added, performing post-add actions", author.Name);
-                _issueMonitoredService.SetIssueMonitoredStatus(author, author.AddOptions);
+                _logger.Info("[{0}] was recently added, performing post-add actions", series.Name);
+                _issueMonitoredService.SetIssueMonitoredStatus(series, series.AddOptions);
 
-                if (author.AddOptions.SearchForMissingIssues)
+                if (series.AddOptions.SearchForMissingIssues)
                 {
-                    _commandQueueManager.Push(new MissingIssueSearchCommand(author.Id));
+                    _commandQueueManager.Push(new MissingIssueSearchCommand(series.Id));
                 }
 
-                author.AddOptions = null;
-                _authorService.RemoveAddOptions(author);
+                series.AddOptions = null;
+                _seriesService.RemoveAddOptions(series);
             }
 
-            _bookAddedService.SearchForRecentlyAdded(author.Id);
+            _bookAddedService.SearchForRecentlyAdded(series.Id);
         }
 
         public void Handle(SeriesScannedEvent message)

@@ -30,27 +30,27 @@ namespace NzbDrone.Core.Extras
 
         public void Handle(SeriesScannedEvent message)
         {
-            var author = message.Series;
+            var series = message.Series;
             var extraFiles = new List<ExtraFile>();
 
-            if (!_diskProvider.FolderExists(author.Path))
+            if (!_diskProvider.FolderExists(series.Path))
             {
                 return;
             }
 
-            _logger.Debug("Looking for existing extra files in {0}", author.Path);
+            _logger.Debug("Looking for existing extra files in {0}", series.Path);
 
-            var filesOnDisk = _diskScanService.GetNonComicFiles(author.Path);
-            var possibleExtraFiles = _diskScanService.FilterPaths(author.Path, filesOnDisk);
+            var filesOnDisk = _diskScanService.GetNonComicFiles(series.Path);
+            var possibleExtraFiles = _diskScanService.FilterPaths(series.Path, filesOnDisk);
 
             var filteredFiles = possibleExtraFiles;
             var importedFiles = new List<string>();
 
             foreach (var existingExtraFileImporter in _existingExtraFileImporters)
             {
-                var imported = existingExtraFileImporter.ProcessFiles(author, filteredFiles, importedFiles);
+                var imported = existingExtraFileImporter.ProcessFiles(series, filteredFiles, importedFiles);
 
-                importedFiles.AddRange(imported.Select(f => Path.Combine(author.Path, f.RelativePath)));
+                importedFiles.AddRange(imported.Select(f => Path.Combine(series.Path, f.RelativePath)));
             }
 
             _logger.Info("Found {0} extra files", extraFiles.Count);

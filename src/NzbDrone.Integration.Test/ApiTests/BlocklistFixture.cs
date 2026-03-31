@@ -9,17 +9,17 @@ namespace NzbDrone.Integration.Test.ApiTests
     [Ignore("Waiting for metadata to be back again", Until = "2026-01-15 00:00:00Z")]
     public class BlocklistFixture : IntegrationTest
     {
-        private SeriesResource _author;
+        private SeriesResource _series;
 
         [Test]
         [Ignore("Adding to blocklist not supported")]
         public void should_be_able_to_add_to_blocklist()
         {
-            _author = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray");
+            _series = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray");
 
             Blocklist.Post(new BlocklistResource
             {
-                SeriesId = _author.Id,
+                SeriesId = _series.Id,
                 SourceTitle = "Blacklist - Issue 1 [2015 FLAC]"
             });
         }

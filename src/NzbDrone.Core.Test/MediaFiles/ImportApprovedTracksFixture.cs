@@ -36,13 +36,13 @@ namespace NzbDrone.Core.Test.MediaFiles
             _rejectedDecisions = new List<ImportDecision<LocalIssue>>();
             _approvedDecisions = new List<ImportDecision<LocalIssue>>();
 
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                                         .With(e => e.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() })
                                         .With(s => s.Path = @"C:\Test\Music\Alien Ant Farm".AsOsAgnostic())
                                         .Build();
 
             var issue = Builder<Issue>.CreateNew()
-                .With(e => e.Series = author)
+                .With(e => e.Series = series)
                 .Build();
 
             var rootFolder = Builder<RootFolder>.CreateNew()
@@ -56,10 +56,10 @@ namespace NzbDrone.Core.Test.MediaFiles
             _approvedDecisions.Add(new ImportDecision<LocalIssue>(
                                        new LocalIssue
                                        {
-                                           Series = author,
+                                           Series = series,
                                            Issue = issue,
                                            Part = 1,
-                                           Path = Path.Combine(author.Path, "Alien Ant Farm - 01 - Pilot.mp3"),
+                                           Path = Path.Combine(series.Path, "Alien Ant Farm - 01 - Pilot.mp3"),
                                            Quality = new QualityModel(Quality.CBR),
                                            FileTrackInfo = new ParsedTrackInfo
                                            {

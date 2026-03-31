@@ -8,13 +8,13 @@ namespace NzbDrone.Core.Issues
     public abstract class RefreshEntityServiceBase<TEntity, TChild>
     {
         private readonly Logger _logger;
-        private readonly ISeriesMetadataService _authorMetadataService;
+        private readonly ISeriesMetadataService _seriesMetadataService;
 
         protected RefreshEntityServiceBase(Logger logger,
-                                           ISeriesMetadataService authorMetadataService)
+                                           ISeriesMetadataService seriesMetadataService)
         {
             _logger = logger;
-            _authorMetadataService = authorMetadataService;
+            _seriesMetadataService = seriesMetadataService;
         }
 
         public enum UpdateResult
@@ -213,7 +213,7 @@ namespace NzbDrone.Core.Issues
         public UpdateResult UpdateSeriesMetadata(List<SeriesMetadata> data)
         {
             var remoteMetadata = data.DistinctBy(x => x.ForeignSeriesId).ToList();
-            var updated = _authorMetadataService.UpsertMany(remoteMetadata);
+            var updated = _seriesMetadataService.UpsertMany(remoteMetadata);
             return updated ? UpdateResult.UpdateTags : UpdateResult.None;
         }
 

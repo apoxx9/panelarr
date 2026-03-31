@@ -28,12 +28,12 @@ namespace NzbDrone.Core.Extras.Others
 
         public override int Order => 2;
 
-        public override IEnumerable<ExtraFile> ProcessFiles(Series author, List<string> filesOnDisk, List<string> importedFiles)
+        public override IEnumerable<ExtraFile> ProcessFiles(Series series, List<string> filesOnDisk, List<string> importedFiles)
         {
-            _logger.Debug("Looking for existing extra files in {0}", author.Path);
+            _logger.Debug("Looking for existing extra files in {0}", series.Path);
 
             var extraFiles = new List<OtherExtraFile>();
-            var filterResult = FilterAndClean(author, filesOnDisk, importedFiles);
+            var filterResult = FilterAndClean(series, filesOnDisk, importedFiles);
 
             foreach (var possibleExtraFile in filterResult.FilesOnDisk)
             {
@@ -48,7 +48,7 @@ namespace NzbDrone.Core.Extras.Others
                 var localTrack = new LocalIssue
                 {
                     FileTrackInfo = Parser.Parser.ParseMusicPath(possibleExtraFile),
-                    Series = author,
+                    Series = series,
                     Path = possibleExtraFile
                 };
 
@@ -70,9 +70,9 @@ namespace NzbDrone.Core.Extras.Others
 
                 var extraFile = new OtherExtraFile
                 {
-                    SeriesId = author.Id,
+                    SeriesId = series.Id,
                     IssueId = localTrack.Issue.Id,
-                    RelativePath = author.Path.GetRelativePath(possibleExtraFile),
+                    RelativePath = series.Path.GetRelativePath(possibleExtraFile),
                     Extension = extension
                 };
 

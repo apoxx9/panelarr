@@ -38,11 +38,11 @@ namespace NzbDrone.Core.ImportLists.Panelarr
                 var remoteIssues = _panelarrV1Proxy.GetIssues(Settings);
                 var remoteSeriesList = _panelarrV1Proxy.GetSeriess(Settings);
 
-                var authorDict = remoteSeriesList.ToDictionary(x => x.Id);
+                var seriesDict = remoteSeriesList.ToDictionary(x => x.Id);
 
                 foreach (var remoteIssue in remoteIssues)
                 {
-                    var remoteSeries = authorDict[remoteIssue.SeriesId];
+                    var remoteSeries = seriesDict[remoteIssue.SeriesId];
 
                     if (Settings.ProfileIds.Any() && !Settings.ProfileIds.Contains(remoteSeries.QualityProfileId))
                     {

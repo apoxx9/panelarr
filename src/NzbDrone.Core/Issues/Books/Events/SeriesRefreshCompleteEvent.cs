@@ -6,9 +6,9 @@ namespace NzbDrone.Core.Issues.Events
     {
         public Series Series { get; set; }
 
-        public SeriesRefreshCompleteEvent(Series author)
+        public SeriesRefreshCompleteEvent(Series series)
         {
-            Series = author;
+            Series = series;
         }
     }
 }

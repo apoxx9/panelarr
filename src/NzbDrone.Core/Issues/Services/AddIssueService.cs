@@ -18,21 +18,21 @@ namespace NzbDrone.Core.Issues
 
     public class AddIssueService : IAddIssueService
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IAddSeriesService _addSeriesService;
         private readonly IIssueService _issueService;
         private readonly IProvideIssueInfo _bookInfo;
         private readonly IImportListExclusionService _importListExclusionService;
         private readonly Logger _logger;
 
-        public AddIssueService(ISeriesService authorService,
+        public AddIssueService(ISeriesService seriesService,
                                IAddSeriesService addSeriesService,
                                IIssueService bookService,
                                IProvideIssueInfo bookInfo,
                                IImportListExclusionService importListExclusionService,
                                Logger logger)
         {
-            _authorService = authorService;
+            _seriesService = seriesService;
             _addSeriesService = addSeriesService;
             _issueService = bookService;
             _bookInfo = bookInfo;
@@ -60,15 +60,15 @@ namespace NzbDrone.Core.Issues
             // Note it's a manual addition so it's not deleted on next refresh
             issue.AddOptions.AddType = IssueAddType.Manual;
 
-            // Add the author if necessary
-            var dbSeries = _authorService.FindById(issue.SeriesMetadata.Value.ForeignSeriesId);
+            // Add the series if necessary
+            var dbSeries = _seriesService.FindById(issue.SeriesMetadata.Value.ForeignSeriesId);
             if (dbSeries == null)
             {
-                var author = issue.Series.Value;
+                var series = issue.Series.Value;
 
-                author.Metadata.Value.ForeignSeriesId = issue.SeriesMetadata.Value.ForeignSeriesId;
+                series.Metadata.Value.ForeignSeriesId = issue.SeriesMetadata.Value.ForeignSeriesId;
 
-                dbSeries = _addSeriesService.AddSeries(author, false);
+                dbSeries = _addSeriesService.AddSeries(series, false);
             }
 
             issue.Series = dbSeries;

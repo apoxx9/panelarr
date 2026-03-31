@@ -55,11 +55,11 @@ namespace NzbDrone.Core.Notifications
         {
         }
 
-        public virtual void OnRename(Series author, List<RenamedComicFile> renamedFiles)
+        public virtual void OnRename(Series series, List<RenamedComicFile> renamedFiles)
         {
         }
 
-        public virtual void OnSeriesAdded(Series author)
+        public virtual void OnSeriesAdded(Series series)
         {
         }
 

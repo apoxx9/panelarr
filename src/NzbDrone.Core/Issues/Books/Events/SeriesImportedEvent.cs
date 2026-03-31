@@ -8,9 +8,9 @@ namespace NzbDrone.Core.Issues.Events
         public List<int> SeriesIds { get; private set; }
         public bool DoRefresh { get; private set; }
 
-        public SeriesImportedEvent(List<int> authorIds, bool doRefresh = true)
+        public SeriesImportedEvent(List<int> seriesIds, bool doRefresh = true)
         {
-            SeriesIds = authorIds;
+            SeriesIds = seriesIds;
             DoRefresh = doRefresh;
         }
     }

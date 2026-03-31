@@ -15,19 +15,19 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
     [TestFixture]
     public class SeriesSearchServiceFixture : CoreTest<SeriesSearchService>
     {
-        private Series _author;
+        private Series _series;
 
         [SetUp]
         public void Setup()
         {
-            _author = new Series();
+            _series = new Series();
 
             Mocker.GetMock<ISeriesService>()
                 .Setup(s => s.GetSeries(It.IsAny<int>()))
-                .Returns(_author);
+                .Returns(_series);
 
             Mocker.GetMock<ISearchForReleases>()
-                .Setup(s => s.SeriesSearch(_author.Id, false, true, false))
+                .Setup(s => s.SeriesSearch(_series.Id, false, true, false))
                 .Returns(Task.FromResult(new List<DownloadDecision>()));
 
             Mocker.GetMock<IProcessDownloadDecisions>()
@@ -38,17 +38,17 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
         [Test]
         public void should_only_include_monitored_books()
         {
-            _author.Issues = new List<Issue>
+            _series.Issues = new List<Issue>
             {
                 new Issue { Monitored = false },
                 new Issue { Monitored = true }
             };
 
-            Subject.Execute(new SeriesSearchCommand { SeriesId = _author.Id, Trigger = CommandTrigger.Manual });
+            Subject.Execute(new SeriesSearchCommand { SeriesId = _series.Id, Trigger = CommandTrigger.Manual });
 
             Mocker.GetMock<ISearchForReleases>()
-                .Verify(v => v.SeriesSearch(_author.Id, false, true, false),
-                    Times.Exactly(_author.Issues.Value.Count(s => s.Monitored)));
+                .Verify(v => v.SeriesSearch(_series.Id, false, true, false),
+                    Times.Exactly(_series.Issues.Value.Count(s => s.Monitored)));
         }
     }
 }

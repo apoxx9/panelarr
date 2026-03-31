@@ -29,13 +29,13 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_delete_metadata_files_that_dont_have_a_coresponding_book()
         {
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                                         .BuildNew();
 
-            Db.Insert(author);
+            Db.Insert(series);
 
             var metadataFile = Builder<MetadataFile>.CreateNew()
-                                                    .With(m => m.SeriesId = author.Id)
+                                                    .With(m => m.SeriesId = series.Id)
                                                     .With(m => m.ComicFileId = null)
                                                     .BuildNew();
 
@@ -47,13 +47,13 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_delete_metadata_files_that_have_a_coresponding_author()
         {
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                                         .BuildNew();
 
-            Db.Insert(author);
+            Db.Insert(series);
 
             var metadataFile = Builder<MetadataFile>.CreateNew()
-                                                    .With(m => m.SeriesId = author.Id)
+                                                    .With(m => m.SeriesId = series.Id)
                                                     .With(m => m.IssueId = null)
                                                     .With(m => m.ComicFileId = null)
                                                     .BuildNew();
@@ -67,17 +67,17 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_delete_metadata_files_that_have_a_coresponding_book()
         {
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                                         .BuildNew();
 
             var issue = Builder<Issue>.CreateNew()
                 .BuildNew();
 
-            Db.Insert(author);
+            Db.Insert(series);
             Db.Insert(issue);
 
             var metadataFile = Builder<MetadataFile>.CreateNew()
-                                                    .With(m => m.SeriesId = author.Id)
+                                                    .With(m => m.SeriesId = series.Id)
                                                     .With(m => m.IssueId = issue.Id)
                                                     .With(m => m.ComicFileId = null)
                                                     .BuildNew();
@@ -90,17 +90,17 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_delete_metadata_files_that_dont_have_a_coresponding_track_file()
         {
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                                         .BuildNew();
 
             var issue = Builder<Issue>.CreateNew()
                 .BuildNew();
 
-            Db.Insert(author);
+            Db.Insert(series);
             Db.Insert(issue);
 
             var metadataFile = Builder<MetadataFile>.CreateNew()
-                                                    .With(m => m.SeriesId = author.Id)
+                                                    .With(m => m.SeriesId = series.Id)
                                                     .With(m => m.IssueId = issue.Id)
                                                     .With(m => m.ComicFileId = 10)
                                                     .BuildNew();
@@ -113,7 +113,7 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_not_delete_metadata_files_that_have_a_coresponding_track_file()
         {
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                                         .BuildNew();
 
             var issue = Builder<Issue>.CreateNew()
@@ -123,12 +123,12 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
                                                   .With(h => h.Quality = new QualityModel())
                                                   .BuildNew();
 
-            Db.Insert(author);
+            Db.Insert(series);
             Db.Insert(issue);
             Db.Insert(trackFile);
 
             var metadataFile = Builder<MetadataFile>.CreateNew()
-                                                    .With(m => m.SeriesId = author.Id)
+                                                    .With(m => m.SeriesId = series.Id)
                                                     .With(m => m.IssueId = issue.Id)
                                                     .With(m => m.ComicFileId = trackFile.Id)
                                                     .BuildNew();
@@ -141,13 +141,13 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_delete_book_metadata_files_that_have_bookid_of_zero()
         {
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                 .BuildNew();
 
-            Db.Insert(author);
+            Db.Insert(series);
 
             var metadataFile = Builder<MetadataFile>.CreateNew()
-                .With(m => m.SeriesId = author.Id)
+                .With(m => m.SeriesId = series.Id)
                 .With(m => m.Type = MetadataType.IssueMetadata)
                 .With(m => m.IssueId = 0)
                 .With(m => m.ComicFileId = null)
@@ -161,13 +161,13 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_delete_book_image_files_that_have_bookid_of_zero()
         {
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                 .BuildNew();
 
-            Db.Insert(author);
+            Db.Insert(series);
 
             var metadataFile = Builder<MetadataFile>.CreateNew()
-                .With(m => m.SeriesId = author.Id)
+                .With(m => m.SeriesId = series.Id)
                 .With(m => m.Type = MetadataType.IssueImage)
                 .With(m => m.IssueId = 0)
                 .With(m => m.ComicFileId = null)
@@ -181,13 +181,13 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         [Test]
         public void should_delete_track_metadata_files_that_have_trackfileid_of_zero()
         {
-            var author = Builder<Series>.CreateNew()
+            var series = Builder<Series>.CreateNew()
                                         .BuildNew();
 
-            Db.Insert(author);
+            Db.Insert(series);
 
             var metadataFile = Builder<MetadataFile>.CreateNew()
-                                                 .With(m => m.SeriesId = author.Id)
+                                                 .With(m => m.SeriesId = series.Id)
                                                  .With(m => m.Type = MetadataType.IssueMetadata)
                                                  .With(m => m.ComicFileId = 0)
                                                  .BuildNew();

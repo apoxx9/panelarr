@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     [TestFixture]
     public class ColonReplacementFixture : CoreTest<FileNameBuilder>
     {
-        private Series _author;
+        private Series _series;
         private Issue _issue;
         private ComicFile _comicFile;
         private NamingConfig _namingConfig;
@@ -24,7 +24,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [SetUp]
         public void Setup()
         {
-            _author = Builder<Series>
+            _series = Builder<Series>
                 .CreateNew()
                 .With(s => s.Name = "Christopher Hopper")
                 .Build();
@@ -44,7 +44,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _issue = Builder<Issue>
                 .CreateNew()
                 .With(s => s.Title = "Fake: Phantom Deadfall")
-                .With(s => s.SeriesMetadata = _author.Metadata.Value)
+                .With(s => s.SeriesMetadata = _series.Metadata.Value)
                 .With(s => s.ReleaseDate = new DateTime(2021, 2, 14))
                 .With(s => s.SeriesLinks = seriesLink)
                 .Build();
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _namingConfig.StandardIssueFormat = "{Series Name} - {Issue SeriesTitle - }{Issue Title} {(Release Year)}";
 
-            Subject.BuildComicFileName(_author, _issue, _comicFile)
+            Subject.BuildComicFileName(_series, _issue, _comicFile)
                    .Should().Be("Christopher Hopper - SeriesGroup - Ruins of the Earth #1-2 - Fake - Phantom Deadfall (2021)");
         }
 
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Series Name} - {Issue SeriesGroup - }{Issue Title} {(Release Year)}";
             _namingConfig.ColonReplacementFormat = replacementFormat;
 
-            Subject.BuildComicFileName(_author, _issue, _comicFile)
+            Subject.BuildComicFileName(_series, _issue, _comicFile)
                 .Should().Be(expected);
         }
 
@@ -94,13 +94,13 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("Series:Name", ColonReplacementFormat.Delete, "SeriesName")]
         [TestCase("Series:Name", ColonReplacementFormat.SpaceDash, "Series -Name")]
         [TestCase("Series:Name", ColonReplacementFormat.SpaceDashSpace, "Series - Name")]
-        public void should_replace_colon_with_expected_result(string authorName, ColonReplacementFormat replacementFormat, string expected)
+        public void should_replace_colon_with_expected_result(string seriesName, ColonReplacementFormat replacementFormat, string expected)
         {
-            _author.Name = authorName;
+            _series.Name = seriesName;
             _namingConfig.StandardIssueFormat = "{Series Name}";
             _namingConfig.ColonReplacementFormat = replacementFormat;
 
-            Subject.BuildComicFileName(_author, _issue, _comicFile)
+            Subject.BuildComicFileName(_series, _issue, _comicFile)
                 .Should().Be(expected);
         }
     }

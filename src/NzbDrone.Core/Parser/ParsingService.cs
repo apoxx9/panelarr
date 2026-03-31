@@ -15,13 +15,13 @@ namespace NzbDrone.Core.Parser
     {
         Series GetSeries(string title);
         RemoteIssue Map(ParsedIssueInfo parsedIssueInfo, SearchCriteriaBase searchCriteria = null);
-        RemoteIssue Map(ParsedIssueInfo parsedIssueInfo, int authorId, IEnumerable<int> bookIds);
-        List<Issue> GetIssues(ParsedIssueInfo parsedIssueInfo, Series author, SearchCriteriaBase searchCriteria = null);
+        RemoteIssue Map(ParsedIssueInfo parsedIssueInfo, int seriesId, IEnumerable<int> bookIds);
+        List<Issue> GetIssues(ParsedIssueInfo parsedIssueInfo, Series series, SearchCriteriaBase searchCriteria = null);
 
         ParsedIssueInfo ParseIssueTitleFuzzy(string title);
 
         // Music stuff here
-        Issue GetLocalIssue(string filename, Series author);
+        Issue GetLocalIssue(string filename, Series series);
 
         // Comic-specific matching
         Series GetSeriesForComicRelease(ParsedComicInfo parsedComicInfo, SearchCriteriaBase searchCriteria = null);
@@ -31,18 +31,18 @@ namespace NzbDrone.Core.Parser
 
     public class ParsingService : IParsingService
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly IMediaFileService _mediaFileService;
         private readonly Logger _logger;
 
-        public ParsingService(ISeriesService authorService,
+        public ParsingService(ISeriesService seriesService,
                               IIssueService bookService,
                               IMediaFileService mediaFileService,
                               Logger logger)
         {
             _issueService = bookService;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _mediaFileService = mediaFileService;
             _logger = logger;
         }
@@ -56,15 +56,15 @@ namespace NzbDrone.Core.Parser
                 title = parsedIssueInfo.SeriesName;
             }
 
-            var authorInfo = _authorService.FindByName(title);
+            var seriesInfo = _seriesService.FindByName(title);
 
-            if (authorInfo == null)
+            if (seriesInfo == null)
             {
                 _logger.Debug("Trying inexact series match for {0}", title);
-                authorInfo = _authorService.FindByNameInexact(title);
+                seriesInfo = _seriesService.FindByNameInexact(title);
             }
 
-            return authorInfo;
+            return seriesInfo;
         }
 
         public RemoteIssue Map(ParsedIssueInfo parsedIssueInfo, SearchCriteriaBase searchCriteria = null)
@@ -74,20 +74,20 @@ namespace NzbDrone.Core.Parser
                 ParsedIssueInfo = parsedIssueInfo,
             };
 
-            var author = GetSeries(parsedIssueInfo, searchCriteria);
+            var series = GetSeries(parsedIssueInfo, searchCriteria);
 
-            if (author == null)
+            if (series == null)
             {
                 return remoteIssue;
             }
 
-            remoteIssue.Series = author;
-            remoteIssue.Issues = GetIssues(parsedIssueInfo, author, searchCriteria);
+            remoteIssue.Series = series;
+            remoteIssue.Issues = GetIssues(parsedIssueInfo, series, searchCriteria);
 
             return remoteIssue;
         }
 
-        public List<Issue> GetIssues(ParsedIssueInfo parsedIssueInfo, Series author, SearchCriteriaBase searchCriteria = null)
+        public List<Issue> GetIssues(ParsedIssueInfo parsedIssueInfo, Series series, SearchCriteriaBase searchCriteria = null)
         {
             var bookTitle = parsedIssueInfo.IssueTitle;
             var result = new List<Issue>();
@@ -103,7 +103,7 @@ namespace NzbDrone.Core.Parser
             {
                 if (parsedIssueInfo.DiscographyStart > 0)
                 {
-                    return _issueService.SeriesIssuesBetweenDates(author,
+                    return _issueService.SeriesIssuesBetweenDates(series,
                         new DateTime(parsedIssueInfo.DiscographyStart, 1, 1),
                         new DateTime(parsedIssueInfo.DiscographyEnd, 12, 31),
                         false);
@@ -111,13 +111,13 @@ namespace NzbDrone.Core.Parser
 
                 if (parsedIssueInfo.DiscographyEnd > 0)
                 {
-                    return _issueService.SeriesIssuesBetweenDates(author,
+                    return _issueService.SeriesIssuesBetweenDates(series,
                         new DateTime(1800, 1, 1),
                         new DateTime(parsedIssueInfo.DiscographyEnd, 12, 31),
                         false);
                 }
 
-                return _issueService.GetIssuesBySeries(author.Id);
+                return _issueService.GetIssuesBySeries(series.Id);
             }
 
             // Try matching by issue number first (for comics with "#N" format titles)
@@ -131,7 +131,7 @@ namespace NzbDrone.Core.Parser
 
                 if (bookInfo == null)
                 {
-                    var seriesIssues = _issueService.GetIssuesBySeries(author.Id);
+                    var seriesIssues = _issueService.GetIssuesBySeries(series.Id);
                     bookInfo = seriesIssues.FirstOrDefault(e => (int)e.IssueNumber == issueNum);
                 }
             }
@@ -144,13 +144,13 @@ namespace NzbDrone.Core.Parser
 
             if (bookInfo == null)
             {
-                bookInfo = _issueService.FindByTitle(author.SeriesMetadataId, parsedIssueInfo.IssueTitle);
+                bookInfo = _issueService.FindByTitle(series.SeriesMetadataId, parsedIssueInfo.IssueTitle);
             }
 
             if (bookInfo == null)
             {
                 _logger.Debug("Trying inexact issue match for {0}", parsedIssueInfo.IssueTitle);
-                bookInfo = _issueService.FindByTitleInexact(author.SeriesMetadataId, parsedIssueInfo.IssueTitle);
+                bookInfo = _issueService.FindByTitleInexact(series.SeriesMetadataId, parsedIssueInfo.IssueTitle);
             }
 
             if (bookInfo != null)
@@ -165,19 +165,19 @@ namespace NzbDrone.Core.Parser
             return result;
         }
 
-        public RemoteIssue Map(ParsedIssueInfo parsedIssueInfo, int authorId, IEnumerable<int> bookIds)
+        public RemoteIssue Map(ParsedIssueInfo parsedIssueInfo, int seriesId, IEnumerable<int> bookIds)
         {
             return new RemoteIssue
             {
                 ParsedIssueInfo = parsedIssueInfo,
-                Series = _authorService.GetSeries(authorId),
+                Series = _seriesService.GetSeries(seriesId),
                 Issues = _issueService.GetIssues(bookIds)
             };
         }
 
         private Series GetSeries(ParsedIssueInfo parsedIssueInfo, SearchCriteriaBase searchCriteria)
         {
-            Series author = null;
+            Series series = null;
 
             if (searchCriteria != null)
             {
@@ -187,21 +187,21 @@ namespace NzbDrone.Core.Parser
                 }
             }
 
-            author = _authorService.FindByName(parsedIssueInfo.SeriesName);
+            series = _seriesService.FindByName(parsedIssueInfo.SeriesName);
 
-            if (author == null)
+            if (series == null)
             {
                 _logger.Debug("Trying inexact series match for {0}", parsedIssueInfo.SeriesName);
-                author = _authorService.FindByNameInexact(parsedIssueInfo.SeriesName);
+                series = _seriesService.FindByNameInexact(parsedIssueInfo.SeriesName);
             }
 
-            if (author == null)
+            if (series == null)
             {
                 _logger.Debug("No matching series {0}", parsedIssueInfo.SeriesName);
                 return null;
             }
 
-            return author;
+            return series;
         }
 
         public ParsedIssueInfo ParseIssueTitleFuzzy(string title)
@@ -211,25 +211,25 @@ namespace NzbDrone.Core.Parser
             Series bestSeries = null;
             Issue bestIssue = null;
 
-            var possibleSeries = _authorService.GetReportCandidates(title);
+            var possibleSeries = _seriesService.GetReportCandidates(title);
 
-            foreach (var author in possibleSeries)
+            foreach (var series in possibleSeries)
             {
-                _logger.Trace($"Trying possible series {author}");
+                _logger.Trace($"Trying possible series {series}");
 
-                var authorMatch = title.FuzzyMatch(author.Metadata.Value.Name, 0.5);
-                var possibleIssues = _issueService.GetCandidates(author.SeriesMetadataId, title);
+                var seriesMatch = title.FuzzyMatch(series.Metadata.Value.Name, 0.5);
+                var possibleIssues = _issueService.GetCandidates(series.SeriesMetadataId, title);
 
                 foreach (var issue in possibleIssues)
                 {
                     var bookMatch = title.FuzzyMatch(issue.Title, 0.5);
-                    var score = (authorMatch.Item3 + bookMatch.Item3) / 2;
+                    var score = (seriesMatch.Item3 + bookMatch.Item3) / 2;
 
                     _logger.Trace($"Issue {issue} has score {score}");
 
                     if (score > bestScore)
                     {
-                        bestSeries = author;
+                        bestSeries = series;
                         bestIssue = issue;
                     }
                 }
@@ -245,14 +245,14 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        public Issue GetLocalIssue(string filename, Series author)
+        public Issue GetLocalIssue(string filename, Series series)
         {
             if (Path.HasExtension(filename))
             {
                 filename = Path.GetDirectoryName(filename);
             }
 
-            var tracksInIssue = _mediaFileService.GetFilesBySeries(author.Id)
+            var tracksInIssue = _mediaFileService.GetFilesBySeries(series.Id)
                 .FindAll(s => Path.GetDirectoryName(s.Path) == filename)
                 .DistinctBy(s => s.IssueId)
                 .ToList();
@@ -276,12 +276,12 @@ namespace NzbDrone.Core.Parser
                 }
             }
 
-            var series = _authorService.FindByName(parsedComicInfo.SeriesTitle);
+            var series = _seriesService.FindByName(parsedComicInfo.SeriesTitle);
 
             if (series == null)
             {
                 _logger.Debug("Trying inexact series match for comic release: {0}", parsedComicInfo.SeriesTitle);
-                series = _authorService.FindByNameInexact(parsedComicInfo.SeriesTitle);
+                series = _seriesService.FindByNameInexact(parsedComicInfo.SeriesTitle);
             }
 
             return series;

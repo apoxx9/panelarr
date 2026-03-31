@@ -37,15 +37,15 @@ namespace NzbDrone.Core.Notifications.CustomScript
 
         public override void OnGrab(GrabMessage message)
         {
-            var author = message.Series;
+            var series = message.Series;
             var remoteIssue = message.RemoteIssue;
             var releaseGroup = remoteIssue.ParsedIssueInfo.ReleaseGroup;
             var environmentVariables = new StringDictionary();
 
             environmentVariables.Add("Panelarr_EventType", "Grab");
-            environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
-            environmentVariables.Add("Panelarr_Series_Name", author.Metadata.Value.Name);
-            environmentVariables.Add("Panelarr_Series_GRId", author.Metadata.Value.ForeignSeriesId);
+            environmentVariables.Add("Panelarr_Series_Id", series.Id.ToString());
+            environmentVariables.Add("Panelarr_Series_Name", series.Metadata.Value.Name);
+            environmentVariables.Add("Panelarr_Series_GRId", series.Metadata.Value.ForeignSeriesId);
             environmentVariables.Add("Panelarr_Release_IssueCount", remoteIssue.Issues.Count.ToString());
             environmentVariables.Add("Panelarr_Release_IssueReleaseDates", string.Join(",", remoteIssue.Issues.Select(e => e.ReleaseDate)));
             environmentVariables.Add("Panelarr_Release_IssueTitles", string.Join("|", remoteIssue.Issues.Select(e => e.Title)));
@@ -67,15 +67,15 @@ namespace NzbDrone.Core.Notifications.CustomScript
 
         public override void OnReleaseImport(IssueDownloadMessage message)
         {
-            var author = message.Series;
+            var series = message.Series;
             var issue = message.Issue;
             var environmentVariables = new StringDictionary();
 
             environmentVariables.Add("Panelarr_EventType", "Download");
-            environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
-            environmentVariables.Add("Panelarr_Series_Name", author.Metadata.Value.Name);
-            environmentVariables.Add("Panelarr_Series_Path", author.Path);
-            environmentVariables.Add("Panelarr_Series_GRId", author.Metadata.Value.ForeignSeriesId);
+            environmentVariables.Add("Panelarr_Series_Id", series.Id.ToString());
+            environmentVariables.Add("Panelarr_Series_Name", series.Metadata.Value.Name);
+            environmentVariables.Add("Panelarr_Series_Path", series.Path);
+            environmentVariables.Add("Panelarr_Series_GRId", series.Metadata.Value.ForeignSeriesId);
             environmentVariables.Add("Panelarr_Issue_Id", issue.Id.ToString());
             environmentVariables.Add("Panelarr_Issue_Title", issue.Title);
             environmentVariables.Add("Panelarr_Issue_GRId", issue.ForeignIssueId);
@@ -98,42 +98,42 @@ namespace NzbDrone.Core.Notifications.CustomScript
             ExecuteScript(environmentVariables);
         }
 
-        public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
+        public override void OnRename(Series series, List<RenamedComicFile> renamedFiles)
         {
             var environmentVariables = new StringDictionary();
 
             environmentVariables.Add("Panelarr_EventType", "Rename");
-            environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
-            environmentVariables.Add("Panelarr_Series_Name", author.Metadata.Value.Name);
-            environmentVariables.Add("Panelarr_Series_Path", author.Path);
-            environmentVariables.Add("Panelarr_Series_GRId", author.Metadata.Value.ForeignSeriesId);
+            environmentVariables.Add("Panelarr_Series_Id", series.Id.ToString());
+            environmentVariables.Add("Panelarr_Series_Name", series.Metadata.Value.Name);
+            environmentVariables.Add("Panelarr_Series_Path", series.Path);
+            environmentVariables.Add("Panelarr_Series_GRId", series.Metadata.Value.ForeignSeriesId);
 
             ExecuteScript(environmentVariables);
         }
 
-        public override void OnSeriesAdded(Series author)
+        public override void OnSeriesAdded(Series series)
         {
             var environmentVariables = new StringDictionary();
 
             environmentVariables.Add("Panelarr_EventType", "SeriesAdded");
-            environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
-            environmentVariables.Add("Panelarr_Series_Name", author.Metadata.Value.Name);
-            environmentVariables.Add("Panelarr_Series_Path", author.Path);
-            environmentVariables.Add("Panelarr_Series_GRId", author.Metadata.Value.ForeignSeriesId);
+            environmentVariables.Add("Panelarr_Series_Id", series.Id.ToString());
+            environmentVariables.Add("Panelarr_Series_Name", series.Metadata.Value.Name);
+            environmentVariables.Add("Panelarr_Series_Path", series.Path);
+            environmentVariables.Add("Panelarr_Series_GRId", series.Metadata.Value.ForeignSeriesId);
 
             ExecuteScript(environmentVariables);
         }
 
         public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
-            var author = deleteMessage.Series;
+            var series = deleteMessage.Series;
             var environmentVariables = new StringDictionary();
 
             environmentVariables.Add("Panelarr_EventType", "SeriesDelete");
-            environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
-            environmentVariables.Add("Panelarr_Series_Name", author.Name);
-            environmentVariables.Add("Panelarr_Series_Path", author.Path);
-            environmentVariables.Add("Panelarr_Series_ForeignId", author.ForeignSeriesId);
+            environmentVariables.Add("Panelarr_Series_Id", series.Id.ToString());
+            environmentVariables.Add("Panelarr_Series_Name", series.Name);
+            environmentVariables.Add("Panelarr_Series_Path", series.Path);
+            environmentVariables.Add("Panelarr_Series_ForeignId", series.ForeignSeriesId);
             environmentVariables.Add("Panelarr_Series_DeletedFiles", deleteMessage.DeletedFiles.ToString());
 
             ExecuteScript(environmentVariables);
@@ -141,16 +141,16 @@ namespace NzbDrone.Core.Notifications.CustomScript
 
         public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
-            var author = deleteMessage.Issue.Series.Value;
+            var series = deleteMessage.Issue.Series.Value;
             var issue = deleteMessage.Issue;
 
             var environmentVariables = new StringDictionary();
 
             environmentVariables.Add("Panelarr_EventType", "IssueDelete");
-            environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
-            environmentVariables.Add("Panelarr_Series_Name", author.Name);
-            environmentVariables.Add("Panelarr_Series_Path", author.Path);
-            environmentVariables.Add("Panelarr_Series_ForeignId", author.ForeignSeriesId);
+            environmentVariables.Add("Panelarr_Series_Id", series.Id.ToString());
+            environmentVariables.Add("Panelarr_Series_Name", series.Name);
+            environmentVariables.Add("Panelarr_Series_Path", series.Path);
+            environmentVariables.Add("Panelarr_Series_ForeignId", series.ForeignSeriesId);
             environmentVariables.Add("Panelarr_Issue_Id", issue.Id.ToString());
             environmentVariables.Add("Panelarr_Issue_Title", issue.Title);
             environmentVariables.Add("Panelarr_Issue_ForeignId", issue.ForeignIssueId);
@@ -161,7 +161,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
 
         public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
-            var author = deleteMessage.Issue.Series.Value;
+            var series = deleteMessage.Issue.Series.Value;
             var issue = deleteMessage.Issue;
             var comicFile = deleteMessage.ComicFile;
 
@@ -169,9 +169,9 @@ namespace NzbDrone.Core.Notifications.CustomScript
 
             environmentVariables.Add("Panelarr_EventType", "ComicFileDelete");
             environmentVariables.Add("Panelarr_Delete_Reason", deleteMessage.Reason.ToString());
-            environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
-            environmentVariables.Add("Panelarr_Series_Name", author.Name);
-            environmentVariables.Add("Panelarr_Series_ForeignId", author.ForeignSeriesId);
+            environmentVariables.Add("Panelarr_Series_Id", series.Id.ToString());
+            environmentVariables.Add("Panelarr_Series_Name", series.Name);
+            environmentVariables.Add("Panelarr_Series_ForeignId", series.ForeignSeriesId);
             environmentVariables.Add("Panelarr_Issue_Id", issue.Id.ToString());
             environmentVariables.Add("Panelarr_Issue_Title", issue.Title);
             environmentVariables.Add("Panelarr_Issue_ForeignId", issue.ForeignIssueId);
@@ -187,16 +187,16 @@ namespace NzbDrone.Core.Notifications.CustomScript
 
         public override void OnIssueRetag(IssueRetagMessage message)
         {
-            var author = message.Series;
+            var series = message.Series;
             var issue = message.Issue;
             var comicFile = message.ComicFile;
             var environmentVariables = new StringDictionary();
 
             environmentVariables.Add("Panelarr_EventType", "TrackRetag");
-            environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
-            environmentVariables.Add("Panelarr_Series_Name", author.Metadata.Value.Name);
-            environmentVariables.Add("Panelarr_Series_Path", author.Path);
-            environmentVariables.Add("Panelarr_Series_GRId", author.Metadata.Value.ForeignSeriesId);
+            environmentVariables.Add("Panelarr_Series_Id", series.Id.ToString());
+            environmentVariables.Add("Panelarr_Series_Name", series.Metadata.Value.Name);
+            environmentVariables.Add("Panelarr_Series_Path", series.Path);
+            environmentVariables.Add("Panelarr_Series_GRId", series.Metadata.Value.ForeignSeriesId);
             environmentVariables.Add("Panelarr_Issue_Id", issue.Id.ToString());
             environmentVariables.Add("Panelarr_Issue_Title", issue.Title);
             environmentVariables.Add("Panelarr_Issue_GRId", issue.ForeignIssueId);

@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     [TestFixture]
     public class QueueSpecificationFixture : CoreTest<QueueSpecification>
     {
-        private Series _author;
+        private Series _series;
         private Issue _issue;
         private RemoteIssue _remoteIssue;
 
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             CustomFormatsTestHelpers.GivenCustomFormats();
 
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                                      .With(e => e.QualityProfile = new QualityProfile
                                      {
                                          UpgradeAllowed = true,
@@ -48,7 +48,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                      .Build();
 
             _issue = Builder<Issue>.CreateNew()
-                                       .With(e => e.SeriesId = _author.Id)
+                                       .With(e => e.SeriesId = _series.Id)
                                        .Build();
 
             _otherSeries = Builder<Series>.CreateNew()
@@ -64,7 +64,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                    .Build();
 
             _remoteIssue = Builder<RemoteIssue>.CreateNew()
-                                                   .With(r => r.Series = _author)
+                                                   .With(r => r.Series = _series)
                                                    .With(r => r.Issues = new List<Issue> { _issue })
                                                    .With(r => r.ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR) })
                                                    .With(r => r.CustomFormats = new List<CustomFormat>())
@@ -126,10 +126,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_if_everything_is_the_same()
         {
-            _author.QualityProfile.Value.Cutoff = Quality.CBZ_HD.Id;
+            _series.QualityProfile.Value.Cutoff = Quality.CBZ_HD.Id;
 
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                .With(r => r.Series = _author)
+                .With(r => r.Series = _series)
                 .With(r => r.Issues = new List<Issue> { _issue })
                 .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                 {
@@ -147,10 +147,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_when_quality_in_queue_is_lower()
         {
-            _author.QualityProfile.Value.Cutoff = Quality.CBR.Id;
+            _series.QualityProfile.Value.Cutoff = Quality.CBR.Id;
 
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                                                      .With(r => r.Series = _author)
+                                                      .With(r => r.Series = _series)
                                                       .With(r => r.Issues = new List<Issue> { _issue })
                                                       .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                                                       {
@@ -168,7 +168,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_return_true_when_book_doesnt_match()
         {
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                                                      .With(r => r.Series = _author)
+                                                      .With(r => r.Series = _series)
                                                       .With(r => r.Issues = new List<Issue> { _otherIssue })
                                                       .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                                                       {
@@ -191,12 +191,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             CustomFormatsTestHelpers.GivenCustomFormats(_remoteIssue.CustomFormats.First(), lowFormat.First());
 
-            _author.QualityProfile.Value.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems("My Format");
+            _series.QualityProfile.Value.FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems("My Format");
 
             GivenQueueFormats(lowFormat);
 
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                .With(r => r.Series = _author)
+                .With(r => r.Series = _series)
                 .With(r => r.Issues = new List<Issue> { _issue })
                 .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                 {
@@ -214,7 +214,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_return_false_when_qualities_are_the_same()
         {
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                                                      .With(r => r.Series = _author)
+                                                      .With(r => r.Series = _series)
                                                       .With(r => r.Issues = new List<Issue> { _issue })
                                                       .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                                                       {
@@ -231,10 +231,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_when_quality_in_queue_is_better()
         {
-            _author.QualityProfile.Value.Cutoff = Quality.CBZ_HD.Id;
+            _series.QualityProfile.Value.Cutoff = Quality.CBZ_HD.Id;
 
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                                                      .With(r => r.Series = _author)
+                                                      .With(r => r.Series = _series)
                                                       .With(r => r.Issues = new List<Issue> { _issue })
                                                       .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                                                       {
@@ -252,7 +252,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_return_false_if_matching_multi_book_is_in_queue()
         {
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                                                      .With(r => r.Series = _author)
+                                                      .With(r => r.Series = _series)
                                                       .With(r => r.Issues = new List<Issue> { _issue, _otherIssue })
                                                       .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                                                       {
@@ -270,7 +270,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_return_false_if_multi_book_has_one_book_in_queue()
         {
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                                                      .With(r => r.Series = _author)
+                                                      .With(r => r.Series = _series)
                                                       .With(r => r.Issues = new List<Issue> { _issue })
                                                       .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                                                       {
@@ -290,7 +290,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_return_false_if_multi_part_book_is_already_in_queue()
         {
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                                                      .With(r => r.Series = _author)
+                                                      .With(r => r.Series = _series)
                                                       .With(r => r.Issues = new List<Issue> { _issue, _otherIssue })
                                                       .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                                                       {
@@ -311,7 +311,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             var remoteIssues = Builder<RemoteIssue>.CreateListOfSize(2)
                                                        .All()
-                                                       .With(r => r.Series = _author)
+                                                       .With(r => r.Series = _series)
                                                        .With(r => r.CustomFormats = new List<CustomFormat>())
                                                        .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                                                        {
@@ -332,11 +332,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_false_when_quality_is_better_and_upgrade_allowed_is_false_for_quality_profile()
         {
-            _author.QualityProfile.Value.Cutoff = Quality.CBZ_HD.Id;
-            _author.QualityProfile.Value.UpgradeAllowed = false;
+            _series.QualityProfile.Value.Cutoff = Quality.CBZ_HD.Id;
+            _series.QualityProfile.Value.UpgradeAllowed = false;
 
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                .With(r => r.Series = _author)
+                .With(r => r.Series = _series)
                 .With(r => r.Issues = new List<Issue> { _issue })
                 .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                 {
@@ -353,10 +353,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_everything_is_the_same_for_failed_pending()
         {
-            _author.QualityProfile.Value.Cutoff = Quality.CBZ_HD.Id;
+            _series.QualityProfile.Value.Cutoff = Quality.CBZ_HD.Id;
 
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                .With(r => r.Series = _author)
+                .With(r => r.Series = _series)
                 .With(r => r.Issues = new List<Issue> { _issue })
                 .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                 {
@@ -375,14 +375,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_return_false_if_same_quality_non_proper_in_queue_and_download_propers_is_do_not_upgrade()
         {
             _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBZ_HD, new Revision(2));
-            _author.QualityProfile.Value.Cutoff = _remoteIssue.ParsedIssueInfo.Quality.Quality.Id;
+            _series.QualityProfile.Value.Cutoff = _remoteIssue.ParsedIssueInfo.Quality.Quality.Id;
 
             Mocker.GetMock<IConfigService>()
                 .Setup(s => s.DownloadPropersAndRepacks)
                 .Returns(ProperDownloadTypes.DoNotUpgrade);
 
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                .With(r => r.Series = _author)
+                .With(r => r.Series = _series)
                 .With(r => r.Issues = new List<Issue> { _issue })
                 .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                 {

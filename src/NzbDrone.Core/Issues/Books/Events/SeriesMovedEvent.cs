@@ -8,9 +8,9 @@ namespace NzbDrone.Core.Issues.Events
         public string SourcePath { get; set; }
         public string DestinationPath { get; set; }
 
-        public SeriesMovedEvent(Series author, string sourcePath, string destinationPath)
+        public SeriesMovedEvent(Series series, string sourcePath, string destinationPath)
         {
-            Series = author;
+            Series = series;
             SourcePath = sourcePath;
             DestinationPath = destinationPath;
         }

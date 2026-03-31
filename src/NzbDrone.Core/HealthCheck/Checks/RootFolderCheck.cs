@@ -16,15 +16,15 @@ namespace NzbDrone.Core.HealthCheck.Checks
     [CheckOn(typeof(TrackImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
     public class RootFolderCheck : HealthCheckBase
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IImportListFactory _importListFactory;
         private readonly IDiskProvider _diskProvider;
         private readonly IRootFolderService _rootFolderService;
 
-        public RootFolderCheck(ISeriesService authorService, IImportListFactory importListFactory, IDiskProvider diskProvider, IRootFolderService rootFolderService, ILocalizationService localizationService)
+        public RootFolderCheck(ISeriesService seriesService, IImportListFactory importListFactory, IDiskProvider diskProvider, IRootFolderService rootFolderService, ILocalizationService localizationService)
             : base(localizationService)
         {
-            _authorService = authorService;
+            _seriesService = seriesService;
             _importListFactory = importListFactory;
             _diskProvider = diskProvider;
             _rootFolderService = rootFolderService;
@@ -32,7 +32,7 @@ namespace NzbDrone.Core.HealthCheck.Checks
 
         public override HealthCheck Check()
         {
-            var rootFolders = _authorService.AllSeriesPaths()
+            var rootFolders = _seriesService.AllSeriesPaths()
                                                            .Select(s => _rootFolderService.GetBestRootFolderPath(s.Value))
                                                            .Distinct();
 

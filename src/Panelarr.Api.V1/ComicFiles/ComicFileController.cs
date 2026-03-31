@@ -27,7 +27,7 @@ namespace Panelarr.Api.V1.ComicFiles
         private readonly IMediaFileService _mediaFileService;
         private readonly IDeleteMediaFiles _mediaFileDeletionService;
         private readonly IMetadataTagService _metadataTagService;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly IUpgradableSpecification _upgradableSpecification;
 
@@ -35,7 +35,7 @@ namespace Panelarr.Api.V1.ComicFiles
                                IMediaFileService mediaFileService,
                                IDeleteMediaFiles mediaFileDeletionService,
                                IMetadataTagService metadataTagService,
-                               ISeriesService authorService,
+                               ISeriesService seriesService,
                                IIssueService bookService,
                                IUpgradableSpecification upgradableSpecification)
             : base(signalRBroadcaster)
@@ -43,7 +43,7 @@ namespace Panelarr.Api.V1.ComicFiles
             _mediaFileService = mediaFileService;
             _mediaFileDeletionService = mediaFileDeletionService;
             _metadataTagService = metadataTagService;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _issueService = bookService;
             _upgradableSpecification = upgradableSpecification;
         }
@@ -83,9 +83,9 @@ namespace Panelarr.Api.V1.ComicFiles
 
             if (seriesId.HasValue && !issueIds.Any())
             {
-                var author = _authorService.GetSeries(seriesId.Value);
+                var series = _seriesService.GetSeries(seriesId.Value);
 
-                return _mediaFileService.GetFilesBySeries(seriesId.Value).ConvertAll(f => f.ToResource(author, _upgradableSpecification));
+                return _mediaFileService.GetFilesBySeries(seriesId.Value).ConvertAll(f => f.ToResource(series, _upgradableSpecification));
             }
 
             if (issueIds.Any())
@@ -94,7 +94,7 @@ namespace Panelarr.Api.V1.ComicFiles
                 foreach (var issueId in issueIds)
                 {
                     var issue = _issueService.GetIssue(issueId);
-                    var bookSeries = _authorService.GetSeries(issue.SeriesId);
+                    var bookSeries = _seriesService.GetSeries(issue.SeriesId);
                     result.AddRange(_mediaFileService.GetFilesByIssue(issue.Id).ConvertAll(f => f.ToResource(bookSeries, _upgradableSpecification)));
                 }
 
@@ -102,7 +102,7 @@ namespace Panelarr.Api.V1.ComicFiles
             }
             else
             {
-                // trackfiles will come back with the author already populated
+                // trackfiles will come back with the series already populated
                 var comicFiles = _mediaFileService.Get(issueFileIds);
                 return comicFiles.ConvertAll(e => MapToResource(e));
             }

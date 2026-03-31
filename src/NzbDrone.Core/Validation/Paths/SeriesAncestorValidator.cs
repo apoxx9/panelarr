@@ -7,14 +7,14 @@ namespace NzbDrone.Core.Validation.Paths
 {
     public class SeriesAncestorValidator : PropertyValidator
     {
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
 
-        public SeriesAncestorValidator(ISeriesService authorService)
+        public SeriesAncestorValidator(ISeriesService seriesService)
         {
-            _authorService = authorService;
+            _seriesService = seriesService;
         }
 
-        protected override string GetDefaultMessageTemplate() => "Path '{path}' is an ancestor of an existing author";
+        protected override string GetDefaultMessageTemplate() => "Path '{path}' is an ancestor of an existing series";
 
         protected override bool IsValid(PropertyValidatorContext context)
         {
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Validation.Paths
 
             context.MessageFormatter.AppendArgument("path", context.PropertyValue.ToString());
 
-            return !_authorService.AllSeriesPaths().Any(s => context.PropertyValue.ToString().IsParentPath(s.Value));
+            return !_seriesService.AllSeriesPaths().Any(s => context.PropertyValue.ToString().IsParentPath(s.Value));
         }
     }
 }

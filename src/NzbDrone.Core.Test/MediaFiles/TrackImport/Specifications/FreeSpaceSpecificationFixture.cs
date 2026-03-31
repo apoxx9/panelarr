@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
     [TestFixture]
     public class FreeSpaceSpecificationFixture : CoreTest<FreeSpaceSpecification>
     {
-        private Series _author;
+        private Series _series;
         private LocalIssue _localTrack;
         private string _rootFolder;
 
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
         {
             _rootFolder = @"C:\Test\Music".AsOsAgnostic();
 
-            _author = Builder<Series>.CreateNew()
+            _series = Builder<Series>.CreateNew()
                                      .With(s => s.Path = Path.Combine(_rootFolder, "Alice in Chains"))
                                      .Build();
 
@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
             {
                 Path = @"C:\Test\Unsorted\Alice in Chains\Alice in Chains - track1.mp3".AsOsAgnostic(),
                 Issue = new Issue(),
-                Series = _author
+                Series = _series
             };
         }
 
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
         }
 
         [Test]
-        public void should_use_author_paths_parent_for_free_space_check()
+        public void should_use_series_paths_parent_for_free_space_check()
         {
             GivenFileSize(100.Megabytes());
             GivenFreeSpace(1.Gigabytes());
@@ -117,7 +117,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
         }
 
         [Test]
-        public void should_skip_check_for_files_under_author_folder()
+        public void should_skip_check_for_files_under_series_folder()
         {
             _localTrack.ExistingFile = true;
 

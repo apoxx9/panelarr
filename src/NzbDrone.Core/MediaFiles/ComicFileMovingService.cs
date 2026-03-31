@@ -15,7 +15,7 @@ namespace NzbDrone.Core.MediaFiles
 {
     public interface IMoveComicFiles
     {
-        ComicFile MoveComicFile(ComicFile comicFile, Series author);
+        ComicFile MoveComicFile(ComicFile comicFile, Series series);
         ComicFile MoveComicFile(ComicFile comicFile, LocalIssue localIssue);
         ComicFile CopyComicFile(ComicFile comicFile, LocalIssue localIssue);
     }
@@ -56,17 +56,17 @@ namespace NzbDrone.Core.MediaFiles
             _logger = logger;
         }
 
-        public ComicFile MoveComicFile(ComicFile comicFile, Series author)
+        public ComicFile MoveComicFile(ComicFile comicFile, Series series)
         {
             var issue = _issueService.GetIssue(comicFile.IssueId);
-            var newFileName = _buildFileNames.BuildComicFileName(author, issue, comicFile);
-            var filePath = _buildFileNames.BuildComicFilePath(author, issue, newFileName, Path.GetExtension(comicFile.Path));
+            var newFileName = _buildFileNames.BuildComicFileName(series, issue, comicFile);
+            var filePath = _buildFileNames.BuildComicFilePath(series, issue, newFileName, Path.GetExtension(comicFile.Path));
 
-            EnsureIssueFolder(comicFile, author, issue, filePath);
+            EnsureIssueFolder(comicFile, series, issue, filePath);
 
             _logger.Debug("Renaming issue file: {0} to {1}", comicFile, filePath);
 
-            return TransferFile(comicFile, author, issue, filePath, TransferMode.Move);
+            return TransferFile(comicFile, series, issue, filePath, TransferMode.Move);
         }
 
         public ComicFile MoveComicFile(ComicFile comicFile, LocalIssue localIssue)
@@ -98,10 +98,10 @@ namespace NzbDrone.Core.MediaFiles
             return TransferFile(comicFile, localIssue.Series, localIssue.Issue, filePath, TransferMode.Copy);
         }
 
-        private ComicFile TransferFile(ComicFile comicFile, Series author, Issue issue, string destinationFilePath, TransferMode mode)
+        private ComicFile TransferFile(ComicFile comicFile, Series series, Issue issue, string destinationFilePath, TransferMode mode)
         {
             Ensure.That(comicFile, () => comicFile).IsNotNull();
-            Ensure.That(author, () => author).IsNotNull();
+            Ensure.That(series, () => series).IsNotNull();
             Ensure.That(destinationFilePath, () => destinationFilePath).IsValidPath(PathValidationType.CurrentOs);
 
             var comicFilePath = comicFile.Path;
@@ -121,11 +121,11 @@ namespace NzbDrone.Core.MediaFiles
 
             comicFile.Path = destinationFilePath;
 
-            _updateComicFileService.ChangeFileDateForFile(comicFile, author, issue);
+            _updateComicFileService.ChangeFileDateForFile(comicFile, series, issue);
 
             try
             {
-                _mediaFileAttributeService.SetFolderLastWriteTime(author.Path, comicFile.DateAdded);
+                _mediaFileAttributeService.SetFolderLastWriteTime(series.Path, comicFile.DateAdded);
             }
             catch (Exception ex)
             {
@@ -142,12 +142,12 @@ namespace NzbDrone.Core.MediaFiles
             EnsureIssueFolder(comicFile, localIssue.Series, localIssue.Issue, filePath);
         }
 
-        private void EnsureIssueFolder(ComicFile comicFile, Series author, Issue issue, string filePath)
+        private void EnsureIssueFolder(ComicFile comicFile, Series series, Issue issue, string filePath)
         {
             var trackFolder = Path.GetDirectoryName(filePath);
-            var bookFolder = _buildFileNames.BuildIssuePath(author);
-            var authorFolder = author.Path;
-            var rootFolder = new OsPath(authorFolder).Directory.FullPath;
+            var bookFolder = _buildFileNames.BuildIssuePath(series);
+            var seriesFolder = series.Path;
+            var rootFolder = new OsPath(seriesFolder).Directory.FullPath;
 
             if (!_diskProvider.FolderExists(rootFolder))
             {
@@ -155,18 +155,18 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             var changed = false;
-            var newEvent = new TrackFolderCreatedEvent(author, comicFile);
+            var newEvent = new TrackFolderCreatedEvent(series, comicFile);
 
-            _rootFolderWatchingService.ReportFileSystemChangeBeginning(authorFolder, bookFolder, trackFolder);
+            _rootFolderWatchingService.ReportFileSystemChangeBeginning(seriesFolder, bookFolder, trackFolder);
 
-            if (!_diskProvider.FolderExists(authorFolder))
+            if (!_diskProvider.FolderExists(seriesFolder))
             {
-                CreateFolder(authorFolder);
-                newEvent.SeriesFolder = authorFolder;
+                CreateFolder(seriesFolder);
+                newEvent.SeriesFolder = seriesFolder;
                 changed = true;
             }
 
-            if (authorFolder != bookFolder && !_diskProvider.FolderExists(bookFolder))
+            if (seriesFolder != bookFolder && !_diskProvider.FolderExists(bookFolder))
             {
                 CreateFolder(bookFolder);
                 newEvent.IssueFolder = bookFolder;

@@ -16,8 +16,8 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 {
     public interface IPlexServerService
     {
-        void UpdateLibrary(Series author, PlexServerSettings settings);
-        void UpdateLibrary(IEnumerable<Series> authors, PlexServerSettings settings);
+        void UpdateLibrary(Series series, PlexServerSettings settings);
+        void UpdateLibrary(IEnumerable<Series> allSeries, PlexServerSettings settings);
         ValidationFailure Test(PlexServerSettings settings);
     }
 
@@ -36,12 +36,12 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             _logger = logger;
         }
 
-        public void UpdateLibrary(Series author, PlexServerSettings settings)
+        public void UpdateLibrary(Series series, PlexServerSettings settings)
         {
-            UpdateLibrary(new[] { author }, settings);
+            UpdateLibrary(new[] { series }, settings);
         }
 
-        public void UpdateLibrary(IEnumerable<Series> authors, PlexServerSettings settings)
+        public void UpdateLibrary(IEnumerable<Series> allSeries, PlexServerSettings settings)
         {
             try
             {
@@ -53,9 +53,9 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
                 var sections = GetSections(settings);
 
-                foreach (var author in authors)
+                foreach (var series in allSeries)
                 {
-                    UpdateSections(author, sections, settings);
+                    UpdateSections(series, sections, settings);
                 }
 
                 _logger.Debug("Finished sending Update Request to Plex Server (took {0} ms)", watch.ElapsedMilliseconds);
@@ -92,10 +92,10 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             return version;
         }
 
-        private void UpdateSections(Series author, List<PlexSection> sections, PlexServerSettings settings)
+        private void UpdateSections(Series series, List<PlexSection> sections, PlexServerSettings settings)
         {
-            var rootFolderPath = _rootFolderService.GetBestRootFolderPath(author.Path);
-            var authorRelativePath = rootFolderPath.GetRelativePath(author.Path);
+            var rootFolderPath = _rootFolderService.GetBestRootFolderPath(series.Path);
+            var seriesRelativePath = rootFolderPath.GetRelativePath(series.Path);
 
             // Try to update a matching section location before falling back to updating all section locations.
             foreach (var section in sections)
@@ -115,7 +115,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
                     if (location.Path.PathEquals(mappedPath.FullPath))
                     {
                         _logger.Debug("Updating matching section location, {0}", location.Path);
-                        UpdateSectionPath(authorRelativePath, section, location, settings);
+                        UpdateSectionPath(seriesRelativePath, section, location, settings);
 
                         return;
                     }
@@ -128,15 +128,15 @@ namespace NzbDrone.Core.Notifications.Plex.Server
             {
                 foreach (var location in section.Locations)
                 {
-                    UpdateSectionPath(authorRelativePath, section, location, settings);
+                    UpdateSectionPath(seriesRelativePath, section, location, settings);
                 }
             }
         }
 
-        private void UpdateSectionPath(string authorRelativePath, PlexSection section, PlexSectionLocation location, PlexServerSettings settings)
+        private void UpdateSectionPath(string seriesRelativePath, PlexSection section, PlexSectionLocation location, PlexServerSettings settings)
         {
             var separator = location.Path.Contains('\\') ? "\\" : "/";
-            var locationRelativePath = authorRelativePath.Replace("\\", separator).Replace("/", separator);
+            var locationRelativePath = seriesRelativePath.Replace("\\", separator).Replace("/", separator);
 
             // Plex location paths trim trailing extraneous separator characters, so it doesn't need to be trimmed
             var pathToUpdate = $"{location.Path}{separator}{locationRelativePath}";

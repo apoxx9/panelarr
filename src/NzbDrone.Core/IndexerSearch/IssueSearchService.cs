@@ -83,7 +83,7 @@ namespace NzbDrone.Core.IndexerSearch
 
             if (message.SeriesId.HasValue)
             {
-                var authorId = message.SeriesId.Value;
+                var seriesId = message.SeriesId.Value;
 
                 var pagingSpec = new PagingSpec<Issue>
                 {
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.IndexerSearch
 
                 pagingSpec.FilterExpressions.Add(v => v.Monitored == true && v.Series.Value.Monitored == true);
 
-                issues = _issueService.IssuesWithoutFiles(pagingSpec).Records.Where(e => e.SeriesId.Equals(authorId)).ToList();
+                issues = _issueService.IssuesWithoutFiles(pagingSpec).Records.Where(e => e.SeriesId.Equals(seriesId)).ToList();
             }
             else
             {

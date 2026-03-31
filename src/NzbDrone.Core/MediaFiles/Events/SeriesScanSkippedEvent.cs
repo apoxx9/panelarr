@@ -8,9 +8,9 @@ namespace NzbDrone.Core.MediaFiles.Events
         public Series Series { get; private set; }
         public SeriesScanSkippedReason Reason { get; private set; }
 
-        public SeriesScanSkippedEvent(Series author, SeriesScanSkippedReason reason)
+        public SeriesScanSkippedEvent(Series series, SeriesScanSkippedReason reason)
         {
-            Series = author;
+            Series = series;
             Reason = reason;
         }
     }

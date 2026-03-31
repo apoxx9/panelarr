@@ -9,9 +9,9 @@ namespace NzbDrone.Core.MediaFiles.Events
         public ComicFile ComicFile { get; private set; }
         public string OriginalPath { get; private set; }
 
-        public ComicFileRenamedEvent(Series author, ComicFile comicFile, string originalPath)
+        public ComicFileRenamedEvent(Series series, ComicFile comicFile, string originalPath)
         {
-            Series = author;
+            Series = series;
             ComicFile = comicFile;
             OriginalPath = originalPath;
         }

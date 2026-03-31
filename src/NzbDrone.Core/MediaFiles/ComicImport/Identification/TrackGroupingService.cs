@@ -23,7 +23,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
         private static readonly List<string> MultiDiscMarkers = new() { @"dis[ck]", @"cd" };
         private static readonly string MultiDiscPatternFormat = @"^(?<root>.*%s[\W_]*)\d";
-        private static readonly List<string> VariousSeriesTitles = new() { "", "various authors", "various", "va", "unknown" };
+        private static readonly List<string> VariousSeriesTitles = new() { "", "various allSeries", "various", "va", "unknown" };
 
         public List<LocalEdition> GroupTracks(List<LocalIssue> localTracks)
         {
@@ -73,7 +73,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             // Finally fall back to grouping by Issue/Series pair
             foreach (var group in unprocessed2.GroupBy(x => new { x.FileTrackInfo.SeriesTitle, x.FileTrackInfo.IssueTitle }))
             {
-                _logger.Debug("Falling back to grouping by issue+author tag");
+                _logger.Debug("Falling back to grouping by issue+series tag");
                 releases.Add(new LocalEdition(group.ToList()));
             }
 
@@ -116,10 +116,10 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         {
             // returns true if we think all the tracks belong to a single release
 
-            // author/issue tags must be the same for 75% of tracks, with no more than 25% having different values
-            // (except in the case of various authors)
+            // series/issue tags must be the same for 75% of tracks, with no more than 25% having different values
+            // (except in the case of various allSeries)
             const double bookTagThreshold = 0.25;
-            const double authorTagThreshold = 0.25;
+            const double seriesTagThreshold = 0.25;
             const double tagFuzz = 0.9;
 
             // check that any Issue/Release MBID is unique
@@ -138,13 +138,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 return false;
             }
 
-            // If not various authors, make sure authors are sensible
+            // If not various allSeries, make sure allSeries are sensible
             if (!IsVariousSeriess(tracks))
             {
-                var authorTags = tracks.Select(x => x.FileTrackInfo.SeriesTitle);
-                if (!HasCommonEntry(authorTags, authorTagThreshold, tagFuzz))
+                var seriesTags = tracks.Select(x => x.FileTrackInfo.SeriesTitle);
+                if (!HasCommonEntry(seriesTags, seriesTagThreshold, tagFuzz))
                 {
-                    _logger.Trace("LooksLikeSingleRelease: No common author tag");
+                    _logger.Trace("LooksLikeSingleRelease: No common series tag");
                     return false;
                 }
             }
@@ -155,19 +155,19 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         public static bool IsVariousSeriess(List<LocalIssue> tracks)
         {
             // checks whether most common title is a known VA title
-            // Also checks whether more than 75% of tracks have a distinct author and that the most common author
+            // Also checks whether more than 75% of tracks have a distinct series and that the most common series
             // is responsible for < 25% of tracks
-            const double authorTagThreshold = 0.75;
+            const double seriesTagThreshold = 0.75;
             const double tagFuzz = 0.9;
 
-            var authorTags = tracks.Select(x => x.FileTrackInfo.SeriesTitle).ToList();
+            var seriesTags = tracks.Select(x => x.FileTrackInfo.SeriesTitle).ToList();
 
-            if (!HasCommonEntry(authorTags, authorTagThreshold, tagFuzz))
+            if (!HasCommonEntry(seriesTags, seriesTagThreshold, tagFuzz))
             {
                 return true;
             }
 
-            if (VariousSeriesTitles.Contains(authorTags.GroupBy(x => x).OrderByDescending(x => x.Count()).First().Key, StringComparer.OrdinalIgnoreCase))
+            if (VariousSeriesTitles.Contains(seriesTags.GroupBy(x => x).OrderByDescending(x => x.Count()).First().Key, StringComparer.OrdinalIgnoreCase))
             {
                 return true;
             }

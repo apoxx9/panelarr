@@ -39,11 +39,11 @@ namespace NzbDrone.Core.Notifications.Synology
             }
         }
 
-        public override void OnRename(Series author, List<RenamedComicFile> renamedFiles)
+        public override void OnRename(Series series, List<RenamedComicFile> renamedFiles)
         {
             if (Settings.UpdateLibrary)
             {
-                _indexerProxy.UpdateFolder(author.Path);
+                _indexerProxy.UpdateFolder(series.Path);
             }
         }
 

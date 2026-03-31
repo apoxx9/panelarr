@@ -8,12 +8,12 @@ namespace NzbDrone.Core.Extras.Metadata
 {
     public interface IMetadata : IProvider
     {
-        string GetFilenameAfterMove(Series author, ComicFile comicFile, MetadataFile metadataFile);
-        string GetFilenameAfterMove(Series author, string bookPath, MetadataFile metadataFile);
-        MetadataFile FindMetadataFile(Series author, string path);
-        MetadataFileResult SeriesMetadata(Series author);
-        MetadataFileResult IssueMetadata(Series author, ComicFile comicFile);
-        List<ImageFileResult> SeriesImages(Series author);
-        List<ImageFileResult> IssueImages(Series author, ComicFile comicFile);
+        string GetFilenameAfterMove(Series series, ComicFile comicFile, MetadataFile metadataFile);
+        string GetFilenameAfterMove(Series series, string bookPath, MetadataFile metadataFile);
+        MetadataFile FindMetadataFile(Series series, string path);
+        MetadataFileResult SeriesMetadata(Series series);
+        MetadataFileResult IssueMetadata(Series series, ComicFile comicFile);
+        List<ImageFileResult> SeriesImages(Series series);
+        List<ImageFileResult> IssueImages(Series series, ComicFile comicFile);
     }
 }

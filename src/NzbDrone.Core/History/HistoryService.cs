@@ -22,7 +22,7 @@ namespace NzbDrone.Core.History
         EntityHistory MostRecentForIssue(int issueId);
         EntityHistory MostRecentForDownloadId(string downloadId);
         EntityHistory Get(int historyId);
-        List<EntityHistory> GetBySeries(int authorId, EntityHistoryEventType? eventType);
+        List<EntityHistory> GetBySeries(int seriesId, EntityHistoryEventType? eventType);
         List<EntityHistory> GetByIssue(int issueId, EntityHistoryEventType? eventType);
         List<EntityHistory> Find(string downloadId, EntityHistoryEventType eventType);
         List<EntityHistory> FindByDownloadId(string downloadId);
@@ -71,9 +71,9 @@ namespace NzbDrone.Core.History
             return _historyRepository.Get(historyId);
         }
 
-        public List<EntityHistory> GetBySeries(int authorId, EntityHistoryEventType? eventType)
+        public List<EntityHistory> GetBySeries(int seriesId, EntityHistoryEventType? eventType)
         {
-            return _historyRepository.GetBySeries(authorId, eventType);
+            return _historyRepository.GetBySeries(seriesId, eventType);
         }
 
         public List<EntityHistory> GetByIssue(int issueId, EntityHistoryEventType? eventType)

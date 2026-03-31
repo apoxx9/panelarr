@@ -16,9 +16,9 @@ namespace NzbDrone.Core.Extras.Files
     public interface IExtraFileService<TExtraFile>
         where TExtraFile : ExtraFile, new()
     {
-        List<TExtraFile> GetFilesBySeries(int authorId);
+        List<TExtraFile> GetFilesBySeries(int seriesId);
         List<TExtraFile> GetFilesByComicFile(int comicFileId);
-        TExtraFile FindByPath(int authorId, string path);
+        TExtraFile FindByPath(int seriesId, string path);
         void Upsert(TExtraFile extraFile);
         void Upsert(List<TExtraFile> extraFiles);
         void Delete(int id);
@@ -31,27 +31,27 @@ namespace NzbDrone.Core.Extras.Files
         where TExtraFile : ExtraFile, new()
     {
         private readonly IExtraFileRepository<TExtraFile> _repository;
-        private readonly ISeriesService _authorService;
+        private readonly ISeriesService _seriesService;
         private readonly IDiskProvider _diskProvider;
         private readonly IRecycleBinProvider _recycleBinProvider;
         private readonly Logger _logger;
 
         public ExtraFileService(IExtraFileRepository<TExtraFile> repository,
-                                ISeriesService authorService,
+                                ISeriesService seriesService,
                                 IDiskProvider diskProvider,
                                 IRecycleBinProvider recycleBinProvider,
                                 Logger logger)
         {
             _repository = repository;
-            _authorService = authorService;
+            _seriesService = seriesService;
             _diskProvider = diskProvider;
             _recycleBinProvider = recycleBinProvider;
             _logger = logger;
         }
 
-        public List<TExtraFile> GetFilesBySeries(int authorId)
+        public List<TExtraFile> GetFilesBySeries(int seriesId)
         {
-            return _repository.GetFilesBySeries(authorId);
+            return _repository.GetFilesBySeries(seriesId);
         }
 
         public List<TExtraFile> GetFilesByComicFile(int comicFileId)
@@ -59,9 +59,9 @@ namespace NzbDrone.Core.Extras.Files
             return _repository.GetFilesByComicFile(comicFileId);
         }
 
-        public TExtraFile FindByPath(int authorId, string path)
+        public TExtraFile FindByPath(int seriesId, string path)
         {
-            return _repository.FindByPath(authorId, path);
+            return _repository.FindByPath(seriesId, path);
         }
 
         public void Upsert(TExtraFile extraFile)
@@ -111,16 +111,16 @@ namespace NzbDrone.Core.Extras.Files
             }
             else
             {
-                var author = comicFile.Series.Value;
+                var series = comicFile.Series.Value;
 
                 foreach (var extra in _repository.GetFilesByComicFile(comicFile.Id))
                 {
-                    var path = Path.Combine(author.Path, extra.RelativePath);
+                    var path = Path.Combine(series.Path, extra.RelativePath);
 
                     if (_diskProvider.FileExists(path))
                     {
                         // Send to the recycling bin so they can be recovered if necessary
-                        var subfolder = _diskProvider.GetParentFolder(author.Path).GetRelativePath(_diskProvider.GetParentFolder(path));
+                        var subfolder = _diskProvider.GetParentFolder(series.Path).GetRelativePath(_diskProvider.GetParentFolder(path));
                         _recycleBinProvider.DeleteFile(path, subfolder);
                     }
                 }

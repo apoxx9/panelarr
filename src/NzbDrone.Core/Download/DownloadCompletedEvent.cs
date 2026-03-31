@@ -8,10 +8,10 @@ namespace NzbDrone.Core.Download
         public TrackedDownload TrackedDownload { get; private set; }
         public int SeriesId { get; set; }
 
-        public DownloadCompletedEvent(TrackedDownload trackedDownload, int authorId)
+        public DownloadCompletedEvent(TrackedDownload trackedDownload, int seriesId)
         {
             TrackedDownload = trackedDownload;
-            SeriesId = authorId;
+            SeriesId = seriesId;
         }
     }
 }
