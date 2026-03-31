@@ -223,33 +223,6 @@ class SeriesIndexOverviewOptionsModalContent extends Component {
 
             <FormGroup>
               <FormLabel>
-                {translate('ShowMonitored')}
-              </FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showMonitored"
-                value={showMonitored}
-                onChange={this.onChangeOverviewOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-
-              <FormLabel>
-                {translate('ShowQualityProfile')}
-              </FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showQualityProfile"
-                value={showQualityProfile}
-                onChange={this.onChangeOverviewOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>
                 {translate('ShowLastIssue')}
               </FormLabel>
 

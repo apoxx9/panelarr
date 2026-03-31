@@ -66,7 +66,7 @@ class SelectEditionModalContent extends Component {
           scrollDirection={scrollDirections.VERTICAL}
         >
           <Alert>
-            Overriding an edition here will <b>disable automatic edition selection</b> for that issue in future.
+            Overriding an edition here will <b>disable automatic edition selection</b> for this issue. Use this to pick a specific printing or variant.
           </Alert>
 
           <Table

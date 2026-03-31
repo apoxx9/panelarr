@@ -195,34 +195,6 @@ class SeriesIndexPosterOptionsModalContent extends Component {
 
             <FormGroup>
               <FormLabel>
-                {translate('ShowMonitored')}
-              </FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showMonitored"
-                value={showMonitored}
-                helpText={translate('ShowMonitoredHelpText')}
-                onChange={this.onChangePosterOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>
-                {translate('ShowQualityProfile')}
-              </FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showQualityProfile"
-                value={showQualityProfile}
-                helpText={translate('ShowQualityProfileHelpText')}
-                onChange={this.onChangePosterOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>
                 {translate('ShowSearch')}
               </FormLabel>
 

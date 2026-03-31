@@ -93,7 +93,7 @@ class Tag extends Component {
               {
                 !!seriesIds.length &&
                   <div>
-                    {seriesIds.length} seriess
+                    {seriesIds.length} series
                   </div>
               }
 

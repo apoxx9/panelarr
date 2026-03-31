@@ -15,7 +15,7 @@ namespace Panelarr.Api.V1.Series
             _fileNameBuilder = fileNameBuilder;
         }
 
-        protected override string GetDefaultMessageTemplate() => "Root folder path '{rootFolderPath}' contains author folder '{authorFolder}'";
+        protected override string GetDefaultMessageTemplate() => "Root folder path '{rootFolderPath}' contains series folder '{authorFolder}'";
 
         protected override bool IsValid(PropertyValidatorContext context)
         {

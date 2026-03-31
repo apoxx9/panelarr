@@ -61,7 +61,7 @@ function IssueIndexSortMenu(props) {
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          Quality Profile
+          Format Profile
         </SortMenuItem>
 
         <SortMenuItem

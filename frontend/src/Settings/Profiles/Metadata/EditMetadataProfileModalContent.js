@@ -67,7 +67,7 @@ function EditMetadataProfileModalContent(props) {
           !isFetching && !error &&
             <Form {...otherProps}>
               <Alert kind={kinds.INFO}>
-                Controls which issues are automatically imported from the metadata provider when adding a series.
+                Controls which issues are automatically added from the metadata provider when importing a comic series.
               </Alert>
 
               <FormGroup>
@@ -135,7 +135,7 @@ function EditMetadataProfileModalContent(props) {
                 <FormInputGroup
                   type={inputTypes.CHECK}
                   name="skipPartsAndSets"
-                  helpText="Skip trade paperbacks, omnibus editions, and collected volumes"
+                  helpText="Skip collected editions such as trade paperbacks, omnibuses, and hardcover collections"
                   {...skipPartsAndSets}
                   onChange={onInputChange}
                 />

@@ -102,7 +102,7 @@ namespace Panelarr.Api.V1.Indexers
                     }
                     else
                     {
-                        throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to find matching author and issues");
+                        throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to find matching series and issues");
                     }
                 }
                 else if (remoteBook.Books.Empty())

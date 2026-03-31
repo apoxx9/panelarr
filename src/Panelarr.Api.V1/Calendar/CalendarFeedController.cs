@@ -63,7 +63,7 @@ namespace Panelarr.Api.V1.Calendar
                 }
 
                 var occurrence = calendar.Create<CalendarEvent>();
-                occurrence.Uid = "Panelarr_book_" + issue.Id;
+                occurrence.Uid = "Panelarr_issue_" + issue.Id;
 
                 //occurrence.Status = issue.HasFile ? EventStatus.Confirmed : EventStatus.Tentative;
                 occurrence.Description = string.Empty;

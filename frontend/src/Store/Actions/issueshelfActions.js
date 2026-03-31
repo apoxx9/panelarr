@@ -42,13 +42,13 @@ export const defaultState = {
     },
     {
       name: 'qualityProfileId',
-      label: 'Quality Profile',
+      label: 'Format Profile',
       type: filterBuilderTypes.EXACT,
       valueType: filterBuilderValueTypes.QUALITY_PROFILE
     },
     {
       name: 'metadataProfileId',
-      label: 'Metadata Profile',
+      label: 'Comic Metadata Profile',
       type: filterBuilderTypes.EXACT,
       valueType: filterBuilderValueTypes.METADATA_PROFILE
     },

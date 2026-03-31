@@ -16,7 +16,7 @@ import styles from './IssueshelfInput.css';
 const columns = [
   {
     name: 'name',
-    label: 'Library Monitor',
+    label: 'Issueshelf',
     isSortable: false,
     isVisible: true
   }
@@ -105,21 +105,21 @@ class IssueshelfInput extends Component {
         {
           !isPopulated && !isFetching &&
             <div>
-              Authenticate with the metadata provider to retrieve issueshelves.
+              Authenticate with your comic metadata provider to retrieve issueshelves.
             </div>
         }
 
         {
           isPopulated && !isFetching && !user &&
             <div>
-              Could not retrieve data from the metadata provider.  Try re-authenticating.
+              Could not retrieve issueshelves from the metadata provider. Try re-authenticating.
             </div>
         }
 
         {
           isPopulated && !isFetching && user && !items.length &&
             <div>
-              No issueshelves found for the metadata provider user {user}.
+              No issueshelves found for user {user}.
             </div>
         }
 

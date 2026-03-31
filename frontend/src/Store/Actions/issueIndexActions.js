@@ -94,7 +94,7 @@ export const defaultState = {
     },
     {
       name: 'qualityProfileId',
-      label: 'Quality Profile',
+      label: 'Format Profile',
       isSortable: true,
       isVisible: true
     },
@@ -209,7 +209,7 @@ export const defaultState = {
 
     {
       name: 'qualityProfileId',
-      label: 'Quality Profile',
+      label: 'Format Profile',
       type: filterBuilderTypes.EXACT,
       valueType: filterBuilderValueTypes.QUALITY_PROFILE
     },
