@@ -11,6 +11,11 @@ namespace NzbDrone.Core.Indexers.GetComics
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+        // Extract issue number from title: "#1", "#15", "001"
+        private static readonly Regex IssueNumberRegex = new Regex(
+            @"#(\d+)",
+            RegexOptions.Compiled);
+
         // Matches: <article id="post-393579" class="post-393579 ...">
         private static readonly Regex ArticleRegex = new Regex(
             @"<article\s+id=""post-(\d+)""[^>]*>",
@@ -108,6 +113,42 @@ namespace NzbDrone.Core.Indexers.GetComics
                 {
                     Logger.Warn(ex, "Failed to parse GetComics article");
                 }
+            }
+
+            // Filter/sort by issue number if the search URL contains one
+            var requestUrl = indexerResponse.Request?.Url?.ToString() ?? "";
+            var searchIssueMatch = IssueNumberRegex.Match(Uri.UnescapeDataString(requestUrl));
+
+            if (searchIssueMatch.Success && int.TryParse(searchIssueMatch.Groups[1].Value, out var requestedIssue))
+            {
+                // Mylar-style: exact match filtering + relevance sorting
+                var exactMatches = new List<ReleaseInfo>();
+                var otherResults = new List<ReleaseInfo>();
+
+                foreach (var release in releases)
+                {
+                    var titleIssueMatch = IssueNumberRegex.Match(release.Title);
+                    if (titleIssueMatch.Success && int.TryParse(titleIssueMatch.Groups[1].Value, out var titleIssue))
+                    {
+                        if (titleIssue == requestedIssue)
+                        {
+                            exactMatches.Add(release);
+                        }
+                        else
+                        {
+                            otherResults.Add(release);
+                        }
+                    }
+                    else
+                    {
+                        // No issue number in title — could be a TPB or collection, keep it
+                        otherResults.Add(release);
+                    }
+                }
+
+                // Return exact matches first, then others
+                exactMatches.AddRange(otherResults);
+                return exactMatches;
             }
 
             return releases;
