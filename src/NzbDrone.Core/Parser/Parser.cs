@@ -8,6 +8,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Books;
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Parser
 {
@@ -330,6 +331,11 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
+        // Simple comic title pattern: "Series Name #N (Year)" or "Series Name #N"
+        private static readonly Regex SimpleComicTitleRegex = new Regex(
+            @"^(?<series>.+?)\s*#(?<issue>\d+)\s*(?:\((?<year>\d{4})\))?\s*$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         public static ParsedIssueInfo ParseBookTitleWithSearchCriteria(string title, Series author, List<Issue> issues)
         {
             try
@@ -337,6 +343,29 @@ namespace NzbDrone.Core.Parser
                 if (!ValidateBeforeParsing(title))
                 {
                     return null;
+                }
+
+                // Try simple comic title format first (GetComics style: "Series #N (Year)")
+                var comicMatch = SimpleComicTitleRegex.Match(title);
+                if (comicMatch.Success)
+                {
+                    var seriesName = comicMatch.Groups["series"].Value.Trim();
+                    var comicResult = new ParsedIssueInfo
+                    {
+                        SeriesName = seriesName,
+                        SeriesTitleInfo = GetSeriesTitleInfo(seriesName),
+                        IssueTitle = $"#{comicMatch.Groups["issue"].Value}"
+                    };
+
+                    comicResult.Quality = QualityParser.ParseQuality(title);
+
+                    if (comicResult.Quality?.Quality == Qualities.Quality.Unknown)
+                    {
+                        comicResult.Quality = new QualityModel(Qualities.Quality.CBZ);
+                    }
+
+                    Logger.Debug("Parsed comic title: {0} - {1} quality: {2}", seriesName, comicResult.IssueTitle, comicResult.Quality);
+                    return comicResult;
                 }
 
                 var authorName = author.Name == "Various Seriess" ? "VA" : author.Name.RemoveAccent();
@@ -449,6 +478,28 @@ namespace NzbDrone.Core.Parser
                 }
 
                 Logger.Debug("Parsing string '{0}'", title);
+
+                // Try simple comic title format first (GetComics style: "Series #N (Year)")
+                var comicMatch = SimpleComicTitleRegex.Match(title);
+                if (comicMatch.Success)
+                {
+                    var seriesName = comicMatch.Groups["series"].Value.Trim();
+                    var result = new ParsedIssueInfo
+                    {
+                        SeriesName = seriesName,
+                        SeriesTitleInfo = GetSeriesTitleInfo(seriesName),
+                        IssueTitle = $"#{comicMatch.Groups["issue"].Value}"
+                    };
+
+                    result.Quality = QualityParser.ParseQuality(title);
+
+                    if (result.Quality?.Quality == Quality.Unknown)
+                    {
+                        result.Quality = new QualityModel(Quality.CBZ);
+                    }
+
+                    return result;
+                }
 
                 var releaseTitle = RemoveFileExtension(title);
 

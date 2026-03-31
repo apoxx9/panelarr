@@ -132,10 +132,14 @@ namespace NzbDrone.Core.DecisionEngine
                         }
                         else if (remoteBook.Books.Empty())
                         {
-                            decision = new DownloadDecision(remoteBook, new Rejection("Unable to parse issues from release name"));
                             if (searchCriteria != null)
                             {
+                                // For interactive search, use the searched issues directly
                                 remoteBook.Books = searchCriteria.Books;
+                            }
+                            else
+                            {
+                                decision = new DownloadDecision(remoteBook, new Rejection("Unable to parse issues from release name"));
                             }
                         }
                         else

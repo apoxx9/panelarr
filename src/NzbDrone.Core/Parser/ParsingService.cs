@@ -120,7 +120,23 @@ namespace NzbDrone.Core.Parser
                 return _bookService.GetIssuesBySeries(author.Id);
             }
 
-            if (searchCriteria != null)
+            // Try matching by issue number first (for comics with "#N" format titles)
+            if (parsedBookInfo.IssueTitle?.StartsWith("#") == true &&
+                int.TryParse(parsedBookInfo.IssueTitle.TrimStart('#'), out var issueNum))
+            {
+                if (searchCriteria != null)
+                {
+                    bookInfo = searchCriteria.Books.FirstOrDefault(e => (int)e.IssueNumber == issueNum);
+                }
+
+                if (bookInfo == null)
+                {
+                    var seriesIssues = _bookService.GetIssuesBySeries(author.Id);
+                    bookInfo = seriesIssues.FirstOrDefault(e => (int)e.IssueNumber == issueNum);
+                }
+            }
+
+            if (bookInfo == null && searchCriteria != null)
             {
                 var cleanTitle = Parser.CleanSeriesName(parsedBookInfo.IssueTitle);
                 bookInfo = searchCriteria.Books.ExclusiveOrDefault(e => e.Title == bookTitle || e.CleanTitle == cleanTitle);
@@ -128,7 +144,6 @@ namespace NzbDrone.Core.Parser
 
             if (bookInfo == null)
             {
-                // TODO: Search by Title and Year instead of just Title when matching
                 bookInfo = _bookService.FindByTitle(author.SeriesMetadataId, parsedBookInfo.IssueTitle);
             }
 
