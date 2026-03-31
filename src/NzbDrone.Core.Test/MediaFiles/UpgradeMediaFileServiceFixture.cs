@@ -5,8 +5,8 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.RootFolders;
@@ -18,13 +18,13 @@ namespace NzbDrone.Core.Test.MediaFiles
     public class UpgradeMediaFileServiceFixture : CoreTest<UpgradeMediaFileService>
     {
         private ComicFile _trackFile;
-        private LocalBook _localTrack;
+        private LocalIssue _localTrack;
         private string _rootPath = @"C:\Test\Music\Series".AsOsAgnostic();
 
         [SetUp]
         public void Setup()
         {
-            _localTrack = new LocalBook();
+            _localTrack = new LocalIssue();
             _localTrack.Series = new Series
             {
                 Path = _rootPath
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             GivenSingleTrackWithSingleTrackFile();
 
-            Subject.UpgradeBookFile(_trackFile, _localTrack);
+            Subject.UpgradeComicFile(_trackFile, _localTrack);
 
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
         }
@@ -81,7 +81,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             GivenSingleTrackWithSingleTrackFile();
 
-            Subject.UpgradeBookFile(_trackFile, _localTrack);
+            Subject.UpgradeComicFile(_trackFile, _localTrack);
 
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(It.IsAny<ComicFile>(), DeleteMediaFileReason.Upgrade), Times.Once());
         }
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .Setup(c => c.FileExists(It.IsAny<string>()))
                 .Returns(false);
 
-            Subject.UpgradeBookFile(_trackFile, _localTrack);
+            Subject.UpgradeComicFile(_trackFile, _localTrack);
 
             // Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_localTrack.Issue.ComicFiles.Value, DeleteMediaFileReason.Upgrade), Times.Once());
         }
@@ -109,7 +109,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .Setup(c => c.FileExists(It.IsAny<string>()))
                 .Returns(false);
 
-            Subject.UpgradeBookFile(_trackFile, _localTrack);
+            Subject.UpgradeComicFile(_trackFile, _localTrack);
 
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(It.IsAny<string>(), It.IsAny<string>()), Times.Never());
         }
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             GivenSingleTrackWithSingleTrackFile();
 
-            Subject.UpgradeBookFile(_trackFile, _localTrack).OldFiles.Count.Should().Be(1);
+            Subject.UpgradeComicFile(_trackFile, _localTrack).OldFiles.Count.Should().Be(1);
         }
 
         [Test]
@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .With(e => e.ComicFiles = new LazyLoaded<List<ComicFile>>())
                 .Build();
 
-            Subject.UpgradeBookFile(_trackFile, _localTrack);
+            Subject.UpgradeComicFile(_trackFile, _localTrack);
 
             // Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_localTrack.Issue.ComicFiles.Value, It.IsAny<DeleteMediaFileReason>()), Times.Never());
         }

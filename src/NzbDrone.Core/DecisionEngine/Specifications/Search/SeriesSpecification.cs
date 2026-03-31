@@ -16,7 +16,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.Search
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public Decision IsSatisfiedBy(RemoteBook remoteBook, SearchCriteriaBase searchCriteria)
+        public Decision IsSatisfiedBy(RemoteIssue remoteIssue, SearchCriteriaBase searchCriteria)
         {
             if (searchCriteria == null)
             {
@@ -25,9 +25,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.Search
 
             _logger.Debug("Checking if series matches searched series");
 
-            if (remoteBook.Series.Id != searchCriteria.Series.Id)
+            if (remoteIssue.Series.Id != searchCriteria.Series.Id)
             {
-                _logger.Debug("Series {0} does not match {1}", remoteBook.Series, searchCriteria.Series);
+                _logger.Debug("Series {0} does not match {1}", remoteIssue.Series, searchCriteria.Series);
                 return Decision.Reject("Wrong series");
             }
 

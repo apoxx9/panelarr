@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NLog;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using PdfSharpCore.Pdf.IO;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Rar;

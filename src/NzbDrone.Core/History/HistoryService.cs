@@ -5,9 +5,9 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Serializer;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
@@ -19,11 +19,11 @@ namespace NzbDrone.Core.History
     public interface IHistoryService
     {
         PagingSpec<EntityHistory> Paged(PagingSpec<EntityHistory> pagingSpec);
-        EntityHistory MostRecentForBook(int bookId);
+        EntityHistory MostRecentForIssue(int issueId);
         EntityHistory MostRecentForDownloadId(string downloadId);
         EntityHistory Get(int historyId);
         List<EntityHistory> GetBySeries(int authorId, EntityHistoryEventType? eventType);
-        List<EntityHistory> GetByBook(int bookId, EntityHistoryEventType? eventType);
+        List<EntityHistory> GetByIssue(int issueId, EntityHistoryEventType? eventType);
         List<EntityHistory> Find(string downloadId, EntityHistoryEventType eventType);
         List<EntityHistory> FindByDownloadId(string downloadId);
         string FindDownloadId(TrackImportedEvent trackedDownload);
@@ -56,9 +56,9 @@ namespace NzbDrone.Core.History
             return _historyRepository.GetPaged(pagingSpec);
         }
 
-        public EntityHistory MostRecentForBook(int bookId)
+        public EntityHistory MostRecentForIssue(int issueId)
         {
-            return _historyRepository.MostRecentForBook(bookId);
+            return _historyRepository.MostRecentForIssue(issueId);
         }
 
         public EntityHistory MostRecentForDownloadId(string downloadId)
@@ -76,9 +76,9 @@ namespace NzbDrone.Core.History
             return _historyRepository.GetBySeries(authorId, eventType);
         }
 
-        public List<EntityHistory> GetByBook(int bookId, EntityHistoryEventType? eventType)
+        public List<EntityHistory> GetByIssue(int issueId, EntityHistoryEventType? eventType)
         {
-            return _historyRepository.GetByBook(bookId, eventType);
+            return _historyRepository.GetByIssue(issueId, eventType);
         }
 
         public List<EntityHistory> Find(string downloadId, EntityHistoryEventType eventType)
@@ -93,10 +93,10 @@ namespace NzbDrone.Core.History
 
         public string FindDownloadId(TrackImportedEvent trackedDownload)
         {
-            _logger.Debug("Trying to find downloadId for {0} from history", trackedDownload.ImportedBook.Path);
+            _logger.Debug("Trying to find downloadId for {0} from history", trackedDownload.ImportedIssue.Path);
 
-            var bookIds = new List<int> { trackedDownload.BookInfo.Issue.Id };
-            var allHistory = _historyRepository.FindDownloadHistory(trackedDownload.BookInfo.Series.Id, trackedDownload.ImportedBook.Quality);
+            var bookIds = new List<int> { trackedDownload.IssueInfo.Issue.Id };
+            var allHistory = _historyRepository.FindDownloadHistory(trackedDownload.IssueInfo.Series.Id, trackedDownload.ImportedIssue.Quality);
 
             //Find download related items for these episodes
             var booksHistory = allHistory.Where(h => bookIds.Contains(h.IssueId)).ToList();
@@ -111,7 +111,7 @@ namespace NzbDrone.Core.History
 
             if (stillDownloading.Any())
             {
-                var matchingHistory = stillDownloading.Where(c => c.IssueId == trackedDownload.BookInfo.Issue.Id).ToList();
+                var matchingHistory = stillDownloading.Where(c => c.IssueId == trackedDownload.IssueInfo.Issue.Id).ToList();
 
                 if (matchingHistory.Count != 1)
                 {
@@ -135,7 +135,7 @@ namespace NzbDrone.Core.History
 
         public void Handle(IssueGrabbedEvent message)
         {
-            foreach (var issue in message.Issue.Books)
+            foreach (var issue in message.Issue.Issues)
             {
                 var history = new EntityHistory
                 {
@@ -182,18 +182,18 @@ namespace NzbDrone.Core.History
 
         public void Handle(IssueImportIncompleteEvent message)
         {
-            if (message.TrackedDownload.RemoteBook == null)
+            if (message.TrackedDownload.RemoteIssue == null)
             {
                 return;
             }
 
-            foreach (var issue in message.TrackedDownload.RemoteBook.Books)
+            foreach (var issue in message.TrackedDownload.RemoteIssue.Issues)
             {
                 var history = new EntityHistory
                 {
                     EventType = EntityHistoryEventType.IssueImportIncomplete,
                     Date = DateTime.UtcNow,
-                    Quality = message.TrackedDownload.RemoteBook.ParsedIssueInfo?.Quality ?? new QualityModel(),
+                    Quality = message.TrackedDownload.RemoteIssue.ParsedIssueInfo?.Quality ?? new QualityModel(),
                     SourceTitle = message.TrackedDownload.DownloadItem.Title,
                     SeriesId = issue.SeriesId,
                     IssueId = issue.Id,
@@ -201,8 +201,8 @@ namespace NzbDrone.Core.History
                 };
 
                 history.Data.Add("StatusMessages", message.TrackedDownload.StatusMessages.ToJson());
-                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteBook?.ParsedIssueInfo?.ReleaseGroup);
-                history.Data.Add("IndexerFlags", message.TrackedDownload?.RemoteBook?.Release?.IndexerFlags.ToString());
+                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteIssue?.ParsedIssueInfo?.ReleaseGroup);
+                history.Data.Add("IndexerFlags", message.TrackedDownload?.RemoteIssue?.Release?.IndexerFlags.ToString());
 
                 _historyRepository.Insert(history);
             }
@@ -226,28 +226,28 @@ namespace NzbDrone.Core.History
             {
                 EventType = EntityHistoryEventType.ComicFileImported,
                 Date = DateTime.UtcNow,
-                Quality = message.BookInfo.Quality,
-                SourceTitle = message.ImportedBook.SceneName ?? Path.GetFileNameWithoutExtension(message.BookInfo.Path),
-                SeriesId = message.BookInfo.Series.Id,
-                IssueId = message.BookInfo.Issue.Id,
+                Quality = message.IssueInfo.Quality,
+                SourceTitle = message.ImportedIssue.SceneName ?? Path.GetFileNameWithoutExtension(message.IssueInfo.Path),
+                SeriesId = message.IssueInfo.Series.Id,
+                IssueId = message.IssueInfo.Issue.Id,
                 DownloadId = downloadId
             };
 
-            history.Data.Add("FileId", message.ImportedBook.Id.ToString());
-            history.Data.Add("DroppedPath", message.BookInfo.Path);
-            history.Data.Add("ImportedPath", message.ImportedBook.Path);
+            history.Data.Add("FileId", message.ImportedIssue.Id.ToString());
+            history.Data.Add("DroppedPath", message.IssueInfo.Path);
+            history.Data.Add("ImportedPath", message.ImportedIssue.Path);
             history.Data.Add("DownloadClient", message.DownloadClientInfo?.Type);
             history.Data.Add("DownloadClientName", message.DownloadClientInfo?.Name);
-            history.Data.Add("ReleaseGroup", message.BookInfo.ReleaseGroup);
-            history.Data.Add("Size", message.BookInfo.Size.ToString());
-            history.Data.Add("IndexerFlags", message.BookInfo.IndexerFlags.ToString());
+            history.Data.Add("ReleaseGroup", message.IssueInfo.ReleaseGroup);
+            history.Data.Add("Size", message.IssueInfo.Size.ToString());
+            history.Data.Add("IndexerFlags", message.IssueInfo.IndexerFlags.ToString());
 
             _historyRepository.Insert(history);
         }
 
         public void Handle(DownloadFailedEvent message)
         {
-            foreach (var bookId in message.IssueIds)
+            foreach (var issueId in message.IssueIds)
             {
                 var history = new EntityHistory
                 {
@@ -256,16 +256,16 @@ namespace NzbDrone.Core.History
                     Quality = message.Quality,
                     SourceTitle = message.SourceTitle,
                     SeriesId = message.SeriesId,
-                    IssueId = bookId,
+                    IssueId = issueId,
                     DownloadId = message.DownloadId
                 };
 
                 history.Data.Add("DownloadClient", message.DownloadClient);
                 history.Data.Add("DownloadClientName", message.TrackedDownload?.DownloadItem.DownloadClientInfo.Name);
                 history.Data.Add("Message", message.Message);
-                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteBook?.ParsedIssueInfo?.ReleaseGroup ?? message.Data.GetValueOrDefault(EntityHistory.RELEASE_GROUP));
+                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteIssue?.ParsedIssueInfo?.ReleaseGroup ?? message.Data.GetValueOrDefault(EntityHistory.RELEASE_GROUP));
                 history.Data.Add("Size", message.TrackedDownload?.DownloadItem.TotalSize.ToString() ?? message.Data.GetValueOrDefault(EntityHistory.SIZE));
-                history.Data.Add("Indexer", message.TrackedDownload?.RemoteBook?.Release?.Indexer ?? message.Data.GetValueOrDefault(EntityHistory.INDEXER));
+                history.Data.Add("Indexer", message.TrackedDownload?.RemoteIssue?.Release?.Indexer ?? message.Data.GetValueOrDefault(EntityHistory.INDEXER));
 
                 _historyRepository.Insert(history);
             }
@@ -358,7 +358,7 @@ namespace NzbDrone.Core.History
         public void Handle(DownloadIgnoredEvent message)
         {
             var historyToAdd = new List<EntityHistory>();
-            foreach (var bookId in message.IssueIds)
+            foreach (var issueId in message.IssueIds)
             {
                 var history = new EntityHistory
                 {
@@ -367,15 +367,15 @@ namespace NzbDrone.Core.History
                     Quality = message.Quality,
                     SourceTitle = message.SourceTitle,
                     SeriesId = message.SeriesId,
-                    IssueId = bookId,
+                    IssueId = issueId,
                     DownloadId = message.DownloadId
                 };
 
                 history.Data.Add("DownloadClient", message.DownloadClientInfo.Name);
                 history.Data.Add("Message", message.Message);
-                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteBook?.ParsedIssueInfo?.ReleaseGroup);
+                history.Data.Add("ReleaseGroup", message.TrackedDownload?.RemoteIssue?.ParsedIssueInfo?.ReleaseGroup);
                 history.Data.Add("Size", message.TrackedDownload?.DownloadItem.TotalSize.ToString());
-                history.Data.Add("Indexer", message.TrackedDownload?.RemoteBook?.Release?.Indexer);
+                history.Data.Add("Indexer", message.TrackedDownload?.RemoteIssue?.Release?.Indexer);
 
                 historyToAdd.Add(history);
             }

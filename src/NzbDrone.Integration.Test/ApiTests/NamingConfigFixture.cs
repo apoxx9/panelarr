@@ -24,20 +24,20 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_be_able_to_update()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameBooks = false;
-            config.StandardBookFormat = "{Series Name} - {Issue Title}{ (PartNumber)}";
+            config.RenameIssues = false;
+            config.StandardIssueFormat = "{Series Name} - {Issue Title}{ (PartNumber)}";
 
             var result = NamingConfig.Put(config);
-            result.RenameBooks.Should().BeFalse();
-            result.StandardBookFormat.Should().Be(config.StandardBookFormat);
+            result.RenameIssues.Should().BeFalse();
+            result.StandardIssueFormat.Should().Be(config.StandardIssueFormat);
         }
 
         [Test]
         public void should_get_bad_request_if_standard_format_is_empty()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameBooks = true;
-            config.StandardBookFormat = "";
+            config.RenameIssues = true;
+            config.StandardIssueFormat = "";
 
             var errors = NamingConfig.InvalidPut(config);
             errors.Should().NotBeNull();
@@ -47,8 +47,8 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_get_bad_request_if_standard_format_doesnt_contain_track_number_and_title()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameBooks = true;
-            config.StandardBookFormat = "{track:00}";
+            config.RenameIssues = true;
+            config.StandardIssueFormat = "{track:00}";
 
             var errors = NamingConfig.InvalidPut(config);
             errors.Should().NotBeNull();
@@ -58,8 +58,8 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_not_require_format_when_rename_tracks_is_false()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameBooks = false;
-            config.StandardBookFormat = "";
+            config.RenameIssues = false;
+            config.StandardIssueFormat = "";
 
             var errors = NamingConfig.InvalidPut(config);
             errors.Should().NotBeNull();
@@ -69,8 +69,8 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_require_format_when_rename_tracks_is_true()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameBooks = true;
-            config.StandardBookFormat = "";
+            config.RenameIssues = true;
+            config.StandardIssueFormat = "";
 
             var errors = NamingConfig.InvalidPut(config);
             errors.Should().NotBeNull();
@@ -80,7 +80,7 @@ namespace NzbDrone.Integration.Test.ApiTests
         public void should_get_bad_request_if_author_folder_format_does_not_contain_author_name()
         {
             var config = NamingConfig.GetSingle();
-            config.RenameBooks = true;
+            config.RenameIssues = true;
             config.SeriesFolderFormat = "This and That";
 
             var errors = NamingConfig.InvalidPut(config);

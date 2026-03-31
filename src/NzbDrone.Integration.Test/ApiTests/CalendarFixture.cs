@@ -4,7 +4,7 @@ using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Integration.Test.Client;
-using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Issues;
 
 namespace NzbDrone.Integration.Test.ApiTests
 {

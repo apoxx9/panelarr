@@ -6,8 +6,8 @@ using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.Events;
@@ -23,7 +23,7 @@ namespace NzbDrone.Core.MediaFiles
         void WriteTags(ComicFile trackfile, bool newDownload, bool force = false);
         void SyncTags(List<Issue> issues);
         List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId);
-        List<RetagComicFilePreview> GetRetagPreviewsByBook(int bookId);
+        List<RetagComicFilePreview> GetRetagPreviewsByIssue(int issueId);
         void RetagFiles(RetagFilesCommand message);
         void RetagSeries(RetagSeriesCommand message);
     }
@@ -220,9 +220,9 @@ namespace NzbDrone.Core.MediaFiles
             return GetPreviews(files).OrderBy(b => b.IssueId).ThenBy(b => b.Path).ToList();
         }
 
-        public List<RetagComicFilePreview> GetRetagPreviewsByBook(int bookId)
+        public List<RetagComicFilePreview> GetRetagPreviewsByIssue(int issueId)
         {
-            var files = _mediaFileService.GetFilesByBook(bookId);
+            var files = _mediaFileService.GetFilesByIssue(issueId);
 
             return GetPreviews(files).OrderBy(b => b.IssueId).ThenBy(b => b.Path).ToList();
         }

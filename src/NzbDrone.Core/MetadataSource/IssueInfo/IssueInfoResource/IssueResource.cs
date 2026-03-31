@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NzbDrone.Core.MetadataSource.BookInfo
+namespace NzbDrone.Core.MetadataSource.IssueInfo
 {
     public class IssueResource
     {

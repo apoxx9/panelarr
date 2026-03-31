@@ -26,7 +26,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
+        public virtual Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
             if (searchCriteria != null)
             {
@@ -41,9 +41,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                 return Decision.Accept();
             }
 
-            foreach (var issue in subject.Books)
+            foreach (var issue in subject.Issues)
             {
-                var comicFiles = _mediaFileService.GetFilesByBook(issue.Id);
+                var comicFiles = _mediaFileService.GetFilesByIssue(issue.Id);
 
                 foreach (var file in comicFiles)
                 {

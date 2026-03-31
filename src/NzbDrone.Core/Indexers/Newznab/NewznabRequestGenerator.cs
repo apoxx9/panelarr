@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             }
         }
 
-        protected virtual bool SupportsBookSearch => false;
+        protected virtual bool SupportsComicSearch => false;
 
         public virtual IndexerPageableRequestChain GetRecentRequests()
         {
@@ -41,7 +41,7 @@ namespace NzbDrone.Core.Indexers.Newznab
 
             var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
 
-            if (capabilities.SupportedBookSearchParameters != null)
+            if (capabilities.SupportedComicSearchParameters != null)
             {
                 pageableRequests.Add(GetPagedRequests(MaxPages, Settings.Categories, "issue", ""));
             }
@@ -57,13 +57,13 @@ namespace NzbDrone.Core.Indexers.Newznab
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
-            if (SupportsBookSearch)
+            if (SupportsComicSearch)
             {
-                AddBookPageableRequests(pageableRequests,
+                AddComicPageableRequests(pageableRequests,
                     searchCriteria,
                     $"&author={NewsnabifyTitle(searchCriteria.SeriesQuery)}&title={NewsnabifyTitle(searchCriteria.IssueQuery)}");
 
-                AddBookPageableRequests(pageableRequests,
+                AddComicPageableRequests(pageableRequests,
                     searchCriteria,
                     $"&title={NewsnabifyTitle(searchCriteria.IssueQuery)}");
             }
@@ -97,9 +97,9 @@ namespace NzbDrone.Core.Indexers.Newznab
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
-            if (SupportsBookSearch)
+            if (SupportsComicSearch)
             {
-                AddBookPageableRequests(pageableRequests,
+                AddComicPageableRequests(pageableRequests,
                     searchCriteria,
                     $"&author={NewsnabifyTitle(searchCriteria.SeriesQuery)}");
             }
@@ -117,7 +117,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             return pageableRequests;
         }
 
-        private void AddBookPageableRequests(IndexerPageableRequestChain chain, SearchCriteriaBase searchCriteria, string parameters)
+        private void AddComicPageableRequests(IndexerPageableRequestChain chain, SearchCriteriaBase searchCriteria, string parameters)
         {
             chain.AddTier();
 

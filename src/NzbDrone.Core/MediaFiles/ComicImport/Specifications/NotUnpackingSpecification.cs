@@ -10,7 +10,7 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
 {
-    public class NotUnpackingSpecification : IImportDecisionEngineSpecification<LocalBook>
+    public class NotUnpackingSpecification : IImportDecisionEngineSpecification<LocalIssue>
     {
         private readonly IDiskProvider _diskProvider;
         private readonly IConfigService _configService;
@@ -23,7 +23,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
             _logger = logger;
         }
 
-        public Decision IsSatisfiedBy(LocalBook item, DownloadClientItem downloadClientItem)
+        public Decision IsSatisfiedBy(LocalIssue item, DownloadClientItem downloadClientItem)
         {
             if (item.ExistingFile)
             {

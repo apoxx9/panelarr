@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Qualities;
 
@@ -10,11 +10,11 @@ namespace NzbDrone.Core.History
 {
     public interface IHistoryRepository : IBasicRepository<EntityHistory>
     {
-        EntityHistory MostRecentForBook(int bookId);
+        EntityHistory MostRecentForIssue(int issueId);
         EntityHistory MostRecentForDownloadId(string downloadId);
         List<EntityHistory> FindByDownloadId(string downloadId);
         List<EntityHistory> GetBySeries(int authorId, EntityHistoryEventType? eventType);
-        List<EntityHistory> GetByBook(int bookId, EntityHistoryEventType? eventType);
+        List<EntityHistory> GetByIssue(int issueId, EntityHistoryEventType? eventType);
         List<EntityHistory> FindDownloadHistory(int idSeriesId, QualityModel quality);
         void DeleteForSeries(int authorId);
         List<EntityHistory> Since(DateTime date, EntityHistoryEventType? eventType);
@@ -27,9 +27,9 @@ namespace NzbDrone.Core.History
         {
         }
 
-        public EntityHistory MostRecentForBook(int bookId)
+        public EntityHistory MostRecentForIssue(int issueId)
         {
-            return Query(h => h.IssueId == bookId).MaxBy(h => h.Date);
+            return Query(h => h.IssueId == issueId).MaxBy(h => h.Date);
         }
 
         public EntityHistory MostRecentForDownloadId(string downloadId)
@@ -64,11 +64,11 @@ namespace NzbDrone.Core.History
             return Query(builder).OrderByDescending(h => h.Date).ToList();
         }
 
-        public List<EntityHistory> GetByBook(int bookId, EntityHistoryEventType? eventType)
+        public List<EntityHistory> GetByIssue(int issueId, EntityHistoryEventType? eventType)
         {
             var builder = Builder()
                 .Join<EntityHistory, Issue>((h, a) => h.IssueId == a.Id)
-                .Where<EntityHistory>(h => h.IssueId == bookId);
+                .Where<EntityHistory>(h => h.IssueId == issueId);
 
             if (eventType.HasValue)
             {

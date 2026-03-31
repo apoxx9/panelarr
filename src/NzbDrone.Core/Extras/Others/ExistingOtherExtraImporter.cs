@@ -3,8 +3,8 @@ using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Extras.Files;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.IssueImport.Aggregation;
 using NzbDrone.Core.Parser.Model;
 
@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Extras.Others
                     continue;
                 }
 
-                var localTrack = new LocalBook
+                var localTrack = new LocalIssue
                 {
                     FileTrackInfo = Parser.Parser.ParseMusicPath(possibleExtraFile),
                     Series = author,

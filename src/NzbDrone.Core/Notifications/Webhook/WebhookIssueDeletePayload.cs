@@ -1,9 +1,9 @@
 namespace NzbDrone.Core.Notifications.Webhook
 {
-    public class WebhookBookDeletePayload : WebhookPayload
+    public class WebhookIssueDeletePayload : WebhookPayload
     {
         public WebhookSeries Series { get; set; }
-        public WebhookBook Issue { get; set; }
+        public WebhookIssue Issue { get; set; }
         public bool DeletedFiles { get; set; }
     }
 }

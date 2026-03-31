@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Indexers;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Delay;
 using NzbDrone.Core.Test.Framework;
@@ -14,15 +14,15 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     [TestFixture]
     public class ProtocolSpecificationFixture : CoreTest<ProtocolSpecification>
     {
-        private RemoteBook _remoteBook;
+        private RemoteIssue _remoteIssue;
         private DelayProfile _delayProfile;
 
         [SetUp]
         public void Setup()
         {
-            _remoteBook = new RemoteBook();
-            _remoteBook.Release = new ReleaseInfo();
-            _remoteBook.Series = new Series();
+            _remoteIssue = new RemoteIssue();
+            _remoteIssue.Release = new ReleaseInfo();
+            _remoteIssue.Series = new Series();
 
             _delayProfile = new DelayProfile();
 
@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void GivenProtocol(DownloadProtocol downloadProtocol)
         {
-            _remoteBook.Release.DownloadProtocol = downloadProtocol;
+            _remoteIssue.Release.DownloadProtocol = downloadProtocol;
         }
 
         [Test]
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenProtocol(DownloadProtocol.Usenet);
             _delayProfile.EnableUsenet = true;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().Be(true);
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().Be(true);
         }
 
         [Test]
@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenProtocol(DownloadProtocol.Torrent);
             _delayProfile.EnableTorrent = true;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().Be(true);
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().Be(true);
         }
 
         [Test]
@@ -60,7 +60,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenProtocol(DownloadProtocol.Usenet);
             _delayProfile.EnableUsenet = false;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().Be(false);
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().Be(false);
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenProtocol(DownloadProtocol.Torrent);
             _delayProfile.EnableTorrent = false;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().Be(false);
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().Be(false);
         }
     }
 }

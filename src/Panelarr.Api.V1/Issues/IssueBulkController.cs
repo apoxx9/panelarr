@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging.Commands;
 using Panelarr.Http;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     /// <summary>
     /// Dedicated bulk-operation endpoints for Issues.
@@ -14,12 +14,12 @@ namespace Panelarr.Api.V1.Books
     [V1ApiController("issue")]
     public class IssueBulkController : Controller
     {
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IManageCommandQueue _commandQueueManager;
 
         public IssueBulkController(IIssueService bookService, IManageCommandQueue commandQueueManager)
         {
-            _bookService = bookService;
+            _issueService = bookService;
             _commandQueueManager = commandQueueManager;
         }
 
@@ -27,7 +27,7 @@ namespace Panelarr.Api.V1.Books
         [HttpPut("monitor")]
         public IActionResult SetMonitored([FromBody] IssueMonitorResource resource)
         {
-            _bookService.SetMonitored(resource.IssueIds, resource.Monitored);
+            _issueService.SetMonitored(resource.IssueIds, resource.Monitored);
             return Accepted();
         }
 
@@ -37,7 +37,7 @@ namespace Panelarr.Api.V1.Books
         {
             foreach (var issueId in resource.IssueIds)
             {
-                _bookService.DeleteIssue(issueId, resource.DeleteFiles);
+                _issueService.DeleteIssue(issueId, resource.DeleteFiles);
             }
 
             return Ok();

@@ -11,8 +11,8 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Common.Serializer;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.MediaFiles.IssueImport;
@@ -25,8 +25,8 @@ namespace NzbDrone.Core.MediaFiles
     public interface IDiskScanService
     {
         void Scan(List<string> folders = null, FilterFilesType filter = FilterFilesType.Known, bool addNewSeries = false, List<int> authorIds = null);
-        IFileInfo[] GetBookFiles(string path, bool allDirectories = true);
-        string[] GetNonBookFiles(string path, bool allDirectories = true);
+        IFileInfo[] GetComicFiles(string path, bool allDirectories = true);
+        string[] GetNonComicFiles(string path, bool allDirectories = true);
         List<IFileInfo> FilterFiles(string basePath, IEnumerable<IFileInfo> files);
         List<string> FilterPaths(string basePath, IEnumerable<string> paths);
     }
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IDiskProvider _diskProvider;
         private readonly IMediaFileService _mediaFileService;
         private readonly IMakeImportDecision _importDecisionMaker;
-        private readonly IImportApprovedBooks _importApprovedTracks;
+        private readonly IImportApprovedIssues _importApprovedTracks;
         private readonly ISeriesService _authorService;
         private readonly IMediaFileTableCleanupService _mediaFileTableCleanupService;
         private readonly IRootFolderService _rootFolderService;
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.MediaFiles
                                IDiskProvider diskProvider,
                                IMediaFileService mediaFileService,
                                IMakeImportDecision importDecisionMaker,
-                               IImportApprovedBooks importApprovedTracks,
+                               IImportApprovedIssues importApprovedTracks,
                                ISeriesService authorService,
                                IRootFolderService rootFolderService,
                                IMediaFileTableCleanupService mediaFileTableCleanupService,
@@ -131,7 +131,7 @@ namespace NzbDrone.Core.MediaFiles
 
                 _logger.ProgressInfo("Scanning {0}", folder);
 
-                var files = FilterFiles(folder, GetBookFiles(folder));
+                var files = FilterFiles(folder, GetComicFiles(folder));
 
                 if (!files.Any())
                 {
@@ -238,7 +238,7 @@ namespace NzbDrone.Core.MediaFiles
             _eventAggregator.PublishEvent(new SeriesScannedEvent(series));
         }
 
-        public IFileInfo[] GetBookFiles(string path, bool allDirectories = true)
+        public IFileInfo[] GetComicFiles(string path, bool allDirectories = true)
         {
             IEnumerable<IFileInfo> filesOnDisk;
 
@@ -260,7 +260,7 @@ namespace NzbDrone.Core.MediaFiles
             return mediaFileList;
         }
 
-        public string[] GetNonBookFiles(string path, bool allDirectories = true)
+        public string[] GetNonComicFiles(string path, bool allDirectories = true)
         {
             _logger.Debug("Scanning '{0}' for non-comic files", path);
 
@@ -289,16 +289,16 @@ namespace NzbDrone.Core.MediaFiles
                         .ToList();
         }
 
-        private static Books.ComicFormat GetComicFormat(string path)
+        private static Issues.ComicFormat GetComicFormat(string path)
         {
             var ext = Path.GetExtension(path)?.TrimStart('.').ToLowerInvariant();
             return ext switch
             {
-                "cbz" => Books.ComicFormat.CBZ,
-                "cbr" => Books.ComicFormat.CBR,
-                "cb7" => Books.ComicFormat.CB7,
-                "pdf" => Books.ComicFormat.PDF,
-                _ => Books.ComicFormat.Unknown
+                "cbz" => Issues.ComicFormat.CBZ,
+                "cbr" => Issues.ComicFormat.CBR,
+                "cb7" => Issues.ComicFormat.CB7,
+                "pdf" => Issues.ComicFormat.PDF,
+                _ => Issues.ComicFormat.Unknown
             };
         }
 

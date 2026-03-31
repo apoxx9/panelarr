@@ -68,13 +68,13 @@ namespace NzbDrone.Core.Download
                 return null;
             }
 
-            ParsedIssueInfo parsedBookInfo = null;
+            ParsedIssueInfo parsedIssueInfo = null;
             if (historyItem.Release != null)
             {
-                parsedBookInfo = Parser.Parser.ParseBookTitle(historyItem.Release.Title);
+                parsedIssueInfo = Parser.Parser.ParseIssueTitle(historyItem.Release.Title);
             }
 
-            if (parsedBookInfo == null)
+            if (parsedIssueInfo == null)
             {
                 _logger.Debug("No parsed title in download history item for infohash {0}, unable to provide seed configuration", infoHash);
                 return null;
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Download
             return new CachedSeedConfiguration
             {
                 IndexerId = historyItem.IndexerId,
-                Discography = parsedBookInfo.Discography
+                Discography = parsedIssueInfo.Discography
             };
         }
     }

@@ -14,12 +14,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class BlockedIndexerSpecificationFixture : CoreTest<BlockedIndexerSpecification>
     {
-        private RemoteBook _remoteBook;
+        private RemoteIssue _remoteIssue;
 
         [SetUp]
         public void Setup()
         {
-            _remoteBook = new RemoteBook
+            _remoteIssue = new RemoteIssue
             {
                 Release = new ReleaseInfo { IndexerId = 1 }
             };
@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_no_blocked_indexer()
         {
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             WithBlockedIndexer();
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
             Subject.Type.Should().Be(RejectionType.Temporary);
         }
     }

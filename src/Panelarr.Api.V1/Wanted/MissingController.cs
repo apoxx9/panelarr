@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine.Specifications;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.SeriesStats;
 using NzbDrone.SignalR;
-using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Issues;
 using Panelarr.Http;
 using Panelarr.Http.Extensions;
 
@@ -15,17 +15,17 @@ namespace Panelarr.Api.V1.Wanted
     public class MissingController : IssueControllerWithSignalR
     {
         public MissingController(IIssueService bookService,
-                             ISeriesBookLinkService seriesBookLinkService,
+                             ISeriesIssueLinkService seriesIssueLinkService,
                              ISeriesStatisticsService authorStatisticsService,
                              IMapCoversToLocal coverMapper,
                              IUpgradableSpecification upgradableSpecification,
                              IBroadcastSignalRMessage signalRBroadcaster)
-        : base(bookService, seriesBookLinkService, authorStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
+        : base(bookService, seriesIssueLinkService, authorStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
         {
         }
 
         [HttpGet]
-        public PagingResource<IssueResource> GetMissingBooks([FromQuery] PagingRequestResource paging, bool includeSeries = false, bool monitored = true)
+        public PagingResource<IssueResource> GetMissingIssues([FromQuery] PagingRequestResource paging, bool includeSeries = false, bool monitored = true)
         {
             var pagingResource = new PagingResource<IssueResource>(paging);
             var pagingSpec = new PagingSpec<Issue>
@@ -45,7 +45,7 @@ namespace Panelarr.Api.V1.Wanted
                 pagingSpec.FilterExpressions.Add(v => v.Monitored == false || v.Series.Value.Monitored == false);
             }
 
-            return pagingSpec.ApplyToPage(_bookService.IssuesWithoutFiles, v => MapToResource(v, includeSeries));
+            return pagingSpec.ApplyToPage(_issueService.IssuesWithoutFiles, v => MapToResource(v, includeSeries));
         }
     }
 }

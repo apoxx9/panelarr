@@ -30,12 +30,12 @@ namespace NzbDrone.Core.Download.TrackedDownloads
                 return false;
             }
 
-            if (trackedDownload.RemoteBook == null || trackedDownload.RemoteBook.Books == null)
+            if (trackedDownload.RemoteIssue == null || trackedDownload.RemoteIssue.Issues == null)
             {
                 return true;
             }
 
-            var allBooksImportedInHistory = trackedDownload.RemoteBook.Books.All(issue =>
+            var allIssuesImportedInHistory = trackedDownload.RemoteIssue.Issues.All(issue =>
             {
                 var lastHistoryItem = historyItems.FirstOrDefault(h => h.IssueId == issue.Id);
 
@@ -50,9 +50,9 @@ namespace NzbDrone.Core.Download.TrackedDownloads
                 return lastHistoryItem.EventType == EntityHistoryEventType.ComicFileImported;
             });
 
-            _logger.Trace("All issues for '{0}' have been imported: {1}", trackedDownload.DownloadItem.Title, allBooksImportedInHistory);
+            _logger.Trace("All issues for '{0}' have been imported: {1}", trackedDownload.DownloadItem.Title, allIssuesImportedInHistory);
 
-            return allBooksImportedInHistory;
+            return allIssuesImportedInHistory;
         }
     }
 }

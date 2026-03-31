@@ -22,7 +22,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
     /// sufficient here; DuplicateComicFileService handles post-import resolution using
     /// ImageQualityScore.
     /// </summary>
-    public class DuplicateComicFileSpecification : IImportDecisionEngineSpecification<LocalBook>
+    public class DuplicateComicFileSpecification : IImportDecisionEngineSpecification<LocalIssue>
     {
         private readonly Logger _logger;
 
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
             _logger = logger;
         }
 
-        public Decision IsSatisfiedBy(LocalBook item, DownloadClientItem downloadClientItem)
+        public Decision IsSatisfiedBy(LocalIssue item, DownloadClientItem downloadClientItem)
         {
             var existingFiles = item.Issue?.ComicFiles?.Value;
             if (existingFiles == null || !existingFiles.Any())

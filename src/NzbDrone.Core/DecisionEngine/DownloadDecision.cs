@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Core.Parser.Model;
 
@@ -6,7 +6,7 @@ namespace NzbDrone.Core.DecisionEngine
 {
     public class DownloadDecision
     {
-        public RemoteBook RemoteBook { get; private set; }
+        public RemoteIssue RemoteIssue { get; private set; }
         public IEnumerable<Rejection> Rejections { get; private set; }
 
         public bool Approved => !Rejections.Any();
@@ -27,9 +27,9 @@ namespace NzbDrone.Core.DecisionEngine
             }
         }
 
-        public DownloadDecision(RemoteBook issue, params Rejection[] rejections)
+        public DownloadDecision(RemoteIssue issue, params Rejection[] rejections)
         {
-            RemoteBook = issue;
+            RemoteIssue = issue;
             Rejections = rejections.ToList();
         }
 
@@ -37,10 +37,10 @@ namespace NzbDrone.Core.DecisionEngine
         {
             if (Approved)
             {
-                return "[OK] " + RemoteBook;
+                return "[OK] " + RemoteIssue;
             }
 
-            return "[Rejected " + Rejections.Count() + "]" + RemoteBook;
+            return "[Rejected " + Rejections.Count() + "]" + RemoteIssue;
         }
     }
 }

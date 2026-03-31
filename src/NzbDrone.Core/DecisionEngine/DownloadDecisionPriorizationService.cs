@@ -23,13 +23,13 @@ namespace NzbDrone.Core.DecisionEngine
 
         public List<DownloadDecision> PrioritizeDecisions(List<DownloadDecision> decisions)
         {
-            return decisions.Where(c => c.RemoteBook.DownloadAllowed)
-                            .GroupBy(c => c.RemoteBook.Series.Id, (authorId, downloadDecisions) =>
+            return decisions.Where(c => c.RemoteIssue.DownloadAllowed)
+                            .GroupBy(c => c.RemoteIssue.Series.Id, (authorId, downloadDecisions) =>
                                 {
                                     return downloadDecisions.OrderByDescending(decision => decision, new DownloadDecisionComparer(_configService, _delayProfileService));
                                 })
                             .SelectMany(c => c)
-                            .Union(decisions.Where(c => !c.RemoteBook.DownloadAllowed))
+                            .Union(decisions.Where(c => !c.RemoteIssue.DownloadAllowed))
                             .ToList();
         }
     }

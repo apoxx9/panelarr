@@ -33,9 +33,9 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
             ScanGracePeriod = TimeSpan.FromSeconds(30);
         }
 
-        protected override string AddFromNzbFile(RemoteBook remoteBook, string filename, byte[] fileContent)
+        protected override string AddFromNzbFile(RemoteIssue remoteIssue, string filename, byte[] fileContent)
         {
-            var title = remoteBook.Release.Title;
+            var title = remoteIssue.Release.Title;
 
             title = FileNameBuilder.CleanFileName(title);
 

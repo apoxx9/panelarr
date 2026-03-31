@@ -4,10 +4,10 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -29,12 +29,12 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                                                     .With(h => h.Title = "Drone.S01E01.HDTV")
                                                     .Build();
 
-            var remoteBook = BuildRemoteBook();
+            var remoteIssue = BuildRemoteIssue();
 
             _trackedDownload = Builder<TrackedDownload>.CreateNew()
                     .With(c => c.State = TrackedDownloadState.Downloading)
                     .With(c => c.DownloadItem = completed)
-                    .With(c => c.RemoteBook = remoteBook)
+                    .With(c => c.RemoteIssue = remoteIssue)
                     .Build();
 
             Mocker.GetMock<IDownloadClient>()
@@ -55,15 +55,15 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
 
             Mocker.GetMock<IParsingService>()
                   .Setup(s => s.GetSeries("Drone.S01E01.HDTV"))
-                  .Returns(remoteBook.Series);
+                  .Returns(remoteIssue.Series);
         }
 
-        private RemoteBook BuildRemoteBook()
+        private RemoteIssue BuildRemoteIssue()
         {
-            return new RemoteBook
+            return new RemoteIssue
             {
                 Series = new Series(),
-                Books = new List<Issue> { new Issue { Id = 1 } }
+                Issues = new List<Issue> { new Issue { Id = 1 } }
             };
         }
 
@@ -78,7 +78,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
         {
             Mocker.GetMock<IParsingService>()
                   .Setup(s => s.GetSeries(It.IsAny<string>()))
-                  .Returns(_trackedDownload.RemoteBook.Series);
+                  .Returns(_trackedDownload.RemoteIssue.Series);
         }
 
         private void GivenABadlyNamedDownload()
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
 
             Mocker.GetMock<IParsingService>()
                   .Setup(s => s.GetSeries("Droned S01E01"))
-                  .Returns(BuildRemoteBook().Series);
+                  .Returns(BuildRemoteIssue().Series);
         }
 
         [TestCase(DownloadItemStatus.Downloading)]
@@ -149,7 +149,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
         public void should_process_if_the_download_cannot_be_tracked_using_the_source_title_as_it_was_initiated_externally()
         {
             GivenABadlyNamedDownload();
-            _trackedDownload.RemoteBook.Series = null;
+            _trackedDownload.RemoteIssue.Series = null;
 
             Mocker.GetMock<IHistoryService>()
                   .Setup(s => s.MostRecentForDownloadId(It.Is<string>(i => i == "1234")));
@@ -162,7 +162,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
         [Test]
         public void should_process_when_there_is_a_title_mismatch()
         {
-            _trackedDownload.RemoteBook.Series = null;
+            _trackedDownload.RemoteIssue.Series = null;
             Mocker.GetMock<IParsingService>()
                   .Setup(s => s.GetSeries("Drone.S01E01.HDTV"))
                   .Returns((Series)null);

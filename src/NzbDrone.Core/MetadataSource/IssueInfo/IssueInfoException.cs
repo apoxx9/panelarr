@@ -2,21 +2,21 @@ using System;
 using System.Net;
 using NzbDrone.Core.Exceptions;
 
-namespace NzbDrone.Core.MetadataSource.BookInfo
+namespace NzbDrone.Core.MetadataSource.IssueInfo
 {
-    public class BookInfoException : NzbDroneClientException
+    public class IssueInfoException : NzbDroneClientException
     {
-        public BookInfoException(string message)
+        public IssueInfoException(string message)
             : base(HttpStatusCode.ServiceUnavailable, message)
         {
         }
 
-        public BookInfoException(string message, params object[] args)
+        public IssueInfoException(string message, params object[] args)
             : base(HttpStatusCode.ServiceUnavailable, message, args)
         {
         }
 
-        public BookInfoException(string message, Exception innerException, params object[] args)
+        public IssueInfoException(string message, Exception innerException, params object[] args)
             : base(HttpStatusCode.ServiceUnavailable, message, innerException, args)
         {
         }

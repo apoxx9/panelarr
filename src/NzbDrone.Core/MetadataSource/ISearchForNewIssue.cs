@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.MetadataSource
 {
-    public interface ISearchForNewBook
+    public interface ISearchForNewIssue
     {
-        List<Issue> SearchForNewBook(string title, string author, bool getAllEditions = true);
+        List<Issue> SearchForNewIssue(string title, string author, bool getAllEditions = true);
     }
 }

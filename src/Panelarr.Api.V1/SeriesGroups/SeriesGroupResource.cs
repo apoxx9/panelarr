@@ -14,7 +14,7 @@ namespace Panelarr.Api.V1.SeriesGroups
 
     public static class SeriesGroupResourceMapper
     {
-        public static SeriesGroupResource ToResource(this NzbDrone.Core.Books.SeriesGroup model)
+        public static SeriesGroupResource ToResource(this NzbDrone.Core.Issues.SeriesGroup model)
         {
             if (model == null)
             {
@@ -31,14 +31,14 @@ namespace Panelarr.Api.V1.SeriesGroups
             };
         }
 
-        public static NzbDrone.Core.Books.SeriesGroup ToModel(this SeriesGroupResource resource)
+        public static NzbDrone.Core.Issues.SeriesGroup ToModel(this SeriesGroupResource resource)
         {
             if (resource == null)
             {
                 return null;
             }
 
-            return new NzbDrone.Core.Books.SeriesGroup
+            return new NzbDrone.Core.Issues.SeriesGroup
             {
                 Id = resource.Id,
                 ForeignSeriesGroupId = resource.ForeignSeriesGroupId,
@@ -48,7 +48,7 @@ namespace Panelarr.Api.V1.SeriesGroups
             };
         }
 
-        public static List<SeriesGroupResource> ToResource(this IEnumerable<NzbDrone.Core.Books.SeriesGroup> models)
+        public static List<SeriesGroupResource> ToResource(this IEnumerable<NzbDrone.Core.Issues.SeriesGroup> models)
         {
             return models?.Select(ToResource).ToList();
         }

@@ -71,9 +71,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.VuzeTests
         {
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
@@ -84,9 +84,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.VuzeTests
             GivenTvDirectory();
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
 
@@ -100,9 +100,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.VuzeTests
             GivenMusicCategory();
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
 
@@ -118,9 +118,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.VuzeTests
 
             _transmissionConfigItems["download-dir"] += "/";
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
 
@@ -133,9 +133,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.VuzeTests
         {
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
 
@@ -148,10 +148,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.VuzeTests
         {
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
-            remoteBook.Release.DownloadUrl = magnetUrl;
+            var remoteIssue = CreateRemoteIssue();
+            remoteIssue.Release.DownloadUrl = magnetUrl;
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().Be(expectedHash);
         }

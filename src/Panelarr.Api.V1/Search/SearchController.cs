@@ -6,7 +6,7 @@ using NLog;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Organizer;
-using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Issues;
 using Panelarr.Api.V1.Series;
 using Panelarr.Http;
 
@@ -43,7 +43,7 @@ namespace Panelarr.Api.V1.Search
                 var resource = new SearchResource();
                 resource.Id = id++;
 
-                if (result is NzbDrone.Core.Books.Series series)
+                if (result is NzbDrone.Core.Issues.Series series)
                 {
                     resource.Series = series.ToResource();
                     resource.ForeignId = series.ForeignSeriesId;
@@ -76,7 +76,7 @@ namespace Panelarr.Api.V1.Search
                         resource.Series.Folder = series.Name;
                     }
                 }
-                else if (result is NzbDrone.Core.Books.Issue issue)
+                else if (result is NzbDrone.Core.Issues.Issue issue)
                 {
                     resource.Issue = issue.ToResource();
                     resource.ForeignId = issue.ForeignIssueId;

@@ -5,10 +5,10 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.DecisionEngine.Specifications.RssSync;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
@@ -19,10 +19,10 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 {
     [TestFixture]
-    public class DeletedTrackFileSpecificationFixture : CoreTest<DeletedBookFileSpecification>
+    public class DeletedTrackFileSpecificationFixture : CoreTest<DeletedComicFileSpecification>
     {
-        private RemoteBook _parseResultMulti;
-        private RemoteBook _parseResultSingle;
+        private RemoteIssue _parseResultMulti;
+        private RemoteIssue _parseResultSingle;
         private ComicFile _firstFile;
         private ComicFile _secondFile;
 
@@ -48,8 +48,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                     IssueId = 2
                 };
 
-            var singleBookList = new List<Issue> { new Issue { Id = 1 } };
-            var doubleBookList = new List<Issue>
+            var singleIssueList = new List<Issue> { new Issue { Id = 1 } };
+            var doubleIssueList = new List<Issue>
             {
                 new Issue { Id = 1 },
                 new Issue { Id = 2 }
@@ -60,18 +60,18 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                          .With(c => c.Path = @"C:\Music\My.Series".AsOsAgnostic())
                          .Build();
 
-            _parseResultMulti = new RemoteBook
+            _parseResultMulti = new RemoteIssue
             {
                 Series = fakeSeries,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
-                Books = doubleBookList
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                Issues = doubleIssueList
             };
 
-            _parseResultSingle = new RemoteBook
+            _parseResultSingle = new RemoteIssue
             {
                 Series = fakeSeries,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
-                Books = singleBookList
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                Issues = singleIssueList
             };
 
             GivenUnmonitorDeletedTracks(true);
@@ -87,7 +87,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         private void SetupMediaFile(List<ComicFile> files)
         {
             Mocker.GetMock<IMediaFileService>()
-                              .Setup(v => v.GetFilesByBook(It.IsAny<int>()))
+                              .Setup(v => v.GetFilesByIssue(It.IsAny<int>()))
                               .Returns(files);
         }
 

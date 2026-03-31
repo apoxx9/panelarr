@@ -4,8 +4,8 @@ using System.Linq;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.CustomFormats;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Qualities;
@@ -17,8 +17,8 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     public class ColonReplacementFixture : CoreTest<FileNameBuilder>
     {
         private Series _author;
-        private Issue _book;
-        private ComicFile _bookFile;
+        private Issue _issue;
+        private ComicFile _comicFile;
         private NamingConfig _namingConfig;
 
         [SetUp]
@@ -41,17 +41,17 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                 .With(s => s.SeriesGroup = series)
                 .BuildListOfNew();
 
-            _book = Builder<Issue>
+            _issue = Builder<Issue>
                 .CreateNew()
                 .With(s => s.Title = "Fake: Phantom Deadfall")
                 .With(s => s.SeriesMetadata = _author.Metadata.Value)
                 .With(s => s.ReleaseDate = new DateTime(2021, 2, 14))
                 .With(s => s.SeriesLinks = seriesLink)
                 .Build();
-            _bookFile = new ComicFile { Quality = new QualityModel(Quality.EPUB), ReleaseGroup = "PanelarrTest" };
+            _comicFile = new ComicFile { Quality = new QualityModel(Quality.EPUB), ReleaseGroup = "PanelarrTest" };
 
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameBooks = true;
+            _namingConfig.RenameIssues = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
@@ -68,9 +68,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [Test]
         public void should_replace_colon_followed_by_space_with_space_dash_space_by_default()
         {
-            _namingConfig.StandardBookFormat = "{Series Name} - {Issue SeriesTitle - }{Issue Title} {(Release Year)}";
+            _namingConfig.StandardIssueFormat = "{Series Name} - {Issue SeriesTitle - }{Issue Title} {(Release Year)}";
 
-            Subject.BuildBookFileName(_author, _book, _bookFile)
+            Subject.BuildComicFileName(_author, _issue, _comicFile)
                    .Should().Be("Christopher Hopper - SeriesGroup - Ruins of the Earth #1-2 - Fake - Phantom Deadfall (2021)");
         }
 
@@ -81,11 +81,11 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [TestCase("Fake: Phantom Deadfall", ColonReplacementFormat.SpaceDashSpace, "Christopher Hopper - SeriesGroup - Ruins of the Earth - Fake - Phantom Deadfall (2021)")]
         public void should_replace_colon_followed_by_space_with_expected_result(string bookTitle, ColonReplacementFormat replacementFormat, string expected)
         {
-            _book.Title = bookTitle;
-            _namingConfig.StandardBookFormat = "{Series Name} - {Issue SeriesGroup - }{Issue Title} {(Release Year)}";
+            _issue.Title = bookTitle;
+            _namingConfig.StandardIssueFormat = "{Series Name} - {Issue SeriesGroup - }{Issue Title} {(Release Year)}";
             _namingConfig.ColonReplacementFormat = replacementFormat;
 
-            Subject.BuildBookFileName(_author, _book, _bookFile)
+            Subject.BuildComicFileName(_author, _issue, _comicFile)
                 .Should().Be(expected);
         }
 
@@ -97,10 +97,10 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         public void should_replace_colon_with_expected_result(string authorName, ColonReplacementFormat replacementFormat, string expected)
         {
             _author.Name = authorName;
-            _namingConfig.StandardBookFormat = "{Series Name}";
+            _namingConfig.StandardIssueFormat = "{Series Name}";
             _namingConfig.ColonReplacementFormat = replacementFormat;
 
-            Subject.BuildBookFileName(_author, _book, _bookFile)
+            Subject.BuildComicFileName(_author, _issue, _comicFile)
                 .Should().Be(expected);
         }
     }

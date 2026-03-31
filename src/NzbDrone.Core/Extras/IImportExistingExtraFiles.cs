@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Extras.Files;
+using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.Extras
 {

@@ -20,7 +20,7 @@ namespace Panelarr.Api.V1.System.Backup
         private readonly IAppFolderInfo _appFolderInfo;
         private readonly IDiskProvider _diskProvider;
 
-        private static readonly List<string> ValidExtensions = new () { ".zip", ".db", ".xml" };
+        private static readonly List<string> ValidExtensions = new() { ".zip", ".db", ".xml" };
 
         public BackupController(IBackupService backupService,
                             IAppFolderInfo appFolderInfo,
@@ -37,14 +37,14 @@ namespace Panelarr.Api.V1.System.Backup
             var backups = _backupService.GetBackups();
 
             return backups.Select(b => new BackupResource
-                {
-                    Id = GetBackupId(b),
-                    Name = b.Name,
-                    Path = $"/backup/{b.Type.ToString().ToLower()}/{b.Name}",
-                    Type = b.Type,
-                    Size = b.Size,
-                    Time = b.Time
-                })
+            {
+                Id = GetBackupId(b),
+                Name = b.Name,
+                Path = $"/backup/{b.Type.ToString().ToLower()}/{b.Name}",
+                Type = b.Type,
+                Size = b.Size,
+                Time = b.Time
+            })
                 .OrderByDescending(b => b.Time)
                 .ToList();
         }

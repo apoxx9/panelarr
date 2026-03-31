@@ -115,8 +115,8 @@ namespace NzbDrone.Core.Indexers.Newznab
                     return null;
                 }
 
-                if (capabilities.SupportedBookSearchParameters != null &&
-                    new[] { "author", "title" }.All(v => capabilities.SupportedBookSearchParameters.Contains(v)))
+                if (capabilities.SupportedComicSearchParameters != null &&
+                    new[] { "author", "title" }.All(v => capabilities.SupportedComicSearchParameters.Contains(v)))
                 {
                     return null;
                 }

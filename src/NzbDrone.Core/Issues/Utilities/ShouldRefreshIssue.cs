@@ -1,18 +1,18 @@
 using System;
 using NLog;
 
-namespace NzbDrone.Core.Books
+namespace NzbDrone.Core.Issues
 {
-    public interface ICheckIfBookShouldBeRefreshed
+    public interface ICheckIfIssueShouldBeRefreshed
     {
         bool ShouldRefresh(Issue issue);
     }
 
-    public class ShouldRefreshBook : ICheckIfBookShouldBeRefreshed
+    public class ShouldRefreshIssue : ICheckIfIssueShouldBeRefreshed
     {
         private readonly Logger _logger;
 
-        public ShouldRefreshBook(Logger logger)
+        public ShouldRefreshIssue(Logger logger)
         {
             _logger = logger;
         }

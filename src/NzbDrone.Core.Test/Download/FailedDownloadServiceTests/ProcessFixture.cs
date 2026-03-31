@@ -4,10 +4,10 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -27,21 +27,21 @@ namespace NzbDrone.Core.Test.Download.FailedDownloadServiceTests
             var completed = Builder<DownloadClientItem>.CreateNew()
                                                     .With(h => h.Status = DownloadItemStatus.Completed)
                                                     .With(h => h.OutputPath = new OsPath(@"C:\DropFolder\MyDownload".AsOsAgnostic()))
-                                                    .With(h => h.Title = "Drone.DroneTheBook.FLAC")
+                                                    .With(h => h.Title = "Drone.DroneTheIssue.FLAC")
                                                     .Build();
 
             _grabHistory = Builder<EntityHistory>.CreateListOfSize(2).BuildList();
 
-            var remoteBook = new RemoteBook
+            var remoteIssue = new RemoteIssue
             {
                 Series = new Series(),
-                Books = new List<Issue> { new Issue { Id = 1 } }
+                Issues = new List<Issue> { new Issue { Id = 1 } }
             };
 
             _trackedDownload = Builder<TrackedDownload>.CreateNew()
                     .With(c => c.State = TrackedDownloadState.Downloading)
                     .With(c => c.DownloadItem = completed)
-                    .With(c => c.RemoteBook = remoteBook)
+                    .With(c => c.RemoteIssue = remoteIssue)
                     .Build();
 
             Mocker.GetMock<IHistoryService>()

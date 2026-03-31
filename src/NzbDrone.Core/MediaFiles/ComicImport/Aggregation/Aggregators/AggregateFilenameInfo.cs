@@ -57,7 +57,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 
         public LocalEdition Aggregate(LocalEdition release, bool others)
         {
-            var tracks = release.LocalBooks;
+            var tracks = release.LocalIssues;
             if (tracks.Any(x => x.FileTrackInfo.IssueTitle.IsNullOrWhiteSpace())
                 || tracks.Any(x => x.FileTrackInfo.SeriesTitle.IsNullOrWhiteSpace()))
             {
@@ -78,9 +78,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
             return release;
         }
 
-        private Dictionary<LocalBook, Match> AllMatches(List<LocalBook> tracks, Regex pattern)
+        private Dictionary<LocalIssue, Match> AllMatches(List<LocalIssue> tracks, Regex pattern)
         {
-            var matches = new Dictionary<LocalBook, Match>();
+            var matches = new Dictionary<LocalIssue, Match>();
             foreach (var track in tracks)
             {
                 var filename = Path.GetFileNameWithoutExtension(track.Path).RemoveAccent();
@@ -104,7 +104,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
             return matches.Select(x => x.Groups[field].Value).Distinct().Count() == 1;
         }
 
-        private void ApplyMatches(Dictionary<LocalBook, Match> matches, Regex pattern)
+        private void ApplyMatches(Dictionary<LocalIssue, Match> matches, Regex pattern)
         {
             _logger.Debug("Got filename match with regex {0}", pattern);
 

@@ -6,22 +6,22 @@ namespace NzbDrone.Core.Exceptions
     {
         public string ForeignIssueId { get; set; }
 
-        public IssueNotFoundException(string foreignBookId)
-            : base($"Issue with id {foreignBookId} was not found, it may have been removed from metadata server.")
+        public IssueNotFoundException(string foreignIssueId)
+            : base($"Issue with id {foreignIssueId} was not found, it may have been removed from metadata server.")
         {
-            ForeignIssueId = foreignBookId;
+            ForeignIssueId = foreignIssueId;
         }
 
-        public IssueNotFoundException(string foreignBookId, string message, params object[] args)
+        public IssueNotFoundException(string foreignIssueId, string message, params object[] args)
             : base(message, args)
         {
-            ForeignIssueId = foreignBookId;
+            ForeignIssueId = foreignIssueId;
         }
 
-        public IssueNotFoundException(string foreignBookId, string message)
+        public IssueNotFoundException(string foreignIssueId, string message)
             : base(message)
         {
-            ForeignIssueId = foreignBookId;
+            ForeignIssueId = foreignIssueId;
         }
     }
 }

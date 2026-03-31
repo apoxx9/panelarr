@@ -22,7 +22,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
 
         public SpecificationPriority Priority => SpecificationPriority.Database;
 
-        public Decision IsSatisfiedBy(LocalEdition localBookRelease, DownloadClientItem downloadClientItem)
+        public Decision IsSatisfiedBy(LocalEdition localIssueRelease, DownloadClientItem downloadClientItem)
         {
             if (downloadClientItem == null)
             {
@@ -30,7 +30,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
                 return Decision.Accept();
             }
 
-            var bookRelease = localBookRelease.Issue;
+            var bookRelease = localIssueRelease.Issue;
 
             if ((!bookRelease?.ComicFiles?.Value?.Any()) ?? true)
             {
@@ -38,7 +38,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
                 return Decision.Accept();
             }
 
-            var bookHistory = _historyService.GetByBook(bookRelease.Id, null);
+            var bookHistory = _historyService.GetByIssue(bookRelease.Id, null);
             var lastImported = bookHistory.FirstOrDefault(h => h.EventType == EntityHistoryEventType.ComicFileImported);
             var lastGrabbed = bookHistory.FirstOrDefault(h => h.EventType == EntityHistoryEventType.Grabbed);
 

@@ -1,8 +1,8 @@
 namespace NzbDrone.Core.Organizer
 {
-    public class AbsoluteBookFormat
+    public class AbsoluteIssueFormat
     {
         public string Separator { get; set; }
-        public string AbsoluteBookPattern { get; set; }
+        public string AbsoluteIssuePattern { get; set; }
     }
 }

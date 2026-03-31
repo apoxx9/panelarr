@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.History

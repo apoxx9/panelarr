@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using Panelarr.Http.REST;
 
 namespace Panelarr.Api.V1.SeriesGroup
 {
-    public class SeriesBookLinkResource : RestResource
+    public class SeriesIssueLinkResource : RestResource
     {
         public string Position { get; set; }
         public int SeriesPosition { get; set; }
@@ -13,11 +13,11 @@ namespace Panelarr.Api.V1.SeriesGroup
         public int IssueId { get; set; }
     }
 
-    public static class SeriesBookLinkResourceMapper
+    public static class SeriesIssueLinkResourceMapper
     {
-        public static SeriesBookLinkResource ToResource(this SeriesGroupLink model)
+        public static SeriesIssueLinkResource ToResource(this SeriesGroupLink model)
         {
-            return new SeriesBookLinkResource
+            return new SeriesIssueLinkResource
             {
                 Id = model.Id,
                 Position = model.Position,
@@ -27,7 +27,7 @@ namespace Panelarr.Api.V1.SeriesGroup
             };
         }
 
-        public static List<SeriesBookLinkResource> ToResource(this IEnumerable<SeriesGroupLink> models)
+        public static List<SeriesIssueLinkResource> ToResource(this IEnumerable<SeriesGroupLink> models)
         {
             return models?.Select(ToResource).ToList();
         }

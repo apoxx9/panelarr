@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             releaseInfo = base.ProcessItem(item, releaseInfo);
 
             releaseInfo.Series = GetSeries(item);
-            releaseInfo.Issue = GetBook(item);
+            releaseInfo.Issue = GetIssue(item);
 
             return releaseInfo;
         }
@@ -183,7 +183,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             return "";
         }
 
-        protected virtual string GetBook(XElement item)
+        protected virtual string GetIssue(XElement item)
         {
             var bookString = TryGetNewznabAttribute(item, "booktitle");
 

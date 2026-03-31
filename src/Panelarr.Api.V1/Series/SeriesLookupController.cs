@@ -33,7 +33,7 @@ namespace Panelarr.Api.V1.Series
             return MapToResource(searchResults).ToList();
         }
 
-        private IEnumerable<SeriesResource> MapToResource(IEnumerable<NzbDrone.Core.Books.Series> seriesList)
+        private IEnumerable<SeriesResource> MapToResource(IEnumerable<NzbDrone.Core.Issues.Series> seriesList)
         {
             foreach (var currentSeries in seriesList)
             {

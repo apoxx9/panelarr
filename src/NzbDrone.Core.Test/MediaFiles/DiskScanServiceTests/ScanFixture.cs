@@ -10,8 +10,8 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.IssueImport;
 using NzbDrone.Core.Parser.Model;
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             Mocker.GetMock<IMakeImportDecision>()
                 .Setup(v => v.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()))
-                .Returns(new List<ImportDecision<LocalBook>>());
+                .Returns(new List<ImportDecision<LocalIssue>>());
 
             Mocker.GetMock<IMediaFileService>()
                 .Setup(v => v.GetFilesBySeries(It.IsAny<int>()))
@@ -392,14 +392,14 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMakeImportDecision>()
                 .Setup(x => x.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()))
                 .Returns((List<IFileInfo> fileList, IdentificationOverrides idOverrides, ImportDecisionMakerInfo idInfo, ImportDecisionMakerConfig idConfig) =>
-                          fileList.Select(x => new LocalBook
+                          fileList.Select(x => new LocalIssue
                           {
                               Series = _author,
                               Path = x.FullName,
                               Modified = x.LastWriteTimeUtc,
                               FileTrackInfo = new ParsedTrackInfo()
                           })
-                          .Select(x => new ImportDecision<LocalBook>(x, new Rejection("Reject")))
+                          .Select(x => new ImportDecision<LocalIssue>(x, new Rejection("Reject")))
                           .ToList());
         }
 
@@ -533,7 +533,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             FileSystem.AddFile(files[0], new MockFileData("".PadRight(100)) { LastWriteTime = new DateTime(2019, 2, 1) });
 
-            var localTrack = Builder<LocalBook>.CreateNew()
+            var localTrack = Builder<LocalIssue>.CreateNew()
                 .With(x => x.Path = files[0])
                 .With(x => x.Modified = new DateTime(2019, 2, 1))
                 .With(x => x.Size = 100)
@@ -546,13 +546,13 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             Mocker.GetMock<IMakeImportDecision>()
                 .Setup(x => x.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()))
-                .Returns(new List<ImportDecision<LocalBook>> { new ImportDecision<LocalBook>(localTrack, new Rejection("Reject")) });
+                .Returns(new List<ImportDecision<LocalIssue>> { new ImportDecision<LocalIssue>(localTrack, new Rejection("Reject")) });
 
             Subject.Scan(new List<string> { _author.Path });
 
             Mocker.GetMock<IMediaFileService>()
                 .Verify(x => x.Update(It.Is<List<ComicFile>>(
-                                          l => l.Count == 1  &&
+                                          l => l.Count == 1 &&
                                           l[0].Path == localTrack.Path &&
                                           l[0].Modified == localTrack.Modified &&
                                           l[0].Size == localTrack.Size &&

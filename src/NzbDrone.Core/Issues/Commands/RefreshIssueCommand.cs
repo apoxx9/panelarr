@@ -1,18 +1,18 @@
 using NzbDrone.Core.Messaging.Commands;
 
-namespace NzbDrone.Core.Books.Commands
+namespace NzbDrone.Core.Issues.Commands
 {
-    public class RefreshBookCommand : Command
+    public class RefreshIssueCommand : Command
     {
         public int? IssueId { get; set; }
 
-        public RefreshBookCommand()
+        public RefreshIssueCommand()
         {
         }
 
-        public RefreshBookCommand(int? bookId)
+        public RefreshIssueCommand(int? issueId)
         {
-            IssueId = bookId;
+            IssueId = issueId;
         }
 
         public override bool SendUpdatesToClient => true;

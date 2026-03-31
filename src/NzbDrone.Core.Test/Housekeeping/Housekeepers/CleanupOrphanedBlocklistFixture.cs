@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Blocklisting;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Housekeeping.Housekeepers;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 

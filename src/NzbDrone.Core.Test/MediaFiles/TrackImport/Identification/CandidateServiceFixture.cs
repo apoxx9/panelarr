@@ -16,15 +16,15 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         [Test]
         public void should_not_throw_on_search_exception()
         {
-            Mocker.GetMock<ISearchForNewBook>()
-                .Setup(s => s.SearchForNewBook(It.IsAny<string>(), It.IsAny<string>(), true))
+            Mocker.GetMock<ISearchForNewIssue>()
+                .Setup(s => s.SearchForNewIssue(It.IsAny<string>(), It.IsAny<string>(), true))
                 .Throws(new Exception("Bad search"));
 
             var edition = new LocalEdition
             {
-                LocalBooks = new List<LocalBook>
+                LocalIssues = new List<LocalIssue>
                 {
-                    new LocalBook
+                    new LocalIssue
                     {
                         FileTrackInfo = new ParsedTrackInfo
                         {

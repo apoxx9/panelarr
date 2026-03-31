@@ -37,8 +37,8 @@ namespace Panelarr.Api.V1.Series
             {
                 ComicFileCount = model.ComicFileCount,
                 IssueCount = model.IssueCount,
-                AvailableIssueCount = model.AvailableBookCount,
-                TotalIssueCount = model.TotalBookCount,
+                AvailableIssueCount = model.AvailableIssueCount,
+                TotalIssueCount = model.TotalIssueCount,
                 SizeOnDisk = model.SizeOnDisk
             };
         }

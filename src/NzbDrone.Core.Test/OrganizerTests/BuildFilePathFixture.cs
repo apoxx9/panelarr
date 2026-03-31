@@ -1,7 +1,7 @@
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -34,11 +34,11 @@ namespace NzbDrone.Core.Test.OrganizerTests
                 .With(s => s.Path = @"C:\Test\Fake- The Series".AsOsAgnostic())
                 .Build();
 
-            var fakeBook = Builder<Issue>.CreateNew()
+            var fakeIssue = Builder<Issue>.CreateNew()
                 .With(s => s.Title = "Fake: Issue")
                 .Build();
 
-            Subject.BuildBookFilePath(fakeSeries, fakeBook, filename, ".mobi").Should().Be(expectedPath.AsOsAgnostic());
+            Subject.BuildComicFilePath(fakeSeries, fakeIssue, filename, ".mobi").Should().Be(expectedPath.AsOsAgnostic());
         }
     }
 }

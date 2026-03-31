@@ -33,12 +33,12 @@ namespace NzbDrone.Core.Download.Clients.Pneumatic
 
         public override DownloadProtocol Protocol => DownloadProtocol.Usenet;
 
-        public override async Task<string> Download(RemoteBook remoteBook, IIndexer indexer)
+        public override async Task<string> Download(RemoteIssue remoteIssue, IIndexer indexer)
         {
-            var url = remoteBook.Release.DownloadUrl;
-            var title = remoteBook.Release.Title;
+            var url = remoteIssue.Release.DownloadUrl;
+            var title = remoteIssue.Release.Title;
 
-            if (remoteBook.ParsedIssueInfo.Discography)
+            if (remoteIssue.ParsedIssueInfo.Discography)
             {
                 throw new NotSupportedException("Discography releases are not supported with Pneumatic.");
             }

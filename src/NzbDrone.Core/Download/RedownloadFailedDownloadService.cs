@@ -1,7 +1,7 @@
 using NLog;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.IndexerSearch;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
@@ -12,7 +12,7 @@ namespace NzbDrone.Core.Download
     public class RedownloadFailedDownloadService : IHandle<DownloadFailedEvent>
     {
         private readonly IConfigService _configService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IManageCommandQueue _commandQueueManager;
         private readonly Logger _logger;
 
@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Download
                                                Logger logger)
         {
             _configService = configService;
-            _bookService = bookService;
+            _issueService = bookService;
             _commandQueueManager = commandQueueManager;
             _logger = logger;
         }
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Download
                 return;
             }
 
-            var booksInSeries = _bookService.GetIssuesBySeries(message.SeriesId);
+            var booksInSeries = _issueService.GetIssuesBySeries(message.SeriesId);
 
             if (message.IssueIds.Count == booksInSeries.Count)
             {

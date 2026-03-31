@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.Indexers;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.Profiles.Delay;

@@ -31,7 +31,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Database;
         public RejectionType Type => RejectionType.Permanent;
 
-        public Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
+        public Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
             var cdhEnabled = _configService.EnableCompletedDownloadHandling;
 
@@ -42,9 +42,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             }
 
             _logger.Debug("Performing already imported check on report");
-            foreach (var issue in subject.Books)
+            foreach (var issue in subject.Issues)
             {
-                var comicFiles = _mediaFileService.GetFilesByBook(issue.Id);
+                var comicFiles = _mediaFileService.GetFilesByIssue(issue.Id);
 
                 if (comicFiles.Count() == 0)
                 {
@@ -52,15 +52,15 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                     continue;
                 }
 
-                var historyForBook = _historyService.GetByBook(issue.Id, null);
-                var lastGrabbed = historyForBook.FirstOrDefault(h => h.EventType == EntityHistoryEventType.Grabbed);
+                var historyForIssue = _historyService.GetByIssue(issue.Id, null);
+                var lastGrabbed = historyForIssue.FirstOrDefault(h => h.EventType == EntityHistoryEventType.Grabbed);
 
                 if (lastGrabbed == null)
                 {
                     continue;
                 }
 
-                var imported = historyForBook.FirstOrDefault(h =>
+                var imported = historyForIssue.FirstOrDefault(h =>
                     h.EventType == EntityHistoryEventType.ComicFileImported &&
                     h.DownloadId == lastGrabbed.DownloadId);
 

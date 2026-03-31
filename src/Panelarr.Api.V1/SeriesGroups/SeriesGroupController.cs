@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Http.REST.Attributes;
 using Panelarr.Http;
 using Panelarr.Http.REST;

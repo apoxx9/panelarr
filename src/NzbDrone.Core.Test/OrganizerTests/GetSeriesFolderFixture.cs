@@ -1,6 +1,6 @@
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Test.Framework;
 

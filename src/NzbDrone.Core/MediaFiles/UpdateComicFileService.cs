@@ -5,8 +5,8 @@ using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Instrumentation.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
 
@@ -21,7 +21,7 @@ namespace NzbDrone.Core.MediaFiles
                                             IHandle<SeriesScannedEvent>
     {
         private readonly IDiskProvider _diskProvider;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IConfigService _configService;
         private readonly Logger _logger;
         private static readonly DateTime EpochTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -33,7 +33,7 @@ namespace NzbDrone.Core.MediaFiles
         {
             _diskProvider = diskProvider;
             _configService = configService;
-            _bookService = bookService;
+            _issueService = bookService;
             _logger = logger;
         }
 
@@ -44,7 +44,7 @@ namespace NzbDrone.Core.MediaFiles
 
         private bool ChangeFileDate(ComicFile comicFile, Issue issue)
         {
-            var bookFilePath = comicFile.Path;
+            var comicFilePath = comicFile.Path;
 
             switch (_configService.FileDate)
             {
@@ -52,14 +52,14 @@ namespace NzbDrone.Core.MediaFiles
                     {
                         if (!issue.ReleaseDate.HasValue)
                         {
-                            _logger.Debug("Could not create valid date to change file [{0}]", bookFilePath);
+                            _logger.Debug("Could not create valid date to change file [{0}]", comicFilePath);
                             return false;
                         }
 
                         var relDate = issue.ReleaseDate.Value;
 
                         // avoiding false +ve checks and set date skewing by not using UTC (Windows)
-                        var oldDateTime = _diskProvider.FileGetLastWrite(bookFilePath);
+                        var oldDateTime = _diskProvider.FileGetLastWrite(comicFilePath);
 
                         if (OsInfo.IsNotWindows && relDate < EpochTime)
                         {
@@ -71,14 +71,14 @@ namespace NzbDrone.Core.MediaFiles
                         {
                             try
                             {
-                                _diskProvider.FileSetLastWriteTime(bookFilePath, relDate);
-                                _logger.Debug("Date of file [{0}] changed from '{1}' to '{2}'", bookFilePath, oldDateTime, relDate);
+                                _diskProvider.FileSetLastWriteTime(comicFilePath, relDate);
+                                _logger.Debug("Date of file [{0}] changed from '{1}' to '{2}'", comicFilePath, oldDateTime, relDate);
 
                                 return true;
                             }
                             catch (Exception ex)
                             {
-                                _logger.Warn(ex, "Unable to set date of file [" + bookFilePath + "]");
+                                _logger.Warn(ex, "Unable to set date of file [" + comicFilePath + "]");
                             }
                         }
 
@@ -96,7 +96,7 @@ namespace NzbDrone.Core.MediaFiles
                 return;
             }
 
-            var issues = _bookService.GetSeriesBooksWithFiles(message.Series);
+            var issues = _issueService.GetSeriesIssuesWithFiles(message.Series);
 
             var comicFiles = new List<ComicFile>();
             var updated = new List<ComicFile>();

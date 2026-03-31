@@ -6,24 +6,24 @@ using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
 using NLog;
 using NzbDrone.Common.Cache;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Exceptions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MetadataSource.Metron;
 using NzbDrone.Core.MetadataSource.Provider;
 
-namespace NzbDrone.Core.MetadataSource.BookInfo
+namespace NzbDrone.Core.MetadataSource.IssueInfo
 {
-    public class BookInfoProxy : IProvideSeriesInfo, IProvideBookInfo, ISearchForNewBook
+    public class IssueInfoProxy : IProvideSeriesInfo, IProvideIssueInfo, ISearchForNewIssue
     {
         private readonly ISeriesService _authorService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly Logger _logger;
         private readonly ICached<HashSet<string>> _cache;
         private readonly CachingService _authorCache;
         private readonly IMetadataProvider _metadataProvider;
         private readonly IMetronMapper _metronMapper;
 
-        public BookInfoProxy(ISeriesService authorService,
+        public IssueInfoProxy(ISeriesService authorService,
                              IIssueService bookService,
                              IMetadataProvider metadataProvider,
                              IMetronMapper metronMapper,
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
                              ICacheManager cacheManager)
         {
             _authorService = authorService;
-            _bookService = bookService;
+            _issueService = bookService;
             _metadataProvider = metadataProvider;
             _metronMapper = metronMapper;
             _cache = cacheManager.GetCache<HashSet<string>>(GetType());
@@ -71,14 +71,14 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
 
                 return GetSeriesInfoFromProvider(foreignSeriesId);
             }
-            catch (BookInfoException)
+            catch (IssueInfoException)
             {
                 throw;
             }
             catch (Exception e)
             {
                 _logger.Warn(e, "Unexpected error getting series info: {0}", foreignSeriesId);
-                throw new BookInfoException("Failed to get series info for {0}", e, foreignSeriesId);
+                throw new IssueInfoException("Failed to get series info for {0}", e, foreignSeriesId);
             }
         }
 
@@ -115,7 +115,7 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
                 }
             }
 
-            series.Books = issues;
+            series.Issues = issues;
             series.SeriesGroups = new List<SeriesGroup>();
 
             var existingSeries = _authorService.GetAllSeries();
@@ -124,67 +124,67 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
             return series;
         }
 
-        public HashSet<string> GetChangedBooks(DateTime startTime)
+        public HashSet<string> GetChangedIssues(DateTime startTime)
         {
-            return _cache.Get("ChangedBooks", () => GetChangedBooksUncached(startTime), TimeSpan.FromMinutes(30));
+            return _cache.Get("ChangedIssues", () => GetChangedIssuesUncached(startTime), TimeSpan.FromMinutes(30));
         }
 
-        private HashSet<string> GetChangedBooksUncached(DateTime startTime)
+        private HashSet<string> GetChangedIssuesUncached(DateTime startTime)
         {
             return null;
         }
 
-        public Tuple<string, Issue, List<SeriesMetadata>> GetBookInfo(string foreignBookId)
+        public Tuple<string, Issue, List<SeriesMetadata>> GetIssueInfo(string foreignIssueId)
         {
             try
             {
-                _logger.Debug("Fetching issue info from provider for {0}", foreignBookId);
+                _logger.Debug("Fetching issue info from provider for {0}", foreignIssueId);
 
-                var providerIssue = _metadataProvider.GetIssueInfo(foreignBookId);
+                var providerIssue = _metadataProvider.GetIssueInfo(foreignIssueId);
 
                 if (providerIssue == null)
                 {
-                    throw new IssueNotFoundException(foreignBookId);
+                    throw new IssueNotFoundException(foreignIssueId);
                 }
 
                 var issue = _metronMapper.MapIssue(providerIssue, 0);
 
-                var dbBook = _bookService.FindById(foreignBookId);
+                var dbIssue = _issueService.FindById(foreignIssueId);
                 string seriesId;
                 SeriesMetadata seriesMetadata;
 
-                if (dbBook != null)
+                if (dbIssue != null)
                 {
-                    var author = _authorService.GetSeriesByMetadataId(dbBook.SeriesMetadataId);
-                    seriesId = author?.ForeignSeriesId ?? foreignBookId;
-                    seriesMetadata = author?.Metadata.Value ?? new SeriesMetadata { ForeignSeriesId = foreignBookId };
+                    var author = _authorService.GetSeriesByMetadataId(dbIssue.SeriesMetadataId);
+                    seriesId = author?.ForeignSeriesId ?? foreignIssueId;
+                    seriesMetadata = author?.Metadata.Value ?? new SeriesMetadata { ForeignSeriesId = foreignIssueId };
                 }
                 else
                 {
-                    seriesId = foreignBookId;
-                    seriesMetadata = new SeriesMetadata { ForeignSeriesId = foreignBookId, Name = issue.Title };
+                    seriesId = foreignIssueId;
+                    seriesMetadata = new SeriesMetadata { ForeignSeriesId = foreignIssueId, Name = issue.Title };
                 }
 
                 issue.SeriesMetadata = seriesMetadata;
 
                 return Tuple.Create(seriesId, issue, new List<SeriesMetadata> { seriesMetadata });
             }
-            catch (BookInfoException)
+            catch (IssueInfoException)
             {
                 throw;
             }
             catch (Exception e)
             {
-                _logger.Warn(e, "Unexpected error getting issue info: {0}", foreignBookId);
-                throw new BookInfoException("Failed to get issue info for {0}", e, foreignBookId);
+                _logger.Warn(e, "Unexpected error getting issue info: {0}", foreignIssueId);
+                throw new IssueInfoException("Failed to get issue info for {0}", e, foreignIssueId);
             }
         }
 
-        public List<Issue> SearchForNewBook(string title, string author, bool getAllEditions = true)
+        public List<Issue> SearchForNewIssue(string title, string author, bool getAllEditions = true)
         {
             try
             {
-                _logger.Debug("Searching for new book: title={0}, author={1}", title, author);
+                _logger.Debug("Searching for new issue: title={0}, author={1}", title, author);
 
                 var query = title?.Trim() ?? string.Empty;
                 if (author != null)
@@ -202,9 +202,9 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
                 foreach (var result in results)
                 {
                     var (metadata, series) = _metronMapper.MapSeries(result);
-                    if (series?.Books?.Value != null)
+                    if (series?.Issues?.Value != null)
                     {
-                        foreach (var issue in series.Books.Value)
+                        foreach (var issue in series.Issues.Value)
                         {
                             issue.SeriesMetadata = metadata;
                             issue.Series = series;
@@ -217,7 +217,7 @@ namespace NzbDrone.Core.MetadataSource.BookInfo
             }
             catch (Exception ex)
             {
-                _logger.Warn(ex, "Error searching for book: {0}", title);
+                _logger.Warn(ex, "Error searching for issue: {0}", title);
                 return new List<Issue>();
             }
         }

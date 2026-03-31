@@ -1,6 +1,6 @@
 using NzbDrone.Core.SeriesStats;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     public class IssueStatisticsResource
     {
@@ -37,7 +37,7 @@ namespace Panelarr.Api.V1.Books
                 ComicFileCount = model.ComicFileCount,
                 IssueCount = model.IssueCount,
                 SizeOnDisk = model.SizeOnDisk,
-                TotalIssueCount = model.TotalBookCount
+                TotalIssueCount = model.TotalIssueCount
             };
         }
     }

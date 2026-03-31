@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using FluentValidation.Results;
 using NLog;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.Notifications.Subsonic

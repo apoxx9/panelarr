@@ -5,8 +5,8 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Blocklisting;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.History;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 
@@ -14,12 +14,12 @@ namespace NzbDrone.Core.CustomFormats
 {
     public interface ICustomFormatCalculationService
     {
-        List<CustomFormat> ParseCustomFormat(RemoteBook remoteBook, long size);
+        List<CustomFormat> ParseCustomFormat(RemoteIssue remoteIssue, long size);
         List<CustomFormat> ParseCustomFormat(ComicFile comicFile, Series artist);
         List<CustomFormat> ParseCustomFormat(ComicFile comicFile);
         List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Series artist);
         List<CustomFormat> ParseCustomFormat(EntityHistory history, Series artist);
-        List<CustomFormat> ParseCustomFormat(LocalBook localBook);
+        List<CustomFormat> ParseCustomFormat(LocalIssue localIssue);
     }
 
     public class CustomFormatCalculationService : ICustomFormatCalculationService
@@ -33,14 +33,14 @@ namespace NzbDrone.Core.CustomFormats
             _logger = logger;
         }
 
-        public List<CustomFormat> ParseCustomFormat(RemoteBook remoteBook, long size)
+        public List<CustomFormat> ParseCustomFormat(RemoteIssue remoteIssue, long size)
         {
             var input = new CustomFormatInput
             {
-                BookInfo = remoteBook.ParsedIssueInfo,
-                Series = remoteBook.Series,
+                IssueInfo = remoteIssue.ParsedIssueInfo,
+                Series = remoteIssue.Series,
                 Size = size,
-                IndexerFlags = remoteBook.Release?.IndexerFlags ?? 0
+                IndexerFlags = remoteIssue.Release?.IndexerFlags ?? 0
             };
 
             return ParseCustomFormat(input);
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.CustomFormats
 
         public List<CustomFormat> ParseCustomFormat(Blocklist blocklist, Series author)
         {
-            var parsed = Parser.Parser.ParseBookTitle(blocklist.SourceTitle);
+            var parsed = Parser.Parser.ParseIssueTitle(blocklist.SourceTitle);
 
             var bookInfo = new ParsedIssueInfo
             {
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.CustomFormats
 
             var input = new CustomFormatInput
             {
-                BookInfo = bookInfo,
+                IssueInfo = bookInfo,
                 Series = author,
                 Size = blocklist.Size ?? 0,
                 IndexerFlags = blocklist.IndexerFlags
@@ -81,7 +81,7 @@ namespace NzbDrone.Core.CustomFormats
 
         public List<CustomFormat> ParseCustomFormat(EntityHistory history, Series author)
         {
-            var parsed = Parser.Parser.ParseBookTitle(history.SourceTitle);
+            var parsed = Parser.Parser.ParseIssueTitle(history.SourceTitle);
 
             long.TryParse(history.Data.GetValueOrDefault("size"), out var size);
             Enum.TryParse(history.Data.GetValueOrDefault("indexerFlags"), true, out IndexerFlags indexerFlags);
@@ -96,7 +96,7 @@ namespace NzbDrone.Core.CustomFormats
 
             var input = new CustomFormatInput
             {
-                BookInfo = bookInfo,
+                IssueInfo = bookInfo,
                 Series = author,
                 Size = size,
                 IndexerFlags = indexerFlags
@@ -105,22 +105,22 @@ namespace NzbDrone.Core.CustomFormats
             return ParseCustomFormat(input);
         }
 
-        public List<CustomFormat> ParseCustomFormat(LocalBook localBook)
+        public List<CustomFormat> ParseCustomFormat(LocalIssue localIssue)
         {
             var bookInfo = new ParsedIssueInfo
             {
-                SeriesName = localBook.Series.Name,
-                ReleaseTitle = localBook.SceneName,
-                Quality = localBook.Quality,
-                ReleaseGroup = localBook.ReleaseGroup
+                SeriesName = localIssue.Series.Name,
+                ReleaseTitle = localIssue.SceneName,
+                Quality = localIssue.Quality,
+                ReleaseGroup = localIssue.ReleaseGroup
             };
 
             var input = new CustomFormatInput
             {
-                BookInfo = bookInfo,
-                Series = localBook.Series,
-                Size = localBook.Size,
-                IndexerFlags = localBook.IndexerFlags,
+                IssueInfo = bookInfo,
+                Series = localIssue.Series,
+                Size = localIssue.Size,
+                IndexerFlags = localIssue.IndexerFlags,
             };
 
             return ParseCustomFormat(input);
@@ -184,7 +184,7 @@ namespace NzbDrone.Core.CustomFormats
 
             var input = new CustomFormatInput
             {
-                BookInfo = bookInfo,
+                IssueInfo = bookInfo,
                 Series = author,
                 Size = comicFile.Size,
                 IndexerFlags = comicFile.IndexerFlags,

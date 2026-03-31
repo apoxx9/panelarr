@@ -1,9 +1,9 @@
 using System.Linq;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.ImportLists;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.RootFolders;

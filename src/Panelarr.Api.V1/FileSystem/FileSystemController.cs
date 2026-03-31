@@ -48,7 +48,7 @@ namespace Panelarr.Api.V1.FileSystem
                 return new string[0];
             }
 
-            return _diskScanService.GetBookFiles(path).Select(f => new
+            return _diskScanService.GetComicFiles(path).Select(f => new
             {
                 Path = f.FullName,
                 Name = f.Name

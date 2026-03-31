@@ -7,11 +7,11 @@ using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Extras.Others;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.Extras.Metadata
@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Extras.Metadata
         private readonly IHttpClient _httpClient;
         private readonly IMediaFileAttributeService _mediaFileAttributeService;
         private readonly IMetadataFileService _metadataFileService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly Logger _logger;
 
         public MetadataService(IConfigService configService,
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Extras.Metadata
             _httpClient = httpClient;
             _mediaFileAttributeService = mediaFileAttributeService;
             _metadataFileService = metadataFileService;
-            _bookService = bookService;
+            _issueService = bookService;
             _logger = logger;
         }
 
@@ -81,7 +81,7 @@ namespace NzbDrone.Core.Extras.Metadata
 
                 foreach (var comicFile in comicFiles)
                 {
-                    files.AddIfNotNull(ProcessBookMetadata(consumer, author, comicFile, consumerFiles));
+                    files.AddIfNotNull(ProcessIssueMetadata(consumer, author, comicFile, consumerFiles));
                 }
             }
 
@@ -96,7 +96,7 @@ namespace NzbDrone.Core.Extras.Metadata
 
             foreach (var consumer in _metadataFactory.Enabled())
             {
-                files.AddIfNotNull(ProcessBookMetadata(consumer, author, comicFile, new List<MetadataFile>()));
+                files.AddIfNotNull(ProcessIssueMetadata(consumer, author, comicFile, new List<MetadataFile>()));
             }
 
             _metadataFileService.Upsert(files);
@@ -255,7 +255,7 @@ namespace NzbDrone.Core.Extras.Metadata
             return metadata;
         }
 
-        private MetadataFile ProcessBookMetadata(IMetadata consumer, Series author, ComicFile comicFile, List<MetadataFile> existingMetadataFiles)
+        private MetadataFile ProcessIssueMetadata(IMetadata consumer, Series author, ComicFile comicFile, List<MetadataFile> existingMetadataFiles)
         {
             var trackMetadata = consumer.IssueMetadata(author, comicFile);
 

@@ -5,24 +5,24 @@ using NzbDrone.Core.MediaFiles;
 using Panelarr.Http;
 using Panelarr.Http.REST;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     [V1ApiController("retag")]
-    public class RetagBookController : Controller
+    public class RetagIssueController : Controller
     {
         private readonly IMetadataTagService _metadataTagService;
 
-        public RetagBookController(IMetadataTagService metadataTagService)
+        public RetagIssueController(IMetadataTagService metadataTagService)
         {
             _metadataTagService = metadataTagService;
         }
 
         [HttpGet]
-        public List<RetagIssueResource> GetBooks(int? seriesId, int? issueId)
+        public List<RetagIssueResource> GetIssues(int? seriesId, int? issueId)
         {
             if (issueId.HasValue)
             {
-                return _metadataTagService.GetRetagPreviewsByBook(issueId.Value).Where(x => x.Changes.Any()).ToResource();
+                return _metadataTagService.GetRetagPreviewsByIssue(issueId.Value).Where(x => x.Changes.Any()).ToResource();
             }
             else if (seriesId.HasValue)
             {

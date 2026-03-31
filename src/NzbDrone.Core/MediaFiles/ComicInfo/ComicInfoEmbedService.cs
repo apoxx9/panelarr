@@ -1,7 +1,7 @@
 using System.IO;
 using System.IO.Compression;
 using NLog;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
 
@@ -16,7 +16,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
 
         private readonly IComicInfoGenerator _generator;
         private readonly IMetronInfoGenerator _metronInfoGenerator;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IPublisherService _publisherService;
         private readonly Logger _logger;
 
@@ -29,7 +29,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
         {
             _generator = generator;
             _metronInfoGenerator = metronInfoGenerator;
-            _bookService = bookService;
+            _issueService = bookService;
             _publisherService = publisherService;
             _logger = logger;
         }
@@ -46,7 +46,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
 
         private void EmbedComicInfo(ComicFile comicFile)
         {
-            if (comicFile.ComicFormat != Books.ComicFormat.CBZ)
+            if (comicFile.ComicFormat != Issues.ComicFormat.CBZ)
             {
                 _logger.Debug("Skipping ComicInfo.xml embedding for non-CBZ file: {0}", comicFile.Path);
                 return;
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                 return;
             }
 
-            var issue = comicFile.Issue?.Value ?? _bookService.GetIssue(comicFile.IssueId);
+            var issue = comicFile.Issue?.Value ?? _issueService.GetIssue(comicFile.IssueId);
             if (issue == null)
             {
                 _logger.Warn("Issue not found for ComicFile {0}, skipping ComicInfo.xml embedding", comicFile.Id);

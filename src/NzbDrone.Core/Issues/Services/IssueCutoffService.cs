@@ -5,21 +5,21 @@ using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
 
-namespace NzbDrone.Core.Books
+namespace NzbDrone.Core.Issues
 {
-    public interface IBookCutoffService
+    public interface IIssueCutoffService
     {
         PagingSpec<Issue> IssuesWhereCutoffUnmet(PagingSpec<Issue> pagingSpec);
     }
 
-    public class IssueCutoffService : IBookCutoffService
+    public class IssueCutoffService : IIssueCutoffService
     {
-        private readonly IBookRepository _bookRepository;
+        private readonly IIssueRepository _issueRepository;
         private readonly IQualityProfileService _qualityProfileService;
 
-        public IssueCutoffService(IBookRepository bookRepository, IQualityProfileService qualityProfileService)
+        public IssueCutoffService(IIssueRepository bookRepository, IQualityProfileService qualityProfileService)
         {
-            _bookRepository = bookRepository;
+            _issueRepository = bookRepository;
             _qualityProfileService = qualityProfileService;
         }
 
@@ -48,7 +48,7 @@ namespace NzbDrone.Core.Books
                 return pagingSpec;
             }
 
-            return _bookRepository.IssuesWhereCutoffUnmet(pagingSpec, qualitiesBelowCutoff);
+            return _issueRepository.IssuesWhereCutoffUnmet(pagingSpec, qualitiesBelowCutoff);
         }
     }
 }

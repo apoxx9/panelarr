@@ -1,4 +1,4 @@
-﻿namespace Panelarr.Http.ClientSchema
+namespace Panelarr.Http.ClientSchema
 {
     public class SelectOption
     {

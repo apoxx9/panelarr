@@ -1,7 +1,7 @@
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Qualities;
 using Panelarr.Api.V1.RootFolders;
 
@@ -31,7 +31,7 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         {
             EnsureProfileCutoff(1, Quality.CBZ, true);
             var author = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray", true);
-            EnsureBookFile(author, 1, "43765115", Quality.CBR);
+            EnsureComicFile(author, 1, "43765115", Quality.CBR);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "releaseDate", "desc");
 
@@ -44,7 +44,7 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         {
             EnsureProfileCutoff(1, Quality.CBZ, true);
             var author = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray", false);
-            EnsureBookFile(author, 1, "43765115", Quality.CBR);
+            EnsureComicFile(author, 1, "43765115", Quality.CBR);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "releaseDate", "desc");
 
@@ -57,7 +57,7 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         {
             EnsureProfileCutoff(1, Quality.CBZ, true);
             var author = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray", true);
-            EnsureBookFile(author, 1, "43765115", Quality.CBR);
+            EnsureComicFile(author, 1, "43765115", Quality.CBR);
 
             var result = WantedCutoffUnmet.GetPagedIncludeSeries(0, 15, "releaseDate", "desc", includeSeries: true);
 
@@ -71,7 +71,7 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         {
             EnsureProfileCutoff(1, Quality.CBZ, true);
             var author = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray", true);
-            EnsureBookFile(author, 1, "43765115", Quality.CBR);
+            EnsureComicFile(author, 1, "43765115", Quality.CBR);
 
             var result = WantedCutoffUnmet.GetPagedIncludeSeries(0, 15, "releaseDate", "desc", includeSeries: false);
 
@@ -84,7 +84,7 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         {
             EnsureProfileCutoff(1, Quality.CBZ, true);
             var author = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray", false);
-            EnsureBookFile(author, 1, "43765115", Quality.CBR);
+            EnsureComicFile(author, 1, "43765115", Quality.CBR);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "releaseDate", "desc", "monitored", false);
 

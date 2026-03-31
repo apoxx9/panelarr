@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
@@ -23,14 +23,14 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         {
             _books = new List<Issue>();
 
-            var remoteBook = Builder<RemoteBook>.CreateNew()
-                                                      .With(r => r.Books = _books)
+            var remoteIssue = Builder<RemoteIssue>.CreateNew()
+                                                      .With(r => r.Issues = _books)
                                                       .Build();
 
             var downloadItem = Builder<DownloadClientItem>.CreateNew().Build();
 
             _trackedDownload = Builder<TrackedDownload>.CreateNew()
-                                                       .With(t => t.RemoteBook = remoteBook)
+                                                       .With(t => t.RemoteIssue = remoteIssue)
                                                        .With(t => t.DownloadItem = downloadItem)
                                                        .Build();
 

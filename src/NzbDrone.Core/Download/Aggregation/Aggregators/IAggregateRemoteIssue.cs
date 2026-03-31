@@ -2,8 +2,8 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.Download.Aggregation.Aggregators
 {
-    public interface IAggregateRemoteBook
+    public interface IAggregateRemoteIssue
     {
-        RemoteBook Aggregate(RemoteBook remoteBook);
+        RemoteIssue Aggregate(RemoteIssue remoteIssue);
     }
 }

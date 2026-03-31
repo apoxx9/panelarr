@@ -25,8 +25,8 @@ namespace NzbDrone.Core.Download
 
         public bool IgnoreDownload(TrackedDownload trackedDownload)
         {
-            var author = trackedDownload.RemoteBook.Series;
-            var issues = trackedDownload.RemoteBook.Books;
+            var author = trackedDownload.RemoteIssue.Series;
+            var issues = trackedDownload.RemoteIssue.Issues;
 
             if (author == null || issues.Empty())
             {
@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Download
             {
                 SeriesId = author.Id,
                 IssueIds = issues.Select(e => e.Id).ToList(),
-                Quality = trackedDownload.RemoteBook.ParsedIssueInfo.Quality,
+                Quality = trackedDownload.RemoteIssue.ParsedIssueInfo.Quality,
                 SourceTitle = trackedDownload.DownloadItem.Title,
                 DownloadClientInfo = trackedDownload.DownloadItem.DownloadClientInfo,
                 DownloadId = trackedDownload.DownloadItem.DownloadId,

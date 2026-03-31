@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.Datastore.Events;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
@@ -20,7 +20,7 @@ using NzbDrone.Http.REST.Attributes;
 using NzbDrone.SignalR;
 using Panelarr.Http;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     [V1ApiController]
     public class IssueController : IssueControllerWithSignalR,
@@ -33,12 +33,12 @@ namespace Panelarr.Api.V1.Books
         IHandle<ComicFileDeletedEvent>
     {
         protected readonly ISeriesService _seriesService;
-        protected readonly IAddIssueService _addBookService;
+        protected readonly IAddIssueService _addIssueService;
 
         public IssueController(ISeriesService authorService,
                           IIssueService bookService,
-                          IAddIssueService addBookService,
-                          ISeriesBookLinkService seriesBookLinkService,
+                          IAddIssueService addIssueService,
+                          ISeriesIssueLinkService seriesIssueLinkService,
                           ISeriesStatisticsService authorStatisticsService,
                           IMapCoversToLocal coverMapper,
                           IUpgradableSpecification upgradableSpecification,
@@ -46,10 +46,10 @@ namespace Panelarr.Api.V1.Books
                           QualityProfileExistsValidator qualityProfileExistsValidator,
                           MetadataProfileExistsValidator metadataProfileExistsValidator)
 
-        : base(bookService, seriesBookLinkService, authorStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
+        : base(bookService, seriesIssueLinkService, authorStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
         {
             _seriesService = authorService;
-            _addBookService = addBookService;
+            _addIssueService = addIssueService;
 
             PostValidator.RuleFor(s => s.ForeignIssueId).NotEmpty();
             PostValidator.RuleFor(s => s.Series.QualityProfileId).SetValidator(qualityProfileExistsValidator);
@@ -58,15 +58,15 @@ namespace Panelarr.Api.V1.Books
         }
 
         [HttpGet]
-        public List<IssueResource> GetBooks([FromQuery]int? seriesId,
-            [FromQuery]List<int> issueIds,
-            [FromQuery]string titleSlug,
-            [FromQuery]bool includeAllSeriesBooks = false)
+        public List<IssueResource> GetIssues([FromQuery] int? seriesId,
+            [FromQuery] List<int> issueIds,
+            [FromQuery] string titleSlug,
+            [FromQuery] bool includeAllSeriesIssues = false)
         {
             if (!seriesId.HasValue && !issueIds.Any() && titleSlug.IsNullOrWhiteSpace())
             {
                 var metadataTask = Task.Run(() => _seriesService.GetAllSeries());
-                var issues = _bookService.GetAllIssues();
+                var issues = _issueService.GetAllIssues();
 
                 var seriesDict = metadataTask.GetAwaiter().GetResult().ToDictionary(x => x.SeriesMetadataId);
 
@@ -80,7 +80,7 @@ namespace Panelarr.Api.V1.Books
 
             if (seriesId.HasValue)
             {
-                var issues = _bookService.GetIssuesBySeries(seriesId.Value);
+                var issues = _issueService.GetIssuesBySeries(seriesId.Value);
 
                 var series = _seriesService.GetSeries(seriesId.Value);
 
@@ -94,16 +94,16 @@ namespace Panelarr.Api.V1.Books
 
             if (titleSlug.IsNotNullOrWhiteSpace())
             {
-                var issue = _bookService.FindBySlug(titleSlug);
+                var issue = _issueService.FindBySlug(titleSlug);
 
                 if (issue == null)
                 {
                     return MapToResource(new List<Issue>(), false);
                 }
 
-                if (includeAllSeriesBooks)
+                if (includeAllSeriesIssues)
                 {
-                    return MapToResource(_bookService.GetIssuesBySeries(issue.SeriesId), false);
+                    return MapToResource(_issueService.GetIssuesBySeries(issue.SeriesId), false);
                 }
                 else
                 {
@@ -111,13 +111,13 @@ namespace Panelarr.Api.V1.Books
                 }
             }
 
-            return MapToResource(_bookService.GetIssues(issueIds), false);
+            return MapToResource(_issueService.GetIssues(issueIds), false);
         }
 
         [HttpGet("{id:int}/overview")]
         public object Overview(int id)
         {
-            var issue = _bookService.GetIssue(id);
+            var issue = _issueService.GetIssue(id);
             return new
             {
                 id,
@@ -126,21 +126,21 @@ namespace Panelarr.Api.V1.Books
         }
 
         [RestPostById]
-        public ActionResult<IssueResource> AddBook([FromBody] IssueResource bookResource)
+        public ActionResult<IssueResource> AddIssue([FromBody] IssueResource bookResource)
         {
-            var issue = _addBookService.AddIssue(bookResource.ToModel());
+            var issue = _addIssueService.AddIssue(bookResource.ToModel());
 
             return Created(issue.Id);
         }
 
         [RestPutById]
-        public ActionResult<IssueResource> UpdateBook([FromBody] IssueResource bookResource)
+        public ActionResult<IssueResource> UpdateIssue([FromBody] IssueResource bookResource)
         {
-            var issue = _bookService.GetIssue(bookResource.Id);
+            var issue = _issueService.GetIssue(bookResource.Id);
 
             var model = bookResource.ToModel(issue);
 
-            _bookService.UpdateIssue(model);
+            _issueService.UpdateIssue(model);
 
             BroadcastResourceChange(ModelAction.Updated, model.Id);
 
@@ -148,15 +148,15 @@ namespace Panelarr.Api.V1.Books
         }
 
         [RestDeleteById]
-        public void DeleteBook(int id, bool deleteFiles = false, bool addImportListExclusion = false)
+        public void DeleteIssue(int id, bool deleteFiles = false, bool addImportListExclusion = false)
         {
-            _bookService.DeleteIssue(id, deleteFiles, addImportListExclusion);
+            _issueService.DeleteIssue(id, deleteFiles, addImportListExclusion);
         }
 
         [NonAction]
         public void Handle(IssueGrabbedEvent message)
         {
-            foreach (var issue in message.Issue.Books)
+            foreach (var issue in message.Issue.Issues)
             {
                 var resource = issue.ToResource();
                 resource.Grabbed = true;
@@ -192,7 +192,7 @@ namespace Panelarr.Api.V1.Books
         [NonAction]
         public void Handle(TrackImportedEvent message)
         {
-            BroadcastResourceChange(ModelAction.Updated, message.BookInfo.Issue.ToResource());
+            BroadcastResourceChange(ModelAction.Updated, message.IssueInfo.Issue.ToResource());
         }
 
         [NonAction]

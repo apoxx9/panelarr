@@ -2,17 +2,17 @@ using NzbDrone.Core.Messaging.Commands;
 
 namespace NzbDrone.Core.IndexerSearch
 {
-    public class CutoffUnmetBookSearchCommand : Command
+    public class CutoffUnmetIssueSearchCommand : Command
     {
         public int? SeriesId { get; set; }
 
         public override bool SendUpdatesToClient => true;
 
-        public CutoffUnmetBookSearchCommand()
+        public CutoffUnmetIssueSearchCommand()
         {
         }
 
-        public CutoffUnmetBookSearchCommand(int authorId)
+        public CutoffUnmetIssueSearchCommand(int authorId)
         {
             SeriesId = authorId;
         }

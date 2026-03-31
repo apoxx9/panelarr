@@ -9,7 +9,7 @@ using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
 {
-    public class UpgradeSpecification : IImportDecisionEngineSpecification<LocalBook>
+    public class UpgradeSpecification : IImportDecisionEngineSpecification<LocalIssue>
     {
         private readonly IConfigService _configService;
         private readonly ICustomFormatCalculationService _customFormatCalculationService;
@@ -24,7 +24,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
             _logger = logger;
         }
 
-        public Decision IsSatisfiedBy(LocalBook item, DownloadClientItem downloadClientItem)
+        public Decision IsSatisfiedBy(LocalIssue item, DownloadClientItem downloadClientItem)
         {
             var files = item.Issue?.ComicFiles?.Value;
             if (files == null || !files.Any())

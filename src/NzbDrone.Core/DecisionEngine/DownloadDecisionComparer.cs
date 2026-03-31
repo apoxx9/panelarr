@@ -32,7 +32,7 @@ namespace NzbDrone.Core.DecisionEngine
                 CompareProtocol,
                 CompareIndexerPriority,
                 ComparePeersIfTorrent,
-                CompareBookCount,
+                CompareIssueCount,
                 CompareAgeIfUsenet,
                 CompareSize
             };
@@ -62,71 +62,71 @@ namespace NzbDrone.Core.DecisionEngine
 
         private int CompareIndexerPriority(DownloadDecision x, DownloadDecision y)
         {
-            return CompareByReverse(x.RemoteBook.Release, y.RemoteBook.Release, release => release.IndexerPriority);
+            return CompareByReverse(x.RemoteIssue.Release, y.RemoteIssue.Release, release => release.IndexerPriority);
         }
 
         private int CompareQuality(DownloadDecision x, DownloadDecision y)
         {
             if (_configService.DownloadPropersAndRepacks == ProperDownloadTypes.DoNotPrefer)
             {
-                return CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Series.QualityProfile.Value.GetIndex(remoteBook.ParsedIssueInfo.Quality.Quality));
+                return CompareBy(x.RemoteIssue, y.RemoteIssue, remoteIssue => remoteIssue.Series.QualityProfile.Value.GetIndex(remoteIssue.ParsedIssueInfo.Quality.Quality));
             }
 
-            return CompareAll(CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Series.QualityProfile.Value.GetIndex(remoteBook.ParsedIssueInfo.Quality.Quality)),
-                           CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.ParsedIssueInfo.Quality.Revision));
+            return CompareAll(CompareBy(x.RemoteIssue, y.RemoteIssue, remoteIssue => remoteIssue.Series.QualityProfile.Value.GetIndex(remoteIssue.ParsedIssueInfo.Quality.Quality)),
+                           CompareBy(x.RemoteIssue, y.RemoteIssue, remoteIssue => remoteIssue.ParsedIssueInfo.Quality.Revision));
         }
 
         private int CompareCustomFormatScore(DownloadDecision x, DownloadDecision y)
         {
-            return CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.CustomFormatScore);
+            return CompareBy(x.RemoteIssue, y.RemoteIssue, remoteIssue => remoteIssue.CustomFormatScore);
         }
 
         private int CompareProtocol(DownloadDecision x, DownloadDecision y)
         {
-            var result = CompareBy(x.RemoteBook, y.RemoteBook, remoteBook =>
+            var result = CompareBy(x.RemoteIssue, y.RemoteIssue, remoteIssue =>
             {
-                var delayProfile = _delayProfileService.BestForTags(remoteBook.Series.Tags);
-                var downloadProtocol = remoteBook.Release.DownloadProtocol;
+                var delayProfile = _delayProfileService.BestForTags(remoteIssue.Series.Tags);
+                var downloadProtocol = remoteIssue.Release.DownloadProtocol;
                 return downloadProtocol == delayProfile.PreferredProtocol;
             });
 
             return result;
         }
 
-        private int CompareBookCount(DownloadDecision x, DownloadDecision y)
+        private int CompareIssueCount(DownloadDecision x, DownloadDecision y)
         {
-            var discographyCompare = CompareBy(x.RemoteBook,
-                y.RemoteBook,
-                remoteBook => remoteBook.ParsedIssueInfo.Discography);
+            var discographyCompare = CompareBy(x.RemoteIssue,
+                y.RemoteIssue,
+                remoteIssue => remoteIssue.ParsedIssueInfo.Discography);
 
             if (discographyCompare != 0)
             {
                 return discographyCompare;
             }
 
-            return CompareByReverse(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Books.Count);
+            return CompareByReverse(x.RemoteIssue, y.RemoteIssue, remoteIssue => remoteIssue.Issues.Count);
         }
 
         private int ComparePeersIfTorrent(DownloadDecision x, DownloadDecision y)
         {
             // Different protocols should get caught when checking the preferred protocol,
             // since we're dealing with the same series in our comparisions
-            if (x.RemoteBook.Release.DownloadProtocol != DownloadProtocol.Torrent ||
-                y.RemoteBook.Release.DownloadProtocol != DownloadProtocol.Torrent)
+            if (x.RemoteIssue.Release.DownloadProtocol != DownloadProtocol.Torrent ||
+                y.RemoteIssue.Release.DownloadProtocol != DownloadProtocol.Torrent)
             {
                 return 0;
             }
 
             return CompareAll(
-                CompareBy(x.RemoteBook, y.RemoteBook, remoteBook =>
+                CompareBy(x.RemoteIssue, y.RemoteIssue, remoteIssue =>
                 {
-                    var seeders = TorrentInfo.GetSeeders(remoteBook.Release);
+                    var seeders = TorrentInfo.GetSeeders(remoteIssue.Release);
 
                     return seeders.HasValue && seeders.Value > 0 ? Math.Round(Math.Log10(seeders.Value)) : 0;
                 }),
-                CompareBy(x.RemoteBook, y.RemoteBook, remoteBook =>
+                CompareBy(x.RemoteIssue, y.RemoteIssue, remoteIssue =>
                 {
-                    var peers = TorrentInfo.GetPeers(remoteBook.Release);
+                    var peers = TorrentInfo.GetPeers(remoteIssue.Release);
 
                     return peers.HasValue && peers.Value > 0 ? Math.Round(Math.Log10(peers.Value)) : 0;
                 }));
@@ -134,16 +134,16 @@ namespace NzbDrone.Core.DecisionEngine
 
         private int CompareAgeIfUsenet(DownloadDecision x, DownloadDecision y)
         {
-            if (x.RemoteBook.Release.DownloadProtocol != DownloadProtocol.Usenet ||
-                y.RemoteBook.Release.DownloadProtocol != DownloadProtocol.Usenet)
+            if (x.RemoteIssue.Release.DownloadProtocol != DownloadProtocol.Usenet ||
+                y.RemoteIssue.Release.DownloadProtocol != DownloadProtocol.Usenet)
             {
                 return 0;
             }
 
-            return CompareBy(x.RemoteBook, y.RemoteBook, remoteBook =>
+            return CompareBy(x.RemoteIssue, y.RemoteIssue, remoteIssue =>
             {
-                var ageHours = remoteBook.Release.AgeHours;
-                var age = remoteBook.Release.Age;
+                var ageHours = remoteIssue.Release.AgeHours;
+                var age = remoteIssue.Release.Age;
 
                 if (ageHours < 1)
                 {
@@ -167,7 +167,7 @@ namespace NzbDrone.Core.DecisionEngine
         private int CompareSize(DownloadDecision x, DownloadDecision y)
         {
             // TODO: Is smaller better? Smaller for usenet could mean no par2 files.
-            return CompareBy(x.RemoteBook, y.RemoteBook, remoteBook => remoteBook.Release.Size.Round(200.Megabytes()));
+            return CompareBy(x.RemoteIssue, y.RemoteIssue, remoteIssue => remoteIssue.Release.Size.Round(200.Megabytes()));
         }
     }
 }

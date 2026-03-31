@@ -9,7 +9,7 @@ namespace NzbDrone.Core.Download
     public interface IDownloadClient : IProvider
     {
         DownloadProtocol Protocol { get; }
-        Task<string> Download(RemoteBook remoteBook, IIndexer indexer);
+        Task<string> Download(RemoteIssue remoteIssue, IIndexer indexer);
         IEnumerable<DownloadClientItem> GetItems();
         DownloadClientItem GetImportItem(DownloadClientItem item, DownloadClientItem previousImportAttempt);
         void RemoveItem(DownloadClientItem item, bool deleteData);

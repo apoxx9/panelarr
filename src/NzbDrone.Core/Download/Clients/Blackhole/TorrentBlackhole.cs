@@ -39,14 +39,14 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
             ScanGracePeriod = TimeSpan.FromSeconds(30);
         }
 
-        protected override string AddFromMagnetLink(RemoteBook remoteBook, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteIssue remoteIssue, string hash, string magnetLink)
         {
             if (!Settings.SaveMagnetFiles)
             {
                 throw new NotSupportedException("Blackhole does not support magnet links.");
             }
 
-            var title = remoteBook.Release.Title;
+            var title = remoteIssue.Release.Title;
 
             title = FileNameBuilder.CleanFileName(title);
 
@@ -63,9 +63,9 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
             return null;
         }
 
-        protected override string AddFromTorrentFile(RemoteBook remoteBook, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteIssue remoteIssue, string hash, string filename, byte[] fileContent)
         {
-            var title = remoteBook.Release.Title;
+            var title = remoteIssue.Release.Title;
 
             title = FileNameBuilder.CleanFileName(title);
 

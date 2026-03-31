@@ -21,7 +21,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
             var qualityComparer = new QualityModelComparer(item.Issue?.Series.Value.QualityProfile);
 
             // min quality of all new tracks
-            var newMinQuality = item.LocalBooks.Select(x => x.Quality).OrderBy(x => x, qualityComparer).First();
+            var newMinQuality = item.LocalIssues.Select(x => x.Quality).OrderBy(x => x, qualityComparer).First();
             _logger.Debug("Min quality of new files: {0}", newMinQuality);
 
             // get minimum quality of existing release

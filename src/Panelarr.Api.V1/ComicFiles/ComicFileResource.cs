@@ -59,7 +59,7 @@ namespace Panelarr.Api.V1.ComicFiles
             };
         }
 
-        public static ComicFileResource ToResource(this ComicFile model, NzbDrone.Core.Books.Series author, IUpgradableSpecification upgradableSpecification)
+        public static ComicFileResource ToResource(this ComicFile model, NzbDrone.Core.Issues.Series author, IUpgradableSpecification upgradableSpecification)
         {
             if (model == null)
             {

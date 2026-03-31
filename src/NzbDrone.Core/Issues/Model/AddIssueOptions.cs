@@ -1,6 +1,6 @@
 using NzbDrone.Core.Datastore;
 
-namespace NzbDrone.Core.Books
+namespace NzbDrone.Core.Issues
 {
     public class AddIssueOptions : IEmbeddedDocument
     {
@@ -11,7 +11,7 @@ namespace NzbDrone.Core.Books
         }
 
         public IssueAddType AddType { get; set; }
-        public bool SearchForNewBook { get; set; }
+        public bool SearchForNewIssue { get; set; }
     }
 
     public enum IssueAddType

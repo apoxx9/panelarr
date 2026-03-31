@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Download.Clients.Aria2
             _proxy = proxy;
         }
 
-        protected override string AddFromMagnetLink(RemoteBook remoteEpisode, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteIssue remoteEpisode, string hash, string magnetLink)
         {
             var gid = _proxy.AddMagnet(Settings, magnetLink);
 
@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Download.Clients.Aria2
             return hash;
         }
 
-        protected override string AddFromTorrentFile(RemoteBook remoteEpisode, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteIssue remoteEpisode, string hash, string filename, byte[] fileContent)
         {
             var gid = _proxy.AddTorrent(Settings, fileContent);
 

@@ -8,8 +8,8 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Processes;
 using NzbDrone.Common.Serializer;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.HealthCheck;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.ThingiProvider;
 using NzbDrone.Core.Validation;
@@ -38,26 +38,26 @@ namespace NzbDrone.Core.Notifications.CustomScript
         public override void OnGrab(GrabMessage message)
         {
             var author = message.Series;
-            var remoteBook = message.RemoteBook;
-            var releaseGroup = remoteBook.ParsedIssueInfo.ReleaseGroup;
+            var remoteIssue = message.RemoteIssue;
+            var releaseGroup = remoteIssue.ParsedIssueInfo.ReleaseGroup;
             var environmentVariables = new StringDictionary();
 
             environmentVariables.Add("Panelarr_EventType", "Grab");
             environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
             environmentVariables.Add("Panelarr_Series_Name", author.Metadata.Value.Name);
             environmentVariables.Add("Panelarr_Series_GRId", author.Metadata.Value.ForeignSeriesId);
-            environmentVariables.Add("Panelarr_Release_BookCount", remoteBook.Books.Count.ToString());
-            environmentVariables.Add("Panelarr_Release_BookReleaseDates", string.Join(",", remoteBook.Books.Select(e => e.ReleaseDate)));
-            environmentVariables.Add("Panelarr_Release_BookTitles", string.Join("|", remoteBook.Books.Select(e => e.Title)));
-            environmentVariables.Add("Panelarr_Release_BookIds", string.Join("|", remoteBook.Books.Select(e => e.Id.ToString())));
-            environmentVariables.Add("Panelarr_Release_GRIds", remoteBook.Books.Select(x => x.ForeignIssueId).ConcatToString("|"));
-            environmentVariables.Add("Panelarr_Release_Title", remoteBook.Release.Title);
-            environmentVariables.Add("Panelarr_Release_Indexer", remoteBook.Release.Indexer ?? string.Empty);
-            environmentVariables.Add("Panelarr_Release_Size", remoteBook.Release.Size.ToString());
-            environmentVariables.Add("Panelarr_Release_Quality", remoteBook.ParsedIssueInfo.Quality.Quality.Name);
-            environmentVariables.Add("Panelarr_Release_QualityVersion", remoteBook.ParsedIssueInfo.Quality.Revision.Version.ToString());
+            environmentVariables.Add("Panelarr_Release_IssueCount", remoteIssue.Issues.Count.ToString());
+            environmentVariables.Add("Panelarr_Release_IssueReleaseDates", string.Join(",", remoteIssue.Issues.Select(e => e.ReleaseDate)));
+            environmentVariables.Add("Panelarr_Release_IssueTitles", string.Join("|", remoteIssue.Issues.Select(e => e.Title)));
+            environmentVariables.Add("Panelarr_Release_IssueIds", string.Join("|", remoteIssue.Issues.Select(e => e.Id.ToString())));
+            environmentVariables.Add("Panelarr_Release_GRIds", remoteIssue.Issues.Select(x => x.ForeignIssueId).ConcatToString("|"));
+            environmentVariables.Add("Panelarr_Release_Title", remoteIssue.Release.Title);
+            environmentVariables.Add("Panelarr_Release_Indexer", remoteIssue.Release.Indexer ?? string.Empty);
+            environmentVariables.Add("Panelarr_Release_Size", remoteIssue.Release.Size.ToString());
+            environmentVariables.Add("Panelarr_Release_Quality", remoteIssue.ParsedIssueInfo.Quality.Quality.Name);
+            environmentVariables.Add("Panelarr_Release_QualityVersion", remoteIssue.ParsedIssueInfo.Quality.Revision.Version.ToString());
             environmentVariables.Add("Panelarr_Release_ReleaseGroup", releaseGroup ?? string.Empty);
-            environmentVariables.Add("Panelarr_Release_IndexerFlags", remoteBook.Release.IndexerFlags.ToString());
+            environmentVariables.Add("Panelarr_Release_IndexerFlags", remoteIssue.Release.IndexerFlags.ToString());
             environmentVariables.Add("Panelarr_Download_Client", message.DownloadClientName ?? string.Empty);
             environmentVariables.Add("Panelarr_Download_Client_Type", message.DownloadClientType ?? string.Empty);
             environmentVariables.Add("Panelarr_Download_Id", message.DownloadId ?? string.Empty);
@@ -76,17 +76,17 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Panelarr_Series_Name", author.Metadata.Value.Name);
             environmentVariables.Add("Panelarr_Series_Path", author.Path);
             environmentVariables.Add("Panelarr_Series_GRId", author.Metadata.Value.ForeignSeriesId);
-            environmentVariables.Add("Panelarr_Book_Id", issue.Id.ToString());
-            environmentVariables.Add("Panelarr_Book_Title", issue.Title);
-            environmentVariables.Add("Panelarr_Book_GRId", issue.ForeignIssueId);
-            environmentVariables.Add("Panelarr_Book_ReleaseDate", issue.ReleaseDate.ToString());
+            environmentVariables.Add("Panelarr_Issue_Id", issue.Id.ToString());
+            environmentVariables.Add("Panelarr_Issue_Title", issue.Title);
+            environmentVariables.Add("Panelarr_Issue_GRId", issue.ForeignIssueId);
+            environmentVariables.Add("Panelarr_Issue_ReleaseDate", issue.ReleaseDate.ToString());
             environmentVariables.Add("Panelarr_Download_Client", message.DownloadClientInfo?.Name ?? string.Empty);
             environmentVariables.Add("Panelarr_Download_Client_Type", message.DownloadClientInfo?.Type ?? string.Empty);
             environmentVariables.Add("Panelarr_Download_Id", message.DownloadId ?? string.Empty);
 
             if (message.ComicFiles.Any())
             {
-                environmentVariables.Add("Panelarr_AddedBookPaths", string.Join("|", message.ComicFiles.Select(e => e.Path)));
+                environmentVariables.Add("Panelarr_AddedIssuePaths", string.Join("|", message.ComicFiles.Select(e => e.Path)));
             }
 
             if (message.OldFiles.Any())
@@ -151,10 +151,10 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Panelarr_Series_Name", author.Name);
             environmentVariables.Add("Panelarr_Series_Path", author.Path);
             environmentVariables.Add("Panelarr_Series_ForeignId", author.ForeignSeriesId);
-            environmentVariables.Add("Panelarr_Book_Id", issue.Id.ToString());
-            environmentVariables.Add("Panelarr_Book_Title", issue.Title);
-            environmentVariables.Add("Panelarr_Book_ForeignId", issue.ForeignIssueId);
-            environmentVariables.Add("Panelarr_Book_DeletedFiles", deleteMessage.DeletedFiles.ToString());
+            environmentVariables.Add("Panelarr_Issue_Id", issue.Id.ToString());
+            environmentVariables.Add("Panelarr_Issue_Title", issue.Title);
+            environmentVariables.Add("Panelarr_Issue_ForeignId", issue.ForeignIssueId);
+            environmentVariables.Add("Panelarr_Issue_DeletedFiles", deleteMessage.DeletedFiles.ToString());
 
             ExecuteScript(environmentVariables);
         }
@@ -172,15 +172,15 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
             environmentVariables.Add("Panelarr_Series_Name", author.Name);
             environmentVariables.Add("Panelarr_Series_ForeignId", author.ForeignSeriesId);
-            environmentVariables.Add("Panelarr_Book_Id", issue.Id.ToString());
-            environmentVariables.Add("Panelarr_Book_Title", issue.Title);
-            environmentVariables.Add("Panelarr_Book_ForeignId", issue.ForeignIssueId);
-            environmentVariables.Add("Panelarr_BookFile_Id", comicFile.Id.ToString());
-            environmentVariables.Add("Panelarr_BookFile_Path", comicFile.Path);
-            environmentVariables.Add("Panelarr_BookFile_Quality", comicFile.Quality.Quality.Name);
-            environmentVariables.Add("Panelarr_BookFile_QualityVersion", comicFile.Quality.Revision.Version.ToString());
-            environmentVariables.Add("Panelarr_BookFile_ReleaseGroup", comicFile.ReleaseGroup ?? string.Empty);
-            environmentVariables.Add("Panelarr_BookFile_SceneName", comicFile.SceneName ?? string.Empty);
+            environmentVariables.Add("Panelarr_Issue_Id", issue.Id.ToString());
+            environmentVariables.Add("Panelarr_Issue_Title", issue.Title);
+            environmentVariables.Add("Panelarr_Issue_ForeignId", issue.ForeignIssueId);
+            environmentVariables.Add("Panelarr_ComicFile_Id", comicFile.Id.ToString());
+            environmentVariables.Add("Panelarr_ComicFile_Path", comicFile.Path);
+            environmentVariables.Add("Panelarr_ComicFile_Quality", comicFile.Quality.Quality.Name);
+            environmentVariables.Add("Panelarr_ComicFile_QualityVersion", comicFile.Quality.Revision.Version.ToString());
+            environmentVariables.Add("Panelarr_ComicFile_ReleaseGroup", comicFile.ReleaseGroup ?? string.Empty);
+            environmentVariables.Add("Panelarr_ComicFile_SceneName", comicFile.SceneName ?? string.Empty);
 
             ExecuteScript(environmentVariables);
         }
@@ -197,16 +197,16 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Panelarr_Series_Name", author.Metadata.Value.Name);
             environmentVariables.Add("Panelarr_Series_Path", author.Path);
             environmentVariables.Add("Panelarr_Series_GRId", author.Metadata.Value.ForeignSeriesId);
-            environmentVariables.Add("Panelarr_Book_Id", issue.Id.ToString());
-            environmentVariables.Add("Panelarr_Book_Title", issue.Title);
-            environmentVariables.Add("Panelarr_Book_GRId", issue.ForeignIssueId);
-            environmentVariables.Add("Panelarr_Book_ReleaseDate", issue.ReleaseDate.ToString());
-            environmentVariables.Add("Panelarr_BookFile_Id", comicFile.Id.ToString());
-            environmentVariables.Add("Panelarr_BookFile_Path", comicFile.Path);
-            environmentVariables.Add("Panelarr_BookFile_Quality", comicFile.Quality.Quality.Name);
-            environmentVariables.Add("Panelarr_BookFile_QualityVersion", comicFile.Quality.Revision.Version.ToString());
-            environmentVariables.Add("Panelarr_BookFile_ReleaseGroup", comicFile.ReleaseGroup ?? string.Empty);
-            environmentVariables.Add("Panelarr_BookFile_SceneName", comicFile.SceneName ?? string.Empty);
+            environmentVariables.Add("Panelarr_Issue_Id", issue.Id.ToString());
+            environmentVariables.Add("Panelarr_Issue_Title", issue.Title);
+            environmentVariables.Add("Panelarr_Issue_GRId", issue.ForeignIssueId);
+            environmentVariables.Add("Panelarr_Issue_ReleaseDate", issue.ReleaseDate.ToString());
+            environmentVariables.Add("Panelarr_ComicFile_Id", comicFile.Id.ToString());
+            environmentVariables.Add("Panelarr_ComicFile_Path", comicFile.Path);
+            environmentVariables.Add("Panelarr_ComicFile_Quality", comicFile.Quality.Quality.Name);
+            environmentVariables.Add("Panelarr_ComicFile_QualityVersion", comicFile.Quality.Revision.Version.ToString());
+            environmentVariables.Add("Panelarr_ComicFile_ReleaseGroup", comicFile.ReleaseGroup ?? string.Empty);
+            environmentVariables.Add("Panelarr_ComicFile_SceneName", comicFile.SceneName ?? string.Empty);
             environmentVariables.Add("Panelarr_Tags_Diff", message.Diff.ToJson());
             environmentVariables.Add("Panelarr_Tags_Scrubbed", message.Scrubbed.ToString());
 

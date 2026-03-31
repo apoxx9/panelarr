@@ -1,7 +1,7 @@
 using NLog;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Extras.Files;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.Extras.Others

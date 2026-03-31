@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NLog;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.Metadata
 {
@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Metadata
     public class MetadataOverrideService : IMetadataOverrideService
     {
         private readonly ISeriesMetadataRepository _seriesMetadataRepository;
-        private readonly IBookRepository _bookRepository;
+        private readonly IIssueRepository _issueRepository;
         private readonly Logger _logger;
 
         // Fields that can be overridden on SeriesMetadata
@@ -35,11 +35,11 @@ namespace NzbDrone.Core.Metadata
         };
 
         public MetadataOverrideService(ISeriesMetadataRepository seriesMetadataRepository,
-                                       IBookRepository bookRepository,
+                                       IIssueRepository bookRepository,
                                        Logger logger)
         {
             _seriesMetadataRepository = seriesMetadataRepository;
-            _bookRepository = bookRepository;
+            _issueRepository = bookRepository;
             _logger = logger;
         }
 
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Metadata
 
         public void SaveIssueOverride(int issueId, Dictionary<string, object> fields)
         {
-            var issue = _bookRepository.Get(issueId);
+            var issue = _issueRepository.Get(issueId);
             if (issue == null)
             {
                 throw new ArgumentException($"Issue {issueId} not found");
@@ -125,13 +125,13 @@ namespace NzbDrone.Core.Metadata
             issue.IsOverridden = true;
             issue.OverriddenFields = string.Join(",", overriddenFieldNames);
 
-            _bookRepository.Update(issue);
+            _issueRepository.Update(issue);
             _logger.Debug("Saved metadata override for Issue {0}: {1}", issueId, issue.OverriddenFields);
         }
 
         public void ClearIssueOverride(int issueId)
         {
-            var issue = _bookRepository.Get(issueId);
+            var issue = _issueRepository.Get(issueId);
             if (issue == null)
             {
                 throw new ArgumentException($"Issue {issueId} not found");
@@ -139,7 +139,7 @@ namespace NzbDrone.Core.Metadata
 
             issue.IsOverridden = false;
             issue.OverriddenFields = null;
-            _bookRepository.Update(issue);
+            _issueRepository.Update(issue);
             _logger.Debug("Cleared metadata override for Issue {0}", issueId);
         }
 

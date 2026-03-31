@@ -1,4 +1,4 @@
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
@@ -8,7 +8,7 @@ namespace NzbDrone.Core.Notifications
     {
         public string Message { get; set; }
         public Series Series { get; set; }
-        public RemoteBook RemoteBook { get; set; }
+        public RemoteIssue RemoteIssue { get; set; }
         public QualityModel Quality { get; set; }
         public string DownloadClientType { get; set; }
         public string DownloadClientName { get; set; }

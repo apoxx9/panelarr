@@ -35,17 +35,17 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
+        public Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
             var queue = _queueService.GetQueue();
-            var matchingBook = queue.Where(q => q.RemoteBook?.Series != null &&
-                                                 q.RemoteBook.Series.Id == subject.Series.Id &&
-                                                 q.RemoteBook.Books.Select(e => e.Id).Intersect(subject.Books.Select(e => e.Id)).Any())
+            var matchingIssue = queue.Where(q => q.RemoteIssue?.Series != null &&
+                                                 q.RemoteIssue.Series.Id == subject.Series.Id &&
+                                                 q.RemoteIssue.Issues.Select(e => e.Id).Intersect(subject.Issues.Select(e => e.Id)).Any())
                            .ToList();
 
-            foreach (var queueItem in matchingBook)
+            foreach (var queueItem in matchingIssue)
             {
-                var remoteBook = queueItem.RemoteBook;
+                var remoteIssue = queueItem.RemoteIssue;
                 var qualityProfile = subject.Series.QualityProfile.Value;
 
                 // To avoid a race make sure it's not FailedPending (failed awaiting removal/search).
@@ -56,33 +56,33 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                     continue;
                 }
 
-                _logger.Debug("Checking if existing release in queue meets cutoff. Queued quality is: {0}", remoteBook.ParsedIssueInfo.Quality);
+                _logger.Debug("Checking if existing release in queue meets cutoff. Queued quality is: {0}", remoteIssue.ParsedIssueInfo.Quality);
 
-                var queuedItemCustomFormats = _formatService.ParseCustomFormat(remoteBook, (long)queueItem.Size);
+                var queuedItemCustomFormats = _formatService.ParseCustomFormat(remoteIssue, (long)queueItem.Size);
 
                 if (!_upgradableSpecification.CutoffNotMet(qualityProfile,
-                                                           new List<QualityModel> { remoteBook.ParsedIssueInfo.Quality },
+                                                           new List<QualityModel> { remoteIssue.ParsedIssueInfo.Quality },
                                                            queuedItemCustomFormats,
                                                            subject.ParsedIssueInfo.Quality))
                 {
-                    return Decision.Reject("Release in queue already meets cutoff: {0}", remoteBook.ParsedIssueInfo.Quality);
+                    return Decision.Reject("Release in queue already meets cutoff: {0}", remoteIssue.ParsedIssueInfo.Quality);
                 }
 
-                _logger.Debug("Checking if release is higher quality than queued release. Queued: {0}", remoteBook.ParsedIssueInfo.Quality);
+                _logger.Debug("Checking if release is higher quality than queued release. Queued: {0}", remoteIssue.ParsedIssueInfo.Quality);
 
                 if (!_upgradableSpecification.IsUpgradable(qualityProfile,
-                                                           remoteBook.ParsedIssueInfo.Quality,
+                                                           remoteIssue.ParsedIssueInfo.Quality,
                                                            queuedItemCustomFormats,
                                                            subject.ParsedIssueInfo.Quality,
                                                            subject.CustomFormats))
                 {
-                    return Decision.Reject("Release in queue is of equal or higher preference: {0}", remoteBook.ParsedIssueInfo.Quality);
+                    return Decision.Reject("Release in queue is of equal or higher preference: {0}", remoteIssue.ParsedIssueInfo.Quality);
                 }
 
-                _logger.Debug("Checking if profiles allow upgrading. Queued: {0}", remoteBook.ParsedIssueInfo.Quality);
+                _logger.Debug("Checking if profiles allow upgrading. Queued: {0}", remoteIssue.ParsedIssueInfo.Quality);
 
                 if (!_upgradableSpecification.IsUpgradeAllowed(qualityProfile,
-                                                               remoteBook.ParsedIssueInfo.Quality,
+                                                               remoteIssue.ParsedIssueInfo.Quality,
                                                                queuedItemCustomFormats,
                                                                subject.ParsedIssueInfo.Quality,
                                                                subject.CustomFormats))
@@ -90,7 +90,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                     return Decision.Reject("Another release is queued and the Quality profile does not allow upgrades");
                 }
 
-                if (_upgradableSpecification.IsRevisionUpgrade(remoteBook.ParsedIssueInfo.Quality, subject.ParsedIssueInfo.Quality))
+                if (_upgradableSpecification.IsRevisionUpgrade(remoteIssue.ParsedIssueInfo.Quality, subject.ParsedIssueInfo.Quality))
                 {
                     if (_configService.DownloadPropersAndRepacks == ProperDownloadTypes.DoNotUpgrade)
                     {

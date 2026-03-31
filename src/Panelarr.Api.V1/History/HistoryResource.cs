@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Qualities;
-using Panelarr.Api.V1.Books;
 using Panelarr.Api.V1.CustomFormats;
+using Panelarr.Api.V1.Issues;
 using Panelarr.Api.V1.Series;
 using Panelarr.Http.REST;
 

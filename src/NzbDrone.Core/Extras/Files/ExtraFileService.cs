@@ -5,8 +5,8 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Events;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Extras.Files
         where TExtraFile : ExtraFile, new()
     {
         List<TExtraFile> GetFilesBySeries(int authorId);
-        List<TExtraFile> GetFilesByBookFile(int bookFileId);
+        List<TExtraFile> GetFilesByComicFile(int comicFileId);
         TExtraFile FindByPath(int authorId, string path);
         void Upsert(TExtraFile extraFile);
         void Upsert(List<TExtraFile> extraFiles);
@@ -54,9 +54,9 @@ namespace NzbDrone.Core.Extras.Files
             return _repository.GetFilesBySeries(authorId);
         }
 
-        public List<TExtraFile> GetFilesByBookFile(int bookFileId)
+        public List<TExtraFile> GetFilesByComicFile(int comicFileId)
         {
-            return _repository.GetFilesByBookFile(bookFileId);
+            return _repository.GetFilesByComicFile(comicFileId);
         }
 
         public TExtraFile FindByPath(int authorId, string path)
@@ -113,7 +113,7 @@ namespace NzbDrone.Core.Extras.Files
             {
                 var author = comicFile.Series.Value;
 
-                foreach (var extra in _repository.GetFilesByBookFile(comicFile.Id))
+                foreach (var extra in _repository.GetFilesByComicFile(comicFile.Id))
                 {
                     var path = Path.Combine(author.Path, extra.RelativePath);
 
@@ -127,7 +127,7 @@ namespace NzbDrone.Core.Extras.Files
             }
 
             _logger.Debug("Deleting Extra from database for track file: {0}", comicFile);
-            _repository.DeleteForBookFile(comicFile.Id);
+            _repository.DeleteForComicFile(comicFile.Id);
         }
     }
 }

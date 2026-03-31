@@ -1,6 +1,6 @@
 using System.Linq;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Localization;
 
 namespace NzbDrone.Core.HealthCheck.Checks

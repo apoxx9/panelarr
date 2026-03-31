@@ -31,18 +31,18 @@ namespace NzbDrone.Core.ImportLists.Panelarr
 
         public override IList<ImportListItemInfo> Fetch()
         {
-            var authorsAndBooks = new List<ImportListItemInfo>();
+            var seriesAndIssues = new List<ImportListItemInfo>();
 
             try
             {
-                var remoteBooks = _panelarrV1Proxy.GetBooks(Settings);
+                var remoteIssues = _panelarrV1Proxy.GetIssues(Settings);
                 var remoteSeriesList = _panelarrV1Proxy.GetSeriess(Settings);
 
                 var authorDict = remoteSeriesList.ToDictionary(x => x.Id);
 
-                foreach (var remoteBook in remoteBooks)
+                foreach (var remoteIssue in remoteIssues)
                 {
-                    var remoteSeries = authorDict[remoteBook.SeriesId];
+                    var remoteSeries = authorDict[remoteIssue.SeriesId];
 
                     if (Settings.ProfileIds.Any() && !Settings.ProfileIds.Contains(remoteSeries.QualityProfileId))
                     {
@@ -59,16 +59,16 @@ namespace NzbDrone.Core.ImportLists.Panelarr
                         continue;
                     }
 
-                    if (!remoteBook.Monitored || !remoteSeries.Monitored)
+                    if (!remoteIssue.Monitored || !remoteSeries.Monitored)
                     {
                         continue;
                     }
 
-                    authorsAndBooks.Add(new ImportListItemInfo
+                    seriesAndIssues.Add(new ImportListItemInfo
                     {
-                        ForeignIssueId = remoteBook.ForeignIssueId,
-                        Issue = remoteBook.Title,
-                        ForeignEditionId = remoteBook.ForeignEditionId,
+                        ForeignIssueId = remoteIssue.ForeignIssueId,
+                        Issue = remoteIssue.Title,
+                        ForeignEditionId = remoteIssue.ForeignEditionId,
                         Series = remoteSeries.SeriesName,
                         ForeignSeriesId = remoteSeries.ForeignSeriesId
                     });
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.ImportLists.Panelarr
                 _importListStatusService.RecordFailure(Definition.Id);
             }
 
-            return CleanupListItems(authorsAndBooks);
+            return CleanupListItems(seriesAndIssues);
         }
 
         public override object RequestAction(string action, IDictionary<string, string> query)

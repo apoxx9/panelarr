@@ -176,7 +176,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         public void should_return_ok_on_book_imported_event()
         {
             GivenFolderExists(_downloadRootPath);
-            var importEvent = new TrackImportedEvent(new LocalBook(), new ComicFile(), new List<ComicFile>(), true, new DownloadClientItem());
+            var importEvent = new TrackImportedEvent(new LocalIssue(), new ComicFile(), new List<ComicFile>(), true, new DownloadClientItem());
 
             Subject.Check(importEvent).ShouldBeOk();
         }
@@ -184,13 +184,13 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         public void should_return_permissions_error_on_book_import_failed_event_if_file_exists()
         {
-            var localBook = new LocalBook
+            var localIssue = new LocalIssue
             {
                 Path = Path.Combine(_downloadItemPath, "file.mp3")
             };
-            GivenFileExists(localBook.Path);
+            GivenFileExists(localIssue.Path);
 
-            var importEvent = new TrackImportFailedEvent(new Exception(), localBook, true, new DownloadClientItem());
+            var importEvent = new TrackImportFailedEvent(new Exception(), localIssue, true, new DownloadClientItem());
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "permissions-error");
         }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Panelarr.Http.REST;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     public class RenameIssueResource : RestResource
     {

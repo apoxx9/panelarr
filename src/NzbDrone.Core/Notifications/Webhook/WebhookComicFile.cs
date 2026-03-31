@@ -3,13 +3,13 @@ using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.Notifications.Webhook
 {
-    public class WebhookBookFile
+    public class WebhookComicFile
     {
-        public WebhookBookFile()
+        public WebhookComicFile()
         {
         }
 
-        public WebhookBookFile(ComicFile comicFile)
+        public WebhookComicFile(ComicFile comicFile)
         {
             Id = comicFile.Id;
             Path = comicFile.Path;

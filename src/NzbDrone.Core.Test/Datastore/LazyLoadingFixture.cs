@@ -1,8 +1,8 @@
 using System.Linq;
 using FizzWare.NBuilder;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;

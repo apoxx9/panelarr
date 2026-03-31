@@ -4,7 +4,7 @@ using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.MediaFiles.IssueImport.Manual;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
-using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Issues;
 using Panelarr.Api.V1.Series;
 using Panelarr.Http.REST;
 

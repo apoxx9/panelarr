@@ -1,6 +1,6 @@
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Test.Framework;
 
@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
             Subject.GetSeries(title);
 
             Mocker.GetMock<ISeriesService>()
-                  .Verify(s => s.FindByName(Parser.Parser.ParseBookTitle(title).SeriesName), Times.Once());
+                  .Verify(s => s.FindByName(Parser.Parser.ParseIssueTitle(title).SeriesName), Times.Once());
         }
     }
 }

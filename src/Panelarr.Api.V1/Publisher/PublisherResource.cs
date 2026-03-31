@@ -16,7 +16,7 @@ namespace Panelarr.Api.V1.Publisher
 
     public static class PublisherResourceMapper
     {
-        public static PublisherResource ToResource(this NzbDrone.Core.Books.Publisher model)
+        public static PublisherResource ToResource(this NzbDrone.Core.Issues.Publisher model)
         {
             if (model == null)
             {
@@ -34,14 +34,14 @@ namespace Panelarr.Api.V1.Publisher
             };
         }
 
-        public static NzbDrone.Core.Books.Publisher ToModel(this PublisherResource resource)
+        public static NzbDrone.Core.Issues.Publisher ToModel(this PublisherResource resource)
         {
             if (resource == null)
             {
                 return null;
             }
 
-            return new NzbDrone.Core.Books.Publisher
+            return new NzbDrone.Core.Issues.Publisher
             {
                 Id = resource.Id,
                 ForeignPublisherId = resource.ForeignPublisherId,
@@ -52,7 +52,7 @@ namespace Panelarr.Api.V1.Publisher
             };
         }
 
-        public static List<PublisherResource> ToResource(this IEnumerable<NzbDrone.Core.Books.Publisher> models)
+        public static List<PublisherResource> ToResource(this IEnumerable<NzbDrone.Core.Issues.Publisher> models)
         {
             return models?.Select(ToResource).ToList();
         }

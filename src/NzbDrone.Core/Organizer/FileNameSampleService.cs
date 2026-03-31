@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.CustomFormats;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Organizer
         private readonly IBuildFileNames _buildFileNames;
 
         private static Series _standardSeries;
-        private static Issue _standardBook;
+        private static Issue _standardIssue;
         private static ComicFile _singleTrackFile;
         private static ComicFile _multiTrackFile;
         private static List<CustomFormat> _customFormats;
@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Organizer
                 SeriesGroup = series
             };
 
-            _standardBook = new Issue
+            _standardIssue = new Issue
             {
                 Title = "The Issue Title",
                 IssueNumber = 42f,
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Organizer
                 SceneName = "The.Series.Name.042",
                 ReleaseGroup = "RlsGrp",
                 MediaInfo = mediaInfo,
-                Issue = _standardBook,
+                Issue = _standardIssue,
                 Part = 1,
                 PartCount = 1
             };
@@ -101,7 +101,7 @@ namespace NzbDrone.Core.Organizer
                 SceneName = "The.Series.Name.042",
                 ReleaseGroup = "RlsGrp",
                 MediaInfo = mediaInfo,
-                Issue = _standardBook,
+                Issue = _standardIssue,
                 Part = 1,
                 PartCount = 2
             };
@@ -111,9 +111,9 @@ namespace NzbDrone.Core.Organizer
         {
             var result = new SampleResult
             {
-                FileName = BuildTrackSample(_standardSeries, _standardBook, _singleTrackFile, nameSpec),
+                FileName = BuildTrackSample(_standardSeries, _standardIssue, _singleTrackFile, nameSpec),
                 Series = _standardSeries,
-                Issue = _standardBook,
+                Issue = _standardIssue,
                 ComicFile = _singleTrackFile
             };
 
@@ -124,9 +124,9 @@ namespace NzbDrone.Core.Organizer
         {
             var result = new SampleResult
             {
-                FileName = BuildTrackSample(_standardSeries, _standardBook, _multiTrackFile, nameSpec),
+                FileName = BuildTrackSample(_standardSeries, _standardIssue, _multiTrackFile, nameSpec),
                 Series = _standardSeries,
-                Issue = _standardBook,
+                Issue = _standardIssue,
                 ComicFile = _singleTrackFile
             };
 
@@ -142,7 +142,7 @@ namespace NzbDrone.Core.Organizer
         {
             try
             {
-                return _buildFileNames.BuildBookFileName(author, issue, comicFile, nameSpec, _customFormats);
+                return _buildFileNames.BuildComicFileName(author, issue, comicFile, nameSpec, _customFormats);
             }
             catch (NamingFormatException)
             {

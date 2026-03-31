@@ -71,9 +71,9 @@ namespace Panelarr.Api.V1.Indexers
                 _downloadDecisionProcessor.ProcessDecision(decision, downloadClientId).GetAwaiter().GetResult();
             }
 
-            if (decision?.RemoteBook.ParsedIssueInfo == null)
+            if (decision?.RemoteIssue.ParsedIssueInfo == null)
             {
-                throw new ValidationException(new List<ValidationFailure> { new ("Title", "Unable to parse", release.Title) });
+                throw new ValidationException(new List<ValidationFailure> { new("Title", "Unable to parse", release.Title) });
             }
 
             return MapDecisions(new[] { decision }).First();

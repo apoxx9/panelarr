@@ -5,15 +5,15 @@ using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource;
 using Panelarr.Http;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     [V1ApiController("issue/lookup")]
     public class IssueLookupController : Controller
     {
-        private readonly ISearchForNewBook _searchProxy;
+        private readonly ISearchForNewIssue _searchProxy;
         private readonly IMapCoversToLocal _coverMapper;
 
-        public IssueLookupController(ISearchForNewBook searchProxy, IMapCoversToLocal coverMapper)
+        public IssueLookupController(ISearchForNewIssue searchProxy, IMapCoversToLocal coverMapper)
         {
             _searchProxy = searchProxy;
             _coverMapper = coverMapper;
@@ -22,15 +22,15 @@ namespace Panelarr.Api.V1.Books
         [HttpGet]
         public object Search(string term)
         {
-            var searchResults = _searchProxy.SearchForNewBook(term, null);
+            var searchResults = _searchProxy.SearchForNewIssue(term, null);
             return MapToResource(searchResults).ToList();
         }
 
-        private IEnumerable<IssueResource> MapToResource(IEnumerable<NzbDrone.Core.Books.Issue> issues)
+        private IEnumerable<IssueResource> MapToResource(IEnumerable<NzbDrone.Core.Issues.Issue> issues)
         {
-            foreach (var currentBook in issues)
+            foreach (var currentIssue in issues)
             {
-                var resource = currentBook.ToResource();
+                var resource = currentIssue.ToResource();
 
                 _coverMapper.ConvertToLocalUrls(resource.Id, MediaCoverEntity.Issue, resource.Images);
 

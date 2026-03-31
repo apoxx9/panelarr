@@ -2,7 +2,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 

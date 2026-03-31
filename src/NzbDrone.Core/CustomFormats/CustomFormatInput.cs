@@ -1,4 +1,4 @@
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 
@@ -6,7 +6,7 @@ namespace NzbDrone.Core.CustomFormats
 {
     public class CustomFormatInput
     {
-        public ParsedIssueInfo BookInfo { get; set; }
+        public ParsedIssueInfo IssueInfo { get; set; }
         public Series Series { get; set; }
         public long Size { get; set; }
         public IndexerFlags IndexerFlags { get; set; }

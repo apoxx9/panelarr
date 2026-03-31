@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class CustomFormatAllowedByProfileSpecificationFixture : CoreTest<CustomFormatAllowedbyProfileSpecification>
     {
-        private RemoteBook _remoteAlbum;
+        private RemoteIssue _remoteAlbum;
 
         private CustomFormat _format1;
         private CustomFormat _format2;
@@ -40,10 +40,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 })
                 .Build();
 
-            _remoteAlbum = new RemoteBook
+            _remoteAlbum = new RemoteIssue
             {
                 Series = fakeArtist,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
             };
 
             CustomFormatsTestHelpers.GivenCustomFormats(_format1, _format2);

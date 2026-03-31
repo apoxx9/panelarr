@@ -4,8 +4,8 @@ namespace Panelarr.Api.V1.Config
 {
     public class NamingExampleResource
     {
-        public string SingleBookExample { get; set; }
-        public string MultiPartBookExample { get; set; }
+        public string SingleIssueExample { get; set; }
+        public string MultiPartIssueExample { get; set; }
         public string SeriesFolderExample { get; set; }
     }
 

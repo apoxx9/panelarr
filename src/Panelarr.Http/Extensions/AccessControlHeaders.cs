@@ -1,4 +1,4 @@
-﻿namespace Panelarr.Http.Extensions
+namespace Panelarr.Http.Extensions
 {
     public static class AccessControlHeaders
     {

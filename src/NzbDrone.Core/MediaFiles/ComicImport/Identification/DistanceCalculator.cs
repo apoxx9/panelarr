@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
@@ -23,7 +23,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
         private static readonly List<string> AudiobookFormats = new List<string> { "Audiobook", "Audio CD", "Audio Cassette", "Audible Audio", "CD-ROM", "MP3 CD" };
 
-        public static Distance IssueDistance(List<LocalBook> localTracks, Issue issue)
+        public static Distance IssueDistance(List<LocalIssue> localTracks, Issue issue)
         {
             var dist = new Distance();
 
@@ -46,7 +46,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 titleOptions.Add(StripSeriesRegex.Replace(titleOptions[0]));
             }
 
-            var (maintitle, _) = issue.Title.SplitBookTitle(issue.SeriesMetadata.Value.Name);
+            var (maintitle, _) = issue.Title.SplitIssueTitle(issue.SeriesMetadata.Value.Name);
             if (!titleOptions.Contains(maintitle))
             {
                 titleOptions.Add(maintitle);

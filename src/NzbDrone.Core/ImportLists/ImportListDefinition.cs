@@ -1,5 +1,5 @@
 using System;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.ThingiProvider;
 
 namespace NzbDrone.Core.ImportLists
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.ImportLists
     public enum ImportListMonitorType
     {
         None,
-        SpecificBook,
+        SpecificIssue,
         EntireSeries
     }
 }

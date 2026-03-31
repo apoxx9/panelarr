@@ -1,4 +1,4 @@
-﻿using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Configuration;
 using Panelarr.Http.REST;
 
 namespace Panelarr.Api.V1.Config

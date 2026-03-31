@@ -67,7 +67,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public void AutoResolve(int issueId)
         {
-            var files = _mediaFileService.GetFilesByBook(issueId);
+            var files = _mediaFileService.GetFilesByIssue(issueId);
             if (files.Count <= 1)
             {
                 _logger.Debug("DuplicateComicFileService.AutoResolve: no duplicates for issueId {0}", issueId);
@@ -87,7 +87,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public void Resolve(int issueId, int keepComicFileId)
         {
-            var files = _mediaFileService.GetFilesByBook(issueId);
+            var files = _mediaFileService.GetFilesByIssue(issueId);
             if (files.Count <= 1)
             {
                 _logger.Debug("DuplicateComicFileService.Resolve: no duplicates for issueId {0}", issueId);

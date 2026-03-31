@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Parser;
-using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Issues;
 using Panelarr.Api.V1.Series;
 using Panelarr.Http;
 
@@ -25,9 +25,9 @@ namespace Panelarr.Api.V1.Parse
                 return null;
             }
 
-            var parsedBookInfo = Parser.ParseBookTitle(title);
+            var parsedIssueInfo = Parser.ParseIssueTitle(title);
 
-            if (parsedBookInfo == null)
+            if (parsedIssueInfo == null)
             {
                 return new ParseResource
                 {
@@ -35,16 +35,16 @@ namespace Panelarr.Api.V1.Parse
                 };
             }
 
-            var remoteBook = _parsingService.Map(parsedBookInfo);
+            var remoteIssue = _parsingService.Map(parsedIssueInfo);
 
-            if (remoteBook != null)
+            if (remoteIssue != null)
             {
                 return new ParseResource
                 {
                     Title = title,
-                    ParsedIssueInfo = remoteBook.ParsedIssueInfo,
-                    Series = remoteBook.Series.ToResource(),
-                    Books = remoteBook.Books.ToResource()
+                    ParsedIssueInfo = remoteIssue.ParsedIssueInfo,
+                    Series = remoteIssue.Series.ToResource(),
+                    Issues = remoteIssue.Issues.ToResource()
                 };
             }
             else
@@ -52,7 +52,7 @@ namespace Panelarr.Api.V1.Parse
                 return new ParseResource
                 {
                     Title = title,
-                    ParsedIssueInfo = parsedBookInfo
+                    ParsedIssueInfo = parsedIssueInfo
                 };
             }
         }

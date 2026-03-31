@@ -186,15 +186,15 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             };
         }
 
-        protected override string AddFromMagnetLink(RemoteBook remoteBook, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteIssue remoteIssue, string hash, string magnetLink)
         {
             _proxy.AddTorrentFromUrl(magnetLink, GetDownloadDirectory(), Settings);
-            _proxy.SetTorrentSeedingConfiguration(hash, remoteBook.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(hash, remoteIssue.SeedConfiguration, Settings);
 
-            var isRecentBook = remoteBook.IsRecentBook();
+            var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentBook && Settings.RecentTvPriority == (int)TransmissionPriority.First) ||
-                (!isRecentBook && Settings.OlderTvPriority == (int)TransmissionPriority.First))
+            if ((isRecentIssue && Settings.RecentTvPriority == (int)TransmissionPriority.First) ||
+                (!isRecentIssue && Settings.OlderTvPriority == (int)TransmissionPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -202,15 +202,15 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             return hash;
         }
 
-        protected override string AddFromTorrentFile(RemoteBook remoteBook, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteIssue remoteIssue, string hash, string filename, byte[] fileContent)
         {
             _proxy.AddTorrentFromData(fileContent, GetDownloadDirectory(), Settings);
-            _proxy.SetTorrentSeedingConfiguration(hash, remoteBook.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(hash, remoteIssue.SeedConfiguration, Settings);
 
-            var isRecentBook = remoteBook.IsRecentBook();
+            var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentBook && Settings.RecentTvPriority == (int)TransmissionPriority.First) ||
-                (!isRecentBook && Settings.OlderTvPriority == (int)TransmissionPriority.First))
+            if ((isRecentIssue && Settings.RecentTvPriority == (int)TransmissionPriority.First) ||
+                (!isRecentIssue && Settings.OlderTvPriority == (int)TransmissionPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -271,9 +271,9 @@ namespace NzbDrone.Core.Download.Clients.Transmission
                 _logger.Error(ex, ex.Message);
 
                 return new NzbDroneValidationFailure("Host", "Unable to connect to Transmission")
-                       {
-                           DetailedDescription = ex.Message
-                       };
+                {
+                    DetailedDescription = ex.Message
+                };
             }
             catch (Exception ex)
             {

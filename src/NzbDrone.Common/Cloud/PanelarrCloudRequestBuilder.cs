@@ -16,7 +16,7 @@ namespace NzbDrone.Common.Cloud
             Services = new HttpRequestBuilder("https://panelarr.servarr.com/v1/")
                 .CreateFactory();
 
-            // TODO: Panelarr uses ComicVine/Metron for metadata, not BookInfo.
+            // TODO: Panelarr uses ComicVine/Metron for metadata, not IssueInfo.
             // This legacy endpoint should be replaced once a Panelarr metadata proxy is set up.
             Metadata = new HttpRequestBuilder("https://api.bookinfo.club/v1/{route}")
                 .CreateFactory();

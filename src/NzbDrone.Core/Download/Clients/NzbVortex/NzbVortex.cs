@@ -30,9 +30,9 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
             _proxy = proxy;
         }
 
-        protected override string AddFromNzbFile(RemoteBook remoteBook, string filename, byte[] fileContent)
+        protected override string AddFromNzbFile(RemoteIssue remoteIssue, string filename, byte[] fileContent)
         {
-            var priority = remoteBook.IsRecentBook() ? Settings.RecentTvPriority : Settings.OlderTvPriority;
+            var priority = remoteIssue.IsRecentIssue() ? Settings.RecentTvPriority : Settings.OlderTvPriority;
 
             var response = _proxy.DownloadNzb(fileContent, filename, priority, Settings);
 
@@ -163,9 +163,9 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
                 _logger.Error(ex, "Unable to connect to NZBVortex");
 
                 return new NzbDroneValidationFailure("Host", "Unable to connect to NZBVortex")
-                       {
-                           DetailedDescription = ex.Message
-                       };
+                {
+                    DetailedDescription = ex.Message
+                };
             }
 
             return null;

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Common.Crypto;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Qualities;
 
@@ -20,7 +20,7 @@ namespace NzbDrone.Core.Queue
     public class QueueService : IQueueService, IHandle<TrackedDownloadRefreshedEvent>
     {
         private readonly IEventAggregator _eventAggregator;
-        private static List<Queue> _queue = new ();
+        private static List<Queue> _queue = new();
         private readonly IHistoryService _historyService;
 
         public QueueService(IEventAggregator eventAggregator,
@@ -47,9 +47,9 @@ namespace NzbDrone.Core.Queue
 
         private IEnumerable<Queue> MapQueue(TrackedDownload trackedDownload)
         {
-            if (trackedDownload.RemoteBook?.Books != null && trackedDownload.RemoteBook.Books.Any())
+            if (trackedDownload.RemoteIssue?.Issues != null && trackedDownload.RemoteIssue.Issues.Any())
             {
-                foreach (var issue in trackedDownload.RemoteBook.Books)
+                foreach (var issue in trackedDownload.RemoteIssue.Issues)
                 {
                     yield return MapQueueItem(trackedDownload, issue);
                 }
@@ -71,9 +71,9 @@ namespace NzbDrone.Core.Queue
 
             var queue = new Queue
             {
-                Series = trackedDownload.RemoteBook?.Series,
+                Series = trackedDownload.RemoteIssue?.Series,
                 Issue = issue,
-                Quality = trackedDownload.RemoteBook?.ParsedIssueInfo.Quality ?? new QualityModel(Quality.Unknown),
+                Quality = trackedDownload.RemoteIssue?.ParsedIssueInfo.Quality ?? new QualityModel(Quality.Unknown),
                 Title = Parser.Parser.RemoveFileExtension(trackedDownload.DownloadItem.Title),
                 Size = trackedDownload.DownloadItem.TotalSize,
                 Sizeleft = trackedDownload.DownloadItem.RemainingSize,
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Queue
                 TrackedDownloadState = trackedDownload.State,
                 StatusMessages = trackedDownload.StatusMessages.ToList(),
                 ErrorMessage = trackedDownload.DownloadItem.Message,
-                RemoteBook = trackedDownload.RemoteBook,
+                RemoteIssue = trackedDownload.RemoteIssue,
                 DownloadId = trackedDownload.DownloadItem.DownloadId,
                 Protocol = trackedDownload.Protocol,
                 DownloadClient = trackedDownload.DownloadItem.DownloadClientInfo.Name,

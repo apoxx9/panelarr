@@ -5,11 +5,11 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.DecisionEngine.Specifications.Search
 {
-    public class SingleBookSearchMatchSpecification : IDecisionEngineSpecification
+    public class SingleIssueSearchMatchSpecification : IDecisionEngineSpecification
     {
         private readonly Logger _logger;
 
-        public SingleBookSearchMatchSpecification(Logger logger)
+        public SingleIssueSearchMatchSpecification(Logger logger)
         {
             _logger = logger;
         }
@@ -17,20 +17,20 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.Search
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual Decision IsSatisfiedBy(RemoteBook remoteBook, SearchCriteriaBase searchCriteria)
+        public virtual Decision IsSatisfiedBy(RemoteIssue remoteIssue, SearchCriteriaBase searchCriteria)
         {
             if (searchCriteria == null)
             {
                 return Decision.Accept();
             }
 
-            var singleBookSpec = searchCriteria as IssueSearchCriteria;
-            if (singleBookSpec == null)
+            var singleIssueSpec = searchCriteria as IssueSearchCriteria;
+            if (singleIssueSpec == null)
             {
                 return Decision.Accept();
             }
 
-            if (!remoteBook.ParsedIssueInfo.IssueTitle.Any())
+            if (!remoteIssue.ParsedIssueInfo.IssueTitle.Any())
             {
                 _logger.Debug("Full discography result during single issue search, skipping.");
                 return Decision.Reject("Full author pack");

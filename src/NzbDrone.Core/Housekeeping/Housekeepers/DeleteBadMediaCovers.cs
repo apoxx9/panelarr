@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Extras.Metadata.Files;
+using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.Housekeeping.Housekeepers
 {

@@ -151,11 +151,11 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("IncludeHealthWarnings").AsBoolean().WithDefaultValue(false)
                 .WithColumn("OnDownloadFailure").AsBoolean().WithDefaultValue(false)
                 .WithColumn("OnImportFailure").AsBoolean().WithDefaultValue(false)
-                .WithColumn("OnBookRetag").AsBoolean().WithDefaultValue(false)
+                .WithColumn("OnIssueRetag").AsBoolean().WithDefaultValue(false)
                 .WithColumn("OnSeriesDelete").AsBoolean().WithDefaultValue(false)
-                .WithColumn("OnBookDelete").AsBoolean().WithDefaultValue(false)
-                .WithColumn("OnBookFileDelete").AsBoolean().WithDefaultValue(false)
-                .WithColumn("OnBookFileDeleteForUpgrade").AsBoolean().WithDefaultValue(false)
+                .WithColumn("OnIssueDelete").AsBoolean().WithDefaultValue(false)
+                .WithColumn("OnComicFileDelete").AsBoolean().WithDefaultValue(false)
+                .WithColumn("OnComicFileDeleteForUpgrade").AsBoolean().WithDefaultValue(false)
                 .WithColumn("OnApplicationUpdate").AsBoolean().WithDefaultValue(true)
                 .WithColumn("OnSeriesAdded").AsBoolean().WithDefaultValue(false);
 

@@ -1,9 +1,9 @@
-using NzbDrone.Core.Books.Commands;
-using NzbDrone.Core.Books.Events;
+using NzbDrone.Core.Issues.Commands;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 
-namespace NzbDrone.Core.Books
+namespace NzbDrone.Core.Issues
 {
     public class IssueAddedHandler : IHandle<IssueAddedEvent>
     {

@@ -6,13 +6,13 @@ using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Commands;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Extras;
 using NzbDrone.Core.History;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Commands;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
@@ -23,21 +23,21 @@ using NzbDrone.Core.RootFolders;
 
 namespace NzbDrone.Core.MediaFiles.IssueImport
 {
-    public interface IImportApprovedBooks
+    public interface IImportApprovedIssues
     {
-        List<ImportResult> Import(List<ImportDecision<LocalBook>> decisions, bool replaceExisting, DownloadClientItem downloadClientItem = null, ImportMode importMode = ImportMode.Auto);
+        List<ImportResult> Import(List<ImportDecision<LocalIssue>> decisions, bool replaceExisting, DownloadClientItem downloadClientItem = null, ImportMode importMode = ImportMode.Auto);
     }
 
-    public class ImportApprovedBooks : IImportApprovedBooks
+    public class ImportApprovedIssues : IImportApprovedIssues
     {
         private static readonly RegexReplace PadNumbers = new RegexReplace(@"\d+", n => n.Value.PadLeft(9, '0'), RegexOptions.Compiled);
 
-        private readonly IUpgradeMediaFiles _bookFileUpgrader;
+        private readonly IUpgradeMediaFiles _comicFileUpgrader;
         private readonly IMediaFileService _mediaFileService;
         private readonly IMetadataTagService _metadataTagService;
         private readonly ISeriesService _authorService;
         private readonly IAddSeriesService _addSeriesService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IRootFolderService _rootFolderService;
         private readonly IRecycleBinProvider _recycleBinProvider;
         private readonly IExtraService _extraService;
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
         private readonly IManageCommandQueue _commandQueueManager;
         private readonly Logger _logger;
 
-        public ImportApprovedBooks(IUpgradeMediaFiles bookFileUpgrader,
+        public ImportApprovedIssues(IUpgradeMediaFiles comicFileUpgrader,
                                    IMediaFileService mediaFileService,
                                    IMetadataTagService metadataTagService,
                                    ISeriesService authorService,
@@ -62,12 +62,12 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                                    IManageCommandQueue commandQueueManager,
                                    Logger logger)
         {
-            _bookFileUpgrader = bookFileUpgrader;
+            _comicFileUpgrader = comicFileUpgrader;
             _mediaFileService = mediaFileService;
             _metadataTagService = metadataTagService;
             _authorService = authorService;
             _addSeriesService = addSeriesService;
-            _bookService = bookService;
+            _issueService = bookService;
             _rootFolderService = rootFolderService;
             _recycleBinProvider = recycleBinProvider;
             _extraService = extraService;
@@ -78,13 +78,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             _logger = logger;
         }
 
-        public List<ImportResult> Import(List<ImportDecision<LocalBook>> decisions, bool replaceExisting, DownloadClientItem downloadClientItem = null, ImportMode importMode = ImportMode.Auto)
+        public List<ImportResult> Import(List<ImportDecision<LocalIssue>> decisions, bool replaceExisting, DownloadClientItem downloadClientItem = null, ImportMode importMode = ImportMode.Auto)
         {
             var importResults = new List<ImportResult>();
             var allImportedTrackFiles = new List<ComicFile>();
             var allOldTrackFiles = new List<ComicFile>();
             var addedSeries = new List<Series>();
-            var addedBooks = new List<Issue>();
+            var addedIssues = new List<Issue>();
 
             var bookDecisions = decisions.Where(e => e.Item.Issue != null && e.Approved)
                 .GroupBy(e => e.Item.Issue.ForeignIssueId).ToList();
@@ -104,7 +104,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                     continue;
                 }
 
-                var issue = EnsureBookAdded(decisionList, addedBooks);
+                var issue = EnsureIssueAdded(decisionList, addedIssues);
 
                 if (issue == null)
                 {
@@ -198,7 +198,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                     {
                         comicFile.SceneName = GetSceneReleaseName(downloadClientItem);
 
-                        var moveResult = _bookFileUpgrader.UpgradeBookFile(comicFile, localTrack, copyOnly);
+                        var moveResult = _comicFileUpgrader.UpgradeComicFile(comicFile, localTrack, copyOnly);
                         oldFiles = moveResult.OldFiles;
                     }
                     else
@@ -304,18 +304,18 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             }
 
             var addedSeriesMetadataIds = addedSeries.Select(x => x.SeriesMetadataId).ToHashSet();
-            var booksToRefresh = addedBooks.Where(x => !addedSeriesMetadataIds.Contains(x.SeriesMetadataId)).ToList();
+            var booksToRefresh = addedIssues.Where(x => !addedSeriesMetadataIds.Contains(x.SeriesMetadataId)).ToList();
 
             if (booksToRefresh.Any())
             {
                 _logger.Debug("Refreshing info for {0} new issues", booksToRefresh.Count);
-                _commandQueueManager.Push(new BulkRefreshBookCommand(booksToRefresh.Select(x => x.Id).ToList()));
+                _commandQueueManager.Push(new BulkRefreshIssueCommand(booksToRefresh.Select(x => x.Id).ToList()));
             }
 
             return importResults;
         }
 
-        private Series EnsureSeriesAdded(List<ImportDecision<LocalBook>> decisions, List<Series> addedSeries)
+        private Series EnsureSeriesAdded(List<ImportDecision<LocalIssue>> decisions, List<Series> addedSeries)
         {
             var series = decisions.First().Item.Series;
 
@@ -337,7 +337,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                     series.Tags = rootFolder.DefaultTags;
                     series.AddOptions = new AddSeriesOptions
                     {
-                        SearchForMissingBooks = false,
+                        SearchForMissingIssues = false,
                         Monitored = series.Monitored,
                         Monitor = rootFolder.DefaultMonitorOption
                     };
@@ -376,15 +376,15 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             return series;
         }
 
-        private Issue EnsureBookAdded(List<ImportDecision<LocalBook>> decisions, List<Issue> addedBooks)
+        private Issue EnsureIssueAdded(List<ImportDecision<LocalIssue>> decisions, List<Issue> addedIssues)
         {
             var issue = decisions.First().Item.Issue;
 
             if (issue.Id == 0)
             {
-                var dbBook = _bookService.FindById(issue.ForeignIssueId);
+                var dbIssue = _issueService.FindById(issue.ForeignIssueId);
 
-                if (dbBook == null)
+                if (dbIssue == null)
                 {
                     _logger.Debug("Adding remote issue {0}", issue);
 
@@ -397,15 +397,15 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                     {
                         issue.Monitored = issue.Series.Value.Monitored;
                         issue.Added = DateTime.UtcNow;
-                        _bookService.InsertMany(new List<Issue> { issue });
-                        addedBooks.Add(issue);
+                        _issueService.InsertMany(new List<Issue> { issue });
+                        addedIssues.Add(issue);
 
-                        dbBook = _bookService.FindById(issue.ForeignIssueId);
+                        dbIssue = _issueService.FindById(issue.ForeignIssueId);
                     }
                     catch (Exception e)
                     {
                         _logger.Error(e, "Failed to add issue {0}", issue);
-                        RejectBook(decisions);
+                        RejectIssue(decisions);
 
                         return null;
                     }
@@ -414,16 +414,16 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                 // Populate the new DB issue
                 foreach (var decision in decisions)
                 {
-                    decision.Item.Issue = dbBook;
+                    decision.Item.Issue = dbIssue;
                 }
 
-                issue = dbBook;
+                issue = dbIssue;
             }
 
             return issue;
         }
 
-        private void RejectBook(List<ImportDecision<LocalBook>> decisions)
+        private void RejectIssue(List<ImportDecision<LocalIssue>> decisions)
         {
             foreach (var decision in decisions)
             {
@@ -434,7 +434,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
         private void RemoveExistingTrackFiles(Series series, Issue issue)
         {
             var rootFolder = _diskProvider.GetParentFolder(series.Path);
-            var previousFiles = _mediaFileService.GetFilesByBook(issue.Id);
+            var previousFiles = _mediaFileService.GetFilesByIssue(issue.Id);
 
             _logger.Debug("Deleting {0} existing files for {1}", previousFiles.Count, issue);
 
@@ -457,7 +457,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             {
                 var title = Parser.Parser.RemoveFileExtension(downloadClientItem.Title);
 
-                var parsedTitle = Parser.Parser.ParseBookTitle(title);
+                var parsedTitle = Parser.Parser.ParseIssueTitle(title);
 
                 if (parsedTitle != null)
                 {

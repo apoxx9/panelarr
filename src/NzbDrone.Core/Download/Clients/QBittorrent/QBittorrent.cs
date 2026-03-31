@@ -66,20 +66,20 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             }
         }
 
-        protected override string AddFromMagnetLink(RemoteBook remoteBook, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteIssue remoteIssue, string hash, string magnetLink)
         {
             if (!Proxy.GetConfig(Settings).DhtEnabled && !magnetLink.Contains("&tr="))
             {
                 throw new NotSupportedException("Magnet Links without trackers not supported if DHT is disabled");
             }
 
-            var setShareLimits = remoteBook.SeedConfiguration != null && (remoteBook.SeedConfiguration.Ratio.HasValue || remoteBook.SeedConfiguration.SeedTime.HasValue);
+            var setShareLimits = remoteIssue.SeedConfiguration != null && (remoteIssue.SeedConfiguration.Ratio.HasValue || remoteIssue.SeedConfiguration.SeedTime.HasValue);
             var addHasSetShareLimits = setShareLimits && ProxyApiVersion >= new Version(2, 8, 1);
-            var isRecentBook = remoteBook.IsRecentBook();
-            var moveToTop = (isRecentBook && Settings.RecentTvPriority == (int)QBittorrentPriority.First) || (!isRecentBook && Settings.OlderTvPriority == (int)QBittorrentPriority.First);
+            var isRecentIssue = remoteIssue.IsRecentIssue();
+            var moveToTop = (isRecentIssue && Settings.RecentTvPriority == (int)QBittorrentPriority.First) || (!isRecentIssue && Settings.OlderTvPriority == (int)QBittorrentPriority.First);
             var forceStart = (QBittorrentState)Settings.InitialState == QBittorrentState.ForceStart;
 
-            Proxy.AddTorrentFromUrl(magnetLink, addHasSetShareLimits && setShareLimits ? remoteBook.SeedConfiguration : null, Settings);
+            Proxy.AddTorrentFromUrl(magnetLink, addHasSetShareLimits && setShareLimits ? remoteIssue.SeedConfiguration : null, Settings);
 
             if ((!addHasSetShareLimits && setShareLimits) || moveToTop || forceStart)
             {
@@ -90,11 +90,11 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
                 if (!addHasSetShareLimits && setShareLimits)
                 {
-                    Proxy.SetTorrentSeedingConfiguration(hash.ToLower(), remoteBook.SeedConfiguration, Settings);
+                    Proxy.SetTorrentSeedingConfiguration(hash.ToLower(), remoteIssue.SeedConfiguration, Settings);
 
                     try
                     {
-                        Proxy.SetTorrentSeedingConfiguration(hash.ToLower(), remoteBook.SeedConfiguration, Settings);
+                        Proxy.SetTorrentSeedingConfiguration(hash.ToLower(), remoteIssue.SeedConfiguration, Settings);
                     }
                     catch (Exception ex)
                     {
@@ -130,15 +130,15 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             return hash;
         }
 
-        protected override string AddFromTorrentFile(RemoteBook remoteBook, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteIssue remoteIssue, string hash, string filename, byte[] fileContent)
         {
-            var setShareLimits = remoteBook.SeedConfiguration != null && (remoteBook.SeedConfiguration.Ratio.HasValue || remoteBook.SeedConfiguration.SeedTime.HasValue);
+            var setShareLimits = remoteIssue.SeedConfiguration != null && (remoteIssue.SeedConfiguration.Ratio.HasValue || remoteIssue.SeedConfiguration.SeedTime.HasValue);
             var addHasSetShareLimits = setShareLimits && ProxyApiVersion >= new Version(2, 8, 1);
-            var isRecentBook = remoteBook.IsRecentBook();
-            var moveToTop = (isRecentBook && Settings.RecentTvPriority == (int)QBittorrentPriority.First) || (!isRecentBook && Settings.OlderTvPriority == (int)QBittorrentPriority.First);
+            var isRecentIssue = remoteIssue.IsRecentIssue();
+            var moveToTop = (isRecentIssue && Settings.RecentTvPriority == (int)QBittorrentPriority.First) || (!isRecentIssue && Settings.OlderTvPriority == (int)QBittorrentPriority.First);
             var forceStart = (QBittorrentState)Settings.InitialState == QBittorrentState.ForceStart;
 
-            Proxy.AddTorrentFromFile(filename, fileContent, addHasSetShareLimits ? remoteBook.SeedConfiguration : null, Settings);
+            Proxy.AddTorrentFromFile(filename, fileContent, addHasSetShareLimits ? remoteIssue.SeedConfiguration : null, Settings);
 
             if ((!addHasSetShareLimits && setShareLimits) || moveToTop || forceStart)
             {
@@ -151,13 +151,13 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 {
                     try
                     {
-                        Proxy.SetTorrentSeedingConfiguration(hash.ToLower(), remoteBook.SeedConfiguration, Settings);
+                        Proxy.SetTorrentSeedingConfiguration(hash.ToLower(), remoteIssue.SeedConfiguration, Settings);
                     }
                     catch (Exception ex)
                     {
                         _logger.Warn(ex, "Failed to set the torrent seed criteria for {0}.", hash);
                     }
-            }
+                }
 
                 if (moveToTop)
                 {
@@ -495,9 +495,9 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 _logger.Error(ex, "Unable to test qBittorrent");
 
                 return new NzbDroneValidationFailure("Host", "Unable to connect to qBittorrent")
-                       {
-                           DetailedDescription = ex.Message
-                       };
+                {
+                    DetailedDescription = ex.Message
+                };
             }
 
             return null;

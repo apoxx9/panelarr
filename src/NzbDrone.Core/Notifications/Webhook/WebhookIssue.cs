@@ -1,15 +1,15 @@
 using System;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.Notifications.Webhook
 {
-    public class WebhookBook
+    public class WebhookIssue
     {
-        public WebhookBook()
+        public WebhookIssue()
         {
         }
 
-        public WebhookBook(Issue issue)
+        public WebhookIssue(Issue issue)
         {
             Id = issue.Id;
             ForeignIssueId = issue.ForeignIssueId;

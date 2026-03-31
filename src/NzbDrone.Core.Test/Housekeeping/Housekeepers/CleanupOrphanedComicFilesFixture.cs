@@ -9,7 +9,7 @@ using NzbDrone.Core.Test.Framework;
 namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
 {
     [TestFixture]
-    public class CleanupOrphanedBookFilesFixture : DbTest<CleanupOrphanedBookFiles, ComicFile>
+    public class CleanupOrphanedComicFilesFixture : DbTest<CleanupOrphanedComicFiles, ComicFile>
     {
         [Test]
         public void should_unlink_orphaned_track_files()

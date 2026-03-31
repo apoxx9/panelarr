@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
         private string _pneumaticFolder;
         private string _strmFolder;
         private string _nzbPath;
-        private RemoteBook _remoteBook;
+        private RemoteIssue _remoteIssue;
         private IIndexer _indexer;
         private DownloadClientItem _downloadClientItem;
 
@@ -39,12 +39,12 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
             _nzbPath = Path.Combine(_pneumaticFolder, _title + ".nzb").AsOsAgnostic();
             _strmFolder = @"d:\unsorted tv\".AsOsAgnostic();
 
-            _remoteBook = new RemoteBook();
-            _remoteBook.Release = new ReleaseInfo();
-            _remoteBook.Release.Title = _title;
-            _remoteBook.Release.DownloadUrl = _nzbUrl;
+            _remoteIssue = new RemoteIssue();
+            _remoteIssue.Release = new ReleaseInfo();
+            _remoteIssue.Release.Title = _title;
+            _remoteIssue.Release.DownloadUrl = _nzbUrl;
 
-            _remoteBook.ParsedBookInfo = new ParsedBookInfo();
+            _remoteIssue.ParsedIssueInfo = new ParsedIssueInfo();
 
             _indexer = new TestIndexer(Mocker.Resolve<IHttpClient>(),
                 Mocker.Resolve<IIndexerStatusService>(),
@@ -72,7 +72,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
         [Test]
         public async Task should_download_file_if_it_doesnt_exist()
         {
-            await Subject.Download(_remoteBook, _indexer);
+            await Subject.Download(_remoteIssue, _indexer);
 
             Mocker.GetMock<IHttpClient>().Verify(c => c.DownloadFileAsync(_nzbUrl, _nzbPath, null), Times.Once());
         }
@@ -82,16 +82,16 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
         {
             WithFailedDownload();
 
-            Assert.ThrowsAsync<WebException>(async () => await Subject.Download(_remoteBook, _indexer));
+            Assert.ThrowsAsync<WebException>(async () => await Subject.Download(_remoteIssue, _indexer));
         }
 
         [Test]
         public void should_throw_if_discography_download()
         {
-            _remoteBook.Release.Title = "Alien Ant Farm - Discography";
-            _remoteBook.ParsedBookInfo.Discography = true;
+            _remoteIssue.Release.Title = "Alien Ant Farm - Discography";
+            _remoteIssue.ParsedIssueInfo.Discography = true;
 
-            Assert.ThrowsAsync<NotSupportedException>(async () => await Subject.Download(_remoteBook, _indexer));
+            Assert.ThrowsAsync<NotSupportedException>(async () => await Subject.Download(_remoteIssue, _indexer));
         }
 
         [Test]
@@ -105,9 +105,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
         {
             var illegalTitle = "Saturday Night Live - S38E08 - Jeremy Renner/Maroon 5 [SDTV]";
             var expectedFilename = Path.Combine(_pneumaticFolder, "Saturday Night Live - S38E08 - Jeremy Renner+Maroon 5 [SDTV].nzb");
-            _remoteBook.Release.Title = illegalTitle;
+            _remoteIssue.Release.Title = illegalTitle;
 
-            await Subject.Download(_remoteBook, _indexer);
+            await Subject.Download(_remoteIssue, _indexer);
 
             Mocker.GetMock<IHttpClient>().Verify(c => c.DownloadFileAsync(It.IsAny<string>(), expectedFilename, null), Times.Once());
         }

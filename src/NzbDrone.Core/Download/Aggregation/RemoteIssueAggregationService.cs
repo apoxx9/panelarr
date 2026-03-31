@@ -6,30 +6,30 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.Download.Aggregation
 {
-    public interface IRemoteBookAggregationService
+    public interface IRemoteIssueAggregationService
     {
-        RemoteBook Augment(RemoteBook remoteBook);
+        RemoteIssue Augment(RemoteIssue remoteIssue);
     }
 
-    public class RemoteBookAggregationService : IRemoteBookAggregationService
+    public class RemoteIssueAggregationService : IRemoteIssueAggregationService
     {
-        private readonly IEnumerable<IAggregateRemoteBook> _augmenters;
+        private readonly IEnumerable<IAggregateRemoteIssue> _augmenters;
         private readonly Logger _logger;
 
-        public RemoteBookAggregationService(IEnumerable<IAggregateRemoteBook> augmenters,
+        public RemoteIssueAggregationService(IEnumerable<IAggregateRemoteIssue> augmenters,
                                   Logger logger)
         {
             _augmenters = augmenters;
             _logger = logger;
         }
 
-        public RemoteBook Augment(RemoteBook remoteBook)
+        public RemoteIssue Augment(RemoteIssue remoteIssue)
         {
             foreach (var augmenter in _augmenters)
             {
                 try
                 {
-                    augmenter.Aggregate(remoteBook);
+                    augmenter.Aggregate(remoteIssue);
                 }
                 catch (Exception ex)
                 {
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Download.Aggregation
                 }
             }
 
-            return remoteBook;
+            return remoteIssue;
         }
     }
 }

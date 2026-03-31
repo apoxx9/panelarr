@@ -1,7 +1,7 @@
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.IndexerSearchTests

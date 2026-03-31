@@ -5,7 +5,6 @@ using Dapper;
 using NzbDrone.Common.Reflection;
 using NzbDrone.Core.Authentication;
 using NzbDrone.Core.Blocklisting;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFilters;
 using NzbDrone.Core.CustomFormats;
@@ -22,6 +21,7 @@ using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.ImportLists.Exclusions;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Instrumentation;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Jobs;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Messaging.Commands;
@@ -112,7 +112,7 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(s => s.ForeignSeriesId)
                   .HasOne(a => a.Metadata, a => a.SeriesMetadataId)
                   .HasOne(a => a.QualityProfile, a => a.QualityProfileId)
-                  .LazyLoad(a => a.Books, (db, a) => db.Query<Issue>(new SqlBuilder(db.DatabaseType).Where<Issue>(b => b.SeriesMetadataId == a.SeriesMetadataId)).ToList(), a => a.SeriesMetadataId > 0);
+                  .LazyLoad(a => a.Issues, (db, a) => db.Query<Issue>(new SqlBuilder(db.DatabaseType).Where<Issue>(b => b.SeriesMetadataId == a.SeriesMetadataId)).ToList(), a => a.SeriesMetadataId > 0);
 
             Mapper.Entity<SeriesGroup>("SeriesGroup").RegisterModel()
                 .Ignore(s => s.ForeignSeriesId)
@@ -123,7 +123,7 @@ namespace NzbDrone.Core.Datastore
                 .LazyLoad(s => s.LinkItems,
                           (db, series) => db.Query<SeriesGroupLink>(new SqlBuilder(db.DatabaseType).Where<SeriesGroupLink>(s => s.SeriesGroupId == series.Id)).ToList(),
                           s => s.Id > 0)
-                .LazyLoad(s => s.Books,
+                .LazyLoad(s => s.Issues,
                           (db, series) => db.Query<Issue>(new SqlBuilder(db.DatabaseType)
                                                          .Join<Issue, SeriesGroupLink>((l, r) => l.SeriesMetadataId == r.SeriesMetadataId)
                                                          .Join<SeriesGroupLink, SeriesGroup>((l, r) => l.SeriesGroupId == r.Id)
@@ -181,7 +181,7 @@ namespace NzbDrone.Core.Datastore
             Mapper.Entity<OtherExtraFile>("ExtraFiles").RegisterModel();
 
             Mapper.Entity<PendingRelease>("PendingReleases").RegisterModel()
-                  .Ignore(e => e.RemoteBook);
+                  .Ignore(e => e.RemoteIssue);
 
             Mapper.Entity<RemotePathMapping>("RemotePathMappings").RegisterModel();
             Mapper.Entity<Tag>("Tags").RegisterModel();

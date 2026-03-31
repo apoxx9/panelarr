@@ -6,7 +6,7 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
 {
-    public class SameFileSpecification : IImportDecisionEngineSpecification<LocalBook>
+    public class SameFileSpecification : IImportDecisionEngineSpecification<LocalIssue>
     {
         private readonly Logger _logger;
 
@@ -15,9 +15,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
             _logger = logger;
         }
 
-        public Decision IsSatisfiedBy(LocalBook localBook, DownloadClientItem downloadClientItem)
+        public Decision IsSatisfiedBy(LocalIssue localIssue, DownloadClientItem downloadClientItem)
         {
-            var comicFiles = localBook.Issue?.ComicFiles?.Value;
+            var comicFiles = localIssue.Issue?.ComicFiles?.Value;
 
             if (comicFiles == null || !comicFiles.Any())
             {
@@ -29,15 +29,15 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
             {
                 if (comicFile == null)
                 {
-                    var issue = localBook.Issue;
+                    var issue = localIssue.Issue;
                     _logger.Trace("Unable to get issue file details from the DB. IssueId: {0}", issue.Id);
 
                     return Decision.Accept();
                 }
 
-                if (comicFile.Size == localBook.Size)
+                if (comicFile.Size == localIssue.Size)
                 {
-                    _logger.Debug("'{0}' Has the same filesize as existing file", localBook.Path);
+                    _logger.Debug("'{0}' Has the same filesize as existing file", localIssue.Path);
                     return Decision.Reject("Has the same filesize as existing file");
                 }
             }

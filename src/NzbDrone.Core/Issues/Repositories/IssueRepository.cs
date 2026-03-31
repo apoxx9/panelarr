@@ -7,41 +7,41 @@ using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Qualities;
 
-namespace NzbDrone.Core.Books
+namespace NzbDrone.Core.Issues
 {
-    public interface IBookRepository : IBasicRepository<Issue>
+    public interface IIssueRepository : IBasicRepository<Issue>
     {
-        List<Issue> GetBooks(int authorId);
-        List<Issue> GetLastBooks(IEnumerable<int> authorMetadataIds);
-        List<Issue> GetNextBooks(IEnumerable<int> authorMetadataIds);
+        List<Issue> GetIssues(int authorId);
+        List<Issue> GetLastIssues(IEnumerable<int> authorMetadataIds);
+        List<Issue> GetNextIssues(IEnumerable<int> authorMetadataIds);
         List<Issue> GetIssuesBySeriesMetadataId(int authorMetadataId);
-        List<Issue> GetBooksForRefresh(int authorMetadataId, List<string> foreignIds);
-        List<Issue> GetBooksByFileIds(IEnumerable<int> fileIds);
+        List<Issue> GetIssuesForRefresh(int authorMetadataId, List<string> foreignIds);
+        List<Issue> GetIssuesByFileIds(IEnumerable<int> fileIds);
         Issue FindByTitle(int authorMetadataId, string title);
-        Issue FindById(string foreignBookId);
+        Issue FindById(string foreignIssueId);
         Issue FindBySlug(string titleSlug);
         PagingSpec<Issue> IssuesWithoutFiles(PagingSpec<Issue> pagingSpec);
         PagingSpec<Issue> IssuesWhereCutoffUnmet(PagingSpec<Issue> pagingSpec, List<QualitiesBelowCutoff> qualitiesBelowCutoff);
         List<Issue> IssuesBetweenDates(DateTime startDate, DateTime endDate, bool includeUnmonitored);
-        List<Issue> SeriesBooksBetweenDates(Series author, DateTime startDate, DateTime endDate, bool includeUnmonitored);
+        List<Issue> SeriesIssuesBetweenDates(Series author, DateTime startDate, DateTime endDate, bool includeUnmonitored);
         void SetMonitoredFlat(Issue issue, bool monitored);
         void SetMonitored(IEnumerable<int> ids, bool monitored);
-        List<Issue> GetSeriesBooksWithFiles(Series author);
+        List<Issue> GetSeriesIssuesWithFiles(Series author);
     }
 
-    public class IssueRepository : BasicRepository<Issue>, IBookRepository
+    public class IssueRepository : BasicRepository<Issue>, IIssueRepository
     {
         public IssueRepository(IMainDatabase database, IEventAggregator eventAggregator)
             : base(database, eventAggregator)
         {
         }
 
-        public List<Issue> GetBooks(int authorId)
+        public List<Issue> GetIssues(int authorId)
         {
             return Query(Builder().Join<Issue, Series>((l, r) => l.SeriesMetadataId == r.SeriesMetadataId).Where<Series>(a => a.Id == authorId));
         }
 
-        public List<Issue> GetLastBooks(IEnumerable<int> authorMetadataIds)
+        public List<Issue> GetLastIssues(IEnumerable<int> authorMetadataIds)
         {
             var now = DateTime.UtcNow;
 
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Books
             return Query(outer);
         }
 
-        public List<Issue> GetNextBooks(IEnumerable<int> authorMetadataIds)
+        public List<Issue> GetNextIssues(IEnumerable<int> authorMetadataIds)
         {
             var now = DateTime.UtcNow;
 
@@ -80,12 +80,12 @@ namespace NzbDrone.Core.Books
             return Query(s => s.SeriesMetadataId == authorMetadataId);
         }
 
-        public List<Issue> GetBooksForRefresh(int authorMetadataId, List<string> foreignIds)
+        public List<Issue> GetIssuesForRefresh(int authorMetadataId, List<string> foreignIds)
         {
             return Query(a => a.SeriesMetadataId == authorMetadataId || foreignIds.Contains(a.ForeignIssueId));
         }
 
-        public List<Issue> GetBooksByFileIds(IEnumerable<int> fileIds)
+        public List<Issue> GetIssuesByFileIds(IEnumerable<int> fileIds)
         {
             return Query(new SqlBuilder(_database.DatabaseType)
                          .Join<Issue, ComicFile>((b, f) => b.Id == f.IssueId)
@@ -94,9 +94,9 @@ namespace NzbDrone.Core.Books
                 .ToList();
         }
 
-        public Issue FindById(string foreignBookId)
+        public Issue FindById(string foreignIssueId)
         {
-            return Query(s => s.ForeignIssueId == foreignBookId).SingleOrDefault();
+            return Query(s => s.ForeignIssueId == foreignIssueId).SingleOrDefault();
         }
 
         public Issue FindBySlug(string titleSlug)
@@ -171,7 +171,7 @@ namespace NzbDrone.Core.Books
             return Query(builder);
         }
 
-        public List<Issue> SeriesBooksBetweenDates(Series author, DateTime startDate, DateTime endDate, bool includeUnmonitored)
+        public List<Issue> SeriesIssuesBetweenDates(Series author, DateTime startDate, DateTime endDate, bool includeUnmonitored)
         {
             var builder = Builder().Where<Issue>(rg => rg.ReleaseDate >= startDate &&
                                                  rg.ReleaseDate <= endDate &&
@@ -214,7 +214,7 @@ namespace NzbDrone.Core.Books
                 .ExclusiveOrDefault();
         }
 
-        public List<Issue> GetSeriesBooksWithFiles(Series author)
+        public List<Issue> GetSeriesIssuesWithFiles(Series author)
         {
             return Query(Builder()
                          .Join<Issue, ComicFile>((b, f) => b.Id == f.IssueId)

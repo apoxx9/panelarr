@@ -7,14 +7,14 @@ namespace NzbDrone.Core.Test.ParserTests
     [TestFixture]
     public class SeriesTitleInfoFixture : CoreTest
     {
-        // TODO: Redo this test and parsed info for Books which do have a year association
+        // TODO: Redo this test and parsed info for Issues which do have a year association
         [Test]
         [Ignore("Series Don't have year association thus we dont use this currently")]
         public void should_have_year_zero_when_title_doesnt_have_a_year()
         {
             const string title = "Alien Ant Farm - TruAnt [Flac]";
 
-            var result = Parser.Parser.ParseBookTitle(title).SeriesTitleInfo;
+            var result = Parser.Parser.ParseIssueTitle(title).SeriesTitleInfo;
 
             result.Year.Should().Be(0);
         }
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             const string title = "Alien Ant Farm - TruAnt [Flac]";
 
-            var result = Parser.Parser.ParseBookTitle(title).SeriesTitleInfo;
+            var result = Parser.Parser.ParseIssueTitle(title).SeriesTitleInfo;
 
             result.Title.Should().Be(result.TitleWithoutYear);
         }
@@ -36,7 +36,7 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             const string title = "Alien Ant Farm - TruAnt [Flac]";
 
-            var result = Parser.Parser.ParseBookTitle(title).SeriesTitleInfo;
+            var result = Parser.Parser.ParseIssueTitle(title).SeriesTitleInfo;
 
             result.Year.Should().Be(2004);
         }
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             const string title = "Alien Ant Farm - TruAnt [Flac]";
 
-            var result = Parser.Parser.ParseBookTitle(title).SeriesTitleInfo;
+            var result = Parser.Parser.ParseIssueTitle(title).SeriesTitleInfo;
 
             result.Title.Should().Be("House 2004");
         }
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             const string title = "Alien Ant Farm - TruAnt [Flac]";
 
-            var result = Parser.Parser.ParseBookTitle(title).SeriesTitleInfo;
+            var result = Parser.Parser.ParseIssueTitle(title).SeriesTitleInfo;
 
             result.TitleWithoutYear.Should().Be("House");
         }

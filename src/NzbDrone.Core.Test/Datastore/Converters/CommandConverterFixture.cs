@@ -1,8 +1,8 @@
 using System.Data.SQLite;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books.Commands;
 using NzbDrone.Core.Datastore.Converters;
+using NzbDrone.Core.Issues.Commands;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Test.Framework;
 

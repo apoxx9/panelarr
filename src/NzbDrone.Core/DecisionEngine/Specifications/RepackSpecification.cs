@@ -27,7 +27,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Database;
         public RejectionType Type => RejectionType.Permanent;
 
-        public Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
+        public Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
             if (!subject.ParsedIssueInfo.Quality.Revision.IsRepack)
             {
@@ -42,10 +42,10 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 return Decision.Accept();
             }
 
-            foreach (var issue in subject.Books)
+            foreach (var issue in subject.Issues)
             {
                 var releaseGroup = subject.ParsedIssueInfo.ReleaseGroup;
-                var comicFiles = _mediaFileService.GetFilesByBook(issue.Id);
+                var comicFiles = _mediaFileService.GetFilesByIssue(issue.Id);
 
                 foreach (var file in comicFiles)
                 {

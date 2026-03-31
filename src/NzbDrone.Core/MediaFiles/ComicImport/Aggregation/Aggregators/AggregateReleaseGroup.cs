@@ -3,11 +3,11 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 {
-    public class AggregateReleaseGroup : IAggregate<LocalBook>
+    public class AggregateReleaseGroup : IAggregate<LocalIssue>
     {
-        public LocalBook Aggregate(LocalBook localTrack, bool otherFiles)
+        public LocalIssue Aggregate(LocalIssue localTrack, bool otherFiles)
         {
-            var releaseGroup = localTrack.DownloadClientBookInfo?.ReleaseGroup;
+            var releaseGroup = localTrack.DownloadClientIssueInfo?.ReleaseGroup;
 
             if (releaseGroup.IsNullOrWhiteSpace())
             {

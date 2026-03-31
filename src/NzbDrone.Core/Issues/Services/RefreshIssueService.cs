@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Instrumentation.Extensions;
-using NzbDrone.Core.Books.Commands;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.History;
+using NzbDrone.Core.Issues.Commands;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Messaging.Commands;
@@ -14,48 +14,48 @@ using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.RootFolders;
 
-namespace NzbDrone.Core.Books
+namespace NzbDrone.Core.Issues
 {
-    public interface IRefreshBookService
+    public interface IRefreshIssueService
     {
-        bool RefreshBookInfo(Issue issue, List<Issue> remoteBooks, Series remoteData, bool forceUpdateFileTags);
-        bool RefreshBookInfo(List<Issue> issues, List<Issue> remoteBooks, Series remoteData, bool forceBookRefresh, bool forceUpdateFileTags, DateTime? lastUpdate);
+        bool RefreshIssueInfo(Issue issue, List<Issue> remoteIssues, Series remoteData, bool forceUpdateFileTags);
+        bool RefreshIssueInfo(List<Issue> issues, List<Issue> remoteIssues, Series remoteData, bool forceIssueRefresh, bool forceUpdateFileTags, DateTime? lastUpdate);
     }
 
-    public class RefreshBookService : RefreshEntityServiceBase<Issue, object>,
-        IRefreshBookService,
-        IExecute<RefreshBookCommand>,
-        IExecute<BulkRefreshBookCommand>
+    public class RefreshIssueService : RefreshEntityServiceBase<Issue, object>,
+        IRefreshIssueService,
+        IExecute<RefreshIssueCommand>,
+        IExecute<BulkRefreshIssueCommand>
     {
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly ISeriesService _authorService;
         private readonly IRootFolderService _rootFolderService;
         private readonly IAddSeriesService _addSeriesService;
         private readonly IProvideSeriesInfo _authorInfo;
-        private readonly IProvideBookInfo _bookInfo;
+        private readonly IProvideIssueInfo _bookInfo;
         private readonly IMediaFileService _mediaFileService;
         private readonly IHistoryService _historyService;
         private readonly IEventAggregator _eventAggregator;
-        private readonly ICheckIfBookShouldBeRefreshed _checkIfBookShouldBeRefreshed;
+        private readonly ICheckIfIssueShouldBeRefreshed _checkIfIssueShouldBeRefreshed;
         private readonly IMapCoversToLocal _mediaCoverService;
         private readonly Logger _logger;
 
-        public RefreshBookService(IIssueService bookService,
+        public RefreshIssueService(IIssueService bookService,
                                   ISeriesService authorService,
                                   IRootFolderService rootFolderService,
                                   IAddSeriesService addSeriesService,
                                   ISeriesMetadataService authorMetadataService,
                                   IProvideSeriesInfo authorInfo,
-                                  IProvideBookInfo bookInfo,
+                                  IProvideIssueInfo bookInfo,
                                   IMediaFileService mediaFileService,
                                   IHistoryService historyService,
                                   IEventAggregator eventAggregator,
-                                  ICheckIfBookShouldBeRefreshed checkIfBookShouldBeRefreshed,
+                                  ICheckIfIssueShouldBeRefreshed checkIfIssueShouldBeRefreshed,
                                   IMapCoversToLocal mediaCoverService,
                                   Logger logger)
         : base(logger, authorMetadataService)
         {
-            _bookService = bookService;
+            _issueService = bookService;
             _authorService = authorService;
             _rootFolderService = rootFolderService;
             _addSeriesService = addSeriesService;
@@ -64,7 +64,7 @@ namespace NzbDrone.Core.Books
             _mediaFileService = mediaFileService;
             _historyService = historyService;
             _eventAggregator = eventAggregator;
-            _checkIfBookShouldBeRefreshed = checkIfBookShouldBeRefreshed;
+            _checkIfIssueShouldBeRefreshed = checkIfIssueShouldBeRefreshed;
             _mediaCoverService = mediaCoverService;
             _logger = logger;
         }
@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Books
         {
             try
             {
-                var tuple = _bookInfo.GetBookInfo(issue.ForeignIssueId);
+                var tuple = _bookInfo.GetIssueInfo(issue.ForeignIssueId);
                 var author = _authorInfo.GetSeriesInfo(tuple.Item1);
                 var newbook = tuple.Item2;
 
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Books
                 newbook.SeriesMetadataId = issue.SeriesMetadataId;
                 newbook.SeriesMetadata.Value.Id = issue.SeriesMetadataId;
 
-                author.Books = new List<Issue> { newbook };
+                author.Issues = new List<Issue> { newbook };
                 return author;
             }
             catch (IssueNotFoundException)
@@ -107,7 +107,7 @@ namespace NzbDrone.Core.Books
             if (issue == null)
             {
                 data = GetSkyhookData(local);
-                issue = data.Books.Value.SingleOrDefault(x => x.ForeignIssueId == local.ForeignIssueId);
+                issue = data.Issues.Value.SingleOrDefault(x => x.ForeignIssueId == local.ForeignIssueId);
             }
 
             result.Entity = issue;
@@ -150,7 +150,7 @@ namespace NzbDrone.Core.Books
         {
             // not manually added and has no files
             return local.AddOptions.AddType != IssueAddType.Manual &&
-                !_mediaFileService.GetFilesByBook(local.Id).Any();
+                !_mediaFileService.GetFilesByIssue(local.Id).Any();
         }
 
         protected override void LogProgress(Issue local)
@@ -197,35 +197,35 @@ namespace NzbDrone.Core.Books
             _logger.Warn($"Issue {local} was merged with {remote} because the original was a duplicate.");
 
             // Update issue ids for files
-            var files = _mediaFileService.GetFilesByBook(local.Id);
+            var files = _mediaFileService.GetFilesByIssue(local.Id);
             files.ForEach(x => x.IssueId = target.Id);
             _mediaFileService.Update(files);
 
             // Update issue ids for history
-            var items = _historyService.GetByBook(local.Id, null);
+            var items = _historyService.GetByIssue(local.Id, null);
             items.ForEach(x => x.IssueId = target.Id);
             _historyService.UpdateMany(items);
 
             // Finally delete the old issue
-            _bookService.DeleteMany(new List<Issue> { local });
+            _issueService.DeleteMany(new List<Issue> { local });
 
             return UpdateResult.UpdateTags;
         }
 
         protected override Issue GetEntityByForeignId(Issue local)
         {
-            return _bookService.FindById(local.ForeignIssueId);
+            return _issueService.FindById(local.ForeignIssueId);
         }
 
         protected override void SaveEntity(Issue local)
         {
             // Use UpdateMany to avoid firing the issue edited event
-            _bookService.UpdateMany(new List<Issue> { local });
+            _issueService.UpdateMany(new List<Issue> { local });
         }
 
         protected override void DeleteEntity(Issue local, bool deleteFiles)
         {
-            _bookService.DeleteIssue(local.Id, deleteFiles);
+            _issueService.DeleteIssue(local.Id, deleteFiles);
         }
 
         protected override List<object> GetRemoteChildren(Issue local, Issue remote)
@@ -263,18 +263,18 @@ namespace NzbDrone.Core.Books
         protected override void PublishEntityUpdatedEvent(Issue entity)
         {
             // Fetch fresh from DB so all lazy loads are available
-            _eventAggregator.PublishEvent(new IssueUpdatedEvent(_bookService.GetIssue(entity.Id)));
+            _eventAggregator.PublishEvent(new IssueUpdatedEvent(_issueService.GetIssue(entity.Id)));
         }
 
-        public bool RefreshBookInfo(List<Issue> issues, List<Issue> remoteBooks, Series remoteData, bool forceBookRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
+        public bool RefreshIssueInfo(List<Issue> issues, List<Issue> remoteIssues, Series remoteData, bool forceIssueRefresh, bool forceUpdateFileTags, DateTime? lastUpdate)
         {
             var updated = false;
 
             foreach (var issue in issues)
             {
-                if (forceBookRefresh || _checkIfBookShouldBeRefreshed.ShouldRefresh(issue))
+                if (forceIssueRefresh || _checkIfIssueShouldBeRefreshed.ShouldRefresh(issue))
                 {
-                    updated |= RefreshBookInfo(issue, remoteBooks, remoteData, forceUpdateFileTags);
+                    updated |= RefreshIssueInfo(issue, remoteIssues, remoteData, forceUpdateFileTags);
                 }
                 else
                 {
@@ -285,35 +285,35 @@ namespace NzbDrone.Core.Books
             return updated;
         }
 
-        public bool RefreshBookInfo(Issue issue, List<Issue> remoteBooks, Series remoteData, bool forceUpdateFileTags)
+        public bool RefreshIssueInfo(Issue issue, List<Issue> remoteIssues, Series remoteData, bool forceUpdateFileTags)
         {
-            return RefreshEntityInfo(issue, remoteBooks, remoteData, true, forceUpdateFileTags, null);
+            return RefreshEntityInfo(issue, remoteIssues, remoteData, true, forceUpdateFileTags, null);
         }
 
-        public bool RefreshBookInfo(Issue issue)
+        public bool RefreshIssueInfo(Issue issue)
         {
             var data = GetSkyhookData(issue);
 
-            return RefreshBookInfo(issue, data.Books, data, false);
+            return RefreshIssueInfo(issue, data.Issues, data, false);
         }
 
-        public void Execute(BulkRefreshBookCommand message)
+        public void Execute(BulkRefreshIssueCommand message)
         {
-            var issues = _bookService.GetIssues(message.IssueIds);
+            var issues = _issueService.GetIssues(message.IssueIds);
 
             foreach (var issue in issues)
             {
-                RefreshBookInfo(issue);
+                RefreshIssueInfo(issue);
             }
         }
 
-        public void Execute(RefreshBookCommand message)
+        public void Execute(RefreshIssueCommand message)
         {
             if (message.IssueId.HasValue)
             {
-                var issue = _bookService.GetIssue(message.IssueId.Value);
+                var issue = _issueService.GetIssue(message.IssueId.Value);
 
-                RefreshBookInfo(issue);
+                RefreshIssueInfo(issue);
             }
         }
     }

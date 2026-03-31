@@ -1,4 +1,4 @@
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Parser.Model

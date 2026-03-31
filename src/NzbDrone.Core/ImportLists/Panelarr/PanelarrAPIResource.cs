@@ -24,7 +24,7 @@ namespace NzbDrone.Core.ImportLists.Panelarr
         public bool Monitored { get; set; }
     }
 
-    public class PanelarrBook
+    public class PanelarrIssue
     {
         public string Title { get; set; }
         public string ForeignIssueId { get; set; }

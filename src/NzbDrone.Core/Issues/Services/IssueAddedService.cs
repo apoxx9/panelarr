@@ -4,24 +4,24 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.IndexerSearch;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 
-namespace NzbDrone.Core.Books
+namespace NzbDrone.Core.Issues
 {
-    public interface IBookAddedService
+    public interface IIssueAddedService
     {
         void SearchForRecentlyAdded(int authorId);
     }
 
-    public class IssueAddedService : IHandle<BookInfoRefreshedEvent>, IBookAddedService
+    public class IssueAddedService : IHandle<IssueInfoRefreshedEvent>, IIssueAddedService
     {
         private readonly IManageCommandQueue _commandQueueManager;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly Logger _logger;
-        private readonly ICached<List<int>> _addedBooksCache;
+        private readonly ICached<List<int>> _addedIssuesCache;
 
         public IssueAddedService(ICacheManager cacheManager,
                                    IManageCommandQueue commandQueueManager,
@@ -29,27 +29,27 @@ namespace NzbDrone.Core.Books
                                    Logger logger)
         {
             _commandQueueManager = commandQueueManager;
-            _bookService = bookService;
+            _issueService = bookService;
             _logger = logger;
-            _addedBooksCache = cacheManager.GetCache<List<int>>(GetType());
+            _addedIssuesCache = cacheManager.GetCache<List<int>>(GetType());
         }
 
         public void SearchForRecentlyAdded(int authorId)
         {
-            var allBooks = _bookService.GetIssuesBySeries(authorId);
-            var toSearch = allBooks.Where(x => x.AddOptions.SearchForNewBook).ToList();
+            var allIssues = _issueService.GetIssuesBySeries(authorId);
+            var toSearch = allIssues.Where(x => x.AddOptions.SearchForNewIssue).ToList();
 
             if (toSearch.Any())
             {
-                toSearch.ForEach(x => x.AddOptions.SearchForNewBook = false);
+                toSearch.ForEach(x => x.AddOptions.SearchForNewIssue = false);
 
-                _bookService.SetAddOptions(toSearch);
+                _issueService.SetAddOptions(toSearch);
             }
 
-            var recentlyAddedIds = _addedBooksCache.Find(authorId.ToString());
+            var recentlyAddedIds = _addedIssuesCache.Find(authorId.ToString());
             if (recentlyAddedIds != null)
             {
-                toSearch.AddRange(allBooks.Where(x => recentlyAddedIds.Contains(x.Id)));
+                toSearch.AddRange(allIssues.Where(x => recentlyAddedIds.Contains(x.Id)));
             }
 
             if (toSearch.Any())
@@ -57,10 +57,10 @@ namespace NzbDrone.Core.Books
                 _commandQueueManager.Push(new IssueSearchCommand(toSearch.Select(e => e.Id).ToList()));
             }
 
-            _addedBooksCache.Remove(authorId.ToString());
+            _addedIssuesCache.Remove(authorId.ToString());
         }
 
-        public void Handle(BookInfoRefreshedEvent message)
+        public void Handle(IssueInfoRefreshedEvent message)
         {
             if (message.Series.AddOptions == null)
             {
@@ -90,7 +90,7 @@ namespace NzbDrone.Core.Books
                     return;
                 }
 
-                _addedBooksCache.Set(message.Series.Id.ToString(), previouslyReleased.Select(e => e.Id).ToList());
+                _addedIssuesCache.Set(message.Series.Id.ToString(), previouslyReleased.Select(e => e.Id).ToList());
             }
         }
     }

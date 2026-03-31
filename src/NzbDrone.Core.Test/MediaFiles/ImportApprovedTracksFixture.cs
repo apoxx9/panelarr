@@ -5,9 +5,9 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.MediaFiles.IssueImport;
@@ -22,10 +22,10 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.MediaFiles
 {
     [TestFixture]
-    public class ImportApprovedTracksFixture : CoreTest<ImportApprovedBooks>
+    public class ImportApprovedTracksFixture : CoreTest<ImportApprovedIssues>
     {
-        private List<ImportDecision<LocalBook>> _rejectedDecisions;
-        private List<ImportDecision<LocalBook>> _approvedDecisions;
+        private List<ImportDecision<LocalIssue>> _rejectedDecisions;
+        private List<ImportDecision<LocalIssue>> _approvedDecisions;
 
         private DownloadClientItem _downloadClientItem;
         private DownloadClientItemClientInfo _clientInfo;
@@ -33,8 +33,8 @@ namespace NzbDrone.Core.Test.MediaFiles
         [SetUp]
         public void Setup()
         {
-            _rejectedDecisions = new List<ImportDecision<LocalBook>>();
-            _approvedDecisions = new List<ImportDecision<LocalBook>>();
+            _rejectedDecisions = new List<ImportDecision<LocalIssue>>();
+            _approvedDecisions = new List<ImportDecision<LocalIssue>>();
 
             var author = Builder<Series>.CreateNew()
                                         .With(e => e.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() })
@@ -49,12 +49,12 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .With(r => r.IsCalibreLibrary = false)
                 .Build();
 
-            _rejectedDecisions.Add(new ImportDecision<LocalBook>(new LocalBook(), new Rejection("Rejected!")));
-            _rejectedDecisions.Add(new ImportDecision<LocalBook>(new LocalBook(), new Rejection("Rejected!")));
-            _rejectedDecisions.Add(new ImportDecision<LocalBook>(new LocalBook(), new Rejection("Rejected!")));
+            _rejectedDecisions.Add(new ImportDecision<LocalIssue>(new LocalIssue(), new Rejection("Rejected!")));
+            _rejectedDecisions.Add(new ImportDecision<LocalIssue>(new LocalIssue(), new Rejection("Rejected!")));
+            _rejectedDecisions.Add(new ImportDecision<LocalIssue>(new LocalIssue(), new Rejection("Rejected!")));
 
-            _approvedDecisions.Add(new ImportDecision<LocalBook>(
-                                       new LocalBook
+            _approvedDecisions.Add(new ImportDecision<LocalIssue>(
+                                       new LocalIssue
                                        {
                                            Series = author,
                                            Issue = issue,
@@ -68,14 +68,14 @@ namespace NzbDrone.Core.Test.MediaFiles
                                        }));
 
             Mocker.GetMock<IUpgradeMediaFiles>()
-                  .Setup(s => s.UpgradeBookFile(It.IsAny<ComicFile>(), It.IsAny<LocalBook>(), It.IsAny<bool>()))
+                  .Setup(s => s.UpgradeComicFile(It.IsAny<ComicFile>(), It.IsAny<LocalIssue>(), It.IsAny<bool>()))
                   .Returns(new ComicFileMoveResult());
 
             _clientInfo = Builder<DownloadClientItemClientInfo>.CreateNew().Build();
             _downloadClientItem = Builder<DownloadClientItem>.CreateNew().With(x => x.DownloadClientInfo = _clientInfo).Build();
 
             Mocker.GetMock<IMediaFileService>()
-                .Setup(s => s.GetFilesByBook(It.IsAny<int>()))
+                .Setup(s => s.GetFilesByIssue(It.IsAny<int>()))
                 .Returns(new List<ComicFile>());
 
             Mocker.GetMock<IRootFolderService>()
@@ -100,7 +100,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_only_import_approved()
         {
-            var all = new List<ImportDecision<LocalBook>>();
+            var all = new List<ImportDecision<LocalIssue>>();
             all.AddRange(_rejectedDecisions);
             all.AddRange(_approvedDecisions);
 
@@ -113,9 +113,9 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_only_import_each_track_once()
         {
-            var all = new List<ImportDecision<LocalBook>>();
+            var all = new List<ImportDecision<LocalIssue>>();
             all.AddRange(_approvedDecisions);
-            all.Add(new ImportDecision<LocalBook>(_approvedDecisions.First().Item));
+            all.Add(new ImportDecision<LocalIssue>(_approvedDecisions.First().Item));
 
             var result = Subject.Import(all, false);
 
@@ -125,17 +125,17 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_move_new_downloads()
         {
-            Subject.Import(new List<ImportDecision<LocalBook>> { _approvedDecisions.First() }, true);
+            Subject.Import(new List<ImportDecision<LocalIssue>> { _approvedDecisions.First() }, true);
 
             Mocker.GetMock<IUpgradeMediaFiles>()
-                  .Verify(v => v.UpgradeBookFile(It.IsAny<ComicFile>(), _approvedDecisions.First().Item, false),
+                  .Verify(v => v.UpgradeComicFile(It.IsAny<ComicFile>(), _approvedDecisions.First().Item, false),
                           Times.Once());
         }
 
         [Test]
         public void should_publish_TrackImportedEvent_for_new_downloads()
         {
-            Subject.Import(new List<ImportDecision<LocalBook>> { _approvedDecisions.First() }, true);
+            Subject.Import(new List<ImportDecision<LocalIssue>> { _approvedDecisions.First() }, true);
 
             Mocker.GetMock<IEventAggregator>()
                 .Verify(v => v.PublishEvent(It.IsAny<TrackImportedEvent>()), Times.Once());
@@ -146,10 +146,10 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             var track = _approvedDecisions.First();
             track.Item.ExistingFile = true;
-            Subject.Import(new List<ImportDecision<LocalBook>> { track }, false);
+            Subject.Import(new List<ImportDecision<LocalIssue>> { track }, false);
 
             Mocker.GetMock<IUpgradeMediaFiles>()
-                  .Verify(v => v.UpgradeBookFile(It.IsAny<ComicFile>(), _approvedDecisions.First().Item, false),
+                  .Verify(v => v.UpgradeComicFile(It.IsAny<ComicFile>(), _approvedDecisions.First().Item, false),
                           Times.Never());
         }
 
@@ -160,8 +160,8 @@ namespace NzbDrone.Core.Test.MediaFiles
             lqDecision.Item.Quality = new QualityModel(Quality.CBR);
             lqDecision.Item.Size = 10.Megabytes();
 
-            var hqDecision = new ImportDecision<LocalBook>(
-                new LocalBook
+            var hqDecision = new ImportDecision<LocalIssue>(
+                new LocalIssue
                 {
                     Series = lqDecision.Item.Series,
                     Issue = lqDecision.Item.Issue,
@@ -175,7 +175,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                     }
                 });
 
-            var all = new List<ImportDecision<LocalBook>>();
+            var all = new List<ImportDecision<LocalIssue>>();
             all.Add(lqDecision);
             all.Add(hqDecision);
 
@@ -192,8 +192,8 @@ namespace NzbDrone.Core.Test.MediaFiles
             var fileDecision = _approvedDecisions.First();
             fileDecision.Item.Size = 1.Gigabytes();
 
-            var sampleDecision = new ImportDecision<LocalBook>(
-                new LocalBook
+            var sampleDecision = new ImportDecision<LocalIssue>(
+                new LocalIssue
                 {
                     Series = fileDecision.Item.Series,
                     Issue = fileDecision.Item.Issue,
@@ -203,7 +203,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                     Size = 80.Megabytes()
                 });
 
-            var all = new List<ImportDecision<LocalBook>>();
+            var all = new List<ImportDecision<LocalIssue>>();
             all.Add(fileDecision);
             all.Add(sampleDecision);
 
@@ -217,19 +217,19 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_copy_when_cannot_move_files_downloads()
         {
-            Subject.Import(new List<ImportDecision<LocalBook>> { _approvedDecisions.First() }, true, new DownloadClientItem { Title = "Alien.Ant.Farm-Truant", CanMoveFiles = false, DownloadClientInfo = _clientInfo });
+            Subject.Import(new List<ImportDecision<LocalIssue>> { _approvedDecisions.First() }, true, new DownloadClientItem { Title = "Alien.Ant.Farm-Truant", CanMoveFiles = false, DownloadClientInfo = _clientInfo });
 
             Mocker.GetMock<IUpgradeMediaFiles>()
-                  .Verify(v => v.UpgradeBookFile(It.IsAny<ComicFile>(), _approvedDecisions.First().Item, true), Times.Once());
+                  .Verify(v => v.UpgradeComicFile(It.IsAny<ComicFile>(), _approvedDecisions.First().Item, true), Times.Once());
         }
 
         [Test]
         public void should_use_override_importmode()
         {
-            Subject.Import(new List<ImportDecision<LocalBook>> { _approvedDecisions.First() }, true, new DownloadClientItem { Title = "Alien.Ant.Farm-Truant", CanMoveFiles = false, DownloadClientInfo = _clientInfo }, ImportMode.Move);
+            Subject.Import(new List<ImportDecision<LocalIssue>> { _approvedDecisions.First() }, true, new DownloadClientItem { Title = "Alien.Ant.Farm-Truant", CanMoveFiles = false, DownloadClientInfo = _clientInfo }, ImportMode.Move);
 
             Mocker.GetMock<IUpgradeMediaFiles>()
-                  .Verify(v => v.UpgradeBookFile(It.IsAny<ComicFile>(), _approvedDecisions.First().Item, false), Times.Once());
+                  .Verify(v => v.UpgradeComicFile(It.IsAny<ComicFile>(), _approvedDecisions.First().Item, false), Times.Once());
         }
 
         [Test]
@@ -241,7 +241,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             var track = _approvedDecisions.First();
             track.Item.ExistingFile = true;
-            Subject.Import(new List<ImportDecision<LocalBook>> { track }, false);
+            Subject.Import(new List<ImportDecision<LocalIssue>> { track }, false);
 
             Mocker.GetMock<IMediaFileService>()
                 .Verify(v => v.Delete(It.IsAny<ComicFile>(), DeleteMediaFileReason.ManualOverride), Times.Once());

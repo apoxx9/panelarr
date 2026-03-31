@@ -9,9 +9,9 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.MediaCover
@@ -20,7 +20,7 @@ namespace NzbDrone.Core.MediaCover
     {
         void ConvertToLocalUrls(int entityId, MediaCoverEntity coverEntity, IEnumerable<MediaCover> covers);
         string GetCoverPath(int entityId, MediaCoverEntity coverEntity, MediaCoverTypes coverType, string extension, int? height = null);
-        void EnsureBookCovers(Issue issue);
+        void EnsureIssueCovers(Issue issue);
     }
 
     public class MediaCoverService :
@@ -33,7 +33,7 @@ namespace NzbDrone.Core.MediaCover
 
         private readonly IMediaCoverProxy _mediaCoverProxy;
         private readonly IImageResizer _resizer;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IHttpClient _httpClient;
         private readonly IDiskProvider _diskProvider;
         private readonly ICoverExistsSpecification _coverExistsSpecification;
@@ -60,7 +60,7 @@ namespace NzbDrone.Core.MediaCover
         {
             _mediaCoverProxy = mediaCoverProxy;
             _resizer = resizer;
-            _bookService = bookService;
+            _issueService = bookService;
             _httpClient = httpClient;
             _diskProvider = diskProvider;
             _coverExistsSpecification = coverExistsSpecification;
@@ -77,7 +77,7 @@ namespace NzbDrone.Core.MediaCover
 
             if (coverEntity == MediaCoverEntity.Issue)
             {
-                return Path.Combine(GetBookCoverPath(entityId), coverType.ToString().ToLower() + heightSuffix + GetExtension(coverType, extension));
+                return Path.Combine(GetIssueCoverPath(entityId), coverType.ToString().ToLower() + heightSuffix + GetExtension(coverType, extension));
             }
 
             return Path.Combine(GetSeriesCoverPath(entityId), coverType.ToString().ToLower() + heightSuffix + GetExtension(coverType, extension));
@@ -109,7 +109,7 @@ namespace NzbDrone.Core.MediaCover
 
                     if (coverEntity == MediaCoverEntity.Issue)
                     {
-                        mediaCover.Url = _configFileProvider.UrlBase + @"/MediaCover/Books/" + entityId + "/" + mediaCover.CoverType.ToString().ToLower() + GetExtension(mediaCover.CoverType, mediaCover.Extension);
+                        mediaCover.Url = _configFileProvider.UrlBase + @"/MediaCover/Comics/" + entityId + "/" + mediaCover.CoverType.ToString().ToLower() + GetExtension(mediaCover.CoverType, mediaCover.Extension);
                     }
                     else
                     {
@@ -130,9 +130,9 @@ namespace NzbDrone.Core.MediaCover
             return Path.Combine(_coverRootFolder, authorId.ToString());
         }
 
-        private string GetBookCoverPath(int bookId)
+        private string GetIssueCoverPath(int issueId)
         {
-            return Path.Combine(_coverRootFolder, "Books", bookId.ToString());
+            return Path.Combine(_coverRootFolder, "Comics", issueId.ToString());
         }
 
         private void EnsureSeriesCovers(Series author)
@@ -207,7 +207,7 @@ namespace NzbDrone.Core.MediaCover
             }
         }
 
-        public void EnsureBookCovers(Issue issue)
+        public void EnsureIssueCovers(Issue issue)
         {
             var coverImages = new List<MediaCover>();
             if (issue.CoverArtUrl.IsNotNullOrWhiteSpace())
@@ -234,7 +234,7 @@ namespace NzbDrone.Core.MediaCover
 
                         if (!alreadyExists)
                         {
-                            DownloadBookCover(issue, cover, serverFileHeaders.LastModified ?? DateTime.Now);
+                            DownloadIssueCover(issue, cover, serverFileHeaders.LastModified ?? DateTime.Now);
                         }
                     }
                     catch (Exception)
@@ -243,7 +243,7 @@ namespace NzbDrone.Core.MediaCover
                         if (!_diskProvider.FileExists(fileName) || _diskProvider.GetFileSize(fileName) == 0)
                         {
                             _logger.Debug("Range header check failed for {0}, downloading directly", cover.Url);
-                            DownloadBookCover(issue, cover, DateTime.Now);
+                            DownloadIssueCover(issue, cover, DateTime.Now);
                         }
                         else
                         {
@@ -283,7 +283,7 @@ namespace NzbDrone.Core.MediaCover
             }
         }
 
-        private void DownloadBookCover(Issue issue, MediaCover cover, DateTime lastModified)
+        private void DownloadIssueCover(Issue issue, MediaCover cover, DateTime lastModified)
         {
             var fileName = GetCoverPath(issue.Id, MediaCoverEntity.Issue, cover.CoverType, cover.Extension, null);
 
@@ -393,10 +393,10 @@ namespace NzbDrone.Core.MediaCover
         {
             EnsureSeriesCovers(message.Series);
 
-            var issues = _bookService.GetIssuesBySeries(message.Series.Id);
+            var issues = _issueService.GetIssuesBySeries(message.Series.Id);
             foreach (var issue in issues)
             {
-                EnsureBookCovers(issue);
+                EnsureIssueCovers(issue);
             }
 
             _eventAggregator.PublishEvent(new MediaCoversUpdatedEvent(message.Series));
@@ -413,7 +413,7 @@ namespace NzbDrone.Core.MediaCover
 
         public void HandleAsync(IssueDeletedEvent message)
         {
-            var path = GetBookCoverPath(message.Issue.Id);
+            var path = GetIssueCoverPath(message.Issue.Id);
             if (_diskProvider.FolderExists(path))
             {
                 _diskProvider.DeleteFolder(path, true);

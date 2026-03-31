@@ -7,10 +7,10 @@ using FluentValidation.Results;
 using Moq;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Commands;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.ImportLists.Exclusions;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Commands;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.IssueImport;
 using NzbDrone.Core.MediaFiles.IssueImport.Aggregation;
@@ -18,7 +18,7 @@ using NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators;
 using NzbDrone.Core.MediaFiles.IssueImport.Identification;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.MetadataSource;
-using NzbDrone.Core.MetadataSource.BookInfo;
+using NzbDrone.Core.MetadataSource.IssueInfo;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Metadata;
 using NzbDrone.Core.Test.Framework;
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             // Resolve all the parts we need
             Mocker.SetConstant<ISeriesRepository>(Mocker.Resolve<SeriesRepository>());
             Mocker.SetConstant<ISeriesMetadataRepository>(Mocker.Resolve<SeriesMetadataRepository>());
-            Mocker.SetConstant<IBookRepository>(Mocker.Resolve<IssueRepository>());
+            Mocker.SetConstant<IIssueRepository>(Mocker.Resolve<IssueRepository>());
             Mocker.SetConstant<IImportListExclusionRepository>(Mocker.Resolve<ImportListExclusionRepository>());
             Mocker.SetConstant<IMediaFileRepository>(Mocker.Resolve<MediaFileRepository>());
 
@@ -52,17 +52,17 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             _authorService = Mocker.Resolve<SeriesService>();
             Mocker.SetConstant<ISeriesService>(_authorService);
             Mocker.SetConstant<ISeriesMetadataService>(Mocker.Resolve<SeriesMetadataService>());
-            Mocker.SetConstant<IBookService>(Mocker.Resolve<IssueService>());
+            Mocker.SetConstant<IIssueService>(Mocker.Resolve<IssueService>());
             Mocker.SetConstant<IImportListExclusionService>(Mocker.Resolve<ImportListExclusionService>());
             Mocker.SetConstant<IMediaFileService>(Mocker.Resolve<MediaFileService>());
 
             Mocker.SetConstant<IConfigService>(Mocker.Resolve<IConfigService>());
-            Mocker.SetConstant<IProvideSeriesInfo>(Mocker.Resolve<BookInfoProxy>());
-            Mocker.SetConstant<IProvideBookInfo>(Mocker.Resolve<BookInfoProxy>());
+            Mocker.SetConstant<IProvideSeriesInfo>(Mocker.Resolve<IssueInfoProxy>());
+            Mocker.SetConstant<IProvideIssueInfo>(Mocker.Resolve<IssueInfoProxy>());
 
             _addSeriesService = Mocker.Resolve<AddSeriesService>();
 
-            Mocker.SetConstant<IRefreshBookService>(Mocker.Resolve<RefreshBookService>());
+            Mocker.SetConstant<IRefreshIssueService>(Mocker.Resolve<RefreshIssueService>());
             _refreshSeriesService = Mocker.Resolve<RefreshSeriesService>();
 
             Mocker.GetMock<IAddSeriesValidator>().Setup(x => x.Validate(It.IsAny<Series>())).Returns(new ValidationResult());
@@ -129,8 +129,8 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             {
                 "FilesWithMBIds.json",
                 "PreferMissingToBadMatch.json",
-                "InconsistentTyposInBook.json",
-                "SucceedWhenManyBooksHaveSameTitle.json",
+                "InconsistentTyposInIssue.json",
+                "SucceedWhenManyIssuesHaveSameTitle.json",
                 "PenalizeUnknownMedia.json",
                 "CorruptFile.json",
                 "FilesWithoutTags.json"
@@ -160,7 +160,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             var specifiedSeries = authors.SingleOrDefault(x => x.Metadata.Value.ForeignSeriesId == testcase.Series);
             var idOverrides = new IdentificationOverrides { Series = specifiedSeries };
 
-            var tracks = testcase.Tracks.Select(x => new LocalBook
+            var tracks = testcase.Tracks.Select(x => new LocalIssue
             {
                 Path = x.Path.AsOsAgnostic(),
                 FileTrackInfo = x.FileTrackInfo

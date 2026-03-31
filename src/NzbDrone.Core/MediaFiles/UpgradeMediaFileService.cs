@@ -10,7 +10,7 @@ namespace NzbDrone.Core.MediaFiles
 {
     public interface IUpgradeMediaFiles
     {
-        ComicFileMoveResult UpgradeBookFile(ComicFile comicFile, LocalBook localBook, bool copyOnly = false);
+        ComicFileMoveResult UpgradeComicFile(ComicFile comicFile, LocalIssue localIssue, bool copyOnly = false);
     }
 
     public class UpgradeMediaFileService : IUpgradeMediaFiles
@@ -18,7 +18,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IRecycleBinProvider _recycleBinProvider;
         private readonly IMediaFileService _mediaFileService;
         private readonly IMetadataTagService _metadataTagService;
-        private readonly IMoveBookFiles _bookFileMover;
+        private readonly IMoveComicFiles _comicFileMover;
         private readonly IDiskProvider _diskProvider;
         private readonly IRootFolderService _rootFolderService;
         private readonly Logger _logger;
@@ -26,7 +26,7 @@ namespace NzbDrone.Core.MediaFiles
         public UpgradeMediaFileService(IRecycleBinProvider recycleBinProvider,
                                        IMediaFileService mediaFileService,
                                        IMetadataTagService metadataTagService,
-                                       IMoveBookFiles bookFileMover,
+                                       IMoveComicFiles comicFileMover,
                                        IDiskProvider diskProvider,
                                        IRootFolderService rootFolderService,
                                        Logger logger)
@@ -34,18 +34,18 @@ namespace NzbDrone.Core.MediaFiles
             _recycleBinProvider = recycleBinProvider;
             _mediaFileService = mediaFileService;
             _metadataTagService = metadataTagService;
-            _bookFileMover = bookFileMover;
+            _comicFileMover = comicFileMover;
             _diskProvider = diskProvider;
             _rootFolderService = rootFolderService;
             _logger = logger;
         }
 
-        public ComicFileMoveResult UpgradeBookFile(ComicFile comicFile, LocalBook localBook, bool copyOnly = false)
+        public ComicFileMoveResult UpgradeComicFile(ComicFile comicFile, LocalIssue localIssue, bool copyOnly = false)
         {
             var moveFileResult = new ComicFileMoveResult();
-            var existingFiles = localBook.Issue.ComicFiles.Value;
+            var existingFiles = localIssue.Issue.ComicFiles.Value;
 
-            var rootFolderPath = _diskProvider.GetParentFolder(localBook.Series.Path);
+            var rootFolderPath = _diskProvider.GetParentFolder(localIssue.Series.Path);
 
             // If there are existing issue files and the root folder is missing, throw, so the old file isn't left behind during the import process.
             if (existingFiles.Any() && !_diskProvider.FolderExists(rootFolderPath))
@@ -55,13 +55,13 @@ namespace NzbDrone.Core.MediaFiles
 
             foreach (var file in existingFiles)
             {
-                var bookFilePath = file.Path;
-                var subfolder = rootFolderPath.GetRelativePath(_diskProvider.GetParentFolder(bookFilePath));
+                var comicFilePath = file.Path;
+                var subfolder = rootFolderPath.GetRelativePath(_diskProvider.GetParentFolder(comicFilePath));
 
-                if (_diskProvider.FileExists(bookFilePath))
+                if (_diskProvider.FileExists(comicFilePath))
                 {
                     _logger.Debug("Removing existing issue file: {0}", file);
-                    _recycleBinProvider.DeleteFile(bookFilePath, subfolder);
+                    _recycleBinProvider.DeleteFile(comicFilePath, subfolder);
                 }
 
                 moveFileResult.OldFiles.Add(file);
@@ -70,11 +70,11 @@ namespace NzbDrone.Core.MediaFiles
 
             if (copyOnly)
             {
-                moveFileResult.ComicFile = _bookFileMover.CopyBookFile(comicFile, localBook);
+                moveFileResult.ComicFile = _comicFileMover.CopyComicFile(comicFile, localIssue);
             }
             else
             {
-                moveFileResult.ComicFile = _bookFileMover.MoveBookFile(comicFile, localBook);
+                moveFileResult.ComicFile = _comicFileMover.MoveComicFile(comicFile, localIssue);
             }
 
             _metadataTagService.WriteTags(comicFile, true);

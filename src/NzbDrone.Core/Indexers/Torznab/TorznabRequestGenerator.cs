@@ -10,16 +10,16 @@ namespace NzbDrone.Core.Indexers.Torznab
         {
         }
 
-        protected override bool SupportsBookSearch
+        protected override bool SupportsComicSearch
         {
             get
             {
                 var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
 
-                return capabilities.SupportedBookSearchParameters != null &&
-                       capabilities.SupportedBookSearchParameters.Contains("q") &&
-                       capabilities.SupportedBookSearchParameters.Contains("author") &&
-                       capabilities.SupportedBookSearchParameters.Contains("title");
+                return capabilities.SupportedComicSearchParameters != null &&
+                       capabilities.SupportedComicSearchParameters.Contains("q") &&
+                       capabilities.SupportedComicSearchParameters.Contains("author") &&
+                       capabilities.SupportedComicSearchParameters.Contains("title");
             }
         }
     }

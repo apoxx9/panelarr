@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.IssueImport.Identification;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Parser.Model
 {
-    public class LocalBook
+    public class LocalIssue
     {
         public string Path { get; set; }
         public int Part { get; set; }
@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Parser.Model
         public DateTime Modified { get; set; }
         public ParsedTrackInfo FileTrackInfo { get; set; }
         public ParsedIssueInfo FolderTrackInfo { get; set; }
-        public ParsedIssueInfo DownloadClientBookInfo { get; set; }
+        public ParsedIssueInfo DownloadClientIssueInfo { get; set; }
         public List<string> AcoustIdResults { get; set; }
         public Series Series { get; set; }
         public Issue Issue { get; set; }

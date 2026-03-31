@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.Blocklisting

@@ -1,14 +1,14 @@
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Housekeeping.Housekeepers;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
 {
     [TestFixture]
-    public class CleanupOrphanedBooksFixture : DbTest<CleanupOrphanedBooks, Issue>
+    public class CleanupOrphanedIssuesFixture : DbTest<CleanupOrphanedIssues, Issue>
     {
         [Test]
         public void should_delete_orphaned_books()

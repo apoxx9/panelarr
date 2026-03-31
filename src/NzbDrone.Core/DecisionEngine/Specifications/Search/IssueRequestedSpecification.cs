@@ -17,19 +17,19 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.Search
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public Decision IsSatisfiedBy(RemoteBook remoteBook, SearchCriteriaBase searchCriteria)
+        public Decision IsSatisfiedBy(RemoteIssue remoteIssue, SearchCriteriaBase searchCriteria)
         {
             if (searchCriteria == null)
             {
                 return Decision.Accept();
             }
 
-            var criteriaBook = searchCriteria.Books.Select(v => v.Id).ToList();
-            var remoteBooks = remoteBook.Books.Select(v => v.Id).ToList();
+            var criteriaIssue = searchCriteria.Issues.Select(v => v.Id).ToList();
+            var remoteIssues = remoteIssue.Issues.Select(v => v.Id).ToList();
 
-            if (!criteriaBook.Intersect(remoteBooks).Any())
+            if (!criteriaIssue.Intersect(remoteIssues).Any())
             {
-                _logger.Debug("Release rejected since the issue wasn't requested: {0}", remoteBook.ParsedIssueInfo);
+                _logger.Debug("Release rejected since the issue wasn't requested: {0}", remoteIssue.ParsedIssueInfo);
                 return Decision.Reject("Issue wasn't requested");
             }
 

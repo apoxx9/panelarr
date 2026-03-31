@@ -9,7 +9,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
     {
         /*
         private Series _author;
-        private Issue _book;
+        private Issue _issue;
         private LocalTrack _localTrack;
 
         [SetUp]
@@ -21,14 +21,14 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
                                          Items = Qualities.QualityFixture.GetDefaultQualities(),
                                      }).Build();
 
-            _book = Builder<Issue>.CreateNew().Build();
+            _issue = Builder<Issue>.CreateNew().Build();
 
             _localTrack = new LocalTrack
             {
                 Path = @"C:\Test\Imagine Dragons\Imagine.Dragons.Song.1.mp3",
                 Quality = new QualityModel(Quality.CBR, new Revision(version: 1)),
                 Series = _author,
-                Issue = _book
+                Issue = _issue
             };
         }
 

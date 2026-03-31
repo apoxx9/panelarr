@@ -7,7 +7,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.MediaFiles;
 
-namespace NzbDrone.Core.Books
+namespace NzbDrone.Core.Issues
 {
     [DebuggerDisplay("{GetType().FullName} ID = {Id} [{ForeignIssueId}][{Title}]")]
     public class Issue : Entity<Issue>

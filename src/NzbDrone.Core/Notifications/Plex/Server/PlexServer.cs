@@ -5,8 +5,8 @@ using FluentValidation.Results;
 using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Exceptions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Notifications.Plex.PlexTv;
 using NzbDrone.Core.Validation;
@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
         private class PlexUpdateQueue
         {
-            public Dictionary<int, Series> Pending { get; } = new ();
+            public Dictionary<int, Series> Pending { get; } = new();
             public bool Refreshing { get; set; }
         }
 
@@ -191,9 +191,9 @@ namespace NzbDrone.Core.Notifications.Plex.Server
                 var authToken = _plexTvService.GetAuthToken(Convert.ToInt32(query["pinId"]));
 
                 return new
-                       {
-                           authToken
-                       };
+                {
+                    authToken
+                };
             }
 
             return new { };

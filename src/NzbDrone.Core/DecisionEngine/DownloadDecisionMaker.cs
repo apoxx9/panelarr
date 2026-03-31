@@ -26,13 +26,13 @@ namespace NzbDrone.Core.DecisionEngine
         private readonly IEnumerable<IDecisionEngineSpecification> _specifications;
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly IParsingService _parsingService;
-        private readonly IRemoteBookAggregationService _aggregationService;
+        private readonly IRemoteIssueAggregationService _aggregationService;
         private readonly Logger _logger;
 
         public DownloadDecisionMaker(IEnumerable<IDecisionEngineSpecification> specifications,
             IParsingService parsingService,
             ICustomFormatCalculationService formatService,
-            IRemoteBookAggregationService aggregationService,
+            IRemoteIssueAggregationService aggregationService,
             Logger logger)
         {
             _specifications = specifications;
@@ -44,15 +44,15 @@ namespace NzbDrone.Core.DecisionEngine
 
         public List<DownloadDecision> GetRssDecision(List<ReleaseInfo> reports, bool pushedRelease = false)
         {
-            return GetBookDecisions(reports).ToList();
+            return GetIssueDecisions(reports).ToList();
         }
 
         public List<DownloadDecision> GetSearchDecision(List<ReleaseInfo> reports, SearchCriteriaBase searchCriteriaBase)
         {
-            return GetBookDecisions(reports, false, searchCriteriaBase).ToList();
+            return GetIssueDecisions(reports, false, searchCriteriaBase).ToList();
         }
 
-        private IEnumerable<DownloadDecision> GetBookDecisions(List<ReleaseInfo> reports, bool pushedRelease = false, SearchCriteriaBase searchCriteria = null)
+        private IEnumerable<DownloadDecision> GetIssueDecisions(List<ReleaseInfo> reports, bool pushedRelease = false, SearchCriteriaBase searchCriteria = null)
         {
             if (reports.Any())
             {
@@ -73,128 +73,128 @@ namespace NzbDrone.Core.DecisionEngine
 
                 try
                 {
-                    var parsedBookInfo = Parser.Parser.ParseBookTitle(report.Title);
+                    var parsedIssueInfo = Parser.Parser.ParseIssueTitle(report.Title);
 
-                    if (parsedBookInfo == null)
+                    if (parsedIssueInfo == null)
                     {
                         if (searchCriteria != null)
                         {
-                            parsedBookInfo = Parser.Parser.ParseBookTitleWithSearchCriteria(report.Title,
+                            parsedIssueInfo = Parser.Parser.ParseIssueTitleWithSearchCriteria(report.Title,
                                                                                               searchCriteria.Series,
-                                                                                              searchCriteria.Books);
+                                                                                              searchCriteria.Issues);
                         }
                         else
                         {
                             // try parsing fuzzy
-                            parsedBookInfo = _parsingService.ParseBookTitleFuzzy(report.Title);
+                            parsedIssueInfo = _parsingService.ParseIssueTitleFuzzy(report.Title);
                         }
                     }
 
-                    if (parsedBookInfo != null && !parsedBookInfo.SeriesName.IsNullOrWhiteSpace())
+                    if (parsedIssueInfo != null && !parsedIssueInfo.SeriesName.IsNullOrWhiteSpace())
                     {
-                        var remoteBook = _parsingService.Map(parsedBookInfo, searchCriteria);
-                        remoteBook.Release = report;
+                        var remoteIssue = _parsingService.Map(parsedIssueInfo, searchCriteria);
+                        remoteIssue.Release = report;
 
-                        _aggregationService.Augment(remoteBook);
+                        _aggregationService.Augment(remoteIssue);
 
                         // try parsing again using the search criteria, in case it parsed but parsed incorrectly
-                        if ((remoteBook.Series == null || remoteBook.Books.Empty()) && searchCriteria != null)
+                        if ((remoteIssue.Series == null || remoteIssue.Issues.Empty()) && searchCriteria != null)
                         {
                             _logger.Debug("Series/Issue null for {0}, reparsing with search criteria", report.Title);
-                            var parsedBookInfoWithCriteria = Parser.Parser.ParseBookTitleWithSearchCriteria(report.Title,
+                            var parsedIssueInfoWithCriteria = Parser.Parser.ParseIssueTitleWithSearchCriteria(report.Title,
                                                                                                                 searchCriteria.Series,
-                                                                                                                searchCriteria.Books);
+                                                                                                                searchCriteria.Issues);
 
-                            if (parsedBookInfoWithCriteria != null && parsedBookInfoWithCriteria.SeriesName.IsNotNullOrWhiteSpace())
+                            if (parsedIssueInfoWithCriteria != null && parsedIssueInfoWithCriteria.SeriesName.IsNotNullOrWhiteSpace())
                             {
-                                remoteBook = _parsingService.Map(parsedBookInfoWithCriteria, searchCriteria);
+                                remoteIssue = _parsingService.Map(parsedIssueInfoWithCriteria, searchCriteria);
                             }
                         }
 
-                        remoteBook.Release = report;
+                        remoteIssue.Release = report;
 
                         // parse quality again with title and category if unknown
-                        if (remoteBook.ParsedIssueInfo.Quality.Quality == Quality.Unknown)
+                        if (remoteIssue.ParsedIssueInfo.Quality.Quality == Quality.Unknown)
                         {
-                            remoteBook.ParsedIssueInfo.Quality = QualityParser.ParseQuality(report.Title, null, report.Categories);
+                            remoteIssue.ParsedIssueInfo.Quality = QualityParser.ParseQuality(report.Title, null, report.Categories);
                         }
 
-                        if (remoteBook.Series == null)
+                        if (remoteIssue.Series == null)
                         {
-                            decision = new DownloadDecision(remoteBook, new Rejection("Unknown Series"));
+                            decision = new DownloadDecision(remoteIssue, new Rejection("Unknown Series"));
 
                             // shove in the searched author in case of forced download in interactive search
                             if (searchCriteria != null)
                             {
-                                remoteBook.Series = searchCriteria.Series;
-                                remoteBook.Books = searchCriteria.Books;
+                                remoteIssue.Series = searchCriteria.Series;
+                                remoteIssue.Issues = searchCriteria.Issues;
                             }
                         }
-                        else if (remoteBook.Books.Empty())
+                        else if (remoteIssue.Issues.Empty())
                         {
                             if (searchCriteria != null)
                             {
                                 // For interactive search, use the searched issues directly
-                                remoteBook.Books = searchCriteria.Books;
+                                remoteIssue.Issues = searchCriteria.Issues;
                             }
                             else
                             {
-                                decision = new DownloadDecision(remoteBook, new Rejection("Unable to parse issues from release name"));
+                                decision = new DownloadDecision(remoteIssue, new Rejection("Unable to parse issues from release name"));
                             }
                         }
                         else
                         {
-                            _aggregationService.Augment(remoteBook);
+                            _aggregationService.Augment(remoteIssue);
 
-                            remoteBook.CustomFormats = _formatCalculator.ParseCustomFormat(remoteBook, remoteBook.Release.Size);
-                            remoteBook.CustomFormatScore = remoteBook?.Series?.QualityProfile?.Value.CalculateCustomFormatScore(remoteBook.CustomFormats) ?? 0;
+                            remoteIssue.CustomFormats = _formatCalculator.ParseCustomFormat(remoteIssue, remoteIssue.Release.Size);
+                            remoteIssue.CustomFormatScore = remoteIssue?.Series?.QualityProfile?.Value.CalculateCustomFormatScore(remoteIssue.CustomFormats) ?? 0;
 
-                            remoteBook.DownloadAllowed = remoteBook.Books.Any();
-                            decision = GetDecisionForReport(remoteBook, searchCriteria);
+                            remoteIssue.DownloadAllowed = remoteIssue.Issues.Any();
+                            decision = GetDecisionForReport(remoteIssue, searchCriteria);
                         }
                     }
 
                     if (searchCriteria != null)
                     {
-                        if (parsedBookInfo == null)
+                        if (parsedIssueInfo == null)
                         {
-                            parsedBookInfo = new ParsedIssueInfo
+                            parsedIssueInfo = new ParsedIssueInfo
                             {
                                 Quality = QualityParser.ParseQuality(report.Title, null, report.Categories)
                             };
                         }
 
-                        if (parsedBookInfo.SeriesName.IsNullOrWhiteSpace())
+                        if (parsedIssueInfo.SeriesName.IsNullOrWhiteSpace())
                         {
-                            var remoteBook = new RemoteBook
+                            var remoteIssue = new RemoteIssue
                             {
                                 Release = report,
-                                ParsedIssueInfo = parsedBookInfo
+                                ParsedIssueInfo = parsedIssueInfo
                             };
 
-                            decision = new DownloadDecision(remoteBook, new Rejection("Unable to parse release"));
+                            decision = new DownloadDecision(remoteIssue, new Rejection("Unable to parse release"));
                         }
                     }
 
                     if (searchCriteria != null)
                     {
-                        if (parsedBookInfo == null)
+                        if (parsedIssueInfo == null)
                         {
-                            parsedBookInfo = new ParsedIssueInfo
+                            parsedIssueInfo = new ParsedIssueInfo
                             {
                                 Quality = QualityParser.ParseQuality(report.Title, null, report.Categories)
                             };
                         }
 
-                        if (parsedBookInfo.SeriesName.IsNullOrWhiteSpace())
+                        if (parsedIssueInfo.SeriesName.IsNullOrWhiteSpace())
                         {
-                            var remoteBook = new RemoteBook
+                            var remoteIssue = new RemoteIssue
                             {
                                 Release = report,
-                                ParsedIssueInfo = parsedBookInfo
+                                ParsedIssueInfo = parsedIssueInfo
                             };
 
-                            decision = new DownloadDecision(remoteBook, new Rejection("Unable to parse release"));
+                            decision = new DownloadDecision(remoteIssue, new Rejection("Unable to parse release"));
                         }
                     }
                 }
@@ -202,8 +202,8 @@ namespace NzbDrone.Core.DecisionEngine
                 {
                     _logger.Error(e, "Couldn't process release.");
 
-                    var remoteBook = new RemoteBook { Release = report };
-                    decision = new DownloadDecision(remoteBook, new Rejection("Unexpected error processing release"));
+                    var remoteIssue = new RemoteIssue { Release = report };
+                    decision = new DownloadDecision(remoteIssue, new Rejection("Unexpected error processing release"));
                 }
 
                 reportNumber++;
@@ -228,7 +228,7 @@ namespace NzbDrone.Core.DecisionEngine
                         }
                     }
 
-                    decision.RemoteBook.ReleaseSource = source;
+                    decision.RemoteIssue.ReleaseSource = source;
 
                     if (decision.Rejections.Any())
                     {
@@ -244,13 +244,13 @@ namespace NzbDrone.Core.DecisionEngine
             }
         }
 
-        private DownloadDecision GetDecisionForReport(RemoteBook remoteBook, SearchCriteriaBase searchCriteria = null)
+        private DownloadDecision GetDecisionForReport(RemoteIssue remoteIssue, SearchCriteriaBase searchCriteria = null)
         {
             var reasons = new Rejection[0];
 
             foreach (var specifications in _specifications.GroupBy(v => v.Priority).OrderBy(v => v.Key))
             {
-                reasons = specifications.Select(c => EvaluateSpec(c, remoteBook, searchCriteria))
+                reasons = specifications.Select(c => EvaluateSpec(c, remoteIssue, searchCriteria))
                                                         .Where(c => c != null)
                                                         .ToArray();
 
@@ -260,14 +260,14 @@ namespace NzbDrone.Core.DecisionEngine
                 }
             }
 
-            return new DownloadDecision(remoteBook, reasons.ToArray());
+            return new DownloadDecision(remoteIssue, reasons.ToArray());
         }
 
-        private Rejection EvaluateSpec(IDecisionEngineSpecification spec, RemoteBook remoteBook, SearchCriteriaBase searchCriteriaBase = null)
+        private Rejection EvaluateSpec(IDecisionEngineSpecification spec, RemoteIssue remoteIssue, SearchCriteriaBase searchCriteriaBase = null)
         {
             try
             {
-                var result = spec.IsSatisfiedBy(remoteBook, searchCriteriaBase);
+                var result = spec.IsSatisfiedBy(remoteIssue, searchCriteriaBase);
 
                 if (!result.Accepted)
                 {
@@ -280,9 +280,9 @@ namespace NzbDrone.Core.DecisionEngine
             }
             catch (Exception e)
             {
-                e.Data.Add("report", remoteBook.Release.ToJson());
-                e.Data.Add("parsed", remoteBook.ParsedIssueInfo.ToJson());
-                _logger.Error(e, "Couldn't evaluate decision on {0}", remoteBook.Release.Title);
+                e.Data.Add("report", remoteIssue.Release.ToJson());
+                e.Data.Add("parsed", remoteIssue.ParsedIssueInfo.ToJson());
+                _logger.Error(e, "Couldn't evaluate decision on {0}", remoteIssue.Release.Title);
                 return new Rejection($"{spec.GetType().Name}: {e.Message}");
             }
 

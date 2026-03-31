@@ -6,12 +6,12 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
 {
-    public class CloseBookMatchSpecification : IImportDecisionEngineSpecification<LocalEdition>
+    public class CloseIssueMatchSpecification : IImportDecisionEngineSpecification<LocalEdition>
     {
         private const double _bookThreshold = 0.20;
         private readonly Logger _logger;
 
-        public CloseBookMatchSpecification(Logger logger)
+        public CloseIssueMatchSpecification(Logger logger)
         {
             _logger = logger;
         }

@@ -51,10 +51,10 @@ namespace NzbDrone.Core.Download
 
             foreach (var report in prioritizedDecisions)
             {
-                var downloadProtocol = report.RemoteBook.Release.DownloadProtocol;
+                var downloadProtocol = report.RemoteIssue.Release.DownloadProtocol;
 
                 //Skip if already grabbed
-                if (IsBookProcessed(grabbed, report))
+                if (IsIssueProcessed(grabbed, report))
                 {
                     continue;
                 }
@@ -167,14 +167,14 @@ namespace NzbDrone.Core.Download
         internal bool IsQualifiedReport(DownloadDecision decision)
         {
             // Process both approved and temporarily rejected
-            return (decision.Approved || decision.TemporarilyRejected) && decision.RemoteBook.Books.Any();
+            return (decision.Approved || decision.TemporarilyRejected) && decision.RemoteIssue.Issues.Any();
         }
 
-        private bool IsBookProcessed(List<DownloadDecision> decisions, DownloadDecision report)
+        private bool IsIssueProcessed(List<DownloadDecision> decisions, DownloadDecision report)
         {
-            var bookIds = report.RemoteBook.Books.Select(e => e.Id).ToList();
+            var bookIds = report.RemoteIssue.Issues.Select(e => e.Id).ToList();
 
-            return decisions.SelectMany(r => r.RemoteBook.Books)
+            return decisions.SelectMany(r => r.RemoteIssue.Issues)
                             .Select(e => e.Id)
                             .ToList()
                             .Intersect(bookIds)
@@ -188,8 +188,8 @@ namespace NzbDrone.Core.Download
             // If a higher quality release failed to add to the download client, but a lower quality release
             // was sent to another client we still list it normally so it apparent that it'll grab next time.
             // Delayed is treated the same, but only the first is listed the subsequent items as stored as Fallback.
-            if (IsBookProcessed(grabbed, report) ||
-                IsBookProcessed(pending, report))
+            if (IsIssueProcessed(grabbed, report) ||
+                IsIssueProcessed(pending, report))
             {
                 reason = PendingReleaseReason.Fallback;
             }
@@ -200,18 +200,18 @@ namespace NzbDrone.Core.Download
 
         private async Task<ProcessedDecisionResult> ProcessDecisionInternal(DownloadDecision decision, int? downloadClientId = null)
         {
-            var remoteBook = decision.RemoteBook;
+            var remoteIssue = decision.RemoteIssue;
 
             try
             {
-                _logger.Trace("Grabbing from Indexer {0} at priority {1}.", remoteBook.Release.Indexer, remoteBook.Release.IndexerPriority);
-                await _downloadService.DownloadReport(remoteBook, downloadClientId);
+                _logger.Trace("Grabbing from Indexer {0} at priority {1}.", remoteIssue.Release.Indexer, remoteIssue.Release.IndexerPriority);
+                await _downloadService.DownloadReport(remoteIssue, downloadClientId);
 
                 return ProcessedDecisionResult.Grabbed;
             }
             catch (ReleaseUnavailableException)
             {
-                _logger.Warn("Failed to download release from indexer, no longer available. " + remoteBook);
+                _logger.Warn("Failed to download release from indexer, no longer available. " + remoteIssue);
                 return ProcessedDecisionResult.Rejected;
             }
             catch (Exception ex)
@@ -219,13 +219,13 @@ namespace NzbDrone.Core.Download
                 if (ex is DownloadClientUnavailableException || ex is DownloadClientAuthenticationException)
                 {
                     _logger.Debug(ex,
-                        "Failed to send release to download client, storing until later. " + remoteBook);
+                        "Failed to send release to download client, storing until later. " + remoteIssue);
 
                     return ProcessedDecisionResult.Failed;
                 }
                 else
                 {
-                    _logger.Warn(ex, "Couldn't add report to download queue. " + remoteBook);
+                    _logger.Warn(ex, "Couldn't add report to download queue. " + remoteIssue);
                     return ProcessedDecisionResult.Skipped;
                 }
             }

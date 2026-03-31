@@ -3,83 +3,83 @@ using System.Collections.Generic;
 using System.Linq;
 using NLog;
 
-namespace NzbDrone.Core.Books
+namespace NzbDrone.Core.Issues
 {
-    public interface IBookMonitoredService
+    public interface IIssueMonitoredService
     {
-        void SetBookMonitoredStatus(Series author, MonitoringOptions monitoringOptions);
+        void SetIssueMonitoredStatus(Series author, MonitoringOptions monitoringOptions);
     }
 
-    public class IssueMonitoredService : IBookMonitoredService
+    public class IssueMonitoredService : IIssueMonitoredService
     {
         private readonly ISeriesService _authorService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly Logger _logger;
 
         public IssueMonitoredService(ISeriesService authorService, IIssueService bookService, Logger logger)
         {
             _authorService = authorService;
-            _bookService = bookService;
+            _issueService = bookService;
             _logger = logger;
         }
 
-        public void SetBookMonitoredStatus(Series author, MonitoringOptions monitoringOptions)
+        public void SetIssueMonitoredStatus(Series author, MonitoringOptions monitoringOptions)
         {
             if (monitoringOptions != null)
             {
                 _logger.Debug("[{0}] Setting issue monitored status.", author.Name);
 
-                var issues = _bookService.GetIssuesBySeries(author.Id);
+                var issues = _issueService.GetIssuesBySeries(author.Id);
 
-                var booksWithFiles = _bookService.GetSeriesBooksWithFiles(author);
+                var booksWithFiles = _issueService.GetSeriesIssuesWithFiles(author);
 
                 var booksWithoutFiles = issues.Where(c => !booksWithFiles.Select(e => e.Id).Contains(c.Id) && c.ReleaseDate <= DateTime.UtcNow).ToList();
 
-                var monitoredBooks = monitoringOptions.IssuesToMonitor;
+                var monitoredIssues = monitoringOptions.IssuesToMonitor;
 
                 // If specific issues are passed use those instead of the monitoring options.
-                if (monitoredBooks.Any())
+                if (monitoredIssues.Any())
                 {
-                    ToggleBooksMonitoredState(
-                        issues.Where(s => monitoredBooks.Contains(s.ForeignIssueId)), true);
-                    ToggleBooksMonitoredState(
-                        issues.Where(s => !monitoredBooks.Contains(s.ForeignIssueId)), false);
+                    ToggleIssuesMonitoredState(
+                        issues.Where(s => monitoredIssues.Contains(s.ForeignIssueId)), true);
+                    ToggleIssuesMonitoredState(
+                        issues.Where(s => !monitoredIssues.Contains(s.ForeignIssueId)), false);
                 }
                 else
                 {
                     switch (monitoringOptions.Monitor)
                     {
                         case MonitorTypes.All:
-                            ToggleBooksMonitoredState(issues, true);
+                            ToggleIssuesMonitoredState(issues, true);
                             break;
                         case MonitorTypes.Future:
-                            _logger.Debug("Unmonitoring Books with Files");
-                            ToggleBooksMonitoredState(issues.Where(e => booksWithFiles.Select(c => c.Id).Contains(e.Id)), false);
-                            _logger.Debug("Unmonitoring Books without Files");
-                            ToggleBooksMonitoredState(issues.Where(e => booksWithoutFiles.Select(c => c.Id).Contains(e.Id)), false);
+                            _logger.Debug("Unmonitoring Issues with Files");
+                            ToggleIssuesMonitoredState(issues.Where(e => booksWithFiles.Select(c => c.Id).Contains(e.Id)), false);
+                            _logger.Debug("Unmonitoring Issues without Files");
+                            ToggleIssuesMonitoredState(issues.Where(e => booksWithoutFiles.Select(c => c.Id).Contains(e.Id)), false);
                             break;
                         case MonitorTypes.None:
-                            ToggleBooksMonitoredState(issues, false);
+                            ToggleIssuesMonitoredState(issues, false);
                             break;
                         case MonitorTypes.Missing:
-                            _logger.Debug("Unmonitoring Books with Files");
-                            ToggleBooksMonitoredState(issues.Where(e => booksWithFiles.Select(c => c.Id).Contains(e.Id)), false);
-                            _logger.Debug("Monitoring Books without Files");
-                            ToggleBooksMonitoredState(issues.Where(e => booksWithoutFiles.Select(c => c.Id).Contains(e.Id)), true);
+                            _logger.Debug("Unmonitoring Issues with Files");
+                            ToggleIssuesMonitoredState(issues.Where(e => booksWithFiles.Select(c => c.Id).Contains(e.Id)), false);
+                            _logger.Debug("Monitoring Issues without Files");
+                            ToggleIssuesMonitoredState(issues.Where(e => booksWithoutFiles.Select(c => c.Id).Contains(e.Id)), true);
                             break;
                         case MonitorTypes.Existing:
-                            _logger.Debug("Monitoring Books with Files");
-                            ToggleBooksMonitoredState(issues.Where(e => booksWithFiles.Select(c => c.Id).Contains(e.Id)), true);
-                            _logger.Debug("Unmonitoring Books without Files");
-                            ToggleBooksMonitoredState(issues.Where(e => booksWithoutFiles.Select(c => c.Id).Contains(e.Id)), false);
+                            _logger.Debug("Monitoring Issues with Files");
+                            ToggleIssuesMonitoredState(issues.Where(e => booksWithFiles.Select(c => c.Id).Contains(e.Id)), true);
+                            _logger.Debug("Unmonitoring Issues without Files");
+                            ToggleIssuesMonitoredState(issues.Where(e => booksWithoutFiles.Select(c => c.Id).Contains(e.Id)), false);
                             break;
                         case MonitorTypes.Latest:
-                            ToggleBooksMonitoredState(issues, false);
-                            ToggleBooksMonitoredState(issues.OrderByDescending(e => e.ReleaseDate).Take(1), true);
+                            ToggleIssuesMonitoredState(issues, false);
+                            ToggleIssuesMonitoredState(issues.OrderByDescending(e => e.ReleaseDate).Take(1), true);
                             break;
                         case MonitorTypes.First:
-                            ToggleBooksMonitoredState(issues, false);
-                            ToggleBooksMonitoredState(issues.OrderBy(e => e.ReleaseDate).Take(1), true);
+                            ToggleIssuesMonitoredState(issues, false);
+                            ToggleIssuesMonitoredState(issues.OrderBy(e => e.ReleaseDate).Take(1), true);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -89,14 +89,14 @@ namespace NzbDrone.Core.Books
                 // Use individual update to ensure updates are sent to frontend
                 foreach (var issue in issues)
                 {
-                    _bookService.UpdateIssue(issue);
+                    _issueService.UpdateIssue(issue);
                 }
             }
 
             _authorService.UpdateSeries(author);
         }
 
-        private void ToggleBooksMonitoredState(IEnumerable<Issue> issues, bool monitored)
+        private void ToggleIssuesMonitoredState(IEnumerable<Issue> issues, bool monitored)
         {
             foreach (var issue in issues)
             {

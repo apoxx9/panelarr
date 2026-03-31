@@ -2,9 +2,9 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 {
-    public class AggregateQuality : IAggregate<LocalBook>
+    public class AggregateQuality : IAggregate<LocalIssue>
     {
-        public LocalBook Aggregate(LocalBook localTrack, bool otherFiles)
+        public LocalIssue Aggregate(LocalIssue localTrack, bool otherFiles)
         {
             var quality = localTrack.FileTrackInfo?.Quality;
 
@@ -15,7 +15,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 
             if (quality == null)
             {
-                quality = localTrack.DownloadClientBookInfo?.Quality;
+                quality = localTrack.DownloadClientIssueInfo?.Quality;
             }
 
             localTrack.Quality = quality;

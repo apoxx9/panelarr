@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.MetadataSource
 {

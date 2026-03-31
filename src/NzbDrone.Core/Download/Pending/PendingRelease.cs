@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Download.Pending
         public PendingReleaseAdditionalInfo AdditionalInfo { get; set; }
 
         //Not persisted
-        public RemoteBook RemoteBook { get; set; }
+        public RemoteIssue RemoteIssue { get; set; }
     }
 
     public class PendingReleaseAdditionalInfo

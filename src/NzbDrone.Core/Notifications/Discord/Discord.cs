@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentValidation.Results;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Notifications.Discord.Payloads;
 using NzbDrone.Core.Validation;

@@ -8,8 +8,8 @@ using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.CustomFormats;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Qualities;
@@ -18,9 +18,9 @@ namespace NzbDrone.Core.Organizer
 {
     public interface IBuildFileNames
     {
-        string BuildBookFileName(Series author, Issue issue, ComicFile comicFile, NamingConfig namingConfig = null, List<CustomFormat> customFormats = null);
-        string BuildBookFilePath(Series author, Issue issue, string fileName, string extension);
-        string BuildBookPath(Series author);
+        string BuildComicFileName(Series author, Issue issue, ComicFile comicFile, NamingConfig namingConfig = null, List<CustomFormat> customFormats = null);
+        string BuildComicFilePath(Series author, Issue issue, string fileName, string extension);
+        string BuildIssuePath(Series author);
         BasicNamingConfig GetBasicNamingConfig(NamingConfig nameSpec);
         string GetSeriesFolder(Series author, NamingConfig namingConfig = null);
     }
@@ -72,7 +72,7 @@ namespace NzbDrone.Core.Organizer
             _logger = logger;
         }
 
-        public string BuildBookFileName(Series author, Issue issue, ComicFile comicFile, NamingConfig namingConfig = null, List<CustomFormat> customFormats = null)
+        public string BuildComicFileName(Series author, Issue issue, ComicFile comicFile, NamingConfig namingConfig = null, List<CustomFormat> customFormats = null)
         {
             if (namingConfig == null)
             {
@@ -103,8 +103,8 @@ namespace NzbDrone.Core.Organizer
             var tokenHandlers = new Dictionary<string, Func<TokenMatch, string>>(FileNameBuilderTokenEqualityComparer.Instance);
 
             AddSeriesTokens(tokenHandlers, author);
-            AddBookTokens(tokenHandlers, issue);
-            AddBookFileTokens(tokenHandlers, comicFile);
+            AddIssueTokens(tokenHandlers, issue);
+            AddComicFileTokens(tokenHandlers, comicFile);
             AddQualityTokens(tokenHandlers, author, comicFile);
             AddMediaInfoTokens(tokenHandlers, comicFile);
             AddCustomFormats(tokenHandlers, author, comicFile, customFormats);
@@ -131,16 +131,16 @@ namespace NzbDrone.Core.Organizer
             return Path.Combine(components.ToArray());
         }
 
-        public string BuildBookFilePath(Series author, Issue issue, string fileName, string extension)
+        public string BuildComicFilePath(Series author, Issue issue, string fileName, string extension)
         {
             Ensure.That(extension, () => extension).IsNotNullOrWhiteSpace();
 
-            var path = BuildBookPath(author);
+            var path = BuildIssuePath(author);
 
             return Path.Combine(path, fileName + extension);
         }
 
-        public string BuildBookPath(Series author)
+        public string BuildIssuePath(Series author)
         {
             return author.Path;
         }
@@ -276,13 +276,13 @@ namespace NzbDrone.Core.Organizer
             }
         }
 
-        private void AddBookTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Issue issue)
+        private void AddIssueTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Issue issue)
         {
             tokenHandlers["{Issue Title}"] = m => issue.Title;
             tokenHandlers["{Issue CleanTitle}"] = m => CleanTitle(issue.Title);
             tokenHandlers["{Issue TitleThe}"] = m => TitleThe(issue.Title);
 
-            var (titleNoSub, subtitle) = issue.Title.SplitBookTitle(issue.SeriesMetadata.Value.Name);
+            var (titleNoSub, subtitle) = issue.Title.SplitIssueTitle(issue.SeriesMetadata.Value.Name);
 
             tokenHandlers["{Issue TitleNoSub}"] = m => titleNoSub;
             tokenHandlers["{Issue CleanTitleNoSub}"] = m => CleanTitle(titleNoSub);
@@ -325,7 +325,7 @@ namespace NzbDrone.Core.Organizer
             }
         }
 
-        private void AddBookFileTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, ComicFile comicFile)
+        private void AddComicFileTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, ComicFile comicFile)
         {
             tokenHandlers["{Original Title}"] = m => GetOriginalTitle(comicFile);
             tokenHandlers["{Original Filename}"] = m => GetOriginalFileName(comicFile);

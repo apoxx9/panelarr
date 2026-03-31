@@ -8,8 +8,8 @@ namespace NzbDrone.Core.SeriesStats
         public int SeriesId { get; set; }
         public int ComicFileCount { get; set; }
         public int IssueCount { get; set; }
-        public int AvailableBookCount { get; set; }
-        public int TotalBookCount { get; set; }
+        public int AvailableIssueCount { get; set; }
+        public int TotalIssueCount { get; set; }
         public long SizeOnDisk { get; set; }
         public List<IssueStatistics> IssueStatistics { get; set; }
     }

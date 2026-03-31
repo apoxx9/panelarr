@@ -8,7 +8,7 @@ using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.ImportLists.Exclusions;
 using NzbDrone.Core.MetadataSource;
 
-namespace NzbDrone.Core.Books
+namespace NzbDrone.Core.Issues
 {
     public interface IAddIssueService
     {
@@ -20,21 +20,21 @@ namespace NzbDrone.Core.Books
     {
         private readonly ISeriesService _authorService;
         private readonly IAddSeriesService _addSeriesService;
-        private readonly IIssueService _bookService;
-        private readonly IProvideBookInfo _bookInfo;
+        private readonly IIssueService _issueService;
+        private readonly IProvideIssueInfo _bookInfo;
         private readonly IImportListExclusionService _importListExclusionService;
         private readonly Logger _logger;
 
         public AddIssueService(ISeriesService authorService,
                                IAddSeriesService addSeriesService,
                                IIssueService bookService,
-                               IProvideBookInfo bookInfo,
+                               IProvideIssueInfo bookInfo,
                                IImportListExclusionService importListExclusionService,
                                Logger logger)
         {
             _authorService = authorService;
             _addSeriesService = addSeriesService;
-            _bookService = bookService;
+            _issueService = bookService;
             _bookInfo = bookInfo;
             _importListExclusionService = importListExclusionService;
             _logger = logger;
@@ -47,10 +47,10 @@ namespace NzbDrone.Core.Books
             issue = AddSkyhookData(issue);
 
             // Check if the issue already exists
-            var dbBook = _bookService.FindById(issue.ForeignIssueId);
-            if (dbBook != null)
+            var dbIssue = _issueService.FindById(issue.ForeignIssueId);
+            if (dbIssue != null)
             {
-                issue.UseDbFieldsFrom(dbBook);
+                issue.UseDbFieldsFrom(dbIssue);
             }
 
             // Remove any import list exclusions preventing addition
@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Books
 
             issue.Series = dbSeries;
             issue.SeriesMetadataId = dbSeries.SeriesMetadataId;
-            _bookService.AddIssue(issue, doRefresh);
+            _issueService.AddIssue(issue, doRefresh);
 
             return issue;
         }
@@ -81,14 +81,14 @@ namespace NzbDrone.Core.Books
         public List<Issue> AddIssues(List<Issue> issues, bool doRefresh = true)
         {
             var added = DateTime.UtcNow;
-            var addedBooks = new List<Issue>();
+            var addedIssues = new List<Issue>();
 
             foreach (var a in issues)
             {
                 a.Added = added;
                 try
                 {
-                    addedBooks.Add(AddIssue(a, doRefresh));
+                    addedIssues.Add(AddIssue(a, doRefresh));
                 }
                 catch (Exception ex)
                 {
@@ -97,33 +97,33 @@ namespace NzbDrone.Core.Books
                 }
             }
 
-            return addedBooks;
+            return addedIssues;
         }
 
-        private Issue AddSkyhookData(Issue newBook)
+        private Issue AddSkyhookData(Issue newIssue)
         {
             Tuple<string, Issue, List<SeriesMetadata>> tuple = null;
             try
             {
-                tuple = _bookInfo.GetBookInfo(newBook.ForeignIssueId);
+                tuple = _bookInfo.GetIssueInfo(newIssue.ForeignIssueId);
             }
             catch (IssueNotFoundException)
             {
-                _logger.Error("Issue with Foreign Id {0} was not found, it may have been removed from metadata.", newBook.ForeignIssueId);
+                _logger.Error("Issue with Foreign Id {0} was not found, it may have been removed from metadata.", newIssue.ForeignIssueId);
 
                 throw new ValidationException(new List<ValidationFailure>
                                               {
-                                                  new ValidationFailure("ForeignIssueId", "A issue with this ID was not found", newBook.ForeignIssueId)
+                                                  new ValidationFailure("ForeignIssueId", "A issue with this ID was not found", newIssue.ForeignIssueId)
                                               });
             }
 
-            newBook.UseMetadataFrom(tuple.Item2);
-            newBook.Added = DateTime.UtcNow;
+            newIssue.UseMetadataFrom(tuple.Item2);
+            newIssue.Added = DateTime.UtcNow;
 
             var metadata = tuple.Item3.FirstOrDefault(x => x.ForeignSeriesId == tuple.Item1);
-            newBook.SeriesMetadata = metadata;
+            newIssue.SeriesMetadata = metadata;
 
-            return newBook;
+            return newIssue;
         }
     }
 }

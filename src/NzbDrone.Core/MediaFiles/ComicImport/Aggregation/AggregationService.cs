@@ -10,18 +10,18 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation
 {
     public interface IAugmentingService
     {
-        LocalBook Augment(LocalBook localTrack, bool otherFiles);
-        LocalEdition Augment(LocalEdition localBook);
+        LocalIssue Augment(LocalIssue localTrack, bool otherFiles);
+        LocalEdition Augment(LocalEdition localIssue);
     }
 
     public class AugmentingService : IAugmentingService
     {
-        private readonly IEnumerable<IAggregate<LocalBook>> _trackAugmenters;
+        private readonly IEnumerable<IAggregate<LocalIssue>> _trackAugmenters;
         private readonly IEnumerable<IAggregate<LocalEdition>> _bookAugmenters;
         private readonly IDiskProvider _diskProvider;
         private readonly Logger _logger;
 
-        public AugmentingService(IEnumerable<IAggregate<LocalBook>> trackAugmenters,
+        public AugmentingService(IEnumerable<IAggregate<LocalIssue>> trackAugmenters,
                                  IEnumerable<IAggregate<LocalEdition>> bookAugmenters,
                                  IDiskProvider diskProvider,
                                  Logger logger)
@@ -32,9 +32,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation
             _logger = logger;
         }
 
-        public LocalBook Augment(LocalBook localTrack, bool otherFiles)
+        public LocalIssue Augment(LocalIssue localTrack, bool otherFiles)
         {
-            if (localTrack.DownloadClientBookInfo == null &&
+            if (localTrack.DownloadClientIssueInfo == null &&
                 localTrack.FolderTrackInfo == null &&
                 localTrack.FileTrackInfo == null)
             {
@@ -64,13 +64,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation
             return localTrack;
         }
 
-        public LocalEdition Augment(LocalEdition localBook)
+        public LocalEdition Augment(LocalEdition localIssue)
         {
             foreach (var augmenter in _bookAugmenters)
             {
                 try
                 {
-                    augmenter.Aggregate(localBook, false);
+                    augmenter.Aggregate(localIssue, false);
                 }
                 catch (Exception ex)
                 {
@@ -78,7 +78,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation
                 }
             }
 
-            return localBook;
+            return localIssue;
         }
     }
 }

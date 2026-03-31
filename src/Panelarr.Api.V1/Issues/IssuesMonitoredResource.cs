@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     public class IssuesMonitoredResource
     {

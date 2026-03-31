@@ -77,9 +77,9 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
             }
         }
 
-        protected override string AddFromMagnetLink(RemoteBook remoteBook, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteIssue remoteIssue, string hash, string magnetLink)
         {
-            var priority = (RTorrentPriority)(remoteBook.IsRecentBook() ? Settings.RecentTvPriority : Settings.OlderTvPriority);
+            var priority = (RTorrentPriority)(remoteIssue.IsRecentIssue() ? Settings.RecentTvPriority : Settings.OlderTvPriority);
 
             _proxy.AddTorrentFromUrl(magnetLink, Settings.MusicCategory, priority, Settings.MusicDirectory, Settings);
 
@@ -97,9 +97,9 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
             return hash;
         }
 
-        protected override string AddFromTorrentFile(RemoteBook remoteBook, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteIssue remoteIssue, string hash, string filename, byte[] fileContent)
         {
-            var priority = (RTorrentPriority)(remoteBook.IsRecentBook() ? Settings.RecentTvPriority : Settings.OlderTvPriority);
+            var priority = (RTorrentPriority)(remoteIssue.IsRecentIssue() ? Settings.RecentTvPriority : Settings.OlderTvPriority);
 
             _proxy.AddTorrentFromFile(filename, fileContent, Settings.MusicCategory, priority, Settings.MusicDirectory, Settings);
 
@@ -109,7 +109,7 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
             {
                 _logger.Debug("rTorrent didn't add the torrent within {0} seconds: {1}.", tries * retryDelay / 1000, filename);
 
-                throw new ReleaseDownloadException(remoteBook.Release, "Downloading torrent failed");
+                throw new ReleaseDownloadException(remoteIssue.Release, "Downloading torrent failed");
             }
 
             return hash;
@@ -261,9 +261,9 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
                 _logger.Error(ex, "Failed to test rTorrent");
 
                 return new NzbDroneValidationFailure("Host", "Unable to connect to rTorrent")
-                       {
-                           DetailedDescription = ex.Message
-                       };
+                {
+                    DetailedDescription = ex.Message
+                };
             }
 
             return null;

@@ -4,11 +4,11 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     public class DownloadDecisionMakerFixture : CoreTest<DownloadDecisionMaker>
     {
         private List<ReleaseInfo> _reports;
-        private RemoteBook _remoteBook;
+        private RemoteIssue _remoteIssue;
 
         private Mock<IDecisionEngineSpecification> _pass1;
         private Mock<IDecisionEngineSpecification> _pass2;
@@ -46,28 +46,28 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _failDelayed1 = new Mock<IDecisionEngineSpecification>();
 
-            _pass1.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null)).Returns(Decision.Accept);
-            _pass2.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null)).Returns(Decision.Accept);
-            _pass3.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null)).Returns(Decision.Accept);
+            _pass1.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null)).Returns(Decision.Accept);
+            _pass2.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null)).Returns(Decision.Accept);
+            _pass3.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null)).Returns(Decision.Accept);
 
-            _fail1.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null)).Returns(Decision.Reject("fail1"));
-            _fail2.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null)).Returns(Decision.Reject("fail2"));
-            _fail3.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null)).Returns(Decision.Reject("fail3"));
+            _fail1.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null)).Returns(Decision.Reject("fail1"));
+            _fail2.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null)).Returns(Decision.Reject("fail2"));
+            _fail3.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null)).Returns(Decision.Reject("fail3"));
 
-            _failDelayed1.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null)).Returns(Decision.Reject("failDelayed1"));
+            _failDelayed1.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null)).Returns(Decision.Reject("failDelayed1"));
             _failDelayed1.SetupGet(c => c.Priority).Returns(SpecificationPriority.Disk);
 
             _reports = new List<ReleaseInfo> { new ReleaseInfo { Title = "Coldplay-A Head Full Of Dreams-CD-FLAC-2015-PERFECT" } };
-            _remoteBook = new RemoteBook
+            _remoteIssue = new RemoteIssue
             {
                 Series = new Series(),
-                Books = new List<Issue> { new Issue() },
-                ParsedBookInfo = Builder<ParsedBookInfo>.CreateNew().With(x => x.Quality = new QualityModel(Quality.CBZ_HD)).Build()
+                Issues = new List<Issue> { new Issue() },
+                ParsedIssueInfo = Builder<ParsedIssueInfo>.CreateNew().With(x => x.Quality = new QualityModel(Quality.CBZ_HD)).Build()
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(c => c.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<SearchCriteriaBase>()))
-                  .Returns(_remoteBook);
+                  .Setup(c => c.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<SearchCriteriaBase>()))
+                  .Returns(_remoteIssue);
         }
 
         private void GivenSpecifications(params Mock<IDecisionEngineSpecification>[] mocks)
@@ -82,12 +82,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.GetRssDecision(_reports).ToList();
 
-            _fail1.Verify(c => c.IsSatisfiedBy(_remoteBook, null), Times.Once());
-            _fail2.Verify(c => c.IsSatisfiedBy(_remoteBook, null), Times.Once());
-            _fail3.Verify(c => c.IsSatisfiedBy(_remoteBook, null), Times.Once());
-            _pass1.Verify(c => c.IsSatisfiedBy(_remoteBook, null), Times.Once());
-            _pass2.Verify(c => c.IsSatisfiedBy(_remoteBook, null), Times.Once());
-            _pass3.Verify(c => c.IsSatisfiedBy(_remoteBook, null), Times.Once());
+            _fail1.Verify(c => c.IsSatisfiedBy(_remoteIssue, null), Times.Once());
+            _fail2.Verify(c => c.IsSatisfiedBy(_remoteIssue, null), Times.Once());
+            _fail3.Verify(c => c.IsSatisfiedBy(_remoteIssue, null), Times.Once());
+            _pass1.Verify(c => c.IsSatisfiedBy(_remoteIssue, null), Times.Once());
+            _pass2.Verify(c => c.IsSatisfiedBy(_remoteIssue, null), Times.Once());
+            _pass3.Verify(c => c.IsSatisfiedBy(_remoteIssue, null), Times.Once());
         }
 
         [Test]
@@ -96,7 +96,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenSpecifications(_pass1, _failDelayed1);
 
             Subject.GetRssDecision(_reports).ToList();
-            _failDelayed1.Verify(c => c.IsSatisfiedBy(_remoteBook, null), Times.Once());
+            _failDelayed1.Verify(c => c.IsSatisfiedBy(_remoteIssue, null), Times.Once());
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.GetRssDecision(_reports).ToList();
 
-            _failDelayed1.Verify(c => c.IsSatisfiedBy(_remoteBook, null), Times.Never());
+            _failDelayed1.Verify(c => c.IsSatisfiedBy(_remoteIssue, null), Times.Never());
         }
 
         [Test]
@@ -156,11 +156,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.GetRssDecision(_reports).ToList();
 
-            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
+            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
 
-            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
-            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
-            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
+            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
+            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
+            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
         }
 
         [Test]
@@ -171,11 +171,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             var results = Subject.GetRssDecision(_reports).ToList();
 
-            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
+            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
 
-            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
-            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
-            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
+            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
+            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
+            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
 
             results.Should().BeEmpty();
         }
@@ -195,13 +195,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 }
             };
 
-            Subject.GetSearchDecision(_reports, new IssueSearchCriteria { Series = author, Books = issues }).ToList();
+            Subject.GetSearchDecision(_reports, new IssueSearchCriteria { Series = author, Issues = issues }).ToList();
 
-            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
+            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
 
-            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
-            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
-            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
+            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
+            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
+            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
         }
 
         [Test]
@@ -209,13 +209,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
 
-            _remoteBook.Series = null;
+            _remoteIssue.Series = null;
 
             Subject.GetRssDecision(_reports);
 
-            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
-            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
-            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteBook>(), null), Times.Never());
+            _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
+            _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
+            _pass3.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null), Times.Never());
         }
 
         [Test]
@@ -223,7 +223,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1);
 
-            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<SearchCriteriaBase>()))
+            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<SearchCriteriaBase>()))
                      .Throws<TestException>();
 
             _reports = new List<ReleaseInfo>
@@ -235,7 +235,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.GetRssDecision(_reports);
 
-            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<SearchCriteriaBase>()), Times.Exactly(_reports.Count));
+            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<SearchCriteriaBase>()), Times.Exactly(_reports.Count));
 
             ExceptionVerification.ExpectedErrors(3);
         }
@@ -245,7 +245,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
 
-            _remoteBook.Series = null;
+            _remoteIssue.Series = null;
 
             var result = Subject.GetRssDecision(_reports);
 
@@ -263,7 +263,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 .With(v => v.Series, new LazyLoaded<Series>(author))
                 .BuildList();
 
-            var criteria = new SeriesSearchCriteria { Books = issues.Take(1).ToList() };
+            var criteria = new SeriesSearchCriteria { Issues = issues.Take(1).ToList() };
 
             var reports = issues.Select(v =>
                 new ReleaseInfo()
@@ -272,14 +272,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 }).ToList();
 
             Mocker.GetMock<IParsingService>()
-                .Setup(v => v.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<SearchCriteriaBase>()))
-                .Returns<ParsedBookInfo, SearchCriteriaBase>((p, c) =>
-                    new RemoteBook
+                .Setup(v => v.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<SearchCriteriaBase>()))
+                .Returns<ParsedIssueInfo, SearchCriteriaBase>((p, c) =>
+                    new RemoteIssue
                     {
                         DownloadAllowed = true,
-                        ParsedBookInfo = p,
+                        ParsedIssueInfo = p,
                         Series = author,
-                        Books = issues.Where(v => v.Title == p.IssueTitle).ToList()
+                        Issues = issues.Where(v => v.Title == p.IssueTitle).ToList()
                     });
 
             Mocker.SetConstant<IEnumerable<IDecisionEngineSpecification>>(new List<IDecisionEngineSpecification>
@@ -299,13 +299,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
 
-            _remoteBook.Series = null;
+            _remoteIssue.Series = null;
 
             var result = Subject.GetRssDecision(_reports);
 
             result.Should().HaveCount(1);
 
-            result.First().RemoteBook.DownloadAllowed.Should().BeFalse();
+            result.First().RemoteIssue.DownloadAllowed.Should().BeFalse();
         }
 
         [Test]
@@ -313,13 +313,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
 
-            _remoteBook.Books = new List<Issue>();
+            _remoteIssue.Issues = new List<Issue>();
 
             var result = Subject.GetRssDecision(_reports);
 
             result.Should().HaveCount(1);
 
-            result.First().RemoteBook.DownloadAllowed.Should().BeFalse();
+            result.First().RemoteIssue.DownloadAllowed.Should().BeFalse();
         }
 
         [Test]
@@ -327,7 +327,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1);
 
-            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<SearchCriteriaBase>()))
+            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<SearchCriteriaBase>()))
                      .Throws<TestException>();
 
             _reports = new List<ReleaseInfo>

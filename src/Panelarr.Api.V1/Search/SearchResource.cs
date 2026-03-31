@@ -1,4 +1,4 @@
-using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Issues;
 using Panelarr.Api.V1.Series;
 using Panelarr.Http.REST;
 

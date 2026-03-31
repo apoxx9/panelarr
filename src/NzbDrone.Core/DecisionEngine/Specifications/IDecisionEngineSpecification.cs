@@ -9,6 +9,6 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         SpecificationPriority Priority { get; }
 
-        Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria);
+        Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria);
     }
 }

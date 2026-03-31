@@ -1,26 +1,26 @@
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging.Commands;
 using Panelarr.Http;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     [V1ApiController("issue/editor")]
     public class IssueEditorController : Controller
     {
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IManageCommandQueue _commandQueueManager;
 
         public IssueEditorController(IIssueService bookService, IManageCommandQueue commandQueueManager)
         {
-            _bookService = bookService;
+            _issueService = bookService;
             _commandQueueManager = commandQueueManager;
         }
 
         [HttpPut]
         public IActionResult SaveAll([FromBody] IssueEditorResource resource)
         {
-            var booksToUpdate = _bookService.GetIssues(resource.IssueIds);
+            var booksToUpdate = _issueService.GetIssues(resource.IssueIds);
 
             foreach (var issue in booksToUpdate)
             {
@@ -30,16 +30,16 @@ namespace Panelarr.Api.V1.Books
                 }
             }
 
-            _bookService.UpdateMany(booksToUpdate);
+            _issueService.UpdateMany(booksToUpdate);
             return Accepted(booksToUpdate.ToResource());
         }
 
         [HttpDelete]
-        public void DeleteBook([FromBody] IssueEditorResource resource)
+        public void DeleteIssue([FromBody] IssueEditorResource resource)
         {
-            foreach (var bookId in resource.IssueIds)
+            foreach (var issueId in resource.IssueIds)
             {
-                _bookService.DeleteIssue(bookId, resource.DeleteFiles ?? false, resource.AddImportListExclusion ?? false);
+                _issueService.DeleteIssue(issueId, resource.DeleteFiles ?? false, resource.AddImportListExclusion ?? false);
             }
         }
     }

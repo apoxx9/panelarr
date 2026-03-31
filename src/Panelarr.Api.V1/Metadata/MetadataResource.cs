@@ -1,4 +1,4 @@
-﻿using NzbDrone.Core.Extras.Metadata;
+using NzbDrone.Core.Extras.Metadata;
 
 namespace Panelarr.Api.V1.Metadata
 {

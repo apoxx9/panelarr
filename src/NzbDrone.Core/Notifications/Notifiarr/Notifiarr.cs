@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using FluentValidation.Results;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Notifications.Webhook;
 using NzbDrone.Core.Validation;
 

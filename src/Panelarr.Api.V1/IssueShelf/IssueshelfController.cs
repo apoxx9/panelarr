@@ -1,6 +1,6 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using Panelarr.Http;
 
 namespace Panelarr.Api.V1.IssueShelf
@@ -9,12 +9,12 @@ namespace Panelarr.Api.V1.IssueShelf
     public class IssueshelfController : Controller
     {
         private readonly ISeriesService _authorService;
-        private readonly IBookMonitoredService _bookMonitoredService;
+        private readonly IIssueMonitoredService _issueMonitoredService;
 
-        public IssueshelfController(ISeriesService authorService, IBookMonitoredService bookMonitoredService)
+        public IssueshelfController(ISeriesService authorService, IIssueMonitoredService bookMonitoredService)
         {
             _authorService = authorService;
-            _bookMonitoredService = bookMonitoredService;
+            _issueMonitoredService = bookMonitoredService;
         }
 
         [HttpPost]
@@ -42,7 +42,7 @@ namespace Panelarr.Api.V1.IssueShelf
                     author.MonitorNewItems = request.MonitorNewItems.Value;
                 }
 
-                _bookMonitoredService.SetBookMonitoredStatus(author, request.MonitoringOptions);
+                _issueMonitoredService.SetIssueMonitoredStatus(author, request.MonitoringOptions);
             }
 
             return Accepted(request);

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Issues;
 using RestSharp;
 
 namespace NzbDrone.Integration.Test.Client
@@ -11,7 +11,7 @@ namespace NzbDrone.Integration.Test.Client
         {
         }
 
-        public List<IssueResource> GetBooksInSeries(int authorId)
+        public List<IssueResource> GetIssuesInSeries(int authorId)
         {
             var request = BuildRequest("?authorId=" + authorId.ToString());
             return Get<List<IssueResource>>(request);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Configuration;
@@ -13,12 +13,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class MinimumAgeSpecificationFixture : CoreTest<MinimumAgeSpecification>
     {
-        private RemoteBook _remoteBook;
+        private RemoteIssue _remoteIssue;
 
         [SetUp]
         public void Setup()
         {
-            _remoteBook = new RemoteBook
+            _remoteIssue = new RemoteIssue
             {
                 Release = new ReleaseInfo() { DownloadProtocol = DownloadProtocol.Usenet }
             };
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void WithAge(int minutes)
         {
-            _remoteBook.Release.PublishDate = DateTime.UtcNow.AddMinutes(-minutes);
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow.AddMinutes(-minutes);
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMinimumAge(0);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMinimumAge(30);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMinimumAge(30);
             WithAge(10);
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }
     }
 }

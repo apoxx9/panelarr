@@ -365,9 +365,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
                   .Callback(PrepareClientToReturnQueuedItem);
         }
 
-        protected override RemoteBook CreateRemoteBook()
+        protected override RemoteIssue CreateRemoteIssue()
         {
-            var issue = base.CreateRemoteBook();
+            var issue = base.CreateRemoteIssue();
 
             issue.Release.DownloadUrl = DownloadURL;
 
@@ -392,9 +392,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
             GivenTvDirectory();
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
 
@@ -409,9 +409,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
             GivenMusicCategory();
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
 
@@ -425,9 +425,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
             GivenSerialNumber();
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
 
@@ -500,13 +500,13 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         [Test]
         public void Download_should_throw_and_not_add_task_if_cannot_get_serial_number()
         {
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
             Mocker.GetMock<ISerialNumberProvider>()
                   .Setup(s => s.GetSerialNumber(_settings))
                   .Throws(new ApplicationException("Some unknown exception, HttpException or DownloadClientException"));
 
-            Assert.ThrowsAsync(Is.InstanceOf<Exception>(), async () => await Subject.Download(remoteBook, CreateIndexer()));
+            Assert.ThrowsAsync(Is.InstanceOf<Exception>(), async () => await Subject.Download(remoteIssue, CreateIndexer()));
 
             Mocker.GetMock<IDownloadStationTaskProxy>()
                   .Verify(v => v.AddTaskFromUrl(It.IsAny<string>(), null, _settings), Times.Never());

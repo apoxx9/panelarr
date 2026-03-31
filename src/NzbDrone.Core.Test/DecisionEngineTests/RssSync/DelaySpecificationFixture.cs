@@ -5,13 +5,13 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.DecisionEngine.Specifications.RssSync;
 using NzbDrone.Core.Download.Pending;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Delay;
@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
     {
         private QualityProfile _profile;
         private DelayProfile _delayProfile;
-        private RemoteBook _remoteBook;
+        private RemoteIssue _remoteIssue;
 
         [SetUp]
         public void Setup()
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                                         .With(s => s.QualityProfile = _profile)
                                         .Build();
 
-            _remoteBook = Builder<RemoteBook>.CreateNew()
+            _remoteIssue = Builder<RemoteIssue>.CreateNew()
                                                    .With(r => r.Series = author)
                                                    .Build();
 
@@ -53,14 +53,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 
             _profile.Cutoff = Quality.CBZ.Id;
 
-            _remoteBook.ParsedBookInfo = new ParsedBookInfo();
-            _remoteBook.Release = new ReleaseInfo();
-            _remoteBook.Release.DownloadProtocol = DownloadProtocol.Usenet;
+            _remoteIssue.ParsedIssueInfo = new ParsedIssueInfo();
+            _remoteIssue.Release = new ReleaseInfo();
+            _remoteIssue.Release.DownloadProtocol = DownloadProtocol.Usenet;
 
-            _remoteBook.Books = Builder<Issue>.CreateListOfSize(1).Build().ToList();
+            _remoteIssue.Issues = Builder<Issue>.CreateListOfSize(1).Build().ToList();
 
             Mocker.GetMock<IMediaFileService>()
-                .Setup(s => s.GetFilesByBook(It.IsAny<int>()))
+                .Setup(s => s.GetFilesByIssue(It.IsAny<int>()))
                 .Returns(new List<ComicFile> { });
 
             Mocker.GetMock<IDelayProfileService>()
@@ -68,14 +68,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                   .Returns(_delayProfile);
 
             Mocker.GetMock<IPendingReleaseService>()
-                  .Setup(s => s.GetPendingRemoteBooks(It.IsAny<int>()))
-                  .Returns(new List<RemoteBook>());
+                  .Setup(s => s.GetPendingRemoteIssues(It.IsAny<int>()))
+                  .Returns(new List<RemoteIssue>());
         }
 
         private void GivenExistingFile(QualityModel quality)
         {
             Mocker.GetMock<IMediaFileService>()
-                .Setup(s => s.GetFilesByBook(It.IsAny<int>()))
+                .Setup(s => s.GetFilesByIssue(It.IsAny<int>()))
                 .Returns(new List<ComicFile>
                 {
                     new ComicFile
@@ -95,18 +95,18 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_true_when_user_invoked_search()
         {
-            Subject.IsSatisfiedBy(new RemoteBook(), new IssueSearchCriteria { UserInvokedSearch = true }).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(new RemoteIssue(), new IssueSearchCriteria { UserInvokedSearch = true }).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_be_false_when_system_invoked_search_and_release_is_younger_than_delay()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR);
-            _remoteBook.Release.PublishDate = DateTime.UtcNow;
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow;
 
             _delayProfile.UsenetDelay = 720;
 
-            Subject.IsSatisfiedBy(_remoteBook, new IssueSearchCriteria()).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, new IssueSearchCriteria()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -114,18 +114,18 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         {
             _delayProfile.UsenetDelay = 0;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_be_false_when_quality_is_last_allowed_in_profile_and_bypass_disabled()
         {
-            _remoteBook.Release.PublishDate = DateTime.UtcNow;
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR);
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow;
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
 
             _delayProfile.UsenetDelay = 720;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -134,39 +134,39 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _delayProfile.UsenetDelay = 720;
             _delayProfile.BypassIfHighestQuality = true;
 
-            _remoteBook.Release.PublishDate = DateTime.UtcNow;
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR);
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow;
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_be_true_when_release_is_older_than_delay()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR);
-            _remoteBook.Release.PublishDate = DateTime.UtcNow.AddHours(-10);
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow.AddHours(-10);
 
             _delayProfile.UsenetDelay = 60;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_be_false_when_release_is_younger_than_delay()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR);
-            _remoteBook.Release.PublishDate = DateTime.UtcNow;
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow;
 
             _delayProfile.UsenetDelay = 720;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_be_true_when_release_is_a_proper_for_existing_book()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR, new Revision(version: 2));
-            _remoteBook.Release.PublishDate = DateTime.UtcNow;
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR, new Revision(version: 2));
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow;
 
             GivenExistingFile(new QualityModel(Quality.CBR));
             GivenUpgradeForExistingFile();
@@ -177,14 +177,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 
             _delayProfile.UsenetDelay = 720;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_be_true_when_release_is_a_real_for_existing_book()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBR, new Revision(real: 1));
-            _remoteBook.Release.PublishDate = DateTime.UtcNow;
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR, new Revision(real: 1));
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow;
 
             GivenExistingFile(new QualityModel(Quality.CBR));
             GivenUpgradeForExistingFile();
@@ -195,58 +195,58 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 
             _delayProfile.UsenetDelay = 720;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_be_false_when_release_is_proper_for_existing_book_of_different_quality()
         {
-            _remoteBook.ParsedBookInfo.Quality = new QualityModel(Quality.CBZ, new Revision(version: 2));
-            _remoteBook.Release.PublishDate = DateTime.UtcNow;
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBZ, new Revision(version: 2));
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow;
 
             GivenExistingFile(new QualityModel(Quality.PDF));
 
             _delayProfile.UsenetDelay = 720;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_be_false_when_custom_format_score_is_above_minimum_but_bypass_disabled()
         {
-            _remoteBook.Release.PublishDate = DateTime.UtcNow;
-            _remoteBook.CustomFormatScore = 100;
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow;
+            _remoteIssue.CustomFormatScore = 100;
 
             _delayProfile.UsenetDelay = 720;
             _delayProfile.MinimumCustomFormatScore = 50;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_be_false_when_custom_format_score_is_above_minimum_and_bypass_enabled_but_under_minimum()
         {
-            _remoteBook.Release.PublishDate = DateTime.UtcNow;
-            _remoteBook.CustomFormatScore = 5;
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow;
+            _remoteIssue.CustomFormatScore = 5;
 
             _delayProfile.UsenetDelay = 720;
             _delayProfile.BypassIfAboveCustomFormatScore = true;
             _delayProfile.MinimumCustomFormatScore = 50;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_be_true_when_custom_format_score_is_above_minimum_and_bypass_enabled()
         {
-            _remoteBook.Release.PublishDate = DateTime.UtcNow;
-            _remoteBook.CustomFormatScore = 100;
+            _remoteIssue.Release.PublishDate = DateTime.UtcNow;
+            _remoteIssue.CustomFormatScore = 100;
 
             _delayProfile.UsenetDelay = 720;
             _delayProfile.BypassIfAboveCustomFormatScore = true;
             _delayProfile.MinimumCustomFormatScore = 50;
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
     }
 }

@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.ImportLists;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Lifecycle;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Messaging.Events;
@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Profiles.Metadata
         List<MetadataProfile> All();
         MetadataProfile Get(int id);
         bool Exists(int id);
-        List<Issue> FilterBooks(Series input, int profileId);
+        List<Issue> FilterIssues(Series input, int profileId);
     }
 
     public class MetadataProfileService : IMetadataProfileService, IHandle<ApplicationStartedEvent>
@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Profiles.Metadata
 
         private readonly IMetadataProfileRepository _profileRepository;
         private readonly ISeriesService _authorService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IMediaFileService _mediaFileService;
         private readonly IImportListFactory _importListFactory;
         private readonly IRootFolderService _rootFolderService;
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Profiles.Metadata
         {
             _profileRepository = profileRepository;
             _authorService = authorService;
-            _bookService = bookService;
+            _issueService = bookService;
             _mediaFileService = mediaFileService;
             _importListFactory = importListFactory;
             _rootFolderService = rootFolderService;
@@ -105,7 +105,7 @@ namespace NzbDrone.Core.Profiles.Metadata
             return _profileRepository.Exists(id);
         }
 
-        public List<Issue> FilterBooks(Series input, int profileId)
+        public List<Issue> FilterIssues(Series input, int profileId)
         {
             var seriesLinks = (input.SeriesGroups?.Value ?? new System.Collections.Generic.List<SeriesGroup>())
                 .SelectMany(x => x.LinkItems.Value)
@@ -114,27 +114,27 @@ namespace NzbDrone.Core.Profiles.Metadata
 
             var dbSeries = _authorService.FindById(input.ForeignSeriesId);
 
-            var localBooks = new List<Issue>();
+            var localIssues = new List<Issue>();
             if (dbSeries != null)
             {
-                localBooks = _bookService.GetIssuesBySeriesMetadataId(dbSeries.SeriesMetadataId);
+                localIssues = _issueService.GetIssuesBySeriesMetadataId(dbSeries.SeriesMetadataId);
             }
 
             var localFiles = _mediaFileService.GetFilesBySeries(dbSeries?.Id ?? 0);
 
-            return FilterBooks(input.Books.Value, localBooks, localFiles, seriesLinks, profileId);
+            return FilterIssues(input.Issues.Value, localIssues, localFiles, seriesLinks, profileId);
         }
 
-        private List<Issue> FilterBooks(IEnumerable<Issue> remoteBooks, List<Issue> localBooks, List<ComicFile> localFiles, Dictionary<Issue, List<SeriesGroupLink>> seriesLinks, int metadataProfileId)
+        private List<Issue> FilterIssues(IEnumerable<Issue> remoteIssues, List<Issue> localIssues, List<ComicFile> localFiles, Dictionary<Issue, List<SeriesGroupLink>> seriesLinks, int metadataProfileId)
         {
             var profile = Get(metadataProfileId);
 
-            _logger.Trace($"Filtering:\n{remoteBooks.Select(x => x.ToString()).Join("\n")}");
+            _logger.Trace($"Filtering:\n{remoteIssues.Select(x => x.ToString()).Join("\n")}");
 
-            var hash = new HashSet<Issue>(remoteBooks);
-            var titles = new HashSet<string>(remoteBooks.Select(x => x.Title));
+            var hash = new HashSet<Issue>(remoteIssues);
+            var titles = new HashSet<string>(remoteIssues.Select(x => x.Title));
 
-            var localHash = new HashSet<string>(localBooks.Where(x => x.AddOptions.AddType == IssueAddType.Manual).Select(x => x.ForeignIssueId));
+            var localHash = new HashSet<string>(localIssues.Where(x => x.AddOptions.AddType == IssueAddType.Manual).Select(x => x.ForeignIssueId));
             localHash.UnionWith(localFiles.Where(x => x.Issue?.Value != null).Select(x => x.Issue.Value.ForeignIssueId));
 
             FilterByPredicate(hash, x => x.ForeignIssueId, localHash, profile, IssueAllowedByRating, "rating criteria not met");

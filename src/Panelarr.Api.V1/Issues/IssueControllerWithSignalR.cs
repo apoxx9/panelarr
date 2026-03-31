@@ -1,33 +1,33 @@
 using System.Collections.Generic;
 using System.Linq;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine.Specifications;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.SeriesStats;
 using NzbDrone.SignalR;
 using Panelarr.Api.V1.Series;
 using Panelarr.Http.REST;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     public abstract class IssueControllerWithSignalR : RestControllerWithSignalR<IssueResource, Issue>
     {
-        protected readonly IIssueService _bookService;
-        protected readonly ISeriesBookLinkService _seriesBookLinkService;
+        protected readonly IIssueService _issueService;
+        protected readonly ISeriesIssueLinkService _seriesIssueLinkService;
         protected readonly ISeriesStatisticsService _authorStatisticsService;
         protected readonly IUpgradableSpecification _qualityUpgradableSpecification;
         protected readonly IMapCoversToLocal _coverMapper;
 
         protected IssueControllerWithSignalR(IIssueService bookService,
-                                        ISeriesBookLinkService seriesBookLinkService,
+                                        ISeriesIssueLinkService seriesIssueLinkService,
                                         ISeriesStatisticsService authorStatisticsService,
                                         IMapCoversToLocal coverMapper,
                                         IUpgradableSpecification qualityUpgradableSpecification,
                                         IBroadcastSignalRMessage signalRBroadcaster)
             : base(signalRBroadcaster)
         {
-            _bookService = bookService;
-            _seriesBookLinkService = seriesBookLinkService;
+            _issueService = bookService;
+            _seriesIssueLinkService = seriesIssueLinkService;
             _authorStatisticsService = authorStatisticsService;
             _coverMapper = coverMapper;
             _qualityUpgradableSpecification = qualityUpgradableSpecification;
@@ -35,14 +35,14 @@ namespace Panelarr.Api.V1.Books
 
         protected override IssueResource GetResourceById(int id)
         {
-            var issue = _bookService.GetIssue(id);
+            var issue = _issueService.GetIssue(id);
             var resource = MapToResource(issue, true);
             return resource;
         }
 
         protected override IssueResource GetResourceByIdForBroadcast(int id)
         {
-            var issue = _bookService.GetIssue(id);
+            var issue = _issueService.GetIssue(id);
             var resource = MapToResource(issue, false);
             return resource;
         }
@@ -58,7 +58,7 @@ namespace Panelarr.Api.V1.Books
                 resource.Series = series.ToResource();
             }
 
-            FetchAndLinkBookStatistics(resource);
+            FetchAndLinkIssueStatistics(resource);
             MapCoversToLocal(resource);
 
             return resource;
@@ -66,7 +66,7 @@ namespace Panelarr.Api.V1.Books
 
         protected List<IssueResource> MapToResource(List<Issue> issues, bool includeSeries)
         {
-            var seriesLinks = _seriesBookLinkService.GetLinksByBook(issues.Select(x => x.SeriesMetadataId).Distinct().ToList())
+            var seriesLinks = _seriesIssueLinkService.GetLinksByIssue(issues.Select(x => x.SeriesMetadataId).Distinct().ToList())
                 .GroupBy(x => x.SeriesMetadataId)
                 .ToDictionary(x => x.Key, y => y.ToList());
 
@@ -86,7 +86,7 @@ namespace Panelarr.Api.V1.Books
 
             if (includeSeries)
             {
-                var seriesDict = new Dictionary<int, NzbDrone.Core.Books.Series>();
+                var seriesDict = new Dictionary<int, NzbDrone.Core.Issues.Series>();
                 for (var i = 0; i < issues.Count; i++)
                 {
                     var issue = issues[i];
@@ -105,7 +105,7 @@ namespace Panelarr.Api.V1.Books
             return result;
         }
 
-        private void FetchAndLinkBookStatistics(IssueResource resource)
+        private void FetchAndLinkIssueStatistics(IssueResource resource)
         {
             LinkSeriesStatistics(resource, _authorStatisticsService.SeriesStatistics(resource.SeriesId));
         }
@@ -127,9 +127,9 @@ namespace Panelarr.Api.V1.Books
         {
             if (seriesStatistics?.IssueStatistics != null)
             {
-                var dictBookStats = seriesStatistics.IssueStatistics.ToDictionary(v => v.IssueId);
+                var dictIssueStats = seriesStatistics.IssueStatistics.ToDictionary(v => v.IssueId);
 
-                resource.Statistics = dictBookStats.GetValueOrDefault(resource.Id).ToResource();
+                resource.Statistics = dictIssueStats.GetValueOrDefault(resource.Id).ToResource();
             }
         }
 

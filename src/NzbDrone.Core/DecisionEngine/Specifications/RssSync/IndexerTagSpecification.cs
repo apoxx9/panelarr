@@ -22,7 +22,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
+        public virtual Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
             if (subject.Release == null || subject.Series?.Tags == null || subject.Release.IndexerId == 0)
             {

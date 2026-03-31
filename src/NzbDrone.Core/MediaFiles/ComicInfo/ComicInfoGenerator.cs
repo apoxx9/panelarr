@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Text;
 using System.Xml;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.MediaFiles.ComicInfo
 {

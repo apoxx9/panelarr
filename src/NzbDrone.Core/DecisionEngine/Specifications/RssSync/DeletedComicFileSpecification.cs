@@ -1,36 +1,36 @@
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
 {
-    public class DeletedBookFileSpecification : IDecisionEngineSpecification
+    public class DeletedComicFileSpecification : IDecisionEngineSpecification
     {
         private readonly IDiskProvider _diskProvider;
         private readonly IConfigService _configService;
-        private readonly IMediaFileService _bookService;
+        private readonly IMediaFileService _issueService;
         private readonly Logger _logger;
 
-        public DeletedBookFileSpecification(IDiskProvider diskProvider,
+        public DeletedComicFileSpecification(IDiskProvider diskProvider,
                                              IConfigService configService,
                                              IMediaFileService bookService,
                                              Logger logger)
         {
             _diskProvider = diskProvider;
             _configService = configService;
-            _bookService = bookService;
+            _issueService = bookService;
             _logger = logger;
         }
 
         public SpecificationPriority Priority => SpecificationPriority.Disk;
         public RejectionType Type => RejectionType.Temporary;
 
-        public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
+        public virtual Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
             if (!_configService.AutoUnmonitorPreviouslyDownloadedIssues)
             {
@@ -43,8 +43,8 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                 return Decision.Accept();
             }
 
-            var missingTrackFiles = subject.Books
-                                             .SelectMany(v => _bookService.GetFilesByBook(v.Id))
+            var missingTrackFiles = subject.Issues
+                                             .SelectMany(v => _issueService.GetFilesByIssue(v.Id))
                                              .DistinctBy(v => v.Id)
                                              .Where(v => IsTrackFileMissing(subject.Series, v))
                                              .ToArray();

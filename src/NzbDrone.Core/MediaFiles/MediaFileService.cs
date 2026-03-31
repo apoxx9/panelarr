@@ -4,8 +4,8 @@ using System.IO.Abstractions;
 using System.Linq;
 using NLog;
 using NzbDrone.Common;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.Datastore.Events;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.RootFolders;
@@ -22,7 +22,7 @@ namespace NzbDrone.Core.MediaFiles
         void DeleteMany(List<ComicFile> comicFiles, DeleteMediaFileReason reason);
         List<ComicFile> GetFilesBySeries(int authorId);
         List<ComicFile> GetFilesBySeriesMetadataId(int authorMetadataId);
-        List<ComicFile> GetFilesByBook(int bookId);
+        List<ComicFile> GetFilesByIssue(int issueId);
         List<ComicFile> GetUnmappedFiles();
         List<IFileInfo> FilterUnchangedFiles(List<IFileInfo> files, FilterFilesType filter);
         ComicFile Get(int id);
@@ -186,9 +186,9 @@ namespace NzbDrone.Core.MediaFiles
             return _mediaFileRepository.GetFilesBySeriesMetadataId(authorMetadataId);
         }
 
-        public List<ComicFile> GetFilesByBook(int bookId)
+        public List<ComicFile> GetFilesByIssue(int issueId)
         {
-            return _mediaFileRepository.GetFilesByBook(bookId);
+            return _mediaFileRepository.GetFilesByIssue(issueId);
         }
 
         public List<ComicFile> GetUnmappedFiles()
@@ -218,11 +218,11 @@ namespace NzbDrone.Core.MediaFiles
         {
             if (message.DeleteFiles)
             {
-                _mediaFileRepository.DeleteFilesByBook(message.Issue.Id);
+                _mediaFileRepository.DeleteFilesByIssue(message.Issue.Id);
             }
             else
             {
-                _mediaFileRepository.UnlinkFilesByBook(message.Issue.Id);
+                _mediaFileRepository.UnlinkFilesByIssue(message.Issue.Id);
             }
         }
 

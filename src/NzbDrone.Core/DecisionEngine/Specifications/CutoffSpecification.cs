@@ -27,11 +27,11 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
+        public virtual Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
             var qualityProfile = subject.Series.QualityProfile.Value;
 
-            foreach (var file in subject.Books.SelectMany(b => b.ComicFiles.Value))
+            foreach (var file in subject.Issues.SelectMany(b => b.ComicFiles.Value))
             {
                 // Get a distinct list of all current track qualities for a given issue
                 var currentQualities = new List<QualityModel> { file.Quality };

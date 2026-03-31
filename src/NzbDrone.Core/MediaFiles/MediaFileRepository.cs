@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NzbDrone.Common;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.MediaFiles
@@ -12,13 +12,13 @@ namespace NzbDrone.Core.MediaFiles
     {
         List<ComicFile> GetFilesBySeries(int authorId);
         List<ComicFile> GetFilesBySeriesMetadataId(int authorMetadataId);
-        List<ComicFile> GetFilesByBook(int bookId);
+        List<ComicFile> GetFilesByIssue(int issueId);
         List<ComicFile> GetUnmappedFiles();
         List<ComicFile> GetFilesWithBasePath(string path);
         List<ComicFile> GetFileWithPath(List<string> paths);
         ComicFile GetFileWithPath(string path);
-        void DeleteFilesByBook(int bookId);
-        void UnlinkFilesByBook(int bookId);
+        void DeleteFilesByIssue(int issueId);
+        void UnlinkFilesByIssue(int issueId);
     }
 
     public class MediaFileRepository : BasicRepository<ComicFile>, IMediaFileRepository
@@ -65,9 +65,9 @@ namespace NzbDrone.Core.MediaFiles
             return Query(Builder().Where<Issue>(b => b.SeriesMetadataId == authorMetadataId));
         }
 
-        public List<ComicFile> GetFilesByBook(int bookId)
+        public List<ComicFile> GetFilesByIssue(int issueId)
         {
-            return Query(Builder().Where<Issue>(b => b.Id == bookId));
+            return Query(Builder().Where<Issue>(b => b.Id == issueId));
         }
 
         public List<ComicFile> GetUnmappedFiles()
@@ -76,15 +76,15 @@ namespace NzbDrone.Core.MediaFiles
                                               .Where<ComicFile>(t => t.IssueId == 0)).ToList();
         }
 
-        public void DeleteFilesByBook(int bookId)
+        public void DeleteFilesByIssue(int issueId)
         {
-            var fileIds = GetFilesByBook(bookId).Select(x => x.Id).ToList();
+            var fileIds = GetFilesByIssue(issueId).Select(x => x.Id).ToList();
             Delete(x => fileIds.Contains(x.Id));
         }
 
-        public void UnlinkFilesByBook(int bookId)
+        public void UnlinkFilesByIssue(int issueId)
         {
-            var files = GetFilesByBook(bookId);
+            var files = GetFilesByIssue(issueId);
             files.ForEach(x => x.IssueId = 0);
             SetFields(files, f => f.IssueId);
         }

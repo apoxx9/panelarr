@@ -20,7 +20,7 @@ namespace NzbDrone.Core.IndexerSearch.Definitions
                     return $"#{(int)IssueNumber}";
                 }
 
-                return GetQueryTitle((IssueTitle ?? string.Empty).SplitBookTitle(Series?.Name ?? string.Empty).Item1);
+                return GetQueryTitle((IssueTitle ?? string.Empty).SplitIssueTitle(Series?.Name ?? string.Empty).Item1);
             }
         }
 

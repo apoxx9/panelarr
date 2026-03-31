@@ -9,7 +9,7 @@ using Panelarr.Http.Frontend.Mappers;
 
 namespace Panelarr.Http.Frontend
 {
-    [Authorize(Policy="UI")]
+    [Authorize(Policy = "UI")]
     [ApiController]
     public class StaticResourceController : Controller
     {

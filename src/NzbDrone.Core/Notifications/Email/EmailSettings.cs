@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentValidation;
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Notifications.Email
         [FieldDefinition(8, Label = "BCC Address(es)", HelpText = "Comma seperated list of email bcc recipients", Advanced = true)]
         public IEnumerable<string> Bcc { get; set; }
 
-        [FieldDefinition(9, Label = "Attach Books", HelpText = "Add issues as an attachment on import", Type = FieldType.Checkbox)]
+        [FieldDefinition(9, Label = "Attach Issues", HelpText = "Add issues as an attachment on import", Type = FieldType.Checkbox)]
         public bool AttachFiles { get; set; }
 
         public NzbDroneValidationResult Validate()

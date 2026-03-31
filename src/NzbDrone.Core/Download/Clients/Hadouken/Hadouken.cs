@@ -139,14 +139,14 @@ namespace NzbDrone.Core.Download.Clients.Hadouken
             failures.AddIfNotNull(TestGetTorrents());
         }
 
-        protected override string AddFromMagnetLink(RemoteBook remoteBook, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteIssue remoteIssue, string hash, string magnetLink)
         {
             _proxy.AddTorrentUri(Settings, magnetLink);
 
             return hash.ToUpper();
         }
 
-        protected override string AddFromTorrentFile(RemoteBook remoteBook, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteIssue remoteIssue, string hash, string filename, byte[] fileContent)
         {
             return _proxy.AddTorrentFile(Settings, fileContent).ToUpper();
         }
@@ -173,9 +173,9 @@ namespace NzbDrone.Core.Download.Clients.Hadouken
             catch (Exception ex)
             {
                 return new NzbDroneValidationFailure("Host", "Unable to connect to Hadouken")
-                       {
-                           DetailedDescription = ex.Message
-                       };
+                {
+                    DetailedDescription = ex.Message
+                };
             }
 
             return null;

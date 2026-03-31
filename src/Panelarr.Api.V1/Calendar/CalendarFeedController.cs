@@ -7,7 +7,7 @@ using Ical.Net.DataTypes;
 using Ical.Net.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Tags;
 using Panelarr.Http;
 

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.HealthCheck;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.Notifications
                                     qualityString);
         }
 
-        private string GetBookDownloadMessage(Series author, Issue issue, List<ComicFile> tracks)
+        private string GetIssueDownloadMessage(Series author, Issue issue, List<ComicFile> tracks)
         {
             // Comic import format: "Imported: {Series} #{IssueNumber} - {Title} [{Quality}]"
             var quality = tracks.FirstOrDefault()?.Quality?.Quality?.ToString() ?? "Unknown";
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Notifications
                 quality);
         }
 
-        private string GetBookIncompleteImportMessage(string source)
+        private string GetIssueIncompleteImportMessage(string source)
         {
             return string.Format("Panelarr failed to Import all files for {0}",
                 source);
@@ -139,10 +139,10 @@ namespace NzbDrone.Core.Notifications
         {
             var grabMessage = new GrabMessage
             {
-                Message = GetMessage(message.Issue.Series, message.Issue.Books, message.Issue.ParsedIssueInfo.Quality),
+                Message = GetMessage(message.Issue.Series, message.Issue.Issues, message.Issue.ParsedIssueInfo.Quality),
                 Series = message.Issue.Series,
                 Quality = message.Issue.ParsedIssueInfo.Quality,
-                RemoteBook = message.Issue,
+                RemoteIssue = message.Issue,
                 DownloadClientName = message.DownloadClientName,
                 DownloadClientType = message.DownloadClient,
                 DownloadId = message.DownloadId
@@ -181,7 +181,7 @@ namespace NzbDrone.Core.Notifications
             if (isUpgrade)
             {
                 var oldQuality = message.OldFiles.First()?.Quality?.Quality?.ToString() ?? "Unknown";
-                var newQuality = message.ImportedBooks.FirstOrDefault()?.Quality?.Quality?.ToString() ?? "Unknown";
+                var newQuality = message.ImportedIssues.FirstOrDefault()?.Quality?.Quality?.ToString() ?? "Unknown";
                 var issueNum = message.Issue.IssueNumber.ToString("0.##");
                 var title = string.IsNullOrWhiteSpace(message.Issue.Title)
                     ? string.Empty
@@ -196,7 +196,7 @@ namespace NzbDrone.Core.Notifications
             }
             else
             {
-                downloadMsg = GetBookDownloadMessage(message.Series, message.Issue, message.ImportedBooks);
+                downloadMsg = GetIssueDownloadMessage(message.Series, message.Issue, message.ImportedIssues);
             }
 
             var downloadMessage = new IssueDownloadMessage
@@ -206,7 +206,7 @@ namespace NzbDrone.Core.Notifications
                 Issue = message.Issue,
                 DownloadClientInfo = message.DownloadClientInfo,
                 DownloadId = message.DownloadId,
-                ComicFiles = message.ImportedBooks,
+                ComicFiles = message.ImportedIssues,
                 OldFiles = message.OldFiles,
             };
 
@@ -389,7 +389,7 @@ namespace NzbDrone.Core.Notifications
             {
                 try
                 {
-                    if (ShouldHandleSeries(notification.Definition, message.TrackedDownload.RemoteBook.Series))
+                    if (ShouldHandleSeries(notification.Definition, message.TrackedDownload.RemoteIssue.Series))
                     {
                         notification.OnDownloadFailure(downloadFailedMessage);
                         _notificationStatusService.RecordSuccess(notification.Definition.Id);
@@ -408,14 +408,14 @@ namespace NzbDrone.Core.Notifications
             // TODO: Build out this message so that we can pass on what failed and what was successful
             var downloadMessage = new IssueDownloadMessage
             {
-                Message = GetBookIncompleteImportMessage(message.TrackedDownload.DownloadItem.Title)
+                Message = GetIssueIncompleteImportMessage(message.TrackedDownload.DownloadItem.Title)
             };
 
             foreach (var notification in _notificationFactory.OnImportFailureEnabled())
             {
                 try
                 {
-                    if (ShouldHandleSeries(notification.Definition, message.TrackedDownload.RemoteBook.Series))
+                    if (ShouldHandleSeries(notification.Definition, message.TrackedDownload.RemoteIssue.Series))
                     {
                         notification.OnImportFailure(downloadMessage);
                         _notificationStatusService.RecordSuccess(notification.Definition.Id);

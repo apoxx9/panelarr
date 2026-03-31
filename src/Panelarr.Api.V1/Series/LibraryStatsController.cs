@@ -1,6 +1,6 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.SeriesStats;
 using Panelarr.Http;
@@ -12,7 +12,7 @@ namespace Panelarr.Api.V1.Series
     public class LibraryStatsController : Controller
     {
         private readonly ISeriesService _seriesService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IMediaFileService _mediaFileService;
         private readonly ISeriesStatisticsService _seriesStatisticsService;
 
@@ -22,7 +22,7 @@ namespace Panelarr.Api.V1.Series
                                       ISeriesStatisticsService seriesStatisticsService)
         {
             _seriesService = seriesService;
-            _bookService = bookService;
+            _issueService = bookService;
             _mediaFileService = mediaFileService;
             _seriesStatisticsService = seriesStatisticsService;
         }
@@ -34,7 +34,7 @@ namespace Panelarr.Api.V1.Series
             var allSeries = _seriesService.GetAllSeries();
 
             var totalSeries = allSeries.Count;
-            var totalIssues = allStats.Sum(s => s.TotalBookCount);
+            var totalIssues = allStats.Sum(s => s.TotalIssueCount);
             var haveIssues = allStats.Sum(s => s.ComicFileCount);
             var missingIssues = totalIssues - haveIssues;
             var totalSizeBytes = allStats.Sum(s => s.SizeOnDisk);

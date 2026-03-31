@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
-        private static readonly Regex[] ReportBookTitleRegex = new[]
+        private static readonly Regex[] ReportIssueTitleRegex = new[]
         {
             //ruTracker - (Genre) [Source]? Series - Discography
             new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<author>.+?)(?: - )(?<discography>Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
@@ -336,7 +336,7 @@ namespace NzbDrone.Core.Parser
             @"^(?<series>.+?)\s*#(?<issue>\d+)\s*(?:\((?<year>\d{4})\))?\s*$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public static ParsedIssueInfo ParseBookTitleWithSearchCriteria(string title, Series author, List<Issue> issues)
+        public static ParsedIssueInfo ParseIssueTitleWithSearchCriteria(string title, Series author, List<Issue> issues)
         {
             try
             {
@@ -384,7 +384,7 @@ namespace NzbDrone.Core.Parser
 
                 simpleTitle = CleanTorrentSuffixRegex.Replace(simpleTitle);
 
-                var bestBook = issues
+                var bestIssue = issues
                     .OrderByDescending(x => simpleTitle.FuzzyMatch(x.Title, wordDelimiters: WordDelimiters))
                     .First();
 
@@ -395,16 +395,16 @@ namespace NzbDrone.Core.Parser
                     foundSeries = GetTitleFuzzy(simpleTitle, authorName.ToLastFirst(), out remainder);
                 }
 
-                var foundBook = GetTitleFuzzy(remainder, bestBook.Title, out _);
+                var foundIssue = GetTitleFuzzy(remainder, bestIssue.Title, out _);
 
-                if (foundBook == null)
+                if (foundIssue == null)
                 {
-                    foundBook = GetTitleFuzzy(remainder, bestBook.Title.SplitBookTitle(authorName).Item1, out _);
+                    foundIssue = GetTitleFuzzy(remainder, bestIssue.Title.SplitIssueTitle(authorName).Item1, out _);
                 }
 
-                Logger.Trace($"Found {foundSeries} - {foundBook} with fuzzy parser");
+                Logger.Trace($"Found {foundSeries} - {foundIssue} with fuzzy parser");
 
-                if (foundSeries == null || foundBook == null)
+                if (foundSeries == null || foundIssue == null)
                 {
                     return null;
                 }
@@ -413,7 +413,7 @@ namespace NzbDrone.Core.Parser
                 {
                     SeriesName = foundSeries,
                     SeriesTitleInfo = GetSeriesTitleInfo(foundSeries),
-                    IssueTitle = foundBook
+                    IssueTitle = foundIssue
                 };
 
                 try
@@ -468,7 +468,7 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        public static ParsedIssueInfo ParseBookTitle(string title)
+        public static ParsedIssueInfo ParseIssueTitle(string title)
         {
             try
             {
@@ -532,7 +532,7 @@ namespace NzbDrone.Core.Parser
                     }
                 }
 
-                foreach (var regex in ReportBookTitleRegex)
+                foreach (var regex in ReportIssueTitleRegex)
                 {
                     var match = regex.Matches(simpleTitle);
 
@@ -541,7 +541,7 @@ namespace NzbDrone.Core.Parser
                         Logger.Trace(regex);
                         try
                         {
-                            var result = ParseBookMatchCollection(match, releaseTitle);
+                            var result = ParseIssueMatchCollection(match, releaseTitle);
 
                             if (result != null)
                             {
@@ -587,7 +587,7 @@ namespace NzbDrone.Core.Parser
             return null;
         }
 
-        public static (string, string) SplitBookTitle(this string issue, string author)
+        public static (string, string) SplitIssueTitle(this string issue, string author)
         {
             // Strip author from title, eg Tom Clancy: Ghost Protocol
             if (issue.StartsWith($"{author}:"))
@@ -724,7 +724,7 @@ namespace NzbDrone.Core.Parser
             return title;
         }
 
-        public static string CleanBookTitle(this string issue)
+        public static string CleanIssueTitle(this string issue)
         {
             return CommonTagRegex[1].Replace(issue, string.Empty).Trim();
         }
@@ -821,7 +821,7 @@ namespace NzbDrone.Core.Parser
         {
             Logger.Debug("Parsing string '{0}'", title);
 
-            var parseResult = ParseBookTitle(title);
+            var parseResult = ParseIssueTitle(title);
 
             if (parseResult == null)
             {
@@ -831,7 +831,7 @@ namespace NzbDrone.Core.Parser
             return parseResult.SeriesName;
         }
 
-        private static ParsedIssueInfo ParseBookMatchCollection(MatchCollection matchCollection, string releaseTitle)
+        private static ParsedIssueInfo ParseIssueMatchCollection(MatchCollection matchCollection, string releaseTitle)
         {
             var authorName = matchCollection[0].Groups["author"].Value.Replace('.', ' ').Replace('_', ' ');
             var bookTitle = matchCollection[0].Groups["issue"].Value.Replace('.', ' ').Replace('_', ' ');

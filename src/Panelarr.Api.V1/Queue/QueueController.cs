@@ -134,12 +134,12 @@ namespace Panelarr.Api.V1.Queue
 
         [HttpGet]
         [Produces("application/json")]
-        public PagingResource<QueueResource> GetQueue([FromQuery] PagingRequestResource paging, bool includeUnknownSeriesItems = false, bool includeSeries = false, bool includeBook = false)
+        public PagingResource<QueueResource> GetQueue([FromQuery] PagingRequestResource paging, bool includeUnknownSeriesItems = false, bool includeSeries = false, bool includeIssue = false)
         {
             var pagingResource = new PagingResource<QueueResource>(paging);
             var pagingSpec = pagingResource.MapToPagingSpec<QueueResource, NzbDrone.Core.Queue.Queue>("timeleft", SortDirection.Ascending);
 
-            return pagingSpec.ApplyToPage((spec) => GetQueue(spec, includeUnknownSeriesItems), (q) => MapToResource(q, includeSeries, includeBook));
+            return pagingSpec.ApplyToPage((spec) => GetQueue(spec, includeUnknownSeriesItems), (q) => MapToResource(q, includeSeries, includeIssue));
         }
 
         private PagingSpec<NzbDrone.Core.Queue.Queue> GetQueue(PagingSpec<NzbDrone.Core.Queue.Queue> pagingSpec, bool includeUnknownSeriesItems)
@@ -241,7 +241,7 @@ namespace Panelarr.Api.V1.Queue
 
         private void Remove(NzbDrone.Core.Queue.Queue pendingRelease)
         {
-            _blocklistService.Block(pendingRelease.RemoteBook, "Pending release manually blocklisted");
+            _blocklistService.Block(pendingRelease.RemoteIssue, "Pending release manually blocklisted");
             _pendingReleaseService.RemovePendingQueueItems(pendingRelease.Id);
         }
 
@@ -305,9 +305,9 @@ namespace Panelarr.Api.V1.Queue
             return trackedDownload;
         }
 
-        private QueueResource MapToResource(NzbDrone.Core.Queue.Queue queueItem, bool includeSeries, bool includeBook)
+        private QueueResource MapToResource(NzbDrone.Core.Queue.Queue queueItem, bool includeSeries, bool includeIssue)
         {
-            return queueItem.ToResource(includeSeries, includeBook);
+            return queueItem.ToResource(includeSeries, includeIssue);
         }
 
         [NonAction]

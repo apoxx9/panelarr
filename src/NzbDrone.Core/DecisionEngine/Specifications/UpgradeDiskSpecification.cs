@@ -26,9 +26,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
+        public virtual Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
-            foreach (var file in subject.Books.SelectMany(c => c.ComicFiles.Value))
+            foreach (var file in subject.Issues.SelectMany(c => c.ComicFiles.Value))
             {
                 if (file == null)
                 {

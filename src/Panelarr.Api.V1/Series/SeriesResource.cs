@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaCover;
 using Panelarr.Http.REST;
 
@@ -61,7 +61,7 @@ namespace Panelarr.Api.V1.Series
 
     public static class SeriesResourceMapper
     {
-        public static SeriesResource ToResource(this NzbDrone.Core.Books.Series model)
+        public static SeriesResource ToResource(this NzbDrone.Core.Issues.Series model)
         {
             if (model == null)
             {
@@ -104,25 +104,25 @@ namespace Panelarr.Api.V1.Series
                 AddOptions = model.AddOptions,
                 Ratings = model.Metadata.Value.Ratings,
                 Year = model.Metadata.Value.Year,
-                SeriesType = model.Metadata.Value.SeriesType == NzbDrone.Core.Books.SeriesType.Single ? null : model.Metadata.Value.SeriesType.ToString(),
+                SeriesType = model.Metadata.Value.SeriesType == NzbDrone.Core.Issues.SeriesType.Single ? null : model.Metadata.Value.SeriesType.ToString(),
                 VolumeNumber = model.Metadata.Value.VolumeNumber,
 
                 Statistics = new SeriesStatisticsResource()
             };
         }
 
-        public static NzbDrone.Core.Books.Series ToModel(this SeriesResource resource)
+        public static NzbDrone.Core.Issues.Series ToModel(this SeriesResource resource)
         {
             if (resource == null)
             {
                 return null;
             }
 
-            return new NzbDrone.Core.Books.Series
+            return new NzbDrone.Core.Issues.Series
             {
                 Id = resource.Id,
 
-                Metadata = new NzbDrone.Core.Books.SeriesMetadata
+                Metadata = new NzbDrone.Core.Issues.SeriesMetadata
                 {
                     ForeignSeriesId = resource.ForeignSeriesId,
                     TitleSlug = resource.TitleSlug,
@@ -152,7 +152,7 @@ namespace Panelarr.Api.V1.Series
             };
         }
 
-        public static NzbDrone.Core.Books.Series ToModel(this SeriesResource resource, NzbDrone.Core.Books.Series author)
+        public static NzbDrone.Core.Issues.Series ToModel(this SeriesResource resource, NzbDrone.Core.Issues.Series author)
         {
             var updatedSeries = resource.ToModel();
 
@@ -161,12 +161,12 @@ namespace Panelarr.Api.V1.Series
             return author;
         }
 
-        public static List<SeriesResource> ToResource(this IEnumerable<NzbDrone.Core.Books.Series> author)
+        public static List<SeriesResource> ToResource(this IEnumerable<NzbDrone.Core.Issues.Series> author)
         {
             return author.Select(ToResource).ToList();
         }
 
-        public static List<NzbDrone.Core.Books.Series> ToModel(this IEnumerable<SeriesResource> resources)
+        public static List<NzbDrone.Core.Issues.Series> ToModel(this IEnumerable<SeriesResource> resources)
         {
             return resources.Select(ToModel).ToList();
         }

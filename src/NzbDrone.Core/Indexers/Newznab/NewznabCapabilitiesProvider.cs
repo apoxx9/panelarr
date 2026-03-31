@@ -145,11 +145,11 @@ namespace NzbDrone.Core.Indexers.Newznab
                 var xmlAudioSearch = xmlSearching.Element("issue-search");
                 if (xmlAudioSearch == null || xmlAudioSearch.Attribute("available").Value != "yes")
                 {
-                    capabilities.SupportedBookSearchParameters = null;
+                    capabilities.SupportedComicSearchParameters = null;
                 }
                 else if (xmlAudioSearch.Attribute("supportedParams") != null)
                 {
-                    capabilities.SupportedBookSearchParameters = xmlAudioSearch.Attribute("supportedParams").Value.Split(',');
+                    capabilities.SupportedComicSearchParameters = xmlAudioSearch.Attribute("supportedParams").Value.Split(',');
                 }
             }
 

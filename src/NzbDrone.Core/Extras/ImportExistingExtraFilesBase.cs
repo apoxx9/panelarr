@@ -3,8 +3,8 @@ using System.IO;
 using System.Linq;
 using NzbDrone.Common;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Extras.Files;
+using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.Extras
 {

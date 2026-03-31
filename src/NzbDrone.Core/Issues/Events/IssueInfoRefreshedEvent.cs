@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using NzbDrone.Common.Messaging;
 
-namespace NzbDrone.Core.Books.Events
+namespace NzbDrone.Core.Issues.Events
 {
-    public class BookInfoRefreshedEvent : IEvent
+    public class IssueInfoRefreshedEvent : IEvent
     {
         public Series Series { get; set; }
         public ReadOnlyCollection<Issue> Added { get; private set; }
@@ -12,7 +12,7 @@ namespace NzbDrone.Core.Books.Events
         public ReadOnlyCollection<Issue> Updated { get; private set; }
         public ReadOnlyCollection<Issue> Removed { get; private set; }
 
-        public BookInfoRefreshedEvent(Series author, IList<Issue> added, IList<Issue> updated, IList<Issue> removed)
+        public IssueInfoRefreshedEvent(Series author, IList<Issue> added, IList<Issue> updated, IList<Issue> removed)
         {
             Series = author;
             Added = new ReadOnlyCollection<Issue>(added);

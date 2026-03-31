@@ -1,4 +1,4 @@
-﻿using Panelarr.Http.REST;
+using Panelarr.Http.REST;
 
 namespace Panelarr.Api.V1.DiskSpace
 {

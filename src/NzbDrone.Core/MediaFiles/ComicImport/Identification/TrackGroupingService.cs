@@ -14,18 +14,18 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 {
     public interface ITrackGroupingService
     {
-        List<LocalEdition> GroupTracks(List<LocalBook> localTracks);
+        List<LocalEdition> GroupTracks(List<LocalIssue> localTracks);
     }
 
     public class TrackGroupingService : ITrackGroupingService
     {
         private static readonly Logger _logger = NzbDroneLogger.GetLogger(typeof(TrackGroupingService));
 
-        private static readonly List<string> MultiDiscMarkers = new () { @"dis[ck]", @"cd" };
+        private static readonly List<string> MultiDiscMarkers = new() { @"dis[ck]", @"cd" };
         private static readonly string MultiDiscPatternFormat = @"^(?<root>.*%s[\W_]*)\d";
-        private static readonly List<string> VariousSeriesTitles = new () { "", "various authors", "various", "va", "unknown" };
+        private static readonly List<string> VariousSeriesTitles = new() { "", "various authors", "various", "va", "unknown" };
 
-        public List<LocalEdition> GroupTracks(List<LocalBook> localTracks)
+        public List<LocalEdition> GroupTracks(List<LocalIssue> localTracks)
         {
             _logger.ProgressInfo($"Grouping {localTracks.Count} tracks");
 
@@ -36,11 +36,11 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
             foreach (var file in textFiles)
             {
-                releases.Add(new LocalEdition(new List<LocalBook> { file }));
+                releases.Add(new LocalEdition(new List<LocalIssue> { file }));
             }
 
             // first attempt, assume grouped by folder
-            var unprocessed = new List<LocalBook>();
+            var unprocessed = new List<LocalIssue>();
             foreach (var group in GroupTracksByDirectory(localTracks.Except(textFiles).ToList()))
             {
                 var tracks = group.ToList();
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             }
 
             // If anything didn't get grouped correctly, try grouping by Issue (to pick up VA)
-            var unprocessed2 = new List<LocalBook>();
+            var unprocessed2 = new List<LocalIssue>();
             foreach (var group in unprocessed.GroupBy(x => x.FileTrackInfo.IssueTitle))
             {
                 _logger.Debug("Falling back to grouping by issue tag");
@@ -112,7 +112,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             return true;
         }
 
-        public static bool LooksLikeSingleRelease(List<LocalBook> tracks)
+        public static bool LooksLikeSingleRelease(List<LocalIssue> tracks)
         {
             // returns true if we think all the tracks belong to a single release
 
@@ -152,7 +152,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             return true;
         }
 
-        public static bool IsVariousSeriess(List<LocalBook> tracks)
+        public static bool IsVariousSeriess(List<LocalIssue> tracks)
         {
             // checks whether most common title is a known VA title
             // Also checks whether more than 75% of tracks have a distinct author and that the most common author
@@ -175,7 +175,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             return false;
         }
 
-        private IEnumerable<List<LocalBook>> GroupTracksByDirectory(List<LocalBook> tracks)
+        private IEnumerable<List<LocalIssue>> GroupTracksByDirectory(List<LocalIssue> tracks)
         {
             // we want to check for layouts like:
             // xx/CD1/1.mp3
@@ -194,7 +194,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             _logger.Trace("Folders:\n{0}", string.Join("\n", distinctFolders));
 
             Regex subdirRegex = null;
-            var output = new List<LocalBook>();
+            var output = new List<LocalIssue>();
             foreach (var folder in distinctFolders)
             {
                 if (subdirRegex != null)
@@ -214,7 +214,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                     _logger.Trace("Yielding from 1:\n{0}", string.Join("\n", output));
                     yield return output;
 
-                    output = new List<LocalBook>();
+                    output = new List<LocalIssue>();
                 }
 
                 // reset and put current folder into output
@@ -246,7 +246,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                     yield return output;
 
                     // reset output
-                    output = new List<LocalBook>();
+                    output = new List<LocalIssue>();
                 }
             }
 

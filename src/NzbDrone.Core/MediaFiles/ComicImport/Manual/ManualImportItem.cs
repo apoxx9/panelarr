@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 

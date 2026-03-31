@@ -47,9 +47,9 @@ namespace Panelarr.Api.V1.MediaCovers
         }
 
         [HttpGet(@"issue/{issueId:int}/{filename:regex((.+)\.(jpg|png|gif))}")]
-        public IActionResult GetBookMediaCover(int issueId, string filename)
+        public IActionResult GetIssueMediaCover(int issueId, string filename)
         {
-            var filePath = Path.Combine(_appFolderInfo.GetAppDataPath(), "MediaCover", "Books", issueId.ToString(), filename);
+            var filePath = Path.Combine(_appFolderInfo.GetAppDataPath(), "MediaCover", "Comics", issueId.ToString(), filename);
 
             if (!_diskProvider.FileExists(filePath) || _diskProvider.GetFileSize(filePath) == 0)
             {

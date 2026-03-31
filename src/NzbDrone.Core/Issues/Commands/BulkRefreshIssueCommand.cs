@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using NzbDrone.Core.Messaging.Commands;
 
-namespace NzbDrone.Core.Books.Commands
+namespace NzbDrone.Core.Issues.Commands
 {
-    public class BulkRefreshBookCommand : Command
+    public class BulkRefreshIssueCommand : Command
     {
-        public BulkRefreshBookCommand()
+        public BulkRefreshIssueCommand()
         {
         }
 
-        public BulkRefreshBookCommand(List<int> bookIds)
+        public BulkRefreshIssueCommand(List<int> bookIds)
         {
             IssueIds = bookIds;
         }

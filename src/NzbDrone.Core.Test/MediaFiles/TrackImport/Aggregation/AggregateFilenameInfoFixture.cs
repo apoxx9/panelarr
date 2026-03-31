@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Aggregation.Aggregators
     {
         private LocalEdition GivenTracks(List<string> files, string root)
         {
-            var tracks = files.Select(x => new LocalBook
+            var tracks = files.Select(x => new LocalIssue
             {
                 Path = Path.Combine(root, x),
                 FileTrackInfo = new ParsedTrackInfo
@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Aggregation.Aggregators
             return new LocalEdition(tracks);
         }
 
-        private void VerifyData(LocalBook track, string author, string title, int trackNum, int disc)
+        private void VerifyData(LocalIssue track, string author, string title, int trackNum, int disc)
         {
             track.FileTrackInfo.SeriesTitle.Should().Be(author);
             track.FileTrackInfo.IssueTitle.Should().Be(title);
@@ -49,10 +49,10 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Aggregation.Aggregators
 
             Subject.Aggregate(release, true);
 
-            VerifyData(release.LocalBooks[0], "Adele", "Daydreamer", 1, 1);
-            VerifyData(release.LocalBooks[1], "Adele", "Best for Last", 2, 1);
-            VerifyData(release.LocalBooks[2], "Adele", "Chasing Pavements", 3, 1);
-            VerifyData(release.LocalBooks[3], "Adele", "That's It, I Quit, I'm Moving On", 3, 2);
+            VerifyData(release.LocalIssues[0], "Adele", "Daydreamer", 1, 1);
+            VerifyData(release.LocalIssues[1], "Adele", "Best for Last", 2, 1);
+            VerifyData(release.LocalIssues[2], "Adele", "Chasing Pavements", 3, 1);
+            VerifyData(release.LocalIssues[3], "Adele", "That's It, I Quit, I'm Moving On", 3, 2);
         }
 
         public static class TestCaseFactory
@@ -159,7 +159,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Aggregation.Aggregators
             return outp;
         }
 
-        private void VerifyDataAuto(List<LocalBook> tracks, string[] tokens, string whitespace)
+        private void VerifyDataAuto(List<LocalIssue> tracks, string[] tokens, string whitespace)
         {
             for (var i = 1; i <= tracks.Count; i++)
             {
@@ -186,7 +186,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Aggregation.Aggregators
 
             Subject.Aggregate(release, true);
 
-            VerifyDataAuto(release.LocalBooks, testcase.Item1, testcase.Item3);
+            VerifyDataAuto(release.LocalIssues, testcase.Item1, testcase.Item3);
         }
     }
 }

@@ -7,17 +7,17 @@ namespace NzbDrone.Core.MediaFiles.Events
 {
     public class TrackImportedEvent : IEvent
     {
-        public LocalBook BookInfo { get; private set; }
-        public ComicFile ImportedBook { get; private set; }
+        public LocalIssue IssueInfo { get; private set; }
+        public ComicFile ImportedIssue { get; private set; }
         public List<ComicFile> OldFiles { get; private set; }
         public bool NewDownload { get; private set; }
         public DownloadClientItemClientInfo DownloadClientInfo { get; set; }
         public string DownloadId { get; private set; }
 
-        public TrackImportedEvent(LocalBook bookInfo, ComicFile importedBook, List<ComicFile> oldFiles, bool newDownload, DownloadClientItem downloadClientItem)
+        public TrackImportedEvent(LocalIssue bookInfo, ComicFile importedIssue, List<ComicFile> oldFiles, bool newDownload, DownloadClientItem downloadClientItem)
         {
-            BookInfo = bookInfo;
-            ImportedBook = importedBook;
+            IssueInfo = bookInfo;
+            ImportedIssue = importedIssue;
             OldFiles = oldFiles;
             NewDownload = newDownload;
 

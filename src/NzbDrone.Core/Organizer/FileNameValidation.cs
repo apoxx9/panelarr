@@ -12,7 +12,7 @@ namespace NzbDrone.Core.Organizer
         internal static readonly Regex OriginalTokenRegex = new Regex(@"(\{original[- ._](?:title|filename)\})",
                                                                             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public static IRuleBuilderOptions<T, string> ValidBookFormat<T>(this IRuleBuilder<T, string> ruleBuilder)
+        public static IRuleBuilderOptions<T, string> ValidIssueFormat<T>(this IRuleBuilder<T, string> ruleBuilder)
         {
             ruleBuilder.SetValidator(new NotEmptyValidator(null));
             ruleBuilder.SetValidator(new IllegalCharactersValidator());

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Extras.Metadata.Files;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.ThingiProvider;
 

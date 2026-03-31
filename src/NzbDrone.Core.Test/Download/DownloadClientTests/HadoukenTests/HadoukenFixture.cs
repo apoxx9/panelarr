@@ -201,9 +201,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
         {
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
@@ -280,14 +280,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
         [Test]
         public async Task Download_from_magnet_link_should_return_hash_uppercase()
         {
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            remoteBook.Release.DownloadUrl = "magnet:?xt=urn:btih:a45129e59d8750f9da982f53552b1e4f0457ee9f";
+            remoteIssue.Release.DownloadUrl = "magnet:?xt=urn:btih:a45129e59d8750f9da982f53552b1e4f0457ee9f";
 
             Mocker.GetMock<IHadoukenProxy>()
                .Setup(v => v.AddTorrentUri(It.IsAny<HadoukenSettings>(), It.IsAny<string>()));
 
-            var result = await Subject.Download(remoteBook, CreateIndexer());
+            var result = await Subject.Download(remoteIssue, CreateIndexer());
 
             Assert.IsFalse(result.Any(c => char.IsLower(c)));
         }
@@ -295,13 +295,13 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.HadoukenTests
         [Test]
         public async Task Download_from_torrent_file_should_return_hash_uppercase()
         {
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
             Mocker.GetMock<IHadoukenProxy>()
                .Setup(v => v.AddTorrentFile(It.IsAny<HadoukenSettings>(), It.IsAny<byte[]>()))
                .Returns("hash");
 
-            var result = await Subject.Download(remoteBook, CreateIndexer());
+            var result = await Subject.Download(remoteIssue, CreateIndexer());
 
             Assert.IsFalse(result.Any(c => char.IsLower(c)));
         }

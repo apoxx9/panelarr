@@ -27,14 +27,14 @@ namespace NzbDrone.Core.Download
         private readonly IEventAggregator _eventAggregator;
         private readonly IHistoryService _historyService;
         private readonly IProvideImportItemService _provideImportItemService;
-        private readonly IDownloadedBooksImportService _downloadedTracksImportService;
+        private readonly IDownloadedIssuesImportService _downloadedTracksImportService;
         private readonly ITrackedDownloadAlreadyImported _trackedDownloadAlreadyImported;
         private readonly Logger _logger;
 
         public CompletedDownloadService(IEventAggregator eventAggregator,
                                         IHistoryService historyService,
                                         IProvideImportItemService provideImportItemService,
-                                        IDownloadedBooksImportService downloadedTracksImportService,
+                                        IDownloadedIssuesImportService downloadedTracksImportService,
                                         ITrackedDownloadAlreadyImported trackedDownloadAlreadyImported,
                                         Logger logger)
         {
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Download
             trackedDownload.State = TrackedDownloadState.Importing;
 
             var outputPath = trackedDownload.ImportItem.OutputPath.FullPath;
-            var importResults = _downloadedTracksImportService.ProcessPath(outputPath, ImportMode.Auto, trackedDownload.RemoteBook?.Series, trackedDownload.DownloadItem);
+            var importResults = _downloadedTracksImportService.ProcessPath(outputPath, ImportMode.Auto, trackedDownload.RemoteIssue?.Series, trackedDownload.DownloadItem);
 
             if (importResults.Empty())
             {
@@ -123,7 +123,7 @@ namespace NzbDrone.Core.Download
         {
             var allItemsImported = importResults.Where(c => c.Result == ImportResultType.Imported)
                                                    .Select(c => c.ImportDecision.Item.Issue)
-                                                   .Count() >= Math.Max(1, trackedDownload.RemoteBook?.Books.Count ?? 1);
+                                                   .Count() >= Math.Max(1, trackedDownload.RemoteIssue?.Issues.Count ?? 1);
 
             if (allItemsImported)
             {
@@ -133,7 +133,7 @@ namespace NzbDrone.Core.Download
                 var importedSeriesId = importResults.Where(x => x.Result == ImportResultType.Imported)
                     .Select(c => c.ImportDecision.Item.Series.Id)
                     .MostCommon();
-                _eventAggregator.PublishEvent(new DownloadCompletedEvent(trackedDownload, trackedDownload.RemoteBook?.Series.Id ?? importedSeriesId));
+                _eventAggregator.PublishEvent(new DownloadCompletedEvent(trackedDownload, trackedDownload.RemoteIssue?.Series.Id ?? importedSeriesId));
                 return true;
             }
 
@@ -165,7 +165,7 @@ namespace NzbDrone.Core.Download
                 {
                     _logger.ForDebugEvent()
                            .Message("No issues were just imported, but all issues were previously imported, possible issue with download history.")
-                           .Property("SeriesId", trackedDownload.RemoteBook.Series.Id)
+                           .Property("SeriesId", trackedDownload.RemoteIssue.Series.Id)
                            .Property("DownloadId", trackedDownload.DownloadItem.DownloadId)
                            .Property("Title", trackedDownload.DownloadItem.Title)
                            .Property("Path", trackedDownload.DownloadItem.OutputPath.ToString())
@@ -178,7 +178,7 @@ namespace NzbDrone.Core.Download
                 var importedSeriesId = historyItems.Where(x => x.EventType == EntityHistoryEventType.ComicFileImported)
                     .Select(x => x.SeriesId)
                     .MostCommon();
-                _eventAggregator.PublishEvent(new DownloadCompletedEvent(trackedDownload, trackedDownload.RemoteBook?.Series.Id ?? importedSeriesId));
+                _eventAggregator.PublishEvent(new DownloadCompletedEvent(trackedDownload, trackedDownload.RemoteIssue?.Series.Id ?? importedSeriesId));
 
                 return true;
             }

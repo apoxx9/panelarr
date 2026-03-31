@@ -1,21 +1,21 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Metadata;
 using Panelarr.Http;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     [V1ApiController("issue/{issueId:int}/override")]
     public class IssueOverrideController : Controller
     {
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IMetadataOverrideService _metadataOverrideService;
 
         public IssueOverrideController(IIssueService bookService,
                                        IMetadataOverrideService metadataOverrideService)
         {
-            _bookService = bookService;
+            _issueService = bookService;
             _metadataOverrideService = metadataOverrideService;
         }
 

@@ -3,10 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.IndexerSearch;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Test.Framework;
 
@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
         [Test]
         public void should_only_include_monitored_books()
         {
-            _author.Books = new List<Issue>
+            _author.Issues = new List<Issue>
             {
                 new Issue { Monitored = false },
                 new Issue { Monitored = true }
@@ -48,7 +48,7 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
 
             Mocker.GetMock<ISearchForReleases>()
                 .Verify(v => v.SeriesSearch(_author.Id, false, true, false),
-                    Times.Exactly(_author.Books.Value.Count(s => s.Monitored)));
+                    Times.Exactly(_author.Issues.Value.Count(s => s.Monitored)));
         }
     }
 }

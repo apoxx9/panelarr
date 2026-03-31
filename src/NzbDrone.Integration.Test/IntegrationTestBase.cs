@@ -39,7 +39,7 @@ namespace NzbDrone.Integration.Test
         public CommandClient Commands;
         public ClientBase<TaskResource> Tasks;
         public DownloadClientClient DownloadClients;
-        public IssueClient Books;
+        public IssueClient Issues;
         public ClientBase<HistoryResource> History;
         public ClientBase<HostConfigResource> HostConfig;
         public IndexerClient Indexers;
@@ -104,7 +104,7 @@ namespace NzbDrone.Integration.Test
             Commands = new CommandClient(RestClient, ApiKey);
             Tasks = new ClientBase<TaskResource>(RestClient, ApiKey, "system/task");
             DownloadClients = new DownloadClientClient(RestClient, ApiKey);
-            Books = new IssueClient(RestClient, ApiKey);
+            Issues = new IssueClient(RestClient, ApiKey);
             History = new ClientBase<HistoryResource>(RestClient, ApiKey);
             HostConfig = new ClientBase<HostConfigResource>(RestClient, ApiKey, "config/host");
             Indexers = new IndexerClient(RestClient, ApiKey);
@@ -247,12 +247,12 @@ namespace NzbDrone.Integration.Test
                 author.QualityProfileId = 1;
                 author.Path = Path.Combine(SeriesRootFolder, author.SeriesName);
                 author.Monitored = true;
-                author.AddOptions = new Core.Books.AddSeriesOptions();
+                author.AddOptions = new Core.Issues.AddSeriesOptions();
                 Directory.CreateDirectory(author.Path);
 
                 result = Series.Post(author);
                 Commands.WaitAll();
-                WaitForCompletion(() => Books.GetBooksInSeries(result.Id).Count > 0);
+                WaitForCompletion(() => Issues.GetIssuesInSeries(result.Id).Count > 0);
             }
 
             var changed = false;
@@ -292,9 +292,9 @@ namespace NzbDrone.Integration.Test
             }
         }
 
-        public void EnsureBookFile(SeriesResource author, int bookId, string foreignEditionId, Quality quality)
+        public void EnsureComicFile(SeriesResource author, int issueId, string foreignEditionId, Quality quality)
         {
-            var result = Books.GetBooksInSeries(author.Id).Single(v => v.Id == bookId);
+            var result = Issues.GetIssuesInSeries(author.Id).Single(v => v.Id == issueId);
 
             // if (result.ComicFile == null)
             if (true)
@@ -312,14 +312,14 @@ namespace NzbDrone.Integration.Test
                             {
                                 Path = path,
                                 SeriesId = author.Id,
-                                IssueId = bookId,
+                                IssueId = issueId,
                                 Quality = new QualityModel(quality)
                             }
                     }
                 });
                 Commands.WaitAll();
 
-                var track = Books.GetBooksInSeries(author.Id).Single(x => x.Id == bookId);
+                var track = Issues.GetIssuesInSeries(author.Id).Single(x => x.Id == issueId);
 
                 // track.ComicFileId.Should().NotBe(0);
             }

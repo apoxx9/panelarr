@@ -4,7 +4,7 @@ using System.Linq;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.SeriesStats;
@@ -16,8 +16,8 @@ namespace NzbDrone.Core.Test.SeriesStatsTests
     public class SeriesStatisticsFixture : DbTest<SeriesStatisticsRepository, Series>
     {
         private Series _author;
-        private Issue _book;
-        private List<ComicFile> _bookFiles;
+        private Issue _issue;
+        private List<ComicFile> _comicFiles;
 
         [SetUp]
         public void Setup()
@@ -27,29 +27,29 @@ namespace NzbDrone.Core.Test.SeriesStatsTests
                 .BuildNew();
             Db.Insert(_author);
 
-            _book = Builder<Issue>.CreateNew()
+            _issue = Builder<Issue>.CreateNew()
                 .With(e => e.ReleaseDate = DateTime.Today.AddDays(-5))
                 .With(e => e.SeriesMetadataId = 10)
                 .BuildNew();
-            Db.Insert(_book);
+            Db.Insert(_issue);
 
-            _bookFiles = Builder<ComicFile>.CreateListOfSize(2)
+            _comicFiles = Builder<ComicFile>.CreateListOfSize(2)
                 .All()
                 .With(x => x.Id = 0)
                 .With(e => e.Series = _author)
-                .With(e => e.IssueId = _book.Id)
+                .With(e => e.IssueId = _issue.Id)
                 .With(e => e.Quality = new QualityModel(Quality.CBR))
                 .BuildList();
         }
 
-        private void GivenBookFile()
+        private void GivenComicFile()
         {
-            Db.Insert(_bookFiles[0]);
+            Db.Insert(_comicFiles[0]);
         }
 
-        private void GivenTwoBookFiles()
+        private void GivenTwoComicFiles()
         {
-            Db.InsertMany(_bookFiles);
+            Db.InsertMany(_comicFiles);
         }
 
         [Test]
@@ -72,7 +72,7 @@ namespace NzbDrone.Core.Test.SeriesStatsTests
         [Test]
         public void should_include_unmonitored_book_with_file_in_book_count()
         {
-            GivenBookFile();
+            GivenComicFile();
 
             var stats = Subject.SeriesStatistics();
 
@@ -92,18 +92,18 @@ namespace NzbDrone.Core.Test.SeriesStatsTests
         [Test]
         public void should_have_size_on_disk_when_book_file_exists()
         {
-            GivenBookFile();
+            GivenComicFile();
 
             var stats = Subject.SeriesStatistics();
 
             stats.Should().HaveCount(1);
-            stats.First().SizeOnDisk.Should().Be(_bookFiles[0].Size);
+            stats.First().SizeOnDisk.Should().Be(_comicFiles[0].Size);
         }
 
         [Test]
         public void should_count_book_with_two_files_as_one_book()
         {
-            GivenTwoBookFiles();
+            GivenTwoComicFiles();
 
             var stats = Subject.SeriesStatistics();
 
@@ -112,10 +112,10 @@ namespace NzbDrone.Core.Test.SeriesStatsTests
 
             var bookStats = stats.First();
 
-            bookStats.TotalBookCount.Should().Be(1);
+            bookStats.TotalIssueCount.Should().Be(1);
             bookStats.IssueCount.Should().Be(1);
-            bookStats.AvailableBookCount.Should().Be(1);
-            bookStats.SizeOnDisk.Should().Be(_bookFiles.Sum(x => x.Size));
+            bookStats.AvailableIssueCount.Should().Be(1);
+            bookStats.SizeOnDisk.Should().Be(_comicFiles.Sum(x => x.Size));
             bookStats.ComicFileCount.Should().Be(2);
         }
     }

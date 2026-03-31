@@ -3,7 +3,7 @@ using NzbDrone.Core.Messaging.Commands;
 
 namespace NzbDrone.Core.MediaFiles.Commands
 {
-    public class DownloadedBooksScanCommand : Command
+    public class DownloadedIssuesScanCommand : Command
     {
         // Properties used by third-party apps, do not modify.
         public string Path { get; set; }

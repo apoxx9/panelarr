@@ -3,11 +3,11 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine.Specifications.RssSync;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
@@ -18,11 +18,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
     {
         private IndexerTagSpecification _specification;
 
-        private RemoteBook _parseResultMulti;
+        private RemoteIssue _parseResultMulti;
         private IndexerDefinition _fakeIndexerDefinition;
         private Series _fakeSeries;
-        private Issue _firstBook;
-        private Issue _secondBook;
+        private Issue _firstIssue;
+        private Issue _secondIssue;
         private ReleaseInfo _fakeRelease;
 
         [SetUp]
@@ -55,15 +55,15 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 IndexerId = 1
             };
 
-            _firstBook = new Issue { Monitored = true };
-            _secondBook = new Issue { Monitored = true };
+            _firstIssue = new Issue { Monitored = true };
+            _secondIssue = new Issue { Monitored = true };
 
-            var doubleBookList = new List<Issue> { _firstBook, _secondBook };
+            var doubleIssueList = new List<Issue> { _firstIssue, _secondIssue };
 
-            _parseResultMulti = new RemoteBook
+            _parseResultMulti = new RemoteIssue
             {
                 Series = _fakeSeries,
-                Books = doubleBookList,
+                Issues = doubleIssueList,
                 Release = _fakeRelease
             };
         }
@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _fakeIndexerDefinition.Tags = new HashSet<int>();
             _fakeSeries.Tags = new HashSet<int>();
 
-            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredBooksOnly = true }).Accepted.Should().BeTrue();
+            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredIssuesOnly = true }).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _fakeIndexerDefinition.Tags = new HashSet<int> { 123 };
             _fakeSeries.Tags = new HashSet<int>();
 
-            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredBooksOnly = true }).Accepted.Should().BeFalse();
+            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredIssuesOnly = true }).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -92,7 +92,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _fakeIndexerDefinition.Tags = new HashSet<int>();
             _fakeSeries.Tags = new HashSet<int> { 123 };
 
-            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredBooksOnly = true }).Accepted.Should().BeTrue();
+            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredIssuesOnly = true }).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -101,7 +101,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _fakeIndexerDefinition.Tags = new HashSet<int> { 123, 456 };
             _fakeSeries.Tags = new HashSet<int> { 123, 789 };
 
-            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredBooksOnly = true }).Accepted.Should().BeTrue();
+            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredIssuesOnly = true }).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -110,7 +110,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _fakeIndexerDefinition.Tags = new HashSet<int> { 456 };
             _fakeSeries.Tags = new HashSet<int> { 123, 789 };
 
-            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredBooksOnly = true }).Accepted.Should().BeFalse();
+            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredIssuesOnly = true }).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -120,7 +120,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _fakeSeries.Tags = new HashSet<int> { 123, 789 };
             _fakeRelease.IndexerId = 0;
 
-            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredBooksOnly = true }).Accepted.Should().BeTrue();
+            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredIssuesOnly = true }).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _fakeSeries.Tags = new HashSet<int> { 123, 789 };
             _fakeRelease.IndexerId = 2;
 
-            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredBooksOnly = true }).Accepted.Should().BeTrue();
+            _specification.IsSatisfiedBy(_parseResultMulti, new IssueSearchCriteria { MonitoredIssuesOnly = true }).Accepted.Should().BeTrue();
         }
     }
 }

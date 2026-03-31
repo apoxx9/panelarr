@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaCover;
 using Panelarr.Api.V1.Series;
 using Panelarr.Http.REST;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     public class IssueResource : RestResource
     {
@@ -61,7 +61,7 @@ namespace Panelarr.Api.V1.Books
                 ForeignIssueId = model.ForeignIssueId,
                 TitleSlug = model.TitleSlug,
                 IssueNumber = model.IssueNumber > 0 ? model.IssueNumber : (float?)null,
-                IssueType = model.IssueType != NzbDrone.Core.Books.IssueType.Standard ? model.IssueType.ToString() : null,
+                IssueType = model.IssueType != NzbDrone.Core.Issues.IssueType.Standard ? model.IssueType.ToString() : null,
                 CoverArtUrl = model.CoverArtUrl,
                 Monitored = model.Monitored,
                 ReleaseDate = model.ReleaseDate,
@@ -84,7 +84,7 @@ namespace Panelarr.Api.V1.Books
                 return null;
             }
 
-            var author = resource.Series?.ToModel() ?? new NzbDrone.Core.Books.Series();
+            var author = resource.Series?.ToModel() ?? new NzbDrone.Core.Issues.Series();
 
             return new Issue
             {
@@ -101,9 +101,9 @@ namespace Panelarr.Api.V1.Books
 
         public static Issue ToModel(this IssueResource resource, Issue issue)
         {
-            var updatedBook = resource.ToModel();
+            var updatedIssue = resource.ToModel();
 
-            issue.ApplyChanges(updatedBook);
+            issue.ApplyChanges(updatedIssue);
 
             return issue;
         }

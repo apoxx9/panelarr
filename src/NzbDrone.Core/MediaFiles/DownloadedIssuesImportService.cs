@@ -6,9 +6,9 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.MediaFiles.IssueImport;
 using NzbDrone.Core.Messaging.Events;
@@ -17,31 +17,31 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.MediaFiles
 {
-    public interface IDownloadedBooksImportService
+    public interface IDownloadedIssuesImportService
     {
         List<ImportResult> ProcessRootFolder(IDirectoryInfo directoryInfo);
         List<ImportResult> ProcessPath(string path, ImportMode importMode = ImportMode.Auto, Series author = null, DownloadClientItem downloadClientItem = null);
         bool ShouldDeleteFolder(IDirectoryInfo directoryInfo);
     }
 
-    public class DownloadedBooksImportService : IDownloadedBooksImportService
+    public class DownloadedIssuesImportService : IDownloadedIssuesImportService
     {
         private readonly IDiskProvider _diskProvider;
         private readonly IDiskScanService _diskScanService;
         private readonly ISeriesService _authorService;
         private readonly IParsingService _parsingService;
         private readonly IMakeImportDecision _importDecisionMaker;
-        private readonly IImportApprovedBooks _importApprovedTracks;
+        private readonly IImportApprovedIssues _importApprovedTracks;
         private readonly IEventAggregator _eventAggregator;
         private readonly IRuntimeInfo _runtimeInfo;
         private readonly Logger _logger;
 
-        public DownloadedBooksImportService(IDiskProvider diskProvider,
+        public DownloadedIssuesImportService(IDiskProvider diskProvider,
                                              IDiskScanService diskScanService,
                                              ISeriesService authorService,
                                              IParsingService parsingService,
                                              IMakeImportDecision importDecisionMaker,
-                                             IImportApprovedBooks importApprovedTracks,
+                                             IImportApprovedIssues importApprovedTracks,
                                              IEventAggregator eventAggregator,
                                              IRuntimeInfo runtimeInfo,
                                              Logger logger)
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.MediaFiles
                 results.AddRange(folderResults);
             }
 
-            foreach (var audioFile in _diskScanService.GetBookFiles(directoryInfo.FullName, false))
+            foreach (var audioFile in _diskScanService.GetComicFiles(directoryInfo.FullName, false))
             {
                 var fileResults = ProcessFile(audioFile, ImportMode.Auto, null);
                 results.AddRange(fileResults);
@@ -114,7 +114,7 @@ namespace NzbDrone.Core.MediaFiles
         {
             try
             {
-                var comicFiles = _diskScanService.GetBookFiles(directoryInfo.FullName);
+                var comicFiles = _diskScanService.GetComicFiles(directoryInfo.FullName);
                 var rarFiles = _diskProvider.GetFiles(directoryInfo.FullName, true).Where(f =>
                     Path.GetExtension(f).Equals(".rar",
                         StringComparison.OrdinalIgnoreCase));
@@ -170,7 +170,7 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             var cleanedUpName = GetCleanedUpFolderName(directoryInfo.Name);
-            var folderInfo = Parser.Parser.ParseBookTitle(directoryInfo.Name);
+            var folderInfo = Parser.Parser.ParseIssueTitle(directoryInfo.Name);
             var trackInfo = new ParsedTrackInfo { };
 
             if (folderInfo != null)
@@ -191,7 +191,7 @@ namespace NzbDrone.Core.MediaFiles
                 trackInfo = null;
             }
 
-            var audioFiles = _diskScanService.FilterFiles(directoryInfo.FullName, _diskScanService.GetBookFiles(directoryInfo.FullName));
+            var audioFiles = _diskScanService.FilterFiles(directoryInfo.FullName, _diskScanService.GetComicFiles(directoryInfo.FullName));
 
             if (downloadClientItem == null)
             {
@@ -277,7 +277,7 @@ namespace NzbDrone.Core.MediaFiles
 
                 return new List<ImportResult>
                        {
-                           new ImportResult(new ImportDecision<LocalBook>(new LocalBook { Path = fileInfo.FullName }, new Rejection("Invalid music file, filename starts with '._'")), "Invalid music file, filename starts with '._'")
+                           new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = fileInfo.FullName }, new Rejection("Invalid music file, filename starts with '._'")), "Invalid music file, filename starts with '._'")
                        };
             }
 
@@ -325,14 +325,14 @@ namespace NzbDrone.Core.MediaFiles
         private ImportResult FileIsLockedResult(string audioFile)
         {
             _logger.Debug("[{0}] is currently locked by another process, skipping", audioFile);
-            return new ImportResult(new ImportDecision<LocalBook>(new LocalBook { Path = audioFile }, new Rejection("Locked file, try again later")), "Locked file, try again later");
+            return new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = audioFile }, new Rejection("Locked file, try again later")), "Locked file, try again later");
         }
 
         private ImportResult UnknownSeriesResult(string message, string comicFile = null)
         {
-            var localTrack = comicFile == null ? null : new LocalBook { Path = comicFile };
+            var localTrack = comicFile == null ? null : new LocalIssue { Path = comicFile };
 
-            return new ImportResult(new ImportDecision<LocalBook>(localTrack, new Rejection("Unknown Series")), message);
+            return new ImportResult(new ImportDecision<LocalIssue>(localTrack, new Rejection("Unknown Series")), message);
         }
 
         private void LogInaccessiblePathError(string path)

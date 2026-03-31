@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
         public void Clean()
         {
             CleanupOrphanedBySeries();
-            CleanupOrphanedByBook();
+            CleanupOrphanedByIssue();
         }
 
         private void CleanupOrphanedBySeries()
@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                              WHERE ""Series"".""Id"" IS NULL)");
         }
 
-        private void CleanupOrphanedByBook()
+        private void CleanupOrphanedByIssue()
         {
             using var mapper = _database.OpenConnection();
             mapper.Execute(@"DELETE FROM ""History""

@@ -2,9 +2,9 @@ using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.Notifications.Webhook
 {
-    public class WebhookRenamedBookFile : WebhookBookFile
+    public class WebhookRenamedComicFile : WebhookComicFile
     {
-        public WebhookRenamedBookFile(RenamedComicFile renamedMovie)
+        public WebhookRenamedComicFile(RenamedComicFile renamedMovie)
             : base(renamedMovie.ComicFile)
         {
             PreviousPath = renamedMovie.PreviousPath;

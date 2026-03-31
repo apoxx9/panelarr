@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.History;
-using Panelarr.Api.V1.Books;
+using NzbDrone.Core.Issues;
+using Panelarr.Api.V1.Issues;
 using Panelarr.Api.V1.Series;
 using Panelarr.Http;
 using Panelarr.Http.Extensions;
@@ -38,7 +38,7 @@ namespace Panelarr.Api.V1.History
             _authorService = authorService;
         }
 
-        protected HistoryResource MapToResource(EntityHistory model, bool includeSeries, bool includeBook)
+        protected HistoryResource MapToResource(EntityHistory model, bool includeSeries, bool includeIssue)
         {
             var resource = model.ToResource(_formatCalculator);
 
@@ -47,7 +47,7 @@ namespace Panelarr.Api.V1.History
                 resource.Series = model.Series.ToResource();
             }
 
-            if (includeBook)
+            if (includeIssue)
             {
                 resource.Issue = model.Issue.ToResource();
             }
@@ -62,7 +62,7 @@ namespace Panelarr.Api.V1.History
 
         [HttpGet]
         [Produces("application/json")]
-        public PagingResource<HistoryResource> GetHistory([FromQuery] PagingRequestResource paging, bool includeSeries, bool includeBook, [FromQuery(Name = "eventType")] int[] eventTypes, int? issueId, string downloadId)
+        public PagingResource<HistoryResource> GetHistory([FromQuery] PagingRequestResource paging, bool includeSeries, bool includeIssue, [FromQuery(Name = "eventType")] int[] eventTypes, int? issueId, string downloadId)
         {
             var pagingResource = new PagingResource<HistoryResource>(paging);
             var pagingSpec = pagingResource.MapToPagingSpec<HistoryResource, EntityHistory>("date", SortDirection.Descending);
@@ -82,27 +82,27 @@ namespace Panelarr.Api.V1.History
                 pagingSpec.FilterExpressions.Add(h => h.DownloadId == downloadId);
             }
 
-            return pagingSpec.ApplyToPage(_historyService.Paged, h => MapToResource(h, includeSeries, includeBook));
+            return pagingSpec.ApplyToPage(_historyService.Paged, h => MapToResource(h, includeSeries, includeIssue));
         }
 
         [HttpGet("since")]
-        public List<HistoryResource> GetHistorySince(DateTime date, EntityHistoryEventType? eventType = null, bool includeSeries = false, bool includeBook = false)
+        public List<HistoryResource> GetHistorySince(DateTime date, EntityHistoryEventType? eventType = null, bool includeSeries = false, bool includeIssue = false)
         {
-            return _historyService.Since(date, eventType).Select(h => MapToResource(h, includeSeries, includeBook)).ToList();
+            return _historyService.Since(date, eventType).Select(h => MapToResource(h, includeSeries, includeIssue)).ToList();
         }
 
         [HttpGet("series")]
-        public List<HistoryResource> GetSeriesHistory(int seriesId, int? issueId = null, EntityHistoryEventType? eventType = null, bool includeSeries = false, bool includeBook = false)
+        public List<HistoryResource> GetSeriesHistory(int seriesId, int? issueId = null, EntityHistoryEventType? eventType = null, bool includeSeries = false, bool includeIssue = false)
         {
             var author = _authorService.GetSeries(seriesId);
 
             if (issueId.HasValue)
             {
-                return _historyService.GetByBook(issueId.Value, eventType).Select(h =>
+                return _historyService.GetByIssue(issueId.Value, eventType).Select(h =>
                 {
                     h.Series = author;
 
-                    return MapToResource(h, includeSeries, includeBook);
+                    return MapToResource(h, includeSeries, includeIssue);
                 }).ToList();
             }
 
@@ -110,7 +110,7 @@ namespace Panelarr.Api.V1.History
             {
                 h.Series = author;
 
-                return MapToResource(h, includeSeries, includeBook);
+                return MapToResource(h, includeSeries, includeIssue);
             }).ToList();
         }
 

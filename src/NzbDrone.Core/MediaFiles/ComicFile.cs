@@ -1,7 +1,7 @@
 using System;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
@@ -24,7 +24,7 @@ namespace NzbDrone.Core.MediaFiles
         public int Part { get; set; }
 
         // Comic-specific fields
-        public NzbDrone.Core.Books.ComicFormat ComicFormat { get; set; }
+        public NzbDrone.Core.Issues.ComicFormat ComicFormat { get; set; }
         public int ImageCount { get; set; }
         public float ImageQualityScore { get; set; }
 

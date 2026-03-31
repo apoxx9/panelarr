@@ -21,7 +21,7 @@ namespace NzbDrone.Core.CustomFormats
             }
 
             // Fall back to matching against release title / filename
-            return MatchString(input.BookInfo?.ReleaseTitle) || MatchString(input.Filename);
+            return MatchString(input.IssueInfo?.ReleaseTitle) || MatchString(input.Filename);
         }
     }
 }

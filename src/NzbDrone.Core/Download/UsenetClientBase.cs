@@ -33,19 +33,19 @@ namespace NzbDrone.Core.Download
 
         public override DownloadProtocol Protocol => DownloadProtocol.Usenet;
 
-        protected abstract string AddFromNzbFile(RemoteBook remoteBook, string filename, byte[] fileContent);
+        protected abstract string AddFromNzbFile(RemoteIssue remoteIssue, string filename, byte[] fileContent);
 
-        public override async Task<string> Download(RemoteBook remoteBook, IIndexer indexer)
+        public override async Task<string> Download(RemoteIssue remoteIssue, IIndexer indexer)
         {
-            var url = remoteBook.Release.DownloadUrl;
-            var filename = FileNameBuilder.CleanFileName(remoteBook.Release.Title) + ".nzb";
+            var url = remoteIssue.Release.DownloadUrl;
+            var filename = FileNameBuilder.CleanFileName(remoteIssue.Release.Title) + ".nzb";
 
             byte[] nzbData;
 
             try
             {
                 var request = indexer?.GetDownloadRequest(url) ?? new HttpRequest(url);
-                request.RateLimitKey = remoteBook?.Release?.IndexerId.ToString();
+                request.RateLimitKey = remoteIssue?.Release?.IndexerId.ToString();
 
                 var response = await RetryStrategy
                     .ExecuteAsync(static async (state, _) => await state._httpClient.GetAsync(state.request), (_httpClient, request))
@@ -53,14 +53,14 @@ namespace NzbDrone.Core.Download
 
                 nzbData = response.ResponseData;
 
-                _logger.Debug("Downloaded nzb for release '{0}' finished ({1} bytes from {2})", remoteBook.Release.Title, nzbData.Length, url);
+                _logger.Debug("Downloaded nzb for release '{0}' finished ({1} bytes from {2})", remoteIssue.Release.Title, nzbData.Length, url);
             }
             catch (HttpException ex)
             {
                 if (ex.Response.StatusCode == HttpStatusCode.NotFound)
                 {
-                    _logger.Error(ex, "Downloading nzb file for issue '{0}' failed since it no longer exists ({1})", remoteBook.Release.Title, url);
-                    throw new ReleaseUnavailableException(remoteBook.Release, "Downloading torrent failed", ex);
+                    _logger.Error(ex, "Downloading nzb file for issue '{0}' failed since it no longer exists ({1})", remoteIssue.Release.Title, url);
+                    throw new ReleaseUnavailableException(remoteIssue.Release, "Downloading torrent failed", ex);
                 }
 
                 if ((int)ex.Response.StatusCode == 429)
@@ -69,22 +69,22 @@ namespace NzbDrone.Core.Download
                 }
                 else
                 {
-                    _logger.Error(ex, "Downloading nzb for release '{0}' failed ({1})", remoteBook.Release.Title, url);
+                    _logger.Error(ex, "Downloading nzb for release '{0}' failed ({1})", remoteIssue.Release.Title, url);
                 }
 
-                throw new ReleaseDownloadException(remoteBook.Release, "Downloading nzb failed", ex);
+                throw new ReleaseDownloadException(remoteIssue.Release, "Downloading nzb failed", ex);
             }
             catch (WebException ex)
             {
-                _logger.Error(ex, "Downloading nzb for release '{0}' failed ({1})", remoteBook.Release.Title, url);
+                _logger.Error(ex, "Downloading nzb for release '{0}' failed ({1})", remoteIssue.Release.Title, url);
 
-                throw new ReleaseDownloadException(remoteBook.Release, "Downloading nzb failed", ex);
+                throw new ReleaseDownloadException(remoteIssue.Release, "Downloading nzb failed", ex);
             }
 
             _nzbValidationService.Validate(filename, nzbData);
 
-            _logger.Info("Adding report [{0}] to the queue.", remoteBook.Release.Title);
-            return AddFromNzbFile(remoteBook, filename, nzbData);
+            _logger.Info("Adding report [{0}] to the queue.", remoteIssue.Release.Title);
+            return AddFromNzbFile(remoteIssue, filename, nzbData);
         }
     }
 }

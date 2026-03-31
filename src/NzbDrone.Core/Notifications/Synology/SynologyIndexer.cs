@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using FluentValidation.Results;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.Notifications.Synology

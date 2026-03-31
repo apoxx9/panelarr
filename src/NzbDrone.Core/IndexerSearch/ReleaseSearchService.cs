@@ -5,24 +5,24 @@ using System.Threading.Tasks;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.IndexerSearch
 {
     public interface ISearchForReleases
     {
-        Task<List<DownloadDecision>> IssueSearch(int bookId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch);
+        Task<List<DownloadDecision>> IssueSearch(int issueId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch);
         Task<List<DownloadDecision>> SeriesSearch(int authorId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch);
     }
 
     public class ReleaseSearchService : ISearchForReleases
     {
         private readonly IIndexerFactory _indexerFactory;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly ISeriesService _authorService;
         private readonly IMakeDownloadDecision _makeDownloadDecision;
         private readonly Logger _logger;
@@ -34,17 +34,17 @@ namespace NzbDrone.Core.IndexerSearch
                                 Logger logger)
         {
             _indexerFactory = indexerFactory;
-            _bookService = bookService;
+            _issueService = bookService;
             _authorService = authorService;
             _makeDownloadDecision = makeDownloadDecision;
             _logger = logger;
         }
 
-        public async Task<List<DownloadDecision>> IssueSearch(int bookId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
+        public async Task<List<DownloadDecision>> IssueSearch(int issueId, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
         {
             var downloadDecisions = new List<DownloadDecision>();
 
-            var issue = _bookService.GetIssue(bookId);
+            var issue = _issueService.GetIssue(issueId);
 
             var decisions = await IssueSearch(issue, missingOnly, userInvokedSearch, interactiveSearch);
             downloadDecisions.AddRange(decisions);
@@ -67,11 +67,11 @@ namespace NzbDrone.Core.IndexerSearch
         public async Task<List<DownloadDecision>> SeriesSearch(Series author, bool missingOnly, bool userInvokedSearch, bool interactiveSearch)
         {
             var searchSpec = Get<SeriesSearchCriteria>(author, userInvokedSearch, interactiveSearch);
-            var issues = _bookService.GetIssuesBySeries(author.Id);
+            var issues = _issueService.GetIssuesBySeries(author.Id);
 
             issues = issues.Where(a => a.Monitored).ToList();
 
-            searchSpec.Books = issues;
+            searchSpec.Issues = issues;
 
             return await Dispatch(indexer => indexer.Fetch(searchSpec), searchSpec);
         }
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.IndexerSearch
         {
             var spec = new TSpec();
 
-            spec.Books = issues;
+            spec.Issues = issues;
             spec.Series = author;
             spec.UserInvokedSearch = userInvokedSearch;
             spec.InteractiveSearch = interactiveSearch;
@@ -141,8 +141,8 @@ namespace NzbDrone.Core.IndexerSearch
                 var lastSearchTime = DateTime.UtcNow;
                 _logger.Debug("Setting last search time to: {0}", lastSearchTime);
 
-                criteriaBase.Books.ForEach(a => a.LastSearchTime = lastSearchTime);
-                _bookService.UpdateLastSearchTime(criteriaBase.Books);
+                criteriaBase.Issues.ForEach(a => a.LastSearchTime = lastSearchTime);
+                _issueService.UpdateLastSearchTime(criteriaBase.Issues);
             }
 
             return _makeDownloadDecision.GetSearchDecision(reports, criteriaBase).ToList();
@@ -165,8 +165,8 @@ namespace NzbDrone.Core.IndexerSearch
         private List<DownloadDecision> DeDupeDecisions(List<DownloadDecision> decisions)
         {
             // De-dupe reports by guid so duplicate results aren't returned. Pick the one with the least rejections and higher indexer priority.
-            return decisions.GroupBy(d => d.RemoteBook.Release.Guid)
-                .Select(d => d.OrderBy(v => v.Rejections.Count()).ThenBy(v => v.RemoteBook?.Release?.IndexerPriority ?? IndexerDefinition.DefaultPriority).First())
+            return decisions.GroupBy(d => d.RemoteIssue.Release.Guid)
+                .Select(d => d.OrderBy(v => v.Rejections.Count()).ThenBy(v => v.RemoteIssue?.Release?.IndexerPriority ?? IndexerDefinition.DefaultPriority).First())
                 .ToList();
         }
     }

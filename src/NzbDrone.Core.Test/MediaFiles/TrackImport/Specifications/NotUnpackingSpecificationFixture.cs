@@ -4,8 +4,8 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.IssueImport.Specifications;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
     [TestFixture]
     public class NotUnpackingSpecificationFixture : CoreTest<NotUnpackingSpecification>
     {
-        private LocalBook _localTrack;
+        private LocalIssue _localTrack;
 
         [SetUp]
         public void Setup()
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
                 .SetupGet(s => s.DownloadClientWorkingFolders)
                 .Returns("_UNPACK_|_FAILED_");
 
-            _localTrack = new LocalBook
+            _localTrack = new LocalIssue
             {
                 Path = @"C:\Test\Unsorted Music\Kid.Rock\Kid.Rock.Cowboy.mp3".AsOsAgnostic(),
                 Size = 100,

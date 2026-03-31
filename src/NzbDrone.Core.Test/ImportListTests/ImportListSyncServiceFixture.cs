@@ -3,9 +3,9 @@ using System.Linq;
 using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.ImportLists.Exclusions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -32,8 +32,8 @@ namespace NzbDrone.Core.Test.ImportListTests
                 .Setup(v => v.Fetch())
                 .Returns(_importListReports);
 
-            Mocker.GetMock<ISearchForNewBook>()
-                .Setup(v => v.SearchForNewBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
+            Mocker.GetMock<ISearchForNewIssue>()
+                .Setup(v => v.SearchForNewIssue(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Returns(new List<Issue>());
 
             Mocker.GetMock<ISearchForNewSeries>()
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Test.ImportListTests
 
             Mocker.GetMock<IImportListFactory>()
                 .Setup(v => v.Get(It.IsAny<int>()))
-                .Returns(new ImportListDefinition { ShouldMonitor = ImportListMonitorType.SpecificBook });
+                .Returns(new ImportListDefinition { ShouldMonitor = ImportListMonitorType.SpecificIssue });
 
             Mocker.GetMock<IImportListFactory>()
                 .Setup(v => v.AutomaticAddEnabled(It.IsAny<bool>()))
@@ -56,8 +56,8 @@ namespace NzbDrone.Core.Test.ImportListTests
                 .Setup(v => v.All())
                 .Returns(new List<ImportListExclusion>());
 
-            Mocker.GetMock<IAddBookService>()
-                .Setup(v => v.AddBooks(It.IsAny<List<Issue>>(), false))
+            Mocker.GetMock<IAddIssueService>()
+                .Setup(v => v.AddIssues(It.IsAny<List<Issue>>(), false))
                 .Returns<List<Issue>, bool>((x, y) => x);
 
             Mocker.GetMock<IAddSeriesService>()
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.ImportListTests
                 .Returns<List<Series>, bool>((x, y) => x);
         }
 
-        private void WithBook()
+        private void WithIssue()
         {
             _importListReports.First().Issue = "Meteora";
         }
@@ -75,12 +75,12 @@ namespace NzbDrone.Core.Test.ImportListTests
             _importListReports.First().ForeignSeriesId = "f59c5520-5f46-4d2c-b2c4-822eabf53419";
         }
 
-        private void WithBookId()
+        private void WithIssueId()
         {
             _importListReports.First().ForeignEditionId = "1234";
         }
 
-        private void WithSecondBook()
+        private void WithSecondIssue()
         {
             var importListItem2 = new ImportListItemInfo
             {
@@ -100,9 +100,9 @@ namespace NzbDrone.Core.Test.ImportListTests
                 .Returns(new Series { Id = 1, ForeignSeriesId = _importListReports.First().ForeignSeriesId });
         }
 
-        private void WithExistingBook()
+        private void WithExistingIssue()
         {
-            Mocker.GetMock<IBookService>()
+            Mocker.GetMock<IIssueService>()
                 .Setup(v => v.FindById("4321"))
                 .Returns(new Issue { Id = 1, ForeignIssueId = _importListReports.First().ForeignIssueId });
         }
@@ -120,7 +120,7 @@ namespace NzbDrone.Core.Test.ImportListTests
                 });
         }
 
-        private void WithExcludedBook()
+        private void WithExcludedIssue()
         {
             Mocker.GetMock<IImportListExclusionService>()
                 .Setup(v => v.All())
@@ -162,34 +162,34 @@ namespace NzbDrone.Core.Test.ImportListTests
         [Test]
         public void should_search_if_book_title_and_no_book_id()
         {
-            WithBook();
+            WithIssue();
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<ISearchForNewBook>()
-                .Verify(v => v.SearchForNewBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Once());
+            Mocker.GetMock<ISearchForNewIssue>()
+                .Verify(v => v.SearchForNewIssue(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
         public void should_not_search_if_book_title_and_book_id()
         {
             WithSeriesId();
-            WithBookId();
+            WithIssueId();
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<ISearchForNewBook>()
-                .Verify(v => v.SearchForNewBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+            Mocker.GetMock<ISearchForNewIssue>()
+                .Verify(v => v.SearchForNewIssue(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test]
         public void should_not_search_if_all_info()
         {
             WithSeriesId();
-            WithBook();
-            WithBookId();
+            WithIssue();
+            WithIssueId();
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<ISearchForNewBook>()
-                .Verify(v => v.SearchForNewBook(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+            Mocker.GetMock<ISearchForNewIssue>()
+                .Verify(v => v.SearchForNewIssue(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
 
             Mocker.GetMock<ISearchForNewSeries>()
                 .Verify(v => v.SearchForNewSeries(It.IsAny<string>()), Times.Never());
@@ -210,8 +210,8 @@ namespace NzbDrone.Core.Test.ImportListTests
         [Test]
         public void should_not_add_if_existing_book()
         {
-            WithBookId();
-            WithExistingBook();
+            WithIssueId();
+            WithExistingIssue();
 
             Subject.Execute(new ImportListSyncCommand());
 
@@ -222,18 +222,18 @@ namespace NzbDrone.Core.Test.ImportListTests
         [Test]
         public void should_add_if_existing_author_but_new_book()
         {
-            WithBookId();
+            WithIssueId();
             WithSeriesId();
             WithExistingSeries();
 
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<IAddBookService>()
-                .Verify(v => v.AddBooks(It.Is<List<Issue>>(t => t.Count == 1), false));
+            Mocker.GetMock<IAddIssueService>()
+                .Verify(v => v.AddIssues(It.Is<List<Issue>>(t => t.Count == 1), false));
         }
 
         [TestCase(ImportListMonitorType.None, false)]
-        [TestCase(ImportListMonitorType.SpecificBook, true)]
+        [TestCase(ImportListMonitorType.SpecificIssue, true)]
         [TestCase(ImportListMonitorType.EntireSeries, true)]
         public void should_add_if_not_existing_author(ImportListMonitorType monitor, bool expectedSeriesMonitored)
         {
@@ -247,17 +247,17 @@ namespace NzbDrone.Core.Test.ImportListTests
         }
 
         [TestCase(ImportListMonitorType.None, false)]
-        [TestCase(ImportListMonitorType.SpecificBook, true)]
+        [TestCase(ImportListMonitorType.SpecificIssue, true)]
         [TestCase(ImportListMonitorType.EntireSeries, true)]
-        public void should_add_if_not_existing_book(ImportListMonitorType monitor, bool expectedBookMonitored)
+        public void should_add_if_not_existing_book(ImportListMonitorType monitor, bool expectedIssueMonitored)
         {
-            WithBookId();
+            WithIssueId();
             WithMonitorType(monitor);
 
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<IAddBookService>()
-                .Verify(v => v.AddBooks(It.Is<List<Issue>>(t => t.Count == 1 && t.First().Monitored == expectedBookMonitored), false));
+            Mocker.GetMock<IAddIssueService>()
+                .Verify(v => v.AddIssues(It.Is<List<Issue>>(t => t.Count == 1 && t.First().Monitored == expectedIssueMonitored), false));
         }
 
         [Test]
@@ -275,46 +275,46 @@ namespace NzbDrone.Core.Test.ImportListTests
         [Test]
         public void should_not_add_book_if_excluded_book()
         {
-            WithBookId();
-            WithExcludedBook();
+            WithIssueId();
+            WithExcludedIssue();
 
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<IAddBookService>()
-                .Verify(v => v.AddBooks(It.Is<List<Issue>>(t => t.Count == 0), false));
+            Mocker.GetMock<IAddIssueService>()
+                .Verify(v => v.AddIssues(It.Is<List<Issue>>(t => t.Count == 0), false));
         }
 
         [Test]
         public void should_not_add_book_if_excluded_author()
         {
-            WithBookId();
+            WithIssueId();
             WithSeriesId();
             WithExcludedSeries();
 
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<IAddBookService>()
-                .Verify(v => v.AddBooks(It.Is<List<Issue>>(t => t.Count == 0), false));
+            Mocker.GetMock<IAddIssueService>()
+                .Verify(v => v.AddIssues(It.Is<List<Issue>>(t => t.Count == 0), false));
         }
 
         [TestCase(ImportListMonitorType.None, 0, false)]
-        [TestCase(ImportListMonitorType.SpecificBook, 2, true)]
+        [TestCase(ImportListMonitorType.SpecificIssue, 2, true)]
         [TestCase(ImportListMonitorType.EntireSeries, 0, true)]
-        public void should_add_two_books(ImportListMonitorType monitor, int expectedBooksMonitored, bool expectedSeriesMonitored)
+        public void should_add_two_books(ImportListMonitorType monitor, int expectedIssuesMonitored, bool expectedSeriesMonitored)
         {
-            WithBook();
-            WithBookId();
-            WithSecondBook();
+            WithIssue();
+            WithIssueId();
+            WithSecondIssue();
             WithSeriesId();
             WithMonitorType(monitor);
 
             Subject.Execute(new ImportListSyncCommand());
 
-            Mocker.GetMock<IAddBookService>()
-                .Verify(v => v.AddBooks(It.Is<List<Issue>>(t => t.Count == 2), false));
+            Mocker.GetMock<IAddIssueService>()
+                .Verify(v => v.AddIssues(It.Is<List<Issue>>(t => t.Count == 2), false));
             Mocker.GetMock<IAddSeriesService>()
                 .Verify(v => v.AddSeries(It.Is<List<Series>>(t => t.Count == 1 &&
-                                                                   t.First().AddOptions.IssuesToMonitor.Count == expectedBooksMonitored &&
+                                                                   t.First().AddOptions.IssuesToMonitor.Count == expectedIssuesMonitored &&
                                                                    t.First().Monitored == expectedSeriesMonitored), false));
         }
 

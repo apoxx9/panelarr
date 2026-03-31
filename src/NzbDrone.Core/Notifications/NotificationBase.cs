@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using FluentValidation.Results;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.ThingiProvider;
 

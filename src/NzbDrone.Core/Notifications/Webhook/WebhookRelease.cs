@@ -11,16 +11,16 @@ namespace NzbDrone.Core.Notifications.Webhook
         {
         }
 
-        public WebhookRelease(QualityModel quality, RemoteBook remoteBook)
+        public WebhookRelease(QualityModel quality, RemoteIssue remoteIssue)
         {
             Quality = quality.Quality.Name;
             QualityVersion = quality.Revision.Version;
-            ReleaseGroup = remoteBook.ParsedIssueInfo.ReleaseGroup;
-            ReleaseTitle = remoteBook.Release.Title;
-            Indexer = remoteBook.Release.Indexer;
-            Size = remoteBook.Release.Size;
-            CustomFormats = remoteBook.CustomFormats?.Select(x => x.Name).ToList();
-            CustomFormatScore = remoteBook.CustomFormatScore;
+            ReleaseGroup = remoteIssue.ParsedIssueInfo.ReleaseGroup;
+            ReleaseTitle = remoteIssue.Release.Title;
+            Indexer = remoteIssue.Release.Indexer;
+            Size = remoteIssue.Release.Size;
+            CustomFormats = remoteIssue.CustomFormats?.Select(x => x.Name).ToList();
+            CustomFormatScore = remoteIssue.CustomFormatScore;
         }
 
         public string Quality { get; set; }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Parser.Model;
 
@@ -16,13 +16,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
     public class CandidateService : ICandidateService
     {
-        private readonly ISearchForNewBook _bookSearchService;
+        private readonly ISearchForNewIssue _bookSearchService;
         private readonly ISeriesService _authorService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IMediaFileService _mediaFileService;
         private readonly Logger _logger;
 
-        public CandidateService(ISearchForNewBook bookSearchService,
+        public CandidateService(ISearchForNewIssue bookSearchService,
                                 ISeriesService authorService,
                                 IIssueService bookService,
                                 IMediaFileService mediaFileService,
@@ -30,7 +30,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         {
             _bookSearchService = bookSearchService;
             _authorService = authorService;
-            _bookService = bookService;
+            _issueService = bookService;
             _mediaFileService = mediaFileService;
             _logger = logger;
         }
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 }
                 else
                 {
-                    candidateReleases = GetDbCandidatesByBook(idOverrides.Issue, includeExisting);
+                    candidateReleases = GetDbCandidatesByIssue(idOverrides.Issue, includeExisting);
                 }
             }
             else if (idOverrides?.Series != null)
@@ -84,14 +84,14 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             }
 
             watch.Stop();
-            _logger.Debug($"Getting {candidateReleases.Count} candidates from tags for {localEdition.LocalBooks.Count} tracks took {watch.ElapsedMilliseconds}ms");
+            _logger.Debug($"Getting {candidateReleases.Count} candidates from tags for {localEdition.LocalIssues.Count} tracks took {watch.ElapsedMilliseconds}ms");
 
             return candidateReleases;
         }
 
         private List<CandidateEdition> GetDbCandidatesByIssue(Issue issue, bool includeExisting)
         {
-            var existingFiles = includeExisting ? _mediaFileService.GetFilesByBook(issue.Id) : new List<ComicFile>();
+            var existingFiles = includeExisting ? _mediaFileService.GetFilesByIssue(issue.Id) : new List<ComicFile>();
             return new List<CandidateEdition>
             {
                 new CandidateEdition
@@ -102,26 +102,21 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             };
         }
 
-        private List<CandidateEdition> GetDbCandidatesByBook(Issue issue, bool includeExisting)
-        {
-            return GetDbCandidatesByIssue(issue, includeExisting);
-        }
-
         private List<CandidateEdition> GetDbCandidatesBySeries(LocalEdition localEdition, Series author, bool includeExisting)
         {
             _logger.Trace("Getting candidates for {0}", author);
             var candidateReleases = new List<CandidateEdition>();
 
-            var bookTag = localEdition.LocalBooks.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
+            var bookTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
             if (bookTag.IsNotNullOrWhiteSpace())
             {
-                var possibleBooks = _bookService.GetCandidates(author.SeriesMetadataId, bookTag);
-                foreach (var issue in possibleBooks)
+                var possibleIssues = _issueService.GetCandidates(author.SeriesMetadataId, bookTag);
+                foreach (var issue in possibleIssues)
                 {
-                    candidateReleases.AddRange(GetDbCandidatesByBook(issue, includeExisting));
+                    candidateReleases.AddRange(GetDbCandidatesByIssue(issue, includeExisting));
                 }
 
-                var possibleEditionIssues = _bookService.GetCandidates(author.SeriesMetadataId, bookTag);
+                var possibleEditionIssues = _issueService.GetCandidates(author.SeriesMetadataId, bookTag);
                 foreach (var possibleIssue in possibleEditionIssues)
                 {
                     candidateReleases.AddRange(GetDbCandidatesByIssue(possibleIssue, includeExisting));
@@ -138,7 +133,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             var candidateReleases = new List<CandidateEdition>();
 
             // check if it looks like VA.
-            if (TrackGroupingService.IsVariousSeriess(localEdition.LocalBooks))
+            if (TrackGroupingService.IsVariousSeriess(localEdition.LocalIssues))
             {
                 var va = _authorService.FindById(DistanceCalculator.VariousSeriesIds[0]);
                 if (va != null)
@@ -147,7 +142,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 }
             }
 
-            var authorTags = localEdition.LocalBooks.MostCommon(x => x.FileTrackInfo.Seriess) ?? new List<string>();
+            var authorTags = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.Seriess) ?? new List<string>();
             if (authorTags.Any())
             {
                 var variants = DistanceCalculator.GetSeriesVariants(authorTags.Where(x => x.IsNotNullOrWhiteSpace()).ToList());
@@ -172,7 +167,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         {
             // Gets candidate issue releases from the metadata server.
             // Will eventually need adding locally if we find a match
-            List<Issue> remoteBooks;
+            List<Issue> remoteIssues;
             var seenCandidates = new HashSet<string>();
 
             // If any overrides are set, stop
@@ -185,14 +180,14 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             // fall back to author / issue name search
             var authorTags = new List<string>();
 
-            if (TrackGroupingService.IsVariousSeriess(localEdition.LocalBooks))
+            if (TrackGroupingService.IsVariousSeriess(localEdition.LocalIssues))
             {
                 authorTags.Add("Various Seriess");
             }
             else
             {
                 // the most common list of authors reported by a file
-                var authors = localEdition.LocalBooks.Select(x => x.FileTrackInfo.Seriess.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
+                var authors = localEdition.LocalIssues.Select(x => x.FileTrackInfo.Seriess.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
                     .GroupBy(x => x.ConcatToString())
                     .OrderByDescending(x => x.Count())
                     .First()
@@ -200,7 +195,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 authorTags.AddRange(authors);
             }
 
-            var bookTag = localEdition.LocalBooks.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
+            var bookTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
 
             // If no valid author or issue tags, stop
             if (!authorTags.Any() || bookTag.IsNullOrWhiteSpace())
@@ -213,15 +208,15 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             {
                 try
                 {
-                    remoteBooks = _bookSearchService.SearchForNewBook(bookTag, authorTag);
+                    remoteIssues = _bookSearchService.SearchForNewIssue(bookTag, authorTag);
                 }
                 catch (System.Exception e)
                 {
                     _logger.Info(e, "Skipping author/title search due to error");
-                    remoteBooks = new List<Issue>();
+                    remoteIssues = new List<Issue>();
                 }
 
-                foreach (var candidate in ToCandidates(remoteBooks, seenCandidates, idOverrides))
+                foreach (var candidate in ToCandidates(remoteIssues, seenCandidates, idOverrides))
                 {
                     yield return candidate;
                 }
@@ -236,15 +231,15 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             // Search by just issue title
             try
             {
-                remoteBooks = _bookSearchService.SearchForNewBook(bookTag, null);
+                remoteIssues = _bookSearchService.SearchForNewIssue(bookTag, null);
             }
             catch (System.Exception e)
             {
                 _logger.Info(e, "Skipping issue title search due to error");
-                remoteBooks = new List<Issue>();
+                remoteIssues = new List<Issue>();
             }
 
-            foreach (var candidate in ToCandidates(remoteBooks, seenCandidates, idOverrides))
+            foreach (var candidate in ToCandidates(remoteIssues, seenCandidates, idOverrides))
             {
                 yield return candidate;
             }
@@ -254,15 +249,15 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             {
                 try
                 {
-                    remoteBooks = _bookSearchService.SearchForNewBook(a, null);
+                    remoteIssues = _bookSearchService.SearchForNewIssue(a, null);
                 }
                 catch (System.Exception e)
                 {
                     _logger.Info(e, "Skipping author search due to error");
-                    remoteBooks = new List<Issue>();
+                    remoteIssues = new List<Issue>();
                 }
 
-                foreach (var candidate in ToCandidates(remoteBooks, seenCandidates, idOverrides))
+                foreach (var candidate in ToCandidates(remoteIssues, seenCandidates, idOverrides))
                 {
                     yield return candidate;
                 }

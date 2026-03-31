@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.IndexerSearch;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Test.Framework;
 
@@ -21,8 +21,8 @@ namespace NzbDrone.Core.Test.Download
                 .Setup(x => x.AutoRedownloadFailed)
                 .Returns(true);
 
-            Mocker.GetMock<IBookService>()
-                .Setup(x => x.GetBooksBySeries(It.IsAny<int>()))
+            Mocker.GetMock<IIssueService>()
+                .Setup(x => x.GetIssuesBySeries(It.IsAny<int>()))
                 .Returns(Builder<Issue>.CreateListOfSize(3).Build() as List<Issue>);
         }
 

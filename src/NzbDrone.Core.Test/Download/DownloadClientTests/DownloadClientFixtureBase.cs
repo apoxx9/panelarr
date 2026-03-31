@@ -7,10 +7,10 @@ using NLog;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Http;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Indexers;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.RemotePathMappings;
@@ -33,8 +33,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
                 .Returns(30);
 
             Mocker.GetMock<IParsingService>()
-                .Setup(s => s.Map(It.IsAny<ParsedBookInfo>(), null))
-                .Returns(() => CreateRemoteBook());
+                .Setup(s => s.Map(It.IsAny<ParsedIssueInfo>(), null))
+                .Returns(() => CreateRemoteIssue());
 
             Mocker.GetMock<IHttpClient>()
                   .Setup(s => s.GetAsync(It.IsAny<HttpRequest>()))
@@ -45,21 +45,21 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
                 .Returns<string, OsPath>((h, r) => r);
         }
 
-        protected virtual RemoteBook CreateRemoteBook()
+        protected virtual RemoteIssue CreateRemoteIssue()
         {
-            var remoteBook = new RemoteBook();
-            remoteBook.Release = new ReleaseInfo();
-            remoteBook.Release.Title = _title;
-            remoteBook.Release.DownloadUrl = _downloadUrl;
-            remoteBook.Release.DownloadProtocol = Subject.Protocol;
+            var remoteIssue = new RemoteIssue();
+            remoteIssue.Release = new ReleaseInfo();
+            remoteIssue.Release.Title = _title;
+            remoteIssue.Release.DownloadUrl = _downloadUrl;
+            remoteIssue.Release.DownloadProtocol = Subject.Protocol;
 
-            remoteBook.ParsedBookInfo = new ParsedBookInfo();
+            remoteIssue.ParsedIssueInfo = new ParsedIssueInfo();
 
-            remoteBook.Books = new List<Issue>();
+            remoteIssue.Issues = new List<Issue>();
 
-            remoteBook.Series = new Series();
+            remoteIssue.Series = new Series();
 
-            return remoteBook;
+            return remoteIssue;
         }
 
         protected virtual IIndexer CreateIndexer()

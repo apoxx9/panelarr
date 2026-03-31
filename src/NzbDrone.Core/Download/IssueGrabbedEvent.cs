@@ -5,13 +5,13 @@ namespace NzbDrone.Core.Download
 {
     public class IssueGrabbedEvent : IEvent
     {
-        public RemoteBook Issue { get; private set; }
+        public RemoteIssue Issue { get; private set; }
         public int DownloadClientId { get; set; }
         public string DownloadClient { get; set; }
         public string DownloadClientName { get; set; }
         public string DownloadId { get; set; }
 
-        public IssueGrabbedEvent(RemoteBook issue)
+        public IssueGrabbedEvent(RemoteIssue issue)
         {
             Issue = issue;
         }

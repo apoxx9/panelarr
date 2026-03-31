@@ -1,8 +1,8 @@
 using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Housekeeping.Housekeepers;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.Housekeeping.Housekeepers

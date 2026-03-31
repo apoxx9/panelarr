@@ -10,7 +10,7 @@ namespace NzbDrone.Core.Indexers
 {
     public interface ISeedConfigProvider
     {
-        TorrentSeedConfiguration GetSeedConfiguration(RemoteBook release);
+        TorrentSeedConfiguration GetSeedConfiguration(RemoteIssue release);
         TorrentSeedConfiguration GetSeedConfiguration(int indexerId, bool fullSeason);
     }
 
@@ -25,19 +25,19 @@ namespace NzbDrone.Core.Indexers
             _cache = cacheManager.GetRollingCache<SeedCriteriaSettings>(GetType(), "criteriaByIndexer", TimeSpan.FromHours(1));
         }
 
-        public TorrentSeedConfiguration GetSeedConfiguration(RemoteBook remoteBook)
+        public TorrentSeedConfiguration GetSeedConfiguration(RemoteIssue remoteIssue)
         {
-            if (remoteBook.Release.DownloadProtocol != DownloadProtocol.Torrent)
+            if (remoteIssue.Release.DownloadProtocol != DownloadProtocol.Torrent)
             {
                 return null;
             }
 
-            if (remoteBook.Release.IndexerId == 0)
+            if (remoteIssue.Release.IndexerId == 0)
             {
                 return null;
             }
 
-            return GetSeedConfiguration(remoteBook.Release.IndexerId, remoteBook.ParsedIssueInfo.Discography);
+            return GetSeedConfiguration(remoteIssue.Release.IndexerId, remoteIssue.ParsedIssueInfo.Discography);
         }
 
         public TorrentSeedConfiguration GetSeedConfiguration(int indexerId, bool fullSeason)

@@ -16,7 +16,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             _logger = logger;
         }
 
-        public Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
+        public Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
             if (subject.Release.Title.ToLower().Contains("sample") && subject.Release.Size < 20.Megabytes())
             {

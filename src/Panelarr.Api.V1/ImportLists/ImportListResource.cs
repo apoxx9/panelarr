@@ -1,6 +1,6 @@
 using System;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.ImportLists;
+using NzbDrone.Core.Issues;
 
 namespace Panelarr.Api.V1.ImportLists
 {

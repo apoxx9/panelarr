@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using FluentValidation.Results;
 using NLog;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.Notifications.Gotify
 {

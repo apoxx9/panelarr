@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Panelarr.Http.REST;
 
 namespace Panelarr.Api.V1.System.Tasks

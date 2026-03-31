@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Extras
 
             _logger.Debug("Looking for existing extra files in {0}", author.Path);
 
-            var filesOnDisk = _diskScanService.GetNonBookFiles(author.Path);
+            var filesOnDisk = _diskScanService.GetNonComicFiles(author.Path);
             var possibleExtraFiles = _diskScanService.FilterPaths(author.Path, filesOnDisk);
 
             var filteredFiles = possibleExtraFiles;

@@ -36,7 +36,7 @@ namespace NzbDrone.Core.Download.Clients.Flood
             _downloadSeedConfigProvider = downloadSeedConfigProvider;
         }
 
-        private static IEnumerable<string> HandleTags(RemoteBook remoteBook, FloodSettings settings)
+        private static IEnumerable<string> HandleTags(RemoteIssue remoteIssue, FloodSettings settings)
         {
             var result = new HashSet<string>();
 
@@ -52,19 +52,19 @@ namespace NzbDrone.Core.Download.Clients.Flood
                     switch (additionalTag)
                     {
                         case (int)AdditionalTags.Series:
-                            result.Add(remoteBook.Series.Name);
+                            result.Add(remoteIssue.Series.Name);
                             break;
                         case (int)AdditionalTags.Format:
-                            result.Add(remoteBook.ParsedIssueInfo.Quality.Quality.ToString());
+                            result.Add(remoteIssue.ParsedIssueInfo.Quality.Quality.ToString());
                             break;
                         case (int)AdditionalTags.ReleaseGroup:
-                            result.Add(remoteBook.ParsedIssueInfo.ReleaseGroup);
+                            result.Add(remoteIssue.ParsedIssueInfo.ReleaseGroup);
                             break;
                         case (int)AdditionalTags.Year:
-                            result.UnionWith(remoteBook.Books.ConvertAll(issue => issue.ReleaseDate.Value.Year.ToString()));
+                            result.UnionWith(remoteIssue.Issues.ConvertAll(issue => issue.ReleaseDate.Value.Year.ToString()));
                             break;
                         case (int)AdditionalTags.Indexer:
-                            result.Add(remoteBook.Release.Indexer);
+                            result.Add(remoteIssue.Release.Indexer);
                             break;
                         default:
                             throw new DownloadClientException("Unexpected additional tag ID");
@@ -78,16 +78,16 @@ namespace NzbDrone.Core.Download.Clients.Flood
         public override string Name => "Flood";
         public override ProviderMessage Message => new ProviderMessage("Panelarr will handle automatic removal of torrents based on the current seed criteria in Settings -> Indexers", ProviderMessageType.Info);
 
-        protected override string AddFromTorrentFile(RemoteBook remoteBook, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteIssue remoteIssue, string hash, string filename, byte[] fileContent)
         {
-            _proxy.AddTorrentByFile(Convert.ToBase64String(fileContent), HandleTags(remoteBook, Settings), Settings);
+            _proxy.AddTorrentByFile(Convert.ToBase64String(fileContent), HandleTags(remoteIssue, Settings), Settings);
 
             return hash;
         }
 
-        protected override string AddFromMagnetLink(RemoteBook remoteBook, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteIssue remoteIssue, string hash, string magnetLink)
         {
-            _proxy.AddTorrentByUrl(magnetLink, HandleTags(remoteBook, Settings), Settings);
+            _proxy.AddTorrentByUrl(magnetLink, HandleTags(remoteIssue, Settings), Settings);
 
             return hash;
         }

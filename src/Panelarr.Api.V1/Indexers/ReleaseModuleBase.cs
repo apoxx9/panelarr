@@ -39,9 +39,9 @@ namespace Panelarr.Api.V1.Indexers
 
             release.ReleaseWeight = initialWeight;
 
-            if (decision.RemoteBook.Series != null)
+            if (decision.RemoteIssue.Series != null)
             {
-                release.QualityWeight = decision.RemoteBook
+                release.QualityWeight = decision.RemoteIssue
                                                 .Series
                                                 .QualityProfile.Value.GetIndex(release.Quality.Quality).Index * 100;
             }

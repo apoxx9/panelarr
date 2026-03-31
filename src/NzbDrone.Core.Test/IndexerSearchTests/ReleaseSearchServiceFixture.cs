@@ -5,20 +5,20 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.IndexerSearchTests
 {
-        public class ReleaseSearchServiceFixture : CoreTest<ReleaseSearchService>
+    public class ReleaseSearchServiceFixture : CoreTest<ReleaseSearchService>
     {
         private Mock<IIndexer> _mockIndexer;
         private Series _author;
-        private Issue _firstBook;
+        private Issue _firstIssue;
 
         [SetUp]
         public void SetUp()
@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
             _author = Builder<Series>.CreateNew()
                 .With(v => v.Monitored = true)
                 .Build();
-            _firstBook = Builder<Issue>.CreateNew()
+            _firstIssue = Builder<Issue>.CreateNew()
                 .With(e => e.Series = _author)
                 .Build();
 
@@ -69,7 +69,7 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
 
             var allCriteria = WatchForSearchCriteria();
 
-            await Subject.IssueSearch(_firstBook, false, true, false);
+            await Subject.IssueSearch(_firstIssue, false, true, false);
 
             var criteria = allCriteria.OfType<IssueSearchCriteria>().ToList();
 
@@ -95,7 +95,7 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
 
             var allCriteria = WatchForSearchCriteria();
 
-            await Subject.IssueSearch(_firstBook, false, true, false);
+            await Subject.IssueSearch(_firstIssue, false, true, false);
 
             var criteria = allCriteria.OfType<IssueSearchCriteria>().ToList();
 
@@ -122,7 +122,7 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
 
             var allCriteria = WatchForSearchCriteria();
 
-            await Subject.IssueSearch(_firstBook, false, true, false);
+            await Subject.IssueSearch(_firstIssue, false, true, false);
 
             var criteria = allCriteria.OfType<IssueSearchCriteria>().ToList();
 
@@ -149,7 +149,7 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
 
             var allCriteria = WatchForSearchCriteria();
 
-            await Subject.IssueSearch(_firstBook, false, true, false);
+            await Subject.IssueSearch(_firstIssue, false, true, false);
 
             var criteria = allCriteria.OfType<IssueSearchCriteria>().ToList();
 

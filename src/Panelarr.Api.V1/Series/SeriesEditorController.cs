@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Commands;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Commands;
 using NzbDrone.Core.Messaging.Commands;
 using Panelarr.Http;
 

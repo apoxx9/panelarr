@@ -54,20 +54,20 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
             }
         }
 
-        protected override string AddFromMagnetLink(RemoteBook remoteBook, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteIssue remoteIssue, string hash, string magnetLink)
         {
             _proxy.AddTorrentFromUrl(magnetLink, Settings);
-            _proxy.SetTorrentSeedingConfiguration(hash, remoteBook.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(hash, remoteIssue.SeedConfiguration, Settings);
 
             if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
             {
                 _proxy.SetTorrentLabel(hash, Settings.MusicCategory, Settings);
             }
 
-            var isRecentBook = remoteBook.IsRecentBook();
+            var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentBook && Settings.RecentTvPriority == (int)UTorrentPriority.First) ||
-                (!isRecentBook && Settings.OlderTvPriority == (int)UTorrentPriority.First))
+            if ((isRecentIssue && Settings.RecentTvPriority == (int)UTorrentPriority.First) ||
+                (!isRecentIssue && Settings.OlderTvPriority == (int)UTorrentPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -77,20 +77,20 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
             return hash;
         }
 
-        protected override string AddFromTorrentFile(RemoteBook remoteBook, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteIssue remoteIssue, string hash, string filename, byte[] fileContent)
         {
             _proxy.AddTorrentFromFile(filename, fileContent, Settings);
-            _proxy.SetTorrentSeedingConfiguration(hash, remoteBook.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(hash, remoteIssue.SeedConfiguration, Settings);
 
             if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
             {
                 _proxy.SetTorrentLabel(hash, Settings.MusicCategory, Settings);
             }
 
-            var isRecentBook = remoteBook.IsRecentBook();
+            var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentBook && Settings.RecentTvPriority == (int)UTorrentPriority.First) ||
-                (!isRecentBook && Settings.OlderTvPriority == (int)UTorrentPriority.First))
+            if ((isRecentIssue && Settings.RecentTvPriority == (int)UTorrentPriority.First) ||
+                (!isRecentIssue && Settings.OlderTvPriority == (int)UTorrentPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -295,9 +295,9 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
                 _logger.Error(ex, "Failed to test uTorrent");
 
                 return new NzbDroneValidationFailure("Host", "Unable to connect to uTorrent")
-                       {
-                           DetailedDescription = ex.Message
-                       };
+                {
+                    DetailedDescription = ex.Message
+                };
             }
 
             return null;

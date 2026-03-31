@@ -35,7 +35,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
         public SpecificationPriority Priority => SpecificationPriority.Database;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
+        public virtual Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
             if (searchCriteria != null)
             {
@@ -46,10 +46,10 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
             var cdhEnabled = _configService.EnableCompletedDownloadHandling;
 
             _logger.Debug("Performing history status check on report");
-            foreach (var issue in subject.Books)
+            foreach (var issue in subject.Issues)
             {
                 _logger.Debug("Checking current status of issue [{0}] in history", issue.Id);
-                var mostRecent = _historyService.MostRecentForBook(issue.Id);
+                var mostRecent = _historyService.MostRecentForIssue(issue.Id);
 
                 if (mostRecent != null && mostRecent.EventType == EntityHistoryEventType.Grabbed)
                 {

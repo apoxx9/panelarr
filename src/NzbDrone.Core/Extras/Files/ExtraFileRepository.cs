@@ -9,11 +9,11 @@ namespace NzbDrone.Core.Extras.Files
         where TExtraFile : ExtraFile, new()
     {
         void DeleteForSeries(int authorId);
-        void DeleteForBook(int authorId, int bookId);
-        void DeleteForBookFile(int bookFileId);
+        void DeleteForIssue(int authorId, int issueId);
+        void DeleteForComicFile(int comicFileId);
         List<TExtraFile> GetFilesBySeries(int authorId);
-        List<TExtraFile> GetFilesByBook(int authorId, int bookId);
-        List<TExtraFile> GetFilesByBookFile(int bookFileId);
+        List<TExtraFile> GetFilesByIssue(int authorId, int issueId);
+        List<TExtraFile> GetFilesByComicFile(int comicFileId);
         TExtraFile FindByPath(int authorId, string path);
     }
 
@@ -30,14 +30,14 @@ namespace NzbDrone.Core.Extras.Files
             Delete(c => c.SeriesId == authorId);
         }
 
-        public void DeleteForBook(int authorId, int bookId)
+        public void DeleteForIssue(int authorId, int issueId)
         {
-            Delete(c => c.SeriesId == authorId && c.IssueId == bookId);
+            Delete(c => c.SeriesId == authorId && c.IssueId == issueId);
         }
 
-        public void DeleteForBookFile(int bookFileId)
+        public void DeleteForComicFile(int comicFileId)
         {
-            Delete(c => c.ComicFileId == bookFileId);
+            Delete(c => c.ComicFileId == comicFileId);
         }
 
         public List<TExtraFile> GetFilesBySeries(int authorId)
@@ -45,14 +45,14 @@ namespace NzbDrone.Core.Extras.Files
             return Query(c => c.SeriesId == authorId);
         }
 
-        public List<TExtraFile> GetFilesByBook(int authorId, int bookId)
+        public List<TExtraFile> GetFilesByIssue(int authorId, int issueId)
         {
-            return Query(c => c.SeriesId == authorId && c.IssueId == bookId);
+            return Query(c => c.SeriesId == authorId && c.IssueId == issueId);
         }
 
-        public List<TExtraFile> GetFilesByBookFile(int bookFileId)
+        public List<TExtraFile> GetFilesByComicFile(int comicFileId)
         {
-            return Query(c => c.ComicFileId == bookFileId);
+            return Query(c => c.ComicFileId == comicFileId);
         }
 
         public TExtraFile FindByPath(int authorId, string path)

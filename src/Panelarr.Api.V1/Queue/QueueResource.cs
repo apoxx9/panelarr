@@ -5,8 +5,8 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Qualities;
-using Panelarr.Api.V1.Books;
 using Panelarr.Api.V1.CustomFormats;
+using Panelarr.Api.V1.Issues;
 using Panelarr.Api.V1.Series;
 using Panelarr.Http.REST;
 
@@ -42,15 +42,15 @@ namespace Panelarr.Api.V1.Queue
 
     public static class QueueResourceMapper
     {
-        public static QueueResource ToResource(this NzbDrone.Core.Queue.Queue model, bool includeSeries, bool includeBook)
+        public static QueueResource ToResource(this NzbDrone.Core.Queue.Queue model, bool includeSeries, bool includeIssue)
         {
             if (model == null)
             {
                 return null;
             }
 
-            var customFormats = model.RemoteBook?.CustomFormats;
-            var customFormatScore = model.RemoteBook?.Series?.QualityProfile?.Value?.CalculateCustomFormatScore(customFormats) ?? 0;
+            var customFormats = model.RemoteIssue?.CustomFormats;
+            var customFormatScore = model.RemoteIssue?.Series?.QualityProfile?.Value?.CalculateCustomFormatScore(customFormats) ?? 0;
 
             return new QueueResource
             {
@@ -58,7 +58,7 @@ namespace Panelarr.Api.V1.Queue
                 SeriesId = model.Series?.Id,
                 IssueId = model.Issue?.Id,
                 Series = includeSeries && model.Series != null ? model.Series.ToResource() : null,
-                Issue = includeBook && model.Issue != null ? model.Issue.ToResource() : null,
+                Issue = includeIssue && model.Issue != null ? model.Issue.ToResource() : null,
                 Quality = model.Quality,
                 CustomFormats = customFormats?.ToResource(false),
                 CustomFormatScore = customFormatScore,
@@ -82,9 +82,9 @@ namespace Panelarr.Api.V1.Queue
             };
         }
 
-        public static List<QueueResource> ToResource(this IEnumerable<NzbDrone.Core.Queue.Queue> models, bool includeSeries, bool includeBook)
+        public static List<QueueResource> ToResource(this IEnumerable<NzbDrone.Core.Queue.Queue> models, bool includeSeries, bool includeIssue)
         {
-            return models.Select((m) => ToResource(m, includeSeries, includeBook)).ToList();
+            return models.Select((m) => ToResource(m, includeSeries, includeIssue)).ToList();
         }
     }
 }

@@ -3,11 +3,11 @@ using NzbDrone.Core.Datastore;
 
 namespace NzbDrone.Core.Housekeeping.Housekeepers
 {
-    public class CleanupOrphanedBookFiles : IHousekeepingTask
+    public class CleanupOrphanedComicFiles : IHousekeepingTask
     {
         private readonly IMainDatabase _database;
 
-        public CleanupOrphanedBookFiles(IMainDatabase database)
+        public CleanupOrphanedComicFiles(IMainDatabase database)
         {
             _database = database;
         }

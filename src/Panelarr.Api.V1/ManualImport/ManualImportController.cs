@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.IssueImport.Manual;
 using NzbDrone.Core.Qualities;
@@ -14,7 +14,7 @@ namespace Panelarr.Api.V1.ManualImport
     public class ManualImportController : Controller
     {
         private readonly ISeriesService _authorService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IManualImportService _manualImportService;
         private readonly Logger _logger;
 
@@ -24,7 +24,7 @@ namespace Panelarr.Api.V1.ManualImport
                                   Logger logger)
         {
             _authorService = authorService;
-            _bookService = bookService;
+            _issueService = bookService;
             _manualImportService = manualImportService;
             _logger = logger;
         }
@@ -38,7 +38,7 @@ namespace Panelarr.Api.V1.ManualImport
         [HttpGet]
         public List<ManualImportResource> GetMediaFiles(string folder, string downloadId, int? seriesId, bool filterExistingFiles = true, bool replaceExistingFiles = true)
         {
-            NzbDrone.Core.Books.Series author = null;
+            NzbDrone.Core.Issues.Series author = null;
 
             if (seriesId > 0)
             {
@@ -73,7 +73,8 @@ namespace Panelarr.Api.V1.ManualImport
                     Path = resource.Path,
                     Name = resource.Name,
                     Series = resource.SeriesId.HasValue ? _authorService.GetSeries(resource.SeriesId.Value) : null,
-                    Issue = resource.IssueId.HasValue ? _bookService.GetIssue(resource.IssueId.Value) : null,                    Quality = resource.Quality,
+                    Issue = resource.IssueId.HasValue ? _issueService.GetIssue(resource.IssueId.Value) : null,
+                    Quality = resource.Quality,
                     ReleaseGroup = resource.ReleaseGroup,
                     IndexerFlags = resource.IndexerFlags,
                     DownloadId = resource.DownloadId,

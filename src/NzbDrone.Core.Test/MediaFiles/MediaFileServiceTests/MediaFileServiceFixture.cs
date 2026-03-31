@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Test.Framework;
@@ -13,18 +13,18 @@ namespace NzbDrone.Core.Test.MediaFiles.TrackFileMovingServiceTests
     [TestFixture]
     public class MediaFileServiceFixture : CoreTest<MediaFileService>
     {
-        private Issue _book;
+        private Issue _issue;
         private List<ComicFile> _trackFiles;
 
         [SetUp]
         public void Setup()
         {
-            _book = Builder<Issue>.CreateNew()
+            _issue = Builder<Issue>.CreateNew()
                          .Build();
 
             _trackFiles = Builder<ComicFile>.CreateListOfSize(3)
                                                .TheFirst(2)
-                                               .With(f => f.IssueId = _book.Id)
+                                               .With(f => f.IssueId = _issue.Id)
                                                .TheNext(1)
                                                .With(f => f.IssueId = 0)
                                                .Build().ToList();

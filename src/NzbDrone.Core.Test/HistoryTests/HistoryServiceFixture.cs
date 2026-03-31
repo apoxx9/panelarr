@@ -3,10 +3,10 @@ using System.IO;
 using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Indexers;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Parser.Model;
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Test.HistoryTests
                 .With(f => f.Series = author)
                 .Build();
 
-            var localTrack = new LocalBook
+            var localTrack = new LocalIssue
             {
                 Series = author,
                 Issue = new Issue(),

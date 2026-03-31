@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.SeriesStats;
 using Panelarr.Api.V1.Series;
 using Panelarr.Http;
 using Panelarr.Http.Extensions;
 
-namespace Panelarr.Api.V1.Books
+namespace Panelarr.Api.V1.Issues
 {
     /// <summary>
     /// Library sub-endpoints under /api/v1/issue:
@@ -20,18 +20,18 @@ namespace Panelarr.Api.V1.Books
     [V1ApiController("issue")]
     public class IssueLibraryController : Controller
     {
-        private readonly IIssueService _bookService;
-        private readonly ISeriesBookLinkService _seriesBookLinkService;
+        private readonly IIssueService _issueService;
+        private readonly ISeriesIssueLinkService _seriesIssueLinkService;
         private readonly ISeriesStatisticsService _seriesStatisticsService;
         private readonly IMapCoversToLocal _coverMapper;
 
         public IssueLibraryController(IIssueService bookService,
-                                      ISeriesBookLinkService seriesBookLinkService,
+                                      ISeriesIssueLinkService seriesIssueLinkService,
                                       ISeriesStatisticsService seriesStatisticsService,
                                       IMapCoversToLocal coverMapper)
         {
-            _bookService = bookService;
-            _seriesBookLinkService = seriesBookLinkService;
+            _issueService = bookService;
+            _seriesIssueLinkService = seriesIssueLinkService;
             _seriesStatisticsService = seriesStatisticsService;
             _coverMapper = coverMapper;
         }
@@ -58,7 +58,7 @@ namespace Panelarr.Api.V1.Books
                 pagingSpec.FilterExpressions.Add(v => v.Monitored == false || v.Series.Value.Monitored == false);
             }
 
-            return pagingSpec.ApplyToPage(_bookService.IssuesWithoutFiles, v => MapToResource(v, includeSeries));
+            return pagingSpec.ApplyToPage(_issueService.IssuesWithoutFiles, v => MapToResource(v, includeSeries));
         }
 
         /// <summary>GET /api/v1/issue/calendar</summary>
@@ -68,7 +68,7 @@ namespace Panelarr.Api.V1.Books
             var startUse = start ?? DateTime.Today;
             var endUse = end ?? DateTime.Today.AddDays(14);
 
-            var resources = MapToResource(_bookService.IssuesBetweenDates(startUse, endUse, unmonitored), includeSeries);
+            var resources = MapToResource(_issueService.IssuesBetweenDates(startUse, endUse, unmonitored), includeSeries);
 
             return resources.OrderBy(e => e.ReleaseDate).ToList();
         }
@@ -90,7 +90,7 @@ namespace Panelarr.Api.V1.Books
 
         private List<IssueResource> MapToResource(List<Issue> issues, bool includeSeries)
         {
-            var seriesLinks = _seriesBookLinkService.GetLinksByBook(issues.Select(x => x.SeriesMetadataId).Distinct().ToList())
+            var seriesLinks = _seriesIssueLinkService.GetLinksByIssue(issues.Select(x => x.SeriesMetadataId).Distinct().ToList())
                 .GroupBy(x => x.SeriesMetadataId)
                 .ToDictionary(x => x.Key, y => y.ToList());
 
@@ -110,7 +110,7 @@ namespace Panelarr.Api.V1.Books
 
             if (includeSeries)
             {
-                var authorDict = new Dictionary<int, NzbDrone.Core.Books.Series>();
+                var authorDict = new Dictionary<int, NzbDrone.Core.Issues.Series>();
                 for (var i = 0; i < issues.Count; i++)
                 {
                     var issue = issues[i];

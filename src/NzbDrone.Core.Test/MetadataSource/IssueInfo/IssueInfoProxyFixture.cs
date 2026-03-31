@@ -4,9 +4,9 @@ using System.Linq;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Exceptions;
-using NzbDrone.Core.MetadataSource.BookInfo;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.MetadataSource.IssueInfo;
 using NzbDrone.Core.Profiles.Metadata;
 using NzbDrone.Core.Test.Framework;
 
@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads
 {
     [TestFixture]
     [Ignore("Waiting for metadata to be back again", Until = "2026-01-15 00:00:00Z")]
-    public class BookInfoProxyFixture : CoreTest<BookInfoProxy>
+    public class IssueInfoProxyFixture : CoreTest<IssueInfoProxy>
     {
         private MetadataProfile _metadataProfile;
 
@@ -49,9 +49,9 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads
         [TestCase("3293141", "Ἰλιάς")]
         public void should_be_able_to_get_book_detail(string mbId, string name)
         {
-            var details = Subject.GetBookInfo(mbId);
+            var details = Subject.GetIssueInfo(mbId);
 
-            ValidateBooks(new List<Issue> { details.Item2 });
+            ValidateIssues(new List<Issue> { details.Item2 });
 
             details.Item2.Title.Should().Be(name);
         }
@@ -60,7 +60,7 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads
         [TestCase("48427681", "October Daye Chronological Order", "7.1")]
         public void should_parse_series_from_title(string id, string series, string position)
         {
-            var result = Subject.GetBookInfo(id);
+            var result = Subject.GetIssueInfo(id);
 
             var link = result.Item2.SeriesLinks.Value.OrderBy(x => x.SeriesPosition).First();
             link.SeriesGroup.Value.Title.Should().Be(series);
@@ -76,7 +76,7 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads
         [Test]
         public void getting_details_of_invalid_book()
         {
-            Assert.Throws<IssueNotFoundException>(() => Subject.GetBookInfo("1"));
+            Assert.Throws<IssueNotFoundException>(() => Subject.GetIssueInfo("1"));
         }
 
         private void ValidateSeries(Series author)
@@ -90,7 +90,7 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads
             author.ForeignSeriesId.Should().NotBeNullOrWhiteSpace();
         }
 
-        private void ValidateBooks(List<Issue> issues, bool idOnly = false)
+        private void ValidateIssues(List<Issue> issues, bool idOnly = false)
         {
             issues.Should().NotBeEmpty();
 
@@ -99,7 +99,7 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads
                 issue.ForeignIssueId.Should().NotBeNullOrWhiteSpace();
                 if (!idOnly)
                 {
-                    ValidateBook(issue);
+                    ValidateIssue(issue);
                 }
             }
 
@@ -110,7 +110,7 @@ namespace NzbDrone.Core.Test.MetadataSource.Goodreads
             }
         }
 
-        private void ValidateBook(Issue issue)
+        private void ValidateIssue(Issue issue)
         {
             issue.Should().NotBeNull();
 

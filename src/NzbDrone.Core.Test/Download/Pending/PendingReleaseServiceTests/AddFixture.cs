@@ -5,10 +5,10 @@ using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download.Pending;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
@@ -22,11 +22,11 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
     {
         private DownloadDecision _temporarilyRejected;
         private Series _author;
-        private Issue _book;
+        private Issue _issue;
         private QualityProfile _profile;
         private ReleaseInfo _release;
-        private ParsedIssueInfo _parsedBookInfo;
-        private RemoteBook _remoteBook;
+        private ParsedIssueInfo _parsedIssueInfo;
+        private RemoteIssue _remoteIssue;
         private List<PendingRelease> _heldReleases;
 
         [SetUp]
@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
             _author = Builder<Series>.CreateNew()
                                      .Build();
 
-            _book = Builder<Issue>.CreateNew()
+            _issue = Builder<Issue>.CreateNew()
                                        .Build();
 
             _profile = new QualityProfile
@@ -54,16 +54,16 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
 
             _release = Builder<ReleaseInfo>.CreateNew().Build();
 
-            _parsedBookInfo = Builder<ParsedIssueInfo>.CreateNew().Build();
-            _parsedBookInfo.Quality = new QualityModel(Quality.CBR);
+            _parsedIssueInfo = Builder<ParsedIssueInfo>.CreateNew().Build();
+            _parsedIssueInfo.Quality = new QualityModel(Quality.CBR);
 
-            _remoteBook = new RemoteBook();
-            _remoteBook.Books = new List<Issue> { _book };
-            _remoteBook.Series = _author;
-            _remoteBook.ParsedIssueInfo = _parsedBookInfo;
-            _remoteBook.Release = _release;
+            _remoteIssue = new RemoteIssue();
+            _remoteIssue.Issues = new List<Issue> { _issue };
+            _remoteIssue.Series = _author;
+            _remoteIssue.ParsedIssueInfo = _parsedIssueInfo;
+            _remoteIssue.Release = _release;
 
-            _temporarilyRejected = new DownloadDecision(_remoteBook, new Rejection("Temp Rejected", RejectionType.Temporary));
+            _temporarilyRejected = new DownloadDecision(_remoteIssue, new Rejection("Temp Rejected", RejectionType.Temporary));
 
             _heldReleases = new List<PendingRelease>();
 
@@ -84,8 +84,8 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
                   .Returns(new List<Series> { _author });
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetBooks(It.IsAny<ParsedIssueInfo>(), _author, null))
-                  .Returns(new List<Issue> { _book });
+                  .Setup(s => s.GetIssues(It.IsAny<ParsedIssueInfo>(), _author, null))
+                  .Returns(new List<Issue> { _issue });
 
             Mocker.GetMock<IPrioritizeDownloadDecision>()
                   .Setup(s => s.PrioritizeDecisions(It.IsAny<List<DownloadDecision>>()))
@@ -104,7 +104,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
                                                    .With(h => h.Title = title)
                                                    .With(h => h.Release = release)
                                                    .With(h => h.Reason = reason)
-                                                   .With(h => h.ParsedIssueInfo = _parsedBookInfo)
+                                                   .With(h => h.ParsedIssueInfo = _parsedIssueInfo)
                                                    .Build();
 
             _heldReleases.AddRange(heldReleases);

@@ -9,11 +9,11 @@ using NzbDrone.Common.Crypto;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Parser;
@@ -37,12 +37,12 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
         private readonly IDiskScanService _diskScanService;
         private readonly IMakeImportDecision _importDecisionMaker;
         private readonly ISeriesService _authorService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IMetadataTagService _metadataTagService;
-        private readonly IImportApprovedBooks _importApprovedBooks;
+        private readonly IImportApprovedIssues _importApprovedIssues;
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly ITrackedDownloadService _trackedDownloadService;
-        private readonly IDownloadedBooksImportService _downloadedTracksImportService;
+        private readonly IDownloadedIssuesImportService _downloadedTracksImportService;
         private readonly IProvideImportItemService _provideImportItemService;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
@@ -55,10 +55,10 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                                    ISeriesService authorService,
                                    IIssueService bookService,
                                    IMetadataTagService metadataTagService,
-                                   IImportApprovedBooks importApprovedBooks,
+                                   IImportApprovedIssues importApprovedIssues,
                                    ICustomFormatCalculationService formatCalculator,
                                    ITrackedDownloadService trackedDownloadService,
-                                   IDownloadedBooksImportService downloadedTracksImportService,
+                                   IDownloadedIssuesImportService downloadedTracksImportService,
                                    IProvideImportItemService provideImportItemService,
                                    IEventAggregator eventAggregator,
                                    Logger logger)
@@ -69,9 +69,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
             _diskScanService = diskScanService;
             _importDecisionMaker = importDecisionMaker;
             _authorService = authorService;
-            _bookService = bookService;
+            _issueService = bookService;
             _metadataTagService = metadataTagService;
-            _importApprovedBooks = importApprovedBooks;
+            _importApprovedIssues = importApprovedIssues;
             _formatCalculator = formatCalculator;
             _trackedDownloadService = trackedDownloadService;
             _downloadedTracksImportService = downloadedTracksImportService;
@@ -140,11 +140,11 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
 
                 if (author == null)
                 {
-                    author = trackedDownload?.RemoteBook?.Series;
+                    author = trackedDownload?.RemoteIssue?.Series;
                 }
             }
 
-            var authorFiles = _diskScanService.GetBookFiles(folder).ToList();
+            var authorFiles = _diskScanService.GetComicFiles(folder).ToList();
             var idOverrides = new IdentificationOverrides
             {
                 Series = author
@@ -152,7 +152,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
             var itemInfo = new ImportDecisionMakerInfo
             {
                 DownloadClientItem = downloadClientItem,
-                ParsedIssueInfo = Parser.Parser.ParseBookTitle(directoryInfo.Name)
+                ParsedIssueInfo = Parser.Parser.ParseIssueTitle(directoryInfo.Name)
             };
             var config = new ImportDecisionMakerConfig
             {
@@ -254,7 +254,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
             return result;
         }
 
-        private ManualImportItem MapItem(ImportDecision<LocalBook> decision, string downloadId, bool replaceExistingFiles, bool disableReleaseSwitching)
+        private ManualImportItem MapItem(ImportDecision<LocalIssue> decision, string downloadId, bool replaceExistingFiles, bool disableReleaseSwitching)
         {
             var item = new ManualImportItem();
 
@@ -296,28 +296,28 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
             var bookIds = message.Files.GroupBy(e => e.IssueId).ToList();
             var fileCount = 0;
 
-            foreach (var importBookId in bookIds)
+            foreach (var importIssueId in bookIds)
             {
-                var bookImportDecisions = new List<ImportDecision<LocalBook>>();
+                var bookImportDecisions = new List<ImportDecision<LocalIssue>>();
 
-                foreach (var file in importBookId)
+                foreach (var file in importIssueId)
                 {
                     _logger.ProgressTrace("Processing file {0} of {1}", fileCount + 1, message.Files.Count);
 
                     var author = _authorService.GetSeries(file.SeriesId);
-                    var issue = _bookService.GetIssue(file.IssueId);
+                    var issue = _issueService.GetIssue(file.IssueId);
 
                     var fileRootFolder = _rootFolderService.GetBestRootFolder(file.Path);
                     var fileInfo = _diskProvider.GetFileInfo(file.Path);
                     var fileTrackInfo = _metadataTagService.ReadTags(fileInfo) ?? new ParsedTrackInfo();
 
-                    var localTrack = new LocalBook
+                    var localTrack = new LocalIssue
                     {
                         ExistingFile = fileRootFolder != null,
                         FileTrackInfo = fileTrackInfo,
                         Path = file.Path,
                         Part = fileTrackInfo.TrackNumbers.Any() ? fileTrackInfo.TrackNumbers.First() : 1,
-                        PartCount = importBookId.Count(),
+                        PartCount = importIssueId.Count(),
                         Size = fileInfo.Length,
                         Modified = fileInfo.LastWriteTimeUtc,
                         Quality = file.Quality,
@@ -326,7 +326,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                         Issue = issue
                     };
 
-                    var importDecision = new ImportDecision<LocalBook>(localTrack);
+                    var importDecision = new ImportDecision<LocalIssue>(localTrack);
                     if (_rootFolderService.GetBestRootFolder(author.Path) == null)
                     {
                         _logger.Warn($"Destination author folder {author.Path} not in a Root Folder, skipping import");
@@ -337,15 +337,15 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                     fileCount += 1;
                 }
 
-                var downloadId = importBookId.Select(x => x.DownloadId).FirstOrDefault(x => x.IsNotNullOrWhiteSpace());
+                var downloadId = importIssueId.Select(x => x.DownloadId).FirstOrDefault(x => x.IsNotNullOrWhiteSpace());
                 if (downloadId.IsNullOrWhiteSpace())
                 {
-                    imported.AddRange(_importApprovedBooks.Import(bookImportDecisions, message.ReplaceExistingFiles, null, message.ImportMode));
+                    imported.AddRange(_importApprovedIssues.Import(bookImportDecisions, message.ReplaceExistingFiles, null, message.ImportMode));
                 }
                 else
                 {
                     var trackedDownload = _trackedDownloadService.Find(downloadId);
-                    var importResults = _importApprovedBooks.Import(bookImportDecisions, message.ReplaceExistingFiles, trackedDownload.DownloadItem, message.ImportMode);
+                    var importResults = _importApprovedIssues.Import(bookImportDecisions, message.ReplaceExistingFiles, trackedDownload.DownloadItem, message.ImportMode);
 
                     imported.AddRange(importResults);
 
@@ -378,7 +378,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
 
                 var importedCount = groupedTrackedDownload.Select(c => c.ImportResult)
                     .Count(c => c.Result == ImportResultType.Imported);
-                var downloadItemCount = Math.Max(1, trackedDownload.RemoteBook?.Books.Count ?? 1);
+                var downloadItemCount = Math.Max(1, trackedDownload.RemoteIssue?.Issues.Count ?? 1);
                 var allItemsImported = importedCount >= downloadItemCount;
 
                 if (allItemsImported)

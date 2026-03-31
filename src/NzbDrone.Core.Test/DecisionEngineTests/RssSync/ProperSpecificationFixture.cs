@@ -4,11 +4,11 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.DecisionEngine.Specifications.RssSync;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
@@ -21,8 +21,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 
     public class ProperSpecificationFixture : CoreTest<ProperSpecification>
     {
-        private RemoteBook _parseResultMulti;
-        private RemoteBook _parseResultSingle;
+        private RemoteIssue _parseResultMulti;
+        private RemoteIssue _parseResultSingle;
         private ComicFile _firstFile;
         private ComicFile _secondFile;
 
@@ -34,29 +34,29 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _firstFile = new ComicFile { Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)), DateAdded = DateTime.Now };
             _secondFile = new ComicFile { Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)), DateAdded = DateTime.Now };
 
-            var singleBookList = new List<Issue> { new Issue { }, new Issue { } };
-            var doubleBookList = new List<Issue> { new Issue { }, new Issue { }, new Issue { } };
+            var singleIssueList = new List<Issue> { new Issue { }, new Issue { } };
+            var doubleIssueList = new List<Issue> { new Issue { }, new Issue { }, new Issue { } };
 
             var fakeSeries = Builder<Series>.CreateNew()
                          .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.CBZ_HD.Id })
                          .Build();
 
             Mocker.GetMock<IMediaFileService>()
-                .Setup(c => c.GetFilesByBook(It.IsAny<int>()))
+                .Setup(c => c.GetFilesByIssue(It.IsAny<int>()))
                 .Returns(new List<ComicFile> { _firstFile, _secondFile });
 
-            _parseResultMulti = new RemoteBook
+            _parseResultMulti = new RemoteIssue
             {
                 Series = fakeSeries,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
-                Books = doubleBookList
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                Issues = doubleIssueList
             };
 
-            _parseResultSingle = new RemoteBook
+            _parseResultSingle = new RemoteIssue
             {
                 Series = fakeSeries,
-                ParsedBookInfo = new ParsedBookInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
-                Books = singleBookList
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                Issues = singleIssueList
             };
         }
 

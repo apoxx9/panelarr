@@ -30,7 +30,7 @@ namespace Panelarr.Api.V1.Queue
                 throw new NotFoundException();
             }
 
-            await _downloadService.DownloadReport(pendingRelease.RemoteBook, null);
+            await _downloadService.DownloadReport(pendingRelease.RemoteIssue, null);
 
             return new { };
         }
@@ -48,7 +48,7 @@ namespace Panelarr.Api.V1.Queue
                     throw new NotFoundException();
                 }
 
-                await _downloadService.DownloadReport(pendingRelease.RemoteBook, null);
+                await _downloadService.DownloadReport(pendingRelease.RemoteIssue, null);
             }
 
             return new { };

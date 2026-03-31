@@ -26,7 +26,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
             var author = item.Issue?.Series.Value;
 
             // a new author will have empty path, and will end up having path assinged based on file location
-            var pathToCheck = author.Path.IsNotNullOrWhiteSpace() ? author.Path : item.LocalBooks.First().Path.GetParentPath();
+            var pathToCheck = author.Path.IsNotNullOrWhiteSpace() ? author.Path : item.LocalIssues.First().Path.GetParentPath();
 
             if (_rootFolderService.GetBestRootFolder(pathToCheck) == null)
             {

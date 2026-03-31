@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using NLog;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Parser.Model;
@@ -15,7 +15,7 @@ namespace NzbDrone.Core.MediaFiles
         void WriteTags(ComicFile trackfile, bool newDownload, bool force = false);
         void SyncTags(List<Issue> issues);
         List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId);
-        List<RetagComicFilePreview> GetRetagPreviewsByBook(int authorId);
+        List<RetagComicFilePreview> GetRetagPreviewsByIssue(int authorId);
     }
 
     public class MetadataTagService : IMetadataTagService,
@@ -63,9 +63,9 @@ namespace NzbDrone.Core.MediaFiles
             return _audioTagService.GetRetagPreviewsBySeries(authorId);
         }
 
-        public List<RetagComicFilePreview> GetRetagPreviewsByBook(int bookId)
+        public List<RetagComicFilePreview> GetRetagPreviewsByIssue(int issueId)
         {
-            return _audioTagService.GetRetagPreviewsByBook(bookId);
+            return _audioTagService.GetRetagPreviewsByIssue(issueId);
         }
 
         public void Execute(RetagFilesCommand message)

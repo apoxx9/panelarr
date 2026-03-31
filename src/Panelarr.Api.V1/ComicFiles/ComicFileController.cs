@@ -3,10 +3,10 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore.Events;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Exceptions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
@@ -28,7 +28,7 @@ namespace Panelarr.Api.V1.ComicFiles
         private readonly IDeleteMediaFiles _mediaFileDeletionService;
         private readonly IMetadataTagService _metadataTagService;
         private readonly ISeriesService _authorService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IUpgradableSpecification _upgradableSpecification;
 
         public ComicFileController(IBroadcastSignalRMessage signalRBroadcaster,
@@ -44,7 +44,7 @@ namespace Panelarr.Api.V1.ComicFiles
             _mediaFileDeletionService = mediaFileDeletionService;
             _metadataTagService = metadataTagService;
             _authorService = authorService;
-            _bookService = bookService;
+            _issueService = bookService;
             _upgradableSpecification = upgradableSpecification;
         }
 
@@ -68,7 +68,7 @@ namespace Panelarr.Api.V1.ComicFiles
         }
 
         [HttpGet]
-        public List<ComicFileResource> GetBookFiles(int? seriesId, [FromQuery]List<int> issueFileIds, [FromQuery(Name="issueId")]List<int> issueIds, bool? unmapped)
+        public List<ComicFileResource> GetComicFiles(int? seriesId, [FromQuery] List<int> issueFileIds, [FromQuery(Name = "issueId")] List<int> issueIds, bool? unmapped)
         {
             if (!seriesId.HasValue && !issueFileIds.Any() && !issueIds.Any() && !unmapped.HasValue)
             {
@@ -93,9 +93,9 @@ namespace Panelarr.Api.V1.ComicFiles
                 var result = new List<ComicFileResource>();
                 foreach (var issueId in issueIds)
                 {
-                    var issue = _bookService.GetIssue(issueId);
+                    var issue = _issueService.GetIssue(issueId);
                     var bookSeries = _authorService.GetSeries(issue.SeriesId);
-                    result.AddRange(_mediaFileService.GetFilesByBook(issue.Id).ConvertAll(f => f.ToResource(bookSeries, _upgradableSpecification)));
+                    result.AddRange(_mediaFileService.GetFilesByIssue(issue.Id).ConvertAll(f => f.ToResource(bookSeries, _upgradableSpecification)));
                 }
 
                 return result;
@@ -109,10 +109,10 @@ namespace Panelarr.Api.V1.ComicFiles
         }
 
         [RestPutById]
-        public ActionResult<ComicFileResource> SetQuality([FromBody] ComicFileResource bookFileResource)
+        public ActionResult<ComicFileResource> SetQuality([FromBody] ComicFileResource comicFileResource)
         {
-            var comicFile = _mediaFileService.Get(bookFileResource.Id);
-            comicFile.Quality = bookFileResource.Quality;
+            var comicFile = _mediaFileService.Get(comicFileResource.Id);
+            comicFile.Quality = comicFileResource.Quality;
             _mediaFileService.Update(comicFile);
             return Accepted(comicFile.Id);
         }
@@ -136,7 +136,7 @@ namespace Panelarr.Api.V1.ComicFiles
         }
 
         [RestDeleteById]
-        public void DeleteBookFile(int id)
+        public void DeleteComicFile(int id)
         {
             var comicFile = _mediaFileService.Get(id);
 

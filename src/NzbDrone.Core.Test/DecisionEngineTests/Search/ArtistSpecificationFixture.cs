@@ -1,9 +1,9 @@
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine.Specifications.Search;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Test.Common;
 
@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
     {
         private Series _author1;
         private Series _author2;
-        private RemoteBook _remoteBook = new RemoteBook();
+        private RemoteIssue _remoteIssue = new RemoteIssue();
         private SearchCriteriaBase _searchCriteria = new IssueSearchCriteria();
 
         [SetUp]
@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
             _author1 = Builder<Series>.CreateNew().With(s => s.Id = 1).Build();
             _author2 = Builder<Series>.CreateNew().With(s => s.Id = 2).Build();
 
-            _remoteBook.Series = _author1;
+            _remoteIssue.Series = _author1;
         }
 
         [Test]
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         {
             _searchCriteria.Series = _author2;
 
-            Subject.IsSatisfiedBy(_remoteBook, _searchCriteria).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, _searchCriteria).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
         {
             _searchCriteria.Series = _author1;
 
-            Subject.IsSatisfiedBy(_remoteBook, _searchCriteria).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, _searchCriteria).Accepted.Should().BeTrue();
         }
     }
 }

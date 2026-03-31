@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Common.Cache;
-using NzbDrone.Core.Books.Events;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging;
 using NzbDrone.Core.Messaging.Events;
@@ -61,8 +61,8 @@ namespace NzbDrone.Core.SeriesStats
                 SeriesId = bookStatistics.First().SeriesId,
                 ComicFileCount = bookStatistics.Sum(s => s.ComicFileCount),
                 IssueCount = bookStatistics.Sum(s => s.IssueCount),
-                AvailableBookCount = bookStatistics.Sum(s => s.AvailableBookCount),
-                TotalBookCount = bookStatistics.Sum(s => s.TotalBookCount),
+                AvailableIssueCount = bookStatistics.Sum(s => s.AvailableIssueCount),
+                TotalIssueCount = bookStatistics.Sum(s => s.TotalIssueCount),
                 SizeOnDisk = bookStatistics.Sum(s => s.SizeOnDisk),
                 IssueStatistics = bookStatistics
             };

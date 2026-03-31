@@ -3,10 +3,10 @@ using System.Linq;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Commands;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.Datastore.Events;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Commands;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
@@ -24,7 +24,7 @@ using Panelarr.Http.REST;
 namespace Panelarr.Api.V1.Series
 {
     [V1ApiController]
-    public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDrone.Core.Books.Series>,
+    public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDrone.Core.Issues.Series>,
                                 IHandle<IssueImportedEvent>,
                                 IHandle<IssueEditedEvent>,
                                 IHandle<ComicFileDeletedEvent>,
@@ -36,7 +36,7 @@ namespace Panelarr.Api.V1.Series
                                 IHandle<MediaCoversUpdatedEvent>
     {
         private readonly ISeriesService _seriesService;
-        private readonly IIssueService _bookService;
+        private readonly IIssueService _issueService;
         private readonly IAddSeriesService _addSeriesService;
         private readonly ISeriesStatisticsService _authorStatisticsService;
         private readonly IMapCoversToLocal _coverMapper;
@@ -66,7 +66,7 @@ namespace Panelarr.Api.V1.Series
             : base(signalRBroadcaster)
         {
             _seriesService = authorService;
-            _bookService = bookService;
+            _issueService = bookService;
             _addSeriesService = addSeriesService;
             _authorStatisticsService = authorStatisticsService;
 
@@ -107,7 +107,7 @@ namespace Panelarr.Api.V1.Series
             return GetSeriesResource(series);
         }
 
-        private SeriesResource GetSeriesResource(NzbDrone.Core.Books.Series series)
+        private SeriesResource GetSeriesResource(NzbDrone.Core.Issues.Series series)
         {
             if (series == null)
             {
@@ -117,7 +117,7 @@ namespace Panelarr.Api.V1.Series
             var resource = series.ToResource();
             MapCoversToLocal(resource);
             FetchAndLinkSeriesStatistics(resource);
-            LinkNextPreviousBooks(resource);
+            LinkNextPreviousIssues(resource);
 
             LinkRootFolderPath(resource);
 
@@ -143,14 +143,14 @@ namespace Panelarr.Api.V1.Series
                 }
                 else
                 {
-                    allSeries = new List<global::NzbDrone.Core.Books.Series>();
+                    allSeries = new List<global::NzbDrone.Core.Issues.Series>();
                 }
             }
 
             var seriesResources = allSeries.ToResource();
 
             MapCoversToLocal(seriesResources.ToArray());
-            LinkNextPreviousBooks(seriesResources.ToArray());
+            LinkNextPreviousIssues(seriesResources.ToArray());
             LinkSeriesStatistics(seriesResources, seriesStats.ToDictionary(x => x.SeriesId));
             LinkRootFolderPath(seriesResources.ToArray());
 
@@ -207,15 +207,15 @@ namespace Panelarr.Api.V1.Series
             }
         }
 
-        private void LinkNextPreviousBooks(params SeriesResource[] seriesList)
+        private void LinkNextPreviousIssues(params SeriesResource[] seriesList)
         {
-            var nextBooks = _bookService.GetNextBooksBySeriesMetadataId(seriesList.Select(x => x.SeriesMetadataId));
-            var lastBooks = _bookService.GetLastBooksBySeriesMetadataId(seriesList.Select(x => x.SeriesMetadataId));
+            var nextIssues = _issueService.GetNextIssuesBySeriesMetadataId(seriesList.Select(x => x.SeriesMetadataId));
+            var lastIssues = _issueService.GetLastIssuesBySeriesMetadataId(seriesList.Select(x => x.SeriesMetadataId));
 
             foreach (var seriesResource in seriesList)
             {
-                seriesResource.NextIssue = nextBooks.FirstOrDefault(x => x.SeriesMetadataId == seriesResource.SeriesMetadataId);
-                seriesResource.LastIssue = lastBooks.FirstOrDefault(x => x.SeriesMetadataId == seriesResource.SeriesMetadataId);
+                seriesResource.NextIssue = nextIssues.FirstOrDefault(x => x.SeriesMetadataId == seriesResource.SeriesMetadataId);
+                seriesResource.LastIssue = lastIssues.FirstOrDefault(x => x.SeriesMetadataId == seriesResource.SeriesMetadataId);
             }
         }
 

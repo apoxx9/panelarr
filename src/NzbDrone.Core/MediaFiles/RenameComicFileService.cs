@@ -6,7 +6,7 @@ using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Commands;
@@ -15,18 +15,18 @@ using NzbDrone.Core.Organizer;
 
 namespace NzbDrone.Core.MediaFiles
 {
-    public interface IRenameBookFileService
+    public interface IRenameComicFileService
     {
         List<RenameComicFilePreview> GetRenamePreviews(int authorId);
-        List<RenameComicFilePreview> GetRenamePreviews(int authorId, int bookId);
+        List<RenameComicFilePreview> GetRenamePreviews(int authorId, int issueId);
     }
 
-    public class RenameComicFileService : IRenameBookFileService, IExecute<RenameFilesCommand>, IExecute<RenameSeriesCommand>
+    public class RenameComicFileService : IRenameComicFileService, IExecute<RenameFilesCommand>, IExecute<RenameSeriesCommand>
     {
         private readonly ISeriesService _authorService;
         private readonly IMediaFileService _mediaFileService;
-        private readonly IIssueService _bookService;
-        private readonly IMoveBookFiles _bookFileMover;
+        private readonly IIssueService _issueService;
+        private readonly IMoveComicFiles _comicFileMover;
         private readonly IEventAggregator _eventAggregator;
         private readonly IBuildFileNames _filenameBuilder;
         private readonly IDiskProvider _diskProvider;
@@ -35,7 +35,7 @@ namespace NzbDrone.Core.MediaFiles
         public RenameComicFileService(ISeriesService authorService,
                                         IMediaFileService mediaFileService,
                                         IIssueService bookService,
-                                        IMoveBookFiles bookFileMover,
+                                        IMoveComicFiles comicFileMover,
                                         IEventAggregator eventAggregator,
                                         IBuildFileNames filenameBuilder,
                                         IDiskProvider diskProvider,
@@ -43,8 +43,8 @@ namespace NzbDrone.Core.MediaFiles
         {
             _authorService = authorService;
             _mediaFileService = mediaFileService;
-            _bookService = bookService;
-            _bookFileMover = bookFileMover;
+            _issueService = bookService;
+            _comicFileMover = comicFileMover;
             _eventAggregator = eventAggregator;
             _filenameBuilder = filenameBuilder;
             _diskProvider = diskProvider;
@@ -64,10 +64,10 @@ namespace NzbDrone.Core.MediaFiles
                 .ToList();
         }
 
-        public List<RenameComicFilePreview> GetRenamePreviews(int authorId, int bookId)
+        public List<RenameComicFilePreview> GetRenamePreviews(int authorId, int issueId)
         {
             var author = _authorService.GetSeries(authorId);
-            var files = _mediaFileService.GetFilesByBook(bookId);
+            var files = _mediaFileService.GetFilesByIssue(issueId);
 
             return GetPreviews(author, files)
                 .OrderBy(e => e.ExistingPath).ToList();
@@ -83,23 +83,23 @@ namespace NzbDrone.Core.MediaFiles
                 file.PartCount = counts[file.IssueId];
 
                 var issue = file.Issue.Value;
-                var bookFilePath = file.Path;
+                var comicFilePath = file.Path;
 
                 if (issue == null)
                 {
-                    _logger.Warn("File ({0}) is not linked to a issue", bookFilePath);
+                    _logger.Warn("File ({0}) is not linked to a issue", comicFilePath);
                     continue;
                 }
 
-                var newName = _filenameBuilder.BuildBookFileName(author, issue, file);
+                var newName = _filenameBuilder.BuildComicFileName(author, issue, file);
 
                 _logger.Trace($"got name {newName}");
 
-                var newPath = _filenameBuilder.BuildBookFilePath(author, issue, newName, Path.GetExtension(bookFilePath));
+                var newPath = _filenameBuilder.BuildComicFilePath(author, issue, newName, Path.GetExtension(comicFilePath));
 
                 _logger.Trace($"got path {newPath}");
 
-                if (!bookFilePath.PathEquals(newPath, StringComparison.Ordinal))
+                if (!comicFilePath.PathEquals(newPath, StringComparison.Ordinal))
                 {
                     yield return new RenameComicFilePreview
                     {
@@ -127,7 +127,7 @@ namespace NzbDrone.Core.MediaFiles
                 try
                 {
                     _logger.Debug("Renaming issue file: {0}", comicFile);
-                    _bookFileMover.MoveBookFile(comicFile, author);
+                    _comicFileMover.MoveComicFile(comicFile, author);
 
                     _mediaFileService.Update(comicFile);
 

@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Configuration
 {
     public enum ConfigKey
     {
-        DownloadedBooksFolder
+        DownloadedIssuesFolder
     }
 
     public class ConfigService : IConfigService

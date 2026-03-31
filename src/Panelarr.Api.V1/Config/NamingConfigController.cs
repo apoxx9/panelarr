@@ -29,7 +29,7 @@ namespace Panelarr.Api.V1.Config
             _filenameValidationService = filenameValidationService;
             _filenameBuilder = filenameBuilder;
 
-            SharedValidator.RuleFor(c => c.StandardIssueFormat).ValidBookFormat();
+            SharedValidator.RuleFor(c => c.StandardIssueFormat).ValidIssueFormat();
             SharedValidator.RuleFor(c => c.SeriesFolderFormat).ValidSeriesFolderFormat();
         }
 
@@ -65,7 +65,7 @@ namespace Panelarr.Api.V1.Config
         }
 
         [HttpGet("examples")]
-        public object GetExamples([FromQuery]NamingConfigResource config)
+        public object GetExamples([FromQuery] NamingConfigResource config)
         {
             if (config.Id == 0)
             {
@@ -78,11 +78,11 @@ namespace Panelarr.Api.V1.Config
             var singleTrackSampleResult = _filenameSampleService.GetStandardTrackSample(nameSpec);
             var multiDiscTrackSampleResult = _filenameSampleService.GetMultiDiscTrackSample(nameSpec);
 
-            sampleResource.SingleBookExample = _filenameValidationService.ValidateTrackFilename(singleTrackSampleResult) != null
+            sampleResource.SingleIssueExample = _filenameValidationService.ValidateTrackFilename(singleTrackSampleResult) != null
                     ? null
                     : singleTrackSampleResult.FileName;
 
-            sampleResource.MultiPartBookExample = _filenameValidationService.ValidateTrackFilename(multiDiscTrackSampleResult) != null
+            sampleResource.MultiPartIssueExample = _filenameValidationService.ValidateTrackFilename(multiDiscTrackSampleResult) != null
                 ? null
                 : multiDiscTrackSampleResult.FileName;
 

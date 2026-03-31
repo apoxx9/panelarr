@@ -2,8 +2,8 @@ using System;
 using System.Linq;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Serializer;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.History;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
 
@@ -116,7 +116,7 @@ namespace NzbDrone.Core.Download.History
                 Protocol = message.Issue.Release.DownloadProtocol,
                 IndexerId = message.Issue.Release.IndexerId,
                 DownloadClientId = message.DownloadClientId,
-                Release =  message.Issue.Release
+                Release = message.Issue.Release
             };
 
             history.Data.Add("Indexer", message.Issue.Release.Indexer);
@@ -152,9 +152,9 @@ namespace NzbDrone.Core.Download.History
             {
                 EventType = DownloadHistoryEventType.FileImported,
 
-                SeriesId = message.ImportedBook.Series.Value.Id,
+                SeriesId = message.ImportedIssue.Series.Value.Id,
                 DownloadId = downloadId,
-                SourceTitle = message.BookInfo.Path,
+                SourceTitle = message.IssueInfo.Path,
                 Date = DateTime.UtcNow,
                 Protocol = message.DownloadClientInfo.Protocol,
                 DownloadClientId = message.DownloadClientInfo.Id
@@ -162,8 +162,8 @@ namespace NzbDrone.Core.Download.History
 
             history.Data.Add("DownloadClient", message.DownloadClientInfo.Type);
             history.Data.Add("DownloadClientName", message.DownloadClientInfo.Name);
-            history.Data.Add("SourcePath", message.BookInfo.Path);
-            history.Data.Add("DestinationPath", message.ImportedBook.Path);
+            history.Data.Add("SourcePath", message.IssueInfo.Path);
+            history.Data.Add("DestinationPath", message.ImportedIssue.Path);
 
             _repository.Insert(history);
         }
@@ -173,7 +173,7 @@ namespace NzbDrone.Core.Download.History
             var history = new DownloadHistory
             {
                 EventType = DownloadHistoryEventType.DownloadImportIncomplete,
-                SeriesId = message.TrackedDownload.RemoteBook?.Series?.Id ?? 0,
+                SeriesId = message.TrackedDownload.RemoteIssue?.Series?.Id ?? 0,
                 DownloadId = message.TrackedDownload.DownloadItem.DownloadId,
                 SourceTitle = message.TrackedDownload.DownloadItem.OutputPath.ToString(),
                 Date = DateTime.UtcNow,

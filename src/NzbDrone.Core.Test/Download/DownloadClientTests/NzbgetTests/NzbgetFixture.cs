@@ -344,9 +344,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
         {
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
@@ -356,9 +356,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
         {
             GivenFailedDownload();
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            Assert.ThrowsAsync<DownloadClientRejectedReleaseException>(async () => await Subject.Download(remoteBook, CreateIndexer()));
+            Assert.ThrowsAsync<DownloadClientRejectedReleaseException>(async () => await Subject.Download(remoteIssue, CreateIndexer()));
         }
 
         [Test]

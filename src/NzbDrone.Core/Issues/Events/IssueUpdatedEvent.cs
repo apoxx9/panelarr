@@ -1,6 +1,6 @@
 using NzbDrone.Common.Messaging;
 
-namespace NzbDrone.Core.Books.Events
+namespace NzbDrone.Core.Issues.Events
 {
     public class IssueUpdatedEvent : IEvent
     {

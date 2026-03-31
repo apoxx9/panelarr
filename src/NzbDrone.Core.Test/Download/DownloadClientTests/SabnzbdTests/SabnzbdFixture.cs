@@ -7,10 +7,10 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.Clients.Sabnzbd;
 using NzbDrone.Core.Download.Clients.Sabnzbd.Responses;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.RemotePathMappings;
 using NzbDrone.Core.Validation;
 using NzbDrone.Test.Common;
@@ -305,10 +305,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         {
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
-            remoteBook.Release.Title = title;
+            var remoteIssue = CreateRemoteIssue();
+            remoteIssue.Release.Title = title;
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             Mocker.GetMock<ISabnzbdProxy>()
                 .Verify(v => v.DownloadNzb(It.IsAny<byte[]>(), filename, It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SabnzbdSettings>()), Times.Once());
@@ -319,9 +319,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         {
             GivenSuccessfulDownload();
 
-            var remoteBook = CreateRemoteBook();
+            var remoteIssue = CreateRemoteIssue();
 
-            var id = await Subject.Download(remoteBook, CreateIndexer());
+            var id = await Subject.Download(remoteIssue, CreateIndexer());
 
             id.Should().NotBeNullOrEmpty();
         }
@@ -360,14 +360,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                     .Setup(s => s.DownloadNzb(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), (int)SabnzbdPriority.High, It.IsAny<SabnzbdSettings>()))
                     .Returns(new SabnzbdAddResponse { Ids = new List<string> { "panelarrtest" } });
 
-            var remoteBook = CreateRemoteBook();
-            remoteBook.Books = Builder<Issue>.CreateListOfSize(1)
+            var remoteIssue = CreateRemoteIssue();
+            remoteIssue.Issues = Builder<Issue>.CreateListOfSize(1)
                                                       .All()
                                                       .With(e => e.ReleaseDate = DateTime.Today)
                                                       .Build()
                                                       .ToList();
 
-            await Subject.Download(remoteBook, CreateIndexer());
+            await Subject.Download(remoteIssue, CreateIndexer());
 
             Mocker.GetMock<ISabnzbdProxy>()
                   .Verify(v => v.DownloadNzb(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), (int)SabnzbdPriority.High, It.IsAny<SabnzbdSettings>()), Times.Once());

@@ -4,11 +4,11 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Indexers;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
@@ -25,14 +25,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         private Series _author;
         private QualityModel _mp3;
         private QualityModel _flac;
-        private RemoteBook _remoteBook;
+        private RemoteIssue _remoteIssue;
         private List<EntityHistory> _history;
         private ComicFile _firstFile;
 
         [SetUp]
         public void Setup()
         {
-            var singleBookList = new List<Issue>
+            var singleIssueList = new List<Issue>
                                     {
                                         new Issue
                                         {
@@ -49,11 +49,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _mp3 = new QualityModel(Quality.CBR, new Revision(version: 1));
             _flac = new QualityModel(Quality.CBZ_HD, new Revision(version: 1));
 
-            _remoteBook = new RemoteBook
+            _remoteIssue = new RemoteIssue
             {
                 Series = _author,
-                ParsedBookInfo = new ParsedBookInfo { Quality = _mp3 },
-                Books = singleBookList,
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = _mp3 },
+                Issues = singleIssueList,
                 Release = Builder<ReleaseInfo>.CreateNew()
                                               .Build()
             };
@@ -65,11 +65,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Returns(true);
 
             Mocker.GetMock<IHistoryService>()
-                  .Setup(s => s.GetByBook(It.IsAny<int>(), null))
+                  .Setup(s => s.GetByIssue(It.IsAny<int>(), null))
                   .Returns(_history);
 
             Mocker.GetMock<IMediaFileService>()
-                  .Setup(c => c.GetFilesByBook(It.IsAny<int>()))
+                  .Setup(c => c.GetFilesByIssue(It.IsAny<int>()))
                   .Returns(new List<ComicFile> { _firstFile });
         }
 
@@ -97,23 +97,23 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenCdhDisabled();
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_be_accepted_if_book_does_not_have_a_file()
         {
             Mocker.GetMock<IMediaFileService>()
-                .Setup(c => c.GetFilesByBook(It.IsAny<int>()))
+                .Setup(c => c.GetFilesByIssue(It.IsAny<int>()))
                 .Returns(new List<ComicFile> { });
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_be_accepted_if_book_does_not_have_grabbed_event()
         {
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -121,7 +121,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenHistoryItem(Guid.NewGuid().ToString().ToUpper(), TITLE, _mp3, EntityHistoryEventType.Grabbed);
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -132,7 +132,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenHistoryItem(downloadId, TITLE, _mp3, EntityHistoryEventType.Grabbed);
             GivenHistoryItem(downloadId, TITLE, _mp3, EntityHistoryEventType.ComicFileImported);
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -143,12 +143,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenHistoryItem(downloadId, TITLE, _mp3, EntityHistoryEventType.Grabbed);
             GivenHistoryItem(downloadId, TITLE, _flac, EntityHistoryEventType.ComicFileImported);
 
-            _remoteBook.Release = Builder<TorrentInfo>.CreateNew()
+            _remoteIssue.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
                                                          .With(t => t.InfoHash = downloadId)
                                                          .Build();
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -159,12 +159,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenHistoryItem(downloadId, TITLE, _mp3, EntityHistoryEventType.Grabbed);
             GivenHistoryItem(downloadId, TITLE, _flac, EntityHistoryEventType.ComicFileImported);
 
-            _remoteBook.Release = Builder<TorrentInfo>.CreateNew()
+            _remoteIssue.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
                                                          .With(t => t.InfoHash = null)
                                                          .Build();
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -173,12 +173,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenHistoryItem(null, TITLE, _mp3, EntityHistoryEventType.Grabbed);
             GivenHistoryItem(null, TITLE, _flac, EntityHistoryEventType.ComicFileImported);
 
-            _remoteBook.Release = Builder<TorrentInfo>.CreateNew()
+            _remoteIssue.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
                                                          .With(t => t.InfoHash = null)
                                                          .Build();
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -189,12 +189,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             GivenHistoryItem(downloadId, TITLE, _mp3, EntityHistoryEventType.Grabbed);
             GivenHistoryItem(downloadId, TITLE, _flac, EntityHistoryEventType.ComicFileImported);
 
-            _remoteBook.Release = Builder<TorrentInfo>.CreateNew()
+            _remoteIssue.Release = Builder<TorrentInfo>.CreateNew()
                                                          .With(t => t.DownloadProtocol = DownloadProtocol.Torrent)
                                                          .With(t => t.InfoHash = downloadId)
                                                          .Build();
 
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }
     }
 }

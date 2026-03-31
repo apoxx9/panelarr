@@ -33,7 +33,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
         public SpecificationPriority Priority => SpecificationPriority.Database;
         public RejectionType Type => RejectionType.Temporary;
 
-        public virtual Decision IsSatisfiedBy(RemoteBook subject, SearchCriteriaBase searchCriteria)
+        public virtual Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
             if (searchCriteria != null && searchCriteria.UserInvokedSearch)
             {
@@ -56,9 +56,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
 
             if (isPreferredProtocol)
             {
-                foreach (var issue in subject.Books)
+                foreach (var issue in subject.Issues)
                 {
-                    var comicFiles = _mediaFileService.GetFilesByBook(issue.Id);
+                    var comicFiles = _mediaFileService.GetFilesByIssue(issue.Id);
 
                     foreach (var file in comicFiles)
                     {
@@ -83,8 +83,8 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
 
                 if (isBestInProfile && isPreferredProtocol)
                 {
-                _logger.Debug("Quality is highest in profile for preferred protocol, will not delay");
-                return Decision.Accept();
+                    _logger.Debug("Quality is highest in profile for preferred protocol, will not delay");
+                    return Decision.Accept();
                 }
             }
 
@@ -101,7 +101,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                 }
             }
 
-            var bookIds = subject.Books.Select(e => e.Id);
+            var bookIds = subject.Issues.Select(e => e.Id);
 
             var oldest = _pendingReleaseService.OldestPendingRelease(subject.Series.Id, bookIds.ToArray());
 

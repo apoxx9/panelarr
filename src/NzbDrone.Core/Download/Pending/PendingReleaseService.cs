@@ -4,13 +4,13 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Crypto;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download.Aggregation;
 using NzbDrone.Core.Indexers;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.Jobs;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Parser;
@@ -25,11 +25,11 @@ namespace NzbDrone.Core.Download.Pending
         void Add(DownloadDecision decision, PendingReleaseReason reason);
         void AddMany(List<Tuple<DownloadDecision, PendingReleaseReason>> decisions);
         List<ReleaseInfo> GetPending();
-        List<RemoteBook> GetPendingRemoteBooks(int authorId);
+        List<RemoteIssue> GetPendingRemoteIssues(int authorId);
         List<Queue.Queue> GetPendingQueue();
         Queue.Queue FindPendingQueueItem(int queueId);
         void RemovePendingQueueItems(int queueId);
-        RemoteBook OldestPendingRelease(int authorId, int[] bookIds);
+        RemoteIssue OldestPendingRelease(int authorId, int[] bookIds);
     }
 
     public class PendingReleaseService : IPendingReleaseService,
@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Download.Pending
         private readonly ITaskManager _taskManager;
         private readonly IConfigService _configService;
         private readonly ICustomFormatCalculationService _formatCalculator;
-        private readonly IRemoteBookAggregationService _aggregationService;
+        private readonly IRemoteIssueAggregationService _aggregationService;
         private readonly IDownloadClientFactory _downloadClientFactory;
         private readonly IIndexerFactory _indexerFactory;
         private readonly IEventAggregator _eventAggregator;
@@ -59,7 +59,7 @@ namespace NzbDrone.Core.Download.Pending
                                     ITaskManager taskManager,
                                     IConfigService configService,
                                     ICustomFormatCalculationService formatCalculator,
-                                    IRemoteBookAggregationService aggregationService,
+                                    IRemoteIssueAggregationService aggregationService,
                                     IDownloadClientFactory downloadClientFactory,
                                     IIndexerFactory indexerFactory,
                                     IEventAggregator eventAggregator,
@@ -87,25 +87,25 @@ namespace NzbDrone.Core.Download.Pending
 
         public void AddMany(List<Tuple<DownloadDecision, PendingReleaseReason>> decisions)
         {
-            foreach (var authorDecisions in decisions.GroupBy(v => v.Item1.RemoteBook.Series.Id))
+            foreach (var authorDecisions in decisions.GroupBy(v => v.Item1.RemoteIssue.Series.Id))
             {
-                var author = authorDecisions.First().Item1.RemoteBook.Series;
+                var author = authorDecisions.First().Item1.RemoteIssue.Series;
                 var alreadyPending = _repository.AllBySeriesId(author.Id);
 
-                alreadyPending = IncludeRemoteBooks(alreadyPending, authorDecisions.ToDictionaryIgnoreDuplicates(v => v.Item1.RemoteBook.Release.Title, v => v.Item1.RemoteBook));
-                var alreadyPendingByBook = CreateBookLookup(alreadyPending);
+                alreadyPending = IncludeRemoteIssues(alreadyPending, authorDecisions.ToDictionaryIgnoreDuplicates(v => v.Item1.RemoteIssue.Release.Title, v => v.Item1.RemoteIssue));
+                var alreadyPendingByIssue = CreateIssueLookup(alreadyPending);
 
                 foreach (var pair in authorDecisions)
                 {
                     var decision = pair.Item1;
                     var reason = pair.Item2;
 
-                    var bookIds = decision.RemoteBook.Books.Select(e => e.Id);
+                    var bookIds = decision.RemoteIssue.Issues.Select(e => e.Id);
 
-                    var existingReports = bookIds.SelectMany(v => alreadyPendingByBook[v])
+                    var existingReports = bookIds.SelectMany(v => alreadyPendingByIssue[v])
                                                     .Distinct().ToList();
 
-                    var matchingReports = existingReports.Where(MatchingReleasePredicate(decision.RemoteBook.Release)).ToList();
+                    var matchingReports = existingReports.Where(MatchingReleasePredicate(decision.RemoteIssue.Release)).ToList();
 
                     if (matchingReports.Any())
                     {
@@ -115,36 +115,36 @@ namespace NzbDrone.Core.Download.Pending
                         {
                             if (matchingReport.Reason == PendingReleaseReason.DownloadClientUnavailable)
                             {
-                                _logger.Debug("The release {0} is already pending with reason {1}, not changing reason", decision.RemoteBook, matchingReport.Reason);
+                                _logger.Debug("The release {0} is already pending with reason {1}, not changing reason", decision.RemoteIssue, matchingReport.Reason);
                             }
                             else
                             {
-                                _logger.Debug("The release {0} is already pending with reason {1}, changing to {2}", decision.RemoteBook, matchingReport.Reason, reason);
+                                _logger.Debug("The release {0} is already pending with reason {1}, changing to {2}", decision.RemoteIssue, matchingReport.Reason, reason);
                                 matchingReport.Reason = reason;
                                 _repository.Update(matchingReport);
                             }
                         }
                         else
                         {
-                            _logger.Debug("The release {0} is already pending with reason {1}, not adding again", decision.RemoteBook, reason);
+                            _logger.Debug("The release {0} is already pending with reason {1}, not adding again", decision.RemoteIssue, reason);
                         }
 
                         if (matchingReports.Count() > 1)
                         {
-                            _logger.Debug("The release {0} had {1} duplicate pending, removing duplicates.", decision.RemoteBook, matchingReports.Count() - 1);
+                            _logger.Debug("The release {0} had {1} duplicate pending, removing duplicates.", decision.RemoteIssue, matchingReports.Count() - 1);
 
                             foreach (var duplicate in matchingReports.Skip(1))
                             {
                                 _repository.Delete(duplicate.Id);
                                 alreadyPending.Remove(duplicate);
-                                alreadyPendingByBook = CreateBookLookup(alreadyPending);
+                                alreadyPendingByIssue = CreateIssueLookup(alreadyPending);
                             }
                         }
 
                         continue;
                     }
 
-                    _logger.Debug("Adding release {0} to pending releases with reason {1}", decision.RemoteBook, reason);
+                    _logger.Debug("Adding release {0} to pending releases with reason {1}", decision.RemoteIssue, reason);
                     Insert(decision, reason);
                 }
             }
@@ -169,9 +169,9 @@ namespace NzbDrone.Core.Download.Pending
             return releases;
         }
 
-        public List<RemoteBook> GetPendingRemoteBooks(int authorId)
+        public List<RemoteIssue> GetPendingRemoteIssues(int authorId)
         {
-            return IncludeRemoteBooks(_repository.AllBySeriesId(authorId)).Select(v => v.RemoteBook).ToList();
+            return IncludeRemoteIssues(_repository.AllBySeriesId(authorId)).Select(v => v.RemoteIssue).ToList();
         }
 
         public List<Queue.Queue> GetPendingQueue()
@@ -180,12 +180,12 @@ namespace NzbDrone.Core.Download.Pending
 
             var nextRssSync = new Lazy<DateTime>(() => _taskManager.GetNextExecution(typeof(RssSyncCommand)));
 
-            var pendingReleases = IncludeRemoteBooks(_repository.WithoutFallback());
+            var pendingReleases = IncludeRemoteIssues(_repository.WithoutFallback());
             foreach (var pendingRelease in pendingReleases)
             {
-                foreach (var issue in pendingRelease.RemoteBook.Books)
+                foreach (var issue in pendingRelease.RemoteIssue.Issues)
                 {
-                    var ect = pendingRelease.Release.PublishDate.AddMinutes(GetDelay(pendingRelease.RemoteBook));
+                    var ect = pendingRelease.Release.PublishDate.AddMinutes(GetDelay(pendingRelease.RemoteIssue));
 
                     if (ect < nextRssSync.Value)
                     {
@@ -216,18 +216,18 @@ namespace NzbDrone.Core.Download.Pending
                     var queue = new Queue.Queue
                     {
                         Id = GetQueueId(pendingRelease, issue),
-                        Series = pendingRelease.RemoteBook.Series,
+                        Series = pendingRelease.RemoteIssue.Series,
                         Issue = issue,
-                        Quality = pendingRelease.RemoteBook.ParsedIssueInfo.Quality,
+                        Quality = pendingRelease.RemoteIssue.ParsedIssueInfo.Quality,
                         Title = pendingRelease.Title,
-                        Size = pendingRelease.RemoteBook.Release.Size,
-                        Sizeleft = pendingRelease.RemoteBook.Release.Size,
-                        RemoteBook = pendingRelease.RemoteBook,
+                        Size = pendingRelease.RemoteIssue.Release.Size,
+                        Sizeleft = pendingRelease.RemoteIssue.Release.Size,
+                        RemoteIssue = pendingRelease.RemoteIssue,
                         Timeleft = timeleft,
                         EstimatedCompletionTime = ect,
                         Status = pendingRelease.Reason.ToString(),
-                        Protocol = pendingRelease.RemoteBook.Release.DownloadProtocol,
-                        Indexer = pendingRelease.RemoteBook.Release.Indexer,
+                        Protocol = pendingRelease.RemoteIssue.Release.DownloadProtocol,
+                        Indexer = pendingRelease.RemoteIssue.Release.Indexer,
                         DownloadClient = downloadClientName
                     };
 
@@ -264,18 +264,18 @@ namespace NzbDrone.Core.Download.Pending
             _repository.DeleteMany(releasesToRemove.Select(c => c.Id));
         }
 
-        public RemoteBook OldestPendingRelease(int authorId, int[] bookIds)
+        public RemoteIssue OldestPendingRelease(int authorId, int[] bookIds)
         {
             var authorReleases = GetPendingReleases(authorId);
 
-            return authorReleases.Select(r => r.RemoteBook)
-                                 .Where(r => r.Books.Select(e => e.Id).Intersect(bookIds).Any())
+            return authorReleases.Select(r => r.RemoteIssue)
+                                 .Where(r => r.Issues.Select(e => e.Id).Intersect(bookIds).Any())
                                  .MaxBy(p => p.Release.AgeHours);
         }
 
-        private ILookup<int, PendingRelease> CreateBookLookup(IEnumerable<PendingRelease> alreadyPending)
+        private ILookup<int, PendingRelease> CreateIssueLookup(IEnumerable<PendingRelease> alreadyPending)
         {
-            return alreadyPending.SelectMany(v => v.RemoteBook.Books
+            return alreadyPending.SelectMany(v => v.RemoteIssue.Issues
                                                    .Select(d => new { Issue = d, PendingRelease = v }))
                                  .ToLookup(v => v.Issue.Id, v => v.PendingRelease);
         }
@@ -289,23 +289,23 @@ namespace NzbDrone.Core.Download.Pending
 
         private List<PendingRelease> GetPendingReleases()
         {
-            return IncludeRemoteBooks(_repository.All().ToList());
+            return IncludeRemoteIssues(_repository.All().ToList());
         }
 
         private List<PendingRelease> GetPendingReleases(int authorId)
         {
-            return IncludeRemoteBooks(_repository.AllBySeriesId(authorId).ToList());
+            return IncludeRemoteIssues(_repository.AllBySeriesId(authorId).ToList());
         }
 
-        private List<PendingRelease> IncludeRemoteBooks(List<PendingRelease> releases, Dictionary<string, RemoteBook> knownRemoteBooks = null)
+        private List<PendingRelease> IncludeRemoteIssues(List<PendingRelease> releases, Dictionary<string, RemoteIssue> knownRemoteIssues = null)
         {
             var result = new List<PendingRelease>();
 
             var authorMap = new Dictionary<int, Series>();
 
-            if (knownRemoteBooks != null)
+            if (knownRemoteIssues != null)
             {
-                foreach (var author in knownRemoteBooks.Values.Select(v => v.Series))
+                foreach (var author in knownRemoteIssues.Values.Select(v => v.Series))
                 {
                     if (!authorMap.ContainsKey(author.Id))
                     {
@@ -331,26 +331,26 @@ namespace NzbDrone.Core.Download.Pending
 
                 List<Issue> issues;
 
-                if (knownRemoteBooks != null && knownRemoteBooks.TryGetValue(release.Release.Title, out var knownRemoteBook))
+                if (knownRemoteIssues != null && knownRemoteIssues.TryGetValue(release.Release.Title, out var knownRemoteIssue))
                 {
-                    issues = knownRemoteBook.Books;
+                    issues = knownRemoteIssue.Issues;
                 }
                 else
                 {
-                    issues = _parsingService.GetBooks(release.ParsedIssueInfo, author);
+                    issues = _parsingService.GetIssues(release.ParsedIssueInfo, author);
                 }
 
-                release.RemoteBook = new RemoteBook
+                release.RemoteIssue = new RemoteIssue
                 {
                     Series = author,
-                    Books = issues,
+                    Issues = issues,
                     ReleaseSource = release.AdditionalInfo?.ReleaseSource ?? ReleaseSourceType.Unknown,
                     ParsedIssueInfo = release.ParsedIssueInfo,
                     Release = release.Release
                 };
 
-                _aggregationService.Augment(release.RemoteBook);
-                release.RemoteBook.CustomFormats = _formatCalculator.ParseCustomFormat(release.RemoteBook, release.Release.Size);
+                _aggregationService.Augment(release.RemoteIssue);
+                release.RemoteIssue.CustomFormats = _formatCalculator.ParseCustomFormat(release.RemoteIssue, release.Release.Size);
 
                 result.Add(release);
             }
@@ -362,15 +362,15 @@ namespace NzbDrone.Core.Download.Pending
         {
             _repository.Insert(new PendingRelease
             {
-                SeriesId = decision.RemoteBook.Series.Id,
-                ParsedIssueInfo = decision.RemoteBook.ParsedIssueInfo,
-                Release = decision.RemoteBook.Release,
-                Title = decision.RemoteBook.Release.Title,
+                SeriesId = decision.RemoteIssue.Series.Id,
+                ParsedIssueInfo = decision.RemoteIssue.ParsedIssueInfo,
+                Release = decision.RemoteIssue.Release,
+                Title = decision.RemoteIssue.Release.Title,
                 Added = DateTime.UtcNow,
                 Reason = reason,
                 AdditionalInfo = new PendingReleaseAdditionalInfo
                 {
-                    ReleaseSource = decision.RemoteBook.ReleaseSource
+                    ReleaseSource = decision.RemoteIssue.ReleaseSource
                 }
             });
 
@@ -383,21 +383,21 @@ namespace NzbDrone.Core.Download.Pending
             _eventAggregator.PublishEvent(new PendingReleasesUpdatedEvent());
         }
 
-        private int GetDelay(RemoteBook remoteBook)
+        private int GetDelay(RemoteIssue remoteIssue)
         {
-            var delayProfile = _delayProfileService.AllForTags(remoteBook.Series.Tags).OrderBy(d => d.Order).First();
-            var delay = delayProfile.GetProtocolDelay(remoteBook.Release.DownloadProtocol);
+            var delayProfile = _delayProfileService.AllForTags(remoteIssue.Series.Tags).OrderBy(d => d.Order).First();
+            var delay = delayProfile.GetProtocolDelay(remoteIssue.Release.DownloadProtocol);
             var minimumAge = _configService.MinimumAge;
 
             return new[] { delay, minimumAge }.Max();
         }
 
-        private void RemoveGrabbed(RemoteBook remoteBook)
+        private void RemoveGrabbed(RemoteIssue remoteIssue)
         {
-            var pendingReleases = GetPendingReleases(remoteBook.Series.Id);
-            var bookIds = remoteBook.Books.Select(e => e.Id);
+            var pendingReleases = GetPendingReleases(remoteIssue.Series.Id);
+            var bookIds = remoteIssue.Issues.Select(e => e.Id);
 
-            var existingReports = pendingReleases.Where(r => r.RemoteBook.Books.Select(e => e.Id)
+            var existingReports = pendingReleases.Where(r => r.RemoteIssue.Issues.Select(e => e.Id)
                                                              .Intersect(bookIds)
                                                              .Any())
                                                              .ToList();
@@ -407,12 +407,12 @@ namespace NzbDrone.Core.Download.Pending
                 return;
             }
 
-            var profile = remoteBook.Series.QualityProfile.Value;
+            var profile = remoteIssue.Series.QualityProfile.Value;
 
             foreach (var existingReport in existingReports)
             {
-                var compare = new QualityModelComparer(profile).Compare(remoteBook.ParsedIssueInfo.Quality,
-                                                                        existingReport.RemoteBook.ParsedIssueInfo.Quality);
+                var compare = new QualityModelComparer(profile).Compare(remoteIssue.ParsedIssueInfo.Quality,
+                                                                        existingReport.RemoteIssue.ParsedIssueInfo.Quality);
 
                 //Only remove lower/equal quality pending releases
                 //It is safer to retry these releases on the next round than remove it and try to re-add it (if its still in the feed)
@@ -431,7 +431,7 @@ namespace NzbDrone.Core.Download.Pending
 
             foreach (var rejectedRelease in rejected)
             {
-                var matching = pending.Where(MatchingReleasePredicate(rejectedRelease.RemoteBook.Release));
+                var matching = pending.Where(MatchingReleasePredicate(rejectedRelease.RemoteIssue.Release));
 
                 foreach (var pendingRelease in matching)
                 {
@@ -443,7 +443,7 @@ namespace NzbDrone.Core.Download.Pending
 
         private PendingRelease FindPendingRelease(int queueId)
         {
-            return GetPendingReleases().First(p => p.RemoteBook.Books.Any(e => queueId == GetQueueId(p, e)));
+            return GetPendingReleases().First(p => p.RemoteIssue.Issues.Any(e => queueId == GetQueueId(p, e)));
         }
 
         private int GetQueueId(PendingRelease pendingRelease, Issue issue)

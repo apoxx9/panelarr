@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Panelarr.Api.V1.Books;
+using Panelarr.Api.V1.Issues;
 
 namespace Panelarr.Api.V1.IssueShelf
 {
@@ -7,6 +7,6 @@ namespace Panelarr.Api.V1.IssueShelf
     {
         public int Id { get; set; }
         public bool? Monitored { get; set; }
-        public List<IssueResource> Books { get; set; }
+        public List<IssueResource> Issues { get; set; }
     }
 }

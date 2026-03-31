@@ -1,9 +1,9 @@
-﻿using FizzWare.NBuilder;
+using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Download.Pending;
 using NzbDrone.Core.Housekeeping.Housekeepers;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
 
@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
         public void should_delete_orphaned_pending_items()
         {
             var pendingRelease = Builder<PendingRelease>.CreateNew()
-                .With(h => h.ParsedBookInfo = new ParsedBookInfo())
+                .With(h => h.ParsedIssueInfo = new ParsedIssueInfo())
                 .With(h => h.Release = new ReleaseInfo())
                 .BuildNew();
 
@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Test.Housekeeping.Housekeepers
 
             var pendingRelease = Builder<PendingRelease>.CreateNew()
                 .With(h => h.SeriesId = author.Id)
-                .With(h => h.ParsedBookInfo = new ParsedBookInfo())
+                .With(h => h.ParsedIssueInfo = new ParsedIssueInfo())
                 .With(h => h.Release = new ReleaseInfo())
                 .BuildNew();
 

@@ -69,17 +69,17 @@ namespace Panelarr.Api.V1.Indexers
     {
         public static ReleaseResource ToResource(this DownloadDecision model)
         {
-            var releaseInfo = model.RemoteBook.Release;
-            var parsedBookInfo = model.RemoteBook.ParsedIssueInfo;
-            var remoteBook = model.RemoteBook;
-            var torrentInfo = (model.RemoteBook.Release as TorrentInfo) ?? new TorrentInfo();
+            var releaseInfo = model.RemoteIssue.Release;
+            var parsedIssueInfo = model.RemoteIssue.ParsedIssueInfo;
+            var remoteIssue = model.RemoteIssue;
+            var torrentInfo = (model.RemoteIssue.Release as TorrentInfo) ?? new TorrentInfo();
             var indexerFlags = torrentInfo.IndexerFlags;
 
             // TODO: Clean this mess up. don't mix data from multiple classes, use sub-resources instead? (Got a huge Deja Vu, didn't we talk about this already once?)
             return new ReleaseResource
             {
                 Guid = releaseInfo.Guid,
-                Quality = parsedBookInfo.Quality,
+                Quality = parsedIssueInfo.Quality,
 
                 //QualityWeight
                 Age = releaseInfo.Age,
@@ -88,12 +88,12 @@ namespace Panelarr.Api.V1.Indexers
                 Size = releaseInfo.Size,
                 IndexerId = releaseInfo.IndexerId,
                 Indexer = releaseInfo.Indexer,
-                ReleaseGroup = parsedBookInfo.ReleaseGroup,
-                ReleaseHash = parsedBookInfo.ReleaseHash,
+                ReleaseGroup = parsedIssueInfo.ReleaseGroup,
+                ReleaseHash = parsedIssueInfo.ReleaseHash,
                 Title = releaseInfo.Title,
-                SeriesName = parsedBookInfo.SeriesName,
-                IssueTitle = parsedBookInfo.IssueTitle,
-                Discography = parsedBookInfo.Discography,
+                SeriesName = parsedIssueInfo.SeriesName,
+                IssueTitle = parsedIssueInfo.IssueTitle,
+                Discography = parsedIssueInfo.Discography,
                 Approved = model.Approved,
                 TemporarilyRejected = model.TemporarilyRejected,
                 Rejected = model.Rejected,
@@ -102,11 +102,11 @@ namespace Panelarr.Api.V1.Indexers
                 CommentUrl = releaseInfo.CommentUrl,
                 DownloadUrl = releaseInfo.DownloadUrl,
                 InfoUrl = releaseInfo.InfoUrl,
-                DownloadAllowed = remoteBook.DownloadAllowed,
+                DownloadAllowed = remoteIssue.DownloadAllowed,
 
                 // ReleaseWeight
-                CustomFormatScore = remoteBook.CustomFormatScore,
-                CustomFormats = remoteBook.CustomFormats.ToResource(false),
+                CustomFormatScore = remoteIssue.CustomFormatScore,
+                CustomFormats = remoteIssue.CustomFormats.ToResource(false),
 
                 MagnetUrl = torrentInfo.MagnetUrl,
                 InfoHash = torrentInfo.InfoHash,

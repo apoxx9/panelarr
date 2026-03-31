@@ -3,10 +3,10 @@ using System.Net;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging;
 using NzbDrone.Core.Messaging.Events;
@@ -154,7 +154,7 @@ namespace NzbDrone.Core.MediaFiles
         {
             if (message.DeleteFiles)
             {
-                var files = _mediaFileService.GetFilesByBook(message.Issue.Id);
+                var files = _mediaFileService.GetFilesByIssue(message.Issue.Id);
                 foreach (var file in files)
                 {
                     DeleteFile(file);

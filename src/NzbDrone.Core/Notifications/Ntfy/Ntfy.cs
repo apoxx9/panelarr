@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using FluentValidation.Results;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.Notifications.Ntfy
 {

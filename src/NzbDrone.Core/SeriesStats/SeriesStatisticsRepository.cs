@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dapper;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.SeriesStats
@@ -53,8 +53,8 @@ namespace NzbDrone.Core.SeriesStats
             .Select($@"""Series"".""Id"" AS ""SeriesId"",
                      ""Issues"".""Id"" AS ""IssueId"",
                      SUM(COALESCE(""ComicFiles"".""Size"", 0)) AS ""SizeOnDisk"",
-                     1 AS ""TotalBookCount"",
-                     CASE WHEN MIN(""ComicFiles"".""Id"") IS NULL THEN 0 ELSE 1 END AS ""AvailableBookCount"",
+                     1 AS ""TotalIssueCount"",
+                     CASE WHEN MIN(""ComicFiles"".""Id"") IS NULL THEN 0 ELSE 1 END AS ""AvailableIssueCount"",
                      CASE WHEN (""Issues"".""Monitored"" = {trueIndicator} AND (""Issues"".""ReleaseDate"" < @currentDate) OR ""Issues"".""ReleaseDate"" IS NULL) OR MIN(""ComicFiles"".""Id"") IS NOT NULL THEN 1 ELSE 0 END AS ""IssueCount"",
                      CASE WHEN MIN(""ComicFiles"".""Id"") IS NULL THEN 0 ELSE COUNT(""ComicFiles"".""Id"") END AS ""ComicFileCount""")
             .Join<Issue, Series>((issue, author) => issue.SeriesMetadataId == author.SeriesMetadataId)

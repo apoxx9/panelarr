@@ -6,11 +6,11 @@ using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Extras.Metadata;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Housekeeping.Housekeepers;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 

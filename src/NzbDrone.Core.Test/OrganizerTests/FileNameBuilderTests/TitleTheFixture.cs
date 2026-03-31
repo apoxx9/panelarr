@@ -3,8 +3,8 @@ using System.Linq;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.CustomFormats;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Qualities;
@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     public class TitleTheFixture : CoreTest<FileNameBuilder>
     {
         private Series _author;
-        private Issue _book;
+        private Issue _issue;
         private ComicFile _trackFile;
         private NamingConfig _namingConfig;
 
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                 .With(s => s.SeriesGroup = series)
                 .BuildListOfNew();
 
-            _book = Builder<Issue>
+            _issue = Builder<Issue>
                     .CreateNew()
                     .With(s => s.Title = "Anthology")
                     .With(s => s.SeriesMetadata = _author.Metadata.Value)
@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile = new ComicFile { Quality = new QualityModel(Quality.CBR), ReleaseGroup = "PanelarrTest" };
 
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameBooks = true;
+            _namingConfig.RenameIssues = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
@@ -76,9 +76,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         public void should_get_expected_title_back(string name, string expected)
         {
             _author.Name = name;
-            _namingConfig.StandardBookFormat = "{Series NameThe}";
+            _namingConfig.StandardIssueFormat = "{Series NameThe}";
 
-            Subject.BuildBookFileName(_author, _book, _trackFile)
+            Subject.BuildComicFileName(_author, _issue, _trackFile)
                    .Should().Be(expected);
         }
 
@@ -89,9 +89,9 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         public void should_not_change_title(string name)
         {
             _author.Name = name;
-            _namingConfig.StandardBookFormat = "{Series NameThe}";
+            _namingConfig.StandardIssueFormat = "{Series NameThe}";
 
-            Subject.BuildBookFileName(_author, _book, _trackFile)
+            Subject.BuildComicFileName(_author, _issue, _trackFile)
                    .Should().Be(name);
         }
     }

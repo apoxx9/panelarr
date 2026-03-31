@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.ThingiProvider;
 
@@ -20,7 +20,7 @@ namespace NzbDrone.Core.Notifications.Webhook
 
         public WebhookGrabPayload BuildOnGrabPayload(GrabMessage message)
         {
-            var remoteBook = message.RemoteBook;
+            var remoteIssue = message.RemoteIssue;
             var quality = message.Quality;
 
             return new WebhookGrabPayload
@@ -28,8 +28,8 @@ namespace NzbDrone.Core.Notifications.Webhook
                 EventType = WebhookEventType.Grab,
                 InstanceName = _configFileProvider.InstanceName,
                 Series = new WebhookSeries(message.Series),
-                Books = remoteBook.Books.ConvertAll(x => new WebhookBook(x)),
-                Release = new WebhookRelease(quality, remoteBook),
+                Issues = remoteIssue.Issues.ConvertAll(x => new WebhookIssue(x)),
+                Release = new WebhookRelease(quality, remoteIssue),
                 DownloadClient = message.DownloadClientName,
                 DownloadClientType = message.DownloadClientType,
                 DownloadId = message.DownloadId
@@ -45,8 +45,8 @@ namespace NzbDrone.Core.Notifications.Webhook
                 EventType = WebhookEventType.Download,
                 InstanceName = _configFileProvider.InstanceName,
                 Series = new WebhookSeries(message.Series),
-                Issue = new WebhookBook(message.Issue),
-                ComicFiles = trackFiles.ConvertAll(x => new WebhookBookFile(x)),
+                Issue = new WebhookIssue(message.Issue),
+                ComicFiles = trackFiles.ConvertAll(x => new WebhookComicFile(x)),
                 IsUpgrade = message.OldFiles.Any(),
                 DownloadClient = message.DownloadClientInfo?.Name,
                 DownloadClientType = message.DownloadClientInfo?.Type,
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Notifications.Webhook
 
             if (message.OldFiles.Any())
             {
-                payload.DeletedFiles = message.OldFiles.ConvertAll(x => new WebhookBookFile(x));
+                payload.DeletedFiles = message.OldFiles.ConvertAll(x => new WebhookComicFile(x));
             }
 
             return payload;
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Notifications.Webhook
                 EventType = WebhookEventType.Rename,
                 InstanceName = _configFileProvider.InstanceName,
                 Series = new WebhookSeries(author),
-                RenamedBookFiles = renamedFiles.ConvertAll(x => new WebhookRenamedBookFile(x))
+                RenamedComicFiles = renamedFiles.ConvertAll(x => new WebhookRenamedComicFile(x))
             };
         }
 
@@ -79,31 +79,31 @@ namespace NzbDrone.Core.Notifications.Webhook
                 EventType = WebhookEventType.Retag,
                 InstanceName = _configFileProvider.InstanceName,
                 Series = new WebhookSeries(message.Series),
-                ComicFile = new WebhookBookFile(message.ComicFile)
+                ComicFile = new WebhookComicFile(message.ComicFile)
             };
         }
 
-        public WebhookBookDeletePayload BuildOnIssueDelete(IssueDeleteMessage deleteMessage)
+        public WebhookIssueDeletePayload BuildOnIssueDelete(IssueDeleteMessage deleteMessage)
         {
-            return new WebhookBookDeletePayload
+            return new WebhookIssueDeletePayload
             {
                 EventType = WebhookEventType.IssueDelete,
                 InstanceName = _configFileProvider.InstanceName,
                 Series = new WebhookSeries(deleteMessage.Issue.Series),
-                Issue = new WebhookBook(deleteMessage.Issue),
+                Issue = new WebhookIssue(deleteMessage.Issue),
                 DeletedFiles = deleteMessage.DeletedFiles
             };
         }
 
-        public WebhookBookFileDeletePayload BuildOnComicFileDelete(ComicFileDeleteMessage deleteMessage)
+        public WebhookComicFileDeletePayload BuildOnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
-            return new WebhookBookFileDeletePayload
+            return new WebhookComicFileDeletePayload
             {
                 EventType = WebhookEventType.ComicFileDelete,
                 InstanceName = _configFileProvider.InstanceName,
                 Series = new WebhookSeries(deleteMessage.Issue.Series),
-                Issue = new WebhookBook(deleteMessage.Issue),
-                ComicFile = new WebhookBookFile(deleteMessage.ComicFile)
+                Issue = new WebhookIssue(deleteMessage.Issue),
+                ComicFile = new WebhookComicFile(deleteMessage.ComicFile)
             };
         }
 
@@ -166,9 +166,9 @@ namespace NzbDrone.Core.Notifications.Webhook
                     Path = "C:\\testpath",
                     ForeignSeriesId = "aaaaa-aaa-aaaa-aaaaaa"
                 },
-                Books = new List<WebhookBook>()
+                Issues = new List<WebhookIssue>()
                     {
-                            new WebhookBook()
+                            new WebhookIssue()
                             {
                                 Id = 123,
                                 Title = "Test title"

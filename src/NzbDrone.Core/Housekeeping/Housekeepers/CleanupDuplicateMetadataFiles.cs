@@ -15,8 +15,8 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
         public void Clean()
         {
             DeleteDuplicateSeriesMetadata();
-            DeleteDuplicateBookMetadata();
-            DeleteDuplicateBookFileMetadata();
+            DeleteDuplicateIssueMetadata();
+            DeleteDuplicateComicFileMetadata();
         }
 
         private void DeleteDuplicateSeriesMetadata()
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                              )");
         }
 
-        private void DeleteDuplicateBookMetadata()
+        private void DeleteDuplicateIssueMetadata()
         {
             using var mapper = _database.OpenConnection();
             mapper.Execute(@"DELETE FROM ""MetadataFiles""
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                              )");
         }
 
-        private void DeleteDuplicateBookFileMetadata()
+        private void DeleteDuplicateComicFileMetadata()
         {
             using var mapper = _database.OpenConnection();
             mapper.Execute(@"DELETE FROM ""MetadataFiles""

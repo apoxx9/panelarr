@@ -3,12 +3,12 @@ using System.Linq;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Indexers;
+using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
@@ -39,11 +39,11 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         {
             GivenDownloadHistory();
 
-            var remoteBook = new RemoteBook
+            var remoteIssue = new RemoteIssue
             {
                 Series = new Series() { Id = 5 },
-                Books = new List<Issue> { new Issue { Id = 4 } },
-                ParsedBookInfo = new ParsedBookInfo()
+                Issues = new List<Issue> { new Issue { Id = 4 } },
+                ParsedIssueInfo = new ParsedIssueInfo()
                 {
                     IssueTitle = "Audio Issue",
                     SeriesName = "Audio Series"
@@ -51,8 +51,8 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.Is<ParsedBookInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
-                  .Returns(remoteBook);
+                  .Setup(s => s.Map(It.Is<ParsedIssueInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
+                  .Returns(remoteIssue);
 
             var client = new DownloadClientDefinition()
             {
@@ -75,10 +75,10 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             var trackedDownload = Subject.TrackDownload(client, item);
 
             trackedDownload.Should().NotBeNull();
-            trackedDownload.RemoteBook.Should().NotBeNull();
-            trackedDownload.RemoteBook.Series.Should().NotBeNull();
-            trackedDownload.RemoteBook.Series.Id.Should().Be(5);
-            trackedDownload.RemoteBook.Books.First().Id.Should().Be(4);
+            trackedDownload.RemoteIssue.Should().NotBeNull();
+            trackedDownload.RemoteIssue.Series.Should().NotBeNull();
+            trackedDownload.RemoteIssue.Series.Id.Should().Be(5);
+            trackedDownload.RemoteIssue.Issues.First().Id.Should().Be(4);
         }
 
         [Test]
@@ -86,11 +86,11 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         {
             GivenDownloadHistory();
 
-            var remoteBook = new RemoteBook
+            var remoteIssue = new RemoteIssue
             {
                 Series = new Series() { Id = 5 },
-                Books = new List<Issue> { new Issue { Id = 4 } },
-                ParsedBookInfo = new ParsedBookInfo()
+                Issues = new List<Issue> { new Issue { Id = 4 } },
+                ParsedIssueInfo = new ParsedIssueInfo()
                 {
                     IssueTitle = "Audio Issue",
                     SeriesName = "Audio Series"
@@ -98,8 +98,8 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.Is<ParsedBookInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
-                  .Returns(remoteBook);
+                  .Setup(s => s.Map(It.Is<ParsedIssueInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
+                  .Returns(remoteIssue);
 
             var client = new DownloadClientDefinition()
             {
@@ -125,16 +125,16 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             // simulate deletion - issue no longer maps
             Mocker.GetMock<IParsingService>()
-                .Setup(s => s.Map(It.Is<ParsedBookInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
-                .Returns(default(RemoteBook));
+                .Setup(s => s.Map(It.Is<ParsedIssueInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
+                .Returns(default(RemoteIssue));
 
             // handle deletion event
-            Subject.Handle(new BookInfoRefreshedEvent(remoteBook.Series, new List<Issue>(), new List<Issue>(), remoteBook.Books));
+            Subject.Handle(new IssueInfoRefreshedEvent(remoteIssue.Series, new List<Issue>(), new List<Issue>(), remoteIssue.Issues));
 
             // verify download has null remote issue
             var trackedDownloads = Subject.GetTrackedDownloads();
             trackedDownloads.Should().HaveCount(1);
-            trackedDownloads.First().RemoteBook.Should().BeNull();
+            trackedDownloads.First().RemoteIssue.Should().BeNull();
         }
 
         [Test]
@@ -142,19 +142,19 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         {
             GivenDownloadHistory();
 
-            var remoteEpisode = new RemoteBook
+            var remoteEpisode = new RemoteIssue
             {
                 Series = new Series() { Id = 5 },
-                Books = new List<Issue> { new Issue { Id = 4 } },
-                ParsedBookInfo = new ParsedBookInfo()
+                Issues = new List<Issue> { new Issue { Id = 4 } },
+                ParsedIssueInfo = new ParsedIssueInfo()
                 {
                     IssueTitle = "TV SeriesGroup"
                 }
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<int>(), It.IsAny<List<int>>()))
-                  .Returns(default(RemoteBook));
+                  .Setup(s => s.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<int>(), It.IsAny<List<int>>()))
+                  .Returns(default(RemoteIssue));
 
             Mocker.GetMock<IHistoryService>()
                   .Setup(s => s.FindByDownloadId(It.IsAny<string>()))
@@ -183,14 +183,14 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             Subject.GetTrackedDownloads().Should().HaveCount(1);
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<int>(), It.IsAny<List<int>>()))
-                  .Returns(default(RemoteBook));
+                  .Setup(s => s.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<int>(), It.IsAny<List<int>>()))
+                  .Returns(default(RemoteIssue));
 
-            Subject.Handle(new BookInfoRefreshedEvent(remoteEpisode.Series, new List<Issue>(), new List<Issue>(), remoteEpisode.Books));
+            Subject.Handle(new IssueInfoRefreshedEvent(remoteEpisode.Series, new List<Issue>(), new List<Issue>(), remoteEpisode.Issues));
 
             var trackedDownloads = Subject.GetTrackedDownloads();
             trackedDownloads.Should().HaveCount(1);
-            trackedDownloads.First().RemoteBook.Should().BeNull();
+            trackedDownloads.First().RemoteIssue.Should().BeNull();
         }
 
         [Test]
@@ -198,19 +198,19 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         {
             GivenDownloadHistory();
 
-            var remoteEpisode = new RemoteBook
+            var remoteEpisode = new RemoteIssue
             {
                 Series = new Series() { Id = 5 },
-                Books = new List<Issue> { new Issue { Id = 4 } },
-                ParsedBookInfo = new ParsedBookInfo()
+                Issues = new List<Issue> { new Issue { Id = 4 } },
+                ParsedIssueInfo = new ParsedIssueInfo()
                 {
                     IssueTitle = "TV SeriesGroup",
                 }
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<int>(), It.IsAny<List<int>>()))
-                  .Returns(default(RemoteBook));
+                  .Setup(s => s.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<int>(), It.IsAny<List<int>>()))
+                  .Returns(default(RemoteIssue));
 
             Mocker.GetMock<IHistoryService>()
                   .Setup(s => s.FindByDownloadId(It.IsAny<string>()))
@@ -239,14 +239,14 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             Subject.GetTrackedDownloads().Should().HaveCount(1);
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.IsAny<ParsedBookInfo>(), It.IsAny<int>(), It.IsAny<List<int>>()))
-                  .Returns(default(RemoteBook));
+                  .Setup(s => s.Map(It.IsAny<ParsedIssueInfo>(), It.IsAny<int>(), It.IsAny<List<int>>()))
+                  .Returns(default(RemoteIssue));
 
             Subject.Handle(new SeriesDeletedEvent(remoteEpisode.Series, true, true));
 
             var trackedDownloads = Subject.GetTrackedDownloads();
             trackedDownloads.Should().HaveCount(1);
-            trackedDownloads.First().RemoteBook.Should().BeNull();
+            trackedDownloads.First().RemoteIssue.Should().BeNull();
         }
     }
 }

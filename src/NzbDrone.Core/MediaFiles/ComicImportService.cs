@@ -34,21 +34,21 @@ namespace NzbDrone.Core.MediaFiles
     {
         private readonly IDiskScanService _diskScanService;
         private readonly IMakeImportDecision _importDecisionMaker;
-        private readonly IImportApprovedBooks _importApprovedBooks;
+        private readonly IImportApprovedIssues _importApprovedIssues;
         private readonly IRootFolderService _rootFolderService;
         private readonly IDiskProvider _diskProvider;
         private readonly Logger _logger;
 
         public ComicImportService(IDiskScanService diskScanService,
                                    IMakeImportDecision importDecisionMaker,
-                                   IImportApprovedBooks importApprovedBooks,
+                                   IImportApprovedIssues importApprovedIssues,
                                    IRootFolderService rootFolderService,
                                    IDiskProvider diskProvider,
                                    Logger logger)
         {
             _diskScanService = diskScanService;
             _importDecisionMaker = importDecisionMaker;
-            _importApprovedBooks = importApprovedBooks;
+            _importApprovedIssues = importApprovedIssues;
             _rootFolderService = rootFolderService;
             _diskProvider = diskProvider;
             _logger = logger;
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.MediaFiles
             _logger.ProgressInfo("Starting comic import scan for: {0}", folderPath);
 
             // 1. Discover all comic files in the folder
-            var comicFiles = _diskScanService.GetBookFiles(folderPath).ToList();
+            var comicFiles = _diskScanService.GetComicFiles(folderPath).ToList();
             result.TotalFiles = comicFiles.Count;
 
             if (!comicFiles.Any())
@@ -124,7 +124,7 @@ namespace NzbDrone.Core.MediaFiles
             // 6. Import approved files
             if (approvedDecisions.Any())
             {
-                var importResults = _importApprovedBooks.Import(approvedDecisions, false, null, importMode);
+                var importResults = _importApprovedIssues.Import(approvedDecisions, false, null, importMode);
                 result.Imported = importResults.Count(r => r.Result == ImportResultType.Imported);
 
                 var failedImports = importResults.Where(r => r.Result != ImportResultType.Imported).ToList();

@@ -52,7 +52,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
             }
         }
 
-        protected override string AddFromMagnetLink(RemoteBook remoteBook, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteIssue remoteIssue, string hash, string magnetLink)
         {
             var actualHash = _proxy.AddTorrentFromMagnet(magnetLink, Settings);
 
@@ -61,17 +61,17 @@ namespace NzbDrone.Core.Download.Clients.Deluge
                 throw new DownloadClientException("Deluge failed to add magnet " + magnetLink);
             }
 
-            _proxy.SetTorrentSeedingConfiguration(actualHash, remoteBook.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(actualHash, remoteIssue.SeedConfiguration, Settings);
 
             if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
             {
                 _proxy.SetTorrentLabel(actualHash, Settings.MusicCategory, Settings);
             }
 
-            var isRecentBook = remoteBook.IsRecentBook();
+            var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentBook && Settings.RecentTvPriority == (int)DelugePriority.First) ||
-                (!isRecentBook && Settings.OlderTvPriority == (int)DelugePriority.First))
+            if ((isRecentIssue && Settings.RecentTvPriority == (int)DelugePriority.First) ||
+                (!isRecentIssue && Settings.OlderTvPriority == (int)DelugePriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(actualHash, Settings);
             }
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
             return actualHash.ToUpper();
         }
 
-        protected override string AddFromTorrentFile(RemoteBook remoteBook, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteIssue remoteIssue, string hash, string filename, byte[] fileContent)
         {
             var actualHash = _proxy.AddTorrentFromFile(filename, fileContent, Settings);
 
@@ -88,17 +88,17 @@ namespace NzbDrone.Core.Download.Clients.Deluge
                 throw new DownloadClientException("Deluge failed to add torrent " + filename);
             }
 
-            _proxy.SetTorrentSeedingConfiguration(actualHash, remoteBook.SeedConfiguration, Settings);
+            _proxy.SetTorrentSeedingConfiguration(actualHash, remoteIssue.SeedConfiguration, Settings);
 
             if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
             {
                 _proxy.SetTorrentLabel(actualHash, Settings.MusicCategory, Settings);
             }
 
-            var isRecentBook = remoteBook.IsRecentBook();
+            var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentBook && Settings.RecentTvPriority == (int)DelugePriority.First) ||
-                (!isRecentBook && Settings.OlderTvPriority == (int)DelugePriority.First))
+            if ((isRecentIssue && Settings.RecentTvPriority == (int)DelugePriority.First) ||
+                (!isRecentIssue && Settings.OlderTvPriority == (int)DelugePriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(actualHash, Settings);
             }
@@ -303,9 +303,9 @@ namespace NzbDrone.Core.Download.Clients.Deluge
                 _logger.Error(ex, "Failed to test connection");
 
                 return new NzbDroneValidationFailure("Host", "Unable to connect to Deluge")
-                       {
-                           DetailedDescription = ex.Message
-                       };
+                {
+                    DetailedDescription = ex.Message
+                };
             }
 
             return null;

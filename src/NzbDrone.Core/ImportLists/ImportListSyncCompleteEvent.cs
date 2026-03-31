@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using NzbDrone.Common.Messaging;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.ImportLists
 {

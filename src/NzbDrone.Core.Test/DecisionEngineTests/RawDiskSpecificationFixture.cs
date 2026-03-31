@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Indexers;
@@ -11,12 +11,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class RawDiskSpecificationFixture : CoreTest<RawDiskSpecification>
     {
-        private RemoteBook _remoteBook;
+        private RemoteIssue _remoteIssue;
 
         [SetUp]
         public void Setup()
         {
-            _remoteBook = new RemoteBook
+            _remoteIssue = new RemoteIssue
             {
                 Release = new ReleaseInfo() { DownloadProtocol = DownloadProtocol.Torrent }
             };
@@ -24,41 +24,41 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void WithContainer(string container)
         {
-            _remoteBook.Release.Container = container;
+            _remoteIssue.Release.Container = container;
         }
 
         [Test]
         public void should_return_true_if_no_container_specified()
         {
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_true_if_flac()
         {
             WithContainer("FLAC");
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]
         public void should_return_false_if_vob()
         {
             WithContainer("VOB");
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_return_false_if_iso()
         {
             WithContainer("ISO");
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }
 
         [Test]
         public void should_compare_case_insensitive()
         {
             WithContainer("vob");
-            Subject.IsSatisfiedBy(_remoteBook, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }
     }
 }

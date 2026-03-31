@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Validation;
@@ -33,7 +33,7 @@ namespace Panelarr.Api.V1.Indexers
         private readonly IParsingService _parsingService;
         private readonly Logger _logger;
 
-        private readonly ICached<RemoteBook> _remoteBookCache;
+        private readonly ICached<RemoteIssue> _remoteIssueCache;
 
         public ReleaseController(IFetchAndParseRss rssFetcherAndParser,
                              ISearchForReleases releaseSearchService,
@@ -59,7 +59,7 @@ namespace Panelarr.Api.V1.Indexers
             PostValidator.RuleFor(s => s.IndexerId).ValidId();
             PostValidator.RuleFor(s => s.Guid).NotEmpty();
 
-            _remoteBookCache = cacheManager.GetCache<RemoteBook>(GetType(), "remoteBooks");
+            _remoteIssueCache = cacheManager.GetCache<RemoteIssue>(GetType(), "remoteIssues");
         }
 
         [HttpPost]
@@ -67,9 +67,9 @@ namespace Panelarr.Api.V1.Indexers
         {
             ValidateResource(release);
 
-            var remoteBook = _remoteBookCache.Find(GetCacheKey(release));
+            var remoteIssue = _remoteIssueCache.Find(GetCacheKey(release));
 
-            if (remoteBook == null)
+            if (remoteIssue == null)
             {
                 _logger.Debug("Couldn't find requested release in cache, cache timeout probably expired.");
 
@@ -78,36 +78,36 @@ namespace Panelarr.Api.V1.Indexers
 
             try
             {
-                if (remoteBook.Series == null)
+                if (remoteIssue.Series == null)
                 {
                     if (release.IssueId.HasValue)
                     {
                         var issue = _issueService.GetIssue(release.IssueId.Value);
 
-                        remoteBook.Series = _seriesService.GetSeries(issue.SeriesId);
-                        remoteBook.Books = new List<Issue> { issue };
+                        remoteIssue.Series = _seriesService.GetSeries(issue.SeriesId);
+                        remoteIssue.Issues = new List<Issue> { issue };
                     }
                     else if (release.SeriesId.HasValue)
                     {
                         var series = _seriesService.GetSeries(release.SeriesId.Value);
-                        var issues = _parsingService.GetBooks(remoteBook.ParsedIssueInfo, series);
+                        var issues = _parsingService.GetIssues(remoteIssue.ParsedIssueInfo, series);
 
                         if (issues.Empty())
                         {
                             throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to parse issues in the release");
                         }
 
-                        remoteBook.Series = series;
-                        remoteBook.Books = issues;
+                        remoteIssue.Series = series;
+                        remoteIssue.Issues = issues;
                     }
                     else
                     {
                         throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to find matching series and issues");
                     }
                 }
-                else if (remoteBook.Books.Empty())
+                else if (remoteIssue.Issues.Empty())
                 {
-                    var issues = _parsingService.GetBooks(remoteBook.ParsedIssueInfo, remoteBook.Series);
+                    var issues = _parsingService.GetIssues(remoteIssue.ParsedIssueInfo, remoteIssue.Series);
 
                     if (issues.Empty() && release.IssueId.HasValue)
                     {
@@ -116,15 +116,15 @@ namespace Panelarr.Api.V1.Indexers
                         issues = new List<Issue> { issue };
                     }
 
-                    remoteBook.Books = issues;
+                    remoteIssue.Issues = issues;
                 }
 
-                if (remoteBook.Books.Empty())
+                if (remoteIssue.Issues.Empty())
                 {
                     throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to parse issues in the release");
                 }
 
-                await _downloadService.DownloadReport(remoteBook, release.DownloadClientId);
+                await _downloadService.DownloadReport(remoteIssue, release.DownloadClientId);
             }
             catch (ReleaseDownloadException ex)
             {
@@ -140,7 +140,7 @@ namespace Panelarr.Api.V1.Indexers
         {
             if (issueId.HasValue)
             {
-                return await GetBookReleases(issueId.Value);
+                return await GetIssueReleases(issueId.Value);
             }
 
             if (seriesId.HasValue)
@@ -151,11 +151,11 @@ namespace Panelarr.Api.V1.Indexers
             return await GetRss();
         }
 
-        private async Task<List<ReleaseResource>> GetBookReleases(int bookId)
+        private async Task<List<ReleaseResource>> GetIssueReleases(int issueId)
         {
             try
             {
-                var decisions = await _releaseSearchService.IssueSearch(bookId, true, true, true);
+                var decisions = await _releaseSearchService.IssueSearch(issueId, true, true, true);
                 var prioritizedDecisions = _prioritizeDownloadDecision.PrioritizeDecisions(decisions);
 
                 return MapDecisions(prioritizedDecisions);
@@ -195,7 +195,7 @@ namespace Panelarr.Api.V1.Indexers
         protected override ReleaseResource MapDecision(DownloadDecision decision, int initialWeight)
         {
             var resource = base.MapDecision(decision, initialWeight);
-            _remoteBookCache.Set(GetCacheKey(resource), decision.RemoteBook, TimeSpan.FromMinutes(30));
+            _remoteIssueCache.Set(GetCacheKey(resource), decision.RemoteIssue, TimeSpan.FromMinutes(30));
 
             return resource;
         }

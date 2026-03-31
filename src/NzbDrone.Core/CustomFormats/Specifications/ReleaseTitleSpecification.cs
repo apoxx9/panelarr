@@ -8,7 +8,7 @@ namespace NzbDrone.Core.CustomFormats
 
         protected override bool IsSatisfiedByWithoutNegate(CustomFormatInput input)
         {
-            return MatchString(input.BookInfo?.ReleaseTitle) || MatchString(input.Filename);
+            return MatchString(input.IssueInfo?.ReleaseTitle) || MatchString(input.Filename);
         }
     }
 }

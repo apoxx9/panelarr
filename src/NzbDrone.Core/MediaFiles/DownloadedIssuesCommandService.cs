@@ -13,16 +13,16 @@ using NzbDrone.Core.Messaging.Commands;
 
 namespace NzbDrone.Core.MediaFiles
 {
-    public class DownloadedBooksCommandService : IExecute<DownloadedBooksScanCommand>
+    public class DownloadedIssuesCommandService : IExecute<DownloadedIssuesScanCommand>
     {
-        private readonly IDownloadedBooksImportService _downloadedTracksImportService;
+        private readonly IDownloadedIssuesImportService _downloadedTracksImportService;
         private readonly ITrackedDownloadService _trackedDownloadService;
         private readonly IDiskProvider _diskProvider;
         private readonly ICompletedDownloadService _completedDownloadService;
         private readonly ICommandResultReporter _commandResultReporter;
         private readonly Logger _logger;
 
-        public DownloadedBooksCommandService(IDownloadedBooksImportService downloadedTracksImportService,
+        public DownloadedIssuesCommandService(IDownloadedIssuesImportService downloadedTracksImportService,
                                                 ITrackedDownloadService trackedDownloadService,
                                                 IDiskProvider diskProvider,
                                                 ICompletedDownloadService completedDownloadService,
@@ -37,7 +37,7 @@ namespace NzbDrone.Core.MediaFiles
             _logger = logger;
         }
 
-        private List<ImportResult> ProcessPath(DownloadedBooksScanCommand message)
+        private List<ImportResult> ProcessPath(DownloadedIssuesScanCommand message)
         {
             if (!_diskProvider.FolderExists(message.Path) && !_diskProvider.FileExists(message.Path))
             {
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.MediaFiles
                 {
                     _logger.Debug("External directory scan request for known download {0}. [{1}]", message.DownloadClientId, message.Path);
 
-                    var importResults = _downloadedTracksImportService.ProcessPath(message.Path, message.ImportMode, trackedDownload.RemoteBook.Series, trackedDownload.DownloadItem);
+                    var importResults = _downloadedTracksImportService.ProcessPath(message.Path, message.ImportMode, trackedDownload.RemoteIssue.Series, trackedDownload.DownloadItem);
 
                     _completedDownloadService.VerifyImport(trackedDownload, importResults);
 
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.MediaFiles
             return _downloadedTracksImportService.ProcessPath(message.Path, message.ImportMode);
         }
 
-        public void Execute(DownloadedBooksScanCommand message)
+        public void Execute(DownloadedIssuesScanCommand message)
         {
             List<ImportResult> importResults;
 

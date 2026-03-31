@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NLog;
-using NzbDrone.Core.Books;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Extras.Metadata.Files;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.IssueImport.Aggregation;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
@@ -55,20 +55,20 @@ namespace NzbDrone.Core.Extras.Metadata
 
                     if (metadata.Type == MetadataType.IssueImage || metadata.Type == MetadataType.IssueMetadata)
                     {
-                        var localBook = _parsingService.GetLocalBook(possibleMetadataFile, author);
+                        var localIssue = _parsingService.GetLocalIssue(possibleMetadataFile, author);
 
-                        if (localBook == null)
+                        if (localIssue == null)
                         {
                             _logger.Debug("Extra file folder has multiple issues: {0}", possibleMetadataFile);
                             continue;
                         }
 
-                        metadata.IssueId = localBook.Id;
+                        metadata.IssueId = localIssue.Id;
                     }
 
                     if (metadata.Type == MetadataType.IssueMetadata)
                     {
-                        var localTrack = new LocalBook
+                        var localTrack = new LocalIssue
                         {
                             FileTrackInfo = Parser.Parser.ParseMusicPath(possibleMetadataFile),
                             Series = author,

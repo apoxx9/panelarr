@@ -2,7 +2,7 @@ using System.Linq;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Test.MediaFiles
     public class MediaFileRepositoryFixture : DbTest<MediaFileRepository, ComicFile>
     {
         private Series _author;
-        private Issue _book;
+        private Issue _issue;
 
         [SetUp]
         public void Setup()
@@ -30,18 +30,18 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .Build();
             Db.Insert(_author);
 
-            _book = Builder<Issue>.CreateNew()
+            _issue = Builder<Issue>.CreateNew()
                 .With(a => a.Id = 0)
                 .With(a => a.SeriesMetadataId = _author.SeriesMetadataId)
                 .Build();
-            Db.Insert(_book);
+            Db.Insert(_issue);
 
             var files = Builder<ComicFile>.CreateListOfSize(10)
                 .All()
                 .With(c => c.Id = 0)
                 .With(c => c.Quality = new QualityModel(Quality.CBR))
                 .TheFirst(5)
-                .With(c => c.IssueId = _book.Id)
+                .With(c => c.IssueId = _issue.Id)
                 .TheRest()
                 .With(c => c.IssueId = 0)
                 .TheFirst(1)
@@ -118,9 +118,9 @@ namespace NzbDrone.Core.Test.MediaFiles
         public void get_files_by_book()
         {
             VerifyData();
-            var files = Subject.GetFilesByBook(_book.Id);
+            var files = Subject.GetFilesByIssue(_issue.Id);
 
-            files.Should().OnlyContain(c => c.IssueId == _book.Id);
+            files.Should().OnlyContain(c => c.IssueId == _issue.Id);
         }
 
         private void VerifyData()
@@ -134,10 +134,10 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void delete_files_by_book_should_work_if_join_fails()
         {
-            Db.Delete(_book);
-            Subject.DeleteFilesByBook(_book.Id);
+            Db.Delete(_issue);
+            Subject.DeleteFilesByIssue(_issue.Id);
 
-            Db.All<ComicFile>().Where(x => x.IssueId == _book.Id).Should().HaveCount(0);
+            Db.All<ComicFile>().Where(x => x.IssueId == _issue.Id).Should().HaveCount(0);
         }
     }
 }

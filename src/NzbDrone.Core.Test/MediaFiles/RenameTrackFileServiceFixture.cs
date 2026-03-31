@@ -3,7 +3,7 @@ using System.Linq;
 using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.Events;
@@ -55,8 +55,8 @@ namespace NzbDrone.Core.Test.MediaFiles
 
         private void GivenMovedFiles()
         {
-            Mocker.GetMock<IMoveBookFiles>()
-                  .Setup(s => s.MoveBookFile(It.IsAny<ComicFile>(), _author));
+            Mocker.GetMock<IMoveComicFiles>()
+                  .Setup(s => s.MoveComicFile(It.IsAny<ComicFile>(), _author));
         }
 
         [Test]
@@ -75,8 +75,8 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             GivenTrackFiles();
 
-            Mocker.GetMock<IMoveBookFiles>()
-                  .Setup(s => s.MoveBookFile(It.IsAny<ComicFile>(), It.IsAny<Series>()))
+            Mocker.GetMock<IMoveComicFiles>()
+                  .Setup(s => s.MoveComicFile(It.IsAny<ComicFile>(), It.IsAny<Series>()))
                   .Throws(new SameFilenameException("Same file name", "Filename"));
 
             Subject.Execute(new RenameFilesCommand(_author.Id, new List<int> { 1 }));

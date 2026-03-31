@@ -4,7 +4,7 @@ using System.Linq;
 using FizzWare.NBuilder;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;

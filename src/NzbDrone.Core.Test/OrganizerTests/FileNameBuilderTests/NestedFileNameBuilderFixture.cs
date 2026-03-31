@@ -4,7 +4,7 @@ using System.Linq;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Qualities;
@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
     public class NestedFileNameBuilderFixture : CoreTest<FileNameBuilder>
     {
         private Series _artist;
-        private Issue _album;        private ComicFile _trackFile;
+        private Issue _album; private ComicFile _trackFile;
         private NamingConfig _namingConfig;
 
         [SetUp]
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                 .With(s => s.SeriesLinks = new List<SeriesGroupLink>())
                 .Build();
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameBooks = true;
+            _namingConfig.RenameIssues = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
@@ -78,18 +78,18 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             WithSeries();
 
-            _namingConfig.StandardBookFormat = "{Issue SeriesGroup}/{Issue SeriesTitle - }{Issue Title} {(Release Year)}";
+            _namingConfig.StandardIssueFormat = "{Issue SeriesGroup}/{Issue SeriesTitle - }{Issue Title} {(Release Year)}";
 
-            var name = Subject.BuildBookFileName(_artist, _album, _trackFile)
+            var name = Subject.BuildComicFileName(_artist, _album, _trackFile)
                 .Should().Be("A SeriesGroup\\A SeriesGroup #2-3 - A Novel (2020)".AsOsAgnostic());
         }
 
         [Test]
         public void should_build_standard_track_filename_with_forward_slash()
         {
-            _namingConfig.StandardBookFormat = "{Issue SeriesGroup}/{Issue SeriesTitle - }{Issue Title} {(Release Year)}";
+            _namingConfig.StandardIssueFormat = "{Issue SeriesGroup}/{Issue SeriesTitle - }{Issue Title} {(Release Year)}";
 
-            Subject.BuildBookFileName(_artist, _album, _trackFile)
+            Subject.BuildComicFileName(_artist, _album, _trackFile)
                 .Should().Be("A Novel (2020)".AsOsAgnostic());
         }
 
@@ -98,18 +98,18 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             WithSeries();
 
-            _namingConfig.StandardBookFormat = "{Issue SeriesGroup}\\{Issue SeriesTitle - }{Issue Title} {(Release Year)}";
+            _namingConfig.StandardIssueFormat = "{Issue SeriesGroup}\\{Issue SeriesTitle - }{Issue Title} {(Release Year)}";
 
-            Subject.BuildBookFileName(_artist, _album, _trackFile)
+            Subject.BuildComicFileName(_artist, _album, _trackFile)
                    .Should().Be("A SeriesGroup\\A SeriesGroup #2-3 - A Novel (2020)".AsOsAgnostic());
         }
 
         [Test]
         public void should_build_standard_track_filename_with_back_slash()
         {
-            _namingConfig.StandardBookFormat = "{Issue SeriesGroup}\\{Issue SeriesTitle - }{Issue Title} {(Release Year)}";
+            _namingConfig.StandardIssueFormat = "{Issue SeriesGroup}\\{Issue SeriesTitle - }{Issue Title} {(Release Year)}";
 
-            Subject.BuildBookFileName(_artist, _album, _trackFile)
+            Subject.BuildComicFileName(_artist, _album, _trackFile)
                 .Should().Be("A Novel (2020)".AsOsAgnostic());
         }
     }

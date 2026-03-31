@@ -3,7 +3,7 @@ using System.Linq;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
@@ -24,7 +24,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                     .Build();
 
             _namingConfig = NamingConfig.Default;
-            _namingConfig.RenameBooks = true;
+            _namingConfig.RenameIssues = true;
 
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);

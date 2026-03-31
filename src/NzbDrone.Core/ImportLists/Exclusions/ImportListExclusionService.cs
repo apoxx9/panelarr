@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using NzbDrone.Core.Books.Events;
+using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.ImportLists.Exclusions

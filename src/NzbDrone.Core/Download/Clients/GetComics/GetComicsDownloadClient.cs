@@ -46,10 +46,10 @@ namespace NzbDrone.Core.Download.Clients.GetComics
             _downloadCache = cacheManager.GetCache<GetComicsDownloadItem>(GetType());
         }
 
-        public override async Task<string> Download(RemoteBook remoteBook, IIndexer indexer)
+        public override async Task<string> Download(RemoteIssue remoteIssue, IIndexer indexer)
         {
-            var postPageUrl = remoteBook.Release.DownloadUrl;
-            var title = remoteBook.Release.Title;
+            var postPageUrl = remoteIssue.Release.DownloadUrl;
+            var title = remoteIssue.Release.Title;
             var cleanTitle = FileNameBuilder.CleanFileName(title);
 
             _logger.Info("GetComics: Resolving download links from post page: {0}", postPageUrl);
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
             catch (Exception ex)
             {
                 _logger.Error(ex, "GetComics: Failed to fetch post page: {0}", postPageUrl);
-                throw new ReleaseDownloadException(remoteBook.Release, "Failed to fetch GetComics post page", ex);
+                throw new ReleaseDownloadException(remoteIssue.Release, "Failed to fetch GetComics post page", ex);
             }
 
             // Step 2: Extract download links
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
             if (!downloadLinks.Any())
             {
                 _logger.Warn("GetComics: No download links found on post page: {0}", postPageUrl);
-                throw new ReleaseDownloadException(remoteBook.Release, "No download links found on GetComics post page");
+                throw new ReleaseDownloadException(remoteIssue.Release, "No download links found on GetComics post page");
             }
 
             // Step 3: Try to download from the best available link
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
             {
                 var availableHosts = string.Join(", ", downloadLinks.Select(l => l.Host.ToString()));
                 _logger.Warn("GetComics: Could not resolve any downloadable URL. Available hosts: {0}", availableHosts);
-                throw new ReleaseDownloadException(remoteBook.Release, $"Could not resolve a direct download URL. Available hosts: {availableHosts}");
+                throw new ReleaseDownloadException(remoteIssue.Release, $"Could not resolve a direct download URL. Available hosts: {availableHosts}");
             }
 
             // Transform host-specific URLs to direct download URLs
@@ -109,7 +109,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
             catch (Exception ex)
             {
                 _logger.Error(ex, "GetComics: Failed to download file from {0}", downloadUrl);
-                throw new ReleaseDownloadException(remoteBook.Release, "Failed to download comic file", ex);
+                throw new ReleaseDownloadException(remoteIssue.Release, "Failed to download comic file", ex);
             }
 
             _logger.Info("GetComics: Successfully downloaded '{0}' to '{1}'", title, filePath);

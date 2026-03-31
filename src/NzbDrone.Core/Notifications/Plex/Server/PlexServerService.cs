@@ -8,7 +8,7 @@ using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Validation;
 
@@ -171,9 +171,9 @@ namespace NzbDrone.Core.Notifications.Plex.Server
                 _logger.Error(ex, "Unable to connect to Plex Media Server");
 
                 return new NzbDroneValidationFailure("Host", "Unable to connect to Plex Media Server")
-                       {
-                           DetailedDescription = ex.Message
-                       };
+                {
+                    DetailedDescription = ex.Message
+                };
             }
 
             return null;

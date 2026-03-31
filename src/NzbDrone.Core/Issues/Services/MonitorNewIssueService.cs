@@ -3,23 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using NLog;
 
-namespace NzbDrone.Core.Books
+namespace NzbDrone.Core.Issues
 {
-    public interface IMonitorNewBookService
+    public interface IMonitorNewIssueService
     {
-        bool ShouldMonitorNewBook(Issue addedBook, List<Issue> existingBooks, NewItemMonitorTypes author);
+        bool ShouldMonitorNewIssue(Issue addedIssue, List<Issue> existingIssues, NewItemMonitorTypes author);
     }
 
-    public class MonitorNewBookService : IMonitorNewBookService
+    public class MonitorNewIssueService : IMonitorNewIssueService
     {
         private readonly Logger _logger;
 
-        public MonitorNewBookService(Logger logger)
+        public MonitorNewIssueService(Logger logger)
         {
             _logger = logger;
         }
 
-        public bool ShouldMonitorNewBook(Issue addedBook, List<Issue> existingBooks, NewItemMonitorTypes monitorNewItems)
+        public bool ShouldMonitorNewIssue(Issue addedIssue, List<Issue> existingIssues, NewItemMonitorTypes monitorNewItems)
         {
             if (monitorNewItems == NewItemMonitorTypes.None)
             {
@@ -33,9 +33,9 @@ namespace NzbDrone.Core.Books
 
             if (monitorNewItems == NewItemMonitorTypes.New)
             {
-                var newest = existingBooks.MaxBy(x => x.ReleaseDate ?? DateTime.MinValue)?.ReleaseDate ?? DateTime.MinValue;
+                var newest = existingIssues.MaxBy(x => x.ReleaseDate ?? DateTime.MinValue)?.ReleaseDate ?? DateTime.MinValue;
 
-                return (addedBook.ReleaseDate ?? DateTime.MinValue) >= newest;
+                return (addedIssue.ReleaseDate ?? DateTime.MinValue) >= newest;
             }
 
             throw new NotImplementedException($"Unknown new item monitor type {monitorNewItems}");

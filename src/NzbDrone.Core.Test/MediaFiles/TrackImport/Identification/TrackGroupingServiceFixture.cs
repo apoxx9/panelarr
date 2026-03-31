@@ -66,7 +66,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
     [TestFixture]
     public class TrackGroupingServiceFixture : CoreTest<TrackGroupingService>
     {
-        private List<LocalBook> GivenTracks(string root, string author, string issue, int count)
+        private List<LocalIssue> GivenTracks(string root, string author, string issue, int count)
         {
             var fileInfos = Builder<ParsedTrackInfo>
                 .CreateListOfSize(count)
@@ -77,7 +77,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
                 .With(f => f.ReleaseMBId = null)
                 .Build();
 
-            var tracks = fileInfos.Select(x => Builder<LocalBook>
+            var tracks = fileInfos.Select(x => Builder<LocalIssue>
                                           .CreateNew()
                                           .With(y => y.FileTrackInfo = x)
                                           .With(y => y.Path = Path.Combine(root, x.Title))
@@ -86,13 +86,13 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             return tracks;
         }
 
-        private List<LocalBook> GivenTracksWithNoTags(string root, int count)
+        private List<LocalIssue> GivenTracksWithNoTags(string root, int count)
         {
-            var outp = new List<LocalBook>();
+            var outp = new List<LocalIssue>();
 
             for (var i = 0; i < count; i++)
             {
-                var track = Builder<LocalBook>
+                var track = Builder<LocalIssue>
                     .CreateNew()
                     .With(y => y.FileTrackInfo = new ParsedTrackInfo())
                     .With(y => y.Path = Path.Combine(root, $"{i}.mp3"))
@@ -104,7 +104,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         }
 
         [Repeat(100)]
-        private List<LocalBook> GivenVaTracks(string root, string issue, int count)
+        private List<LocalIssue> GivenVaTracks(string root, string issue, int count)
         {
             var settings = new BuilderSettings();
             settings.SetPropertyNamerFor<ParsedTrackInfo>(new RandomValueNamerShortStrings(settings));
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
                 .With(f => f.ReleaseMBId = null)
                 .Build();
 
-            var tracks = fileInfos.Select(x => Builder<LocalBook>
+            var tracks = fileInfos.Select(x => Builder<LocalIssue>
                                           .CreateNew()
                                           .With(y => y.FileTrackInfo = x)
                                           .With(y => y.Path = Path.Combine(@"C:\music\incoming".AsOsAgnostic(), x.Title))
@@ -201,7 +201,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
 
             output.Count.Should().Be(1);
-            output[0].LocalBooks.Count.Should().Be(count);
+            output[0].LocalIssues.Count.Should().Be(count);
         }
 
         [TestCase("cd")]
@@ -217,7 +217,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var output = Subject.GroupTracks(tracks);
             output.Count.Should().Be(1);
-            output[0].LocalBooks.Count.Should().Be(15);
+            output[0].LocalIssues.Count.Should().Be(15);
         }
 
         [Test]
@@ -231,8 +231,8 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var output = Subject.GroupTracks(tracks);
             output.Count.Should().Be(2);
-            output[0].LocalBooks.Count.Should().Be(10);
-            output[1].LocalBooks.Count.Should().Be(5);
+            output[0].LocalIssues.Count.Should().Be(10);
+            output[1].LocalIssues.Count.Should().Be(5);
         }
 
         [Test]
@@ -246,7 +246,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var output = Subject.GroupTracks(tracks);
             output.Count.Should().Be(1);
-            output[0].LocalBooks.Count.Should().Be(15);
+            output[0].LocalIssues.Count.Should().Be(15);
         }
 
         [Test]
@@ -260,8 +260,8 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var output = Subject.GroupTracks(tracks);
             output.Count.Should().Be(2);
-            output[0].LocalBooks.Count.Should().Be(1);
-            output[1].LocalBooks.Count.Should().Be(1);
+            output[0].LocalIssues.Count.Should().Be(1);
+            output[1].LocalIssues.Count.Should().Be(1);
         }
 
         [Test]
@@ -275,14 +275,14 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var output = Subject.GroupTracks(tracks);
             output.Count.Should().Be(2);
-            output[0].LocalBooks.Count.Should().Be(10);
-            output[1].LocalBooks.Count.Should().Be(5);
+            output[0].LocalIssues.Count.Should().Be(10);
+            output[1].LocalIssues.Count.Should().Be(5);
         }
 
         [Test]
         public void should_separate_many_books_in_same_directory()
         {
-            var tracks = new List<LocalBook>();
+            var tracks = new List<LocalIssue>();
             for (var i = 0; i < 100; i++)
             {
                 tracks.AddRange(GivenTracks($"C:\\music".AsOsAgnostic(), "author" + i, "issue" + i, 10));
@@ -293,7 +293,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var output = Subject.GroupTracks(tracks);
             output.Count.Should().Be(100);
-            output.Select(x => x.LocalBooks.Count).Distinct().Should().BeEquivalentTo(new List<int> { 10 });
+            output.Select(x => x.LocalIssues.Count).Distinct().Should().BeEquivalentTo(new List<int> { 10 });
         }
 
         [Test]
@@ -307,8 +307,8 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var output = Subject.GroupTracks(tracks);
             output.Count.Should().Be(2);
-            output[0].LocalBooks.Count.Should().Be(10);
-            output[1].LocalBooks.Count.Should().Be(5);
+            output[0].LocalIssues.Count.Should().Be(10);
+            output[1].LocalIssues.Count.Should().Be(5);
         }
 
         [Ignore("TODO: fix")]
@@ -323,7 +323,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var output = Subject.GroupTracks(tracks);
             output.Count.Should().Be(1);
-            output[0].LocalBooks.Count.Should().Be(10);
+            output[0].LocalIssues.Count.Should().Be(10);
         }
 
         [Test]
@@ -338,8 +338,8 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             var output = Subject.GroupTracks(tracks);
 
             output.Count.Should().Be(2);
-            output[0].LocalBooks.Count.Should().Be(10);
-            output[1].LocalBooks.Count.Should().Be(5);
+            output[0].LocalIssues.Count.Should().Be(10);
+            output[1].LocalIssues.Count.Should().Be(5);
         }
 
         [Test]
@@ -352,7 +352,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var output = Subject.GroupTracks(tracks);
             output.Count.Should().Be(1);
-            output[0].LocalBooks.Count.Should().Be(10);
+            output[0].LocalIssues.Count.Should().Be(10);
         }
 
         [Test]
@@ -366,7 +366,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var output = Subject.GroupTracks(tracks);
             output.Count.Should().Be(1);
-            output[0].LocalBooks.Count.Should().Be(12);
+            output[0].LocalIssues.Count.Should().Be(12);
         }
 
         [Test]
@@ -383,12 +383,12 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             foreach (var group in output)
             {
                 TestLogger.Debug($"*** group {group} ***");
-                TestLogger.Debug(string.Join("\n", group.LocalBooks.Select(x => x.Path)));
+                TestLogger.Debug(string.Join("\n", group.LocalIssues.Select(x => x.Path)));
             }
 
             output.Count.Should().Be(2);
-            output[0].LocalBooks.Count.Should().Be(10);
-            output[1].LocalBooks.Count.Should().Be(10);
+            output[0].LocalIssues.Count.Should().Be(10);
+            output[1].LocalIssues.Count.Should().Be(10);
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using FluentAssertions;
 using FluentValidation.Results;
 using NUnit.Framework;
-using NzbDrone.Core.Books;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.ThingiProvider;
