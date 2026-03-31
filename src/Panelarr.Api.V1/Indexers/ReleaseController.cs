@@ -28,8 +28,8 @@ namespace Panelarr.Api.V1.Indexers
         private readonly IMakeDownloadDecision _downloadDecisionMaker;
         private readonly IPrioritizeDownloadDecision _prioritizeDownloadDecision;
         private readonly IDownloadService _downloadService;
-        private readonly ISeriesService _authorService;
-        private readonly IIssueService _bookService;
+        private readonly ISeriesService _seriesService;
+        private readonly IIssueService _issueService;
         private readonly IParsingService _parsingService;
         private readonly Logger _logger;
 
@@ -40,8 +40,8 @@ namespace Panelarr.Api.V1.Indexers
                              IMakeDownloadDecision downloadDecisionMaker,
                              IPrioritizeDownloadDecision prioritizeDownloadDecision,
                              IDownloadService downloadService,
-                             ISeriesService authorService,
-                             IIssueService bookService,
+                             ISeriesService seriesService,
+                             IIssueService issueService,
                              IParsingService parsingService,
                              ICacheManager cacheManager,
                              Logger logger)
@@ -51,8 +51,8 @@ namespace Panelarr.Api.V1.Indexers
             _downloadDecisionMaker = downloadDecisionMaker;
             _prioritizeDownloadDecision = prioritizeDownloadDecision;
             _downloadService = downloadService;
-            _authorService = authorService;
-            _bookService = bookService;
+            _seriesService = seriesService;
+            _issueService = issueService;
             _parsingService = parsingService;
             _logger = logger;
 
@@ -82,22 +82,22 @@ namespace Panelarr.Api.V1.Indexers
                 {
                     if (release.IssueId.HasValue)
                     {
-                        var issue = _bookService.GetIssue(release.IssueId.Value);
+                        var issue = _issueService.GetIssue(release.IssueId.Value);
 
-                        remoteBook.Series = _authorService.GetSeries(issue.SeriesId);
+                        remoteBook.Series = _seriesService.GetSeries(issue.SeriesId);
                         remoteBook.Books = new List<Issue> { issue };
                     }
                     else if (release.SeriesId.HasValue)
                     {
-                        var author = _authorService.GetSeries(release.SeriesId.Value);
-                        var issues = _parsingService.GetBooks(remoteBook.ParsedIssueInfo, author);
+                        var series = _seriesService.GetSeries(release.SeriesId.Value);
+                        var issues = _parsingService.GetBooks(remoteBook.ParsedIssueInfo, series);
 
                         if (issues.Empty())
                         {
                             throw new NzbDroneClientException(HttpStatusCode.NotFound, "Unable to parse issues in the release");
                         }
 
-                        remoteBook.Series = author;
+                        remoteBook.Series = series;
                         remoteBook.Books = issues;
                     }
                     else
@@ -111,7 +111,7 @@ namespace Panelarr.Api.V1.Indexers
 
                     if (issues.Empty() && release.IssueId.HasValue)
                     {
-                        var issue = _bookService.GetIssue(release.IssueId.Value);
+                        var issue = _issueService.GetIssue(release.IssueId.Value);
 
                         issues = new List<Issue> { issue };
                     }

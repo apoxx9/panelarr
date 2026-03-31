@@ -15,7 +15,7 @@ namespace Panelarr.Api.V1.Series
             _fileNameBuilder = fileNameBuilder;
         }
 
-        protected override string GetDefaultMessageTemplate() => "Root folder path '{rootFolderPath}' contains series folder '{authorFolder}'";
+        protected override string GetDefaultMessageTemplate() => "Root folder path '{rootFolderPath}' contains series folder '{seriesFolder}'";
 
         protected override bool IsValid(PropertyValidatorContext context)
         {
@@ -24,7 +24,7 @@ namespace Panelarr.Api.V1.Series
                 return true;
             }
 
-            if (context.ParentContext.InstanceToValidate is not SeriesResource authorResource)
+            if (context.ParentContext.InstanceToValidate is not SeriesResource seriesResource)
             {
                 return true;
             }
@@ -37,20 +37,20 @@ namespace Panelarr.Api.V1.Series
             }
 
             var rootFolder = new DirectoryInfo(rootFolderPath!).Name;
-            var author = authorResource.ToModel();
-            var authorFolder = _fileNameBuilder.GetSeriesFolder(author);
+            var series = seriesResource.ToModel();
+            var seriesFolder = _fileNameBuilder.GetSeriesFolder(series);
 
             context.MessageFormatter.AppendArgument("rootFolderPath", rootFolderPath);
-            context.MessageFormatter.AppendArgument("authorFolder", authorFolder);
+            context.MessageFormatter.AppendArgument("seriesFolder", seriesFolder);
 
-            if (authorFolder == rootFolder)
+            if (seriesFolder == rootFolder)
             {
                 return false;
             }
 
-            var distance = authorFolder.LevenshteinDistance(rootFolder);
+            var distance = seriesFolder.LevenshteinDistance(rootFolder);
 
-            return distance >= Math.Max(1, authorFolder.Length * 0.2);
+            return distance >= Math.Max(1, seriesFolder.Length * 0.2);
         }
     }
 }

@@ -8,7 +8,6 @@ import SeriesDetailsPageConnector from 'Series/Details/SeriesDetailsPageConnecto
 import SeriesIndexConnector from 'Series/Index/SeriesIndexConnector';
 import IssueDetailsPageConnector from 'Issue/Details/IssueDetailsPageConnector';
 import IssueIndexConnector from 'Issue/Index/IssueIndexConnector';
-import IssueshelfConnector from 'Issueshelf/IssueshelfConnector';
 import CalendarPageConnector from 'Calendar/CalendarPageConnector';
 import NotFound from 'Components/NotFound';
 import Switch from 'Components/Router/Switch';
@@ -80,12 +79,6 @@ function AppRoutes(props) {
       <Route
         path="/add/search"
         component={AddNewItemConnector}
-      />
-
-      <Route
-        exact={true}
-        path="/shelf"
-        component={IssueshelfConnector}
       />
 
       <Route

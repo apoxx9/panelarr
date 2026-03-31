@@ -16,14 +16,14 @@ namespace Panelarr.Api.V1.Calendar
     [V1FeedController("calendar")]
     public class CalendarFeedController : Controller
     {
-        private readonly IIssueService _bookService;
-        private readonly ISeriesService _authorService;
+        private readonly IIssueService _issueService;
+        private readonly ISeriesService _seriesService;
         private readonly ITagService _tagService;
 
-        public CalendarFeedController(IIssueService bookService, ISeriesService authorService, ITagService tagService)
+        public CalendarFeedController(IIssueService issueService, ISeriesService seriesService, ITagService tagService)
         {
-            _bookService = bookService;
-            _authorService = authorService;
+            _issueService = issueService;
+            _seriesService = seriesService;
             _tagService = tagService;
         }
 
@@ -39,8 +39,8 @@ namespace Panelarr.Api.V1.Calendar
                 tags.AddRange(tagList.Split(',').Select(_tagService.GetTag).Select(t => t.Id));
             }
 
-            var issues = _bookService.IssuesBetweenDates(start, end, unmonitored);
-            var allSeries = _authorService.GetAllSeries().ToDictionary(s => s.Id);
+            var issues = _issueService.IssuesBetweenDates(start, end, unmonitored);
+            var allSeries = _seriesService.GetAllSeries().ToDictionary(s => s.Id);
             var calendar = new Ical.Net.Calendar
             {
                 ProductId = "-//panelarr.com//Panelarr//EN"
@@ -52,12 +52,12 @@ namespace Panelarr.Api.V1.Calendar
 
             foreach (var issue in issues.OrderBy(v => v.ReleaseDate.Value))
             {
-                if (!allSeries.TryGetValue(issue.SeriesId, out var author))
+                if (!allSeries.TryGetValue(issue.SeriesId, out var series))
                 {
                     continue;
                 }
 
-                if (tags.Any() && tags.None(author.Tags.Contains))
+                if (tags.Any() && tags.None(series.Tags.Contains))
                 {
                     continue;
                 }
@@ -73,7 +73,7 @@ namespace Panelarr.Api.V1.Calendar
                 occurrence.End = occurrence.Start;
                 occurrence.IsAllDay = true;
 
-                occurrence.Summary = $"{author.Name} - {issue.Title}";
+                occurrence.Summary = $"{series.Name} - {issue.Title}";
             }
 
             var serializer = (IStringSerializer)new SerializerFactory().Build(calendar.GetType(), new SerializationContext());
