@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     [TestFixture]
     public class RepackSpecificationFixture : CoreTest<RepackSpecification>
     {
-        private ParsedBookInfo _parsedBookInfo;
+        private ParsedIssueInfo _parsedBookInfo;
         private List<Issue> _books;
         private List<ComicFile> _trackFiles;
 
@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             Mocker.Resolve<UpgradableSpecification>();
 
-            _parsedBookInfo = Builder<ParsedBookInfo>.CreateNew()
+            _parsedBookInfo = Builder<ParsedIssueInfo>.CreateNew()
                                                            .With(p => p.Quality = new QualityModel(Quality.CBZ_HD,
                                                                new Revision(2, 0, false)))
                                                            .With(p => p.ReleaseGroup = "Panelarr")
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_return_true_if_it_is_not_a_repack()
         {
             var remoteBook = Builder<RemoteBook>.CreateNew()
-                                                      .With(e => e.ParsedBookInfo = _parsedBookInfo)
+                                                      .With(e => e.ParsedIssueInfo = _parsedBookInfo)
                                                       .With(e => e.Books = _books)
                                                       .Build();
 
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parsedBookInfo.Quality.Revision.IsRepack = true;
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
-                                                      .With(e => e.ParsedBookInfo = _parsedBookInfo)
+                                                      .With(e => e.ParsedIssueInfo = _parsedBookInfo)
                                                       .With(e => e.Books = _books)
                                                       .Build();
 
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
-                                                      .With(e => e.ParsedBookInfo = _parsedBookInfo)
+                                                      .With(e => e.ParsedIssueInfo = _parsedBookInfo)
                                                       .With(e => e.Books = _books)
                                                       .Build();
 
@@ -124,7 +124,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
-                                                      .With(e => e.ParsedBookInfo = _parsedBookInfo)
+                                                      .With(e => e.ParsedIssueInfo = _parsedBookInfo)
                                                       .With(e => e.Books = _books)
                                                       .Build();
 
@@ -153,7 +153,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _trackFiles.First().ReleaseGroup = "NotPanelarr";
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
-                                                      .With(e => e.ParsedBookInfo = _parsedBookInfo)
+                                                      .With(e => e.ParsedIssueInfo = _parsedBookInfo)
                                                       .With(e => e.Books = _books)
                                                       .Build();
 
@@ -180,7 +180,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
-                                                      .With(e => e.ParsedBookInfo = _parsedBookInfo)
+                                                      .With(e => e.ParsedIssueInfo = _parsedBookInfo)
                                                       .With(e => e.Books = _books)
                                                       .Build();
 
@@ -207,7 +207,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
-                                                      .With(e => e.ParsedBookInfo = _parsedBookInfo)
+                                                      .With(e => e.ParsedIssueInfo = _parsedBookInfo)
                                                       .With(e => e.Books = _books)
                                                       .Build();
 
@@ -236,7 +236,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
 
             var remoteBook = Builder<RemoteBook>.CreateNew()
-                                                      .With(e => e.ParsedBookInfo = _parsedBookInfo)
+                                                      .With(e => e.ParsedIssueInfo = _parsedBookInfo)
                                                       .With(e => e.Books = _books)
                                                       .Build();
 
@@ -266,7 +266,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
 
             var remoteAlbum = Builder<RemoteBook>.CreateNew()
-                                                      .With(e => e.ParsedBookInfo = _parsedBookInfo)
+                                                      .With(e => e.ParsedIssueInfo = _parsedBookInfo)
                                                       .With(e => e.Books = _books)
                                                       .Build();
 
@@ -295,7 +295,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
 
             var remoteAlbum = Builder<RemoteBook>.CreateNew()
-                                                      .With(e => e.ParsedBookInfo = _parsedBookInfo)
+                                                      .With(e => e.ParsedIssueInfo = _parsedBookInfo)
                                                       .With(e => e.Books = _books)
                                                       .Build();
 
@@ -323,7 +323,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             }).ToList();
 
             var remoteAlbum = Builder<RemoteBook>.CreateNew()
-                                                      .With(e => e.ParsedBookInfo = _parsedBookInfo)
+                                                      .With(e => e.ParsedIssueInfo = _parsedBookInfo)
                                                       .With(e => e.Books = _books)
                                                       .Build();
 

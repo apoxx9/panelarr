@@ -72,12 +72,12 @@ namespace NzbDrone.Core.Test.ImportListTests
 
         private void WithSeriesId()
         {
-            _importListReports.First().SeriesGoodreadsId = "f59c5520-5f46-4d2c-b2c4-822eabf53419";
+            _importListReports.First().ForeignSeriesId = "f59c5520-5f46-4d2c-b2c4-822eabf53419";
         }
 
         private void WithBookId()
         {
-            _importListReports.First().EditionGoodreadsId = "1234";
+            _importListReports.First().ForeignEditionId = "1234";
         }
 
         private void WithSecondBook()
@@ -85,10 +85,10 @@ namespace NzbDrone.Core.Test.ImportListTests
             var importListItem2 = new ImportListItemInfo
             {
                 Series = "Linkin Park",
-                SeriesGoodreadsId = "f59c5520-5f46-4d2c-b2c4-822eabf53419",
+                ForeignSeriesId = "f59c5520-5f46-4d2c-b2c4-822eabf53419",
                 Issue = "Meteora 2",
-                EditionGoodreadsId = "5678",
-                IssueGoodreadsId = "8765"
+                ForeignEditionId = "5678",
+                ForeignIssueId = "8765"
             };
             _importListReports.Add(importListItem2);
         }
@@ -96,15 +96,15 @@ namespace NzbDrone.Core.Test.ImportListTests
         private void WithExistingSeries()
         {
             Mocker.GetMock<ISeriesService>()
-                .Setup(v => v.FindById(_importListReports.First().SeriesGoodreadsId))
-                .Returns(new Series { Id = 1, ForeignSeriesId = _importListReports.First().SeriesGoodreadsId });
+                .Setup(v => v.FindById(_importListReports.First().ForeignSeriesId))
+                .Returns(new Series { Id = 1, ForeignSeriesId = _importListReports.First().ForeignSeriesId });
         }
 
         private void WithExistingBook()
         {
             Mocker.GetMock<IBookService>()
                 .Setup(v => v.FindById("4321"))
-                .Returns(new Issue { Id = 1, ForeignIssueId = _importListReports.First().IssueGoodreadsId });
+                .Returns(new Issue { Id = 1, ForeignIssueId = _importListReports.First().ForeignIssueId });
         }
 
         private void WithExcludedSeries()

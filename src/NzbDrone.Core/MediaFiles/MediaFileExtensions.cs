@@ -16,8 +16,6 @@ namespace NzbDrone.Core.MediaFiles
                 { ".cbr", Quality.CBR },
                 { ".cb7", Quality.CB7 },
                 { ".pdf", Quality.PDF },
-                { ".epub", Quality.EPUB },
-                { ".kepub", Quality.EPUB },
             };
         }
 

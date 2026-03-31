@@ -4,14 +4,12 @@ using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Calibre;
 using NzbDrone.Core.Books.Events;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.RootFolders;
 
 namespace NzbDrone.Core.MediaFiles
 {
@@ -33,8 +31,6 @@ namespace NzbDrone.Core.MediaFiles
         private readonly ISeriesService _authorService;
         private readonly IConfigService _configService;
         private readonly IEventAggregator _eventAggregator;
-        private readonly IRootFolderService _rootFolderService;
-        private readonly ICalibreProxy _calibre;
         private readonly Logger _logger;
 
         public MediaFileDeletionService(IDiskProvider diskProvider,
@@ -43,8 +39,6 @@ namespace NzbDrone.Core.MediaFiles
                                         ISeriesService authorService,
                                         IConfigService configService,
                                         IEventAggregator eventAggregator,
-                                        IRootFolderService rootFolderService,
-                                        ICalibreProxy calibre,
                                         Logger logger)
         {
             _diskProvider = diskProvider;
@@ -53,8 +47,6 @@ namespace NzbDrone.Core.MediaFiles
             _authorService = authorService;
             _configService = configService;
             _eventAggregator = eventAggregator;
-            _rootFolderService = rootFolderService;
-            _calibre = calibre;
             _logger = logger;
         }
 
@@ -105,19 +97,9 @@ namespace NzbDrone.Core.MediaFiles
 
         private void DeleteFile(ComicFile comicFile, string subfolder = "")
         {
-            var rootFolder = _rootFolderService.GetBestRootFolder(comicFile.Path);
-            var isCalibre = rootFolder.IsCalibreLibrary && rootFolder.CalibreSettings != null;
-
             try
             {
-                if (!isCalibre)
-                {
-                    _recycleBinProvider.DeleteFile(comicFile.Path, subfolder);
-                }
-                else
-                {
-                    _calibre.DeleteBook(comicFile, rootFolder.CalibreSettings);
-                }
+                _recycleBinProvider.DeleteFile(comicFile.Path, subfolder);
             }
             catch (Exception e)
             {
@@ -129,20 +111,7 @@ namespace NzbDrone.Core.MediaFiles
         [EventHandleOrder(EventHandleOrder.First)]
         public void Handle(SeriesDeletedEvent message)
         {
-            if (message.DeleteFiles)
-            {
-                var author = message.Series;
-
-                var rootFolder = _rootFolderService.GetBestRootFolder(message.Series.Path);
-                var isCalibre = rootFolder.IsCalibreLibrary && rootFolder.CalibreSettings != null;
-
-                if (isCalibre)
-                {
-                    // use metadataId instead of authorId so that query works even after author deleted
-                    var issues = _mediaFileService.GetFilesBySeriesMetadataId(author.SeriesMetadataId);
-                    _calibre.DeleteBooks(issues, rootFolder.CalibreSettings);
-                }
-            }
+            // No Calibre-specific handling needed; file deletion is handled in HandleAsync
         }
 
         public void HandleAsync(SeriesDeletedEvent message)
@@ -150,41 +119,34 @@ namespace NzbDrone.Core.MediaFiles
             if (message.DeleteFiles)
             {
                 var author = message.Series;
+                var allSeries = _authorService.AllSeriesPaths();
 
-                var rootFolder = _rootFolderService.GetBestRootFolder(message.Series.Path);
-                var isCalibre = rootFolder.IsCalibreLibrary && rootFolder.CalibreSettings != null;
-
-                if (!isCalibre)
+                foreach (var s in allSeries)
                 {
-                    var allSeries = _authorService.AllSeriesPaths();
-
-                    foreach (var s in allSeries)
+                    if (s.Key == author.Id)
                     {
-                        if (s.Key == author.Id)
-                        {
-                            continue;
-                        }
-
-                        if (author.Path.IsParentPath(s.Value))
-                        {
-                            _logger.Error("Series path: '{0}' is a parent of another author, not deleting files.", author.Path);
-                            return;
-                        }
-
-                        if (author.Path.PathEquals(s.Value))
-                        {
-                            _logger.Error("Series path: '{0}' is the same as another author, not deleting files.", author.Path);
-                            return;
-                        }
+                        continue;
                     }
 
-                    if (_diskProvider.FolderExists(message.Series.Path))
+                    if (author.Path.IsParentPath(s.Value))
                     {
-                        _recycleBinProvider.DeleteFolder(message.Series.Path);
+                        _logger.Error("Series path: '{0}' is a parent of another author, not deleting files.", author.Path);
+                        return;
                     }
 
-                    _eventAggregator.PublishEvent(new DeleteCompletedEvent());
+                    if (author.Path.PathEquals(s.Value))
+                    {
+                        _logger.Error("Series path: '{0}' is the same as another author, not deleting files.", author.Path);
+                        return;
+                    }
                 }
+
+                if (_diskProvider.FolderExists(message.Series.Path))
+                {
+                    _recycleBinProvider.DeleteFolder(message.Series.Path);
+                }
+
+                _eventAggregator.PublishEvent(new DeleteCompletedEvent());
             }
         }
 

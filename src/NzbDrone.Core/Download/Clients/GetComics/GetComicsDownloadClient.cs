@@ -141,7 +141,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
             foreach (var file in _diskProvider.GetFiles(downloadFolder, false))
             {
                 var extension = Path.GetExtension(file).ToLowerInvariant();
-                if (extension != ".cbz" && extension != ".cbr" && extension != ".pdf" && extension != ".zip" && extension != ".rar" && extension != ".epub")
+                if (extension != ".cbz" && extension != ".cbr" && extension != ".pdf" && extension != ".zip" && extension != ".rar")
                 {
                     continue;
                 }
@@ -336,8 +336,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
                      ext.Equals(".cbr", StringComparison.OrdinalIgnoreCase) ||
                      ext.Equals(".pdf", StringComparison.OrdinalIgnoreCase) ||
                      ext.Equals(".zip", StringComparison.OrdinalIgnoreCase) ||
-                     ext.Equals(".rar", StringComparison.OrdinalIgnoreCase) ||
-                     ext.Equals(".epub", StringComparison.OrdinalIgnoreCase)))
+                     ext.Equals(".rar", StringComparison.OrdinalIgnoreCase)))
                 {
                     return ext;
                 }

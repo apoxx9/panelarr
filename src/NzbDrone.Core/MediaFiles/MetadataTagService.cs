@@ -23,16 +23,12 @@ namespace NzbDrone.Core.MediaFiles
         IExecute<RetagSeriesCommand>
     {
         private readonly IAudioTagService _audioTagService;
-        private readonly IEBookTagService _eBookTagService;
         private readonly Logger _logger;
 
         public MetadataTagService(IAudioTagService audioTagService,
-            IEBookTagService eBookTagService,
             Logger logger)
         {
             _audioTagService = audioTagService;
-            _eBookTagService = eBookTagService;
-
             _logger = logger;
         }
 
@@ -44,7 +40,7 @@ namespace NzbDrone.Core.MediaFiles
             }
             else
             {
-                return _eBookTagService.ReadTags(file);
+                return new ParsedTrackInfo();
             }
         }
 
@@ -55,43 +51,30 @@ namespace NzbDrone.Core.MediaFiles
             {
                 _audioTagService.WriteTags(comicFile, newDownload, force);
             }
-            else
-            {
-                _eBookTagService.WriteTags(comicFile, newDownload, force);
-            }
         }
 
         public void SyncTags(List<Issue> issues)
         {
             _audioTagService.SyncTags(issues);
-            _eBookTagService.SyncTags(issues);
         }
 
         public List<RetagComicFilePreview> GetRetagPreviewsBySeries(int authorId)
         {
-            var previews = _audioTagService.GetRetagPreviewsBySeries(authorId);
-            previews.AddRange(_eBookTagService.GetRetagPreviewsBySeries(authorId));
-
-            return previews;
+            return _audioTagService.GetRetagPreviewsBySeries(authorId);
         }
 
         public List<RetagComicFilePreview> GetRetagPreviewsByBook(int bookId)
         {
-            var previews = _audioTagService.GetRetagPreviewsByBook(bookId);
-            previews.AddRange(_eBookTagService.GetRetagPreviewsByBook(bookId));
-
-            return previews;
+            return _audioTagService.GetRetagPreviewsByBook(bookId);
         }
 
         public void Execute(RetagFilesCommand message)
         {
-            _eBookTagService.RetagFiles(message);
             _audioTagService.RetagFiles(message);
         }
 
         public void Execute(RetagSeriesCommand message)
         {
-            _eBookTagService.RetagSeries(message);
             _audioTagService.RetagSeries(message);
         }
     }

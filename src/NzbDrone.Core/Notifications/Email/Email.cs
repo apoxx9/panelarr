@@ -145,11 +145,11 @@ namespace NzbDrone.Core.Notifications.Email
                     {
                         var bytes = System.IO.File.ReadAllBytes(url);
                         builder.Attachments.Add(url, bytes);
-                        _logger.Trace("Attaching ebook file: {0}", url);
+                        _logger.Trace("Attaching comic file: {0}", url);
                     }
                     else
                     {
-                        _logger.Trace("Skipping audiobook file: {0}", url);
+                        _logger.Trace("Skipping non-comic file: {0}", url);
                     }
                 }
 

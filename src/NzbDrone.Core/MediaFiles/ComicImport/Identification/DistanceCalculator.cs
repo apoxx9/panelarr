@@ -21,8 +21,6 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
         private static readonly RegexReplace CleanTitleCruft = new RegexReplace(@"\((?:unabridged)\)", string.Empty, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private static readonly List<string> EbookFormats = new List<string> { "Kindle Edition", "Nook", "ebook" };
-
         private static readonly List<string> AudiobookFormats = new List<string> { "Audiobook", "Audio CD", "Audio Cassette", "Audible Audio", "CD-ROM", "MP3 CD" };
 
         public static Distance IssueDistance(List<LocalBook> localTracks, Issue issue)

@@ -90,7 +90,6 @@ namespace NzbDrone.Core.Parser
                 "cbr" => ComicFormat.CBR,
                 "cb7" => ComicFormat.CB7,
                 "pdf" => ComicFormat.PDF,
-                "epub" => ComicFormat.EPUB,
                 _ => ComicFormat.Unknown
             };
 
@@ -251,7 +250,6 @@ namespace NzbDrone.Core.Parser
                 ComicFormat.CBR => Quality.CBR,
                 ComicFormat.CB7 => Quality.CB7,
                 ComicFormat.PDF => Quality.PDF,
-                ComicFormat.EPUB => Quality.EPUB,
                 _ => Quality.Unknown
             };
         }

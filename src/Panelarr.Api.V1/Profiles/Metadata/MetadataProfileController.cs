@@ -29,9 +29,9 @@ namespace Panelarr.Api.V1.Profiles.Metadata
                     .Trim(',')
                     .Split(',')
                     .Select(y => y.Trim())
-                    .All(y => y == "null" || NzbDrone.Core.Books.Calibre.Extensions.KnownLanguages.Contains(y)))
+                    .All(y => y == "null" || y.IsNotNullOrWhiteSpace()))
                 .When(x => x.AllowedLanguages.IsNotNullOrWhiteSpace())
-                .WithMessage("Unknown languages");
+                .WithMessage("Invalid languages");
         }
 
         [RestPostById]

@@ -342,12 +342,6 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                         Monitor = rootFolder.DefaultMonitorOption
                     };
 
-                    if (rootFolder.IsCalibreLibrary)
-                    {
-                        // calibre has series / issue / files
-                        series.Path = path.GetParentPath().GetParentPath();
-                    }
-
                     try
                     {
                         dbSeries = _addSeriesService.AddSeries(series, false);
@@ -483,7 +477,6 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                 "cbr" => ComicFormat.CBR,
                 "cb7" => ComicFormat.CB7,
                 "pdf" => ComicFormat.PDF,
-                "epub" or "kepub" => ComicFormat.EPUB,
                 _ => ComicFormat.Unknown
             };
         }

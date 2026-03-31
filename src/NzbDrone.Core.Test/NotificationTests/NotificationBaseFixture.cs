@@ -74,14 +74,14 @@ namespace NzbDrone.Core.Test.NotificationTests
                 TestLogger.Info("OnSeriesDelete was called");
             }
 
-            public override void OnBookDelete(IssueDeleteMessage message)
+            public override void OnIssueDelete(IssueDeleteMessage message)
             {
-                TestLogger.Info("OnBookDelete was called");
+                TestLogger.Info("OnIssueDelete was called");
             }
 
-            public override void OnBookFileDelete(ComicFileDeleteMessage message)
+            public override void OnComicFileDelete(ComicFileDeleteMessage message)
             {
-                TestLogger.Info("OnBookFileDelete was called");
+                TestLogger.Info("OnComicFileDelete was called");
             }
 
             public override void OnHealthIssue(NzbDrone.Core.HealthCheck.HealthCheck author)
@@ -99,9 +99,9 @@ namespace NzbDrone.Core.Test.NotificationTests
                 TestLogger.Info("OnImportFailure was called");
             }
 
-            public override void OnBookRetag(IssueRetagMessage message)
+            public override void OnIssueRetag(IssueRetagMessage message)
             {
-                TestLogger.Info("OnBookRetag was called");
+                TestLogger.Info("OnIssueRetag was called");
             }
 
             public override void OnApplicationUpdate(ApplicationUpdateMessage updateMessage)
@@ -145,12 +145,12 @@ namespace NzbDrone.Core.Test.NotificationTests
             notification.SupportsOnHealthIssue.Should().BeTrue();
             notification.SupportsOnSeriesAdded.Should().BeTrue();
             notification.SupportsOnSeriesDelete.Should().BeTrue();
-            notification.SupportsOnBookDelete.Should().BeTrue();
-            notification.SupportsOnBookFileDelete.Should().BeTrue();
-            notification.SupportsOnBookFileDeleteForUpgrade.Should().BeTrue();
+            notification.SupportsOnIssueDelete.Should().BeTrue();
+            notification.SupportsOnComicFileDelete.Should().BeTrue();
+            notification.SupportsOnComicFileDeleteForUpgrade.Should().BeTrue();
             notification.SupportsOnDownloadFailure.Should().BeTrue();
             notification.SupportsOnImportFailure.Should().BeTrue();
-            notification.SupportsOnBookRetag.Should().BeTrue();
+            notification.SupportsOnIssueRetag.Should().BeTrue();
             notification.SupportsOnApplicationUpdate.Should().BeTrue();
         }
 
@@ -165,13 +165,13 @@ namespace NzbDrone.Core.Test.NotificationTests
             notification.SupportsOnRename.Should().BeFalse();
             notification.SupportsOnSeriesAdded.Should().BeFalse();
             notification.SupportsOnSeriesDelete.Should().BeFalse();
-            notification.SupportsOnBookDelete.Should().BeFalse();
-            notification.SupportsOnBookFileDelete.Should().BeFalse();
-            notification.SupportsOnBookFileDeleteForUpgrade.Should().BeFalse();
+            notification.SupportsOnIssueDelete.Should().BeFalse();
+            notification.SupportsOnComicFileDelete.Should().BeFalse();
+            notification.SupportsOnComicFileDeleteForUpgrade.Should().BeFalse();
             notification.SupportsOnHealthIssue.Should().BeFalse();
             notification.SupportsOnDownloadFailure.Should().BeFalse();
             notification.SupportsOnImportFailure.Should().BeFalse();
-            notification.SupportsOnBookRetag.Should().BeFalse();
+            notification.SupportsOnIssueRetag.Should().BeFalse();
             notification.SupportsOnApplicationUpdate.Should().BeFalse();
         }
     }

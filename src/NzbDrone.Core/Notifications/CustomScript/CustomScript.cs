@@ -133,7 +133,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
             environmentVariables.Add("Panelarr_Series_Name", author.Name);
             environmentVariables.Add("Panelarr_Series_Path", author.Path);
-            environmentVariables.Add("Panelarr_Series_GoodreadsId", author.ForeignSeriesId);
+            environmentVariables.Add("Panelarr_Series_ForeignId", author.ForeignSeriesId);
             environmentVariables.Add("Panelarr_Series_DeletedFiles", deleteMessage.DeletedFiles.ToString());
 
             ExecuteScript(environmentVariables);
@@ -150,10 +150,10 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
             environmentVariables.Add("Panelarr_Series_Name", author.Name);
             environmentVariables.Add("Panelarr_Series_Path", author.Path);
-            environmentVariables.Add("Panelarr_Series_GoodreadsId", author.ForeignSeriesId);
+            environmentVariables.Add("Panelarr_Series_ForeignId", author.ForeignSeriesId);
             environmentVariables.Add("Panelarr_Book_Id", issue.Id.ToString());
             environmentVariables.Add("Panelarr_Book_Title", issue.Title);
-            environmentVariables.Add("Panelarr_Book_GoodreadsId", issue.ForeignIssueId);
+            environmentVariables.Add("Panelarr_Book_ForeignId", issue.ForeignIssueId);
             environmentVariables.Add("Panelarr_Book_DeletedFiles", deleteMessage.DeletedFiles.ToString());
 
             ExecuteScript(environmentVariables);
@@ -171,10 +171,10 @@ namespace NzbDrone.Core.Notifications.CustomScript
             environmentVariables.Add("Panelarr_Delete_Reason", deleteMessage.Reason.ToString());
             environmentVariables.Add("Panelarr_Series_Id", author.Id.ToString());
             environmentVariables.Add("Panelarr_Series_Name", author.Name);
-            environmentVariables.Add("Panelarr_Series_GoodreadsId", author.ForeignSeriesId);
+            environmentVariables.Add("Panelarr_Series_ForeignId", author.ForeignSeriesId);
             environmentVariables.Add("Panelarr_Book_Id", issue.Id.ToString());
             environmentVariables.Add("Panelarr_Book_Title", issue.Title);
-            environmentVariables.Add("Panelarr_Book_GoodreadsId", issue.ForeignIssueId);
+            environmentVariables.Add("Panelarr_Book_ForeignId", issue.ForeignIssueId);
             environmentVariables.Add("Panelarr_BookFile_Id", comicFile.Id.ToString());
             environmentVariables.Add("Panelarr_BookFile_Path", comicFile.Path);
             environmentVariables.Add("Panelarr_BookFile_Quality", comicFile.Quality.Quality.Name);

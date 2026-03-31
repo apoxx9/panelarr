@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
         private Issue _book;
         private QualityProfile _profile;
         private ReleaseInfo _release;
-        private ParsedBookInfo _parsedBookInfo;
+        private ParsedIssueInfo _parsedBookInfo;
         private RemoteBook _remoteBook;
         private List<PendingRelease> _heldReleases;
 
@@ -54,13 +54,13 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
 
             _release = Builder<ReleaseInfo>.CreateNew().Build();
 
-            _parsedBookInfo = Builder<ParsedBookInfo>.CreateNew().Build();
+            _parsedBookInfo = Builder<ParsedIssueInfo>.CreateNew().Build();
             _parsedBookInfo.Quality = new QualityModel(Quality.CBR);
 
             _remoteBook = new RemoteBook();
             _remoteBook.Books = new List<Issue> { _book };
             _remoteBook.Series = _author;
-            _remoteBook.ParsedBookInfo = _parsedBookInfo;
+            _remoteBook.ParsedIssueInfo = _parsedBookInfo;
             _remoteBook.Release = _release;
 
             _temporarilyRejected = new DownloadDecision(_remoteBook, new Rejection("Temp Rejected", RejectionType.Temporary));
@@ -84,7 +84,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
                   .Returns(new List<Series> { _author });
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetBooks(It.IsAny<ParsedBookInfo>(), _author, null))
+                  .Setup(s => s.GetBooks(It.IsAny<ParsedIssueInfo>(), _author, null))
                   .Returns(new List<Issue> { _book });
 
             Mocker.GetMock<IPrioritizeDownloadDecision>()
@@ -101,7 +101,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
                                                    .All()
                                                    .With(h => h.SeriesId = _author.Id)
                                                    .With(h => h.Release = _release.JsonClone())
-                                                   .With(h => h.ParsedBookInfo = parsedEpisodeInfo)
+                                                   .With(h => h.ParsedIssueInfo = parsedEpisodeInfo)
                                                    .Build();
 
             _heldReleases.AddRange(heldReleases);

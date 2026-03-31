@@ -18,7 +18,6 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             { "asin", 10.0 },
             { "asin_missing", 0.1 },
             { "media_count", 1.0 },
-            { "ebook_format", 0.1 },
             { "audio_format", 0.1 },
             { "wrong_format", 5.0 },
             { "year", 1.0 },

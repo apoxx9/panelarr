@@ -99,7 +99,7 @@ namespace NzbDrone.Core.Books
             }
             catch (SeriesNotFoundException)
             {
-                _logger.Error("PanelarrId {0} was not found, it may have been removed from Goodreads.", newSeries.Metadata.Value.ForeignSeriesId);
+                _logger.Error("PanelarrId {0} was not found, it may have been removed from the metadata provider.", newSeries.Metadata.Value.ForeignSeriesId);
 
                 throw new ValidationException(new List<ValidationFailure>
                 {

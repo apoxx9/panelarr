@@ -166,7 +166,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             }
 
             // If the result isn't great and we haven't tried remote candidates, try looking for remote candidates
-            // Goodreads may have a better edition of a local issue
+            // The metadata provider may have a better edition of a local issue
             if (localBookRelease.Distance.NormalizedDistance() > 0.15 && !usedRemote)
             {
                 _logger.Debug("Match not good enough, trying remote candidates");

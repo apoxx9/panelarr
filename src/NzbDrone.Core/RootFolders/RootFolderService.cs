@@ -191,17 +191,7 @@ namespace NzbDrone.Core.RootFolders
 
         public void Handle(ModelEvent<RemotePathMapping> message)
         {
-            var commands = All()
-                .Where(x => x.IsCalibreLibrary &&
-                       x.CalibreSettings.Host == message.Model.Host &&
-                       x.Path.StartsWith(message.Model.LocalPath))
-                .Select(x => new RescanFoldersCommand(new List<string> { x.Path }, FilterFilesType.None, true, null))
-                .ToList();
-
-            if (commands.Any())
-            {
-                _commandQueueManager.PushMany(commands);
-            }
+            // Remote path mapping changed - no action needed without Calibre
         }
     }
 }

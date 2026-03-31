@@ -12,7 +12,6 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Books;
-using NzbDrone.Core.Books.Calibre;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.Events;
@@ -41,7 +40,6 @@ namespace NzbDrone.Core.MediaFiles
 
         private readonly IConfigService _configService;
         private readonly IDiskProvider _diskProvider;
-        private readonly ICalibreProxy _calibre;
         private readonly IMediaFileService _mediaFileService;
         private readonly IMakeImportDecision _importDecisionMaker;
         private readonly IImportApprovedBooks _importApprovedTracks;
@@ -53,7 +51,6 @@ namespace NzbDrone.Core.MediaFiles
 
         public DiskScanService(IConfigService configService,
                                IDiskProvider diskProvider,
-                               ICalibreProxy calibre,
                                IMediaFileService mediaFileService,
                                IMakeImportDecision importDecisionMaker,
                                IImportApprovedBooks importApprovedTracks,
@@ -65,8 +62,6 @@ namespace NzbDrone.Core.MediaFiles
         {
             _configService = configService;
             _diskProvider = diskProvider;
-            _calibre = calibre;
-
             _mediaFileService = mediaFileService;
             _importDecisionMaker = importDecisionMaker;
             _importApprovedTracks = importApprovedTracks;
@@ -251,22 +246,11 @@ namespace NzbDrone.Core.MediaFiles
 
             _logger.Trace(rootFolder.ToJson());
 
-            if (rootFolder != null && rootFolder.IsCalibreLibrary && rootFolder.CalibreSettings != null)
-            {
-                _logger.Info($"Getting issue list from calibre for {path}");
-                var paths = _calibre.GetAllBookFilePaths(rootFolder.CalibreSettings);
-                var folderPaths = paths.Where(x => path.IsParentPath(x));
+            _logger.Debug("Scanning '{0}' for comic files", path);
 
-                filesOnDisk = folderPaths.Select(x => _diskProvider.GetFileInfo(x));
-            }
-            else
-            {
-                _logger.Debug("Scanning '{0}' for ebook files", path);
+            filesOnDisk = _diskProvider.GetFileInfos(path, allDirectories);
 
-                filesOnDisk = _diskProvider.GetFileInfos(path, allDirectories);
-
-                _logger.Trace("{0} files were found in {1}", filesOnDisk.Count(), path);
-            }
+            _logger.Trace("{0} files were found in {1}", filesOnDisk.Count(), path);
 
             var mediaFileList = filesOnDisk.Where(file => MediaFileExtensions.AllExtensions.Contains(file.Extension))
                 .ToArray();
@@ -278,7 +262,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public string[] GetNonBookFiles(string path, bool allDirectories = true)
         {
-            _logger.Debug("Scanning '{0}' for non-ebook files", path);
+            _logger.Debug("Scanning '{0}' for non-comic files", path);
 
             var filesOnDisk = _diskProvider.GetFiles(path, allDirectories).ToList();
 
@@ -286,7 +270,7 @@ namespace NzbDrone.Core.MediaFiles
                                            .ToList();
 
             _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, path);
-            _logger.Debug("{0} non-ebook files were found in {1}", mediaFileList.Count, path);
+            _logger.Debug("{0} non-comic files were found in {1}", mediaFileList.Count, path);
 
             return mediaFileList.ToArray();
         }
@@ -314,7 +298,6 @@ namespace NzbDrone.Core.MediaFiles
                 "cbr" => Books.ComicFormat.CBR,
                 "cb7" => Books.ComicFormat.CB7,
                 "pdf" => Books.ComicFormat.PDF,
-                "epub" or "kepub" => Books.ComicFormat.EPUB,
                 _ => Books.ComicFormat.Unknown
             };
         }
