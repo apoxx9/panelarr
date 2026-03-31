@@ -9,11 +9,11 @@ namespace NzbDrone.Core.IndexerSearch.Definitions
         public string IssueIsbn { get; set; }
         public string Disambiguation { get; set; }
 
-        public string IssueQuery => GetQueryTitle(IssueTitle.SplitBookTitle(Series.Name).Item1);
+        public string IssueQuery => GetQueryTitle((IssueTitle ?? string.Empty).SplitBookTitle(Series?.Name ?? string.Empty).Item1);
 
         public override string ToString()
         {
-            return $"[{Series.Name} - {IssueTitle}]";
+            return $"[{Series?.Name} - {IssueTitle ?? "Unknown"}]";
         }
     }
 }

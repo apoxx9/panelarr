@@ -18,11 +18,14 @@ namespace NzbDrone.Core.IndexerSearch.Definitions
         public Series Series { get; set; }
         public List<Issue> Books { get; set; }
 
-        public string SeriesQuery => GetQueryTitle(Series.Name);
+        public string SeriesQuery => GetQueryTitle(Series?.Name ?? string.Empty);
 
         public static string GetQueryTitle(string title)
         {
-            Ensure.That(title, () => title).IsNotNullOrWhiteSpace();
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return string.Empty;
+            }
 
             // Most VA issues are listed as VA, not Various Series
             // TODO: Needed in Panelarr??
