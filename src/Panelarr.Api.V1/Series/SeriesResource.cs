@@ -55,13 +55,14 @@ namespace Panelarr.Api.V1.Series
         public int? Year { get; set; }
         public string SeriesType { get; set; }
         public int? VolumeNumber { get; set; }
+        public string PublisherName { get; set; }
 
         public SeriesStatisticsResource Statistics { get; set; }
     }
 
     public static class SeriesResourceMapper
     {
-        public static SeriesResource ToResource(this NzbDrone.Core.Issues.Series model)
+        public static SeriesResource ToResource(this NzbDrone.Core.Issues.Series model, string publisherName = null)
         {
             if (model == null)
             {
@@ -106,6 +107,7 @@ namespace Panelarr.Api.V1.Series
                 Year = model.Metadata.Value.Year,
                 SeriesType = model.Metadata.Value.SeriesType == NzbDrone.Core.Issues.SeriesType.Single ? null : model.Metadata.Value.SeriesType.ToString(),
                 VolumeNumber = model.Metadata.Value.VolumeNumber,
+                PublisherName = publisherName,
 
                 Statistics = new SeriesStatisticsResource()
             };
@@ -163,7 +165,7 @@ namespace Panelarr.Api.V1.Series
 
         public static List<SeriesResource> ToResource(this IEnumerable<NzbDrone.Core.Issues.Series> series)
         {
-            return series.Select(ToResource).ToList();
+            return series.Select(s => s.ToResource()).ToList();
         }
 
         public static List<NzbDrone.Core.Issues.Series> ToModel(this IEnumerable<SeriesResource> resources)

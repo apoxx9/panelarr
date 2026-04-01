@@ -39,6 +39,7 @@ namespace Panelarr.Api.V1.Series
         private readonly IIssueService _issueService;
         private readonly IAddSeriesService _addSeriesService;
         private readonly ISeriesStatisticsService _seriesStatisticsService;
+        private readonly IPublisherService _publisherService;
         private readonly IMapCoversToLocal _coverMapper;
         private readonly IManageCommandQueue _commandQueueManager;
         private readonly IRootFolderService _rootFolderService;
@@ -49,6 +50,7 @@ namespace Panelarr.Api.V1.Series
                             IIssueService bookService,
                             IAddSeriesService addSeriesService,
                             ISeriesStatisticsService seriesStatisticsService,
+                            IPublisherService publisherService,
                             IMapCoversToLocal coverMapper,
                             IManageCommandQueue commandQueueManager,
                             IRootFolderService rootFolderService,
@@ -69,6 +71,7 @@ namespace Panelarr.Api.V1.Series
             _issueService = bookService;
             _addSeriesService = addSeriesService;
             _seriesStatisticsService = seriesStatisticsService;
+            _publisherService = publisherService;
 
             _coverMapper = coverMapper;
             _commandQueueManager = commandQueueManager;
@@ -114,7 +117,8 @@ namespace Panelarr.Api.V1.Series
                 return null;
             }
 
-            var resource = series.ToResource();
+            var publisherName = ResolvePublisherName(series.Metadata?.Value?.PublisherId);
+            var resource = series.ToResource(publisherName);
             MapCoversToLocal(resource);
             FetchAndLinkSeriesStatistics(resource);
             LinkNextPreviousIssues(resource);
@@ -147,7 +151,11 @@ namespace Panelarr.Api.V1.Series
                 }
             }
 
-            var seriesResources = allSeries.ToResource();
+            var seriesResources = allSeries.Select(s =>
+            {
+                var pubName = ResolvePublisherName(s.Metadata?.Value?.PublisherId);
+                return s.ToResource(pubName);
+            }).ToList();
 
             MapCoversToLocal(seriesResources.ToArray());
             LinkNextPreviousIssues(seriesResources.ToArray());
@@ -307,6 +315,23 @@ namespace Panelarr.Api.V1.Series
         public void Handle(MediaCoversUpdatedEvent message)
         {
             BroadcastResourceChange(ModelAction.Updated, GetSeriesResource(message.Series));
+        }
+
+        private string ResolvePublisherName(int? publisherId)
+        {
+            if (!publisherId.HasValue)
+            {
+                return null;
+            }
+
+            try
+            {
+                return _publisherService.GetPublisher(publisherId.Value)?.Name;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

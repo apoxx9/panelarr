@@ -58,6 +58,7 @@ class IssueDetailsHeader extends Component {
       width,
       titleSlug,
       title,
+      issueNumber,
       seriesTitle,
       pageCount,
       overview,
@@ -119,6 +120,13 @@ class IssueDetailsHeader extends Component {
                   />
                 </div>
 
+                {
+                  !!issueNumber &&
+                    <div className={styles.issueNumber}>
+                      #{issueNumber}
+                    </div>
+                }
+
                 <div className={styles.title} style={{ width: marqueeWidth }}>
                   <Marquee text={title} />
                 </div>
@@ -128,15 +136,18 @@ class IssueDetailsHeader extends Component {
 
             <div className={styles.details}>
               <div>
-                {seriesTitle}
-              </div>
-
-              <div>
                 <SeriesNameLink
                   className={styles.seriesLink}
                   titleSlug={series.titleSlug}
                   seriesName={series.seriesName}
                 />
+
+                {
+                  series.publisherName &&
+                    <span className={styles.publisher}>
+                      {series.publisherName}
+                    </span>
+                }
 
                 {
                   !!pageCount &&
@@ -250,6 +261,7 @@ IssueDetailsHeader.propTypes = {
   width: PropTypes.number.isRequired,
   titleSlug: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
+  issueNumber: PropTypes.number,
   seriesTitle: PropTypes.string.isRequired,
   pageCount: PropTypes.number,
   overview: PropTypes.string,
