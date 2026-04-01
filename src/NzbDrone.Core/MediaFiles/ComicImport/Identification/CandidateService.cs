@@ -107,7 +107,26 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             _logger.Trace("Getting candidates for {0}", series);
             var candidateReleases = new List<CandidateEdition>();
 
+            // Try embedded metadata first, then download client title, then filename
             var bookTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
+
+            if (bookTag.IsNullOrWhiteSpace())
+            {
+                bookTag = localEdition.LocalIssues.MostCommon(x => x.DownloadClientIssueInfo?.IssueTitle) ?? "";
+            }
+
+            if (bookTag.IsNullOrWhiteSpace())
+            {
+                bookTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.CleanTitle) ?? "";
+            }
+
+            if (bookTag.IsNullOrWhiteSpace())
+            {
+                bookTag = localEdition.LocalIssues
+                    .Select(x => System.IO.Path.GetFileNameWithoutExtension(x.Path))
+                    .FirstOrDefault() ?? "";
+            }
+
             if (bookTag.IsNotNullOrWhiteSpace())
             {
                 var possibleIssues = _issueService.GetCandidates(series.SeriesMetadataId, bookTag);
@@ -115,11 +134,21 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 {
                     candidateReleases.AddRange(GetDbCandidatesByIssue(issue, includeExisting));
                 }
+            }
 
-                var possibleEditionIssues = _issueService.GetCandidates(series.SeriesMetadataId, bookTag);
-                foreach (var possibleIssue in possibleEditionIssues)
+            // If title matching found nothing, try matching by issue number
+            if (!candidateReleases.Any())
+            {
+                var issueNumberStr = System.Text.RegularExpressions.Regex.Match(bookTag, @"#?(\d+\.?\d*)").Groups[1].Value;
+                if (float.TryParse(issueNumberStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var issueNumber))
                 {
-                    candidateReleases.AddRange(GetDbCandidatesByIssue(possibleIssue, includeExisting));
+                    _logger.Debug("Title match failed for series {0}, trying issue number {1}", series.SeriesMetadataId, issueNumber);
+                    var allIssues = _issueService.GetIssuesBySeriesMetadataId(series.SeriesMetadataId);
+                    var matchByNumber = allIssues.Where(x => x.IssueNumber == issueNumber).ToList();
+                    foreach (var issue in matchByNumber)
+                    {
+                        candidateReleases.AddRange(GetDbCandidatesByIssue(issue, includeExisting));
+                    }
                 }
             }
 

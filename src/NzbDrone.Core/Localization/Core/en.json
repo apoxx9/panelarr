@@ -302,6 +302,7 @@
   "DeleteSelectedBookFilesMessageText": "Are you sure you want to delete the selected issue files?",
   "DeleteSelectedDownloadClients": "Delete Download Client(s)",
   "DeleteSelectedDownloadClientsMessageText": "Are you sure you want to delete {count} selected download client(s)?",
+  "DirectDownload": "Direct Download",
   "DeleteSelectedImportLists": "Delete Import List(s)",
   "DeleteSelectedImportListsMessageText": "Are you sure you want to delete {count} selected import list(s)?",
   "DeleteSelectedIndexers": "Delete Indexer(s)",

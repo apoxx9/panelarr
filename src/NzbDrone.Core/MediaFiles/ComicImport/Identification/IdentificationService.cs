@@ -152,6 +152,29 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
             GetBestRelease(localIssueRelease, candidateReleases, allLocalTracks, out var seenCandidate);
 
+            // If candidates were found but distance calc failed (e.g. no embedded metadata),
+            // and we have a series override, force-accept the best candidate.
+            // This handles direct-downloaded comics without ComicInfo.xml.
+            if (seenCandidate && localIssueRelease.Issue == null && idOverrides?.Series != null)
+            {
+                var candidateList = _candidateService.GetDbCandidatesFromTags(localIssueRelease, idOverrides, config.IncludeExisting);
+                if (candidateList.Count == 1)
+                {
+                    var forcedIssue = candidateList[0].Issue;
+                    _logger.Debug("Distance calc failed but single candidate found via series override, force-accepting: {0}", forcedIssue.Title);
+                    localIssueRelease.Issue = forcedIssue;
+                    localIssueRelease.Distance = new Distance();
+                    foreach (var localTrack in localIssueRelease.LocalIssues)
+                    {
+                        localTrack.Issue = forcedIssue;
+                        localTrack.Series = idOverrides.Series;
+                    }
+
+                    localIssueRelease.PopulateMatch(config.KeepAllEditions);
+                    return;
+                }
+            }
+
             if (!seenCandidate)
             {
                 // can't find any candidates even after using remote search

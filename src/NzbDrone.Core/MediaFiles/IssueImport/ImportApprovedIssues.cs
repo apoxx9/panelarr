@@ -35,6 +35,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
         private readonly IUpgradeMediaFiles _comicFileUpgrader;
         private readonly IMediaFileService _mediaFileService;
         private readonly IMetadataTagService _metadataTagService;
+        private readonly IComicFormatConverter _comicFormatConverter;
         private readonly ISeriesService _seriesService;
         private readonly IAddSeriesService _addSeriesService;
         private readonly IIssueService _issueService;
@@ -50,6 +51,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
         public ImportApprovedIssues(IUpgradeMediaFiles comicFileUpgrader,
                                    IMediaFileService mediaFileService,
                                    IMetadataTagService metadataTagService,
+                                   IComicFormatConverter comicFormatConverter,
                                    ISeriesService seriesService,
                                    IAddSeriesService addSeriesService,
                                    IIssueService bookService,
@@ -65,6 +67,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             _comicFileUpgrader = comicFileUpgrader;
             _mediaFileService = mediaFileService;
             _metadataTagService = metadataTagService;
+            _comicFormatConverter = comicFormatConverter;
             _seriesService = seriesService;
             _addSeriesService = addSeriesService;
             _issueService = bookService;
@@ -196,6 +199,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
 
                     if (!localTrack.ExistingFile)
                     {
+                        // Convert mislabeled archives (RAR-as-CBZ) to real CBZ before import
+                        _comicFormatConverter.NormalizeToCbz(localTrack.Path);
+
                         comicFile.SceneName = GetSceneReleaseName(downloadClientItem);
 
                         var moveResult = _comicFileUpgrader.UpgradeComicFile(comicFile, localTrack, copyOnly);
