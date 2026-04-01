@@ -26,6 +26,7 @@ namespace Panelarr.Api.V1.Issues
         public Ratings Ratings { get; set; }
         public DateTime? ReleaseDate { get; set; }
         public int PageCount { get; set; }
+        public string Overview { get; set; }
         public List<string> Genres { get; set; }
         public SeriesResource Series { get; set; }
         public List<MediaCover> Images { get; set; }
@@ -66,10 +67,20 @@ namespace Panelarr.Api.V1.Issues
                 Monitored = model.Monitored,
                 ReleaseDate = model.ReleaseDate,
                 PageCount = model.PageCount,
+                Overview = model.Overview,
                 Genres = model.Genres,
                 Title = model.Title,
                 SeriesTitle = seriesTitle,
-                Images = new List<MediaCover>(),
+                Images = model.CoverArtUrl.IsNotNullOrWhiteSpace()
+                    ? new List<MediaCover>
+                    {
+                        new MediaCover
+                        {
+                            Url = model.CoverArtUrl,
+                            CoverType = MediaCoverTypes.Cover
+                        }
+                    }
+                    : new List<MediaCover>(),
                 Links = model.Links ?? new List<Links>(),
                 Ratings = model.Ratings ?? new Ratings(),
                 Added = model.Added,

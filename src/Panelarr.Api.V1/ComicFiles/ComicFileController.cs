@@ -8,6 +8,7 @@ using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.MediaFiles.ComicInfo;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Http.REST.Attributes;
@@ -27,6 +28,7 @@ namespace Panelarr.Api.V1.ComicFiles
         private readonly IMediaFileService _mediaFileService;
         private readonly IDeleteMediaFiles _mediaFileDeletionService;
         private readonly IMetadataTagService _metadataTagService;
+        private readonly IComicInfoReaderService _comicInfoReaderService;
         private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly IUpgradableSpecification _upgradableSpecification;
@@ -35,6 +37,7 @@ namespace Panelarr.Api.V1.ComicFiles
                                IMediaFileService mediaFileService,
                                IDeleteMediaFiles mediaFileDeletionService,
                                IMetadataTagService metadataTagService,
+                               IComicInfoReaderService comicInfoReaderService,
                                ISeriesService seriesService,
                                IIssueService bookService,
                                IUpgradableSpecification upgradableSpecification)
@@ -43,6 +46,7 @@ namespace Panelarr.Api.V1.ComicFiles
             _mediaFileService = mediaFileService;
             _mediaFileDeletionService = mediaFileDeletionService;
             _metadataTagService = metadataTagService;
+            _comicInfoReaderService = comicInfoReaderService;
             _seriesService = seriesService;
             _issueService = bookService;
             _upgradableSpecification = upgradableSpecification;
@@ -106,6 +110,19 @@ namespace Panelarr.Api.V1.ComicFiles
                 var comicFiles = _mediaFileService.Get(issueFileIds);
                 return comicFiles.ConvertAll(e => MapToResource(e));
             }
+        }
+
+        [HttpGet("{id:int}/metadata")]
+        public ActionResult<List<ComicMetadataResult>> GetMetadata(int id)
+        {
+            var comicFile = _mediaFileService.Get(id);
+            if (comicFile == null)
+            {
+                return NotFound();
+            }
+
+            var metadata = _comicInfoReaderService.ReadMetadata(comicFile);
+            return Ok(metadata);
         }
 
         [RestPutById]

@@ -7,13 +7,17 @@ interface CssExports {
   'cover': string;
   'details': string;
   'detailsLabel': string;
-  'duration': string;
   'header': string;
   'headerContent': string;
   'info': string;
+  'issueNumber': string;
   'links': string;
   'monitorToggleButton': string;
   'overview': string;
+  'overviewExpanded': string;
+  'overviewText': string;
+  'overviewToggle': string;
+  'publisher': string;
   'qualityProfileName': string;
   'seriesLink': string;
   'sizeOnDisk': string;

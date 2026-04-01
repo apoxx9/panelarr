@@ -39,37 +39,42 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             dist.AddString("series", allSeries, issue.SeriesMetadata.Value.Name);
             Logger.Trace("series: '{0}' vs '{1}'; {2}", allSeries.ConcatToString("' or '"), issue.SeriesMetadata.Value.Name, dist.NormalizedDistance());
 
-            var title = localTracks.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
-            var titleOptions = new List<string> { issue.Title };
-            if (titleOptions[0].Contains("#"))
+            // Only compare issue title if the database has one — an empty title
+            // (e.g. unreleased issue) should not penalize the match
+            if (issue.Title.IsNotNullOrWhiteSpace())
             {
-                titleOptions.Add(StripSeriesRegex.Replace(titleOptions[0]));
-            }
-
-            var (maintitle, _) = issue.Title.SplitIssueTitle(issue.SeriesMetadata.Value.Name);
-            if (!titleOptions.Contains(maintitle))
-            {
-                titleOptions.Add(maintitle);
-            }
-
-            if (issue.SeriesLinks?.Value?.Any() ?? false)
-            {
-                foreach (var l in issue.SeriesLinks.Value)
+                var title = localTracks.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
+                var titleOptions = new List<string> { issue.Title };
+                if (titleOptions[0].Contains("#"))
                 {
-                    if (l.SeriesGroup?.Value?.Title?.IsNotNullOrWhiteSpace() ?? false)
+                    titleOptions.Add(StripSeriesRegex.Replace(titleOptions[0]));
+                }
+
+                var (maintitle, _) = issue.Title.SplitIssueTitle(issue.SeriesMetadata.Value.Name);
+                if (!titleOptions.Contains(maintitle))
+                {
+                    titleOptions.Add(maintitle);
+                }
+
+                if (issue.SeriesLinks?.Value?.Any() ?? false)
+                {
+                    foreach (var l in issue.SeriesLinks.Value)
                     {
-                        titleOptions.Add($"{l.SeriesGroup.Value.Title} {l.Position} {issue.Title}");
-                        titleOptions.Add($"{l.SeriesGroup.Value.Title} Issue {l.Position} {issue.Title}");
-                        titleOptions.Add($"{issue.Title} {l.SeriesGroup.Value.Title} {l.Position}");
-                        titleOptions.Add($"{issue.Title} {l.SeriesGroup.Value.Title} Issue {l.Position}");
+                        if (l.SeriesGroup?.Value?.Title?.IsNotNullOrWhiteSpace() ?? false)
+                        {
+                            titleOptions.Add($"{l.SeriesGroup.Value.Title} {l.Position} {issue.Title}");
+                            titleOptions.Add($"{l.SeriesGroup.Value.Title} Issue {l.Position} {issue.Title}");
+                            titleOptions.Add($"{issue.Title} {l.SeriesGroup.Value.Title} {l.Position}");
+                            titleOptions.Add($"{issue.Title} {l.SeriesGroup.Value.Title} Issue {l.Position}");
+                        }
                     }
                 }
+
+                var fileTitles = new[] { title, CleanTitleCruft.Replace(title) }.Distinct().ToList();
+
+                dist.AddString("issue", fileTitles, titleOptions);
+                Logger.Trace("issue: '{0}' vs '{1}'; {2}", fileTitles.ConcatToString("' or '"), titleOptions.ConcatToString("' or '"), dist.NormalizedDistance());
             }
-
-            var fileTitles = new[] { title, CleanTitleCruft.Replace(title) }.Distinct().ToList();
-
-            dist.AddString("issue", fileTitles, titleOptions);
-            Logger.Trace("issue: '{0}' vs '{1}'; {2}", fileTitles.ConcatToString("' or '"), titleOptions.ConcatToString("' or '"), dist.NormalizedDistance());
 
             // Year
             var localYear = localTracks.MostCommon(x => x.FileTrackInfo.Year);

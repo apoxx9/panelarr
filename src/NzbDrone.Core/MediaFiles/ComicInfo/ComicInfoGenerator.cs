@@ -39,7 +39,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                 WriteElement(writer, "Genre", seriesMetadata?.Genres != null && seriesMetadata.Genres.Any()
                     ? string.Join(", ", seriesMetadata.Genres)
                     : null);
-                WriteElement(writer, "Summary", seriesMetadata?.Overview);
+                WriteElement(writer, "Summary", !string.IsNullOrWhiteSpace(issue?.Overview) ? issue.Overview : seriesMetadata?.Overview);
                 WriteElement(writer, "Web", issue?.CoverArtUrl);
 
                 writer.WriteEndElement();

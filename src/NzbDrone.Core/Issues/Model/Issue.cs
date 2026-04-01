@@ -38,6 +38,7 @@ namespace NzbDrone.Core.Issues
         public IssueType IssueType { get; set; }
         public string CoverArtUrl { get; set; }
         public int PageCount { get; set; }
+        public string Overview { get; set; }
 
         // These are Panelarr generated/config
         public string CleanTitle { get; set; }
@@ -137,6 +138,11 @@ namespace NzbDrone.Core.Issues
             if (!IsProtectedField(overridden, "PageCount"))
             {
                 PageCount = other.PageCount;
+            }
+
+            if (!IsProtectedField(overridden, "Overview"))
+            {
+                Overview = other.Overview;
             }
         }
 

@@ -80,6 +80,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
                 IssueType = MapIssueType(providerIssue.IssueType),
                 PageCount = providerIssue.PageCount ?? 0,
                 CoverArtUrl = providerIssue.CoverUrl ?? string.Empty,
+                Overview = providerIssue.Overview ?? string.Empty,
                 CleanTitle = (providerIssue.Title ?? string.Empty).CleanSeriesName(),
                 Monitored = false
             };

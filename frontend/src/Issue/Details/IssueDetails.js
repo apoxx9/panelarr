@@ -5,6 +5,7 @@ import SeriesHistoryTable from 'Series/History/SeriesHistoryTable';
 import DeleteIssueModal from 'Issue/Delete/DeleteIssueModal';
 import EditIssueModalConnector from 'Issue/Edit/EditIssueModalConnector';
 import IssueFileEditorTable from 'IssueFile/Editor/IssueFileEditorTable';
+import IssueMetadataTable from './IssueMetadataTable';
 import IconButton from 'Components/Link/IconButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
@@ -243,7 +244,14 @@ class IssueDetails extends Component {
                   className={styles.tab}
                   selectedClassName={styles.selectedTab}
                 >
-                  {translate('History')}
+                  {translate('Metadata')}
+                </Tab>
+
+                <Tab
+                  className={styles.tab}
+                  selectedClassName={styles.selectedTab}
+                >
+                  {translate('FilesTotal', [issueFileCount])}
                 </Tab>
 
                 <Tab
@@ -257,11 +265,11 @@ class IssueDetails extends Component {
                   className={styles.tab}
                   selectedClassName={styles.selectedTab}
                 >
-                  {translate('FilesTotal', [issueFileCount])}
+                  {translate('History')}
                 </Tab>
 
                 {
-                  selectedTabIndex === 1 &&
+                  selectedTabIndex === 2 &&
                     <div className={styles.filterIcon}>
                       <InteractiveSearchFilterMenuConnector
                         type="issue"
@@ -272,7 +280,13 @@ class IssueDetails extends Component {
               </TabList>
 
               <TabPanel>
-                <SeriesHistoryTable
+                <IssueMetadataTable
+                  issueId={id}
+                />
+              </TabPanel>
+
+              <TabPanel>
+                <IssueFileEditorTable
                   seriesId={series.id}
                   issueId={id}
                 />
@@ -286,7 +300,7 @@ class IssueDetails extends Component {
               </TabPanel>
 
               <TabPanel>
-                <IssueFileEditorTable
+                <SeriesHistoryTable
                   seriesId={series.id}
                   issueId={id}
                 />

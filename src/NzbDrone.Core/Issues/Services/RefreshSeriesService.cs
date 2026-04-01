@@ -340,11 +340,16 @@ namespace NzbDrone.Core.Issues
 
             if (shouldRescan)
             {
-                // some metadata has updated so rescan unmatched
-                // (but don't add new allSeries to reduce repeated searches against api)
-                var folders = _rootFolderService.All().Select(x => x.Path).ToList();
+                // Only scan the specific series folder, not all root folders
+                var seriesPaths = _seriesService.GetSeriess(seriesIds)
+                    .Where(s => s.Path.IsNotNullOrWhiteSpace())
+                    .Select(s => s.Path)
+                    .ToList();
 
-                _commandQueueManager.Push(new RescanFoldersCommand(folders, FilterFilesType.Matched, false, seriesIds));
+                if (seriesPaths.Any())
+                {
+                    _commandQueueManager.Push(new RescanFoldersCommand(seriesPaths, FilterFilesType.Matched, false, seriesIds));
+                }
             }
         }
 

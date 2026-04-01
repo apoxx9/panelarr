@@ -4,7 +4,7 @@ namespace Panelarr.Api.V1.Issues
 {
     public class IssueStatisticsResource
     {
-        public int ComicFileCount { get; set; }
+        public int IssueFileCount { get; set; }
         public int IssueCount { get; set; }
         public int TotalIssueCount { get; set; }
         public long SizeOnDisk { get; set; }
@@ -18,7 +18,7 @@ namespace Panelarr.Api.V1.Issues
                     return 0;
                 }
 
-                return ComicFileCount / (decimal)IssueCount * 100;
+                return IssueFileCount / (decimal)IssueCount * 100;
             }
         }
     }
@@ -34,7 +34,7 @@ namespace Panelarr.Api.V1.Issues
 
             return new IssueStatisticsResource
             {
-                ComicFileCount = model.ComicFileCount,
+                IssueFileCount = model.ComicFileCount,
                 IssueCount = model.IssueCount,
                 SizeOnDisk = model.SizeOnDisk,
                 TotalIssueCount = model.TotalIssueCount

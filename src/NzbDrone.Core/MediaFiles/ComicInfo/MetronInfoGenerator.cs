@@ -80,7 +80,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                         writer.WriteEndElement(); // Genres
                     }
 
-                    WriteElement(writer, "Summary", seriesMetadata?.Overview);
+                    WriteElement(writer, "Summary", !string.IsNullOrWhiteSpace(issue?.Overview) ? issue.Overview : seriesMetadata?.Overview);
 
                     if (issue.PageCount > 0)
                     {

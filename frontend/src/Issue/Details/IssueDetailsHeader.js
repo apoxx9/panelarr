@@ -21,8 +21,8 @@ import styles from './IssueDetailsHeader.css';
 const defaultFontSize = parseInt(fonts.defaultFontSize);
 const lineHeight = parseFloat(fonts.lineHeight);
 
-function getFanartUrl(images) {
-  return images.find((x) => x.coverType === 'fanart')?.url;
+function getCoverUrl(images) {
+  return images.find((x) => x.coverType === 'cover')?.url;
 }
 
 class IssueDetailsHeader extends Component {
@@ -35,7 +35,8 @@ class IssueDetailsHeader extends Component {
 
     this.state = {
       overviewHeight: 0,
-      titleWidth: 0
+      titleWidth: 0,
+      isOverviewExpanded: false
     };
   }
 
@@ -48,6 +49,10 @@ class IssueDetailsHeader extends Component {
 
   onTitleMeasure = ({ width }) => {
     this.setState({ titleWidth: width });
+  };
+
+  onExpandOverview = () => {
+    this.setState({ isOverviewExpanded: !this.state.isOverviewExpanded });
   };
 
   //
@@ -77,10 +82,11 @@ class IssueDetailsHeader extends Component {
 
     const {
       overviewHeight,
-      titleWidth
+      titleWidth,
+      isOverviewExpanded
     } = this.state;
 
-    const fanartUrl = getFanartUrl(series.images);
+    const coverUrl = getCoverUrl(images);
     const marqueeWidth = titleWidth - (isSmallScreen ? 85 : 160);
 
     return (
@@ -88,8 +94,8 @@ class IssueDetailsHeader extends Component {
         <div
           className={styles.backdrop}
           style={
-            fanartUrl ?
-              { backgroundImage: `url(${fanartUrl})` } :
+            coverUrl ?
+              { backgroundImage: `url(${coverUrl})` } :
               null
           }
         >
@@ -149,13 +155,6 @@ class IssueDetailsHeader extends Component {
                     </span>
                 }
 
-                {
-                  !!pageCount &&
-                    <span className={styles.duration}>
-                      {`${pageCount} pages`}
-                    </span>
-                }
-
                 <HeartRating
                   rating={ratings.value}
                   iconSize={20}
@@ -179,6 +178,23 @@ class IssueDetailsHeader extends Component {
                       {
                         moment(releaseDate).format(shortDateFormat)
                       }
+                    </span>
+                  </Label>
+              }
+
+              {
+                !!pageCount &&
+                  <Label
+                    className={styles.detailsLabel}
+                    size={sizes.LARGE}
+                  >
+                    <Icon
+                      name={icons.ISSUE}
+                      size={17}
+                    />
+
+                    <span className={styles.sizeOnDisk}>
+                      {`${pageCount} pages`}
                     </span>
                   </Label>
               }
@@ -242,12 +258,33 @@ class IssueDetailsHeader extends Component {
             </div>
             <Measure
               onMeasure={this.onOverviewMeasure}
-              className={styles.overview}
+              className={isOverviewExpanded ? styles.overviewExpanded : styles.overview}
             >
-              <TextTruncate
-                line={Math.floor(overviewHeight / (defaultFontSize * lineHeight))}
-                text={stripHtml(overview)}
-              />
+              {
+                isOverviewExpanded ?
+                  <span className={styles.overviewText}>
+                    {stripHtml(overview)}
+                    <button
+                      className={styles.overviewToggle}
+                      onClick={this.onExpandOverview}
+                    >
+                      less
+                    </button>
+                  </span> :
+                  <TextTruncate
+                    line={Math.floor(overviewHeight / (defaultFontSize * lineHeight))}
+                    text={stripHtml(overview)}
+                    truncateText="…"
+                    textTruncateChild={
+                      <button
+                        className={styles.overviewToggle}
+                        onClick={this.onExpandOverview}
+                      >
+                        more
+                      </button>
+                    }
+                  />
+              }
             </Measure>
           </div>
         </div>
