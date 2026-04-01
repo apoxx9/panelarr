@@ -164,13 +164,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                     _logger.Debug("Distance calc failed but single candidate found via series override, force-accepting: {0}", forcedIssue.Title);
                     localIssueRelease.Issue = forcedIssue;
                     localIssueRelease.Distance = new Distance();
+                    localIssueRelease.ExistingTracks = new List<LocalIssue>();
                     foreach (var localTrack in localIssueRelease.LocalIssues)
                     {
                         localTrack.Issue = forcedIssue;
                         localTrack.Series = idOverrides.Series;
                     }
 
-                    localIssueRelease.PopulateMatch(config.KeepAllEditions);
                     return;
                 }
             }

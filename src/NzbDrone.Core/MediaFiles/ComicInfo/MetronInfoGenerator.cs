@@ -24,71 +24,73 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                 OmitXmlDeclaration = false
             };
 
-            using var writer = XmlWriter.Create(sb, settings);
-            writer.WriteStartDocument();
-            writer.WriteStartElement("MetronInfo");
-            writer.WriteAttributeString("xmlns", "xsi", null, "http://www.w3.org/2001/XMLSchema-instance");
-            writer.WriteAttributeString("xsi", "noNamespaceSchemaLocation", null, "https://metron.cloud/schemas/MetronInfo.xsd");
-
-            // Source / ID block
-            if (!string.IsNullOrWhiteSpace(issue?.ForeignIssueId))
+            using (var writer = XmlWriter.Create(sb, settings))
             {
-                writer.WriteStartElement("IDs");
-                writer.WriteStartElement("ID");
-                writer.WriteAttributeString("source", "metron");
-                writer.WriteValue(issue.ForeignIssueId);
-                writer.WriteEndElement(); // ID
-                writer.WriteEndElement(); // IDs
-            }
+                writer.WriteStartDocument();
+                writer.WriteStartElement("MetronInfo");
+                writer.WriteAttributeString("xmlns", "xsi", null, "http://www.w3.org/2001/XMLSchema-instance");
+                writer.WriteAttributeString("xsi", "noNamespaceSchemaLocation", null, "https://metron.cloud/schemas/MetronInfo.xsd");
 
-            // Publisher
-            if (publisher != null && !string.IsNullOrWhiteSpace(publisher.Name))
-            {
-                writer.WriteStartElement("Publisher");
-                WriteElement(writer, "Name", publisher.Name);
-                writer.WriteEndElement();
-            }
-
-            // Series
-            if (seriesMetadata != null)
-            {
-                writer.WriteStartElement("Series");
-                WriteElement(writer, "Name", seriesMetadata.Name);
-                if (seriesMetadata.Year.HasValue)
+                // Source / ID block
+                if (!string.IsNullOrWhiteSpace(issue?.ForeignIssueId))
                 {
-                    WriteElement(writer, "StartYear", seriesMetadata.Year.Value.ToString());
+                    writer.WriteStartElement("IDs");
+                    writer.WriteStartElement("ID");
+                    writer.WriteAttributeString("source", "metron");
+                    writer.WriteValue(issue.ForeignIssueId);
+                    writer.WriteEndElement(); // ID
+                    writer.WriteEndElement(); // IDs
                 }
 
-                writer.WriteEndElement(); // Series
-            }
-
-            // Issue details
-            if (issue != null)
-            {
-                WriteElement(writer, "Number", issue.IssueNumber.ToString("0.##"));
-                WriteElement(writer, "Title", issue.Title);
-
-                if (seriesMetadata?.Genres != null && seriesMetadata.Genres.Any())
+                // Publisher
+                if (publisher != null && !string.IsNullOrWhiteSpace(publisher.Name))
                 {
-                    writer.WriteStartElement("Genres");
-                    foreach (var genre in seriesMetadata.Genres)
+                    writer.WriteStartElement("Publisher");
+                    WriteElement(writer, "Name", publisher.Name);
+                    writer.WriteEndElement();
+                }
+
+                // Series
+                if (seriesMetadata != null)
+                {
+                    writer.WriteStartElement("Series");
+                    WriteElement(writer, "Name", seriesMetadata.Name);
+                    if (seriesMetadata.Year.HasValue)
                     {
-                        WriteElement(writer, "Genre", genre);
+                        WriteElement(writer, "StartYear", seriesMetadata.Year.Value.ToString());
                     }
 
-                    writer.WriteEndElement(); // Genres
+                    writer.WriteEndElement(); // Series
                 }
 
-                WriteElement(writer, "Summary", seriesMetadata?.Overview);
-
-                if (issue.PageCount > 0)
+                // Issue details
+                if (issue != null)
                 {
-                    WriteElement(writer, "PageCount", issue.PageCount.ToString());
-                }
-            }
+                    WriteElement(writer, "Number", issue.IssueNumber.ToString("0.##"));
+                    WriteElement(writer, "Title", issue.Title);
 
-            writer.WriteEndElement(); // MetronInfo
-            writer.WriteEndDocument();
+                    if (seriesMetadata?.Genres != null && seriesMetadata.Genres.Any())
+                    {
+                        writer.WriteStartElement("Genres");
+                        foreach (var genre in seriesMetadata.Genres)
+                        {
+                            WriteElement(writer, "Genre", genre);
+                        }
+
+                        writer.WriteEndElement(); // Genres
+                    }
+
+                    WriteElement(writer, "Summary", seriesMetadata?.Overview);
+
+                    if (issue.PageCount > 0)
+                    {
+                        WriteElement(writer, "PageCount", issue.PageCount.ToString());
+                    }
+                }
+
+                writer.WriteEndElement(); // MetronInfo
+                writer.WriteEndDocument();
+            }
 
             return sb.ToString();
         }
