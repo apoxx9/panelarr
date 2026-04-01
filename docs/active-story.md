@@ -1,8 +1,8 @@
-# Active Story: UX Audit — Clean Up Legacy Readarr UI Artifacts
+# Active Story: None
 
-## Status: COMPLETE — Session 9
+## Status: IDLE — Session 9 complete
 
-All 11 UX audit items resolved. See last-handoff.md for details.
+Session 9 completed the UX audit (11 items) and fixed the entire GetComics direct download pipeline (5 bugs).
 
 ---
 

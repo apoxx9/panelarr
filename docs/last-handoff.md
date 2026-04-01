@@ -2,44 +2,42 @@
 
 ## Session 9 Summary
 
-Completed the full UX audit — cleaned up all 11 legacy Readarr UI artifacts identified in Session 5. The app now presents a consistent comic-focused experience with no book/audio/Calibre remnants.
+Two major areas of work:
+
+1. **UX Audit** — Cleaned up all 11 legacy Readarr UI artifacts (audio tokens, Calibre, Edition, Issueshelf, etc.)
+2. **GetComics Direct Download Pipeline** — Fixed 5 bugs to make the full download→identify→convert→import→embed chain work end-to-end
 
 ---
 
 ## Key Accomplishments
 
-**Backend (FileNameBuilder.cs):**
-- Removed all audio MediaInfo naming tokens ({MediaInfo AudioCodec}, AudioChannels, AudioBitRate, AudioBitsPerSample, AudioSampleRate)
-- Removed {Edition Year} naming token (duplicate of {Release Year})
-- Removed unused `System.Globalization` import
+### UX Audit (commit aa986f7)
+- Removed audio MediaInfo tokens and {Edition Year} from FileNameBuilder
+- Removed Calibre references from frontend (root folder schema, remote path mapping)
+- Removed Edition concept from Interactive Import validation and payloads
+- Renamed Edition → Variant, Issueshelf → Pull List in localization
+- Improved Metadata Profile tooltips
+- Rephrased skip toggles for comics context
 
-**Frontend — Calibre removal:**
-- Removed `isCalibreLibrary`, `host`, `port`, `useSsl`, `outputProfile` from root folder schema
-- Removed Calibre library host aggregation from RemotePathMapping connector
+### Theme (commit 70e4784)
+- Lightened brand purple #7B4F9B → #9B6BBF across both themes
 
-**Frontend — Edition concept removal:**
-- Removed `foreignEditionId` from Interactive Import row validation (componentDidMount, componentDidUpdate, isValid check)
-- Removed `foreignEditionId` from save payload in interactiveImportActions
-- Removed `disableReleaseSwitching` from save payload
-- Removed `inconsistentIssueReleases` state and validation from InteractiveImportModalContent
-- Removed `foreignEditionId` clearing from Issue and Series selection connectors
-- Removed `ISSUE_EDITION_SELECT` input type and its FormInputGroup mapping
+### GetComics Pipeline (commits 3079cdf, a1185fe)
+- **Direct Download UI**: Added "Direct Download" section to Add Download Client modal
+- **Issue Identification**: CandidateService falls back from embedded tags → download title → issue number matching for CBZ without ComicInfo.xml
+- **Force-Accept**: IdentificationService force-accepts single-candidate matches when series is known but distance calc fails (no metadata to compare)
+- **Format Conversion**: New ComicFormatConverter detects RAR/7z mislabeled as .cbz and repacks to real ZIP-based CBZ on import
+- **XmlWriter Flush Bug**: Fixed `using var` → scoped `using` in ComicInfoGenerator and MetronInfoGenerator so XML is flushed before `sb.ToString()`
+- **Retag for Comics**: Wired RetagFilesCommand to trigger ComicInfo.xml embedding via ComicFileAddedEvent
 
-**Localization (en.json):**
-- Edition → "Variant" (Edition, EditionsHelpText, LoadingEditionsFailed, ManualImportSelectEdition, SelectEdition)
-- AnyEditionOkHelpText → removed "edition" reference
-- AutomaticallySwitchEdition → "Automatically Select Best Match"
-- Issueshelf → "Pull List"
-- SkipPartBooksAndSets/SkipPartIssuesAndSets → "Skip variant covers and box sets"
-- SkipCollectedEditions → "Skip Collected Editions (TPBs, Omnibuses)"
+---
 
-**Frontend — Issueshelf rename:**
-- Column header: "Issueshelf" → "Pull List"
-- All user-facing "issueshelves" messages → "pull lists"
+## Session 9 Commits
 
-**Frontend — Metadata Profile improvements:**
-- Enhanced Alert text explaining what metadata profiles control
-- Improved SeriesMetadataProfilePopoverContent with clearer explanation
+1. `aa986f7` — Complete UX audit: remove legacy Readarr UI artifacts (16 files)
+2. `70e4784` — Lighten brand purple for better readability (#7B4F9B → #9B6BBF)
+3. `3079cdf` — Fix GetComics direct download pipeline: identification, import, and format conversion
+4. `a1185fe` — Fix ComicInfo.xml/MetronInfo.xml embedding and wire retag for comics
 
 ---
 
@@ -75,9 +73,17 @@ Must set metadata credentials after DB reset (via Settings > Metadata or direct 
 ## Current State
 
 - Production: 0 errors, 0 warnings (.NET + webpack)
-- Puppeteer test: all 25 pages load clean (pre-existing metadataProfile PropTypes warning on library pages is data-dependent, not a bug)
+- Puppeteer test: all 25 pages load clean
 - Version: v1.0.0
-- All UX audit items resolved
+- GetComics download → import → metadata embed pipeline working end-to-end
+- ComicInfo.xml and MetronInfo.xml embedded with: Series, Number, Year, Title, Summary, Publisher, Metron ID
+
+---
+
+## Known Issues
+
+- Pre-existing metadataProfile PropTypes warning on library pages (data-dependent, cosmetic)
+- Root folder scan takes ~5 minutes for 32 files (each hits remote metadata search)
 
 ---
 
