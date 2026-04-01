@@ -48,7 +48,6 @@ class SelectSeriesModalContentConnector extends Component {
         id,
         series,
         issue: undefined,
-        foreignEditionId: undefined,
         rejections: []
       });
     });

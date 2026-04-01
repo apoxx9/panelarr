@@ -3,7 +3,7 @@ import React from 'react';
 function SeriesMetadataProfilePopoverContent() {
   return (
     <div>
-      Select 'None' to only include items manually added via search or that match files on disk
+      Metadata profiles control which issues are automatically monitored when you add a series. Select 'None' to only track issues you add manually or that match existing files on disk.
     </div>
   );
 }

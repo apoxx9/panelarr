@@ -64,7 +64,6 @@ class SelectIssueModalContentConnector extends Component {
       this.props.updateInteractiveImportItem({
         id,
         issue,
-        foreignEditionId: undefined,
         rejections: []
       });
     });

@@ -46,7 +46,6 @@ class InteractiveImportRow extends Component {
       id,
       series,
       issue,
-      foreignEditionId,
       quality,
       size
     } = this.props;
@@ -54,7 +53,6 @@ class InteractiveImportRow extends Component {
     if (
       series &&
       issue != null &&
-      foreignEditionId &&
       quality &&
       size > 0
     ) {
@@ -67,7 +65,6 @@ class InteractiveImportRow extends Component {
       id,
       series,
       issue,
-      foreignEditionId,
       quality,
       isSelected,
       onValidRowChange
@@ -76,7 +73,6 @@ class InteractiveImportRow extends Component {
     if (
       prevProps.series === series &&
       prevProps.issue === issue &&
-      prevProps.foreignEditionId === foreignEditionId &&
       prevProps.quality === quality &&
       prevProps.isSelected === isSelected
     ) {
@@ -86,7 +82,6 @@ class InteractiveImportRow extends Component {
     const isValid = !!(
       series &&
       issue &&
-      foreignEditionId &&
       quality
     );
 
@@ -439,7 +434,6 @@ InteractiveImportRow.propTypes = {
   path: PropTypes.string.isRequired,
   series: PropTypes.object,
   issue: PropTypes.object,
-  foreignEditionId: PropTypes.string,
   releaseGroup: PropTypes.string,
   quality: PropTypes.object,
   size: PropTypes.number.isRequired,

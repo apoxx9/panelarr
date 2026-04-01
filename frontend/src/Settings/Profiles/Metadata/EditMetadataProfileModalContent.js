@@ -67,7 +67,7 @@ function EditMetadataProfileModalContent(props) {
           !isFetching && !error &&
             <Form {...otherProps}>
               <Alert kind={kinds.INFO}>
-                Controls which issues are automatically added from the metadata provider when importing a comic series.
+                Controls which issues are automatically monitored when you add a comic series. Issues that don't match these filters will still appear but won't be monitored for download. Use the 'None' profile to only track issues you add manually or that match existing files.
               </Alert>
 
               <FormGroup>

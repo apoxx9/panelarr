@@ -136,25 +136,11 @@ class InteractiveImportModalContent extends Component {
       invalidRowsSelected: [],
       selectModalOpen: null,
       issuesImported: [],
-      isConfirmImportModalOpen: false,
-      inconsistentIssueReleases: false
+      isConfirmImportModalOpen: false
     };
   }
 
   componentDidUpdate(prevProps) {
-    const selectedIds = this.getSelectedIds();
-    const selectedItems = _.filter(this.props.items, (x) => _.includes(selectedIds, x.id));
-
-    const inconsistent = _(selectedItems)
-      .map((x) => ({ issueId: x.issue ? x.issue.id : 0, foreignEditionId: x.ForeignEditionId }))
-      .groupBy('issueId')
-      .mapValues((issue) => _(issue).groupBy((x) => x.foreignEditionId).values().value().length)
-      .values()
-      .some((x) => x !== undefined && x > 1);
-
-    if (inconsistent !== this.state.inconsistentIssueReleases) {
-      this.setState({ inconsistentIssueReleases: inconsistent });
-    }
   }
 
   //
@@ -296,8 +282,7 @@ class InteractiveImportModalContent extends Component {
       invalidRowsSelected,
       selectModalOpen,
       issuesImported,
-      isConfirmImportModalOpen,
-      inconsistentIssueReleases
+      isConfirmImportModalOpen
     } = this.state;
 
     const allColumns = _.cloneDeep(COLUMNS);
@@ -502,7 +487,7 @@ class InteractiveImportModalContent extends Component {
 
             <Button
               kind={kinds.SUCCESS}
-              isDisabled={isSaving || !selectedIds.length || !!invalidRowsSelected.length || inconsistentIssueReleases}
+              isDisabled={isSaving || !selectedIds.length || !!invalidRowsSelected.length}
               onPress={this.onImportSelectedPress}
             >
               Import

@@ -204,14 +204,12 @@ export const actionHandlers = handleThunks({
         path: item.path,
         seriesId: item.series ? item.series.id : undefined,
         issueId: item.issue ? item.issue.id : undefined,
-        foreignEditionId: item.foreignEditionId ? item.ForeignEditionId : undefined,
         quality: item.quality,
         releaseGroup: item.releaseGroup,
         indexerFlags: item.indexerFlags,
         downloadId: item.downloadId,
         additionalFile: item.additionalFile,
-        replaceExistingFiles: item.replaceExistingFiles,
-        disableReleaseSwitching: item.disableReleaseSwitching
+        replaceExistingFiles: item.replaceExistingFiles
       };
     });
 

@@ -5,7 +5,6 @@ import { inputTypes, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 // import translate from 'Utilities/String/translate';
 import AutoCompleteInput from './AutoCompleteInput';
-import IssueEditionSelectInputConnector from './IssueEditionSelectInputConnector';
 import IssueshelfInputConnector from './IssueshelfInputConnector';
 import CaptchaInputConnector from './CaptchaInputConnector';
 import CheckInput from './CheckInput';
@@ -77,9 +76,6 @@ function getComponent(type) {
 
     case inputTypes.METADATA_PROFILE_SELECT:
       return MetadataProfileSelectInputConnector;
-
-    case inputTypes.ISSUE_EDITION_SELECT:
-      return IssueEditionSelectInputConnector;
 
     case inputTypes.INDEXER_SELECT:
       return IndexerSelectInputConnector;

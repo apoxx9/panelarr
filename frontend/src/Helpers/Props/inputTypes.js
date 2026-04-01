@@ -13,7 +13,6 @@ export const PASSWORD = 'password';
 export const PATH = 'path';
 export const QUALITY_PROFILE_SELECT = 'qualityProfileSelect';
 export const METADATA_PROFILE_SELECT = 'metadataProfileSelect';
-export const ISSUE_EDITION_SELECT = 'issueEditionSelect';
 export const INDEXER_SELECT = 'indexerSelect';
 export const INDEXER_FLAGS_SELECT = 'indexerFlagsSelect';
 export const DOWNLOAD_CLIENT_SELECT = 'downloadClientSelect';
@@ -43,7 +42,6 @@ export const all = [
   PATH,
   QUALITY_PROFILE_SELECT,
   METADATA_PROFILE_SELECT,
-  ISSUE_EDITION_SELECT,
   INDEXER_SELECT,
   DOWNLOAD_CLIENT_SELECT,
   ROOT_FOLDER_SELECT,

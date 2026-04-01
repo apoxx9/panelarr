@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -314,13 +313,11 @@ namespace NzbDrone.Core.Organizer
             if (issue.ReleaseDate.HasValue)
             {
                 tokenHandlers["{Release Year}"] = m => issue.ReleaseDate.Value.Year.ToString();
-                tokenHandlers["{Edition Year}"] = m => issue.ReleaseDate.Value.Year.ToString();
                 tokenHandlers["{Release YearFirst}"] = m => issue.ReleaseDate.Value.Year.ToString();
             }
             else
             {
                 tokenHandlers["{Release Year}"] = m => "Unknown";
-                tokenHandlers["{Edition Year}"] = m => "Unknown";
                 tokenHandlers["{Release YearFirst}"] = m => "Unknown";
             }
         }
@@ -353,24 +350,7 @@ namespace NzbDrone.Core.Organizer
 
         private void AddMediaInfoTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, ComicFile comicFile)
         {
-            if (comicFile.MediaInfo == null)
-            {
-                _logger.Trace("Media info is unavailable for {0}", comicFile);
-
-                return;
-            }
-
-            var audioCodec = MediaInfoFormatter.FormatAudioCodec(comicFile.MediaInfo);
-            var audioChannels = MediaInfoFormatter.FormatAudioChannels(comicFile.MediaInfo);
-            var audioChannelsFormatted = audioChannels > 0 ?
-                                audioChannels.ToString("F1", CultureInfo.InvariantCulture) :
-                                string.Empty;
-
-            tokenHandlers["{MediaInfo AudioCodec}"] = m => audioCodec;
-            tokenHandlers["{MediaInfo AudioChannels}"] = m => audioChannelsFormatted;
-            tokenHandlers["{MediaInfo AudioBitRate}"] = m => MediaInfoFormatter.FormatAudioBitrate(comicFile.MediaInfo);
-            tokenHandlers["{MediaInfo AudioBitsPerSample}"] = m => MediaInfoFormatter.FormatAudioBitsPerSample(comicFile.MediaInfo);
-            tokenHandlers["{MediaInfo AudioSampleRate}"] = m => MediaInfoFormatter.FormatAudioSampleRate(comicFile.MediaInfo);
+            // No media-info tokens for comic files — audio metadata is not relevant.
         }
 
         private void AddCustomFormats(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Series series, ComicFile comicFile, List<CustomFormat> customFormats = null)
