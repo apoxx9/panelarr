@@ -1,10 +1,10 @@
-const panelarrPurple = '#7B4F9B';
+const panelarrPurple = '#9B6BBF';
 const darkGray = '#888';
 const gray = '#adadad';
 const black = '#000';
 const white = '#fff';
 const offWhite = '#f5f7fa';
-const purple = '#7a43b6';
+const purple = '#9B6BBF';
 const pink = '#ff69b4';
 const lightGray = '#ddd';
 
@@ -34,10 +34,10 @@ module.exports = {
   // Theme Colors
 
   themePurple: panelarrPurple,
-  themeAlternatePurple: '#6A3D89',
-  themeDarkPurple: '#5A2D79',
+  themeAlternatePurple: '#8A5AAE',
+  themeDarkPurple: '#7B4F9B',
   themeDarkColor: '#353535',
-  themeLightColor: '#9B6FBB',
+  themeLightColor: '#B48AD4',
   pageBackground: '#f5f7fa',
   pageFooterBackgroud: '#f1f1f1',
 

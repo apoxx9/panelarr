@@ -1,10 +1,10 @@
-const panelarrPurple = '#7B4F9B';
+const panelarrPurple = '#9B6BBF';
 const darkGray = '#888';
 const gray = '#adadad';
 const black = '#000';
 const white = '#fff';
 const offWhite = '#f5f7fa';
-const purple = '#7a43b6';
+const purple = '#9B6BBF';
 const pink = '#ff69b4';
 const lightGray = '#ddd';
 
@@ -34,8 +34,8 @@ module.exports = {
   // Theme Colors
 
   themePurple: panelarrPurple,
-  themeAlternatePurple: '#6A3D89',
-  themeDarkPurple: '#5A2D79',
+  themeAlternatePurple: '#8A5AAE',
+  themeDarkPurple: '#7B4F9B',
   themeDarkColor: '#494949',
   themeLightColor: '#595959',
   pageBackground: '#202020',
@@ -53,7 +53,7 @@ module.exports = {
   // Links
   defaultLinkHoverColor: '#fff',
   linkColor: '#fff',
-  linkHoverColor: '#7B4F9B',
+  linkHoverColor: '#9B6BBF',
 
   // Header
   pageHeaderBackgroundColor: '#2a2a2a',

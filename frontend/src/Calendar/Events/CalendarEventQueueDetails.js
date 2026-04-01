@@ -30,7 +30,7 @@ function CalendarEventQueueDetails(props) {
             progress={progress}
             size={20}
             strokeWidth={2}
-            strokeColor={'#7a43b6'}
+            strokeColor={'#9B6BBF'}
           />
         </div>
       }
