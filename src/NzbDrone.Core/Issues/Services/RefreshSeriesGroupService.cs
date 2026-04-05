@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Issues
         private readonly IRefreshSeriesIssueLinkService _refreshLinkService;
         private readonly Logger _logger;
 
-        public RefreshSeriesGroupService(IIssueService bookService,
+        public RefreshSeriesGroupService(IIssueService issueService,
                                     ISeriesGroupService seriesService,
                                     ISeriesIssueLinkService linkService,
                                     IRefreshSeriesIssueLinkService refreshLinkService,
@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Issues
                                     Logger logger)
         : base(logger, seriesMetadataService)
         {
-            _issueService = bookService;
+            _issueService = issueService;
             _seriesService = seriesService;
             _linkService = linkService;
             _refreshLinkService = refreshLinkService;
@@ -136,13 +136,13 @@ namespace NzbDrone.Core.Issues
             var existing = existingByMetadata.Concat(existingByForeignId).GroupBy(x => x.ForeignSeriesId).Select(x => x.First()).ToList();
 
             var issues = _issueService.GetIssuesBySeriesMetadataId(seriesMetadataId);
-            var bookDict = issues.ToDictionary(x => x.ForeignIssueId);
+            var issueDict = issues.ToDictionary(x => x.ForeignIssueId);
             var links = new List<SeriesGroupLink>();
 
             foreach (var s in remoteData.SeriesGroups?.Value ?? new List<SeriesGroup>())
             {
                 s.LinkItems.Value.ForEach(x => x.SeriesGroup = s);
-                links.AddRange(s.LinkItems.Value.Where(x => bookDict.ContainsKey(x.Issue.Value.ForeignIssueId)));
+                links.AddRange(s.LinkItems.Value.Where(x => issueDict.ContainsKey(x.Issue.Value.ForeignIssueId)));
             }
 
             var grouped = links.GroupBy(x => x.SeriesGroup.Value);

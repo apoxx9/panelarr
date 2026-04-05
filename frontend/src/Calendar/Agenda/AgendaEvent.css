@@ -42,7 +42,7 @@
   flex: 1 1 1px;
 }
 
-.seasonEpisodeNumber {
+.issueNumber {
   flex: 0 0 100px;
 }
 
@@ -50,7 +50,7 @@
   display: none;
 }
 
-.absoluteEpisodeNumber {
+.absoluteIssueNumber {
   margin-left: 3px;
 }
 
@@ -102,7 +102,7 @@
     flex: 0 0 100%;
   }
 
-  .seasonEpisodeNumber {
+  .issueNumber {
     flex: 0 0 auto;
   }
 

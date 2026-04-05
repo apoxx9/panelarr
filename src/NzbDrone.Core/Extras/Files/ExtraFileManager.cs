@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Extras.Files
         int Order { get; }
         IEnumerable<ExtraFile> CreateAfterSeriesScan(Series series, List<ComicFile> comicFiles);
         IEnumerable<ExtraFile> CreateAfterComicImport(Series series, ComicFile comicFile);
-        IEnumerable<ExtraFile> CreateAfterComicImport(Series series, Issue issue, string seriesFolder, string bookFolder);
+        IEnumerable<ExtraFile> CreateAfterComicImport(Series series, Issue issue, string seriesFolder, string issueFolder);
         IEnumerable<ExtraFile> MoveFilesAfterRename(Series series, List<ComicFile> comicFiles);
         ExtraFile Import(Series series, ComicFile comicFile, string path, string extension, bool readOnly);
     }
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Extras.Files
         public abstract int Order { get; }
         public abstract IEnumerable<ExtraFile> CreateAfterSeriesScan(Series series, List<ComicFile> comicFiles);
         public abstract IEnumerable<ExtraFile> CreateAfterComicImport(Series series, ComicFile comicFile);
-        public abstract IEnumerable<ExtraFile> CreateAfterComicImport(Series series, Issue issue, string seriesFolder, string bookFolder);
+        public abstract IEnumerable<ExtraFile> CreateAfterComicImport(Series series, Issue issue, string seriesFolder, string issueFolder);
         public abstract IEnumerable<ExtraFile> MoveFilesAfterRename(Series series, List<ComicFile> comicFiles);
         public abstract ExtraFile Import(Series series, ComicFile comicFile, string path, string extension, bool readOnly);
 

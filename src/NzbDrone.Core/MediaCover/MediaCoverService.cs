@@ -49,7 +49,7 @@ namespace NzbDrone.Core.MediaCover
 
         public MediaCoverService(IMediaCoverProxy mediaCoverProxy,
                                  IImageResizer resizer,
-                                 IIssueService bookService,
+                                 IIssueService issueService,
                                  IHttpClient httpClient,
                                  IDiskProvider diskProvider,
                                  IAppFolderInfo appFolderInfo,
@@ -60,7 +60,7 @@ namespace NzbDrone.Core.MediaCover
         {
             _mediaCoverProxy = mediaCoverProxy;
             _resizer = resizer;
-            _issueService = bookService;
+            _issueService = issueService;
             _httpClient = httpClient;
             _diskProvider = diskProvider;
             _coverExistsSpecification = coverExistsSpecification;

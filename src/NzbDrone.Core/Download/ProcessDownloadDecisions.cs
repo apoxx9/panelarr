@@ -172,12 +172,12 @@ namespace NzbDrone.Core.Download
 
         private bool IsIssueProcessed(List<DownloadDecision> decisions, DownloadDecision report)
         {
-            var bookIds = report.RemoteIssue.Issues.Select(e => e.Id).ToList();
+            var issueIds = report.RemoteIssue.Issues.Select(e => e.Id).ToList();
 
             return decisions.SelectMany(r => r.RemoteIssue.Issues)
                             .Select(e => e.Id)
                             .ToList()
-                            .Intersect(bookIds)
+                            .Intersect(issueIds)
                             .Any();
         }
 

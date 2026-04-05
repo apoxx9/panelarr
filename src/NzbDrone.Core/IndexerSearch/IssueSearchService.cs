@@ -25,15 +25,15 @@ namespace NzbDrone.Core.IndexerSearch
         private readonly Logger _logger;
 
         public IssueSearchService(ISearchForReleases releaseSearchService,
-            IIssueService bookService,
-            IIssueCutoffService bookCutoffService,
+            IIssueService issueService,
+            IIssueCutoffService issueCutoffService,
             IQueueService queueService,
             IProcessDownloadDecisions processDownloadDecisions,
             Logger logger)
         {
             _releaseSearchService = releaseSearchService;
-            _issueService = bookService;
-            _issueCutoffService = bookCutoffService;
+            _issueService = issueService;
+            _issueCutoffService = issueCutoffService;
             _queueService = queueService;
             _processDownloadDecisions = processDownloadDecisions;
             _logger = logger;

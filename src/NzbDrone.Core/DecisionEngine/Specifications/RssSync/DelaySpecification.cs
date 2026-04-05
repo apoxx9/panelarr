@@ -101,9 +101,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                 }
             }
 
-            var bookIds = subject.Issues.Select(e => e.Id);
+            var issueIds = subject.Issues.Select(e => e.Id);
 
-            var oldest = _pendingReleaseService.OldestPendingRelease(subject.Series.Id, bookIds.ToArray());
+            var oldest = _pendingReleaseService.OldestPendingRelease(subject.Series.Id, issueIds.ToArray());
 
             if (oldest != null && oldest.Release.AgeMinutes > delay)
             {

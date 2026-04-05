@@ -7,25 +7,25 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
 {
     public static class SceneNameCalculator
     {
-        public static string GetSceneName(LocalIssue localEpisode)
+        public static string GetSceneName(LocalIssue localIssue)
         {
-            var downloadClientInfo = localEpisode.DownloadClientIssueInfo;
+            var downloadClientInfo = localIssue.DownloadClientIssueInfo;
 
             if (downloadClientInfo != null && !downloadClientInfo.Discography)
             {
                 return Parser.Parser.RemoveFileExtension(downloadClientInfo.ReleaseTitle);
             }
 
-            var fileName = Path.GetFileNameWithoutExtension(localEpisode.Path.CleanFilePath());
+            var fileName = Path.GetFileNameWithoutExtension(localIssue.Path.CleanFilePath());
 
             if (SceneChecker.IsSceneTitle(fileName))
             {
                 return fileName;
             }
 
-            var folderTitle = localEpisode.FolderTrackInfo?.ReleaseTitle;
+            var folderTitle = localIssue.FolderTrackInfo?.ReleaseTitle;
 
-            if (localEpisode.FolderTrackInfo?.Discography == false &&
+            if (localIssue.FolderTrackInfo?.Discography == false &&
                 folderTitle.IsNotNullOrWhiteSpace() &&
                 SceneChecker.IsSceneTitle(folderTitle))
             {

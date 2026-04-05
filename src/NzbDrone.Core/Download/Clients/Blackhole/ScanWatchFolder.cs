@@ -86,16 +86,16 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
                 yield return newWatchItem;
             }
 
-            foreach (var audioFile in _diskScanService.FilterFiles(watchFolder, _diskScanService.GetComicFiles(watchFolder, false)))
+            foreach (var comicFile in _diskScanService.FilterFiles(watchFolder, _diskScanService.GetComicFiles(watchFolder, false)))
             {
-                var title = FileNameBuilder.CleanFileName(audioFile.Name);
+                var title = FileNameBuilder.CleanFileName(comicFile.Name);
 
                 var newWatchItem = new WatchFolderItem
                 {
-                    DownloadId = audioFile.Name + "_" + audioFile.LastWriteTimeUtc.Ticks,
+                    DownloadId = comicFile.Name + "_" + comicFile.LastWriteTimeUtc.Ticks,
                     Title = title,
 
-                    OutputPath = new OsPath(audioFile.FullName),
+                    OutputPath = new OsPath(comicFile.FullName),
 
                     Status = DownloadItemStatus.Completed,
                     RemainingTime = TimeSpan.Zero
@@ -105,10 +105,10 @@ namespace NzbDrone.Core.Download.Clients.Blackhole
 
                 if (PreCheckWatchItemExpiry(newWatchItem, oldWatchItem))
                 {
-                    newWatchItem.TotalSize = audioFile.Length;
-                    newWatchItem.Hash = GetHash(audioFile.FullName);
+                    newWatchItem.TotalSize = comicFile.Length;
+                    newWatchItem.Hash = GetHash(comicFile.FullName);
 
-                    if (_diskProvider.IsFileLocked(audioFile.FullName))
+                    if (_diskProvider.IsFileLocked(comicFile.FullName))
                     {
                         newWatchItem.Status = DownloadItemStatus.Downloading;
                     }

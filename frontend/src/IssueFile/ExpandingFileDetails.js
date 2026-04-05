@@ -35,7 +35,7 @@ class ExpandingFileDetails extends Component {
   render() {
     const {
       filename,
-      audioTags,
+      fileTags,
       rejections
     } = this.props;
 
@@ -65,7 +65,7 @@ class ExpandingFileDetails extends Component {
         {
           isExpanded &&
             <FileDetails
-              audioTags={audioTags}
+              fileTags={fileTags}
               rejections={rejections}
             />
         }
@@ -75,7 +75,7 @@ class ExpandingFileDetails extends Component {
 }
 
 ExpandingFileDetails.propTypes = {
-  audioTags: PropTypes.object.isRequired,
+  fileTags: PropTypes.object.isRequired,
   filename: PropTypes.string.isRequired,
   rejections: PropTypes.arrayOf(PropTypes.object),
   isExpanded: PropTypes.bool

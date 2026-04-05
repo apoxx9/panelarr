@@ -183,7 +183,7 @@ class InteractiveImportRow extends Component {
       isSelected,
       isReprocessing,
       onSelectedChange,
-      audioTags
+      fileTags
     } = this.props;
 
     const {
@@ -223,7 +223,7 @@ class InteractiveImportRow extends Component {
 
     const fileDetails = (
       <FileDetails
-        audioTags={audioTags}
+        fileTags={fileTags}
         filename={path}
       />
     );
@@ -441,7 +441,7 @@ InteractiveImportRow.propTypes = {
   indexerFlags: PropTypes.number.isRequired,
   rejections: PropTypes.arrayOf(PropTypes.object).isRequired,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
-  audioTags: PropTypes.object.isRequired,
+  fileTags: PropTypes.object.isRequired,
   additionalFile: PropTypes.bool.isRequired,
   isReprocessing: PropTypes.bool,
   isSelected: PropTypes.bool,

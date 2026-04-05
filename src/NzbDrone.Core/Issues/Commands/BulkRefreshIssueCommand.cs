@@ -9,9 +9,9 @@ namespace NzbDrone.Core.Issues.Commands
         {
         }
 
-        public BulkRefreshIssueCommand(List<int> bookIds)
+        public BulkRefreshIssueCommand(List<int> issueIds)
         {
-            IssueIds = bookIds;
+            IssueIds = issueIds;
         }
 
         public List<int> IssueIds { get; set; }

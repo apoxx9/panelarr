@@ -32,13 +32,13 @@ export default function QueuedTaskRowNameCell(
   props: QueuedTaskRowNameCellProps
 ) {
   const { commandName, body, clientUserAgent } = props;
-  const movieIds = [...(body.seriesIds ?? [])];
+  const seriesIds = [...(body.seriesIds ?? [])];
 
   if (body.seriesId) {
-    movieIds.push(body.seriesId);
+    seriesIds.push(body.seriesId);
   }
 
-  const seriess = useSelector(createMultiSeriessSelector(movieIds));
+  const seriess = useSelector(createMultiSeriessSelector(seriesIds));
   const sortedSeriess = seriess.sort((a, b) =>
     a.sortName.localeCompare(b.sortName)
   );

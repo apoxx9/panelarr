@@ -9,7 +9,7 @@ namespace NzbDrone.Core.Issues
     {
         List<SeriesGroupLink> GetLinksBySeries(int seriesId);
         List<SeriesGroupLink> GetLinksBySeriesAndSeries(int seriesId, string foreignSeriesId);
-        List<SeriesGroupLink> GetLinksByIssue(List<int> bookIds);
+        List<SeriesGroupLink> GetLinksByIssue(List<int> issueIds);
     }
 
     public class SeriesGroupLinkRepository : BasicRepository<SeriesGroupLink>, ISeriesIssueLinkRepository

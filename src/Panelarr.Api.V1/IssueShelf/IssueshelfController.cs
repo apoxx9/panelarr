@@ -11,10 +11,10 @@ namespace Panelarr.Api.V1.IssueShelf
         private readonly ISeriesService _seriesService;
         private readonly IIssueMonitoredService _issueMonitoredService;
 
-        public IssueshelfController(ISeriesService seriesService, IIssueMonitoredService bookMonitoredService)
+        public IssueshelfController(ISeriesService seriesService, IIssueMonitoredService issueMonitoredService)
         {
             _seriesService = seriesService;
-            _issueMonitoredService = bookMonitoredService;
+            _issueMonitoredService = issueMonitoredService;
         }
 
         [HttpPost]

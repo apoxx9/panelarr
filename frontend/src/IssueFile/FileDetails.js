@@ -31,13 +31,13 @@ function FileDetails(props) {
 
   const {
     filename,
-    audioTags,
+    fileTags,
     rejections
   } = props;
 
   return (
     <Fragment>
-      <div className={styles.audioTags}>
+      <div className={styles.fileTags}>
         <DescriptionList>
           {
             filename &&
@@ -48,24 +48,24 @@ function FileDetails(props) {
               />
           }
           {
-            audioTags.quality !== undefined &&
+            fileTags.quality !== undefined &&
               <DescriptionListItem
                 title={translate('Quality')}
-                data={audioTags.quality}
+                data={fileTags.quality}
               />
           }
           {
-            audioTags.size !== undefined &&
+            fileTags.size !== undefined &&
               <DescriptionListItem
                 title={translate('Size')}
-                data={audioTags.size}
+                data={fileTags.size}
               />
           }
           {
-            audioTags.dateAdded !== undefined &&
+            fileTags.dateAdded !== undefined &&
               <DescriptionListItem
                 title={translate('DateAdded')}
-                data={audioTags.dateAdded}
+                data={fileTags.dateAdded}
               />
           }
           {
@@ -80,7 +80,7 @@ function FileDetails(props) {
 
 FileDetails.propTypes = {
   filename: PropTypes.string,
-  audioTags: PropTypes.object.isRequired,
+  fileTags: PropTypes.object.isRequired,
   rejections: PropTypes.arrayOf(PropTypes.object)
 };
 

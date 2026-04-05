@@ -37,9 +37,9 @@ namespace NzbDrone.Core.SeriesStats
 
         public List<SeriesStatistics> SeriesStatistics()
         {
-            var bookStatistics = _cache.Get("AllSeries", () => _seriesStatisticsRepository.SeriesStatistics());
+            var issueStatistics = _cache.Get("AllSeries", () => _seriesStatisticsRepository.SeriesStatistics());
 
-            return bookStatistics.GroupBy(s => s.SeriesId).Select(s => MapSeriesStatistics(s.ToList())).ToList();
+            return issueStatistics.GroupBy(s => s.SeriesId).Select(s => MapSeriesStatistics(s.ToList())).ToList();
         }
 
         public SeriesStatistics SeriesStatistics(int seriesId)
@@ -54,17 +54,17 @@ namespace NzbDrone.Core.SeriesStats
             return MapSeriesStatistics(stats);
         }
 
-        private SeriesStatistics MapSeriesStatistics(List<IssueStatistics> bookStatistics)
+        private SeriesStatistics MapSeriesStatistics(List<IssueStatistics> issueStatistics)
         {
             var seriesStatistics = new SeriesStatistics
             {
-                SeriesId = bookStatistics.First().SeriesId,
-                ComicFileCount = bookStatistics.Sum(s => s.ComicFileCount),
-                IssueCount = bookStatistics.Sum(s => s.IssueCount),
-                AvailableIssueCount = bookStatistics.Sum(s => s.AvailableIssueCount),
-                TotalIssueCount = bookStatistics.Sum(s => s.TotalIssueCount),
-                SizeOnDisk = bookStatistics.Sum(s => s.SizeOnDisk),
-                IssueStatistics = bookStatistics
+                SeriesId = issueStatistics.First().SeriesId,
+                ComicFileCount = issueStatistics.Sum(s => s.ComicFileCount),
+                IssueCount = issueStatistics.Sum(s => s.IssueCount),
+                AvailableIssueCount = issueStatistics.Sum(s => s.AvailableIssueCount),
+                TotalIssueCount = issueStatistics.Sum(s => s.TotalIssueCount),
+                SizeOnDisk = issueStatistics.Sum(s => s.SizeOnDisk),
+                IssueStatistics = issueStatistics
             };
 
             return seriesStatistics;

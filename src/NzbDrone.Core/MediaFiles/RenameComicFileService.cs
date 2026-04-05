@@ -34,7 +34,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public RenameComicFileService(ISeriesService seriesService,
                                         IMediaFileService mediaFileService,
-                                        IIssueService bookService,
+                                        IIssueService issueService,
                                         IMoveComicFiles comicFileMover,
                                         IEventAggregator eventAggregator,
                                         IBuildFileNames filenameBuilder,
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.MediaFiles
         {
             _seriesService = seriesService;
             _mediaFileService = mediaFileService;
-            _issueService = bookService;
+            _issueService = issueService;
             _comicFileMover = comicFileMover;
             _eventAggregator = eventAggregator;
             _filenameBuilder = filenameBuilder;

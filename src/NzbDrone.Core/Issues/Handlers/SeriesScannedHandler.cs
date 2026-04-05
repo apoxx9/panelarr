@@ -12,19 +12,19 @@ namespace NzbDrone.Core.Issues
         private readonly IIssueMonitoredService _issueMonitoredService;
         private readonly ISeriesService _seriesService;
         private readonly IManageCommandQueue _commandQueueManager;
-        private readonly IIssueAddedService _bookAddedService;
+        private readonly IIssueAddedService _issueAddedService;
         private readonly Logger _logger;
 
-        public SeriesScannedHandler(IIssueMonitoredService bookMonitoredService,
+        public SeriesScannedHandler(IIssueMonitoredService issueMonitoredService,
                                     ISeriesService seriesService,
                                     IManageCommandQueue commandQueueManager,
-                                    IIssueAddedService bookAddedService,
+                                    IIssueAddedService issueAddedService,
                                     Logger logger)
         {
-            _issueMonitoredService = bookMonitoredService;
+            _issueMonitoredService = issueMonitoredService;
             _seriesService = seriesService;
             _commandQueueManager = commandQueueManager;
-            _bookAddedService = bookAddedService;
+            _issueAddedService = issueAddedService;
             _logger = logger;
         }
 
@@ -44,7 +44,7 @@ namespace NzbDrone.Core.Issues
                 _seriesService.RemoveAddOptions(series);
             }
 
-            _bookAddedService.SearchForRecentlyAdded(series.Id);
+            _issueAddedService.SearchForRecentlyAdded(series.Id);
         }
 
         public void Handle(SeriesScannedEvent message)

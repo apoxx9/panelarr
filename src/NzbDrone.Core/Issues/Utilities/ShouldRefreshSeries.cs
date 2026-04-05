@@ -14,9 +14,9 @@ namespace NzbDrone.Core.Issues
         private readonly IIssueService _issueService;
         private readonly Logger _logger;
 
-        public ShouldRefreshSeries(IIssueService bookService, Logger logger)
+        public ShouldRefreshSeries(IIssueService issueService, Logger logger)
         {
-            _issueService = bookService;
+            _issueService = issueService;
             _logger = logger;
         }
 

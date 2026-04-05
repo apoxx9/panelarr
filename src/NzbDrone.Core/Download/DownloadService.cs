@@ -128,18 +128,18 @@ namespace NzbDrone.Core.Download
                 throw;
             }
 
-            var bookGrabbedEvent = new IssueGrabbedEvent(remoteIssue);
-            bookGrabbedEvent.DownloadClient = downloadClient.Name;
-            bookGrabbedEvent.DownloadClientId = downloadClient.Definition.Id;
-            bookGrabbedEvent.DownloadClientName = downloadClient.Definition.Name;
+            var issueGrabbedEvent = new IssueGrabbedEvent(remoteIssue);
+            issueGrabbedEvent.DownloadClient = downloadClient.Name;
+            issueGrabbedEvent.DownloadClientId = downloadClient.Definition.Id;
+            issueGrabbedEvent.DownloadClientName = downloadClient.Definition.Name;
 
             if (downloadClientId.IsNotNullOrWhiteSpace())
             {
-                bookGrabbedEvent.DownloadId = downloadClientId;
+                issueGrabbedEvent.DownloadId = downloadClientId;
             }
 
             _logger.ProgressInfo("Report sent to {0} from indexer {1}. {2}", downloadClient.Definition.Name, remoteIssue.Release.Indexer, downloadTitle);
-            _eventAggregator.PublishEvent(bookGrabbedEvent);
+            _eventAggregator.PublishEvent(issueGrabbedEvent);
         }
     }
 }

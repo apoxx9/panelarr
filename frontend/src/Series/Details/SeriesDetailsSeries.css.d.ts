@@ -8,11 +8,11 @@ interface CssExports {
   'actionsMenuContent': string;
   'collapseButtonContainer': string;
   'collapseButtonIcon': string;
-  'episodeCountTooltip': string;
   'expandButton': string;
   'expandButtonIcon': string;
   'header': string;
   'issueCount': string;
+  'issueCountTooltip': string;
   'issueType': string;
   'issueTypeLabel': string;
   'issues': string;

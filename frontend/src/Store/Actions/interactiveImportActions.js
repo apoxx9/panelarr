@@ -101,8 +101,8 @@ export const FETCH_INTERACTIVE_IMPORT_ISSUES_LIST = 'interactiveImport/fetchInte
 export const SET_INTERACTIVE_IMPORT_ISSUES_LIST_SORT = 'interactiveImport/clearInteractiveImportIssuesSort';
 export const CLEAR_INTERACTIVE_IMPORT_ISSUES_LIST = 'interactiveImport/clearInteractiveImportIssues';
 
-export const FETCH_INTERACTIVE_IMPORT_TRACKFILES = 'interactiveImport/fetchInteractiveImportIssueFiles';
-export const CLEAR_INTERACTIVE_IMPORT_TRACKFILES = 'interactiveImport/clearInteractiveImportIssueFiles';
+export const FETCH_INTERACTIVE_IMPORT_ISSUEFILES = 'interactiveImport/fetchInteractiveImportIssueFiles';
+export const CLEAR_INTERACTIVE_IMPORT_ISSUEFILES = 'interactiveImport/clearInteractiveImportIssueFiles';
 
 //
 // Action Creators
@@ -121,8 +121,8 @@ export const fetchInteractiveImportIssues = createThunk(FETCH_INTERACTIVE_IMPORT
 export const setInteractiveImportIssuesSort = createAction(SET_INTERACTIVE_IMPORT_ISSUES_LIST_SORT);
 export const clearInteractiveImportIssues = createAction(CLEAR_INTERACTIVE_IMPORT_ISSUES_LIST);
 
-export const fetchInteractiveImportIssueFiles = createThunk(FETCH_INTERACTIVE_IMPORT_TRACKFILES);
-export const clearInteractiveImportIssueFiles = createAction(CLEAR_INTERACTIVE_IMPORT_TRACKFILES);
+export const fetchInteractiveImportIssueFiles = createThunk(FETCH_INTERACTIVE_IMPORT_ISSUEFILES);
+export const clearInteractiveImportIssueFiles = createAction(CLEAR_INTERACTIVE_IMPORT_ISSUEFILES);
 
 //
 // Action Handlers
@@ -252,7 +252,7 @@ export const actionHandlers = handleThunks({
 
   [FETCH_INTERACTIVE_IMPORT_ISSUES_LIST]: createFetchHandler(issuesSection, '/issue'),
 
-  [FETCH_INTERACTIVE_IMPORT_TRACKFILES]: createFetchHandler(issueFilesSection, '/comicfile')
+  [FETCH_INTERACTIVE_IMPORT_ISSUEFILES]: createFetchHandler(issueFilesSection, '/comicfile')
 });
 
 //
@@ -341,7 +341,7 @@ export const reducers = createHandleActions({
     });
   },
 
-  [CLEAR_INTERACTIVE_IMPORT_TRACKFILES]: (state) => {
+  [CLEAR_INTERACTIVE_IMPORT_ISSUEFILES]: (state) => {
     return updateSectionState(state, issueFilesSection, {
       ...defaultState.issueFiles
     });

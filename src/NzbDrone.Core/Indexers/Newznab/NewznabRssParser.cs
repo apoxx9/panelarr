@@ -185,11 +185,11 @@ namespace NzbDrone.Core.Indexers.Newznab
 
         protected virtual string GetIssue(XElement item)
         {
-            var bookString = TryGetNewznabAttribute(item, "booktitle");
+            var issueString = TryGetNewznabAttribute(item, "booktitle");
 
-            if (!bookString.IsNullOrWhiteSpace())
+            if (!issueString.IsNullOrWhiteSpace())
             {
-                return bookString;
+                return issueString;
             }
 
             return "";

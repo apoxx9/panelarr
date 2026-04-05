@@ -16,16 +16,16 @@ namespace Panelarr.Api.V1.Wanted
     {
         private readonly IIssueCutoffService _issueCutoffService;
 
-        public CutoffController(IIssueCutoffService bookCutoffService,
-                            IIssueService bookService,
+        public CutoffController(IIssueCutoffService issueCutoffService,
+                            IIssueService issueService,
                             ISeriesIssueLinkService seriesIssueLinkService,
                             ISeriesStatisticsService seriesStatisticsService,
                             IMapCoversToLocal coverMapper,
                             IUpgradableSpecification upgradableSpecification,
                             IBroadcastSignalRMessage signalRBroadcaster)
-        : base(bookService, seriesIssueLinkService, seriesStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
+        : base(issueService, seriesIssueLinkService, seriesStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
         {
-            _issueCutoffService = bookCutoffService;
+            _issueCutoffService = issueCutoffService;
         }
 
         [HttpGet]

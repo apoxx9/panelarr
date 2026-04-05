@@ -222,8 +222,8 @@ module.exports = {
   //
   // Season
 
-  seasonBackgroundColor: white,
-  episodesBackgroundColor: offWhite,
+  volumeBackgroundColor: white,
+  issuesBackgroundColor: offWhite,
 
   //
   // misc

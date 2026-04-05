@@ -28,12 +28,12 @@ namespace NzbDrone.Core.MediaFiles
 
         public UpdateComicFileService(IDiskProvider diskProvider,
                                       IConfigService configService,
-                                      IIssueService bookService,
+                                      IIssueService issueService,
                                       Logger logger)
         {
             _diskProvider = diskProvider;
             _configService = configService;
-            _issueService = bookService;
+            _issueService = issueService;
             _logger = logger;
         }
 

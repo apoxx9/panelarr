@@ -173,15 +173,15 @@ namespace NzbDrone.Core.MediaFiles
             if (_configService.DeleteEmptyFolders)
             {
                 var series = message.ComicFile.Series.Value;
-                var bookFolder = message.ComicFile.Path.GetParentPath();
+                var issueFolder = message.ComicFile.Path.GetParentPath();
 
                 if (_diskProvider.GetFiles(series.Path, true).Empty())
                 {
                     _diskProvider.DeleteFolder(series.Path, true);
                 }
-                else if (_diskProvider.GetFiles(bookFolder, true).Empty())
+                else if (_diskProvider.GetFiles(issueFolder, true).Empty())
                 {
-                    _diskProvider.RemoveEmptySubfolders(bookFolder);
+                    _diskProvider.RemoveEmptySubfolders(issueFolder);
                 }
             }
         }

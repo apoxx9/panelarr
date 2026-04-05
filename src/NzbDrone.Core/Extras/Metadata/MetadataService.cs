@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Extras.Metadata
                                IHttpClient httpClient,
                                IMediaFileAttributeService mediaFileAttributeService,
                                IMetadataFileService metadataFileService,
-                               IIssueService bookService,
+                               IIssueService issueService,
                                Logger logger)
             : base(configService, diskProvider, diskTransferService, logger)
         {
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Extras.Metadata
             _httpClient = httpClient;
             _mediaFileAttributeService = mediaFileAttributeService;
             _metadataFileService = metadataFileService;
-            _issueService = bookService;
+            _issueService = issueService;
             _logger = logger;
         }
 
@@ -104,11 +104,11 @@ namespace NzbDrone.Core.Extras.Metadata
             return files;
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterComicImport(Series series, Issue issue, string seriesFolder, string bookFolder)
+        public override IEnumerable<ExtraFile> CreateAfterComicImport(Series series, Issue issue, string seriesFolder, string issueFolder)
         {
             var metadataFiles = _metadataFileService.GetFilesBySeries(series.Id);
 
-            if (seriesFolder.IsNullOrWhiteSpace() && bookFolder.IsNullOrWhiteSpace())
+            if (seriesFolder.IsNullOrWhiteSpace() && issueFolder.IsNullOrWhiteSpace())
             {
                 return new List<MetadataFile>();
             }

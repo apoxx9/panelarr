@@ -1,7 +1,7 @@
 /* eslint max-params: 0 */
 import moment from 'moment';
 
-function getStatusStyle(episodeNumber, downloading, startTime, isMonitored, percentOfIssues) {
+function getStatusStyle(issueNumber, downloading, startTime, isMonitored, percentOfIssues) {
   const currentTime = moment();
 
   if (percentOfIssues === 100) {

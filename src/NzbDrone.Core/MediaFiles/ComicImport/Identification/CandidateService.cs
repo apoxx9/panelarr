@@ -16,21 +16,21 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
     public class CandidateService : ICandidateService
     {
-        private readonly ISearchForNewIssue _bookSearchService;
+        private readonly ISearchForNewIssue _issueSearchService;
         private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
         private readonly IMediaFileService _mediaFileService;
         private readonly Logger _logger;
 
-        public CandidateService(ISearchForNewIssue bookSearchService,
+        public CandidateService(ISearchForNewIssue issueSearchService,
                                 ISeriesService seriesService,
-                                IIssueService bookService,
+                                IIssueService issueService,
                                 IMediaFileService mediaFileService,
                                 Logger logger)
         {
-            _bookSearchService = bookSearchService;
+            _issueSearchService = issueSearchService;
             _seriesService = seriesService;
-            _issueService = bookService;
+            _issueService = issueService;
             _mediaFileService = mediaFileService;
             _logger = logger;
         }
@@ -108,28 +108,28 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             var candidateReleases = new List<CandidateEdition>();
 
             // Try embedded metadata first, then download client title, then filename
-            var bookTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
+            var issueTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
 
-            if (bookTag.IsNullOrWhiteSpace())
+            if (issueTag.IsNullOrWhiteSpace())
             {
-                bookTag = localEdition.LocalIssues.MostCommon(x => x.DownloadClientIssueInfo?.IssueTitle) ?? "";
+                issueTag = localEdition.LocalIssues.MostCommon(x => x.DownloadClientIssueInfo?.IssueTitle) ?? "";
             }
 
-            if (bookTag.IsNullOrWhiteSpace())
+            if (issueTag.IsNullOrWhiteSpace())
             {
-                bookTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.CleanTitle) ?? "";
+                issueTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.CleanTitle) ?? "";
             }
 
-            if (bookTag.IsNullOrWhiteSpace())
+            if (issueTag.IsNullOrWhiteSpace())
             {
-                bookTag = localEdition.LocalIssues
+                issueTag = localEdition.LocalIssues
                     .Select(x => System.IO.Path.GetFileNameWithoutExtension(x.Path))
                     .FirstOrDefault() ?? "";
             }
 
-            if (bookTag.IsNotNullOrWhiteSpace())
+            if (issueTag.IsNotNullOrWhiteSpace())
             {
-                var possibleIssues = _issueService.GetCandidates(series.SeriesMetadataId, bookTag);
+                var possibleIssues = _issueService.GetCandidates(series.SeriesMetadataId, issueTag);
                 foreach (var issue in possibleIssues)
                 {
                     candidateReleases.AddRange(GetDbCandidatesByIssue(issue, includeExisting));
@@ -139,7 +139,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             // If title matching found nothing, try matching by issue number
             if (!candidateReleases.Any())
             {
-                var issueNumberStr = System.Text.RegularExpressions.Regex.Match(bookTag, @"#?(\d+\.?\d*)").Groups[1].Value;
+                var issueNumberStr = System.Text.RegularExpressions.Regex.Match(issueTag, @"#?(\d+\.?\d*)").Groups[1].Value;
                 if (float.TryParse(issueNumberStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var issueNumber))
                 {
                     _logger.Debug("Title match failed for series {0}, trying issue number {1}", series.SeriesMetadataId, issueNumber);
@@ -224,10 +224,10 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 seriesTags.AddRange(allSeries);
             }
 
-            var bookTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
+            var issueTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
 
             // If no valid series or issue tags, stop
-            if (!seriesTags.Any() || bookTag.IsNullOrWhiteSpace())
+            if (!seriesTags.Any() || issueTag.IsNullOrWhiteSpace())
             {
                 yield break;
             }
@@ -237,7 +237,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             {
                 try
                 {
-                    remoteIssues = _bookSearchService.SearchForNewIssue(bookTag, seriesTag);
+                    remoteIssues = _issueSearchService.SearchForNewIssue(issueTag, seriesTag);
                 }
                 catch (System.Exception e)
                 {
@@ -260,7 +260,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             // Search by just issue title
             try
             {
-                remoteIssues = _bookSearchService.SearchForNewIssue(bookTag, null);
+                remoteIssues = _issueSearchService.SearchForNewIssue(issueTag, null);
             }
             catch (System.Exception e)
             {
@@ -278,7 +278,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             {
                 try
                 {
-                    remoteIssues = _bookSearchService.SearchForNewIssue(a, null);
+                    remoteIssues = _issueSearchService.SearchForNewIssue(a, null);
                 }
                 catch (System.Exception e)
                 {

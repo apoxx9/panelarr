@@ -5,7 +5,7 @@
   margin: 2px 4px;
   border: 1px solid var(--borderColor);
   border-radius: 4px;
-  background-color: var(--seasonBackgroundColor);
+  background-color: var(--volumeBackgroundColor);
   cursor: default;
 }
 
@@ -24,7 +24,7 @@
 
 .issues {
   padding: 0 4px;
-  background-color: var(--episodesBackgroundColor);
+  background-color: var(--issuesBackgroundColor);
   color: var(--defaultColor);
 }
 

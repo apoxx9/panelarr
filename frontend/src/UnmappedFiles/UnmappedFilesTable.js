@@ -190,7 +190,7 @@ class UnmappedFilesTable extends Component {
       selectedState
     } = this.state;
 
-    const selectedTrackFileIds = this.getSelectedIds();
+    const selectedFileIds = this.getSelectedIds();
 
     return (
       <PageContent title={translate('UnmappedFiles')}>
@@ -206,7 +206,7 @@ class UnmappedFilesTable extends Component {
             <PageToolbarButton
               label={translate('DeleteSelected')}
               iconName={icons.DELETE}
-              isDisabled={selectedTrackFileIds.length === 0}
+              isDisabled={selectedFileIds.length === 0}
               isSpinning={isDeleting}
               onPress={this.onDeleteUnmappedFilesPress}
             />

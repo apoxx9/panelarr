@@ -80,14 +80,14 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             var localYear = localTracks.MostCommon(x => x.FileTrackInfo.Year);
             if (localYear > 0 && issue.ReleaseDate.HasValue)
             {
-                var bookYear = issue.ReleaseDate?.Year ?? 0;
-                if (localYear == bookYear)
+                var issueYear = issue.ReleaseDate?.Year ?? 0;
+                if (localYear == issueYear)
                 {
                     dist.Add("year", 0.0);
                 }
                 else
                 {
-                    var remoteYear = bookYear;
+                    var remoteYear = issueYear;
                     var diff = Math.Abs(localYear - remoteYear);
                     var diff_max = Math.Abs(DateTime.Now.Year - remoteYear);
                     dist.AddRatio("year", diff, diff_max);

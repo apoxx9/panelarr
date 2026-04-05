@@ -17,9 +17,9 @@ namespace NzbDrone.Core.Issues
         private readonly IIssueRepository _issueRepository;
         private readonly IQualityProfileService _qualityProfileService;
 
-        public IssueCutoffService(IIssueRepository bookRepository, IQualityProfileService qualityProfileService)
+        public IssueCutoffService(IIssueRepository issueRepository, IQualityProfileService qualityProfileService)
         {
-            _issueRepository = bookRepository;
+            _issueRepository = issueRepository;
             _qualityProfileService = qualityProfileService;
         }
 

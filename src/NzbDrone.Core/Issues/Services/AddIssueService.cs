@@ -21,21 +21,21 @@ namespace NzbDrone.Core.Issues
         private readonly ISeriesService _seriesService;
         private readonly IAddSeriesService _addSeriesService;
         private readonly IIssueService _issueService;
-        private readonly IProvideIssueInfo _bookInfo;
+        private readonly IProvideIssueInfo _issueInfoProvider;
         private readonly IImportListExclusionService _importListExclusionService;
         private readonly Logger _logger;
 
         public AddIssueService(ISeriesService seriesService,
                                IAddSeriesService addSeriesService,
-                               IIssueService bookService,
-                               IProvideIssueInfo bookInfo,
+                               IIssueService issueService,
+                               IProvideIssueInfo issueInfoProvider,
                                IImportListExclusionService importListExclusionService,
                                Logger logger)
         {
             _seriesService = seriesService;
             _addSeriesService = addSeriesService;
-            _issueService = bookService;
-            _bookInfo = bookInfo;
+            _issueService = issueService;
+            _issueInfoProvider = issueInfoProvider;
             _importListExclusionService = importListExclusionService;
             _logger = logger;
         }
@@ -105,7 +105,7 @@ namespace NzbDrone.Core.Issues
             Tuple<string, Issue, List<SeriesMetadata>> tuple = null;
             try
             {
-                tuple = _bookInfo.GetIssueInfo(newIssue.ForeignIssueId);
+                tuple = _issueInfoProvider.GetIssueInfo(newIssue.ForeignIssueId);
             }
             catch (IssueNotFoundException)
             {

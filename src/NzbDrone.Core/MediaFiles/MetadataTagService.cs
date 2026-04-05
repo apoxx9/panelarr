@@ -15,7 +15,7 @@ namespace NzbDrone.Core.MediaFiles
     public interface IMetadataTagService
     {
         ParsedTrackInfo ReadTags(IFileInfo file);
-        void WriteTags(ComicFile trackfile, bool newDownload, bool force = false);
+        void WriteTags(ComicFile comicFile, bool newDownload, bool force = false);
         void SyncTags(List<Issue> issues);
         List<RetagComicFilePreview> GetRetagPreviewsBySeries(int seriesId);
         List<RetagComicFilePreview> GetRetagPreviewsByIssue(int seriesId);

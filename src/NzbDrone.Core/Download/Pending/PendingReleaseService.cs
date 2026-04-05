@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Download.Pending
         List<Queue.Queue> GetPendingQueue();
         Queue.Queue FindPendingQueueItem(int queueId);
         void RemovePendingQueueItems(int queueId);
-        RemoteIssue OldestPendingRelease(int seriesId, int[] bookIds);
+        RemoteIssue OldestPendingRelease(int seriesId, int[] issueIds);
     }
 
     public class PendingReleaseService : IPendingReleaseService,
@@ -100,9 +100,9 @@ namespace NzbDrone.Core.Download.Pending
                     var decision = pair.Item1;
                     var reason = pair.Item2;
 
-                    var bookIds = decision.RemoteIssue.Issues.Select(e => e.Id);
+                    var issueIds = decision.RemoteIssue.Issues.Select(e => e.Id);
 
-                    var existingReports = bookIds.SelectMany(v => alreadyPendingByIssue[v])
+                    var existingReports = issueIds.SelectMany(v => alreadyPendingByIssue[v])
                                                     .Distinct().ToList();
 
                     var matchingReports = existingReports.Where(MatchingReleasePredicate(decision.RemoteIssue.Release)).ToList();
@@ -264,12 +264,12 @@ namespace NzbDrone.Core.Download.Pending
             _repository.DeleteMany(releasesToRemove.Select(c => c.Id));
         }
 
-        public RemoteIssue OldestPendingRelease(int seriesId, int[] bookIds)
+        public RemoteIssue OldestPendingRelease(int seriesId, int[] issueIds)
         {
             var seriesReleases = GetPendingReleases(seriesId);
 
             return seriesReleases.Select(r => r.RemoteIssue)
-                                 .Where(r => r.Issues.Select(e => e.Id).Intersect(bookIds).Any())
+                                 .Where(r => r.Issues.Select(e => e.Id).Intersect(issueIds).Any())
                                  .MaxBy(p => p.Release.AgeHours);
         }
 
@@ -395,10 +395,10 @@ namespace NzbDrone.Core.Download.Pending
         private void RemoveGrabbed(RemoteIssue remoteIssue)
         {
             var pendingReleases = GetPendingReleases(remoteIssue.Series.Id);
-            var bookIds = remoteIssue.Issues.Select(e => e.Id);
+            var issueIds = remoteIssue.Issues.Select(e => e.Id);
 
             var existingReports = pendingReleases.Where(r => r.RemoteIssue.Issues.Select(e => e.Id)
-                                                             .Intersect(bookIds)
+                                                             .Intersect(issueIds)
                                                              .Any())
                                                              .ToList();
 

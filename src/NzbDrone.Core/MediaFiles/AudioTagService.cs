@@ -20,7 +20,7 @@ namespace NzbDrone.Core.MediaFiles
     public interface IAudioTagService
     {
         ParsedTrackInfo ReadTags(string file);
-        void WriteTags(ComicFile trackfile, bool newDownload, bool force = false);
+        void WriteTags(ComicFile comicFile, bool newDownload, bool force = false);
         void SyncTags(List<Issue> issues);
         List<RetagComicFilePreview> GetRetagPreviewsBySeries(int seriesId);
         List<RetagComicFilePreview> GetRetagPreviewsByIssue(int issueId);
@@ -68,9 +68,9 @@ namespace NzbDrone.Core.MediaFiles
             return new AudioTag(path);
         }
 
-        public AudioTag GetTrackMetadata(ComicFile trackfile)
+        public AudioTag GetTrackMetadata(ComicFile comicFile)
         {
-            var issue = trackfile.Issue?.Value;
+            var issue = comicFile.Issue?.Value;
 
             if (issue == null)
             {
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.MediaFiles
                 return new AudioTag();
             }
 
-            var fileTags = ReadAudioTag(trackfile.Path);
+            var fileTags = ReadAudioTag(comicFile.Path);
 
             string imageFile = null;
             long imageSize = 0;
@@ -107,7 +107,7 @@ namespace NzbDrone.Core.MediaFiles
                 Title = issue.Title,
                 Performers = new[] { series.Name },
                 IssueSeriess = new[] { series.Name },
-                Track = (uint)trackfile.Part,
+                Track = (uint)comicFile.Part,
                 TrackCount = (uint)partCount,
                 Issue = issue.Title,
                 Disc = fileTags.Disc,
@@ -123,16 +123,16 @@ namespace NzbDrone.Core.MediaFiles
             };
         }
 
-        private void UpdateTrackfileSizeAndModified(ComicFile trackfile, string path)
+        private void UpdateTrackfileSizeAndModified(ComicFile comicFile, string path)
         {
             // update the saved file size so that the importer doesn't get confused on the next scan
             var fileInfo = _diskProvider.GetFileInfo(path);
-            trackfile.Size = fileInfo.Length;
-            trackfile.Modified = fileInfo.LastWriteTimeUtc;
+            comicFile.Size = fileInfo.Length;
+            comicFile.Modified = fileInfo.LastWriteTimeUtc;
 
-            if (trackfile.Id > 0)
+            if (comicFile.Id > 0)
             {
-                _mediaFileService.Update(trackfile);
+                _mediaFileService.Update(comicFile);
             }
         }
 
@@ -163,7 +163,7 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        public void WriteTags(ComicFile trackfile, bool newDownload, bool force = false)
+        public void WriteTags(ComicFile comicFile, bool newDownload, bool force = false)
         {
             if (!force)
             {
@@ -174,14 +174,14 @@ namespace NzbDrone.Core.MediaFiles
                 }
             }
 
-            var newTags = GetTrackMetadata(trackfile);
-            var path = trackfile.Path;
+            var newTags = GetTrackMetadata(comicFile);
+            var path = comicFile.Path;
 
             var diff = ReadAudioTag(path).Diff(newTags);
 
             if (!diff.Any())
             {
-                _logger.Debug("No tags update for {0} due to no difference", trackfile);
+                _logger.Debug("No tags update for {0} due to no difference", comicFile);
                 return;
             }
 
@@ -189,17 +189,17 @@ namespace NzbDrone.Core.MediaFiles
 
             if (_configService.ScrubAudioTags)
             {
-                _logger.Debug($"Scrubbing tags for {trackfile}");
+                _logger.Debug($"Scrubbing tags for {comicFile}");
                 RemoveAllTags(path);
             }
 
-            _logger.Debug($"Writing tags for {trackfile}");
+            _logger.Debug($"Writing tags for {comicFile}");
 
             newTags.Write(path);
 
-            UpdateTrackfileSizeAndModified(trackfile, path);
+            UpdateTrackfileSizeAndModified(comicFile, path);
 
-            _eventAggregator.PublishEvent(new ComicFileRetaggedEvent(trackfile.Series.Value, trackfile, diff, _configService.ScrubAudioTags));
+            _eventAggregator.PublishEvent(new ComicFileRetaggedEvent(comicFile.Series.Value, comicFile, diff, _configService.ScrubAudioTags));
         }
 
         public void SyncTags(List<Issue> issues)

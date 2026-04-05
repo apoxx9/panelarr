@@ -18,12 +18,12 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
 
         public DeletedComicFileSpecification(IDiskProvider diskProvider,
                                              IConfigService configService,
-                                             IMediaFileService bookService,
+                                             IMediaFileService issueService,
                                              Logger logger)
         {
             _diskProvider = diskProvider;
             _configService = configService;
-            _issueService = bookService;
+            _issueService = issueService;
             _logger = logger;
         }
 

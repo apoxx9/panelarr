@@ -24,10 +24,10 @@ namespace NzbDrone.Core.Indexers.FileList
             var pageableRequests = new IndexerPageableRequestChain();
 
             var seriesQuery = searchCriteria.SeriesQuery.Replace("+", " ").Trim();
-            var bookQuery = searchCriteria.IssueQuery.Replace("+", " ").Trim();
+            var issueQuery = searchCriteria.IssueQuery.Replace("+", " ").Trim();
 
-            pageableRequests.Add(GetRequest("search-torrents", Settings.Categories, string.Format("&type=name&query={0}+{1}", Uri.EscapeDataString(seriesQuery), Uri.EscapeDataString(bookQuery))));
-            pageableRequests.Add(GetRequest("search-torrents", Settings.Categories, string.Format("&type=name&query={0}+{1}", Uri.EscapeDataString(bookQuery), Uri.EscapeDataString(seriesQuery))));
+            pageableRequests.Add(GetRequest("search-torrents", Settings.Categories, string.Format("&type=name&query={0}+{1}", Uri.EscapeDataString(seriesQuery), Uri.EscapeDataString(issueQuery))));
+            pageableRequests.Add(GetRequest("search-torrents", Settings.Categories, string.Format("&type=name&query={0}+{1}", Uri.EscapeDataString(issueQuery), Uri.EscapeDataString(seriesQuery))));
 
             return pageableRequests;
         }

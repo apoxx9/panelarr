@@ -36,7 +36,7 @@ namespace Panelarr.Api.V1.Issues
         protected readonly IAddIssueService _addIssueService;
 
         public IssueController(ISeriesService seriesService,
-                          IIssueService bookService,
+                          IIssueService issueService,
                           IAddIssueService addIssueService,
                           ISeriesIssueLinkService seriesIssueLinkService,
                           ISeriesStatisticsService seriesStatisticsService,
@@ -46,7 +46,7 @@ namespace Panelarr.Api.V1.Issues
                           QualityProfileExistsValidator qualityProfileExistsValidator,
                           MetadataProfileExistsValidator metadataProfileExistsValidator)
 
-        : base(bookService, seriesIssueLinkService, seriesStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
+        : base(issueService, seriesIssueLinkService, seriesStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
         {
             _seriesService = seriesService;
             _addIssueService = addIssueService;
@@ -126,19 +126,19 @@ namespace Panelarr.Api.V1.Issues
         }
 
         [RestPostById]
-        public ActionResult<IssueResource> AddIssue([FromBody] IssueResource bookResource)
+        public ActionResult<IssueResource> AddIssue([FromBody] IssueResource issueResource)
         {
-            var issue = _addIssueService.AddIssue(bookResource.ToModel());
+            var issue = _addIssueService.AddIssue(issueResource.ToModel());
 
             return Created(issue.Id);
         }
 
         [RestPutById]
-        public ActionResult<IssueResource> UpdateIssue([FromBody] IssueResource bookResource)
+        public ActionResult<IssueResource> UpdateIssue([FromBody] IssueResource issueResource)
         {
-            var issue = _issueService.GetIssue(bookResource.Id);
+            var issue = _issueService.GetIssue(issueResource.Id);
 
-            var model = bookResource.ToModel(issue);
+            var model = issueResource.ToModel(issue);
 
             _issueService.UpdateIssue(model);
 

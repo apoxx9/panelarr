@@ -17,17 +17,17 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation
     public class AugmentingService : IAugmentingService
     {
         private readonly IEnumerable<IAggregate<LocalIssue>> _trackAugmenters;
-        private readonly IEnumerable<IAggregate<LocalEdition>> _bookAugmenters;
+        private readonly IEnumerable<IAggregate<LocalEdition>> _issueAugmenters;
         private readonly IDiskProvider _diskProvider;
         private readonly Logger _logger;
 
         public AugmentingService(IEnumerable<IAggregate<LocalIssue>> trackAugmenters,
-                                 IEnumerable<IAggregate<LocalEdition>> bookAugmenters,
+                                 IEnumerable<IAggregate<LocalEdition>> issueAugmenters,
                                  IDiskProvider diskProvider,
                                  Logger logger)
         {
             _trackAugmenters = trackAugmenters;
-            _bookAugmenters = bookAugmenters;
+            _issueAugmenters = issueAugmenters;
             _diskProvider = diskProvider;
             _logger = logger;
         }
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation
 
         public LocalEdition Augment(LocalEdition localIssue)
         {
-            foreach (var augmenter in _bookAugmenters)
+            foreach (var augmenter in _issueAugmenters)
             {
                 try
                 {

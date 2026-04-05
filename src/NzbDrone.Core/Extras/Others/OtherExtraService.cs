@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Extras.Others
             return Enumerable.Empty<ExtraFile>();
         }
 
-        public override IEnumerable<ExtraFile> CreateAfterComicImport(Series series, Issue issue, string seriesFolder, string bookFolder)
+        public override IEnumerable<ExtraFile> CreateAfterComicImport(Series series, Issue issue, string seriesFolder, string issueFolder)
         {
             return Enumerable.Empty<ExtraFile>();
         }

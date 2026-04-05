@@ -53,7 +53,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                                    IDiskScanService diskScanService,
                                    IMakeImportDecision importDecisionMaker,
                                    ISeriesService seriesService,
-                                   IIssueService bookService,
+                                   IIssueService issueService,
                                    IMetadataTagService metadataTagService,
                                    IImportApprovedIssues importApprovedIssues,
                                    ICustomFormatCalculationService formatCalculator,
@@ -69,7 +69,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
             _diskScanService = diskScanService;
             _importDecisionMaker = importDecisionMaker;
             _seriesService = seriesService;
-            _issueService = bookService;
+            _issueService = issueService;
             _metadataTagService = metadataTagService;
             _importApprovedIssues = importApprovedIssues;
             _formatCalculator = formatCalculator;
@@ -293,12 +293,12 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
 
             var imported = new List<ImportResult>();
             var importedTrackedDownload = new List<ManuallyImportedFile>();
-            var bookIds = message.Files.GroupBy(e => e.IssueId).ToList();
+            var issueIds = message.Files.GroupBy(e => e.IssueId).ToList();
             var fileCount = 0;
 
-            foreach (var importIssueId in bookIds)
+            foreach (var importIssueId in issueIds)
             {
-                var bookImportDecisions = new List<ImportDecision<LocalIssue>>();
+                var issueImportDecisions = new List<ImportDecision<LocalIssue>>();
 
                 foreach (var file in importIssueId)
                 {
@@ -333,19 +333,19 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
                         importDecision.Reject(new Rejection($"Destination series folder {series.Path} is not in a Root Folder"));
                     }
 
-                    bookImportDecisions.Add(importDecision);
+                    issueImportDecisions.Add(importDecision);
                     fileCount += 1;
                 }
 
                 var downloadId = importIssueId.Select(x => x.DownloadId).FirstOrDefault(x => x.IsNotNullOrWhiteSpace());
                 if (downloadId.IsNullOrWhiteSpace())
                 {
-                    imported.AddRange(_importApprovedIssues.Import(bookImportDecisions, message.ReplaceExistingFiles, null, message.ImportMode));
+                    imported.AddRange(_importApprovedIssues.Import(issueImportDecisions, message.ReplaceExistingFiles, null, message.ImportMode));
                 }
                 else
                 {
                     var trackedDownload = _trackedDownloadService.Find(downloadId);
-                    var importResults = _importApprovedIssues.Import(bookImportDecisions, message.ReplaceExistingFiles, trackedDownload.DownloadItem, message.ImportMode);
+                    var importResults = _importApprovedIssues.Import(issueImportDecisions, message.ReplaceExistingFiles, trackedDownload.DownloadItem, message.ImportMode);
 
                     imported.AddRange(importResults);
 

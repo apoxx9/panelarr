@@ -54,7 +54,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                                    IComicFormatConverter comicFormatConverter,
                                    ISeriesService seriesService,
                                    IAddSeriesService addSeriesService,
-                                   IIssueService bookService,
+                                   IIssueService issueService,
                                    IRootFolderService rootFolderService,
                                    IRecycleBinProvider recycleBinProvider,
                                    IExtraService extraService,
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             _comicFormatConverter = comicFormatConverter;
             _seriesService = seriesService;
             _addSeriesService = addSeriesService;
-            _issueService = bookService;
+            _issueService = issueService;
             _rootFolderService = rootFolderService;
             _recycleBinProvider = recycleBinProvider;
             _extraService = extraService;
@@ -84,20 +84,20 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
         public List<ImportResult> Import(List<ImportDecision<LocalIssue>> decisions, bool replaceExisting, DownloadClientItem downloadClientItem = null, ImportMode importMode = ImportMode.Auto)
         {
             var importResults = new List<ImportResult>();
-            var allImportedTrackFiles = new List<ComicFile>();
-            var allOldTrackFiles = new List<ComicFile>();
+            var allImportedComicFiles = new List<ComicFile>();
+            var allOldComicFiles = new List<ComicFile>();
             var addedSeries = new List<Series>();
             var addedIssues = new List<Issue>();
 
-            var bookDecisions = decisions.Where(e => e.Item.Issue != null && e.Approved)
+            var issueDecisions = decisions.Where(e => e.Item.Issue != null && e.Approved)
                 .GroupBy(e => e.Item.Issue.ForeignIssueId).ToList();
 
             var iDecision = 1;
-            foreach (var bookDecision in bookDecisions)
+            foreach (var issueDecision in issueDecisions)
             {
-                _logger.ProgressInfo("Importing issue {0}/{1} {2}", iDecision++, bookDecisions.Count, bookDecision.First().Item.Issue);
+                _logger.ProgressInfo("Importing issue {0}/{1} {2}", iDecision++, issueDecisions.Count, issueDecision.First().Item.Issue);
 
-                var decisionList = bookDecision.ToList();
+                var decisionList = issueDecision.ToList();
 
                 var series = EnsureSeriesAdded(decisionList, addedSeries);
 
@@ -228,10 +228,10 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                         _extraService.ImportTrack(localTrack, comicFile, copyOnly);
                     }
 
-                    allImportedTrackFiles.Add(comicFile);
-                    allOldTrackFiles.AddRange(oldFiles);
+                    allImportedComicFiles.Add(comicFile);
+                    allOldComicFiles.AddRange(oldFiles);
 
-                    // create all the import events here, but we can't publish until the trackfiles have been
+                    // create all the import events here, but we can't publish until the comic files have been
                     // inserted and ids created
                     trackImportedEvents.Add(new TrackImportedEvent(localTrack, comicFile, oldFiles, !localTrack.ExistingFile, downloadClientItem));
                 }
@@ -271,29 +271,29 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
             _mediaFileService.AddMany(filesToAdd);
-            _logger.Debug("Inserted new trackfiles in {0}ms", watch.ElapsedMilliseconds);
+            _logger.Debug("Inserted new comic files in {0}ms", watch.ElapsedMilliseconds);
 
-            // now that trackfiles have been inserted and ids generated, publish the import events
+            // now that comic files have been inserted and ids generated, publish the import events
             foreach (var trackImportedEvent in trackImportedEvents)
             {
                 _eventAggregator.PublishEvent(trackImportedEvent);
             }
 
-            var bookImports = importResults.Where(e => e.ImportDecision.Item.Issue != null)
+            var issueImports = importResults.Where(e => e.ImportDecision.Item.Issue != null)
                 .GroupBy(e => e.ImportDecision.Item.Issue.Id).ToList();
 
-            foreach (var bookImport in bookImports)
+            foreach (var issueImport in issueImports)
             {
-                var issue = bookImport.First().ImportDecision.Item.Issue;
-                var series = bookImport.First().ImportDecision.Item.Series;
+                var issue = issueImport.First().ImportDecision.Item.Issue;
+                var series = issueImport.First().ImportDecision.Item.Series;
 
-                if (bookImport.Where(e => e.Errors.Count == 0).ToList().Count > 0 && series != null && issue != null)
+                if (issueImport.Where(e => e.Errors.Count == 0).ToList().Count > 0 && series != null && issue != null)
                 {
                     _eventAggregator.PublishEvent(new IssueImportedEvent(
                         series,
                         issue,
-                        allImportedTrackFiles.Where(s => s.IssueId == issue.Id).ToList(),
-                        allOldTrackFiles.Where(s => s.IssueId == issue.Id).ToList(),
+                        allImportedComicFiles.Where(s => s.IssueId == issue.Id).ToList(),
+                        allOldComicFiles.Where(s => s.IssueId == issue.Id).ToList(),
                         replaceExisting,
                         downloadClientItem));
                 }
@@ -310,12 +310,12 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             }
 
             var addedSeriesMetadataIds = addedSeries.Select(x => x.SeriesMetadataId).ToHashSet();
-            var booksToRefresh = addedIssues.Where(x => !addedSeriesMetadataIds.Contains(x.SeriesMetadataId)).ToList();
+            var issuesToRefresh = addedIssues.Where(x => !addedSeriesMetadataIds.Contains(x.SeriesMetadataId)).ToList();
 
-            if (booksToRefresh.Any())
+            if (issuesToRefresh.Any())
             {
-                _logger.Debug("Refreshing info for {0} new issues", booksToRefresh.Count);
-                _commandQueueManager.Push(new BulkRefreshIssueCommand(booksToRefresh.Select(x => x.Id).ToList()));
+                _logger.Debug("Refreshing info for {0} new issues", issuesToRefresh.Count);
+                _commandQueueManager.Push(new BulkRefreshIssueCommand(issuesToRefresh.Select(x => x.Id).ToList()));
             }
 
             return importResults;
@@ -437,7 +437,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             }
         }
 
-        private void RemoveExistingTrackFiles(Series series, Issue issue)
+        private void RemoveExistingComicFiles(Series series, Issue issue)
         {
             var rootFolder = _diskProvider.GetParentFolder(series.Path);
             var previousFiles = _mediaFileService.GetFilesByIssue(issue.Id);

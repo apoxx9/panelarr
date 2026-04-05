@@ -118,7 +118,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
             // series/issue tags must be the same for 75% of tracks, with no more than 25% having different values
             // (except in the case of various allSeries)
-            const double bookTagThreshold = 0.25;
+            const double issueTagThreshold = 0.25;
             const double seriesTagThreshold = 0.25;
             const double tagFuzz = 0.9;
 
@@ -131,8 +131,8 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             }
 
             // check that there's a common issue tag.
-            var bookTags = tracks.Select(x => x.FileTrackInfo.IssueTitle);
-            if (!HasCommonEntry(bookTags, bookTagThreshold, tagFuzz))
+            var issueTags = tracks.Select(x => x.FileTrackInfo.IssueTitle);
+            if (!HasCommonEntry(issueTags, issueTagThreshold, tagFuzz))
             {
                 _logger.Trace("LooksLikeSingleRelease: No common issue tag");
                 return false;

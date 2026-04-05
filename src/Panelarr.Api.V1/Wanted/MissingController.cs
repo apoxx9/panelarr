@@ -14,13 +14,13 @@ namespace Panelarr.Api.V1.Wanted
     [V1ApiController("wanted/missing")]
     public class MissingController : IssueControllerWithSignalR
     {
-        public MissingController(IIssueService bookService,
+        public MissingController(IIssueService issueService,
                              ISeriesIssueLinkService seriesIssueLinkService,
                              ISeriesStatisticsService seriesStatisticsService,
                              IMapCoversToLocal coverMapper,
                              IUpgradableSpecification upgradableSpecification,
                              IBroadcastSignalRMessage signalRBroadcaster)
-        : base(bookService, seriesIssueLinkService, seriesStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
+        : base(issueService, seriesIssueLinkService, seriesStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
         {
         }
 

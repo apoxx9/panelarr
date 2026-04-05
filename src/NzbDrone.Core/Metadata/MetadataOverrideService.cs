@@ -35,11 +35,11 @@ namespace NzbDrone.Core.Metadata
         };
 
         public MetadataOverrideService(ISeriesMetadataRepository seriesMetadataRepository,
-                                       IIssueRepository bookRepository,
+                                       IIssueRepository issueRepository,
                                        Logger logger)
         {
             _seriesMetadataRepository = seriesMetadataRepository;
-            _issueRepository = bookRepository;
+            _issueRepository = issueRepository;
             _logger = logger;
         }
 

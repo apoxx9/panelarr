@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Parser
     {
         Series GetSeries(string title);
         RemoteIssue Map(ParsedIssueInfo parsedIssueInfo, SearchCriteriaBase searchCriteria = null);
-        RemoteIssue Map(ParsedIssueInfo parsedIssueInfo, int seriesId, IEnumerable<int> bookIds);
+        RemoteIssue Map(ParsedIssueInfo parsedIssueInfo, int seriesId, IEnumerable<int> issueIds);
         List<Issue> GetIssues(ParsedIssueInfo parsedIssueInfo, Series series, SearchCriteriaBase searchCriteria = null);
 
         ParsedIssueInfo ParseIssueTitleFuzzy(string title);
@@ -37,11 +37,11 @@ namespace NzbDrone.Core.Parser
         private readonly Logger _logger;
 
         public ParsingService(ISeriesService seriesService,
-                              IIssueService bookService,
+                              IIssueService issueService,
                               IMediaFileService mediaFileService,
                               Logger logger)
         {
-            _issueService = bookService;
+            _issueService = issueService;
             _seriesService = seriesService;
             _mediaFileService = mediaFileService;
             _logger = logger;
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Parser
 
         public List<Issue> GetIssues(ParsedIssueInfo parsedIssueInfo, Series series, SearchCriteriaBase searchCriteria = null)
         {
-            var bookTitle = parsedIssueInfo.IssueTitle;
+            var issueTitle = parsedIssueInfo.IssueTitle;
             var result = new List<Issue>();
 
             if (parsedIssueInfo.IssueTitle == null)
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Parser
                 return new List<Issue>();
             }
 
-            Issue bookInfo = null;
+            Issue issueMatch = null;
 
             if (parsedIssueInfo.Discography)
             {
@@ -126,36 +126,36 @@ namespace NzbDrone.Core.Parser
             {
                 if (searchCriteria != null)
                 {
-                    bookInfo = searchCriteria.Issues.FirstOrDefault(e => (int)e.IssueNumber == issueNum);
+                    issueMatch = searchCriteria.Issues.FirstOrDefault(e => (int)e.IssueNumber == issueNum);
                 }
 
-                if (bookInfo == null)
+                if (issueMatch == null)
                 {
                     var seriesIssues = _issueService.GetIssuesBySeries(series.Id);
-                    bookInfo = seriesIssues.FirstOrDefault(e => (int)e.IssueNumber == issueNum);
+                    issueMatch = seriesIssues.FirstOrDefault(e => (int)e.IssueNumber == issueNum);
                 }
             }
 
-            if (bookInfo == null && searchCriteria != null)
+            if (issueMatch == null && searchCriteria != null)
             {
                 var cleanTitle = Parser.CleanSeriesName(parsedIssueInfo.IssueTitle);
-                bookInfo = searchCriteria.Issues.ExclusiveOrDefault(e => e.Title == bookTitle || e.CleanTitle == cleanTitle);
+                issueMatch = searchCriteria.Issues.ExclusiveOrDefault(e => e.Title == issueTitle || e.CleanTitle == cleanTitle);
             }
 
-            if (bookInfo == null)
+            if (issueMatch == null)
             {
-                bookInfo = _issueService.FindByTitle(series.SeriesMetadataId, parsedIssueInfo.IssueTitle);
+                issueMatch = _issueService.FindByTitle(series.SeriesMetadataId, parsedIssueInfo.IssueTitle);
             }
 
-            if (bookInfo == null)
+            if (issueMatch == null)
             {
                 _logger.Debug("Trying inexact issue match for {0}", parsedIssueInfo.IssueTitle);
-                bookInfo = _issueService.FindByTitleInexact(series.SeriesMetadataId, parsedIssueInfo.IssueTitle);
+                issueMatch = _issueService.FindByTitleInexact(series.SeriesMetadataId, parsedIssueInfo.IssueTitle);
             }
 
-            if (bookInfo != null)
+            if (issueMatch != null)
             {
-                result.Add(bookInfo);
+                result.Add(issueMatch);
             }
             else
             {
@@ -165,13 +165,13 @@ namespace NzbDrone.Core.Parser
             return result;
         }
 
-        public RemoteIssue Map(ParsedIssueInfo parsedIssueInfo, int seriesId, IEnumerable<int> bookIds)
+        public RemoteIssue Map(ParsedIssueInfo parsedIssueInfo, int seriesId, IEnumerable<int> issueIds)
         {
             return new RemoteIssue
             {
                 ParsedIssueInfo = parsedIssueInfo,
                 Series = _seriesService.GetSeries(seriesId),
-                Issues = _issueService.GetIssues(bookIds)
+                Issues = _issueService.GetIssues(issueIds)
             };
         }
 
@@ -222,8 +222,8 @@ namespace NzbDrone.Core.Parser
 
                 foreach (var issue in possibleIssues)
                 {
-                    var bookMatch = title.FuzzyMatch(issue.Title, 0.5);
-                    var score = (seriesMatch.Item3 + bookMatch.Item3) / 2;
+                    var issueMatch = title.FuzzyMatch(issue.Title, 0.5);
+                    var score = (seriesMatch.Item3 + issueMatch.Item3) / 2;
 
                     _logger.Trace($"Issue {issue} has score {score}");
 

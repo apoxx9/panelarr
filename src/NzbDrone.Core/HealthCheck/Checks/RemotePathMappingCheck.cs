@@ -138,7 +138,7 @@ namespace NzbDrone.Core.HealthCheck.Checks
                     else
                     {
                         // If the file doesn't exist but TrackInfo is not null then the message is coming from
-                        // ImportApprovedTracks and the file must have been removed part way through processing
+                        // ImportApprovedIssues and the file must have been removed part way through processing
                         return new HealthCheck(GetType(), HealthCheckResult.Error, string.Format(_localizationService.GetLocalizedString("RemotePathMappingCheckFileRemoved"), trackPath), "#remote-path-file-removed");
                     }
                 }

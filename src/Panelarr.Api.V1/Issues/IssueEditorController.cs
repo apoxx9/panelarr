@@ -11,18 +11,18 @@ namespace Panelarr.Api.V1.Issues
         private readonly IIssueService _issueService;
         private readonly IManageCommandQueue _commandQueueManager;
 
-        public IssueEditorController(IIssueService bookService, IManageCommandQueue commandQueueManager)
+        public IssueEditorController(IIssueService issueService, IManageCommandQueue commandQueueManager)
         {
-            _issueService = bookService;
+            _issueService = issueService;
             _commandQueueManager = commandQueueManager;
         }
 
         [HttpPut]
         public IActionResult SaveAll([FromBody] IssueEditorResource resource)
         {
-            var booksToUpdate = _issueService.GetIssues(resource.IssueIds);
+            var issuesToUpdate = _issueService.GetIssues(resource.IssueIds);
 
-            foreach (var issue in booksToUpdate)
+            foreach (var issue in issuesToUpdate)
             {
                 if (resource.Monitored.HasValue)
                 {
@@ -30,8 +30,8 @@ namespace Panelarr.Api.V1.Issues
                 }
             }
 
-            _issueService.UpdateMany(booksToUpdate);
-            return Accepted(booksToUpdate.ToResource());
+            _issueService.UpdateMany(issuesToUpdate);
+            return Accepted(issuesToUpdate.ToResource());
         }
 
         [HttpDelete]

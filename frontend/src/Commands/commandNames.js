@@ -23,5 +23,4 @@ export const RETAG_SERIES = 'RetagSeries';
 export const RESET_API_KEY = 'ResetApiKey';
 export const RESET_QUALITY_DEFINITIONS = 'ResetQualityDefinitions';
 export const RSS_SYNC = 'RssSync';
-export const SEASON_SEARCH = 'IssueSearch';
 export const SERIES_SEARCH = 'SeriesSearch';

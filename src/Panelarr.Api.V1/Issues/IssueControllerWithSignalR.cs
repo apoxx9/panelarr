@@ -18,7 +18,7 @@ namespace Panelarr.Api.V1.Issues
         protected readonly IUpgradableSpecification _qualityUpgradableSpecification;
         protected readonly IMapCoversToLocal _coverMapper;
 
-        protected IssueControllerWithSignalR(IIssueService bookService,
+        protected IssueControllerWithSignalR(IIssueService issueService,
                                         ISeriesIssueLinkService seriesIssueLinkService,
                                         ISeriesStatisticsService seriesStatisticsService,
                                         IMapCoversToLocal coverMapper,
@@ -26,7 +26,7 @@ namespace Panelarr.Api.V1.Issues
                                         IBroadcastSignalRMessage signalRBroadcaster)
             : base(signalRBroadcaster)
         {
-            _issueService = bookService;
+            _issueService = issueService;
             _seriesIssueLinkService = seriesIssueLinkService;
             _seriesStatisticsService = seriesStatisticsService;
             _coverMapper = coverMapper;
@@ -112,11 +112,11 @@ namespace Panelarr.Api.V1.Issues
 
         private void LinkSeriesStatistics(List<IssueResource> resources, List<SeriesStatistics> seriesStatistics)
         {
-            var bookStatsDict = seriesStatistics.SelectMany(x => x.IssueStatistics).ToDictionary(x => x.IssueId);
+            var issueStatsDict = seriesStatistics.SelectMany(x => x.IssueStatistics).ToDictionary(x => x.IssueId);
 
             foreach (var issue in resources)
             {
-                if (bookStatsDict.TryGetValue(issue.Id, out var stats))
+                if (issueStatsDict.TryGetValue(issue.Id, out var stats))
                 {
                     issue.Statistics = stats.ToResource();
                 }
@@ -135,9 +135,9 @@ namespace Panelarr.Api.V1.Issues
 
         private void MapCoversToLocal(params IssueResource[] issues)
         {
-            foreach (var bookResource in issues)
+            foreach (var issueResource in issues)
             {
-                _coverMapper.ConvertToLocalUrls(bookResource.Id, MediaCoverEntity.Issue, bookResource.Images);
+                _coverMapper.ConvertToLocalUrls(issueResource.Id, MediaCoverEntity.Issue, issueResource.Images);
             }
         }
     }

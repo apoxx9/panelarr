@@ -42,7 +42,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IDiskProvider _diskProvider;
         private readonly IMediaFileService _mediaFileService;
         private readonly IMakeImportDecision _importDecisionMaker;
-        private readonly IImportApprovedIssues _importApprovedTracks;
+        private readonly IImportApprovedIssues _importApprovedIssues;
         private readonly ISeriesService _seriesService;
         private readonly IMediaFileTableCleanupService _mediaFileTableCleanupService;
         private readonly IRootFolderService _rootFolderService;
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.MediaFiles
                                IDiskProvider diskProvider,
                                IMediaFileService mediaFileService,
                                IMakeImportDecision importDecisionMaker,
-                               IImportApprovedIssues importApprovedTracks,
+                               IImportApprovedIssues importApprovedIssues,
                                ISeriesService seriesService,
                                IRootFolderService rootFolderService,
                                IMediaFileTableCleanupService mediaFileTableCleanupService,
@@ -64,7 +64,7 @@ namespace NzbDrone.Core.MediaFiles
             _diskProvider = diskProvider;
             _mediaFileService = mediaFileService;
             _importDecisionMaker = importDecisionMaker;
-            _importApprovedTracks = importApprovedTracks;
+            _importApprovedIssues = importApprovedIssues;
             _seriesService = seriesService;
             _mediaFileTableCleanupService = mediaFileTableCleanupService;
             _rootFolderService = rootFolderService;
@@ -86,7 +86,7 @@ namespace NzbDrone.Core.MediaFiles
 
             var mediaFileList = new List<IFileInfo>();
 
-            var musicFilesStopwatch = Stopwatch.StartNew();
+            var comicFilesStopwatch = Stopwatch.StartNew();
 
             foreach (var folder in folders)
             {
@@ -143,8 +143,8 @@ namespace NzbDrone.Core.MediaFiles
                 mediaFileList.AddRange(files);
             }
 
-            musicFilesStopwatch.Stop();
-            _logger.Trace("Finished getting track files for:\n{0} [{1}]", folders.ConcatToString("\n"), musicFilesStopwatch.Elapsed);
+            comicFilesStopwatch.Stop();
+            _logger.Trace("Finished getting comic files for:\n{0} [{1}]", folders.ConcatToString("\n"), comicFilesStopwatch.Elapsed);
 
             var decisionsStopwatch = Stopwatch.StartNew();
 
@@ -161,7 +161,7 @@ namespace NzbDrone.Core.MediaFiles
             _logger.Debug("Import decisions complete [{0}]", decisionsStopwatch.Elapsed);
 
             var importStopwatch = Stopwatch.StartNew();
-            _importApprovedTracks.Import(decisions, false);
+            _importApprovedIssues.Import(decisions, false);
 
             // decisions may have been filtered to just new files.  Anything new and approved will have been inserted.
             // Now we need to make sure anything new but not approved gets inserted
@@ -187,7 +187,7 @@ namespace NzbDrone.Core.MediaFiles
                 .ToList();
             _mediaFileService.AddMany(newFiles);
 
-            _logger.Debug($"Inserted {newFiles.Count} new unmatched trackfiles");
+            _logger.Debug($"Inserted {newFiles.Count} new unmatched comic files");
 
             // finally update info on size/modified for existing files
             var updatedFiles = knownFiles

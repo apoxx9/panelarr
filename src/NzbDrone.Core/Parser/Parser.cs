@@ -831,10 +831,10 @@ namespace NzbDrone.Core.Parser
         private static ParsedIssueInfo ParseIssueMatchCollection(MatchCollection matchCollection, string releaseTitle)
         {
             var seriesName = matchCollection[0].Groups["series"].Value.Replace('.', ' ').Replace('_', ' ');
-            var bookTitle = matchCollection[0].Groups["issue"].Value.Replace('.', ' ').Replace('_', ' ');
+            var issueTitle = matchCollection[0].Groups["issue"].Value.Replace('.', ' ').Replace('_', ' ');
             var releaseVersion = matchCollection[0].Groups["version"].Value.Replace('.', ' ').Replace('_', ' ');
             seriesName = RequestInfoRegex.Replace(seriesName, "").Trim(' ');
-            bookTitle = RequestInfoRegex.Replace(bookTitle, "").Trim(' ');
+            issueTitle = RequestInfoRegex.Replace(issueTitle, "").Trim(' ');
             releaseVersion = RequestInfoRegex.Replace(releaseVersion, "").Trim(' ');
 
             int.TryParse(matchCollection[0].Groups["releaseyear"].Value, out var releaseYear);
@@ -847,7 +847,7 @@ namespace NzbDrone.Core.Parser
             };
 
             result.SeriesName = seriesName;
-            result.IssueTitle = bookTitle;
+            result.IssueTitle = issueTitle;
             result.SeriesTitleInfo = GetSeriesTitleInfo(result.SeriesName);
             result.ReleaseDate = releaseYear.ToString();
             result.ReleaseVersion = releaseVersion;

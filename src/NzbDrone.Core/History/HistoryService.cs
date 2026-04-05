@@ -95,17 +95,17 @@ namespace NzbDrone.Core.History
         {
             _logger.Debug("Trying to find downloadId for {0} from history", trackedDownload.ImportedIssue.Path);
 
-            var bookIds = new List<int> { trackedDownload.IssueInfo.Issue.Id };
+            var issueIds = new List<int> { trackedDownload.IssueInfo.Issue.Id };
             var allHistory = _historyRepository.FindDownloadHistory(trackedDownload.IssueInfo.Series.Id, trackedDownload.ImportedIssue.Quality);
 
             //Find download related items for these episodes
-            var booksHistory = allHistory.Where(h => bookIds.Contains(h.IssueId)).ToList();
+            var issuesHistory = allHistory.Where(h => issueIds.Contains(h.IssueId)).ToList();
 
-            var processedDownloadId = booksHistory
+            var processedDownloadId = issuesHistory
                 .Where(c => c.EventType != EntityHistoryEventType.Grabbed && c.DownloadId != null)
                 .Select(c => c.DownloadId);
 
-            var stillDownloading = booksHistory.Where(c => c.EventType == EntityHistoryEventType.Grabbed && !processedDownloadId.Contains(c.DownloadId)).ToList();
+            var stillDownloading = issuesHistory.Where(c => c.EventType == EntityHistoryEventType.Grabbed && !processedDownloadId.Contains(c.DownloadId)).ToList();
 
             string downloadId = null;
 

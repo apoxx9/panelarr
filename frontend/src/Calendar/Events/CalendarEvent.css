@@ -31,7 +31,7 @@ $fullColorGradient: rgba(244, 245, 246, 0.2);
   font-size: $defaultFontSize;
 }
 
-.absoluteEpisodeNumber {
+.absoluteIssueNumber {
   margin-left: 3px;
 }
 

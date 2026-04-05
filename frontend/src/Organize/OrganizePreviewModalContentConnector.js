@@ -19,7 +19,7 @@ function createMapStateToProps() {
       props.isFetching = organizePreview.isFetching || naming.isFetching;
       props.isPopulated = organizePreview.isPopulated && naming.isPopulated;
       props.error = organizePreview.error || naming.error;
-      props.trackFormat = naming.item.standardIssueFormat;
+      props.issueFormat = naming.item.standardIssueFormat;
       props.path = series.path;
 
       return props;

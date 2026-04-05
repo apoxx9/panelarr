@@ -31,7 +31,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly ISeriesService _seriesService;
         private readonly IParsingService _parsingService;
         private readonly IMakeImportDecision _importDecisionMaker;
-        private readonly IImportApprovedIssues _importApprovedTracks;
+        private readonly IImportApprovedIssues _importApprovedIssues;
         private readonly IEventAggregator _eventAggregator;
         private readonly IRuntimeInfo _runtimeInfo;
         private readonly Logger _logger;
@@ -41,7 +41,7 @@ namespace NzbDrone.Core.MediaFiles
                                              ISeriesService seriesService,
                                              IParsingService parsingService,
                                              IMakeImportDecision importDecisionMaker,
-                                             IImportApprovedIssues importApprovedTracks,
+                                             IImportApprovedIssues importApprovedIssues,
                                              IEventAggregator eventAggregator,
                                              IRuntimeInfo runtimeInfo,
                                              Logger logger)
@@ -51,7 +51,7 @@ namespace NzbDrone.Core.MediaFiles
             _seriesService = seriesService;
             _parsingService = parsingService;
             _importDecisionMaker = importDecisionMaker;
-            _importApprovedTracks = importApprovedTracks;
+            _importApprovedIssues = importApprovedIssues;
             _eventAggregator = eventAggregator;
             _runtimeInfo = runtimeInfo;
             _logger = logger;
@@ -67,9 +67,9 @@ namespace NzbDrone.Core.MediaFiles
                 results.AddRange(folderResults);
             }
 
-            foreach (var audioFile in _diskScanService.GetComicFiles(directoryInfo.FullName, false))
+            foreach (var comicFile in _diskScanService.GetComicFiles(directoryInfo.FullName, false))
             {
-                var fileResults = ProcessFile(audioFile, ImportMode.Auto, null);
+                var fileResults = ProcessFile(comicFile, ImportMode.Auto, null);
                 results.AddRange(fileResults);
             }
 
@@ -121,9 +121,9 @@ namespace NzbDrone.Core.MediaFiles
 
                 foreach (var comicFile in comicFiles)
                 {
-                    var bookParseResult = Parser.Parser.ParseTitle(comicFile.Name);
+                    var parseResult = Parser.Parser.ParseTitle(comicFile.Name);
 
-                    if (bookParseResult == null)
+                    if (parseResult == null)
                     {
                         _logger.Warn("Unable to parse file on import: [{0}]", comicFile);
                         return false;
@@ -191,17 +191,17 @@ namespace NzbDrone.Core.MediaFiles
                 trackInfo = null;
             }
 
-            var audioFiles = _diskScanService.FilterFiles(directoryInfo.FullName, _diskScanService.GetComicFiles(directoryInfo.FullName));
+            var comicFiles = _diskScanService.FilterFiles(directoryInfo.FullName, _diskScanService.GetComicFiles(directoryInfo.FullName));
 
             if (downloadClientItem == null)
             {
-                foreach (var audioFile in audioFiles)
+                foreach (var comicFile in comicFiles)
                 {
-                    if (_diskProvider.IsFileLocked(audioFile.FullName))
+                    if (_diskProvider.IsFileLocked(comicFile.FullName))
                     {
                         return new List<ImportResult>
                                {
-                                   FileIsLockedResult(audioFile.FullName)
+                                   FileIsLockedResult(comicFile.FullName)
                                };
                     }
                 }
@@ -225,8 +225,8 @@ namespace NzbDrone.Core.MediaFiles
                 AddNewSeries = false
             };
 
-            var decisions = _importDecisionMaker.GetImportDecisions(audioFiles, idOverrides, idInfo, idConfig);
-            var importResults = _importApprovedTracks.Import(decisions, true, downloadClientItem, importMode);
+            var decisions = _importDecisionMaker.GetImportDecisions(comicFiles, idOverrides, idInfo, idConfig);
+            var importResults = _importApprovedIssues.Import(decisions, true, downloadClientItem, importMode);
 
             if (importMode == ImportMode.Auto)
             {
@@ -311,7 +311,7 @@ namespace NzbDrone.Core.MediaFiles
 
             var decisions = _importDecisionMaker.GetImportDecisions(new List<IFileInfo>() { fileInfo }, idOverrides, idInfo, idConfig);
 
-            return _importApprovedTracks.Import(decisions, true, downloadClientItem, importMode);
+            return _importApprovedIssues.Import(decisions, true, downloadClientItem, importMode);
         }
 
         private string GetCleanedUpFolderName(string folder)
@@ -322,10 +322,10 @@ namespace NzbDrone.Core.MediaFiles
             return folder;
         }
 
-        private ImportResult FileIsLockedResult(string audioFile)
+        private ImportResult FileIsLockedResult(string comicFile)
         {
-            _logger.Debug("[{0}] is currently locked by another process, skipping", audioFile);
-            return new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = audioFile }, new Rejection("Locked file, try again later")), "Locked file, try again later");
+            _logger.Debug("[{0}] is currently locked by another process, skipping", comicFile);
+            return new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = comicFile }, new Rejection("Locked file, try again later")), "Locked file, try again later");
         }
 
         private ImportResult UnknownSeriesResult(string message, string comicFile = null)

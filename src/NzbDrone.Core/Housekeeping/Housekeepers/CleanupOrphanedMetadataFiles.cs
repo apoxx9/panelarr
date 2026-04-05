@@ -16,9 +16,9 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
         {
             DeleteOrphanedBySeries();
             DeleteOrphanedByIssue();
-            DeleteOrphanedByTrackFile();
+            DeleteOrphanedByComicFile();
             DeleteWhereIssueIdIsZero();
-            DeleteWhereTrackFileIsZero();
+            DeleteWhereComicFileIsZero();
         }
 
         private void DeleteOrphanedBySeries()
@@ -44,7 +44,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                              AND ""Issues"".""Id"" IS NULL)");
         }
 
-        private void DeleteOrphanedByTrackFile()
+        private void DeleteOrphanedByComicFile()
         {
             using var mapper = _database.OpenConnection();
             mapper.Execute(@"DELETE FROM ""MetadataFiles""
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                              AND ""IssueId"" = 0)");
         }
 
-        private void DeleteWhereTrackFileIsZero()
+        private void DeleteWhereComicFileIsZero()
         {
             using var mapper = _database.OpenConnection();
             mapper.Execute(@"DELETE FROM ""MetadataFiles""

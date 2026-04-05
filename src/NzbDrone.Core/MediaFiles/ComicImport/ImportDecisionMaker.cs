@@ -18,7 +18,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
 {
     public interface IMakeImportDecision
     {
-        List<ImportDecision<LocalIssue>> GetImportDecisions(List<IFileInfo> musicFiles, IdentificationOverrides idOverrides, ImportDecisionMakerInfo itemInfo, ImportDecisionMakerConfig config);
+        List<ImportDecision<LocalIssue>> GetImportDecisions(List<IFileInfo> comicFiles, IdentificationOverrides idOverrides, ImportDecisionMakerInfo itemInfo, ImportDecisionMakerConfig config);
     }
 
     public class IdentificationOverrides
@@ -46,7 +46,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
     public class ImportDecisionMaker : IMakeImportDecision
     {
         private readonly IEnumerable<IImportDecisionEngineSpecification<LocalIssue>> _trackSpecifications;
-        private readonly IEnumerable<IImportDecisionEngineSpecification<LocalEdition>> _bookSpecifications;
+        private readonly IEnumerable<IImportDecisionEngineSpecification<LocalEdition>> _issueSpecifications;
         private readonly IMediaFileService _mediaFileService;
         private readonly IMetadataTagService _metadataTagService;
         private readonly IAugmentingService _augmentingService;
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
         private readonly Logger _logger;
 
         public ImportDecisionMaker(IEnumerable<IImportDecisionEngineSpecification<LocalIssue>> trackSpecifications,
-                                   IEnumerable<IImportDecisionEngineSpecification<LocalEdition>> bookSpecifications,
+                                   IEnumerable<IImportDecisionEngineSpecification<LocalEdition>> issueSpecifications,
                                    IMediaFileService mediaFileService,
                                    IMetadataTagService metadataTagService,
                                    IAugmentingService augmentingService,
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                                    Logger logger)
         {
             _trackSpecifications = trackSpecifications;
-            _bookSpecifications = bookSpecifications;
+            _issueSpecifications = issueSpecifications;
             _mediaFileService = mediaFileService;
             _metadataTagService = metadataTagService;
             _augmentingService = augmentingService;
@@ -76,17 +76,17 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             _logger = logger;
         }
 
-        public Tuple<List<LocalIssue>, List<ImportDecision<LocalIssue>>> GetLocalTracks(List<IFileInfo> musicFiles, DownloadClientItem downloadClientItem, ParsedIssueInfo folderInfo, FilterFilesType filter)
+        public Tuple<List<LocalIssue>, List<ImportDecision<LocalIssue>>> GetLocalTracks(List<IFileInfo> comicFiles, DownloadClientItem downloadClientItem, ParsedIssueInfo folderInfo, FilterFilesType filter)
         {
             var watch = new System.Diagnostics.Stopwatch();
             watch.Start();
 
-            var files = _mediaFileService.FilterUnchangedFiles(musicFiles, filter);
+            var files = _mediaFileService.FilterUnchangedFiles(comicFiles, filter);
 
             var localTracks = new List<LocalIssue>();
             var decisions = new List<ImportDecision<LocalIssue>>();
 
-            _logger.Debug("Analyzing {0}/{1} files.", files.Count, musicFiles.Count);
+            _logger.Debug("Analyzing {0}/{1} files.", files.Count, comicFiles.Count);
 
             if (!files.Any())
             {
@@ -142,14 +142,14 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             return Tuple.Create(localTracks, decisions);
         }
 
-        public List<ImportDecision<LocalIssue>> GetImportDecisions(List<IFileInfo> musicFiles, IdentificationOverrides idOverrides, ImportDecisionMakerInfo itemInfo, ImportDecisionMakerConfig config)
+        public List<ImportDecision<LocalIssue>> GetImportDecisions(List<IFileInfo> comicFiles, IdentificationOverrides idOverrides, ImportDecisionMakerInfo itemInfo, ImportDecisionMakerConfig config)
         {
             idOverrides = idOverrides ?? new IdentificationOverrides();
             itemInfo = itemInfo ?? new ImportDecisionMakerInfo();
 
-            var trackData = GetLocalTracks(musicFiles, itemInfo.DownloadClientItem, itemInfo.ParsedIssueInfo, config.Filter);
-            var localTracks = trackData.Item1;
-            var decisions = trackData.Item2;
+            var localIssueData = GetLocalTracks(comicFiles, itemInfo.DownloadClientItem, itemInfo.ParsedIssueInfo, config.Filter);
+            var localTracks = localIssueData.Item1;
+            var decisions = localIssueData.Item2;
 
             localTracks.ForEach(x => x.ExistingFile = !config.NewDownload);
 
@@ -203,7 +203,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             }
             else
             {
-                var reasons = _bookSpecifications.Select(c => EvaluateSpec(c, localEdition, downloadClientItem))
+                var reasons = _issueSpecifications.Select(c => EvaluateSpec(c, localEdition, downloadClientItem))
                     .Where(c => c != null);
 
                 decision = new ImportDecision<LocalEdition>(localEdition, reasons.ToArray());

@@ -13,7 +13,7 @@ namespace NzbDrone.Core.Issues
     public interface IIssueService
     {
         Issue GetIssue(int issueId);
-        List<Issue> GetIssues(IEnumerable<int> bookIds);
+        List<Issue> GetIssues(IEnumerable<int> issueIds);
         List<Issue> GetIssuesBySeries(int seriesId);
         List<Issue> GetNextIssuesBySeriesMetadataId(IEnumerable<int> seriesMetadataIds);
         List<Issue> GetLastIssuesBySeriesMetadataId(IEnumerable<int> seriesMetadataIds);
@@ -49,11 +49,11 @@ namespace NzbDrone.Core.Issues
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
 
-        public IssueService(IIssueRepository bookRepository,
+        public IssueService(IIssueRepository issueRepository,
                            IEventAggregator eventAggregator,
                            Logger logger)
         {
-            _issueRepository = bookRepository;
+            _issueRepository = issueRepository;
             _eventAggregator = eventAggregator;
             _logger = logger;
         }
@@ -172,9 +172,9 @@ namespace NzbDrone.Core.Issues
             return _issueRepository.Get(issueId);
         }
 
-        public List<Issue> GetIssues(IEnumerable<int> bookIds)
+        public List<Issue> GetIssues(IEnumerable<int> issueIds)
         {
-            return _issueRepository.Get(bookIds).ToList();
+            return _issueRepository.Get(issueIds).ToList();
         }
 
         public List<Issue> GetIssuesBySeries(int seriesId)
@@ -214,9 +214,9 @@ namespace NzbDrone.Core.Issues
 
         public PagingSpec<Issue> IssuesWithoutFiles(PagingSpec<Issue> pagingSpec)
         {
-            var bookResult = _issueRepository.IssuesWithoutFiles(pagingSpec);
+            var issueResult = _issueRepository.IssuesWithoutFiles(pagingSpec);
 
-            return bookResult;
+            return issueResult;
         }
 
         public List<Issue> IssuesBetweenDates(DateTime start, DateTime end, bool includeUnmonitored)

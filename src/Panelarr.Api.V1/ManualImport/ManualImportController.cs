@@ -20,11 +20,11 @@ namespace Panelarr.Api.V1.ManualImport
 
         public ManualImportController(IManualImportService manualImportService,
                                   ISeriesService seriesService,
-                                  IIssueService bookService,
+                                  IIssueService issueService,
                                   Logger logger)
         {
             _seriesService = seriesService;
-            _issueService = bookService;
+            _issueService = issueService;
             _manualImportService = manualImportService;
             _logger = logger;
         }

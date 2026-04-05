@@ -305,7 +305,7 @@ namespace NzbDrone.Core.MediaFiles
             Logger.Debug($"Starting tag write for {path}");
 
             // patch up any null fields to work around TagLib exception for
-            // WMA with null performers/bookauthors
+            // WMA with null performers/performers
             Performers = Performers ?? new string[0];
             IssueSeriess = IssueSeriess ?? new string[0];
             Genres = Genres ?? new string[0];

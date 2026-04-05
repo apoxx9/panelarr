@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Organizer
             _qualityDefinitionService = qualityDefinitionService;
             _formatCalculator = formatCalculator;
             _publisherService = publisherService;
-            _issueFormatCache = cacheManager.GetCache<IssueFormat[]>(GetType(), "bookFormat");
+            _issueFormatCache = cacheManager.GetCache<IssueFormat[]>(GetType(), "issueFormat");
             _logger = logger;
         }
 

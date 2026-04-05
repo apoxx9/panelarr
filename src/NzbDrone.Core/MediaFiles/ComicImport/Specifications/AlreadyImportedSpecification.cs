@@ -30,17 +30,17 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
                 return Decision.Accept();
             }
 
-            var bookRelease = localIssueRelease.Issue;
+            var issueRelease = localIssueRelease.Issue;
 
-            if ((!bookRelease?.ComicFiles?.Value?.Any()) ?? true)
+            if ((!issueRelease?.ComicFiles?.Value?.Any()) ?? true)
             {
                 _logger.Debug("Skipping already imported check for issue without files");
                 return Decision.Accept();
             }
 
-            var bookHistory = _historyService.GetByIssue(bookRelease.Id, null);
-            var lastImported = bookHistory.FirstOrDefault(h => h.EventType == EntityHistoryEventType.ComicFileImported);
-            var lastGrabbed = bookHistory.FirstOrDefault(h => h.EventType == EntityHistoryEventType.Grabbed);
+            var issueHistory = _historyService.GetByIssue(issueRelease.Id, null);
+            var lastImported = issueHistory.FirstOrDefault(h => h.EventType == EntityHistoryEventType.ComicFileImported);
+            var lastGrabbed = issueHistory.FirstOrDefault(h => h.EventType == EntityHistoryEventType.Grabbed);
 
             if (lastImported == null)
             {

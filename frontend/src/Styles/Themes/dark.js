@@ -228,8 +228,8 @@ module.exports = {
   //
   // Season
 
-  seasonBackgroundColor: '#424242',
-  episodesBackgroundColor: '#2a2a2a',
+  volumeBackgroundColor: '#424242',
+  issuesBackgroundColor: '#2a2a2a',
 
   //
   // misc

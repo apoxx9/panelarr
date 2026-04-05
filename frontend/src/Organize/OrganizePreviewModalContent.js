@@ -75,7 +75,7 @@ class OrganizePreviewModalContent extends Component {
       isPopulated,
       error,
       items,
-      trackFormat,
+      issueFormat,
       onModalClose
     } = this.props;
 
@@ -119,8 +119,8 @@ class OrganizePreviewModalContent extends Component {
                 <Alert>
                   <div>
                     Naming pattern:
-                    <span className={styles.trackFormat}>
-                      {trackFormat}
+                    <span className={styles.issueFormat}>
+                      {issueFormat}
                     </span>
                   </div>
                 </Alert>
@@ -181,7 +181,7 @@ OrganizePreviewModalContent.propTypes = {
   error: PropTypes.object,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
   path: PropTypes.string.isRequired,
-  trackFormat: PropTypes.string,
+  issueFormat: PropTypes.string,
   onOrganizePress: PropTypes.func.isRequired,
   onModalClose: PropTypes.func.isRequired
 };

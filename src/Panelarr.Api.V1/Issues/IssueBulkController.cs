@@ -17,9 +17,9 @@ namespace Panelarr.Api.V1.Issues
         private readonly IIssueService _issueService;
         private readonly IManageCommandQueue _commandQueueManager;
 
-        public IssueBulkController(IIssueService bookService, IManageCommandQueue commandQueueManager)
+        public IssueBulkController(IIssueService issueService, IManageCommandQueue commandQueueManager)
         {
-            _issueService = bookService;
+            _issueService = issueService;
             _commandQueueManager = commandQueueManager;
         }
 

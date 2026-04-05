@@ -9,9 +9,9 @@ namespace NzbDrone.Core.Issues.Handlers
         private readonly IIssueService _issueService;
         private readonly Logger _logger;
 
-        public AutoUnmonitorAfterDownloadHandler(IIssueService bookService, Logger logger)
+        public AutoUnmonitorAfterDownloadHandler(IIssueService issueService, Logger logger)
         {
-            _issueService = bookService;
+            _issueService = issueService;
             _logger = logger;
         }
 

@@ -39,7 +39,7 @@ namespace Panelarr.Api.V1.ComicFiles
                                IMetadataTagService metadataTagService,
                                IComicInfoReaderService comicInfoReaderService,
                                ISeriesService seriesService,
-                               IIssueService bookService,
+                               IIssueService issueService,
                                IUpgradableSpecification upgradableSpecification)
             : base(signalRBroadcaster)
         {
@@ -48,7 +48,7 @@ namespace Panelarr.Api.V1.ComicFiles
             _metadataTagService = metadataTagService;
             _comicInfoReaderService = comicInfoReaderService;
             _seriesService = seriesService;
-            _issueService = bookService;
+            _issueService = issueService;
             _upgradableSpecification = upgradableSpecification;
         }
 
@@ -98,8 +98,8 @@ namespace Panelarr.Api.V1.ComicFiles
                 foreach (var issueId in issueIds)
                 {
                     var issue = _issueService.GetIssue(issueId);
-                    var bookSeries = _seriesService.GetSeries(issue.SeriesId);
-                    result.AddRange(_mediaFileService.GetFilesByIssue(issue.Id).ConvertAll(f => f.ToResource(bookSeries, _upgradableSpecification)));
+                    var issueSeries = _seriesService.GetSeries(issue.SeriesId);
+                    result.AddRange(_mediaFileService.GetFilesByIssue(issue.Id).ConvertAll(f => f.ToResource(issueSeries, _upgradableSpecification)));
                 }
 
                 return result;

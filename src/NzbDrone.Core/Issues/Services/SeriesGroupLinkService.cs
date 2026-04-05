@@ -8,7 +8,7 @@ namespace NzbDrone.Core.Issues
     {
         List<SeriesGroupLink> GetLinksBySeries(int seriesId);
         List<SeriesGroupLink> GetLinksBySeriesAndSeries(int seriesId, string foreignSeriesId);
-        List<SeriesGroupLink> GetLinksByIssue(List<int> bookIds);
+        List<SeriesGroupLink> GetLinksByIssue(List<int> issueIds);
         void InsertMany(List<SeriesGroupLink> model);
         void UpdateMany(List<SeriesGroupLink> model);
         void DeleteMany(List<SeriesGroupLink> model);
@@ -34,9 +34,9 @@ namespace NzbDrone.Core.Issues
             return _repo.GetLinksBySeriesAndSeries(seriesId, foreignSeriesId);
         }
 
-        public List<SeriesGroupLink> GetLinksByIssue(List<int> bookIds)
+        public List<SeriesGroupLink> GetLinksByIssue(List<int> issueIds)
         {
-            return _repo.GetLinksByIssue(bookIds);
+            return _repo.GetLinksByIssue(issueIds);
         }
 
         public void InsertMany(List<SeriesGroupLink> model)

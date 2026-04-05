@@ -33,7 +33,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IConfigService _configService;
         private readonly Logger _logger;
 
-        public ComicFileMovingService(IIssueService bookService,
+        public ComicFileMovingService(IIssueService issueService,
                                       IUpdateComicFileService updateComicFileService,
                                       IBuildFileNames buildFileNames,
                                       IDiskTransferService diskTransferService,
@@ -44,7 +44,7 @@ namespace NzbDrone.Core.MediaFiles
                                       IConfigService configService,
                                       Logger logger)
         {
-            _issueService = bookService;
+            _issueService = issueService;
             _updateComicFileService = updateComicFileService;
             _buildFileNames = buildFileNames;
             _diskTransferService = diskTransferService;
@@ -144,8 +144,8 @@ namespace NzbDrone.Core.MediaFiles
 
         private void EnsureIssueFolder(ComicFile comicFile, Series series, Issue issue, string filePath)
         {
-            var trackFolder = Path.GetDirectoryName(filePath);
-            var bookFolder = _buildFileNames.BuildIssuePath(series);
+            var comicFileFolder = Path.GetDirectoryName(filePath);
+            var issueFolder = _buildFileNames.BuildIssuePath(series);
             var seriesFolder = series.Path;
             var rootFolder = new OsPath(seriesFolder).Directory.FullPath;
 
@@ -157,7 +157,7 @@ namespace NzbDrone.Core.MediaFiles
             var changed = false;
             var newEvent = new IssueFolderCreatedEvent(series, comicFile);
 
-            _rootFolderWatchingService.ReportFileSystemChangeBeginning(seriesFolder, bookFolder, trackFolder);
+            _rootFolderWatchingService.ReportFileSystemChangeBeginning(seriesFolder, issueFolder, comicFileFolder);
 
             if (!_diskProvider.FolderExists(seriesFolder))
             {
@@ -166,17 +166,17 @@ namespace NzbDrone.Core.MediaFiles
                 changed = true;
             }
 
-            if (seriesFolder != bookFolder && !_diskProvider.FolderExists(bookFolder))
+            if (seriesFolder != issueFolder && !_diskProvider.FolderExists(issueFolder))
             {
-                CreateFolder(bookFolder);
-                newEvent.IssueFolder = bookFolder;
+                CreateFolder(issueFolder);
+                newEvent.IssueFolder = issueFolder;
                 changed = true;
             }
 
-            if (bookFolder != trackFolder && !_diskProvider.FolderExists(trackFolder))
+            if (issueFolder != comicFileFolder && !_diskProvider.FolderExists(comicFileFolder))
             {
-                CreateFolder(trackFolder);
-                newEvent.ComicFileFolder = trackFolder;
+                CreateFolder(comicFileFolder);
+                newEvent.ComicFileFolder = comicFileFolder;
                 changed = true;
             }
 

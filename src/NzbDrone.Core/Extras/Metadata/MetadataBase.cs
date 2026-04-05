@@ -36,10 +36,10 @@ namespace NzbDrone.Core.Extras.Metadata
             return newFileName;
         }
 
-        public virtual string GetFilenameAfterMove(Series series, string bookPath, MetadataFile metadataFile)
+        public virtual string GetFilenameAfterMove(Series series, string issuePath, MetadataFile metadataFile)
         {
             var existingFilename = Path.GetFileName(metadataFile.RelativePath);
-            var newFileName = Path.Combine(series.Path, bookPath, existingFilename);
+            var newFileName = Path.Combine(series.Path, issuePath, existingFilename);
 
             return newFileName;
         }

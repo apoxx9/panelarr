@@ -79,7 +79,7 @@ namespace NzbDrone.Core.MediaFiles
         {
             _mediaFileRepository.Delete(comicFile);
 
-            // If the trackfile wasn't mapped to a track, don't publish an event
+            // If the comic file wasn't mapped to a track, don't publish an event
             if (comicFile.IssueId > 0)
             {
                 _eventAggregator.PublishEvent(new ComicFileDeletedEvent(comicFile, reason));
@@ -90,7 +90,7 @@ namespace NzbDrone.Core.MediaFiles
         {
             _mediaFileRepository.DeleteMany(comicFiles);
 
-            // publish events where trackfile was mapped to a track
+            // publish events where comic file was mapped to a track
             foreach (var comicFile in comicFiles.Where(x => x.IssueId > 0))
             {
                 _eventAggregator.PublishEvent(new ComicFileDeletedEvent(comicFile, reason));

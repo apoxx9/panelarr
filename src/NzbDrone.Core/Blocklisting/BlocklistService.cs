@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Blocklisting
         bool Blocklisted(int seriesId, ReleaseInfo release);
         bool BlocklistedTorrentHash(int seriesId, string hash);
         PagingSpec<Blocklist> Paged(PagingSpec<Blocklist> pagingSpec);
-        void Block(RemoteIssue remoteEpisode, string message);
+        void Block(RemoteIssue remoteIssue, string message);
         void Delete(int id);
         void Delete(List<int> ids);
     }
@@ -72,23 +72,23 @@ namespace NzbDrone.Core.Blocklisting
             return _blocklistRepository.GetPaged(pagingSpec);
         }
 
-        public void Block(RemoteIssue remoteEpisode, string message)
+        public void Block(RemoteIssue remoteIssue, string message)
         {
             var blocklist = new Blocklist
             {
-                SeriesId = remoteEpisode.Series.Id,
-                IssueIds = remoteEpisode.Issues.Select(e => e.Id).ToList(),
-                SourceTitle = remoteEpisode.Release.Title,
-                Quality = remoteEpisode.ParsedIssueInfo.Quality,
+                SeriesId = remoteIssue.Series.Id,
+                IssueIds = remoteIssue.Issues.Select(e => e.Id).ToList(),
+                SourceTitle = remoteIssue.Release.Title,
+                Quality = remoteIssue.ParsedIssueInfo.Quality,
                 Date = DateTime.UtcNow,
-                PublishedDate = remoteEpisode.Release.PublishDate,
-                Size = remoteEpisode.Release.Size,
-                Indexer = remoteEpisode.Release.Indexer,
-                Protocol = remoteEpisode.Release.DownloadProtocol,
+                PublishedDate = remoteIssue.Release.PublishDate,
+                Size = remoteIssue.Release.Size,
+                Indexer = remoteIssue.Release.Indexer,
+                Protocol = remoteIssue.Release.DownloadProtocol,
                 Message = message
             };
 
-            if (remoteEpisode.Release is TorrentInfo torrentRelease)
+            if (remoteIssue.Release is TorrentInfo torrentRelease)
             {
                 blocklist.TorrentInfoHash = torrentRelease.InfoHash;
             }

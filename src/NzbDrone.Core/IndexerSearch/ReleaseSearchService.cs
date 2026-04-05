@@ -28,13 +28,13 @@ namespace NzbDrone.Core.IndexerSearch
         private readonly Logger _logger;
 
         public ReleaseSearchService(IIndexerFactory indexerFactory,
-                                IIssueService bookService,
+                                IIssueService issueService,
                                 ISeriesService seriesService,
                                 IMakeDownloadDecision makeDownloadDecision,
                                 Logger logger)
         {
             _indexerFactory = indexerFactory;
-            _issueService = bookService;
+            _issueService = issueService;
             _seriesService = seriesService;
             _makeDownloadDecision = makeDownloadDecision;
             _logger = logger;

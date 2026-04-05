@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Issues
         private readonly IRootFolderService _rootFolderService;
         private readonly IAddSeriesService _addSeriesService;
         private readonly IProvideSeriesInfo _seriesInfo;
-        private readonly IProvideIssueInfo _bookInfo;
+        private readonly IProvideIssueInfo _issueInfoProvider;
         private readonly IMediaFileService _mediaFileService;
         private readonly IComicInfoEmbedService _comicInfoEmbedService;
         private readonly IHistoryService _historyService;
@@ -42,13 +42,13 @@ namespace NzbDrone.Core.Issues
         private readonly IMapCoversToLocal _mediaCoverService;
         private readonly Logger _logger;
 
-        public RefreshIssueService(IIssueService bookService,
+        public RefreshIssueService(IIssueService issueService,
                                   ISeriesService seriesService,
                                   IRootFolderService rootFolderService,
                                   IAddSeriesService addSeriesService,
                                   ISeriesMetadataService seriesMetadataService,
                                   IProvideSeriesInfo seriesInfo,
-                                  IProvideIssueInfo bookInfo,
+                                  IProvideIssueInfo issueInfoProvider,
                                   IMediaFileService mediaFileService,
                                   IComicInfoEmbedService comicInfoEmbedService,
                                   IHistoryService historyService,
@@ -58,12 +58,12 @@ namespace NzbDrone.Core.Issues
                                   Logger logger)
         : base(logger, seriesMetadataService)
         {
-            _issueService = bookService;
+            _issueService = issueService;
             _seriesService = seriesService;
             _rootFolderService = rootFolderService;
             _addSeriesService = addSeriesService;
             _seriesInfo = seriesInfo;
-            _bookInfo = bookInfo;
+            _issueInfoProvider = issueInfoProvider;
             _mediaFileService = mediaFileService;
             _comicInfoEmbedService = comicInfoEmbedService;
             _historyService = historyService;
@@ -77,7 +77,7 @@ namespace NzbDrone.Core.Issues
         {
             try
             {
-                var tuple = _bookInfo.GetIssueInfo(issue.ForeignIssueId);
+                var tuple = _issueInfoProvider.GetIssueInfo(issue.ForeignIssueId);
                 var series = _seriesInfo.GetSeriesInfo(tuple.Item1);
                 var newbook = tuple.Item2;
 

@@ -16,13 +16,13 @@ namespace Panelarr.Api.V1.Calendar
     [V1ApiController]
     public class CalendarController : IssueControllerWithSignalR
     {
-        public CalendarController(IIssueService bookService,
+        public CalendarController(IIssueService issueService,
                               ISeriesIssueLinkService seriesIssueLinkService,
                               ISeriesStatisticsService seriesStatisticsService,
                               IMapCoversToLocal coverMapper,
                               IUpgradableSpecification upgradableSpecification,
                               IBroadcastSignalRMessage signalRBroadcaster)
-        : base(bookService, seriesIssueLinkService, seriesStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
+        : base(issueService, seriesIssueLinkService, seriesStatisticsService, coverMapper, upgradableSpecification, signalRBroadcaster)
         {
         }
 

@@ -33,14 +33,14 @@ namespace NzbDrone.Core.Extras
         private readonly Logger _logger;
 
         public ExtraService(IMediaFileService mediaFileService,
-                            IIssueService bookService,
+                            IIssueService issueService,
                             IDiskProvider diskProvider,
                             IConfigService configService,
                             IEnumerable<IManageExtraFiles> extraFileManagers,
                             Logger logger)
         {
             _mediaFileService = mediaFileService;
-            _issueService = bookService;
+            _issueService = issueService;
             _diskProvider = diskProvider;
             _configService = configService;
             _extraFileManagers = extraFileManagers.OrderBy(e => e.Order).ToList();

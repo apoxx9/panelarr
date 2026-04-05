@@ -16,10 +16,10 @@ namespace NzbDrone.Core.Issues
         private readonly IIssueService _issueService;
         private readonly Logger _logger;
 
-        public IssueMonitoredService(ISeriesService seriesService, IIssueService bookService, Logger logger)
+        public IssueMonitoredService(ISeriesService seriesService, IIssueService issueService, Logger logger)
         {
             _seriesService = seriesService;
-            _issueService = bookService;
+            _issueService = issueService;
             _logger = logger;
         }
 
@@ -31,9 +31,9 @@ namespace NzbDrone.Core.Issues
 
                 var issues = _issueService.GetIssuesBySeries(series.Id);
 
-                var booksWithFiles = _issueService.GetSeriesIssuesWithFiles(series);
+                var issuesWithFiles = _issueService.GetSeriesIssuesWithFiles(series);
 
-                var booksWithoutFiles = issues.Where(c => !booksWithFiles.Select(e => e.Id).Contains(c.Id) && c.ReleaseDate <= DateTime.UtcNow).ToList();
+                var issuesWithoutFiles = issues.Where(c => !issuesWithFiles.Select(e => e.Id).Contains(c.Id) && c.ReleaseDate <= DateTime.UtcNow).ToList();
 
                 var monitoredIssues = monitoringOptions.IssuesToMonitor;
 
@@ -54,24 +54,24 @@ namespace NzbDrone.Core.Issues
                             break;
                         case MonitorTypes.Future:
                             _logger.Debug("Unmonitoring Issues with Files");
-                            ToggleIssuesMonitoredState(issues.Where(e => booksWithFiles.Select(c => c.Id).Contains(e.Id)), false);
+                            ToggleIssuesMonitoredState(issues.Where(e => issuesWithFiles.Select(c => c.Id).Contains(e.Id)), false);
                             _logger.Debug("Unmonitoring Issues without Files");
-                            ToggleIssuesMonitoredState(issues.Where(e => booksWithoutFiles.Select(c => c.Id).Contains(e.Id)), false);
+                            ToggleIssuesMonitoredState(issues.Where(e => issuesWithoutFiles.Select(c => c.Id).Contains(e.Id)), false);
                             break;
                         case MonitorTypes.None:
                             ToggleIssuesMonitoredState(issues, false);
                             break;
                         case MonitorTypes.Missing:
                             _logger.Debug("Unmonitoring Issues with Files");
-                            ToggleIssuesMonitoredState(issues.Where(e => booksWithFiles.Select(c => c.Id).Contains(e.Id)), false);
+                            ToggleIssuesMonitoredState(issues.Where(e => issuesWithFiles.Select(c => c.Id).Contains(e.Id)), false);
                             _logger.Debug("Monitoring Issues without Files");
-                            ToggleIssuesMonitoredState(issues.Where(e => booksWithoutFiles.Select(c => c.Id).Contains(e.Id)), true);
+                            ToggleIssuesMonitoredState(issues.Where(e => issuesWithoutFiles.Select(c => c.Id).Contains(e.Id)), true);
                             break;
                         case MonitorTypes.Existing:
                             _logger.Debug("Monitoring Issues with Files");
-                            ToggleIssuesMonitoredState(issues.Where(e => booksWithFiles.Select(c => c.Id).Contains(e.Id)), true);
+                            ToggleIssuesMonitoredState(issues.Where(e => issuesWithFiles.Select(c => c.Id).Contains(e.Id)), true);
                             _logger.Debug("Unmonitoring Issues without Files");
-                            ToggleIssuesMonitoredState(issues.Where(e => booksWithoutFiles.Select(c => c.Id).Contains(e.Id)), false);
+                            ToggleIssuesMonitoredState(issues.Where(e => issuesWithoutFiles.Select(c => c.Id).Contains(e.Id)), false);
                             break;
                         case MonitorTypes.Latest:
                             ToggleIssuesMonitoredState(issues, false);

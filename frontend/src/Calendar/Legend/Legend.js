@@ -17,7 +17,7 @@ function Legend(props) {
     iconsToShow.push(
       <LegendIconItem
         name="Cutoff Not Met"
-        icon={icons.TRACK_FILE}
+        icon={icons.COMIC_FILE}
         kind={kinds.WARNING}
         tooltip="Quality cutoff has not been met"
       />

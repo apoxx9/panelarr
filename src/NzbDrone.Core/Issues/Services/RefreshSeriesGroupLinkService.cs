@@ -15,10 +15,10 @@ namespace NzbDrone.Core.Issues
         private readonly ISeriesIssueLinkService _seriesIssueLinkService;
         private readonly Logger _logger;
 
-        public RefreshSeriesGroupLinkService(ISeriesIssueLinkService trackService,
+        public RefreshSeriesGroupLinkService(ISeriesIssueLinkService linkService,
                                             Logger logger)
         {
-            _seriesIssueLinkService = trackService;
+            _seriesIssueLinkService = linkService;
             _logger = logger;
         }
 

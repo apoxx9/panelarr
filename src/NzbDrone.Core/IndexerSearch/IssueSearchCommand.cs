@@ -13,9 +13,9 @@ namespace NzbDrone.Core.IndexerSearch
         {
         }
 
-        public IssueSearchCommand(List<int> bookIds)
+        public IssueSearchCommand(List<int> issueIds)
         {
-            IssueIds = bookIds;
+            IssueIds = issueIds;
         }
     }
 }

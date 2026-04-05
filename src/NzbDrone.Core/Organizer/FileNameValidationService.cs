@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Organizer
         {
             var validationFailure = new ValidationFailure("StandardIssueFormat", ERROR_MESSAGE);
 
-            //TODO Add Validation for TrackFilename
+            //TODO Add Validation for IssueFilename
             //var parsedEpisodeInfo = Parser.Parser.ParseTitle(sampleResult.FileName);
 
             //if (parsedEpisodeInfo == null)

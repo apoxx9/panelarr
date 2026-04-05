@@ -73,7 +73,7 @@ class SelectEditionModalContentConnector extends Component {
         id,
         foreignEditionId,
         disableReleaseSwitching: true,
-        tracks: [],
+        editions: [],
         rejections: []
       });
     });

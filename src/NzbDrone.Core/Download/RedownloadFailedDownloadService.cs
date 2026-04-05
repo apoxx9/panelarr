@@ -17,12 +17,12 @@ namespace NzbDrone.Core.Download
         private readonly Logger _logger;
 
         public RedownloadFailedDownloadService(IConfigService configService,
-                                               IIssueService bookService,
+                                               IIssueService issueService,
                                                IManageCommandQueue commandQueueManager,
                                                Logger logger)
         {
             _configService = configService;
-            _issueService = bookService;
+            _issueService = issueService;
             _commandQueueManager = commandQueueManager;
             _logger = logger;
         }
@@ -57,9 +57,9 @@ namespace NzbDrone.Core.Download
                 return;
             }
 
-            var booksInSeries = _issueService.GetIssuesBySeries(message.SeriesId);
+            var issuesInSeries = _issueService.GetIssuesBySeries(message.SeriesId);
 
-            if (message.IssueIds.Count == booksInSeries.Count)
+            if (message.IssueIds.Count == issuesInSeries.Count)
             {
                 _logger.Debug("Failed download was entire series, searching again");
 

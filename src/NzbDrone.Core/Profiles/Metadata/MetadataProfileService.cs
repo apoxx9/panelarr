@@ -44,7 +44,7 @@ namespace NzbDrone.Core.Profiles.Metadata
 
         public MetadataProfileService(IMetadataProfileRepository profileRepository,
                                       ISeriesService seriesService,
-                                      IIssueService bookService,
+                                      IIssueService issueService,
                                       IMediaFileService mediaFileService,
                                       IImportListFactory importListFactory,
                                       IRootFolderService rootFolderService,
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Profiles.Metadata
         {
             _profileRepository = profileRepository;
             _seriesService = seriesService;
-            _issueService = bookService;
+            _issueService = issueService;
             _mediaFileService = mediaFileService;
             _importListFactory = importListFactory;
             _rootFolderService = rootFolderService;
@@ -147,9 +147,9 @@ namespace NzbDrone.Core.Profiles.Metadata
             return hash.ToList();
         }
 
-        private void FilterByPredicate<T>(HashSet<T> remoteItems, Func<T, string> getId, HashSet<string> localItems, MetadataProfile profile, Func<T, MetadataProfile, bool> bookAllowed, string message)
+        private void FilterByPredicate<T>(HashSet<T> remoteItems, Func<T, string> getId, HashSet<string> localItems, MetadataProfile profile, Func<T, MetadataProfile, bool> issueAllowed, string message)
         {
-            var filtered = new HashSet<T>(remoteItems.Where(x => !bookAllowed(x, profile) && !localItems.Contains(getId(x))));
+            var filtered = new HashSet<T>(remoteItems.Where(x => !issueAllowed(x, profile) && !localItems.Contains(getId(x))));
             if (filtered.Any())
             {
                 _logger.Trace($"Skipping {filtered.Count} {typeof(T).Name} because {message}:\n{filtered.ConcatToString(x => x.ToString(), "\n")}");

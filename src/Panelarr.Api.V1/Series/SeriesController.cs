@@ -47,7 +47,7 @@ namespace Panelarr.Api.V1.Series
 
         public SeriesController(IBroadcastSignalRMessage signalRBroadcaster,
                             ISeriesService seriesService,
-                            IIssueService bookService,
+                            IIssueService issueService,
                             IAddSeriesService addSeriesService,
                             ISeriesStatisticsService seriesStatisticsService,
                             IPublisherService publisherService,
@@ -68,7 +68,7 @@ namespace Panelarr.Api.V1.Series
             : base(signalRBroadcaster)
         {
             _seriesService = seriesService;
-            _issueService = bookService;
+            _issueService = issueService;
             _addSeriesService = addSeriesService;
             _seriesStatisticsService = seriesStatisticsService;
             _publisherService = publisherService;

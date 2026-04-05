@@ -25,12 +25,12 @@ namespace Panelarr.Api.V1.Issues
         private readonly ISeriesStatisticsService _seriesStatisticsService;
         private readonly IMapCoversToLocal _coverMapper;
 
-        public IssueLibraryController(IIssueService bookService,
+        public IssueLibraryController(IIssueService issueService,
                                       ISeriesIssueLinkService seriesIssueLinkService,
                                       ISeriesStatisticsService seriesStatisticsService,
                                       IMapCoversToLocal coverMapper)
         {
-            _issueService = bookService;
+            _issueService = issueService;
             _seriesIssueLinkService = seriesIssueLinkService;
             _seriesStatisticsService = seriesStatisticsService;
             _coverMapper = coverMapper;
@@ -123,11 +123,11 @@ namespace Panelarr.Api.V1.Issues
             }
 
             var seriesStats = _seriesStatisticsService.SeriesStatistics();
-            var bookStatsDict = seriesStats.SelectMany(x => x.IssueStatistics).ToDictionary(x => x.IssueId);
+            var issueStatsDict = seriesStats.SelectMany(x => x.IssueStatistics).ToDictionary(x => x.IssueId);
 
             foreach (var issueResource in result)
             {
-                if (bookStatsDict.TryGetValue(issueResource.Id, out var stats))
+                if (issueStatsDict.TryGetValue(issueResource.Id, out var stats))
                 {
                     issueResource.Statistics = stats.ToResource();
                 }

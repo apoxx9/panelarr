@@ -13,10 +13,10 @@ namespace NzbDrone.Core.MediaFiles.Events
         public DownloadClientItemClientInfo DownloadClientInfo { get; }
         public string DownloadId { get; }
 
-        public TrackImportFailedEvent(Exception exception, LocalIssue bookInfo, bool newDownload, DownloadClientItem downloadClientItem)
+        public TrackImportFailedEvent(Exception exception, LocalIssue issueInfo, bool newDownload, DownloadClientItem downloadClientItem)
         {
             Exception = exception;
-            IssueInfo = bookInfo;
+            IssueInfo = issueInfo;
             NewDownload = newDownload;
 
             if (downloadClientItem != null)

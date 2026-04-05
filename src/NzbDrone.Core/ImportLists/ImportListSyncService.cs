@@ -21,7 +21,7 @@ namespace NzbDrone.Core.ImportLists
         private readonly IImportListFactory _importListFactory;
         private readonly IImportListExclusionService _importListExclusionService;
         private readonly IFetchAndParseImportList _listFetcherAndParser;
-        private readonly IProvideIssueInfo _bookInfoProxy;
+        private readonly IProvideIssueInfo _issueInfoProxy;
         private readonly ISearchForNewIssue _searchProxy;
         private readonly ISearchForNewSeries _searchSeriesProxy;
         private readonly ISeriesService _seriesService;
@@ -35,11 +35,11 @@ namespace NzbDrone.Core.ImportLists
         public ImportListSyncService(IImportListFactory importListFactory,
                                      IImportListExclusionService importListExclusionService,
                                      IFetchAndParseImportList listFetcherAndParser,
-                                     IProvideIssueInfo bookInfoProxy,
+                                     IProvideIssueInfo issueInfoProxy,
                                      ISearchForNewIssue searchProxy,
                                      ISearchForNewSeries searchSeriesProxy,
                                      ISeriesService seriesService,
-                                     IIssueService bookService,
+                                     IIssueService issueService,
                                      IAddSeriesService addSeriesService,
                                      IAddIssueService addIssueService,
                                      IEventAggregator eventAggregator,
@@ -49,11 +49,11 @@ namespace NzbDrone.Core.ImportLists
             _importListFactory = importListFactory;
             _importListExclusionService = importListExclusionService;
             _listFetcherAndParser = listFetcherAndParser;
-            _bookInfoProxy = bookInfoProxy;
+            _issueInfoProxy = issueInfoProxy;
             _searchProxy = searchProxy;
             _searchSeriesProxy = searchSeriesProxy;
             _seriesService = seriesService;
-            _issueService = bookService;
+            _issueService = issueService;
             _addSeriesService = addSeriesService;
             _addIssueService = addIssueService;
             _eventAggregator = eventAggregator;
@@ -90,7 +90,7 @@ namespace NzbDrone.Core.ImportLists
         {
             var processed = new List<Issue>();
             var seriesToAdd = new List<Series>();
-            var booksToAdd = new List<Issue>();
+            var issuesToAdd = new List<Issue>();
 
             if (items.Count == 0)
             {
@@ -120,7 +120,7 @@ namespace NzbDrone.Core.ImportLists
                         MapIssueReport(report);
                     }
 
-                    ProcessIssueReport(importList, report, listExclusions, booksToAdd, seriesToAdd);
+                    ProcessIssueReport(importList, report, listExclusions, issuesToAdd, seriesToAdd);
                 }
                 else if (report.Series.IsNotNullOrWhiteSpace() || report.ForeignSeriesId.IsNotNullOrWhiteSpace())
                 {
@@ -134,9 +134,9 @@ namespace NzbDrone.Core.ImportLists
             }
 
             var addedSeries = _addSeriesService.AddSeries(seriesToAdd, false);
-            var addedIssues = _addIssueService.AddIssues(booksToAdd, false);
+            var addedIssues = _addIssueService.AddIssues(issuesToAdd, false);
 
-            var message = string.Format($"Import List Sync Completed. Items found: {items.Count}, Series added: {seriesToAdd.Count}, Issues added: {booksToAdd.Count}");
+            var message = string.Format($"Import List Sync Completed. Items found: {items.Count}, Series added: {seriesToAdd.Count}, Issues added: {issuesToAdd.Count}");
 
             _logger.ProgressInfo(message);
 
@@ -160,7 +160,7 @@ namespace NzbDrone.Core.ImportLists
             {
                 try
                 {
-                    var mappedIssue = _bookInfoProxy.GetIssueInfo(report.ForeignIssueId);
+                    var mappedIssue = _issueInfoProxy.GetIssueInfo(report.ForeignIssueId);
 
                     report.ForeignIssueId = mappedIssue.Item2.ForeignIssueId;
                     report.Issue = mappedIssue.Item2.Title;
@@ -176,7 +176,7 @@ namespace NzbDrone.Core.ImportLists
             {
                 try
                 {
-                    var mappedIssue = _bookInfoProxy.GetIssueInfo(report.ForeignEditionId);
+                    var mappedIssue = _issueInfoProxy.GetIssueInfo(report.ForeignEditionId);
 
                     _logger.Trace($"Mapped {report.ForeignEditionId} to [{mappedIssue.Item2.ForeignIssueId}] {mappedIssue.Item2.Title}");
 
@@ -215,7 +215,7 @@ namespace NzbDrone.Core.ImportLists
             }
         }
 
-        private void ProcessIssueReport(ImportListDefinition importList, ImportListItemInfo report, List<ImportListExclusion> listExclusions, List<Issue> booksToAdd, List<Series> seriesToAdd)
+        private void ProcessIssueReport(ImportListDefinition importList, ImportListItemInfo report, List<ImportListExclusion> listExclusions, List<Issue> issuesToAdd, List<Series> seriesToAdd)
         {
             // Check to see if issue in DB
             var existingIssue = _issueService.FindById(report.ForeignIssueId);
@@ -283,7 +283,7 @@ namespace NzbDrone.Core.ImportLists
             }
 
             // Append Issue if not already in DB or already on add list
-            if (booksToAdd.All(s => s.ForeignIssueId != report.ForeignIssueId))
+            if (issuesToAdd.All(s => s.ForeignIssueId != report.ForeignIssueId))
             {
                 var monitored = importList.ShouldMonitor != ImportListMonitorType.None;
 
@@ -326,7 +326,7 @@ namespace NzbDrone.Core.ImportLists
                     toAddSeries.AddOptions.IssuesToMonitor.Add(toAdd.ForeignIssueId);
                 }
 
-                booksToAdd.Add(toAdd);
+                issuesToAdd.Add(toAdd);
             }
         }
 

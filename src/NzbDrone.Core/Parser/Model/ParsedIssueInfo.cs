@@ -24,14 +24,14 @@ namespace NzbDrone.Core.Parser.Model
 
         public override string ToString()
         {
-            var bookString = "[Unknown Issue]";
+            var issueString = "[Unknown Issue]";
 
             if (IssueTitle != null)
             {
-                bookString = string.Format("{0}", IssueTitle);
+                issueString = string.Format("{0}", IssueTitle);
             }
 
-            return string.Format("{0} - {1} {2}", SeriesName, bookString, Quality);
+            return string.Format("{0} - {1} {2}", SeriesName, issueString, Quality);
         }
     }
 }

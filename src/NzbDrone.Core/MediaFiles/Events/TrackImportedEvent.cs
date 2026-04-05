@@ -14,9 +14,9 @@ namespace NzbDrone.Core.MediaFiles.Events
         public DownloadClientItemClientInfo DownloadClientInfo { get; set; }
         public string DownloadId { get; private set; }
 
-        public TrackImportedEvent(LocalIssue bookInfo, ComicFile importedIssue, List<ComicFile> oldFiles, bool newDownload, DownloadClientItem downloadClientItem)
+        public TrackImportedEvent(LocalIssue issueInfo, ComicFile importedIssue, List<ComicFile> oldFiles, bool newDownload, DownloadClientItem downloadClientItem)
         {
-            IssueInfo = bookInfo;
+            IssueInfo = issueInfo;
             ImportedIssue = importedIssue;
             OldFiles = oldFiles;
             NewDownload = newDownload;

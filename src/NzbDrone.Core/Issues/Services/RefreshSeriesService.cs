@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Issues
         public RefreshSeriesService(IProvideSeriesInfo seriesInfo,
                                     ISeriesService seriesService,
                                     ISeriesMetadataService seriesMetadataService,
-                                    IIssueService bookService,
+                                    IIssueService issueService,
                                     IMetadataProfileService metadataProfileService,
                                     IRefreshIssueService refreshIssueService,
                                     IRefreshSeriesGroupService refreshSeriesGroupService,
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Issues
         {
             _seriesInfo = seriesInfo;
             _seriesService = seriesService;
-            _issueService = bookService;
+            _issueService = issueService;
             _metadataProfileService = metadataProfileService;
             _refreshIssueService = refreshIssueService;
             _refreshSeriesGroupService = refreshSeriesGroupService;

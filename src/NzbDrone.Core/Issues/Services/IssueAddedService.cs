@@ -25,11 +25,11 @@ namespace NzbDrone.Core.Issues
 
         public IssueAddedService(ICacheManager cacheManager,
                                    IManageCommandQueue commandQueueManager,
-                                   IIssueService bookService,
+                                   IIssueService issueService,
                                    Logger logger)
         {
             _commandQueueManager = commandQueueManager;
-            _issueService = bookService;
+            _issueService = issueService;
             _logger = logger;
             _addedIssuesCache = cacheManager.GetCache<List<int>>(GetType());
         }

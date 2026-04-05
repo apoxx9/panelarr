@@ -12,10 +12,10 @@ namespace Panelarr.Api.V1.Issues
         private readonly IIssueService _issueService;
         private readonly IMetadataOverrideService _metadataOverrideService;
 
-        public IssueOverrideController(IIssueService bookService,
+        public IssueOverrideController(IIssueService issueService,
                                        IMetadataOverrideService metadataOverrideService)
         {
-            _issueService = bookService;
+            _issueService = issueService;
             _metadataOverrideService = metadataOverrideService;
         }
 

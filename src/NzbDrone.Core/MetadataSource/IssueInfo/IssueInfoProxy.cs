@@ -24,14 +24,14 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
         private readonly IMetronMapper _metronMapper;
 
         public IssueInfoProxy(ISeriesService seriesService,
-                             IIssueService bookService,
+                             IIssueService issueService,
                              IMetadataProvider metadataProvider,
                              IMetronMapper metronMapper,
                              Logger logger,
                              ICacheManager cacheManager)
         {
             _seriesService = seriesService;
-            _issueService = bookService;
+            _issueService = issueService;
             _metadataProvider = metadataProvider;
             _metronMapper = metronMapper;
             _cache = cacheManager.GetCache<HashSet<string>>(GetType());
