@@ -49,6 +49,7 @@ namespace Panelarr.Api.V1.ComicFiles
             return new ComicFileResource
             {
                 Id = model.Id,
+                SeriesId = model.Series?.Value?.Id ?? 0,
                 IssueId = model.IssueId,
                 Path = model.Path,
                 Size = model.Size,

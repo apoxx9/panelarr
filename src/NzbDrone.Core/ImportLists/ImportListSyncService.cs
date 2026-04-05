@@ -414,8 +414,6 @@ namespace NzbDrone.Core.ImportLists
         public void Execute(ImportListSyncCommand message)
         {
             var processed = message.DefinitionId.HasValue ? SyncList(_importListFactory.Get(message.DefinitionId.Value)) : SyncAll();
-
-            _eventAggregator.PublishEvent(new ImportListSyncCompleteEvent(processed));
         }
     }
 }
