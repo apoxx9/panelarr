@@ -9,6 +9,7 @@ using NzbDrone.Core.Update;
 
 namespace NzbDrone.Core.Test.UpdateTests
 {
+    [Explicit("Integration test requiring network access to panelarr.servarr.com")]
     public class UpdatePackageProviderFixture : CoreTest<UpdatePackageProvider>
     {
         [SetUp]

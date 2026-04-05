@@ -46,11 +46,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Subject.CutoffNotMet(
             new QualityProfile
             {
-                Cutoff = Quality.CBZ.Id,
+                Cutoff = Quality.CBR.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true
             },
-            new List<QualityModel> { new QualityModel(Quality.CBR, new Revision(version: 2)) },
+            new List<QualityModel> { new QualityModel(Quality.CBZ, new Revision(version: 2)) },
             new List<CustomFormat>()).Should().BeFalse();
         }
 

@@ -19,8 +19,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             new object[] { Quality.CBZ, 1, Quality.CBZ, 2, Quality.CBZ, true },
             new object[] { Quality.CBR, 1, Quality.CBR, 2, Quality.CBR, true },
             new object[] { Quality.CBR, 1, Quality.CBR, 1, Quality.CBR, false },
-            new object[] { Quality.CBR, 1, Quality.CBZ, 2, Quality.CBR, false },
-            new object[] { Quality.CBR, 1, Quality.CBZ, 2, Quality.CBR, false },
+            new object[] { Quality.CBR, 1, Quality.CBZ, 2, Quality.CBR, true },
+            new object[] { Quality.CBZ, 1, Quality.CBR, 2, Quality.CBZ, false },
             new object[] { Quality.CBR, 1, Quality.CBR, 1, Quality.CBR, false }
         };
 

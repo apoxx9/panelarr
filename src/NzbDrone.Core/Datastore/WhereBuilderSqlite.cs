@@ -194,12 +194,12 @@ namespace NzbDrone.Core.Datastore
 
             var memberExp = expression as MemberExpression;
 
-            if (TryGetPropertyValue(memberExp, out value))
+            if (memberExp != null && TryGetPropertyValue(memberExp, out value))
             {
                 return true;
             }
 
-            if (TryGetVariableValue(memberExp, out value))
+            if (memberExp != null && TryGetVariableValue(memberExp, out value))
             {
                 return true;
             }
@@ -297,14 +297,44 @@ namespace NzbDrone.Core.Datastore
             else
             {
                 // Static method
-                // Must be Enumerable.Contains(source, item)
-                if (body.Method.DeclaringType != typeof(Enumerable) || body.Arguments.Count != 2)
+                // Enumerable.Contains(source, item) or MemoryExtensions.Contains(span, item, comparer)
+                if (body.Arguments.Count == 2)
+                {
+                    list = body.Arguments[0];
+
+                    // Unwrap implicit conversion from array to ReadOnlySpan
+                    if (list is MethodCallExpression convExpr2 && convExpr2.Method.Name == "op_Implicit")
+                    {
+                        list = convExpr2.Arguments[0];
+                    }
+                    else if (list is UnaryExpression unary2 && unary2.NodeType == ExpressionType.Convert)
+                    {
+                        list = unary2.Operand;
+                    }
+
+                    item = body.Arguments[1];
+                }
+                else if (body.Arguments.Count == 3)
+                {
+                    // .NET 10+ resolves array.Contains() to MemoryExtensions.Contains(span, item, comparer)
+                    list = body.Arguments[0];
+
+                    // Unwrap implicit conversion from array to ReadOnlySpan
+                    if (list is MethodCallExpression convExpr && convExpr.Method.Name == "op_Implicit")
+                    {
+                        list = convExpr.Arguments[0];
+                    }
+                    else if (list is UnaryExpression unary && unary.NodeType == ExpressionType.Convert)
+                    {
+                        list = unary.Operand;
+                    }
+
+                    item = body.Arguments[1];
+                }
+                else
                 {
                     throw new NotSupportedException("Unexpected form of Enumerable.Contains");
                 }
-
-                list = body.Arguments[0];
-                item = body.Arguments[1];
             }
 
             _sb.Append('(');

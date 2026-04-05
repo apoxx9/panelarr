@@ -18,11 +18,11 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
 
             // Unlink where issues no longer exists
             mapper.Execute(@"UPDATE ""ComicFiles""
-                             SET ""EditionId"" = 0
+                             SET ""IssueId"" = 0
                              WHERE ""Id"" IN (
                              SELECT ""ComicFiles"".""Id"" FROM ""ComicFiles""
                              LEFT OUTER JOIN ""Issues""
-                             ON ""ComicFiles"".""EditionId"" = ""Issues"".""Id""
+                             ON ""ComicFiles"".""IssueId"" = ""Issues"".""Id""
                              WHERE ""Issues"".""Id"" IS NULL)");
         }
     }

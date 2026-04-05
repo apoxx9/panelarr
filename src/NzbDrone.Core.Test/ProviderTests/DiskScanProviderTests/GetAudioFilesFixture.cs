@@ -22,11 +22,11 @@ namespace NzbDrone.Core.Test.ProviderTests.DiskScanProviderTests
         {
             _fileNames = new[]
                         {
-                            @"30 Rock1.mp3",
-                            @"30 Rock2.flac",
+                            @"30 Rock1.cbz",
+                            @"30 Rock2.cbr",
                             @"30 Rock3.pdf",
-                            @"30 Rock4.epub",
-                            @"30 Rock.mobi",
+                            @"30 Rock4.cb7",
+                            @"30 Rock.cbz",
                             @"movie.exe",
                             @"movie"
                         };

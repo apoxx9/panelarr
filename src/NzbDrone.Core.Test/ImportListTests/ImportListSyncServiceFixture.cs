@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Moq;
@@ -54,6 +55,13 @@ namespace NzbDrone.Core.Test.ImportListTests
             Mocker.GetMock<IImportListExclusionService>()
                 .Setup(v => v.All())
                 .Returns(new List<ImportListExclusion>());
+
+            Mocker.GetMock<IProvideIssueInfo>()
+                .Setup(v => v.GetIssueInfo(It.IsAny<string>()))
+                .Returns<string>(id => Tuple.Create(
+                    "edition-" + id,
+                    new Issue { ForeignIssueId = "4321", Title = "Mapped Issue" },
+                    new List<SeriesMetadata> { new SeriesMetadata { ForeignSeriesId = "f59c5520-5f46-4d2c-b2c4-822eabf53419", Name = "Linkin Park" } }));
 
             Mocker.GetMock<IAddIssueService>()
                 .Setup(v => v.AddIssues(It.IsAny<List<Issue>>(), false))

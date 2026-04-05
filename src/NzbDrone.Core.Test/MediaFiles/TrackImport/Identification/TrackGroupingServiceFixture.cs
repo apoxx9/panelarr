@@ -72,6 +72,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
                 .CreateListOfSize(count)
                 .All()
                 .With(f => f.Seriess = new List<string> { series })
+                .With(f => f.SeriesTitle = series)
                 .With(f => f.IssueTitle = issue)
                 .With(f => f.IssueMBId = null)
                 .With(f => f.ReleaseMBId = null)

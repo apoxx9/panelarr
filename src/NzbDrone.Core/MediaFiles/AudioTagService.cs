@@ -70,9 +70,20 @@ namespace NzbDrone.Core.MediaFiles
 
         public AudioTag GetTrackMetadata(ComicFile trackfile)
         {
-            var issue = trackfile.Issue.Value;
-            var series = issue.Series.Value;
-            var partCount = issue.ComicFiles.Value.Count;
+            var issue = trackfile.Issue?.Value;
+
+            if (issue == null)
+            {
+                return new AudioTag();
+            }
+
+            var series = issue.Series?.Value;
+            var partCount = issue.ComicFiles?.Value?.Count ?? 0;
+
+            if (series == null)
+            {
+                return new AudioTag();
+            }
 
             var fileTags = ReadAudioTag(trackfile.Path);
 

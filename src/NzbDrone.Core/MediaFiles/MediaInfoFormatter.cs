@@ -38,20 +38,15 @@ namespace NzbDrone.Core.MediaFiles
 
         public static readonly Dictionary<Codec, string> CodecNames = new Dictionary<Codec, string>
         {
-            { Codec.MP1, "MP1" },
-            { Codec.MP2, "MP2" },
-            { Codec.AAC, "AAC" },
-            { Codec.AACVBR, "AAC" },
-            { Codec.ALAC, "ALAC" },
-            { Codec.APE, "APE" },
-            { Codec.FLAC, "FLAC" },
-            { Codec.MP3CBR, "MP3" },
-            { Codec.MP3VBR, "MP3" },
-            { Codec.OGG, "OGG" },
-            { Codec.OPUS, "OPUS" },
-            { Codec.WAV, "PCM" },
-            { Codec.WAVPACK, "WavPack" },
-            { Codec.WMA, "WMA" }
+            { Codec.CBZ, "CBZ" },
+            { Codec.CBZ_HD, "CBZ HD" },
+            { Codec.CBZ_Web, "CBZ Web" },
+            { Codec.CBR, "CBR" },
+            { Codec.CB7, "CB7" },
+            { Codec.PDF, "PDF" },
+            { Codec.EPUB, "EPUB" },
+            { Codec.MOBI, "MOBI" },
+            { Codec.AZW3, "AZW3" }
         };
 
         public static string FormatAudioCodec(MediaInfoModel mediaInfo)

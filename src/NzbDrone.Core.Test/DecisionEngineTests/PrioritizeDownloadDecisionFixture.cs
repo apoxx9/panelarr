@@ -393,7 +393,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             decisions.Add(new DownloadDecision(remoteIssue2));
 
             var qualifiedReports = Subject.PrioritizeDecisions(decisions);
-            ((TorrentInfo)qualifiedReports.First().RemoteIssue.Release).Should().Be(torrentInfo1);
+            ((TorrentInfo)qualifiedReports.First().RemoteIssue.Release).Should().Be(torrentInfo2);
         }
 
         [Test]

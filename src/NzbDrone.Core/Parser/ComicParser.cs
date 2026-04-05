@@ -62,7 +62,7 @@ namespace NzbDrone.Core.Parser
 
         // Release group (typically last parenthetical containing known group indicators)
         private static readonly Regex ReleaseGroupRegex = new Regex(
-            @"\(([^)]*(?:Empire|Minutemen|DCP|Mephisto|Digi|GetComics|Zone|Shan|GreenGiant|Novus|Senpai)(?:[^)]*)?)\)",
+            @"\(([^)]*(?:Empire|Minutemen|DCP|Mephisto|Digi(?!tal)|GetComics|Zone|Shan|GreenGiant|Novus|Senpai)(?:[^)]*)?)\)",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Generic last parenthetical for release group fallback
@@ -90,6 +90,7 @@ namespace NzbDrone.Core.Parser
                 "cbr" => ComicFormat.CBR,
                 "cb7" => ComicFormat.CB7,
                 "pdf" => ComicFormat.PDF,
+                "epub" => ComicFormat.EPUB,
                 _ => ComicFormat.Unknown
             };
 
@@ -168,11 +169,18 @@ namespace NzbDrone.Core.Parser
                 }
                 else
                 {
-                    // Try scene-style 3-digit number
-                    var sceneMatch = SceneIssueNumberRegex.Match(name);
-                    if (sceneMatch.Success && float.TryParse(sceneMatch.Groups[1].Value, out var sceneNum))
+                    // Try scene-style 3-digit number - use the last match before a
+                    // parenthetical year, since earlier numbers may be part of the
+                    // series name (e.g. "100 Bullets 050 (2004)")
+                    var sceneMatches = SceneIssueNumberRegex.Matches(name);
+                    if (sceneMatches.Count > 0)
                     {
-                        result.IssueNumber = sceneNum;
+                        // Prefer the last match (closest to year/end of string)
+                        var bestMatch = sceneMatches[sceneMatches.Count - 1];
+                        if (float.TryParse(bestMatch.Groups[1].Value, out var sceneNum))
+                        {
+                            result.IssueNumber = sceneNum;
+                        }
                     }
                 }
             }
@@ -213,27 +221,118 @@ namespace NzbDrone.Core.Parser
             return result;
         }
 
+        // Bare year (not in parentheses): 2016, 1986, etc.
+        private static readonly Regex BareYearRegex = new Regex(
+            @"(?<!\d)\b(19|20)\d{2}\b(?!\))",
+            RegexOptions.Compiled);
+
+        // Regex for TPB/collected edition title extraction:
+        // "Series TPB Vol NN - Subtitle" or "Series Vol. NN - Subtitle"
+        private static readonly Regex TpbTitleRegex = new Regex(
+            @"^(?<series>.+?)\s+(?:TPB|Trade\s*Paperback|HC|Hardcover|Omnibus)\s+(?:Vol\.?\s*\d+)\s*[-–]\s*(?<subtitle>.+)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // Also handle "Series Vol. NN - Subtitle" (without TPB marker)
+        private static readonly Regex VolSubtitleRegex = new Regex(
+            @"^(?<series>.+?)\s+Vol\.?\s*\d+\s*[-–]\s*(?<subtitle>.+)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         private static string ExtractSeriesTitle(string name, ParsedComicInfo parsed)
         {
-            // Remove all parentheticals first
-            var stripped = Regex.Replace(name, @"\([^)]*\)", " ").Trim();
+            // Remove all parentheticals for title extraction
+            var cleaned = Regex.Replace(name, @"\([^)]*\)", " ").Trim();
+            cleaned = Regex.Replace(cleaned, @"\s{2,}", " ").Trim();
 
-            // Remove volume indicators
-            stripped = VolumeRegex.Replace(stripped, " ").Trim();
+            // For collected editions (TPB/HC/Omnibus), try to extract "Series - Subtitle"
+            if (parsed.IssueType == IssueType.TPB || parsed.IssueType == IssueType.Hardcover ||
+                parsed.IssueType == IssueType.Omnibus)
+            {
+                var tpbMatch = TpbTitleRegex.Match(cleaned);
+                if (tpbMatch.Success)
+                {
+                    var series = tpbMatch.Groups["series"].Value.Trim();
+                    var subtitle = tpbMatch.Groups["subtitle"].Value.Trim();
+                    return $"{series} - {subtitle}".TrimEnd('-', '_', ' ');
+                }
 
-            // Remove issue number patterns
-            stripped = IssueNumberRegex.Replace(stripped, " ").Trim();
-            stripped = SceneIssueNumberRegex.Replace(stripped, " ").Trim();
+                var volMatch = VolSubtitleRegex.Match(cleaned);
+                if (volMatch.Success)
+                {
+                    var series = volMatch.Groups["series"].Value.Trim();
+                    var subtitle = volMatch.Groups["subtitle"].Value.Trim();
+                    return $"{series} - {subtitle}".TrimEnd('-', '_', ' ');
+                }
+            }
 
-            // Remove collected edition markers
-            stripped = CollectedEditionRegex.Replace(stripped, " ").Trim();
+            // For standard issues, find the earliest marker and take everything before it
+            var cutoff = name.Length;
 
-            // Remove Annual/Special/Annual markers (keep them in IssueType, strip from title)
+            // Check for parentheticals
+            var parenIndex = name.IndexOf('(');
+            if (parenIndex >= 0 && parenIndex < cutoff)
+            {
+                cutoff = parenIndex;
+            }
+
+            // Check for volume indicators
+            var volumeMatch = VolumeRegex.Match(name);
+            if (volumeMatch.Success && volumeMatch.Index < cutoff)
+            {
+                cutoff = volumeMatch.Index;
+            }
+
+            // Check for issue number patterns (#001, Issue 1, etc.)
+            var issueMatch = IssueNumberRegex.Match(name);
+            if (issueMatch.Success && issueMatch.Index < cutoff)
+            {
+                cutoff = issueMatch.Index;
+            }
+
+            // Check for scene-style 3-digit number — but only the one that was
+            // actually used as the issue number (to avoid stripping numbers that
+            // are part of the title like "100" in "100 Bullets")
+            if (parsed.IssueNumber.HasValue)
+            {
+                var sceneMatches = SceneIssueNumberRegex.Matches(name);
+                for (var i = sceneMatches.Count - 1; i >= 0; i--)
+                {
+                    var sm = sceneMatches[i];
+                    if (float.TryParse(sm.Groups[1].Value, out var num) &&
+                        num == parsed.IssueNumber.Value &&
+                        sm.Index < cutoff)
+                    {
+                        cutoff = sm.Index;
+                        break;
+                    }
+                }
+            }
+
+            // Check for limited series marker ("of N")
+            var limitedMatch = LimitedSeriesRegex.Match(name);
+            if (limitedMatch.Success && limitedMatch.Index < cutoff)
+            {
+                cutoff = limitedMatch.Index;
+            }
+
+            // Check for collected edition markers
+            var collectedMatch = CollectedEditionRegex.Match(name);
+            if (collectedMatch.Success && collectedMatch.Index < cutoff)
+            {
+                cutoff = collectedMatch.Index;
+            }
+
+            var stripped = name.Substring(0, cutoff).Trim();
+
+            // Remove Annual/Special markers (keep them in IssueType, strip from title)
             stripped = AnnualRegex.Replace(stripped, " ").Trim();
             stripped = SpecialRegex.Replace(stripped, " ").Trim();
 
-            // Remove source
-            stripped = SourceRegex.Replace(stripped, " ").Trim();
+            // Remove bare years from the series title only if they match the extracted year
+            // (e.g. "Batman 2016" -> "Batman" when year=2016, but keep "Spider-Man 2099")
+            if (parsed.Year.HasValue)
+            {
+                stripped = Regex.Replace(stripped, $@"\b{parsed.Year.Value}\b", " ").Trim();
+            }
 
             // Clean up extra spaces and trailing dashes/underscores
             stripped = Regex.Replace(stripped, @"\s{2,}", " ").Trim();
@@ -250,6 +349,7 @@ namespace NzbDrone.Core.Parser
                 ComicFormat.CBR => Quality.CBR,
                 ComicFormat.CB7 => Quality.CB7,
                 ComicFormat.PDF => Quality.PDF,
+                ComicFormat.EPUB => Quality.EPUB,
                 _ => Quality.Unknown
             };
         }

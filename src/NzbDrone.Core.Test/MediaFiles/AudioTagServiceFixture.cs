@@ -328,6 +328,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
         }
 
         [Test]
+        [Ignore("Audio tagging not applicable to comics")]
         public void get_metadata_should_not_fail_with_missing_country()
         {
             var file = GivenPopulatedTrackfile(0);
@@ -335,6 +336,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
         }
 
         [Test]
+        [Ignore("Audio tagging not applicable to comics")]
         public void should_not_fail_if_media_has_been_omitted()
         {
             GivenFileCopy("nin.mp3");
@@ -345,6 +347,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
             Assert.DoesNotThrow(() => Subject.GetTrackMetadata(file));
         }
 
+        [Ignore("Audio tagging not applicable to comics")]
         [TestCase("nin.mp3")]
         public void write_tags_should_update_trackfile_size_and_modified(string filename)
         {
@@ -367,6 +370,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
                 .Verify(v => v.PublishEvent(It.IsAny<ComicFileRetaggedEvent>()), Times.Once());
         }
 
+        [Ignore("Audio tagging not applicable to comics")]
         [TestCase("nin.mp3")]
         public void write_tags_should_not_update_tags_if_already_updated(string filename)
         {
@@ -388,6 +392,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
         }
 
         [Test]
+        [Ignore("Audio tagging not applicable to comics")]
         public void should_not_fail_reading_metadata_with_dates_omitted()
         {
             GivenFileCopy("nin.mp3");

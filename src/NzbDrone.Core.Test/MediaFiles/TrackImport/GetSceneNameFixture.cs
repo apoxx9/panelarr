@@ -125,7 +125,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
                                .BeNull();
         }
 
-        [TestCase(".flac")]
+        [TestCase(".cbr")]
         [TestCase(".par2")]
         [TestCase(".nzb")]
         public void should_remove_extension_from_nzb_title_for_scene_name(string extension)

@@ -23,7 +23,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
         private static readonly List<string> MultiDiscMarkers = new () { @"dis[ck]", @"cd" };
         private static readonly string MultiDiscPatternFormat = @"^(?<root>.*%s[\W_]*)\d";
-        private static readonly List<string> VariousSeriesTitles = new () { "", "various allSeries", "various", "va", "unknown" };
+        private static readonly List<string> VariousSeriesTitles = new () { "", "various seriess", "various", "va", "unknown" };
 
         public List<LocalEdition> GroupTracks(List<LocalIssue> localTracks)
         {

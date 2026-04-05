@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Test.Datastore
         {
             _subject = Where(x => x.Id == 10);
 
-            _subject.ToString().Should().Be($"(\"Seriess\".\"Id\" = @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"Series\".\"Id\" = @Clause1_P1)");
             _subject.Parameters.Get<int>("Clause1_P1").Should().Be(10);
         }
 
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Test.Datastore
             var id = 10;
             _subject = Where(x => x.Id == id);
 
-            _subject.ToString().Should().Be($"(\"Seriess\".\"Id\" = @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"Series\".\"Id\" = @Clause1_P1)");
             _subject.Parameters.Get<int>("Clause1_P1").Should().Be(id);
         }
 
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.Datastore
             _subject = Where(x => x.Id == series.Id);
 
             _subject.Parameters.ParameterNames.Should().HaveCount(1);
-            _subject.ToString().Should().Be($"(\"Seriess\".\"Id\" = @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"Series\".\"Id\" = @Clause1_P1)");
             _subject.Parameters.Get<int>("Clause1_P1").Should().Be(series.Id);
         }
 
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.Test.Datastore
         {
             Expression<Func<Series, Series, bool>> filter = (x, y) => x.Id == y.Id;
             _subject = new WhereBuilderSqlite(filter, false, 0);
-            _subject.ToString().Should().Be($"(\"Seriess\".\"Id\" = \"Seriess\".\"Id\")");
+            _subject.ToString().Should().Be($"(\"Series\".\"Id\" = \"Series\".\"Id\")");
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Test.Datastore
         {
             _subject = Where(x => x.CleanName == null);
 
-            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" IS NULL)");
+            _subject.ToString().Should().Be($"(\"Series\".\"CleanName\" IS NULL)");
         }
 
         [Test]
@@ -102,7 +102,7 @@ namespace NzbDrone.Core.Test.Datastore
             string imdb = null;
             _subject = Where(x => x.CleanName == imdb);
 
-            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" IS NULL)");
+            _subject.ToString().Should().Be($"(\"Series\".\"CleanName\" IS NULL)");
         }
 
         [Test]
@@ -111,7 +111,7 @@ namespace NzbDrone.Core.Test.Datastore
             var series = new Series { CleanName = null };
             _subject = Where(x => x.CleanName == series.CleanName);
 
-            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" IS NULL)");
+            _subject.ToString().Should().Be($"(\"Series\".\"CleanName\" IS NULL)");
         }
 
         [Test]
@@ -120,7 +120,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = Where(x => x.CleanName.Contains(test));
 
-            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" LIKE '%' || @Clause1_P1 || '%')");
+            _subject.ToString().Should().Be($"(\"Series\".\"CleanName\" LIKE '%' || @Clause1_P1 || '%')");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = Where(x => test.Contains(x.CleanName));
 
-            _subject.ToString().Should().Be($"(@Clause1_P1 LIKE '%' || \"Seriess\".\"CleanName\" || '%')");
+            _subject.ToString().Should().Be($"(@Clause1_P1 LIKE '%' || \"Series\".\"CleanName\" || '%')");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -140,7 +140,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = Where(x => x.CleanName.StartsWith(test));
 
-            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" LIKE @Clause1_P1 || '%')");
+            _subject.ToString().Should().Be($"(\"Series\".\"CleanName\" LIKE @Clause1_P1 || '%')");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -150,7 +150,7 @@ namespace NzbDrone.Core.Test.Datastore
             var test = "small";
             _subject = Where(x => x.CleanName.EndsWith(test));
 
-            _subject.ToString().Should().Be($"(\"Seriess\".\"CleanName\" LIKE '%' || @Clause1_P1)");
+            _subject.ToString().Should().Be($"(\"Series\".\"CleanName\" LIKE '%' || @Clause1_P1)");
             _subject.Parameters.Get<string>("Clause1_P1").Should().Be(test);
         }
 
@@ -160,7 +160,7 @@ namespace NzbDrone.Core.Test.Datastore
             var list = new List<int> { 1, 2, 3 };
             _subject = Where(x => list.Contains(x.Id));
 
-            _subject.ToString().Should().Be($"(\"Seriess\".\"Id\" IN (1, 2, 3))");
+            _subject.ToString().Should().Be($"(\"Series\".\"Id\" IN (1, 2, 3))");
 
             _subject.Parameters.ParameterNames.Should().BeEmpty();
         }
@@ -171,7 +171,7 @@ namespace NzbDrone.Core.Test.Datastore
             var list = new List<int> { 1, 2, 3 };
             _subject = Where(x => x.CleanName == "test" && list.Contains(x.Id));
 
-            _subject.ToString().Should().Be($"((\"Seriess\".\"CleanName\" = @Clause1_P1) AND (\"Seriess\".\"Id\" IN (1, 2, 3)))");
+            _subject.ToString().Should().Be($"((\"Series\".\"CleanName\" = @Clause1_P1) AND (\"Series\".\"Id\" IN (1, 2, 3)))");
         }
 
         [Test]

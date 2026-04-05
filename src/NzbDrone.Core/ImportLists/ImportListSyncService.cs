@@ -182,8 +182,12 @@ namespace NzbDrone.Core.ImportLists
 
                     report.ForeignIssueId = mappedIssue.Item2.ForeignIssueId;
                     report.Issue = mappedIssue.Item2.Title;
-                    report.Series ??= mappedIssue.Item3.First().Name;
-                    report.ForeignSeriesId ??= mappedIssue.Item3.First().ForeignSeriesId;
+
+                    if (mappedIssue.Item3 != null && mappedIssue.Item3.Any())
+                    {
+                        report.Series ??= mappedIssue.Item3.First().Name;
+                        report.ForeignSeriesId ??= mappedIssue.Item3.First().ForeignSeriesId;
+                    }
                 }
                 catch (IssueNotFoundException)
                 {

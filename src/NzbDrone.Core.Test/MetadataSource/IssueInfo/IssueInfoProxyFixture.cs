@@ -13,7 +13,7 @@ using NzbDrone.Core.Test.Framework;
 namespace NzbDrone.Core.Test.MetadataSource.Goodreads
 {
     [TestFixture]
-    [Ignore("Waiting for metadata to be back again", Until = "2026-01-15 00:00:00Z")]
+    [Explicit("Integration test requiring network access to metadata server")]
     public class IssueInfoProxyFixture : CoreTest<IssueInfoProxy>
     {
         private MetadataProfile _metadataProfile;

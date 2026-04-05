@@ -64,14 +64,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                 .With(e => e.PartCount = 1)
                 .With(e => e.Quality = new QualityModel(Quality.CBR))
                 .With(e => e.ReleaseGroup = "PanelarrTest")
-                .With(e => e.MediaInfo = new Parser.Model.MediaInfoModel
-                {
-                    AudioBitrate = 320,
-                    AudioBits = 16,
-                    AudioChannels = 2,
-                    AudioFormat = "Flac Audio",
-                    AudioSampleRate = 44100
-                }).Build();
+                .Build();
 
             Mocker.GetMock<IQualityDefinitionService>()
                 .Setup(v => v.Get(Moq.It.IsAny<Quality>()))
@@ -129,18 +122,18 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         }
 
         [Test]
-        public void should_replace_ARTIST_NAME_with_all_caps()
+        public void should_replace_SERIES_NAME_with_all_caps()
         {
-            _namingConfig.StandardIssueFormat = "{AUTHOR NAME}";
+            _namingConfig.StandardIssueFormat = "{SERIES NAME}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("LINKIN PARK");
         }
 
         [Test]
-        public void should_replace_ARTIST_NAME_with_random_casing_should_keep_original_casing()
+        public void should_replace_SERIES_NAME_with_random_casing_should_keep_original_casing()
         {
-            _namingConfig.StandardIssueFormat = "{aUtHoR-nAmE}";
+            _namingConfig.StandardIssueFormat = "{sErIeS-nAmE}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(_series.Name.Replace(' ', '-'));
@@ -184,12 +177,13 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         }
 
         [Test]
-        public void should_replace_Issue_Disambiguation()
+        public void should_replace_Series_Year()
         {
-            _namingConfig.StandardIssueFormat = "{Issue Disambiguation}";
+            _series.Metadata.Value.Year = 2003;
+            _namingConfig.StandardIssueFormat = "{Series Year}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                .Should().Be("The Best Issue");
+                .Should().Be("2003");
         }
 
         [Test]
@@ -220,18 +214,18 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         }
 
         [Test]
-        public void should_replace_ALBUM_TITLE_with_all_caps()
+        public void should_replace_ISSUE_TITLE_with_all_caps()
         {
-            _namingConfig.StandardIssueFormat = "{BOOK TITLE}";
+            _namingConfig.StandardIssueFormat = "{ISSUE TITLE}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be("HYBRID THEORY");
         }
 
         [Test]
-        public void should_replace_ALBUM_TITLE_with_random_casing_should_keep_original_casing()
+        public void should_replace_ISSUE_TITLE_with_random_casing_should_keep_original_casing()
         {
-            _namingConfig.StandardIssueFormat = "{bOoK-tItLE}";
+            _namingConfig.StandardIssueFormat = "{iSsUe-tItLE}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
                    .Should().Be(_issue.Title.Replace(' ', '-'));
@@ -355,52 +349,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Quality Title}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("MP3");
-        }
-
-        [Test]
-        public void should_replace_media_info_audio_codec()
-        {
-            _namingConfig.StandardIssueFormat = "{MediaInfo AudioCodec}";
-
-            Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("FLAC");
-        }
-
-        [Test]
-        public void should_replace_media_info_audio_bitrate()
-        {
-            _namingConfig.StandardIssueFormat = "{MediaInfo AudioBitRate}";
-
-            Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("320 kbps");
-        }
-
-        [Test]
-        public void should_replace_media_info_audio_channels()
-        {
-            _namingConfig.StandardIssueFormat = "{MediaInfo AudioChannels}";
-
-            Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("2.0");
-        }
-
-        [Test]
-        public void should_replace_media_info_bits_per_sample()
-        {
-            _namingConfig.StandardIssueFormat = "{MediaInfo AudioBitsPerSample}";
-
-            Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("16bit");
-        }
-
-        [Test]
-        public void should_replace_media_info_sample_rate()
-        {
-            _namingConfig.StandardIssueFormat = "{MediaInfo AudioSampleRate}";
-
-            Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("44.1kHz");
+                   .Should().Be("CBR");
         }
 
         [Test]
@@ -409,7 +358,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Series Name} - {Issue Title} - [{Quality Title}]";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("Linkin Park - Hybrid Theory - [MP3]");
+                   .Should().Be("Linkin Park - Hybrid Theory - [CBR]");
         }
 
         [Test]
@@ -489,7 +438,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Series.Name}{_Issue.Title_}{Quality.Title}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("Linkin.Park_Hybrid.Theory_MP3");
+                   .Should().Be("Linkin.Park_Hybrid.Theory_CBR");
         }
 
         [Test]
@@ -543,7 +492,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Quality Title} {Quality Proper}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("MP3");
+                   .Should().Be("CBR");
         }
 
         [Test]
@@ -552,7 +501,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Series Name} - {Issue Title} [{Quality Title}] {[Quality Proper]}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("Linkin Park - Hybrid Theory [MP3]");
+                   .Should().Be("Linkin Park - Hybrid Theory [CBR]");
         }
 
         [Test]
@@ -561,7 +510,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Series Name} - {Issue Title} [{Quality Full}]";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("Linkin Park - Hybrid Theory [MP3]");
+                   .Should().Be("Linkin Park - Hybrid Theory [CBR]");
         }
 
         [TestCase(' ')]
@@ -573,7 +522,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}", separator);
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("MP3");
+                   .Should().Be("CBR");
         }
 
         [TestCase(' ')]
@@ -585,7 +534,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}{0}{{Issue{0}Title}}", separator);
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be(string.Format("MP3{0}Hybrid{0}Theory", separator));
+                   .Should().Be(string.Format("CBR{0}Hybrid{0}Theory", separator));
         }
 
         [Test]

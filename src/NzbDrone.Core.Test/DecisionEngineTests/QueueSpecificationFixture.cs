@@ -147,14 +147,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_when_quality_in_queue_is_lower()
         {
-            _series.QualityProfile.Value.Cutoff = Quality.CBR.Id;
+            _series.QualityProfile.Value.Cutoff = Quality.CBZ.Id;
 
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
                                                       .With(r => r.Series = _series)
                                                       .With(r => r.Issues = new List<Issue> { _issue })
                                                       .With(r => r.ParsedIssueInfo = new ParsedIssueInfo
                                                       {
-                                                          Quality = new QualityModel(Quality.CBZ)
+                                                          Quality = new QualityModel(Quality.PDF)
                                                       })
                                                       .With(r => r.Release = _releaseInfo)
                                                       .With(r => r.CustomFormats = new List<CustomFormat>())

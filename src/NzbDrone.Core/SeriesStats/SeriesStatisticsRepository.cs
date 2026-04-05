@@ -59,7 +59,6 @@ namespace NzbDrone.Core.SeriesStats
                      CASE WHEN MIN(""ComicFiles"".""Id"") IS NULL THEN 0 ELSE COUNT(""ComicFiles"".""Id"") END AS ""ComicFileCount""")
             .Join<Issue, Series>((issue, series) => issue.SeriesMetadataId == series.SeriesMetadataId)
             .LeftJoin<Issue, ComicFile>((b, f) => b.Id == f.IssueId)
-            .Where<Issue>(x => x.Monitored == true)
             .GroupBy<Series>(x => x.Id)
             .GroupBy<Issue>(x => x.Id)
             .AddParameters(new Dictionary<string, object> { { "currentDate", DateTime.UtcNow } });
