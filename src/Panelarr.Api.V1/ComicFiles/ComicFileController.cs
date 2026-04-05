@@ -164,16 +164,16 @@ namespace Panelarr.Api.V1.ComicFiles
 
             if (comicFile.IssueId > 0 && comicFile.Series != null && comicFile.Series.Value != null)
             {
-                _mediaFileDeletionService.DeleteTrackFile(comicFile.Series.Value, comicFile);
+                _mediaFileDeletionService.DeleteComicFile(comicFile.Series.Value, comicFile);
             }
             else
             {
-                _mediaFileDeletionService.DeleteTrackFile(comicFile, "Unmapped_Files");
+                _mediaFileDeletionService.DeleteComicFile(comicFile, "Unmapped_Files");
             }
         }
 
         [HttpDelete("bulk")]
-        public object DeleteTrackFiles([FromBody] ComicFileListResource resource)
+        public object DeleteComicFiles([FromBody] ComicFileListResource resource)
         {
             var comicFiles = _mediaFileService.Get(resource.ComicFileIds);
 
@@ -181,11 +181,11 @@ namespace Panelarr.Api.V1.ComicFiles
             {
                 if (comicFile.IssueId > 0 && comicFile.Series != null && comicFile.Series.Value != null)
                 {
-                    _mediaFileDeletionService.DeleteTrackFile(comicFile.Series.Value, comicFile);
+                    _mediaFileDeletionService.DeleteComicFile(comicFile.Series.Value, comicFile);
                 }
                 else
                 {
-                    _mediaFileDeletionService.DeleteTrackFile(comicFile, "Unmapped_Files");
+                    _mediaFileDeletionService.DeleteComicFile(comicFile, "Unmapped_Files");
                 }
             }
 

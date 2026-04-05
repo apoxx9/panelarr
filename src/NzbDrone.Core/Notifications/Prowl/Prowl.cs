@@ -19,12 +19,12 @@ namespace NzbDrone.Core.Notifications.Prowl
 
         public override void OnGrab(GrabMessage message)
         {
-            _prowlProxy.SendNotification(BOOK_GRABBED_TITLE, message.Message, Settings);
+            _prowlProxy.SendNotification(ISSUE_GRABBED_TITLE, message.Message, Settings);
         }
 
         public override void OnReleaseImport(IssueDownloadMessage message)
         {
-            _prowlProxy.SendNotification(BOOK_DOWNLOADED_TITLE, message.Message, Settings);
+            _prowlProxy.SendNotification(ISSUE_DOWNLOADED_TITLE, message.Message, Settings);
         }
 
         public override void OnSeriesAdded(Series series)
@@ -39,12 +39,12 @@ namespace NzbDrone.Core.Notifications.Prowl
 
         public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
-            _prowlProxy.SendNotification(BOOK_DELETED_TITLE, deleteMessage.Message, Settings);
+            _prowlProxy.SendNotification(ISSUE_DELETED_TITLE, deleteMessage.Message, Settings);
         }
 
         public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
-            _prowlProxy.SendNotification(BOOK_FILE_DELETED_TITLE, deleteMessage.Message, Settings);
+            _prowlProxy.SendNotification(ISSUE_FILE_DELETED_TITLE, deleteMessage.Message, Settings);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)

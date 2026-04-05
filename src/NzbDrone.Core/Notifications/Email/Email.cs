@@ -32,7 +32,7 @@ namespace NzbDrone.Core.Notifications.Email
         {
             var body = $"{grabMessage.Message} sent to queue.";
 
-            SendEmail(Settings, BOOK_GRABBED_TITLE_BRANDED, body);
+            SendEmail(Settings, ISSUE_GRABBED_TITLE_BRANDED, body);
         }
 
         public override void OnReleaseImport(IssueDownloadMessage message)
@@ -41,7 +41,7 @@ namespace NzbDrone.Core.Notifications.Email
 
             var paths = Settings.AttachFiles ? message.ComicFiles.SelectList(a => a.Path) : null;
 
-            SendEmail(Settings, BOOK_DOWNLOADED_TITLE_BRANDED, body, false, paths);
+            SendEmail(Settings, ISSUE_DOWNLOADED_TITLE_BRANDED, body, false, paths);
         }
 
         public override void OnSeriesAdded(Series series)

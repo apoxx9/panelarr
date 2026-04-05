@@ -39,14 +39,14 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .Returns(_trackFiles);
         }
 
-        private void GivenNoTrackFiles()
+        private void GivenNoComicFiles()
         {
             Mocker.GetMock<IMediaFileService>()
                   .Setup(s => s.Get(It.IsAny<IEnumerable<int>>()))
                   .Returns(new List<ComicFile>());
         }
 
-        private void GivenTrackFiles()
+        private void GivenComicFiles()
         {
             Mocker.GetMock<IMediaFileService>()
                   .Setup(s => s.Get(It.IsAny<IEnumerable<int>>()))
@@ -62,7 +62,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_not_publish_event_if_no_files_to_rename()
         {
-            GivenNoTrackFiles();
+            GivenNoComicFiles();
 
             Subject.Execute(new RenameFilesCommand(_series.Id, new List<int> { 1 }));
 
@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_not_publish_event_if_no_files_are_renamed()
         {
-            GivenTrackFiles();
+            GivenComicFiles();
 
             Mocker.GetMock<IMoveComicFiles>()
                   .Setup(s => s.MoveComicFile(It.IsAny<ComicFile>(), It.IsAny<Series>()))
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_publish_event_if_files_are_renamed()
         {
-            GivenTrackFiles();
+            GivenComicFiles();
             GivenMovedFiles();
 
             Subject.Execute(new RenameFilesCommand(_series.Id, new List<int> { 1 }));
@@ -100,7 +100,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_update_moved_files()
         {
-            GivenTrackFiles();
+            GivenComicFiles();
             GivenMovedFiles();
 
             Subject.Execute(new RenameFilesCommand(_series.Id, new List<int> { 1 }));
@@ -112,7 +112,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_get_trackfiles_by_ids_only()
         {
-            GivenTrackFiles();
+            GivenComicFiles();
             GivenMovedFiles();
 
             var files = new List<int> { 1 };

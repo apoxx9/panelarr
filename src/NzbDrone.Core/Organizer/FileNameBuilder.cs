@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Organizer
         private readonly IQualityDefinitionService _qualityDefinitionService;
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly IPublisherService _publisherService;
-        private readonly ICached<IssueFormat[]> _trackFormatCache;
+        private readonly ICached<IssueFormat[]> _issueFormatCache;
         private readonly Logger _logger;
 
         private static readonly Regex TitleRegex = new Regex(@"\{(?<prefix>[- ._\[(]*)(?<token>(?:[a-z0-9]+)(?:(?<separator>[- ._]+)(?:[a-z0-9]+))?)(?::(?<customFormat>[a-z0-9]+))?(?<suffix>[- ._)\]]*)\}",
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Organizer
             _qualityDefinitionService = qualityDefinitionService;
             _formatCalculator = formatCalculator;
             _publisherService = publisherService;
-            _trackFormatCache = cacheManager.GetCache<IssueFormat[]>(GetType(), "bookFormat");
+            _issueFormatCache = cacheManager.GetCache<IssueFormat[]>(GetType(), "bookFormat");
             _logger = logger;
         }
 
@@ -146,16 +146,16 @@ namespace NzbDrone.Core.Organizer
 
         public BasicNamingConfig GetBasicNamingConfig(NamingConfig nameSpec)
         {
-            var trackFormat = GetTrackFormat(nameSpec.StandardIssueFormat).LastOrDefault();
+            var issueFormat = GetIssueFormat(nameSpec.StandardIssueFormat).LastOrDefault();
 
-            if (trackFormat == null)
+            if (issueFormat == null)
             {
                 return new BasicNamingConfig();
             }
 
             var basicNamingConfig = new BasicNamingConfig
             {
-                Separator = trackFormat.Separator
+                Separator = issueFormat.Separator
             };
 
             var titleTokens = TitleRegex.Matches(nameSpec.StandardIssueFormat);
@@ -448,9 +448,9 @@ namespace NzbDrone.Core.Organizer
             return $"{prefix}{tokenText1}{separator}{tokenText2}{suffix}";
         }
 
-        private IssueFormat[] GetTrackFormat(string pattern)
+        private IssueFormat[] GetIssueFormat(string pattern)
         {
-            return _trackFormatCache.Get(pattern, () => SeasonEpisodePatternRegex.Matches(pattern).OfType<Match>()
+            return _issueFormatCache.Get(pattern, () => SeasonEpisodePatternRegex.Matches(pattern).OfType<Match>()
                 .Select(match => new IssueFormat
                 {
                     IssueSeparator = match.Groups["episodeSeparator"].Value,

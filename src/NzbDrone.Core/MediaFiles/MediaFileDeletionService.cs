@@ -15,8 +15,8 @@ namespace NzbDrone.Core.MediaFiles
 {
     public interface IDeleteMediaFiles
     {
-        void DeleteTrackFile(Series series, ComicFile comicFile);
-        void DeleteTrackFile(ComicFile comicFile, string subfolder = "");
+        void DeleteComicFile(Series series, ComicFile comicFile);
+        void DeleteComicFile(ComicFile comicFile, string subfolder = "");
     }
 
     public class MediaFileDeletionService : IDeleteMediaFiles,
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.MediaFiles
             _logger = logger;
         }
 
-        public void DeleteTrackFile(Series series, ComicFile comicFile)
+        public void DeleteComicFile(Series series, ComicFile comicFile)
         {
             var fullPath = comicFile.Path;
             var rootFolder = _diskProvider.GetParentFolder(series.Path);
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.MediaFiles
             if (_diskProvider.FolderExists(series.Path))
             {
                 var subfolder = _diskProvider.GetParentFolder(series.Path).GetRelativePath(_diskProvider.GetParentFolder(fullPath));
-                DeleteTrackFile(comicFile, subfolder);
+                DeleteComicFile(comicFile, subfolder);
             }
             else
             {
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        public void DeleteTrackFile(ComicFile comicFile, string subfolder = "")
+        public void DeleteComicFile(ComicFile comicFile, string subfolder = "")
         {
             var fullPath = comicFile.Path;
 

@@ -20,12 +20,12 @@ namespace NzbDrone.Core.Notifications.Apprise
 
         public override void OnGrab(GrabMessage grabMessage)
         {
-            _proxy.SendNotification(BOOK_GRABBED_TITLE, grabMessage.Message, Settings);
+            _proxy.SendNotification(ISSUE_GRABBED_TITLE, grabMessage.Message, Settings);
         }
 
         public override void OnReleaseImport(IssueDownloadMessage message)
         {
-            _proxy.SendNotification(BOOK_DOWNLOADED_TITLE, message.Message, Settings);
+            _proxy.SendNotification(ISSUE_DOWNLOADED_TITLE, message.Message, Settings);
         }
 
         public override void OnSeriesAdded(Series series)
@@ -40,12 +40,12 @@ namespace NzbDrone.Core.Notifications.Apprise
 
         public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(BOOK_DELETED_TITLE, deleteMessage.Message, Settings);
+            _proxy.SendNotification(ISSUE_DELETED_TITLE, deleteMessage.Message, Settings);
         }
 
         public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(BOOK_FILE_DELETED_TITLE, deleteMessage.Message, Settings);
+            _proxy.SendNotification(ISSUE_FILE_DELETED_TITLE, deleteMessage.Message, Settings);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck healthCheck)

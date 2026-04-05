@@ -222,7 +222,6 @@ namespace NzbDrone.Core.Profiles.Metadata
             var emptyProfile = profiles.FirstOrDefault(x => x.Name == NONE_PROFILE_NAME);
 
             // make sure empty profile exists and is actually empty
-            // TODO: reinstate
             if (emptyProfile != null &&
                 emptyProfile.MinPopularity == NONE_PROFILE_MIN_POPULARITY)
             {
@@ -256,6 +255,7 @@ namespace NzbDrone.Core.Profiles.Metadata
                 while (names.Contains(emptyProfile.Name))
                 {
                     i++;
+                    emptyProfile.Name = $"{NONE_PROFILE_NAME}.{i}";
                 }
 
                 _profileRepository.Update(emptyProfile);

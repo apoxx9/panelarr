@@ -3,15 +3,15 @@ using NzbDrone.Core.Issues;
 
 namespace NzbDrone.Core.MediaFiles.Events
 {
-    public class TrackFolderCreatedEvent : IEvent
+    public class IssueFolderCreatedEvent : IEvent
     {
         public Series Series { get; private set; }
         public ComicFile ComicFile { get; private set; }
         public string SeriesFolder { get; set; }
         public string IssueFolder { get; set; }
-        public string TrackFolder { get; set; }
+        public string ComicFileFolder { get; set; }
 
-        public TrackFolderCreatedEvent(Series series, ComicFile comicFile)
+        public IssueFolderCreatedEvent(Series series, ComicFile comicFile)
         {
             Series = series;
             ComicFile = comicFile;

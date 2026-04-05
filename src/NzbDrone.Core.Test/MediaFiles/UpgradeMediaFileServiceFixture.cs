@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .Returns(new RootFolder());
         }
 
-        private void GivenSingleTrackWithSingleTrackFile()
+        private void GivenSingleIssueWithSingleComicFile()
         {
             _localTrack.Issue = Builder<Issue>.CreateNew()
                 .With(e => e.ComicFiles = new LazyLoaded<List<ComicFile>>(
@@ -69,7 +69,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_delete_single_track_file_once()
         {
-            GivenSingleTrackWithSingleTrackFile();
+            GivenSingleIssueWithSingleComicFile();
 
             Subject.UpgradeComicFile(_trackFile, _localTrack);
 
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_delete_track_file_from_database()
         {
-            GivenSingleTrackWithSingleTrackFile();
+            GivenSingleIssueWithSingleComicFile();
 
             Subject.UpgradeComicFile(_trackFile, _localTrack);
 
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_delete_existing_file_fromdb_if_file_doesnt_exist()
         {
-            GivenSingleTrackWithSingleTrackFile();
+            GivenSingleIssueWithSingleComicFile();
 
             Mocker.GetMock<IDiskProvider>()
                 .Setup(c => c.FileExists(It.IsAny<string>()))
@@ -103,7 +103,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_not_try_to_recyclebin_existing_file_if_file_doesnt_exist()
         {
-            GivenSingleTrackWithSingleTrackFile();
+            GivenSingleIssueWithSingleComicFile();
 
             Mocker.GetMock<IDiskProvider>()
                 .Setup(c => c.FileExists(It.IsAny<string>()))
@@ -117,7 +117,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_return_old_track_file_in_oldFiles()
         {
-            GivenSingleTrackWithSingleTrackFile();
+            GivenSingleIssueWithSingleComicFile();
 
             Subject.UpgradeComicFile(_trackFile, _localTrack).OldFiles.Count.Should().Be(1);
         }

@@ -19,7 +19,7 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 {
     [TestFixture]
-    public class DeletedTrackFileSpecificationFixture : CoreTest<DeletedComicFileSpecification>
+    public class DeletedComicFileSpecificationFixture : CoreTest<DeletedComicFileSpecification>
     {
         private RemoteIssue _parseResultMulti;
         private RemoteIssue _parseResultSingle;

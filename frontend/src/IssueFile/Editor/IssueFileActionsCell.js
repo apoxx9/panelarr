@@ -62,7 +62,7 @@ class IssueFileActionsCell extends Component {
     } = this.state;
 
     return (
-      <TableRowCell className={styles.TrackActionsCell}>
+      <TableRowCell className={styles.IssueFileActionsCell}>
         {
           path &&
             <IconButton

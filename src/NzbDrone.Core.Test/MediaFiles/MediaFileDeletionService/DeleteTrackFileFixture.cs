@@ -13,7 +13,7 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
 {
     [TestFixture]
-    public class DeleteTrackFileFixture : CoreTest<Core.MediaFiles.MediaFileDeletionService>
+    public class DeleteComicFileFixture : CoreTest<Core.MediaFiles.MediaFileDeletionService>
     {
         private static readonly string RootFolder = @"C:\Test\Music";
         private Series _series;
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
         [Test]
         public void should_throw_if_root_folder_does_not_exist()
         {
-            Assert.Throws<NzbDroneClientException>(() => Subject.DeleteTrackFile(_series, _trackFile));
+            Assert.Throws<NzbDroneClientException>(() => Subject.DeleteComicFile(_series, _trackFile));
             ExceptionVerification.ExpectedWarns(1);
         }
 
@@ -78,7 +78,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
         public void should_throw_if_root_folder_is_empty()
         {
             GivenRootFolderExists();
-            Assert.Throws<NzbDroneClientException>(() => Subject.DeleteTrackFile(_series, _trackFile));
+            Assert.Throws<NzbDroneClientException>(() => Subject.DeleteComicFile(_series, _trackFile));
             ExceptionVerification.ExpectedWarns(1);
         }
 
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
             GivenRootFolderExists();
             GivenRootFolderHasFolders();
 
-            Subject.DeleteTrackFile(_series, _trackFile);
+            Subject.DeleteComicFile(_series, _trackFile);
 
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_trackFile, DeleteMediaFileReason.Manual), Times.Once());
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_trackFile.Path, It.IsAny<string>()), Times.Never());
@@ -101,7 +101,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
             GivenRootFolderHasFolders();
             GivenSeriesFolderExists();
 
-            Subject.DeleteTrackFile(_series, _trackFile);
+            Subject.DeleteComicFile(_series, _trackFile);
 
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_trackFile, DeleteMediaFileReason.Manual), Times.Once());
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_trackFile.Path, It.IsAny<string>()), Times.Never());
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
                   .Setup(s => s.FileExists(_trackFile.Path))
                   .Returns(true);
 
-            Subject.DeleteTrackFile(_series, _trackFile);
+            Subject.DeleteComicFile(_series, _trackFile);
 
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_trackFile.Path, "Series Name"), Times.Once());
             Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_trackFile, DeleteMediaFileReason.Manual), Times.Once());
@@ -141,7 +141,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
                   .Setup(s => s.DeleteFile(_trackFile.Path, "Series Name"))
                   .Throws(new IOException());
 
-            Assert.Throws<NzbDroneClientException>(() => Subject.DeleteTrackFile(_series, _trackFile));
+            Assert.Throws<NzbDroneClientException>(() => Subject.DeleteComicFile(_series, _trackFile));
 
             ExceptionVerification.ExpectedErrors(1);
             Mocker.GetMock<IRecycleBinProvider>().Verify(v => v.DeleteFile(_trackFile.Path, "Series Name"), Times.Once());

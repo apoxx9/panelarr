@@ -29,7 +29,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                                      .Build();
         }
 
-        private void GivenTrackFiles(IEnumerable<ComicFile> trackFiles)
+        private void GivenComicFiles(IEnumerable<ComicFile> trackFiles)
         {
             Mocker.GetMock<IMediaFileService>()
                   .Setup(c => c.GetFilesWithBasePath(It.IsAny<string>()))
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .With(x => x.Path = Path.Combine(@"c:\test".AsOsAgnostic(), Path.GetRandomFileName()))
                 .Build();
 
-            GivenTrackFiles(trackFiles);
+            GivenComicFiles(trackFiles);
 
             Subject.Clean(_series.Path, FilesOnDisk(trackFiles));
 
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .With(c => c.Path = Path.Combine(_DELETED_PATH, Path.GetRandomFileName()))
                 .Build();
 
-            GivenTrackFiles(trackFiles);
+            GivenComicFiles(trackFiles);
 
             Subject.Clean(_series.Path, FilesOnDisk(trackFiles.Where(e => !e.Path.StartsWith(_DELETED_PATH))));
 
@@ -87,7 +87,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .With(c => c.Path = Path.Combine(@"c:\test".AsOsAgnostic(), Path.GetRandomFileName()))
                 .Build();
 
-            GivenTrackFiles(trackFiles);
+            GivenComicFiles(trackFiles);
 
             Subject.Clean(_series.Path, new List<string>());
         }
@@ -100,7 +100,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                                 .With(c => c.Path = Path.Combine(@"c:\test".AsOsAgnostic(), Path.GetRandomFileName()))
                                 .Build();
 
-            GivenTrackFiles(trackFiles);
+            GivenComicFiles(trackFiles);
 
             Subject.Clean(_series.Path, FilesOnDisk(trackFiles));
         }

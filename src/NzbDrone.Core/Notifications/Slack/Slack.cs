@@ -156,12 +156,12 @@ namespace NzbDrone.Core.Notifications.Slack
                               {
                                   new Attachment
                                   {
-                                      Title = BOOK_RETAGGED_TITLE,
+                                      Title = ISSUE_RETAGGED_TITLE,
                                       Text = message.Message
                                   }
                               };
 
-            var payload = CreatePayload(BOOK_RETAGGED_TITLE, attachments);
+            var payload = CreatePayload(ISSUE_RETAGGED_TITLE, attachments);
 
             _proxy.SendPayload(payload, Settings);
         }

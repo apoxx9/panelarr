@@ -85,7 +85,7 @@ namespace NzbDrone.Core.Notifications.Subsonic
 
         public override void OnIssueRetag(IssueRetagMessage message)
         {
-            Notify(Settings, BOOK_RETAGGED_TITLE_BRANDED, message.Message);
+            Notify(Settings, ISSUE_RETAGGED_TITLE_BRANDED, message.Message);
         }
 
         public override string Name => "Subsonic";

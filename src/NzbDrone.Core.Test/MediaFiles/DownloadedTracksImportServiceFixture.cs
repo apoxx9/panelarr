@@ -21,7 +21,7 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.MediaFiles
 {
     [TestFixture]
-    public class DownloadedTracksImportServiceFixture : FileSystemTest<DownloadedIssuesImportService>
+    public class DownloadedIssuesImportServiceFixture : FileSystemTest<DownloadedIssuesImportService>
     {
         private string _droneFactory = "c:\\drop\\".AsOsAgnostic();
         private string[] _subFolders = new[] { "c:\\drop\\foldername".AsOsAgnostic() };

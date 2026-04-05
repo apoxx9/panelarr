@@ -4,14 +4,14 @@ namespace NzbDrone.Core.Organizer
 {
     public interface IFilenameValidationService
     {
-        ValidationFailure ValidateTrackFilename(SampleResult sampleResult);
+        ValidationFailure ValidateComicFilename(SampleResult sampleResult);
     }
 
     public class FileNameValidationService : IFilenameValidationService
     {
         private const string ERROR_MESSAGE = "Produces invalid file names";
 
-        public ValidationFailure ValidateTrackFilename(SampleResult sampleResult)
+        public ValidationFailure ValidateComicFilename(SampleResult sampleResult)
         {
             var validationFailure = new ValidationFailure("StandardIssueFormat", ERROR_MESSAGE);
 

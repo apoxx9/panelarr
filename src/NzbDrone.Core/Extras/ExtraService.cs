@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Extras
 
     public class ExtraService : IExtraService,
                                 IHandle<MediaCoversUpdatedEvent>,
-                                IHandle<TrackFolderCreatedEvent>,
+                                IHandle<IssueFolderCreatedEvent>,
                                 IHandle<SeriesRenamedEvent>
     {
         private readonly IMediaFileService _mediaFileService;
@@ -139,7 +139,7 @@ namespace NzbDrone.Core.Extras
             }
         }
 
-        public void Handle(TrackFolderCreatedEvent message)
+        public void Handle(IssueFolderCreatedEvent message)
         {
             var series = message.Series;
             var issue = _issueService.GetIssue(message.ComicFile.IssueId);

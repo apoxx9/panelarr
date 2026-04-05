@@ -10,28 +10,28 @@ namespace NzbDrone.Core.Notifications
     public abstract class NotificationBase<TSettings> : INotification
         where TSettings : IProviderConfig, new()
     {
-        protected const string BOOK_GRABBED_TITLE = "Issue Grabbed";
-        protected const string BOOK_DOWNLOADED_TITLE = "Issue Downloaded";
+        protected const string ISSUE_GRABBED_TITLE = "Issue Grabbed";
+        protected const string ISSUE_DOWNLOADED_TITLE = "Issue Downloaded";
         protected const string AUTHOR_ADDED_TITLE = "Series Added";
         protected const string AUTHOR_DELETED_TITLE = "Series Deleted";
-        protected const string BOOK_DELETED_TITLE = "Issue Deleted";
-        protected const string BOOK_FILE_DELETED_TITLE = "Issue File Deleted";
+        protected const string ISSUE_DELETED_TITLE = "Issue Deleted";
+        protected const string ISSUE_FILE_DELETED_TITLE = "Issue File Deleted";
         protected const string HEALTH_ISSUE_TITLE = "Health Check Failure";
         protected const string DOWNLOAD_FAILURE_TITLE = "Download Failed";
         protected const string IMPORT_FAILURE_TITLE = "Import Failed";
-        protected const string BOOK_RETAGGED_TITLE = "Issue File Tags Updated";
+        protected const string ISSUE_RETAGGED_TITLE = "Issue File Tags Updated";
         protected const string APPLICATION_UPDATE_TITLE = "Application Updated";
 
-        protected const string BOOK_GRABBED_TITLE_BRANDED = "Panelarr - " + BOOK_GRABBED_TITLE;
-        protected const string BOOK_DOWNLOADED_TITLE_BRANDED = "Panelarr - " + BOOK_DOWNLOADED_TITLE;
+        protected const string ISSUE_GRABBED_TITLE_BRANDED = "Panelarr - " + ISSUE_GRABBED_TITLE;
+        protected const string ISSUE_DOWNLOADED_TITLE_BRANDED = "Panelarr - " + ISSUE_DOWNLOADED_TITLE;
         protected const string AUTHOR_ADDED_TITLE_BRANDED = "Panelarr - " + AUTHOR_ADDED_TITLE;
         protected const string AUTHOR_DELETED_TITlE_BRANDED = "Panelarr - " + AUTHOR_DELETED_TITLE;
-        protected const string BOOK_DELETED_TITLE_BRANDED = "Panelarr - " + BOOK_DELETED_TITLE;
-        protected const string BOOK_FILE_DELETED_TITLE_BRANDED = "Panelarr - " + BOOK_FILE_DELETED_TITLE;
+        protected const string ISSUE_DELETED_TITLE_BRANDED = "Panelarr - " + ISSUE_DELETED_TITLE;
+        protected const string ISSUE_FILE_DELETED_TITLE_BRANDED = "Panelarr - " + ISSUE_FILE_DELETED_TITLE;
         protected const string HEALTH_ISSUE_TITLE_BRANDED = "Panelarr - " + HEALTH_ISSUE_TITLE;
         protected const string DOWNLOAD_FAILURE_TITLE_BRANDED = "Panelarr - " + DOWNLOAD_FAILURE_TITLE;
         protected const string IMPORT_FAILURE_TITLE_BRANDED = "Panelarr - " + IMPORT_FAILURE_TITLE;
-        protected const string BOOK_RETAGGED_TITLE_BRANDED = "Panelarr - " + BOOK_RETAGGED_TITLE;
+        protected const string ISSUE_RETAGGED_TITLE_BRANDED = "Panelarr - " + ISSUE_RETAGGED_TITLE;
         protected const string APPLICATION_UPDATE_TITLE_BRANDED = "Panelarr - " + APPLICATION_UPDATE_TITLE;
 
         public abstract string Name { get; }

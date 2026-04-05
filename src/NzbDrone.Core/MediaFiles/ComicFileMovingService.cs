@@ -74,7 +74,7 @@ namespace NzbDrone.Core.MediaFiles
             var newFileName = _buildFileNames.BuildComicFileName(localIssue.Series, localIssue.Issue, comicFile);
             var filePath = _buildFileNames.BuildComicFilePath(localIssue.Series, localIssue.Issue, newFileName, Path.GetExtension(localIssue.Path));
 
-            EnsureTrackFolder(comicFile, localIssue, filePath);
+            EnsureIssueFolder(comicFile, localIssue, filePath);
 
             _logger.Debug("Moving issue file: {0} to {1}", comicFile.Path, filePath);
 
@@ -86,7 +86,7 @@ namespace NzbDrone.Core.MediaFiles
             var newFileName = _buildFileNames.BuildComicFileName(localIssue.Series, localIssue.Issue, comicFile);
             var filePath = _buildFileNames.BuildComicFilePath(localIssue.Series, localIssue.Issue, newFileName, Path.GetExtension(localIssue.Path));
 
-            EnsureTrackFolder(comicFile, localIssue, filePath);
+            EnsureIssueFolder(comicFile, localIssue, filePath);
 
             if (_configService.CopyUsingHardlinks)
             {
@@ -137,7 +137,7 @@ namespace NzbDrone.Core.MediaFiles
             return comicFile;
         }
 
-        private void EnsureTrackFolder(ComicFile comicFile, LocalIssue localIssue, string filePath)
+        private void EnsureIssueFolder(ComicFile comicFile, LocalIssue localIssue, string filePath)
         {
             EnsureIssueFolder(comicFile, localIssue.Series, localIssue.Issue, filePath);
         }
@@ -155,7 +155,7 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             var changed = false;
-            var newEvent = new TrackFolderCreatedEvent(series, comicFile);
+            var newEvent = new IssueFolderCreatedEvent(series, comicFile);
 
             _rootFolderWatchingService.ReportFileSystemChangeBeginning(seriesFolder, bookFolder, trackFolder);
 
@@ -176,7 +176,7 @@ namespace NzbDrone.Core.MediaFiles
             if (bookFolder != trackFolder && !_diskProvider.FolderExists(trackFolder))
             {
                 CreateFolder(trackFolder);
-                newEvent.TrackFolder = trackFolder;
+                newEvent.ComicFileFolder = trackFolder;
                 changed = true;
             }
 

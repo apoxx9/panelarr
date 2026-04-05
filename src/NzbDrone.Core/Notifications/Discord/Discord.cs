@@ -164,7 +164,7 @@ namespace NzbDrone.Core.Notifications.Discord
             {
                 new ()
                 {
-                    Title = BOOK_RETAGGED_TITLE,
+                    Title = ISSUE_RETAGGED_TITLE,
                     Text = message.Message
                 }
             };

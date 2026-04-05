@@ -75,16 +75,16 @@ namespace Panelarr.Api.V1.Config
             var nameSpec = config.ToModel();
             var sampleResource = new NamingExampleResource();
 
-            var singleTrackSampleResult = _filenameSampleService.GetStandardTrackSample(nameSpec);
-            var multiDiscTrackSampleResult = _filenameSampleService.GetMultiDiscTrackSample(nameSpec);
+            var singleIssueSampleResult = _filenameSampleService.GetStandardIssueSample(nameSpec);
+            var multiDiscIssueSampleResult = _filenameSampleService.GetMultiDiscIssueSample(nameSpec);
 
-            sampleResource.SingleIssueExample = _filenameValidationService.ValidateTrackFilename(singleTrackSampleResult) != null
+            sampleResource.SingleIssueExample = _filenameValidationService.ValidateComicFilename(singleIssueSampleResult) != null
                     ? null
-                    : singleTrackSampleResult.FileName;
+                    : singleIssueSampleResult.FileName;
 
-            sampleResource.MultiPartIssueExample = _filenameValidationService.ValidateTrackFilename(multiDiscTrackSampleResult) != null
+            sampleResource.MultiPartIssueExample = _filenameValidationService.ValidateComicFilename(multiDiscIssueSampleResult) != null
                 ? null
-                : multiDiscTrackSampleResult.FileName;
+                : multiDiscIssueSampleResult.FileName;
 
             sampleResource.SeriesFolderExample = nameSpec.SeriesFolderFormat.IsNullOrWhiteSpace()
                 ? null
@@ -95,13 +95,13 @@ namespace Panelarr.Api.V1.Config
 
         private void ValidateFormatResult(NamingConfig nameSpec)
         {
-            var singleTrackSampleResult = _filenameSampleService.GetStandardTrackSample(nameSpec);
+            var singleIssueSampleResult = _filenameSampleService.GetStandardIssueSample(nameSpec);
 
-            var singleTrackValidationResult = _filenameValidationService.ValidateTrackFilename(singleTrackSampleResult);
+            var singleIssueValidationResult = _filenameValidationService.ValidateComicFilename(singleIssueSampleResult);
 
             var validationFailures = new List<ValidationFailure>();
 
-            validationFailures.AddIfNotNull(singleTrackValidationResult);
+            validationFailures.AddIfNotNull(singleIssueValidationResult);
 
             if (validationFailures.Any())
             {

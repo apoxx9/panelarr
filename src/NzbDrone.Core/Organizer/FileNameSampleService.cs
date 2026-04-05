@@ -9,8 +9,8 @@ namespace NzbDrone.Core.Organizer
 {
     public interface IFilenameSampleService
     {
-        SampleResult GetStandardTrackSample(NamingConfig nameSpec);
-        SampleResult GetMultiDiscTrackSample(NamingConfig nameSpec);
+        SampleResult GetStandardIssueSample(NamingConfig nameSpec);
+        SampleResult GetMultiDiscIssueSample(NamingConfig nameSpec);
         string GetSeriesFolderSample(NamingConfig nameSpec);
     }
 
@@ -20,8 +20,8 @@ namespace NzbDrone.Core.Organizer
 
         private static Series _standardSeries;
         private static Issue _standardIssue;
-        private static ComicFile _singleTrackFile;
-        private static ComicFile _multiTrackFile;
+        private static ComicFile _singleComicFile;
+        private static ComicFile _multiComicFile;
         private static List<CustomFormat> _customFormats;
 
         public FileNameSampleService(IBuildFileNames buildFileNames)
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Organizer
                 AudioSampleRate = 44100
             };
 
-            _singleTrackFile = new ComicFile
+            _singleComicFile = new ComicFile
             {
                 Quality = new QualityModel(Quality.CBZ, new Revision(2)),
                 Path = "/comics/The.Series.Name.042.CBZ",
@@ -94,7 +94,7 @@ namespace NzbDrone.Core.Organizer
                 PartCount = 1
             };
 
-            _multiTrackFile = new ComicFile
+            _multiComicFile = new ComicFile
             {
                 Quality = new QualityModel(Quality.CBZ, new Revision(2)),
                 Path = "/comics/The.Series.Name.042.CBZ",
@@ -107,27 +107,27 @@ namespace NzbDrone.Core.Organizer
             };
         }
 
-        public SampleResult GetStandardTrackSample(NamingConfig nameSpec)
+        public SampleResult GetStandardIssueSample(NamingConfig nameSpec)
         {
             var result = new SampleResult
             {
-                FileName = BuildTrackSample(_standardSeries, _standardIssue, _singleTrackFile, nameSpec),
+                FileName = BuildIssueSample(_standardSeries, _standardIssue, _singleComicFile, nameSpec),
                 Series = _standardSeries,
                 Issue = _standardIssue,
-                ComicFile = _singleTrackFile
+                ComicFile = _singleComicFile
             };
 
             return result;
         }
 
-        public SampleResult GetMultiDiscTrackSample(NamingConfig nameSpec)
+        public SampleResult GetMultiDiscIssueSample(NamingConfig nameSpec)
         {
             var result = new SampleResult
             {
-                FileName = BuildTrackSample(_standardSeries, _standardIssue, _multiTrackFile, nameSpec),
+                FileName = BuildIssueSample(_standardSeries, _standardIssue, _multiComicFile, nameSpec),
                 Series = _standardSeries,
                 Issue = _standardIssue,
-                ComicFile = _singleTrackFile
+                ComicFile = _singleComicFile
             };
 
             return result;
@@ -138,7 +138,7 @@ namespace NzbDrone.Core.Organizer
             return _buildFileNames.GetSeriesFolder(_standardSeries, nameSpec);
         }
 
-        private string BuildTrackSample(Series series, Issue issue, ComicFile comicFile, NamingConfig nameSpec)
+        private string BuildIssueSample(Series series, Issue issue, ComicFile comicFile, NamingConfig nameSpec)
         {
             try
             {

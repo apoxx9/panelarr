@@ -25,24 +25,24 @@ public class Kavita : NotificationBase<KavitaSettings>
     {
         var allPaths = message.ComicFiles.Select(v => v.Path).Distinct();
         var path = Directory.GetParent(allPaths.First())?.FullName;
-        Notify(Settings, BOOK_DOWNLOADED_TITLE_BRANDED, path);
+        Notify(Settings, ISSUE_DOWNLOADED_TITLE_BRANDED, path);
     }
 
     public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
     {
         var allPaths = deleteMessage.Issue.ComicFiles.Value.Select(v => v.Path).Distinct();
         var path = Directory.GetParent(allPaths.First())?.FullName;
-        Notify(Settings, BOOK_FILE_DELETED_TITLE_BRANDED, path);
+        Notify(Settings, ISSUE_FILE_DELETED_TITLE_BRANDED, path);
     }
 
     public override void OnComicFileDelete(ComicFileDeleteMessage message)
     {
-        Notify(Settings, BOOK_FILE_DELETED_TITLE_BRANDED, Directory.GetParent(message.ComicFile.Path)?.FullName);
+        Notify(Settings, ISSUE_FILE_DELETED_TITLE_BRANDED, Directory.GetParent(message.ComicFile.Path)?.FullName);
     }
 
     public override void OnIssueRetag(IssueRetagMessage message)
     {
-        Notify(Settings, BOOK_RETAGGED_TITLE_BRANDED, Directory.GetParent(message.ComicFile.Path)?.FullName);
+        Notify(Settings, ISSUE_RETAGGED_TITLE_BRANDED, Directory.GetParent(message.ComicFile.Path)?.FullName);
     }
 
     public override string Name => "Kavita";
