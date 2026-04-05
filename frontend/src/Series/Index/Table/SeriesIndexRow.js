@@ -88,7 +88,6 @@ class SeriesIndexRow extends Component {
       year,
       titleSlug,
       qualityProfile,
-      metadataProfile,
       nextIssue,
       lastIssue,
       added,
@@ -234,17 +233,6 @@ class SeriesIndexRow extends Component {
                   className={styles[name]}
                 >
                   {qualityProfile?.name ?? ''}
-                </VirtualTableRowCell>
-              );
-            }
-
-            if (name === 'metadataProfileId') {
-              return (
-                <VirtualTableRowCell
-                  key={name}
-                  className={styles[name]}
-                >
-                  {metadataProfile?.name ?? ''}
                 </VirtualTableRowCell>
               );
             }
@@ -452,7 +440,6 @@ SeriesIndexRow.propTypes = {
   seriesNameLastFirst: PropTypes.string.isRequired,
   titleSlug: PropTypes.string.isRequired,
   qualityProfile: PropTypes.object.isRequired,
-  metadataProfile: PropTypes.object.isRequired,
   nextIssue: PropTypes.object,
   lastIssue: PropTypes.object,
   added: PropTypes.string,

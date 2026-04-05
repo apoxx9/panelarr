@@ -168,7 +168,6 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex FileExtensionRegex = new Regex(@"\.[a-z0-9]{2,4}$",
                                                                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        //TODO Rework this Regex for Music
         private static readonly RegexReplace SimpleTitleRegex = new RegexReplace(@"(?:(480|720|1080|2160|320)[ip]|[xh][\W_]?26[45]|DD\W?5\W1|848x480|1280x720|1920x1080|3840x2160|4096x2160|(8|10)b(it)?)\s*",
                                                                 string.Empty,
                                                                 RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -265,7 +264,6 @@ namespace NzbDrone.Core.Parser
 
                 var simpleTitle = SimpleTitleRegex.Replace(releaseTitle);
 
-                // TODO: Quick fix stripping [url] - prefixes.
                 simpleTitle = WebsitePrefixRegex.Replace(simpleTitle);
                 simpleTitle = WebsitePostfixRegex.Replace(simpleTitle);
 
@@ -505,7 +503,6 @@ namespace NzbDrone.Core.Parser
 
                 var simpleTitle = SimpleTitleRegex.Replace(releaseTitle);
 
-                // TODO: Quick fix stripping [url] - prefixes.
                 simpleTitle = WebsitePrefixRegex.Replace(simpleTitle);
                 simpleTitle = WebsitePostfixRegex.Replace(simpleTitle);
 

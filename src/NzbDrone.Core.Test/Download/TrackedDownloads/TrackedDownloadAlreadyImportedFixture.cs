@@ -14,17 +14,17 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
     [TestFixture]
     public class TrackedDownloadAlreadyImportedFixture : CoreTest<TrackedDownloadAlreadyImported>
     {
-        private List<Issue> _books;
+        private List<Issue> _issues;
         private TrackedDownload _trackedDownload;
         private List<EntityHistory> _historyItems;
 
         [SetUp]
         public void Setup()
         {
-            _books = new List<Issue>();
+            _issues = new List<Issue>();
 
             var remoteIssue = Builder<RemoteIssue>.CreateNew()
-                                                      .With(r => r.Issues = _books)
+                                                      .With(r => r.Issues = _issues)
                                                       .Build();
 
             var downloadItem = Builder<DownloadClientItem>.CreateNew().Build();
@@ -37,19 +37,19 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             _historyItems = new List<EntityHistory>();
         }
 
-        public void GivenEpisodes(int count)
+        public void GivenIssues(int count)
         {
-            _books.AddRange(Builder<Issue>.CreateListOfSize(count)
+            _issues.AddRange(Builder<Issue>.CreateListOfSize(count)
                                                .BuildList());
         }
 
-        public void GivenHistoryForEpisode(Issue episode, params EntityHistoryEventType[] eventTypes)
+        public void GivenHistoryForIssue(Issue issue, params EntityHistoryEventType[] eventTypes)
         {
             foreach (var eventType in eventTypes)
             {
                 _historyItems.Add(
                     Builder<EntityHistory>.CreateNew()
-                                            .With(h => h.IssueId = episode.Id)
+                                            .With(h => h.IssueId = issue.Id)
                                             .With(h => h.EventType = eventType)
                                             .Build());
             }
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         [Test]
         public void should_return_false_if_there_is_no_history()
         {
-            GivenEpisodes(1);
+            GivenIssues(1);
 
             Subject.IsImported(_trackedDownload, _historyItems)
                    .Should()
@@ -66,11 +66,11 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         }
 
         [Test]
-        public void should_return_false_if_single_episode_download_is_not_imported()
+        public void should_return_false_if_single_issue_download_is_not_imported()
         {
-            GivenEpisodes(1);
+            GivenIssues(1);
 
-            GivenHistoryForEpisode(_books[0], EntityHistoryEventType.Grabbed);
+            GivenHistoryForIssue(_issues[0], EntityHistoryEventType.Grabbed);
 
             Subject.IsImported(_trackedDownload, _historyItems)
                    .Should()
@@ -78,12 +78,12 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         }
 
         [Test]
-        public void should_return_false_if_no_episode_in_multi_episode_download_is_imported()
+        public void should_return_false_if_no_issue_in_multi_issue_download_is_imported()
         {
-            GivenEpisodes(2);
+            GivenIssues(2);
 
-            GivenHistoryForEpisode(_books[0], EntityHistoryEventType.Grabbed);
-            GivenHistoryForEpisode(_books[1], EntityHistoryEventType.Grabbed);
+            GivenHistoryForIssue(_issues[0], EntityHistoryEventType.Grabbed);
+            GivenHistoryForIssue(_issues[1], EntityHistoryEventType.Grabbed);
 
             Subject.IsImported(_trackedDownload, _historyItems)
                    .Should()
@@ -91,12 +91,12 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         }
 
         [Test]
-        public void should_should_return_false_if_only_one_episode_in_multi_episode_download_is_imported()
+        public void should_should_return_false_if_only_one_issue_in_multi_issue_download_is_imported()
         {
-            GivenEpisodes(2);
+            GivenIssues(2);
 
-            GivenHistoryForEpisode(_books[0], EntityHistoryEventType.ComicFileImported, EntityHistoryEventType.Grabbed);
-            GivenHistoryForEpisode(_books[1], EntityHistoryEventType.Grabbed);
+            GivenHistoryForIssue(_issues[0], EntityHistoryEventType.ComicFileImported, EntityHistoryEventType.Grabbed);
+            GivenHistoryForIssue(_issues[1], EntityHistoryEventType.Grabbed);
 
             Subject.IsImported(_trackedDownload, _historyItems)
                    .Should()
@@ -104,11 +104,11 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         }
 
         [Test]
-        public void should_return_true_if_single_episode_download_is_imported()
+        public void should_return_true_if_single_issue_download_is_imported()
         {
-            GivenEpisodes(1);
+            GivenIssues(1);
 
-            GivenHistoryForEpisode(_books[0], EntityHistoryEventType.ComicFileImported, EntityHistoryEventType.Grabbed);
+            GivenHistoryForIssue(_issues[0], EntityHistoryEventType.ComicFileImported, EntityHistoryEventType.Grabbed);
 
             Subject.IsImported(_trackedDownload, _historyItems)
                    .Should()
@@ -116,12 +116,12 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
         }
 
         [Test]
-        public void should_return_true_if_multi_episode_download_is_imported()
+        public void should_return_true_if_multi_issue_download_is_imported()
         {
-            GivenEpisodes(2);
+            GivenIssues(2);
 
-            GivenHistoryForEpisode(_books[0], EntityHistoryEventType.ComicFileImported, EntityHistoryEventType.Grabbed);
-            GivenHistoryForEpisode(_books[1], EntityHistoryEventType.ComicFileImported, EntityHistoryEventType.Grabbed);
+            GivenHistoryForIssue(_issues[0], EntityHistoryEventType.ComicFileImported, EntityHistoryEventType.Grabbed);
+            GivenHistoryForIssue(_issues[1], EntityHistoryEventType.ComicFileImported, EntityHistoryEventType.Grabbed);
 
             Subject.IsImported(_trackedDownload, _historyItems)
                    .Should()

@@ -159,7 +159,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         }
 
         [Test]
-        public void should_search_if_book_title_and_no_book_id()
+        public void should_search_if_issue_title_and_no_issue_id()
         {
             WithIssue();
             Subject.Execute(new ImportListSyncCommand());
@@ -169,7 +169,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         }
 
         [Test]
-        public void should_not_search_if_book_title_and_book_id()
+        public void should_not_search_if_issue_title_and_issue_id()
         {
             WithSeriesId();
             WithIssueId();
@@ -195,7 +195,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         }
 
         [Test]
-        public void should_not_add_if_existing_author()
+        public void should_not_add_if_existing_series()
         {
             WithSeriesId();
             WithExistingSeries();
@@ -207,7 +207,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         }
 
         [Test]
-        public void should_not_add_if_existing_book()
+        public void should_not_add_if_existing_issue()
         {
             WithIssueId();
             WithExistingIssue();
@@ -219,7 +219,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         }
 
         [Test]
-        public void should_add_if_existing_author_but_new_book()
+        public void should_add_if_existing_series_but_new_issue()
         {
             WithIssueId();
             WithSeriesId();
@@ -234,7 +234,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         [TestCase(ImportListMonitorType.None, false)]
         [TestCase(ImportListMonitorType.SpecificIssue, true)]
         [TestCase(ImportListMonitorType.EntireSeries, true)]
-        public void should_add_if_not_existing_author(ImportListMonitorType monitor, bool expectedSeriesMonitored)
+        public void should_add_if_not_existing_series(ImportListMonitorType monitor, bool expectedSeriesMonitored)
         {
             WithSeriesId();
             WithMonitorType(monitor);
@@ -248,7 +248,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         [TestCase(ImportListMonitorType.None, false)]
         [TestCase(ImportListMonitorType.SpecificIssue, true)]
         [TestCase(ImportListMonitorType.EntireSeries, true)]
-        public void should_add_if_not_existing_book(ImportListMonitorType monitor, bool expectedIssueMonitored)
+        public void should_add_if_not_existing_issue(ImportListMonitorType monitor, bool expectedIssueMonitored)
         {
             WithIssueId();
             WithMonitorType(monitor);
@@ -260,7 +260,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         }
 
         [Test]
-        public void should_not_add_author_if_excluded_author()
+        public void should_not_add_series_if_excluded_series()
         {
             WithSeriesId();
             WithExcludedSeries();
@@ -272,7 +272,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         }
 
         [Test]
-        public void should_not_add_book_if_excluded_book()
+        public void should_not_add_issue_if_excluded_issue()
         {
             WithIssueId();
             WithExcludedIssue();
@@ -284,7 +284,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         }
 
         [Test]
-        public void should_not_add_book_if_excluded_author()
+        public void should_not_add_issue_if_excluded_series()
         {
             WithIssueId();
             WithSeriesId();
@@ -299,7 +299,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         [TestCase(ImportListMonitorType.None, 0, false)]
         [TestCase(ImportListMonitorType.SpecificIssue, 2, true)]
         [TestCase(ImportListMonitorType.EntireSeries, 0, true)]
-        public void should_add_two_books(ImportListMonitorType monitor, int expectedIssuesMonitored, bool expectedSeriesMonitored)
+        public void should_add_two_issues(ImportListMonitorType monitor, int expectedIssuesMonitored, bool expectedSeriesMonitored)
         {
             WithIssue();
             WithIssueId();

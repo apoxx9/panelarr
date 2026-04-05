@@ -12,10 +12,9 @@ function createMapStateToProps() {
   return createSelector(
     (state, { isExistingSeries }) => isExistingSeries,
     (state) => state.search,
-    (state) => state.settings.metadataProfiles,
     createDimensionsSelector(),
     createSystemStatusSelector(),
-    (isExistingSeries, searchState, metadataProfiles, dimensions, systemStatus) => {
+    (isExistingSeries, searchState, dimensions, systemStatus) => {
       const {
         isAdding,
         addError,
@@ -31,7 +30,6 @@ function createMapStateToProps() {
       return {
         isAdding,
         addError,
-        showMetadataProfile: true,
         isSmallScreen: dimensions.isSmallScreen,
         validationErrors,
         validationWarnings,
@@ -62,7 +60,6 @@ class AddNewIssueModalContentConnector extends Component {
       rootFolderPath,
       monitor,
       qualityProfileId,
-      metadataProfileId,
       tags
     } = this.props;
 
@@ -72,7 +69,6 @@ class AddNewIssueModalContentConnector extends Component {
       monitor: monitor.value,
       monitorNewItems: 'all',
       qualityProfileId: qualityProfileId.value,
-      metadataProfileId: metadataProfileId.value,
       tags: tags.value,
       searchForNewIssue
     });
@@ -98,7 +94,6 @@ AddNewIssueModalContentConnector.propTypes = {
   rootFolderPath: PropTypes.object,
   monitor: PropTypes.object.isRequired,
   qualityProfileId: PropTypes.object,
-  metadataProfileId: PropTypes.object,
   tags: PropTypes.object.isRequired,
   onModalClose: PropTypes.func.isRequired,
   setIssueAddDefault: PropTypes.func.isRequired,

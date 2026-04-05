@@ -28,7 +28,6 @@ class SeriesEditorRow extends Component {
       titleSlug,
       seriesName,
       monitored,
-      metadataProfile,
       qualityProfile,
       path,
       statistics,
@@ -88,14 +87,6 @@ class SeriesEditorRow extends Component {
               );
             }
 
-            if (name === 'metadataProfileId') {
-              return (
-                <TableRowCell key={name}>
-                  {metadataProfile.name}
-                </TableRowCell>
-              );
-            }
-
             if (name === 'path') {
               return (
                 <TableRowCell key={name}>
@@ -136,7 +127,6 @@ SeriesEditorRow.propTypes = {
   titleSlug: PropTypes.string.isRequired,
   seriesName: PropTypes.string.isRequired,
   monitored: PropTypes.bool.isRequired,
-  metadataProfile: PropTypes.object.isRequired,
   qualityProfile: PropTypes.object.isRequired,
   path: PropTypes.string.isRequired,
   statistics: PropTypes.object.isRequired,

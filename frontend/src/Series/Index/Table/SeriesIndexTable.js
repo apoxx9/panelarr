@@ -69,7 +69,6 @@ class SeriesIndexTable extends Component {
           columns={columns}
           seriesId={series.id}
           qualityProfileId={series.qualityProfileId}
-          metadataProfileId={series.metadataProfileId}
           isSelected={selectedState[series.id]}
           onSelectedChange={onSelectedChange}
           isEditorActive={isEditorActive}

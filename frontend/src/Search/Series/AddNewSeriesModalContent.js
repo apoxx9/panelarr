@@ -96,7 +96,6 @@ class AddNewSeriesModalContent extends Component {
               }
 
               <AddSeriesOptionsForm
-                includeNoneMetadataProfile={false}
                 {...otherProps}
               />
 

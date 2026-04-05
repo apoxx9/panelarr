@@ -11,10 +11,9 @@ import AddNewSeriesModalContent from './AddNewSeriesModalContent';
 function createMapStateToProps() {
   return createSelector(
     (state) => state.search,
-    (state) => state.settings.metadataProfiles,
     createDimensionsSelector(),
     createSystemStatusSelector(),
-    (searchState, metadataProfiles, dimensions, systemStatus) => {
+    (searchState, dimensions, systemStatus) => {
       const {
         isAdding,
         addError,
@@ -30,7 +29,6 @@ function createMapStateToProps() {
       return {
         isAdding,
         addError,
-        showMetadataProfile: metadataProfiles.items.length > 2, // NONE (not allowed for seriess) and one other
         isSmallScreen: dimensions.isSmallScreen,
         validationErrors,
         validationWarnings,
@@ -61,7 +59,6 @@ class AddNewSeriesModalContentConnector extends Component {
       rootFolderPath,
       monitor,
       qualityProfileId,
-      metadataProfileId,
       tags
     } = this.props;
 
@@ -71,7 +68,6 @@ class AddNewSeriesModalContentConnector extends Component {
       monitor: monitor.value,
       monitorNewItems: 'all',
       qualityProfileId: qualityProfileId.value,
-      metadataProfileId: metadataProfileId.value,
       tags: tags.value,
       searchForMissingIssues
     });
@@ -96,7 +92,6 @@ AddNewSeriesModalContentConnector.propTypes = {
   rootFolderPath: PropTypes.object,
   monitor: PropTypes.object.isRequired,
   qualityProfileId: PropTypes.object,
-  metadataProfileId: PropTypes.object,
   tags: PropTypes.object.isRequired,
   onModalClose: PropTypes.func.isRequired,
   setSeriesAddDefault: PropTypes.func.isRequired,

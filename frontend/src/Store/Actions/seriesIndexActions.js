@@ -126,12 +126,6 @@ export const defaultState = {
       isHidden: true
     },
     {
-      name: 'metadataProfileId',
-      label: 'Metadata Profile',
-      isSortable: true,
-      isVisible: false
-    },
-    {
       name: 'nextIssue',
       label: 'Next Issue',
       isSortable: true,
@@ -273,12 +267,6 @@ export const defaultState = {
       label: 'Quality Profile',
       type: filterBuilderTypes.EXACT,
       valueType: filterBuilderValueTypes.QUALITY_PROFILE
-    },
-    {
-      name: 'metadataProfileId',
-      label: 'Metadata Profile',
-      type: filterBuilderTypes.EXACT,
-      valueType: filterBuilderValueTypes.METADATA_PROFILE
     },
     {
       name: 'nextIssue',

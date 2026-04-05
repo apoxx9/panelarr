@@ -47,12 +47,6 @@ export const defaultState = {
       valueType: filterBuilderValueTypes.QUALITY_PROFILE
     },
     {
-      name: 'metadataProfileId',
-      label: 'Comic Metadata Profile',
-      type: filterBuilderTypes.EXACT,
-      valueType: filterBuilderValueTypes.METADATA_PROFILE
-    },
-    {
       name: 'rootFolderPath',
       label: 'Root Folder Path',
       type: filterBuilderTypes.EXACT

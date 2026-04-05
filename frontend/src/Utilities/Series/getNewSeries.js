@@ -5,7 +5,6 @@ function getNewSeries(series, payload) {
     monitor,
     monitorNewItems,
     qualityProfileId,
-    metadataProfileId,
     tags,
     searchForMissingIssues = false
   } = payload;
@@ -19,7 +18,6 @@ function getNewSeries(series, payload) {
   series.monitored = true;
   series.monitorNewItems = monitorNewItems;
   series.qualityProfileId = qualityProfileId;
-  series.metadataProfileId = metadataProfileId;
   series.rootFolderPath = rootFolderPath;
   series.tags = tags;
 

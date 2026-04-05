@@ -130,7 +130,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
         private double StringScore(string value, string target)
         {
-            // Adds a penaltly based on the distance between value and target
+            // Adds a penalty based on the distance between value and target
             var cleanValue = Clean(value);
             var cleanTarget = Clean(target);
 

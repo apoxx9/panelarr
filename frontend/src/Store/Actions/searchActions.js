@@ -35,7 +35,6 @@ export const defaultState = {
     monitor: monitorOptions[0].key,
     monitorNewItems: monitorNewItemsOptions[0].key,
     qualityProfileId: 0,
-    metadataProfileId: 0,
     tags: []
   },
 
@@ -44,7 +43,6 @@ export const defaultState = {
     monitor: monitorOptions[0].key,
     monitorNewItems: monitorNewItemsOptions[0].key,
     qualityProfileId: 0,
-    metadataProfileId: 0,
     tags: []
   }
 };

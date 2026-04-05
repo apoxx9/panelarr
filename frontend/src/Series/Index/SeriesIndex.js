@@ -511,7 +511,6 @@ class SeriesIndex extends Component {
               deleteError={deleteError}
               isOrganizingSeries={isOrganizingSeries}
               isRetaggingSeries={isRetaggingSeries}
-              showMetadataProfile={true}
               onSaveSelected={this.onSaveSelected}
               onOrganizeSeriesPress={this.onOrganizeSeriesPress}
               onRetagSeriesPress={this.onRetagSeriesPress}

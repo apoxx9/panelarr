@@ -8,8 +8,6 @@ import * as commandNames from 'Commands/commandNames';
 import { toggleIssuesMonitored } from 'Store/Actions/issueActions';
 import { clearIssueFiles, fetchIssueFiles } from 'Store/Actions/issueFileActions';
 import { executeCommand } from 'Store/Actions/commandActions';
-// Edition concept removed for comics
-// import { clearEditions, fetchEditions } from 'Store/Actions/editionActions';
 import { cancelFetchReleases, clearReleases } from 'Store/Actions/releaseActions';
 import createAllSeriesSelector from 'Store/Selectors/createAllSeriessSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';

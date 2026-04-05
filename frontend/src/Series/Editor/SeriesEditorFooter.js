@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import MoveSeriesModal from 'Series/MoveSeries/MoveSeriesModal';
-import MetadataProfileSelectInputConnector from 'Components/Form/MetadataProfileSelectInputConnector';
 import MonitorNewItemsSelectInput from 'Components/Form/MonitorNewItemsSelectInput';
 import QualityProfileSelectInputConnector from 'Components/Form/QualityProfileSelectInputConnector';
 import RootFolderSelectInputConnector from 'Components/Form/RootFolderSelectInputConnector';
@@ -35,7 +34,6 @@ class SeriesEditorFooter extends Component {
       monitored: NO_CHANGE,
       monitorNewItems: NO_CHANGE,
       qualityProfileId: NO_CHANGE,
-      metadataProfileId: NO_CHANGE,
       rootFolderPath: NO_CHANGE,
       savingTags: false,
       isDeleteSeriesModalOpen: false,
@@ -63,7 +61,6 @@ class SeriesEditorFooter extends Component {
         monitored: NO_CHANGE,
         monitorNewItems: NO_CHANGE,
         qualityProfileId: NO_CHANGE,
-        metadataProfileId: NO_CHANGE,
         rootFolderPath: NO_CHANGE,
         savingTags: false
       });
@@ -163,7 +160,6 @@ class SeriesEditorFooter extends Component {
       monitored,
       monitorNewItems,
       qualityProfileId,
-      metadataProfileId,
       rootFolderPath,
       savingTags,
       isTagsModalOpen,
@@ -222,24 +218,6 @@ class SeriesEditorFooter extends Component {
                 name="qualityProfileId"
                 value={qualityProfileId}
                 includeNoChange={true}
-                isDisabled={!selectedCount}
-                onChange={this.onInputChange}
-              />
-            </div>
-
-            <div
-              className={styles.inputContainer}
-            >
-              <SeriesEditorFooterLabel
-                label={translate('MetadataProfile')}
-                isSaving={isSaving && metadataProfileId !== NO_CHANGE}
-              />
-
-              <MetadataProfileSelectInputConnector
-                name="metadataProfileId"
-                value={metadataProfileId}
-                includeNoChange={true}
-                includeNone={true}
                 isDisabled={!selectedCount}
                 onChange={this.onInputChange}
               />
@@ -351,7 +329,6 @@ SeriesEditorFooter.propTypes = {
   deleteError: PropTypes.object,
   isOrganizingSeries: PropTypes.bool.isRequired,
   isRetaggingSeries: PropTypes.bool.isRequired,
-  showMetadataProfile: PropTypes.bool.isRequired,
   onSaveSelected: PropTypes.func.isRequired,
   onOrganizeSeriesPress: PropTypes.func.isRequired,
   onRetagSeriesPress: PropTypes.func.isRequired,

@@ -190,7 +190,6 @@ class SeriesIndexOverviews extends Component {
           isSmallScreen={isSmallScreen}
           seriesId={series.id}
           qualityProfileId={series.qualityProfileId}
-          metadataProfileId={series.metadataProfileId}
           isSelected={selectedState[series.id]}
           onSelectedChange={onSelectedChange}
           isEditorActive={isEditorActive}

@@ -20,7 +20,6 @@ namespace NzbDrone.Core.Issues
         public int WorkCount { get; set; }
         public int PrimaryWorkCount { get; set; }
         public LazyLoaded<List<Issue>> Issues { get; set; }
-        public LazyLoaded<List<Issue>> Works { get; set; }
 
         public override void UseMetadataFrom(SeriesGroup other)
         {

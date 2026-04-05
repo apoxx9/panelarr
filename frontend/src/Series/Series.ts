@@ -9,7 +9,6 @@ interface Series extends ModelBase {
   overview: string;
   path: string;
   qualityProfileId: number;
-  metadataProfileId: number;
   rootFolderPath: string;
   sortName: string;
   status: SeriesStatus;

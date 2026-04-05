@@ -8,7 +8,6 @@ function SeriesIndexPosterInfo(props) {
   const {
     qualityProfile,
     showQualityProfile,
-    metadataProfile,
     added,
     nextIssue,
     lastIssue,
@@ -25,14 +24,6 @@ function SeriesIndexPosterInfo(props) {
     return (
       <div className={styles.info}>
         {qualityProfile.name}
-      </div>
-    );
-  }
-
-  if (sortKey === 'metadataProfileId') {
-    return (
-      <div className={styles.info}>
-        {metadataProfile.name}
       </div>
     );
   }
@@ -129,7 +120,6 @@ function SeriesIndexPosterInfo(props) {
 SeriesIndexPosterInfo.propTypes = {
   qualityProfile: PropTypes.object.isRequired,
   showQualityProfile: PropTypes.bool.isRequired,
-  metadataProfile: PropTypes.object.isRequired,
   added: PropTypes.string,
   nextIssue: PropTypes.object,
   lastIssue: PropTypes.object,

@@ -113,7 +113,6 @@ class AddNewIssueModalContent extends Component {
                 !isExistingSeries &&
                   <AddSeriesOptionsForm
                     seriesName={seriesName}
-                    includeNoneMetadataProfile={true}
                     includeSpecificIssueMonitor={true}
                     {...otherProps}
                   />

@@ -27,8 +27,7 @@ namespace NzbDrone.Core.IndexerSearch.Definitions
             }
 
             // Most VA issues are listed as VA, not Various Series
-            // TODO: Needed in Panelarr??
-            if (title == "Various Seriess")
+            if (title == "Various Series")
             {
                 title = "VA";
             }

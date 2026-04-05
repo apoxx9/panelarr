@@ -355,21 +355,6 @@ class PageSidebar extends Component {
       return;
     }
 
-    // This is a bit funky when trying to close and you scroll
-    // vertical too much by mistake, commenting out for now.
-    // TODO: Evaluate if this should be nuked
-
-    // if (Math.abs(this._touchStartY - currentTouchY) > 40) {
-    //   const transform = isSidebarVisible ? 0 : SIDEBAR_WIDTH * -1;
-
-    //   this.setState({
-    //     transition: 'none',
-    //     transform
-    //   });
-
-    //   return;
-    // }
-
     if (Math.abs(this._touchStartX - currentTouchX) < 40) {
       return;
     }

@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesMetadataProfilePopoverContent from 'AddSeries/SeriesMetadataProfilePopoverContent';
 import SeriesMonitorNewItemsOptionsPopoverContent from 'AddSeries/SeriesMonitorNewItemsOptionsPopoverContent';
 import MoveSeriesModal from 'Series/MoveSeries/MoveSeriesModal';
 import Form from 'Components/Form/Form';
@@ -64,7 +63,6 @@ class EditSeriesModalContent extends Component {
       seriesName,
       item,
       isSaving,
-      showMetadataProfile,
       originalPath,
       onInputChange,
       onModalClose,
@@ -76,7 +74,6 @@ class EditSeriesModalContent extends Component {
       monitored,
       monitorNewItems,
       qualityProfileId,
-      metadataProfileId,
       path,
       tags
     } = item;
@@ -140,37 +137,6 @@ class EditSeriesModalContent extends Component {
                 onChange={onInputChange}
               />
             </FormGroup>
-
-            {
-              showMetadataProfile &&
-                <FormGroup>
-                  <FormLabel>
-                    Metadata Profile
-
-                    <Popover
-                      anchor={
-                        <Icon
-                          className={styles.labelIcon}
-                          name={icons.INFO}
-                        />
-                      }
-                      title={translate('MetadataProfile')}
-                      body={<SeriesMetadataProfilePopoverContent />}
-                      position={tooltipPositions.RIGHT}
-                    />
-
-                  </FormLabel>
-
-                  <FormInputGroup
-                    type={inputTypes.METADATA_PROFILE_SELECT}
-                    name="metadataProfileId"
-                    helpText={translate('MetadataProfileIdHelpText')}
-                    includeNone={true}
-                    {...metadataProfileId}
-                    onChange={onInputChange}
-                  />
-                </FormGroup>
-            }
 
             <FormGroup>
               <FormLabel>
@@ -240,7 +206,6 @@ EditSeriesModalContent.propTypes = {
   seriesName: PropTypes.string.isRequired,
   item: PropTypes.object.isRequired,
   isSaving: PropTypes.bool.isRequired,
-  showMetadataProfile: PropTypes.bool.isRequired,
   isPathChanging: PropTypes.bool.isRequired,
   originalPath: PropTypes.string.isRequired,
   onInputChange: PropTypes.func.isRequired,

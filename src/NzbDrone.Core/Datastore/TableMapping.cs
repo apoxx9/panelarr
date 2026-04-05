@@ -119,7 +119,6 @@ namespace NzbDrone.Core.Datastore
                 .Ignore(s => s.Numbered)
                 .Ignore(s => s.WorkCount)
                 .Ignore(s => s.PrimaryWorkCount)
-                .Ignore(s => s.Works)
                 .LazyLoad(s => s.LinkItems,
                           (db, series) => db.Query<SeriesGroupLink>(new SqlBuilder(db.DatabaseType).Where<SeriesGroupLink>(s => s.SeriesGroupId == series.Id)).ToList(),
                           s => s.Id > 0)
@@ -205,6 +204,8 @@ namespace NzbDrone.Core.Datastore
             Mapper.Entity<DownloadHistory>("DownloadHistory").RegisterModel();
 
             Mapper.Entity<UpdateHistory>("UpdateHistory").RegisterModel();
+
+            Mapper.Entity<Publisher>("Publishers").RegisterModel();
         }
 
         private static void RegisterMappers()

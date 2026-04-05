@@ -27,10 +27,9 @@ function createIsPathChangingSelector() {
 function createMapStateToProps() {
   return createSelector(
     (state) => state.seriess,
-    (state) => state.settings.metadataProfiles,
     createSeriesSelector(),
     createIsPathChangingSelector(),
-    (seriessState, metadataProfiles, series, isPathChanging) => {
+    (seriessState, series, isPathChanging) => {
       const {
         isSaving,
         saveError,
@@ -41,7 +40,6 @@ function createMapStateToProps() {
         'monitored',
         'monitorNewItems',
         'qualityProfileId',
-        'metadataProfileId',
         'path',
         'tags'
       ]);
@@ -55,7 +53,6 @@ function createMapStateToProps() {
         isPathChanging,
         originalPath: series.path,
         item: settings.settings,
-        showMetadataProfile: metadataProfiles.items.length > 1,
         ...settings
       };
     }

@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesMetadataProfilePopoverContent from 'AddSeries/SeriesMetadataProfilePopoverContent';
 import SeriesMonitoringOptionsPopoverContent from 'AddSeries/SeriesMonitoringOptionsPopoverContent';
 import Form from 'Components/Form/Form';
 import FormGroup from 'Components/Form/FormGroup';
@@ -21,10 +20,6 @@ class AddSeriesOptionsForm extends Component {
     this.props.onInputChange({ name: 'qualityProfileId', value: parseInt(value) });
   };
 
-  onMetadataProfileIdChange = ({ value }) => {
-    this.props.onInputChange({ name: 'metadataProfileId', value: parseInt(value) });
-  };
-
   //
   // Render
 
@@ -33,10 +28,7 @@ class AddSeriesOptionsForm extends Component {
       rootFolderPath,
       monitor,
       qualityProfileId,
-      metadataProfileId,
-      includeNoneMetadataProfile,
       includeSpecificIssueMonitor,
-      showMetadataProfile,
       folder,
       tags,
       isWindows,
@@ -108,35 +100,6 @@ class AddSeriesOptionsForm extends Component {
           />
         </FormGroup>
 
-        <FormGroup className={showMetadataProfile ? undefined : styles.hideMetadataProfile}>
-          <FormLabel>
-            {translate('MetadataProfile')}
-
-            {
-              includeNoneMetadataProfile &&
-                <Popover
-                  anchor={
-                    <Icon
-                      className={styles.labelIcon}
-                      name={icons.INFO}
-                    />
-                  }
-                  title={translate('MetadataProfile')}
-                  body={<SeriesMetadataProfilePopoverContent />}
-                  position={tooltipPositions.RIGHT}
-                />
-            }
-          </FormLabel>
-
-          <FormInputGroup
-            type={inputTypes.METADATA_PROFILE_SELECT}
-            name="metadataProfileId"
-            includeNone={includeNoneMetadataProfile}
-            onChange={this.onMetadataProfileIdChange}
-            {...metadataProfileId}
-          />
-        </FormGroup>
-
         <FormGroup>
           <FormLabel>
             {translate('Tags')}
@@ -158,9 +121,6 @@ AddSeriesOptionsForm.propTypes = {
   rootFolderPath: PropTypes.object,
   monitor: PropTypes.object.isRequired,
   qualityProfileId: PropTypes.object,
-  metadataProfileId: PropTypes.object,
-  showMetadataProfile: PropTypes.bool.isRequired,
-  includeNoneMetadataProfile: PropTypes.bool.isRequired,
   includeSpecificIssueMonitor: PropTypes.bool.isRequired,
   folder: PropTypes.string.isRequired,
   tags: PropTypes.object.isRequired,

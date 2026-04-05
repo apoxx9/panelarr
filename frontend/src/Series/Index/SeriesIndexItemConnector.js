@@ -6,7 +6,6 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
 import { executeCommand } from 'Store/Actions/commandActions';
-import createSeriesMetadataProfileSelector from 'Store/Selectors/createSeriesMetadataProfileSelector';
 import createSeriesQualityProfileSelector from 'Store/Selectors/createSeriesQualityProfileSelector';
 import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createExecutingCommandsSelector from 'Store/Selectors/createExecutingCommandsSelector';
@@ -35,13 +34,11 @@ function createMapStateToProps() {
   return createSelector(
     createSeriesSelector(),
     createSeriesQualityProfileSelector(),
-    createSeriesMetadataProfileSelector(),
     selectShowSearchAction(),
     createExecutingCommandsSelector(),
     (
       series,
       qualityProfile,
-      metadataProfile,
       showSearchAction,
       executingCommands
     ) => {
@@ -74,7 +71,6 @@ function createMapStateToProps() {
       return {
         ...series,
         qualityProfile,
-        metadataProfile,
         latestIssue,
         showSearchAction,
         isRefreshingSeries,
