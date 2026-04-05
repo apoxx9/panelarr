@@ -28,6 +28,7 @@ namespace Panelarr.Api.V1.Issues
         public int PageCount { get; set; }
         public string Overview { get; set; }
         public List<string> Genres { get; set; }
+        public List<Credit> Credits { get; set; }
         public SeriesResource Series { get; set; }
         public List<MediaCover> Images { get; set; }
         public List<Links> Links { get; set; }
@@ -69,6 +70,7 @@ namespace Panelarr.Api.V1.Issues
                 PageCount = model.PageCount,
                 Overview = model.Overview,
                 Genres = model.Genres,
+                Credits = model.Credits ?? new List<Credit>(),
                 Title = model.Title,
                 SeriesTitle = seriesTitle,
                 Images = model.CoverArtUrl.IsNotNullOrWhiteSpace()

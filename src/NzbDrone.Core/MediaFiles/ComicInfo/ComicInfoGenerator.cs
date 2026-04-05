@@ -42,6 +42,23 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                 WriteElement(writer, "Summary", !string.IsNullOrWhiteSpace(issue?.Overview) ? issue.Overview : seriesMetadata?.Overview);
                 WriteElement(writer, "Web", issue?.CoverArtUrl);
 
+                // Credits — ComicInfo.xml uses one element per role with comma-separated names
+                if (issue?.Credits != null && issue.Credits.Any())
+                {
+                    foreach (var (role, elementName) in ComicInfoCreditRoles.RoleToElement)
+                    {
+                        var names = issue.Credits
+                            .Where(c => c.Role == role)
+                            .Select(c => c.PersonName)
+                            .ToList();
+
+                        if (names.Any())
+                        {
+                            WriteElement(writer, elementName, string.Join(", ", names));
+                        }
+                    }
+                }
+
                 writer.WriteEndElement();
                 writer.WriteEndDocument();
             }

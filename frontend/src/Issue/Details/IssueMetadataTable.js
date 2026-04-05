@@ -63,6 +63,37 @@ function buildDatabaseMetadata(issue, series) {
     });
   }
 
+  if (issue.credits && issue.credits.length) {
+    // Group credits by role, preserving order
+    const roleOrder = ['Writer', 'Penciller', 'Inker', 'Colorist', 'Letterer', 'Cover Artist', 'Editor'];
+    const grouped = {};
+
+    issue.credits.forEach((credit) => {
+      if (!credit.role || !credit.personName || !credit.personName.trim()) {
+        return;
+      }
+
+      if (!grouped[credit.role]) {
+        grouped[credit.role] = [];
+      }
+
+      grouped[credit.role].push(credit.personName.trim());
+    });
+
+    roleOrder.forEach((role) => {
+      if (grouped[role]) {
+        fields[role] = grouped[role].join(', ');
+      }
+    });
+
+    // Any roles not in the predefined order
+    Object.keys(grouped).forEach((role) => {
+      if (!roleOrder.includes(role)) {
+        fields[role] = grouped[role].join(', ');
+      }
+    });
+  }
+
   if (issue.foreignIssueId) {
     fields['Foreign ID'] = issue.foreignIssueId;
   }

@@ -29,13 +29,13 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
         public ComicInfoEmbedService(
             IComicInfoGenerator generator,
             IMetronInfoGenerator metronInfoGenerator,
-            IIssueService bookService,
+            IIssueService issueService,
             IPublisherService publisherService,
             Logger logger)
         {
             _generator = generator;
             _metronInfoGenerator = metronInfoGenerator;
-            _issueService = bookService;
+            _issueService = issueService;
             _publisherService = publisherService;
             _logger = logger;
         }

@@ -86,6 +86,23 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                     {
                         WriteElement(writer, "PageCount", issue.PageCount.ToString());
                     }
+
+                    // Credits
+                    if (issue.Credits != null && issue.Credits.Any())
+                    {
+                        writer.WriteStartElement("Credits");
+                        foreach (var credit in issue.Credits)
+                        {
+                            writer.WriteStartElement("Credit");
+                            WriteElement(writer, "Creator", credit.PersonName);
+                            writer.WriteStartElement("Roles");
+                            WriteElement(writer, "Role", credit.Role);
+                            writer.WriteEndElement(); // Roles
+                            writer.WriteEndElement(); // Credit
+                        }
+
+                        writer.WriteEndElement(); // Credits
+                    }
                 }
 
                 writer.WriteEndElement(); // MetronInfo

@@ -16,6 +16,7 @@ namespace NzbDrone.Core.Issues
         {
             Links = new List<Links>();
             Genres = new List<string>();
+            Credits = new List<Credit>();
             Ratings = new Ratings();
             Series = new Series();
             AddOptions = new AddIssueOptions();
@@ -39,6 +40,7 @@ namespace NzbDrone.Core.Issues
         public string CoverArtUrl { get; set; }
         public int PageCount { get; set; }
         public string Overview { get; set; }
+        public List<Credit> Credits { get; set; }
 
         // These are Panelarr generated/config
         public string CleanTitle { get; set; }
@@ -157,6 +159,7 @@ namespace NzbDrone.Core.Issues
             LastSearchTime = other.LastSearchTime;
             Added = other.Added;
             AddOptions = other.AddOptions;
+            Credits = other.Credits;
         }
 
         public override void ApplyChanges(Issue other)
