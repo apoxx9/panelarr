@@ -7,7 +7,13 @@ using NzbDrone.Core.Messaging.Events;
 
 namespace NzbDrone.Core.MediaFiles.ComicInfo
 {
+    public interface IComicInfoEmbedService
+    {
+        void EmbedMetadata(ComicFile comicFile);
+    }
+
     public class ComicInfoEmbedService :
+        IComicInfoEmbedService,
         IHandle<ComicFileAddedEvent>,
         IHandle<ComicFileRenamedEvent>
     {
@@ -42,6 +48,11 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
         public void Handle(ComicFileRenamedEvent message)
         {
             EmbedComicInfo(message.ComicFile);
+        }
+
+        public void EmbedMetadata(ComicFile comicFile)
+        {
+            EmbedComicInfo(comicFile);
         }
 
         private void EmbedComicInfo(ComicFile comicFile)

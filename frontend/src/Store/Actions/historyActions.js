@@ -177,7 +177,7 @@ export const defaultState = {
     },
     {
       key: 'retagged',
-      label: 'Retagged',
+      label: 'Metadata Updated',
       filters: [
         {
           key: 'eventType',

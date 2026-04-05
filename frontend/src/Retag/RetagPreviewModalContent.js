@@ -190,7 +190,7 @@ class RetagPreviewModalContent extends Component {
             kind={kinds.PRIMARY}
             onPress={this.onRetagPress}
           >
-            Retag
+            Write Metadata
           </Button>
         </ModalFooter>
       </ModalContent>

@@ -127,8 +127,10 @@ class IssueMetadataTable extends Component {
     const issueChanged = prevProps.issueId !== this.props.issueId;
     const filesArrived = prevProps.issueFileIds.length === 0 &&
       this.props.issueFileIds.length > 0;
+    const refreshCompleted = prevProps.isRefreshing && !this.props.isRefreshing;
+    const retagCompleted = prevProps.isRetagging && !this.props.isRetagging;
 
-    if (issueChanged || filesArrived) {
+    if (issueChanged || filesArrived || refreshCompleted || retagCompleted) {
       this.fetchFileMetadata();
     }
   }
@@ -201,7 +203,9 @@ IssueMetadataTable.propTypes = {
   issueId: PropTypes.number.isRequired,
   issue: PropTypes.object.isRequired,
   series: PropTypes.object.isRequired,
-  issueFileIds: PropTypes.arrayOf(PropTypes.number).isRequired
+  issueFileIds: PropTypes.arrayOf(PropTypes.number).isRequired,
+  isRefreshing: PropTypes.bool,
+  isRetagging: PropTypes.bool
 };
 
 function createMapStateToProps() {

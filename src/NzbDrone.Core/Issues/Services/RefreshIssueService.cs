@@ -9,6 +9,7 @@ using NzbDrone.Core.Issues.Commands;
 using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.MediaFiles.ComicInfo;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.MetadataSource;
@@ -34,6 +35,7 @@ namespace NzbDrone.Core.Issues
         private readonly IProvideSeriesInfo _seriesInfo;
         private readonly IProvideIssueInfo _bookInfo;
         private readonly IMediaFileService _mediaFileService;
+        private readonly IComicInfoEmbedService _comicInfoEmbedService;
         private readonly IHistoryService _historyService;
         private readonly IEventAggregator _eventAggregator;
         private readonly ICheckIfIssueShouldBeRefreshed _checkIfIssueShouldBeRefreshed;
@@ -48,6 +50,7 @@ namespace NzbDrone.Core.Issues
                                   IProvideSeriesInfo seriesInfo,
                                   IProvideIssueInfo bookInfo,
                                   IMediaFileService mediaFileService,
+                                  IComicInfoEmbedService comicInfoEmbedService,
                                   IHistoryService historyService,
                                   IEventAggregator eventAggregator,
                                   ICheckIfIssueShouldBeRefreshed checkIfIssueShouldBeRefreshed,
@@ -62,6 +65,7 @@ namespace NzbDrone.Core.Issues
             _seriesInfo = seriesInfo;
             _bookInfo = bookInfo;
             _mediaFileService = mediaFileService;
+            _comicInfoEmbedService = comicInfoEmbedService;
             _historyService = historyService;
             _eventAggregator = eventAggregator;
             _checkIfIssueShouldBeRefreshed = checkIfIssueShouldBeRefreshed;
@@ -314,6 +318,13 @@ namespace NzbDrone.Core.Issues
                 var issue = _issueService.GetIssue(message.IssueId.Value);
 
                 RefreshIssueInfo(issue);
+
+                var files = _mediaFileService.GetFilesByIssue(issue.Id);
+
+                foreach (var file in files)
+                {
+                    _comicInfoEmbedService.EmbedMetadata(file);
+                }
             }
         }
     }

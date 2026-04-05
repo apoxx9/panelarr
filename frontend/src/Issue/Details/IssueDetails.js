@@ -282,6 +282,8 @@ class IssueDetails extends Component {
               <TabPanel>
                 <IssueMetadataTable
                   issueId={id}
+                  isRefreshing={isRefreshing}
+                  isRetagging={this.props.isRetagging}
                 />
               </TabPanel>
 
@@ -359,6 +361,7 @@ IssueDetails.propTypes = {
   shortDateFormat: PropTypes.string.isRequired,
   isSaving: PropTypes.bool.isRequired,
   isRefreshing: PropTypes.bool,
+  isRetagging: PropTypes.bool,
   isSearching: PropTypes.bool,
   isFetching: PropTypes.bool,
   isPopulated: PropTypes.bool,

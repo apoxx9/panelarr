@@ -48,7 +48,7 @@ class RetagSeriesModalContent extends Component {
     return (
       <ModalContent onModalClose={onModalClose}>
         <ModalHeader>
-          Retag Selected Series
+          Write Metadata - Selected Series
         </ModalHeader>
 
         <ModalBody>
@@ -61,7 +61,7 @@ class RetagSeriesModalContent extends Component {
           </Alert>
 
           <div className={styles.message}>
-            Are you sure you want to re-tag all files in the {seriesNames.length} selected series?
+            Are you sure you want to write metadata to all files in the {seriesNames.length} selected series?
           </div>
           <ul>
             {
@@ -113,7 +113,7 @@ class RetagSeriesModalContent extends Component {
             kind={kinds.DANGER}
             onPress={this.onRetagSeriesPress}
           >
-            Retag
+            Write Metadata
           </Button>
         </ModalFooter>
       </ModalContent>

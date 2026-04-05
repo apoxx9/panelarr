@@ -77,6 +77,8 @@ function createMapStateToProps() {
         isCommandExecuting(isSearchingCommand) &&
         isSearchingCommand.body.issueIds.indexOf(issue.id) > -1
       );
+      const isRetaggingCommand = findCommand(commands, { name: commandNames.RETAG_FILES, seriesId: series.id });
+      const isRetagging = isCommandExecuting(isRetaggingCommand);
       const isRenamingFiles = isCommandExecuting(findCommand(commands, { name: commandNames.RENAME_FILES, seriesId: series.id }));
       const isRenamingSeriesCommand = findCommand(commands, { name: commandNames.RENAME_SERIES });
       const isRenamingSeries = (
@@ -92,6 +94,7 @@ function createMapStateToProps() {
         shortDateFormat: uiSettings.shortDateFormat,
         series,
         isRefreshing,
+        isRetagging,
         isSearching,
         isRenamingFiles,
         isRenamingSeries,
@@ -212,6 +215,7 @@ class IssueDetailsConnector extends Component {
 IssueDetailsConnector.propTypes = {
   id: PropTypes.number,
   anyReleaseOk: PropTypes.bool,
+  isRetagging: PropTypes.bool.isRequired,
   isRenamingFiles: PropTypes.bool.isRequired,
   isRenamingSeries: PropTypes.bool.isRequired,
   isIssueFetching: PropTypes.bool,
