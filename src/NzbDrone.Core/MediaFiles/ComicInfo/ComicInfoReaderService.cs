@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 using NLog;
 using NzbDrone.Core.Issues;
@@ -173,50 +174,110 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
 
         private void FlattenElement(XElement element, string prefix, Dictionary<string, string> fields)
         {
+            var name = HumanizeElementName(element.Name.LocalName);
             var key = string.IsNullOrEmpty(prefix)
-                ? element.Name.LocalName
-                : $"{prefix} > {element.Name.LocalName}";
+                ? name
+                : $"{prefix} - {name}";
 
             if (!element.HasElements)
             {
                 var value = element.Value.Trim();
                 if (!string.IsNullOrEmpty(value))
                 {
-                    // Handle duplicate keys by appending index
-                    if (fields.ContainsKey(key))
-                    {
-                        var index = 2;
-                        while (fields.ContainsKey($"{key} ({index})"))
-                        {
-                            index++;
-                        }
+                    // If the element has a qualifying attribute (e.g. <ID source="metron">),
+                    // incorporate it into the display key for clarity
+                    var qualifier = element.Attributes()
+                        .FirstOrDefault(a => !a.IsNamespaceDeclaration);
 
-                        fields[$"{key} ({index})"] = value;
-                    }
-                    else
-                    {
-                        fields[key] = value;
-                    }
+                    var displayKey = qualifier != null
+                        ? $"{key} ({qualifier.Value})"
+                        : key;
+
+                    AddField(fields, displayKey, value);
                 }
-
-                // Also capture attributes
-                foreach (var attr in element.Attributes().Where(a => !a.IsNamespaceDeclaration))
+                else
                 {
-                    fields[$"{key} @{attr.Name.LocalName}"] = attr.Value;
+                    // Element has no text value — show attributes as standalone fields
+                    foreach (var attr in element.Attributes().Where(a => !a.IsNamespaceDeclaration))
+                    {
+                        AddField(fields, $"{key} - {HumanizeElementName(attr.Name.LocalName)}", attr.Value);
+                    }
                 }
             }
             else
             {
-                // Capture attributes on parent elements too
-                foreach (var attr in element.Attributes().Where(a => !a.IsNamespaceDeclaration))
+                // Recurse into children, skipping the root element prefix
+                var childPrefix = element.Name.LocalName == element.Document?.Root?.Name.LocalName
+                    ? ""
+                    : key;
+
+                // If this parent has a single child with the same base name (e.g. IDs > ID),
+                // collapse the nesting to avoid redundant labels
+                var children = element.Elements().ToList();
+                var isSingleChildWrapper = children.Count == 1 &&
+                    children[0].Name.LocalName.TrimEnd('s') == element.Name.LocalName.TrimEnd('s');
+
+                if (isSingleChildWrapper && string.IsNullOrEmpty(childPrefix))
                 {
-                    fields[$"{key} @{attr.Name.LocalName}"] = attr.Value;
+                    // Root-level wrapper: skip entirely
+                    FlattenElement(children[0], "", fields);
+                }
+                else if (isSingleChildWrapper)
+                {
+                    // Nested wrapper: use parent name for the child
+                    FlattenElement(children[0], prefix, fields);
+                }
+                else
+                {
+                    foreach (var child in children)
+                    {
+                        FlattenElement(child, childPrefix, fields);
+                    }
+                }
+            }
+        }
+
+        private static string HumanizeElementName(string name)
+        {
+            // Convert PascalCase/camelCase to spaced words:
+            // "StartYear" -> "Start Year", "PageCount" -> "Page Count"
+            // Leave already-spaced or short names alone
+            if (string.IsNullOrEmpty(name) || name.Length <= 2)
+            {
+                return name;
+            }
+
+            var result = new StringBuilder();
+            result.Append(name[0]);
+
+            for (var i = 1; i < name.Length; i++)
+            {
+                if (char.IsUpper(name[i]) && !char.IsUpper(name[i - 1]))
+                {
+                    result.Append(' ');
                 }
 
-                foreach (var child in element.Elements())
+                result.Append(name[i]);
+            }
+
+            return result.ToString();
+        }
+
+        private static void AddField(Dictionary<string, string> fields, string key, string value)
+        {
+            if (fields.ContainsKey(key))
+            {
+                var index = 2;
+                while (fields.ContainsKey($"{key} ({index})"))
                 {
-                    FlattenElement(child, element.Name.LocalName == element.Document?.Root?.Name.LocalName ? "" : key, fields);
+                    index++;
                 }
+
+                fields[$"{key} ({index})"] = value;
+            }
+            else
+            {
+                fields[key] = value;
             }
         }
     }
