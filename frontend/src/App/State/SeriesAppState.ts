@@ -4,7 +4,7 @@ import AppSectionState, {
 } from 'App/State/AppSectionState';
 import Series from 'Series/Series';
 
-interface SeriessAppState
+interface SeriesAppState
   extends AppSectionState<Series>,
     AppSectionDeleteState,
     AppSectionSaveState {
@@ -15,4 +15,4 @@ interface SeriessAppState
   };
 }
 
-export default SeriessAppState;
+export default SeriesAppState;

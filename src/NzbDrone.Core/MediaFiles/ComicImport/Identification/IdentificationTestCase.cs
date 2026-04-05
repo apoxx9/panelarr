@@ -19,7 +19,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
     public class IdTestCase
     {
         public List<string> ExpectedMusicBrainzReleaseIds { get; set; }
-        public List<SeriesTestCase> LibrarySeriess { get; set; }
+        public List<SeriesTestCase> LibrarySeries { get; set; }
         public string Series { get; set; }
         public string Issue { get; set; }
         public string Release { get; set; }

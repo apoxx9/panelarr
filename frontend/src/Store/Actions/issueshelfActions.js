@@ -94,7 +94,7 @@ export const actionHandlers = handleThunks({
       monitorNewItems
     } = payload;
 
-    const seriess = [];
+    const series = [];
 
     seriesIds.forEach((id) => {
       const seriesToUpdate = { id };
@@ -103,7 +103,7 @@ export const actionHandlers = handleThunks({
         seriesToUpdate.monitored = monitored;
       }
 
-      seriess.push(seriesToUpdate);
+      series.push(seriesToUpdate);
     });
 
     dispatch(set({
@@ -115,7 +115,7 @@ export const actionHandlers = handleThunks({
       url: '/issueshelf',
       method: 'POST',
       data: JSON.stringify({
-        seriess,
+        series,
         monitoringOptions: { monitor },
         monitorNewItems
       }),

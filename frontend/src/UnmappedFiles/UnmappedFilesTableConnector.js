@@ -63,10 +63,10 @@ function createMapDispatchToProps(dispatch, props) {
       dispatch(deleteIssueFiles({ issueFileIds }));
     },
 
-    onAddMissingSeriessPress() {
+    onAddMissingSeriesPress() {
       dispatch(executeCommand({
         name: commandNames.RESCAN_FOLDERS,
-        addNewSeriess: true,
+        addNewSeries: true,
         filter: 'matched'
       }));
     }

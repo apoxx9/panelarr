@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                 .Returns(new RootFolder { Path = _rootFolder });
 
             Mocker.GetMock<ISeriesService>()
-                .Setup(s => s.GetSeriess(It.IsAny<List<int>>()))
+                .Setup(s => s.GetSeries(It.IsAny<List<int>>()))
                 .Returns(new List<Series>());
 
             Mocker.GetMock<IMakeImportDecision>()

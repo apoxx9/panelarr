@@ -16,15 +16,15 @@ import styles from './SeriesDetails.css';
 function createMapStateToProps() {
   return createSelector(
     (state, { match }) => match,
-    (state) => state.seriess,
-    (match, seriess) => {
+    (state) => state.series,
+    (match, series) => {
       const titleSlug = match.params.titleSlug;
       const {
         isFetching,
         isPopulated,
         error,
         items
-      } = seriess;
+      } = series;
 
       const seriesIndex = _.findIndex(items, { titleSlug });
 

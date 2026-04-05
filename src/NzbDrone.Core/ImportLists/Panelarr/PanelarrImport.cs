@@ -36,7 +36,7 @@ namespace NzbDrone.Core.ImportLists.Panelarr
             try
             {
                 var remoteIssues = _panelarrV1Proxy.GetIssues(Settings);
-                var remoteSeriesList = _panelarrV1Proxy.GetSeriess(Settings);
+                var remoteSeriesList = _panelarrV1Proxy.GetSeries(Settings);
 
                 var seriesDict = remoteSeriesList.ToDictionary(x => x.Id);
 

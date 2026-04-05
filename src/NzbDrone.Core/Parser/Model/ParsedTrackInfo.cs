@@ -11,7 +11,7 @@ namespace NzbDrone.Core.Parser.Model
         //public int TrackNumber { get; set; }
         public string Title { get; set; }
         public string CleanTitle { get; set; }
-        public List<string> Seriess { get; set; }
+        public List<string> Series { get; set; }
         public string IssueTitle { get; set; }
         public string SeriesTitle { get; set; }
         public string SeriesIndex { get; set; }
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Parser.Model
 
         public ParsedTrackInfo()
         {
-            Seriess = new List<string>();
+            Series = new List<string>();
             TrackNumbers = new int[0];
         }
 
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Parser.Model
                 trackString = string.Format("{0}", string.Join("-", TrackNumbers.Select(c => c.ToString("00"))));
             }
 
-            return string.Format("{0} - {1} - {2}:{3} {4}: {5}", Seriess.ConcatToString(" & "), IssueTitle, DiscNumber, trackString, Title, Quality);
+            return string.Format("{0} - {1} - {2}:{3} {4}: {5}", Series.ConcatToString(" & "), IssueTitle, DiscNumber, trackString, Title, Quality);
         }
     }
 }

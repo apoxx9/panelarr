@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import createAllSeriesSelector from 'Store/Selectors/createAllSeriessSelector';
+import createAllSeriesSelector from 'Store/Selectors/createAllSeriesSelector';
 import createTagsSelector from 'Store/Selectors/createTagsSelector';
 import TagsModalContent from './TagsModalContent';
 
@@ -10,8 +10,8 @@ function createMapStateToProps() {
     (state, { seriesIds }) => seriesIds,
     createAllSeriesSelector(),
     createTagsSelector(),
-    (seriesIds, allSeriess, tagList) => {
-      const series = _.intersectionWith(allSeriess, seriesIds, (s, id) => {
+    (seriesIds, allSeries, tagList) => {
+      const series = _.intersectionWith(allSeries, seriesIds, (s, id) => {
         return s.id === id;
       });
 

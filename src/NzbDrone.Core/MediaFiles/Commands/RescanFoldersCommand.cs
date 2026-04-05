@@ -12,11 +12,11 @@ namespace NzbDrone.Core.MediaFiles.Commands
             AddNewSeries = true;
         }
 
-        public RescanFoldersCommand(List<string> folders, FilterFilesType filter, bool addNewSeriess, List<int> seriesIds)
+        public RescanFoldersCommand(List<string> folders, FilterFilesType filter, bool addNewSeries, List<int> seriesIds)
         {
             Folders = folders;
             Filter = filter;
-            AddNewSeries = addNewSeriess;
+            AddNewSeries = addNewSeries;
             SeriesIds = seriesIds;
         }
 

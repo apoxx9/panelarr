@@ -11,7 +11,7 @@ namespace NzbDrone.Core.ImportLists.Panelarr
 {
     public interface IPanelarrV1Proxy
     {
-        List<PanelarrSeries> GetSeriess(PanelarrSettings settings);
+        List<PanelarrSeries> GetSeries(PanelarrSettings settings);
         List<PanelarrIssue> GetIssues(PanelarrSettings settings);
         List<PanelarrProfile> GetProfiles(PanelarrSettings settings);
         List<PanelarrRootFolder> GetRootFolders(PanelarrSettings settings);
@@ -30,7 +30,7 @@ namespace NzbDrone.Core.ImportLists.Panelarr
             _logger = logger;
         }
 
-        public List<PanelarrSeries> GetSeriess(PanelarrSettings settings)
+        public List<PanelarrSeries> GetSeries(PanelarrSettings settings)
         {
             return Execute<PanelarrSeries>("/api/v1/series", settings);
         }
@@ -59,7 +59,7 @@ namespace NzbDrone.Core.ImportLists.Panelarr
         {
             try
             {
-                GetSeriess(settings);
+                GetSeries(settings);
             }
             catch (HttpException ex)
             {

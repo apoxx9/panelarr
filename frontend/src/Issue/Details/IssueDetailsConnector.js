@@ -9,7 +9,7 @@ import { toggleIssuesMonitored } from 'Store/Actions/issueActions';
 import { clearIssueFiles, fetchIssueFiles } from 'Store/Actions/issueFileActions';
 import { executeCommand } from 'Store/Actions/commandActions';
 import { cancelFetchReleases, clearReleases } from 'Store/Actions/releaseActions';
-import createAllSeriesSelector from 'Store/Selectors/createAllSeriessSelector';
+import createAllSeriesSelector from 'Store/Selectors/createAllSeriesSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
@@ -47,9 +47,9 @@ function createMapStateToProps() {
     createCommandsSelector(),
     createUISettingsSelector(),
     createDimensionsSelector(),
-    (titleSlug, issueFiles, issues, seriess, commands, uiSettings, dimensions) => {
+    (titleSlug, issueFiles, issues, allSeries, commands, uiSettings, dimensions) => {
       const issue = issues.items.find((b) => b.titleSlug === titleSlug);
-      const series = seriess.find((a) => a.id === issue.seriesId);
+      const series = allSeries.find((a) => a.id === issue.seriesId);
       const sortedIssues = issues.items.filter((b) => b.seriesId === issue.seriesId);
       sortedIssues.sort((a, b) => ((a.releaseDate > b.releaseDate) ? 1 : -1));
       const issueIndex = sortedIssues.findIndex((b) => b.id === issue.id);

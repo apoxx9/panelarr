@@ -10,12 +10,12 @@ import History from './History';
 function createMapStateToProps() {
   return createSelector(
     (state) => state.history,
-    (state) => state.seriess,
+    (state) => state.series,
     (state) => state.issues,
-    (history, seriess, issues) => {
+    (history, series, issues) => {
       return {
-        isSeriesFetching: seriess.isFetching,
-        isSeriesPopulated: seriess.isPopulated,
+        isSeriesFetching: series.isFetching,
+        isSeriesPopulated: series.isPopulated,
         isIssuesFetching: issues.isFetching,
         isIssuesPopulated: issues.isPopulated,
         issuesError: issues.error,

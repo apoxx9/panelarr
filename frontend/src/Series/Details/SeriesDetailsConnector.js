@@ -13,7 +13,7 @@ import { clearQueueDetails, fetchQueueDetails } from 'Store/Actions/queueActions
 import { cancelFetchReleases, clearReleases } from 'Store/Actions/releaseActions';
 import { clearSeries } from 'Store/Actions/seriesCollectionActions';
 import { fetchSeries } from 'Store/Actions/seriesActions';
-import createAllSeriesSelector from 'Store/Selectors/createAllSeriessSelector';
+import createAllSeriesSelector from 'Store/Selectors/createAllSeriesSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import createSortedSectionSelector from 'Store/Selectors/createSortedSectionSelector';
@@ -57,14 +57,14 @@ const selectIssues = createSelector(
 );
 
 const selectSeries = createSelector(
-  (state) => state.seriess,
-  (seriess) => {
+  (state) => state.series,
+  (series) => {
     const {
       items,
       isFetching,
       isPopulated,
       error
-    } = seriess;
+    } = series;
 
     const hasSeries = !!items.length;
 
@@ -108,8 +108,8 @@ function createMapStateToProps() {
     createAllSeriesSelector(),
     createCommandsSelector(),
     createDimensionsSelector(),
-    (titleSlug, issues, seriesState, issueFiles, allSeriess, commands, dimensions) => {
-      const sortedSeries = _.orderBy(allSeriess, 'sortNameLastFirst');
+    (titleSlug, issues, seriesState, issueFiles, allSeries, commands, dimensions) => {
+      const sortedSeries = _.orderBy(allSeries, 'sortNameLastFirst');
       const seriesIndex = _.findIndex(sortedSeries, { titleSlug });
       const series = sortedSeries[seriesIndex];
 

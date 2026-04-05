@@ -107,7 +107,7 @@ namespace NzbDrone.Core.MediaFiles
                     if (!_diskProvider.FolderExists(rootFolder.Path))
                     {
                         _logger.Warn("Series root folder ({0}) doesn't exist.", rootFolder.Path);
-                        var skippedSeries = _seriesService.GetSeriess(seriesIds);
+                        var skippedSeries = _seriesService.GetSeries(seriesIds);
                         skippedSeries.ForEach(x => _eventAggregator.PublishEvent(new SeriesScanSkippedEvent(x, SeriesScanSkippedReason.RootFolderDoesNotExist)));
                         return;
                     }
@@ -115,7 +115,7 @@ namespace NzbDrone.Core.MediaFiles
                     if (_diskProvider.FolderEmpty(rootFolder.Path))
                     {
                         _logger.Warn("Series root folder ({0}) is empty.", rootFolder.Path);
-                        var skippedSeries = _seriesService.GetSeriess(seriesIds);
+                        var skippedSeries = _seriesService.GetSeries(seriesIds);
                         skippedSeries.ForEach(x => _eventAggregator.PublishEvent(new SeriesScanSkippedEvent(x, SeriesScanSkippedReason.RootFolderIsEmpty)));
                         return;
                     }
@@ -216,7 +216,7 @@ namespace NzbDrone.Core.MediaFiles
 
             _logger.Debug($"Updated info for {updatedFiles.Count} known files");
 
-            var seriesList = _seriesService.GetSeriess(seriesIds);
+            var seriesList = _seriesService.GetSeries(seriesIds);
             foreach (var series in seriesList)
             {
                 CompletedScanning(series);

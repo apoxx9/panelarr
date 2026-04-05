@@ -401,7 +401,7 @@ export const actionHandlers = handleThunks({
         ...data.map((series) => {
           return updateItem({
             id: series.id,
-            section: 'seriess',
+            section: 'series',
             ...series
           });
         }),

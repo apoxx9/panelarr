@@ -2,15 +2,15 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { bulkDeleteSeries } from 'Store/Actions/seriesIndexActions';
-import createAllSeriesSelector from 'Store/Selectors/createAllSeriessSelector';
+import createAllSeriesSelector from 'Store/Selectors/createAllSeriesSelector';
 import DeleteSeriesModalContent from './DeleteSeriesModalContent';
 
 function createMapStateToProps() {
   return createSelector(
     (state, { seriesIds }) => seriesIds,
     createAllSeriesSelector(),
-    (seriesIds, allSeriess) => {
-      const selectedSeries = _.intersectionWith(allSeriess, seriesIds, (s, id) => {
+    (seriesIds, allSeries) => {
+      const selectedSeries = _.intersectionWith(allSeries, seriesIds, (s, id) => {
         return s.id === id;
       });
 

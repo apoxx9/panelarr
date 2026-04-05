@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
         {
             private static readonly string[] MediaFiles = new[] { "nin.mp2", "nin.mp3", "nin.flac", "nin.m4a", "nin.wma", "nin.ape", "nin.opus" };
 
-            private static readonly string[] SkipProperties = new[] { "IsValid", "Duration", "Quality", "MediaInfo", "ImageFile", "IssueSeriess" };
+            private static readonly string[] SkipProperties = new[] { "IsValid", "Duration", "Quality", "MediaInfo", "ImageFile", "IssueSeries" };
             private static readonly Dictionary<string, string[]> SkipPropertiesByFile = new Dictionary<string, string[]>
             {
                 { "nin.mp2", new[] { "OriginalReleaseDate" } }
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
                 .With(x => x.OriginalReleaseDate = new DateTime(2009, 4, 1))
                 .With(x => x.OriginalYear = 2009)
                 .With(x => x.Performers = new[] { "Performer1" })
-                .With(x => x.IssueSeriess = new[] { "방탄소년단" })
+                .With(x => x.IssueSeries = new[] { "방탄소년단" })
                 .With(x => x.Genres = new[] { "Genre1", "Genre2" })
                 .With(x => x.ImageFile = imageFile)
                 .With(x => x.ImageSize = imageSize)
@@ -195,8 +195,8 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
             var writtentags = Subject.ReadAudioTag(path);
 
             VerifySame(writtentags, _testTags, skipProperties);
-            writtentags.IssueSeriess.Should().BeEquivalentTo(
-                _testTags.IssueSeriess.Concat(_testTags.Performers),
+            writtentags.IssueSeries.Should().BeEquivalentTo(
+                _testTags.IssueSeries.Concat(_testTags.Performers),
                 options => options.WithStrictOrdering());
         }
 
@@ -213,7 +213,7 @@ namespace NzbDrone.Core.Test.MediaFiles.AudioTagServiceFixture
             var expected = new AudioTag()
             {
                 Performers = new string[0],
-                IssueSeriess = new string[0],
+                IssueSeries = new string[0],
                 Genres = new string[0]
             };
 

@@ -180,7 +180,7 @@ namespace NzbDrone.Core.MediaFiles
                 trackInfo = new ParsedTrackInfo
                 {
                     IssueTitle = folderInfo.IssueTitle,
-                    Seriess = new List<string> { folderInfo.SeriesName },
+                    Series = new List<string> { folderInfo.SeriesName },
                     Quality = folderInfo.Quality,
                     ReleaseGroup = folderInfo.ReleaseGroup,
                     ReleaseHash = folderInfo.ReleaseHash,

@@ -21,9 +21,9 @@ namespace Panelarr.Api.V1.IssueShelf
         public IActionResult UpdateAll([FromBody] IssueshelfResource request)
         {
             //Read from request
-            var seriesToUpdate = _seriesService.GetSeriess(request.Seriess.Select(s => s.Id));
+            var seriesToUpdate = _seriesService.GetSeries(request.Series.Select(s => s.Id));
 
-            foreach (var s in request.Seriess)
+            foreach (var s in request.Series)
             {
                 var series = seriesToUpdate.Single(c => c.Id == s.Id);
 

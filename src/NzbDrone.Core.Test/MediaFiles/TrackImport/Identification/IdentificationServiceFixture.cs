@@ -86,7 +86,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             Mocker.GetMock<IMetadataProfileService>().Setup(x => x.Get(profile.Id)).Returns(profile);
         }
 
-        private List<Series> GivenSeriess(List<SeriesTestCase> allSeries)
+        private List<Series> GivenSeries(List<SeriesTestCase> allSeries)
         {
             var outp = new List<Series>();
             for (var i = 0; i < allSeries.Count; i++)
@@ -156,7 +156,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             var path = Path.Combine(TestContext.CurrentContext.TestDirectory, "Files", "Identification", file);
             var testcase = JsonConvert.DeserializeObject<IdTestCase>(File.ReadAllText(path));
 
-            var allSeries = GivenSeriess(testcase.LibrarySeriess);
+            var allSeries = GivenSeries(testcase.LibrarySeries);
             var specifiedSeries = allSeries.SingleOrDefault(x => x.Metadata.Value.ForeignSeriesId == testcase.Series);
             var idOverrides = new IdentificationOverrides { Series = specifiedSeries };
 

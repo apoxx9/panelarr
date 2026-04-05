@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
                   .Returns(new Series());
 
             Mocker.GetMock<ISeriesService>()
-                  .Setup(s => s.GetSeriess(It.IsAny<IEnumerable<int>>()))
+                  .Setup(s => s.GetSeries(It.IsAny<IEnumerable<int>>()))
                   .Returns(new List<Series> { new Series() });
 
             Mocker.GetMock<IParsingService>()

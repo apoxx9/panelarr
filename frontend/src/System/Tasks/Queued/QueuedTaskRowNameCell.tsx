@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { CommandBody } from 'Commands/Command';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
-import createMultiSeriessSelector from 'Store/Selectors/createMultiSeriessSelector';
+import createMultiSeriesSelector from 'Store/Selectors/createMultiSeriesSelector';
 import translate from 'Utilities/String/translate';
 import styles from './QueuedTaskRowNameCell.css';
 
@@ -38,8 +38,8 @@ export default function QueuedTaskRowNameCell(
     seriesIds.push(body.seriesId);
   }
 
-  const seriess = useSelector(createMultiSeriessSelector(seriesIds));
-  const sortedSeriess = seriess.sort((a, b) =>
+  const series = useSelector(createMultiSeriesSelector(seriesIds));
+  const sortedSeries = series.sort((a, b) =>
     a.sortName.localeCompare(b.sortName)
   );
 
@@ -47,8 +47,8 @@ export default function QueuedTaskRowNameCell(
     <TableRowCell>
       <span className={styles.commandName}>
         {commandName}
-        {sortedSeriess.length ? (
-          <span> - {formatTitles(sortedSeriess.map((a) => a.seriesName))}</span>
+        {sortedSeries.length ? (
+          <span> - {formatTitles(sortedSeries.map((a) => a.seriesName))}</span>
         ) : null}
       </span>
 

@@ -11,10 +11,10 @@ import SeriesDetailsHeader from './SeriesDetailsHeader';
 
 function createMapStateToProps() {
   return createSelector(
-    (state) => state.seriess,
+    (state) => state.series,
     createSeriesSelector(),
     createDimensionsSelector(),
-    (seriess, series, dimensions) => {
+    (seriesState, series, dimensions) => {
       const alternateTitles = _.reduce(series.alternateTitles, (acc, alternateTitle) => {
         if ((alternateTitle.seasonNumber === -1 || alternateTitle.seasonNumber === undefined) &&
             (alternateTitle.sceneSeasonNumber === -1 || alternateTitle.sceneSeasonNumber === undefined)) {
@@ -26,7 +26,7 @@ function createMapStateToProps() {
 
       return {
         ...series,
-        isSaving: seriess.isSaving,
+        isSaving: seriesState.isSaving,
         alternateTitles,
         isSmallScreen: dimensions.isSmallScreen
       };

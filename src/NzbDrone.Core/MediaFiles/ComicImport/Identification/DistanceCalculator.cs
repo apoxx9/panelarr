@@ -28,7 +28,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             var dist = new Distance();
 
             // the most common list of allSeries reported by a file
-            var fileSeries = localTracks.Select(x => x.FileTrackInfo.Seriess.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
+            var fileSeries = localTracks.Select(x => x.FileTrackInfo.Series.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
                 .GroupBy(x => x.ConcatToString())
                 .OrderByDescending(x => x.Count())
                 .First()

@@ -5,7 +5,7 @@ import { setIssueshelfFilter } from 'Store/Actions/issueshelfActions';
 
 function createMapStateToProps() {
   return createSelector(
-    (state) => state.seriess.items,
+    (state) => state.series.items,
     (state) => state.issueshelf.filterBuilderProps,
     (sectionItems, filterBuilderProps) => {
       return {

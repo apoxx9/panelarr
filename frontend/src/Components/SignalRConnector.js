@@ -216,7 +216,7 @@ class SignalRConnector extends Component {
 
   handleSeries = (body) => {
     const action = body.action;
-    const section = 'seriess';
+    const section = 'series';
 
     if (action === 'updated') {
       this.props.dispatchUpdateItem({ section, ...body.resource });

@@ -12,15 +12,15 @@ import Queue from './Queue';
 
 function createMapStateToProps() {
   return createSelector(
-    (state) => state.seriess,
+    (state) => state.series,
     (state) => state.issues,
     (state) => state.queue.options,
     (state) => state.queue.paged,
     createCommandExecutingSelector(commandNames.REFRESH_MONITORED_DOWNLOADS),
-    (seriess, issues, options, queue, isRefreshMonitoredDownloadsExecuting) => {
+    (series, issues, options, queue, isRefreshMonitoredDownloadsExecuting) => {
       return {
-        isSeriesFetching: seriess.isFetching,
-        isSeriesPopulated: seriess.isPopulated,
+        isSeriesFetching: series.isFetching,
+        isSeriesPopulated: series.isPopulated,
         isIssuesFetching: issues.isFetching,
         isIssuesPopulated: issues.isPopulated,
         issuesError: issues.error,

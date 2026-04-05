@@ -106,7 +106,7 @@ namespace NzbDrone.Core.MediaFiles
             {
                 Title = issue.Title,
                 Performers = new[] { series.Name },
-                IssueSeriess = new[] { series.Name },
+                IssueSeries = new[] { series.Name },
                 Track = (uint)comicFile.Part,
                 TrackCount = (uint)partCount,
                 Issue = issue.Title,
@@ -286,7 +286,7 @@ namespace NzbDrone.Core.MediaFiles
         public void RetagSeries(RetagSeriesCommand message)
         {
             _logger.Debug("Re-tagging all audio files for selected allSeries");
-            var seriesToRename = _seriesService.GetSeriess(message.SeriesIds);
+            var seriesToRename = _seriesService.GetSeries(message.SeriesIds);
 
             foreach (var series in seriesToRename)
             {

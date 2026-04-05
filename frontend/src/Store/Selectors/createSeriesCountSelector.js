@@ -1,15 +1,15 @@
 import { createSelector } from 'reselect';
-import createAllSeriessSelector from './createAllSeriessSelector';
+import createAllSeriesSelector from './createAllSeriesSelector';
 
 function createSeriesCountSelector() {
   return createSelector(
-    createAllSeriessSelector(),
-    (state) => state.seriess.error,
-    (state) => state.seriess.isFetching,
-    (state) => state.seriess.isPopulated,
-    (seriess, error, isFetching, isPopulated) => {
+    createAllSeriesSelector(),
+    (state) => state.series.error,
+    (state) => state.series.isFetching,
+    (state) => state.series.isPopulated,
+    (series, error, isFetching, isPopulated) => {
       return {
-        count: seriess.length,
+        count: series.length,
         error,
         isFetching,
         isPopulated

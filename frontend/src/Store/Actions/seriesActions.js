@@ -16,7 +16,7 @@ import createSetSettingValueReducer from './Creators/Reducers/createSetSettingVa
 //
 // Variables
 
-export const section = 'seriess';
+export const section = 'series';
 
 export const filters = [
   {
@@ -163,14 +163,14 @@ export const defaultState = {
 //
 // Actions Types
 
-export const FETCH_SERIES = 'seriess/fetchSeries';
-export const SET_SERIES_VALUE = 'seriess/setSeriesValue';
-export const SAVE_SERIES = 'seriess/saveSeries';
-export const DELETE_SERIES = 'seriess/deleteSeries';
+export const FETCH_SERIES = 'series/fetchSeries';
+export const SET_SERIES_VALUE = 'series/setSeriesValue';
+export const SAVE_SERIES = 'series/saveSeries';
+export const DELETE_SERIES = 'series/deleteSeries';
 
-export const TOGGLE_SERIES_MONITORED = 'seriess/toggleSeriesMonitored';
-export const TOGGLE_ISSUE_MONITORED = 'seriess/toggleIssueMonitored';
-export const UPDATE_ISSUE_MONITORED = 'seriess/updateIssueMonitored';
+export const TOGGLE_SERIES_MONITORED = 'series/toggleSeriesMonitored';
+export const TOGGLE_ISSUE_MONITORED = 'series/toggleIssueMonitored';
+export const UPDATE_ISSUE_MONITORED = 'series/updateIssueMonitored';
 
 //
 // Action Creators
@@ -239,7 +239,7 @@ export const actionHandlers = handleThunks({
       monitored
     } = payload;
 
-    const series = _.find(getState().seriess.items, { id });
+    const series = _.find(getState().series.items, { id });
 
     dispatch(updateItem({
       id,
@@ -282,7 +282,7 @@ export const actionHandlers = handleThunks({
       monitored
     } = payload;
 
-    const series = _.find(getState().seriess.items, { id });
+    const series = _.find(getState().series.items, { id });
     const seasons = _.cloneDeep(series.seasons);
     const season = _.find(seasons, { seasonNumber });
 
@@ -356,7 +356,7 @@ export const actionHandlers = handleThunks({
       url: '/issueshelf',
       method: 'POST',
       data: JSON.stringify({
-        seriess: [{ id }],
+        series: [{ id }],
         monitoringOptions: { monitor }
       }),
       dataType: 'json'

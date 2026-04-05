@@ -20,7 +20,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public string Title { get; set; }
         public string[] Performers { get; set; }
-        public string[] IssueSeriess { get; set; }
+        public string[] IssueSeries { get; set; }
         public uint Track { get; set; }
         public uint TrackCount { get; set; }
         public string Issue { get; set; }
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.MediaFiles
                     allSeries.AddRange(tag.PerformersSort);
                 }
 
-                IssueSeriess = allSeries.Distinct().ToArray();
+                IssueSeries = allSeries.Distinct().ToArray();
                 Track = tag.Track;
                 TrackCount = tag.TrackCount;
                 Issue = tag.Album ?? tag.AlbumSort;
@@ -307,7 +307,7 @@ namespace NzbDrone.Core.MediaFiles
             // patch up any null fields to work around TagLib exception for
             // WMA with null performers/performers
             Performers = Performers ?? new string[0];
-            IssueSeriess = IssueSeriess ?? new string[0];
+            IssueSeries = IssueSeries ?? new string[0];
             Genres = Genres ?? new string[0];
 
             TagLib.File file = null;
@@ -319,7 +319,7 @@ namespace NzbDrone.Core.MediaFiles
                 // do the ones with direct support in TagLib
                 tag.Title = Title;
                 tag.Performers = Performers;
-                tag.AlbumArtists = IssueSeriess;
+                tag.AlbumArtists = IssueSeries;
                 tag.Track = Track;
                 tag.TrackCount = TrackCount;
                 tag.Album = Issue;
@@ -438,10 +438,10 @@ namespace NzbDrone.Core.MediaFiles
                 output.Add("Issue", Tuple.Create(Issue, other.Issue));
             }
 
-            if (!IssueSeriess.SequenceEqual(other.IssueSeriess))
+            if (!IssueSeries.SequenceEqual(other.IssueSeries))
             {
-                var oldValue = IssueSeriess.Any() ? string.Join(" / ", IssueSeriess) : null;
-                var newValue = other.IssueSeriess.Any() ? string.Join(" / ", other.IssueSeriess) : null;
+                var oldValue = IssueSeries.Any() ? string.Join(" / ", IssueSeries) : null;
+                var newValue = other.IssueSeries.Any() ? string.Join(" / ", other.IssueSeries) : null;
 
                 output.Add("Issue Series", Tuple.Create(oldValue, newValue));
             }
@@ -527,7 +527,7 @@ namespace NzbDrone.Core.MediaFiles
                 };
             }
 
-            var allSeries = tag.IssueSeriess.Where(x => x.IsNotNullOrWhiteSpace()).ToList();
+            var allSeries = tag.IssueSeries.Where(x => x.IsNotNullOrWhiteSpace()).ToList();
             if (!allSeries.Any())
             {
                 allSeries.AddRange(tag.Performers.Where(x => x.IsNotNullOrWhiteSpace()));
@@ -536,7 +536,7 @@ namespace NzbDrone.Core.MediaFiles
             return new ParsedTrackInfo
             {
                 IssueTitle = tag.Issue.IsNotNullOrWhiteSpace() ? tag.Issue : tag.Title,
-                Seriess = allSeries,
+                Series = allSeries,
                 DiscNumber = (int)tag.Disc,
                 DiscCount = (int)tag.DiscCount,
                 Year = tag.Year,

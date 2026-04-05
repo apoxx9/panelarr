@@ -149,7 +149,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
                 {
                     if (track.FileTrackInfo.SeriesTitle.IsNullOrWhiteSpace())
                     {
-                        track.FileTrackInfo.Seriess = new List<string> { series };
+                        track.FileTrackInfo.Series = new List<string> { series };
                         track.FileTrackInfo.SeriesTitle = series;
                     }
                 }

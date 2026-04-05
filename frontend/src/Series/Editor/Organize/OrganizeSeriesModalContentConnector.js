@@ -5,15 +5,15 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
 import { executeCommand } from 'Store/Actions/commandActions';
-import createAllSeriesSelector from 'Store/Selectors/createAllSeriessSelector';
+import createAllSeriesSelector from 'Store/Selectors/createAllSeriesSelector';
 import OrganizeSeriesModalContent from './OrganizeSeriesModalContent';
 
 function createMapStateToProps() {
   return createSelector(
     (state, { seriesIds }) => seriesIds,
     createAllSeriesSelector(),
-    (seriesIds, allSeriess) => {
-      const series = _.intersectionWith(allSeriess, seriesIds, (s, id) => {
+    (seriesIds, allSeries) => {
+      const series = _.intersectionWith(allSeries, seriesIds, (s, id) => {
         return s.id === id;
       });
 

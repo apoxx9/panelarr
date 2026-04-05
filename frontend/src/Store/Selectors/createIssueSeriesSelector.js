@@ -4,10 +4,10 @@ import createIssueSelector from './createIssueSelector';
 function createIssueSeriesSelector() {
   return createSelector(
     createIssueSelector(),
-    (state) => state.seriess.itemMap,
-    (state) => state.seriess.items,
-    (issue, seriesMap, allSeriess) => {
-      return allSeriess[seriesMap[issue.seriesId]];
+    (state) => state.series.itemMap,
+    (state) => state.series.items,
+    (issue, seriesMap, allSeries) => {
+      return allSeries[seriesMap[issue.seriesId]];
     }
   );
 }

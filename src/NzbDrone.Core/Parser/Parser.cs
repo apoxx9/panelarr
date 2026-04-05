@@ -366,7 +366,7 @@ namespace NzbDrone.Core.Parser
                     return comicResult;
                 }
 
-                var seriesName = series.Name == "Various Seriess" ? "VA" : series.Name.RemoveAccent();
+                var seriesName = series.Name == "Various Series" ? "VA" : series.Name.RemoveAccent();
 
                 Logger.Debug("Parsing string '{0}' using search criteria series: '{1}' issues: '{2}'",
                              title,
@@ -800,7 +800,7 @@ namespace NzbDrone.Core.Parser
 
             var result = new ParsedTrackInfo();
 
-            result.Seriess = new List<string> { seriesName };
+            result.Series = new List<string> { seriesName };
 
             Logger.Debug("Track Parsed. {0}", result);
             return result;

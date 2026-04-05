@@ -23,7 +23,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
         private static readonly List<string> MultiDiscMarkers = new () { @"dis[ck]", @"cd" };
         private static readonly string MultiDiscPatternFormat = @"^(?<root>.*%s[\W_]*)\d";
-        private static readonly List<string> VariousSeriesTitles = new () { "", "various seriess", "various", "va", "unknown" };
+        private static readonly List<string> VariousSeriesTitles = new () { "", "various series", "various", "va", "unknown" };
 
         public List<LocalEdition> GroupTracks(List<LocalIssue> localTracks)
         {
@@ -139,7 +139,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             }
 
             // If not various allSeries, make sure allSeries are sensible
-            if (!IsVariousSeriess(tracks))
+            if (!IsVariousSeries(tracks))
             {
                 var seriesTags = tracks.Select(x => x.FileTrackInfo.SeriesTitle);
                 if (!HasCommonEntry(seriesTags, seriesTagThreshold, tagFuzz))
@@ -152,7 +152,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             return true;
         }
 
-        public static bool IsVariousSeriess(List<LocalIssue> tracks)
+        public static bool IsVariousSeries(List<LocalIssue> tracks)
         {
             // checks whether most common title is a known VA title
             // Also checks whether more than 75% of tracks have a distinct series and that the most common series

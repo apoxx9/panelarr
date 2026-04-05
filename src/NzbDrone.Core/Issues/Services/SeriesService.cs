@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Issues
     {
         Series GetSeries(int seriesId);
         Series GetSeriesByMetadataId(int seriesMetadataId);
-        List<Series> GetSeriess(IEnumerable<int> seriesIds);
+        List<Series> GetSeries(IEnumerable<int> seriesIds);
         Series AddSeries(Series newSeries, bool doRefresh);
         List<Series> AddSeries(List<Series> newSeriesList, bool doRefresh);
         Series FindById(string foreignSeriesId);
@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Issues
         Dictionary<int, List<int>> GetAllSeriesTags();
         List<Series> AllForTag(int tagId);
         Series UpdateSeries(Series series);
-        List<Series> UpdateSeriess(List<Series> allSeries, bool useExistingRelativeFolder);
+        List<Series> UpdateSeries(List<Series> allSeries, bool useExistingRelativeFolder);
         Dictionary<int, string> AllSeriesPaths();
         bool SeriesPathExists(string folder);
         void RemoveAddOptions(Series series);
@@ -210,7 +210,7 @@ namespace NzbDrone.Core.Issues
             return _seriesRepository.GetSeriesByMetadataId(seriesMetadataId);
         }
 
-        public List<Series> GetSeriess(IEnumerable<int> seriesIds)
+        public List<Series> GetSeries(IEnumerable<int> seriesIds)
         {
             return _seriesRepository.Get(seriesIds).ToList();
         }
@@ -235,7 +235,7 @@ namespace NzbDrone.Core.Issues
             return updatedSeries;
         }
 
-        public List<Series> UpdateSeriess(List<Series> series, bool useExistingRelativeFolder)
+        public List<Series> UpdateSeries(List<Series> series, bool useExistingRelativeFolder)
         {
             _cache.Clear();
             _logger.Debug("Updating {0} series", series.Count);

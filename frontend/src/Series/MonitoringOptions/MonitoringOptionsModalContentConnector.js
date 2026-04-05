@@ -7,7 +7,7 @@ import MonitoringOptionsModalContent from './MonitoringOptionsModalContent';
 
 function createMapStateToProps() {
   return createSelector(
-    (state) => state.seriess,
+    (state) => state.series,
     (seriesState) => {
       const {
         isSaving,

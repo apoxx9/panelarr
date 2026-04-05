@@ -177,7 +177,7 @@ namespace NzbDrone.Core.MediaFiles
         public void Execute(RenameSeriesCommand message)
         {
             _logger.Debug("Renaming all files for selected series");
-            var seriesToRename = _seriesService.GetSeriess(message.SeriesIds);
+            var seriesToRename = _seriesService.GetSeries(message.SeriesIds);
 
             foreach (var series in seriesToRename)
             {

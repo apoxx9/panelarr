@@ -4,9 +4,9 @@ import createClientSideCollectionSelector from './createClientSideCollectionSele
 
 function createUnoptimizedSelector(uiSection) {
   return createSelector(
-    createClientSideCollectionSelector('seriess', uiSection),
-    (seriess) => {
-      const items = seriess.items.map((s) => {
+    createClientSideCollectionSelector('series', uiSection),
+    (series) => {
+      const items = series.items.map((s) => {
         const {
           id,
           sortName,
@@ -21,7 +21,7 @@ function createUnoptimizedSelector(uiSection) {
       });
 
       return {
-        ...seriess,
+        ...series,
         items
       };
     }

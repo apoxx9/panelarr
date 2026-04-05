@@ -341,7 +341,7 @@ namespace NzbDrone.Core.Issues
             if (shouldRescan)
             {
                 // Only scan the specific series folder, not all root folders
-                var seriesPaths = _seriesService.GetSeriess(seriesIds)
+                var seriesPaths = _seriesService.GetSeries(seriesIds)
                     .Where(s => s.Path.IsNotNullOrWhiteSpace())
                     .Select(s => s.Path)
                     .ToList();
@@ -356,7 +356,7 @@ namespace NzbDrone.Core.Issues
         private void RefreshSelectedSeries(List<int> seriesIds, bool isNew, CommandTrigger trigger)
         {
             var updated = false;
-            var allSeries = _seriesService.GetSeriess(seriesIds);
+            var allSeries = _seriesService.GetSeries(seriesIds);
 
             foreach (var series in allSeries)
             {

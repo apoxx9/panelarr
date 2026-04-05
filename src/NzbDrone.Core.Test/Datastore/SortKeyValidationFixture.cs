@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.Datastore
             TableMapping.Mapper.IsValidSortKey(sortKey).Should().BeFalse();
         }
 
-        //[TestCase("allSeries.sortName")] TODO: Figure out why Seriess table properties don't get mapped
+        //[TestCase("allSeries.sortName")] TODO: Figure out why Series table properties don't get mapped
         [TestCase("Id")]
         [TestCase("id")]
         [TestCase("commands.id")]

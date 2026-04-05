@@ -17,13 +17,13 @@ import CutoffUnmet from './CutoffUnmet';
 function createMapStateToProps() {
   return createSelector(
     (state) => state.wanted.cutoffUnmet,
-    (state) => state.seriess,
+    (state) => state.series,
     createCommandExecutingSelector(commandNames.CUTOFF_UNMET_ISSUE_SEARCH),
-    (cutoffUnmet, seriess, isSearchingForCutoffUnmetIssues) => {
+    (cutoffUnmet, series, isSearchingForCutoffUnmetIssues) => {
 
       return {
-        isSeriesFetching: seriess.isFetching,
-        isSeriesPopulated: seriess.isPopulated,
+        isSeriesFetching: series.isFetching,
+        isSeriesPopulated: series.isPopulated,
         isSearchingForCutoffUnmetIssues,
         isSaving: cutoffUnmet.items.filter((m) => m.isSaving).length > 1,
         ...cutoffUnmet

@@ -335,7 +335,7 @@ export const actionHandlers = handleThunks({
     });
 
     request.done((data) => {
-      // Preserve issues for other seriess we didn't fetch
+      // Preserve issues for other series we didn't fetch
       if (payload.hasOwnProperty('seriesId')) {
         const oldIssues = getState().issues.items;
         const newIssues = oldIssues.filter((x) => x.seriesId !== payload.seriesId);

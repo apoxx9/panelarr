@@ -8,7 +8,7 @@ export default function migrateSeriesSortKey(persistedState) {
     const key = `${table}.sortKey`;
     const sortKey = get(persistedState, key);
 
-    if (sortKey === 'seriess.sortName') {
+    if (sortKey === 'series.sortName') {
       set(persistedState, key, 'seriesMetadata.sortName');
     }
   }

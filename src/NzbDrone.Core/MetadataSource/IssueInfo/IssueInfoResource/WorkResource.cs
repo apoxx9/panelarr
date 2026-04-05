@@ -13,6 +13,6 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
         public List<int> RelatedWorks { get; set; }
         public List<IssueResource> Issues { get; set; }
         public List<SeriesResource> SeriesGroup { get; set; } = new List<SeriesResource>();
-        public List<SeriesResource> Seriess { get; set; } = new List<SeriesResource>();
+        public List<SeriesResource> Series { get; set; } = new List<SeriesResource>();
     }
 }

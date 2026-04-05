@@ -21,10 +21,10 @@ class IssueIndexFooter extends PureComponent {
     let monitored = 0;
     let totalFileSize = 0;
 
-    const seriess = new Set();
+    const series = new Set();
 
     issue.forEach((s) => {
-      seriess.add(s.seriesId);
+      series.add(s.seriesId);
 
       const { statistics = {} } = s;
 
@@ -115,7 +115,7 @@ class IssueIndexFooter extends PureComponent {
                 <DescriptionList>
                   <DescriptionListItem
                     title={translate('Series')}
-                    data={seriess.size}
+                    data={series.size}
                   />
 
                   <DescriptionListItem

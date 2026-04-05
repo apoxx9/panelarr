@@ -129,7 +129,7 @@ namespace Panelarr.Api.V1.Series
         }
 
         [HttpGet]
-        public List<SeriesResource> AllSeriess(int? seriesGroupId = null)
+        public List<SeriesResource> AllSeries(int? seriesGroupId = null)
         {
             var seriesStats = _seriesStatisticsService.SeriesStatistics();
             var allSeries = _seriesService.GetAllSeries();

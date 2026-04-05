@@ -1,12 +1,12 @@
 import { createSelector } from 'reselect';
 
-function createAllSeriessSelector() {
+function createAllSeriesSelector() {
   return createSelector(
-    (state) => state.seriess,
+    (state) => state.series,
     (series) => {
       return series.items;
     }
   );
 }
 
-export default createAllSeriessSelector;
+export default createAllSeriesSelector;

@@ -314,7 +314,7 @@ namespace NzbDrone.Core.Download.Pending
                 }
             }
 
-            foreach (var series in _seriesService.GetSeriess(releases.Select(v => v.SeriesId).Distinct().Where(v => !seriesMap.ContainsKey(v))))
+            foreach (var series in _seriesService.GetSeries(releases.Select(v => v.SeriesId).Distinct().Where(v => !seriesMap.ContainsKey(v))))
             {
                 seriesMap[series.Id] = series;
             }

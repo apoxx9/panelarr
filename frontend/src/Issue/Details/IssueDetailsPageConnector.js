@@ -15,7 +15,7 @@ function createMapStateToProps() {
   return createSelector(
     (state, { match }) => match,
     (state) => state.issues,
-    (state) => state.seriess,
+    (state) => state.series,
     (match, issues, series) => {
       const titleSlug = match.params.titleSlug;
       const isFetching = issues.isFetching || series.isFetching;

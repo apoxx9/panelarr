@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Issues
         Dictionary<int, string> AllSeriesPaths();
         Dictionary<int, List<int>> AllSeriesTags();
         Series GetSeriesByMetadataId(int seriesMetadataId);
-        List<Series> GetSeriessByMetadataId(IEnumerable<int> seriesMetadataId);
+        List<Series> GetSeriesByMetadataId(IEnumerable<int> seriesMetadataId);
     }
 
     public class SeriesRepository : BasicRepository<Series>, ISeriesRepository
@@ -80,7 +80,7 @@ namespace NzbDrone.Core.Issues
             return Query(s => s.SeriesMetadataId == seriesMetadataId).SingleOrDefault();
         }
 
-        public List<Series> GetSeriessByMetadataId(IEnumerable<int> seriesMetadataIds)
+        public List<Series> GetSeriesByMetadataId(IEnumerable<int> seriesMetadataIds)
         {
             return Query(s => seriesMetadataIds.Contains(s.SeriesMetadataId));
         }

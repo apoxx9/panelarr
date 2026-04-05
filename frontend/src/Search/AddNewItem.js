@@ -83,7 +83,7 @@ class AddNewItem extends Component {
     const {
       error,
       items,
-      hasExistingSeriess
+      hasExistingSeries
     } = this.props;
 
     const term = this.state.term;
@@ -198,7 +198,7 @@ class AddNewItem extends Component {
           }
 
           {
-            !term && !hasExistingSeriess ?
+            !term && !hasExistingSeries ?
               <div className={styles.message}>
                 <div className={styles.helpText}>
                   You haven't added any series yet, do you want to add an existing library location (Root Folder) and update?
@@ -229,7 +229,7 @@ AddNewItem.propTypes = {
   isAdding: PropTypes.bool.isRequired,
   addError: PropTypes.object,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
-  hasExistingSeriess: PropTypes.bool.isRequired,
+  hasExistingSeries: PropTypes.bool.isRequired,
   onSearchChange: PropTypes.func.isRequired,
   onClearSearch: PropTypes.func.isRequired
 };

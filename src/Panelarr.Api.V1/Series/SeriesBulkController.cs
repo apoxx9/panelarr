@@ -27,14 +27,14 @@ namespace Panelarr.Api.V1.Series
         [HttpPut("monitor")]
         public IActionResult SetMonitored([FromBody] SeriesMonitorResource resource)
         {
-            var seriesToUpdate = _seriesService.GetSeriess(resource.SeriesIds);
+            var seriesToUpdate = _seriesService.GetSeries(resource.SeriesIds);
 
             foreach (var series in seriesToUpdate)
             {
                 series.Monitored = resource.Monitored;
             }
 
-            _seriesService.UpdateSeriess(seriesToUpdate, true);
+            _seriesService.UpdateSeries(seriesToUpdate, true);
             return Accepted();
         }
 

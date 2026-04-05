@@ -134,7 +134,7 @@ export const actionHandlers = handleThunks({
 
     promise.done((data) => {
       dispatch(batchActions([
-        updateItem({ section: 'seriess', ...data }),
+        updateItem({ section: 'series', ...data }),
 
         set({
           section,
@@ -174,7 +174,7 @@ export const actionHandlers = handleThunks({
     promise.done((data) => {
       itemToAdd.issue = data;
       dispatch(batchActions([
-        updateItem({ section: 'seriess', ...data.series }),
+        updateItem({ section: 'series', ...data.series }),
         updateItem({ section: 'issues', ...data }),
         updateItem({ section, ...itemToAdd }),
 

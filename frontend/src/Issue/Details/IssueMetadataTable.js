@@ -242,7 +242,7 @@ IssueMetadataTable.propTypes = {
 function createMapStateToProps() {
   return (state, ownProps) => {
     const issue = state.issues.items.find((i) => i.id === ownProps.issueId) || {};
-    const series = state.seriess.items.find((s) => s.id === issue.seriesId) || {};
+    const series = state.series.items.find((s) => s.id === issue.seriesId) || {};
     const issueFileIds = state.issueFiles.items
       .filter((f) => f.issueId === ownProps.issueId)
       .map((f) => f.id);

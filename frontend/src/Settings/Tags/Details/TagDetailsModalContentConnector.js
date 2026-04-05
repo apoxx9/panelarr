@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import createAllSeriesSelector from 'Store/Selectors/createAllSeriessSelector';
+import createAllSeriesSelector from 'Store/Selectors/createAllSeriesSelector';
 import TagDetailsModalContent from './TagDetailsModalContent';
 
 function findMatchingItems(ids, items) {
@@ -20,8 +20,8 @@ function createUnorderedMatchingSeriesSelector() {
 function createMatchingSeriesSelector() {
   return createSelector(
     createUnorderedMatchingSeriesSelector(),
-    (seriess) => {
-      return seriess.sort((seriesA, seriesB) => {
+    (series) => {
+      return series.sort((seriesA, seriesB) => {
         const sortNameA = seriesA.sortName;
         const sortNameB = seriesB.sortName;
 

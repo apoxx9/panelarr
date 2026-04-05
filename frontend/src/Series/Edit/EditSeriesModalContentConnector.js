@@ -10,7 +10,7 @@ import EditSeriesModalContent from './EditSeriesModalContent';
 
 function createIsPathChangingSelector() {
   return createSelector(
-    (state) => state.seriess.pendingChanges,
+    (state) => state.series.pendingChanges,
     createSeriesSelector(),
     (pendingChanges, series) => {
       const path = pendingChanges.path;
@@ -26,15 +26,15 @@ function createIsPathChangingSelector() {
 
 function createMapStateToProps() {
   return createSelector(
-    (state) => state.seriess,
+    (state) => state.series,
     createSeriesSelector(),
     createIsPathChangingSelector(),
-    (seriessState, series, isPathChanging) => {
+    (seriesState, series, isPathChanging) => {
       const {
         isSaving,
         saveError,
         pendingChanges
-      } = seriessState;
+      } = seriesState;
 
       const seriesSettings = _.pick(series, [
         'monitored',

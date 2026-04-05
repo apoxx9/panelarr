@@ -24,7 +24,7 @@ namespace Panelarr.Api.V1.Series
         [HttpPut]
         public IActionResult SaveAll([FromBody] SeriesEditorResource resource)
         {
-            var seriesToUpdate = _seriesService.GetSeriess(resource.SeriesIds);
+            var seriesToUpdate = _seriesService.GetSeries(resource.SeriesIds);
             var seriesToMove = new List<BulkMoveSeries>();
 
             foreach (var series in seriesToUpdate)
@@ -83,7 +83,7 @@ namespace Panelarr.Api.V1.Series
                 });
             }
 
-            return Accepted(_seriesService.UpdateSeriess(seriesToUpdate, !resource.MoveFiles).ToResource());
+            return Accepted(_seriesService.UpdateSeries(seriesToUpdate, !resource.MoveFiles).ToResource());
         }
 
         [HttpDelete]

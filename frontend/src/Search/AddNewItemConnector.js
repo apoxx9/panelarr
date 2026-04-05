@@ -10,15 +10,15 @@ import AddNewItem from './AddNewItem';
 function createMapStateToProps() {
   return createSelector(
     (state) => state.search,
-    (state) => state.seriess.items.length,
+    (state) => state.series.items.length,
     (state) => state.router.location,
-    (search, existingSeriessCount, location) => {
+    (search, existingSeriesCount, location) => {
       const { params } = parseUrl(location.search);
 
       return {
         ...search,
         term: params.term,
-        hasExistingSeriess: existingSeriessCount > 0
+        hasExistingSeries: existingSeriesCount > 0
       };
     }
   );

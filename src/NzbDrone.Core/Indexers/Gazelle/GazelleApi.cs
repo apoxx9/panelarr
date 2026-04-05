@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Indexers.Gazelle
     {
         public int TorrentId { get; set; }
         public int EditionId { get; set; }
-        public List<GazelleSeries> Seriess { get; set; }
+        public List<GazelleSeries> Series { get; set; }
         public bool Remastered { get; set; }
         public string RemasterYear { get; set; }
         public string RemasterTitle { get; set; }

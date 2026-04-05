@@ -7,7 +7,7 @@ import createCustomFiltersSelector from './createCustomFiltersSelector';
 function createIssuesClientSideCollectionSelector(uiSection) {
   return createSelector(
     (state) => _.get(state, 'issues'),
-    (state) => _.get(state, 'seriess'),
+    (state) => _.get(state, 'series'),
     (state) => _.get(state, uiSection),
     createCustomFiltersSelector('issues', uiSection),
     (issueState, seriesState, uiSectionState = {}, customFilters) => {

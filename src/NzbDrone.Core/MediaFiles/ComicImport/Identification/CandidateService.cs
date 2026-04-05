@@ -162,7 +162,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             var candidateReleases = new List<CandidateEdition>();
 
             // check if it looks like VA.
-            if (TrackGroupingService.IsVariousSeriess(localEdition.LocalIssues))
+            if (TrackGroupingService.IsVariousSeries(localEdition.LocalIssues))
             {
                 var va = _seriesService.FindById(DistanceCalculator.VariousSeriesIds[0]);
                 if (va != null)
@@ -171,7 +171,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 }
             }
 
-            var seriesTags = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.Seriess) ?? new List<string>();
+            var seriesTags = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.Series) ?? new List<string>();
             if (seriesTags.Any())
             {
                 var variants = DistanceCalculator.GetSeriesVariants(seriesTags.Where(x => x.IsNotNullOrWhiteSpace()).ToList());
@@ -209,14 +209,14 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             // fall back to series / issue name search
             var seriesTags = new List<string>();
 
-            if (TrackGroupingService.IsVariousSeriess(localEdition.LocalIssues))
+            if (TrackGroupingService.IsVariousSeries(localEdition.LocalIssues))
             {
-                seriesTags.Add("Various Seriess");
+                seriesTags.Add("Various Series");
             }
             else
             {
                 // the most common list of allSeries reported by a file
-                var allSeries = localEdition.LocalIssues.Select(x => x.FileTrackInfo.Seriess.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
+                var allSeries = localEdition.LocalIssues.Select(x => x.FileTrackInfo.Series.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
                     .GroupBy(x => x.ConcatToString())
                     .OrderByDescending(x => x.Count())
                     .First()

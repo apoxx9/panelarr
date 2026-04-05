@@ -5,7 +5,7 @@ import { setSeriesFilter } from 'Store/Actions/seriesIndexActions';
 
 function createMapStateToProps() {
   return createSelector(
-    (state) => state.seriess.items,
+    (state) => state.series.items,
     (state) => state.seriesIndex.filterBuilderProps,
     (sectionItems, filterBuilderProps) => {
       return {

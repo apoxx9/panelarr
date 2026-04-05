@@ -6,9 +6,9 @@ import SeriesIndexFooter from './SeriesIndexFooter';
 
 function createUnoptimizedSelector() {
   return createSelector(
-    createClientSideCollectionSelector('seriess', 'seriesIndex'),
-    (seriess) => {
-      return seriess.items.map((s) => {
+    createClientSideCollectionSelector('series', 'seriesIndex'),
+    (series) => {
+      return series.items.map((s) => {
         const {
           monitored,
           status,
