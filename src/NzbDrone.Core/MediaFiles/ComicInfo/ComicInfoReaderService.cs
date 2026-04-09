@@ -18,9 +18,23 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
         public Dictionary<string, string> Fields { get; set; } = new Dictionary<string, string>();
     }
 
+    public class ComicInfoIdentification
+    {
+        public string Series { get; set; }
+        public string Title { get; set; }
+        public string Number { get; set; }
+        public string Volume { get; set; }
+        public string Year { get; set; }
+        public string Publisher { get; set; }
+        public bool HasAny => !string.IsNullOrWhiteSpace(Series)
+            || !string.IsNullOrWhiteSpace(Title)
+            || !string.IsNullOrWhiteSpace(Number);
+    }
+
     public interface IComicInfoReaderService
     {
         List<ComicMetadataResult> ReadMetadata(ComicFile comicFile);
+        ComicInfoIdentification ReadIdentificationFromPath(string path);
     }
 
     public class ComicInfoReaderService : IComicInfoReaderService
@@ -31,6 +45,62 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
         public ComicInfoReaderService(Logger logger)
         {
             _logger = logger;
+        }
+
+        public ComicInfoIdentification ReadIdentificationFromPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            {
+                return null;
+            }
+
+            var format = GetFormatFromExtension(path);
+            if (format == ComicFormat.Unknown)
+            {
+                return null;
+            }
+
+            var fakeFile = new ComicFile { Path = path, ComicFormat = format };
+            var results = ReadMetadata(fakeFile);
+
+            // Prefer ComicInfo.xml; fall back to MetronInfo.xml
+            var preferred = results.FirstOrDefault(r => r.Source.Equals("ComicInfo.xml", StringComparison.OrdinalIgnoreCase))
+                ?? results.FirstOrDefault();
+
+            if (preferred == null)
+            {
+                return null;
+            }
+
+            // Field names are humanized at the root: "Series" stays "Series", "StartYear" becomes "Start Year"
+            return new ComicInfoIdentification
+            {
+                Series = GetField(preferred.Fields, "Series"),
+                Title = GetField(preferred.Fields, "Title"),
+                Number = GetField(preferred.Fields, "Number"),
+                Volume = GetField(preferred.Fields, "Volume"),
+                Year = GetField(preferred.Fields, "Year") ?? GetField(preferred.Fields, "Start Year"),
+                Publisher = GetField(preferred.Fields, "Publisher")
+            };
+        }
+
+        private static ComicFormat GetFormatFromExtension(string path)
+        {
+            var ext = Path.GetExtension(path)?.ToLowerInvariant();
+            return ext switch
+            {
+                ".cbz" => ComicFormat.CBZ,
+                ".cbr" => ComicFormat.CBR,
+                ".cb7" => ComicFormat.CB7,
+                _ => ComicFormat.Unknown
+            };
+        }
+
+        private static string GetField(Dictionary<string, string> fields, string key)
+        {
+            return fields.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value)
+                ? value
+                : null;
         }
 
         public List<ComicMetadataResult> ReadMetadata(ComicFile comicFile)

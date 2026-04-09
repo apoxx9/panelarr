@@ -4,10 +4,12 @@ using System.IO.Abstractions;
 using System.Linq;
 using NLog;
 using NzbDrone.Core.Issues;
+using NzbDrone.Core.MediaFiles.ComicInfo;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
+using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.MediaFiles
@@ -26,16 +28,19 @@ namespace NzbDrone.Core.MediaFiles
         IExecute<RetagSeriesCommand>
     {
         private readonly IAudioTagService _audioTagService;
+        private readonly IComicInfoReaderService _comicInfoReaderService;
         private readonly IMediaFileService _mediaFileService;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
 
         public MetadataTagService(IAudioTagService audioTagService,
+            IComicInfoReaderService comicInfoReaderService,
             IMediaFileService mediaFileService,
             IEventAggregator eventAggregator,
             Logger logger)
         {
             _audioTagService = audioTagService;
+            _comicInfoReaderService = comicInfoReaderService;
             _mediaFileService = mediaFileService;
             _eventAggregator = eventAggregator;
             _logger = logger;
@@ -47,10 +52,64 @@ namespace NzbDrone.Core.MediaFiles
             {
                 return _audioTagService.ReadTags(file.FullName);
             }
-            else
+
+            return ReadComicTags(file);
+        }
+
+        private ParsedTrackInfo ReadComicTags(IFileInfo file)
+        {
+            var info = new ParsedTrackInfo();
+
+            try
             {
-                return new ParsedTrackInfo();
+                var ident = _comicInfoReaderService.ReadIdentificationFromPath(file.FullName);
+                if (ident == null || !ident.HasAny)
+                {
+                    return info;
+                }
+
+                if (!string.IsNullOrWhiteSpace(ident.Series))
+                {
+                    info.Series = new List<string> { ident.Series };
+                    info.SeriesTitle = ident.Series;
+                    info.CleanTitle = ident.Series.CleanSeriesName();
+                }
+
+                if (!string.IsNullOrWhiteSpace(ident.Title))
+                {
+                    info.IssueTitle = ident.Title;
+                    info.Title = ident.Title;
+                }
+
+                if (!string.IsNullOrWhiteSpace(ident.Number))
+                {
+                    info.SeriesIndex = ident.Number;
+                }
+
+                if (!string.IsNullOrWhiteSpace(ident.Year)
+                    && uint.TryParse(ident.Year, out var year))
+                {
+                    info.Year = year;
+                }
+
+                if (!string.IsNullOrWhiteSpace(ident.Publisher))
+                {
+                    info.Publisher = ident.Publisher;
+                }
+
+                _logger.Debug(
+                    "Read ComicInfo identification from {0}: series='{1}', issue='{2}', number='{3}'",
+                    file.Name,
+                    ident.Series,
+                    ident.Title,
+                    ident.Number);
             }
+            catch (System.Exception ex)
+            {
+                _logger.Warn(ex, "Failed to read ComicInfo from {0}", file.FullName);
+            }
+
+            return info;
         }
 
         public void WriteTags(ComicFile comicFile, bool newDownload, bool force = false)

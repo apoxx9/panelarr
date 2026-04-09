@@ -107,6 +107,25 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             _logger.Trace("Getting candidates for {0}", series);
             var candidateReleases = new List<CandidateEdition>();
 
+            // If we have an explicit issue number from embedded ComicInfo, use it first — most reliable
+            var issueIndexTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.SeriesIndex) ?? "";
+            if (issueIndexTag.IsNotNullOrWhiteSpace()
+                && float.TryParse(issueIndexTag, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var explicitIssueNumber))
+            {
+                _logger.Debug("Matching series {0} by explicit issue number {1} from embedded metadata", series.SeriesMetadataId, explicitIssueNumber);
+                var allIssues = _issueService.GetIssuesBySeriesMetadataId(series.SeriesMetadataId);
+                var matchByNumber = allIssues.Where(x => x.IssueNumber == explicitIssueNumber).ToList();
+                foreach (var issue in matchByNumber)
+                {
+                    candidateReleases.AddRange(GetDbCandidatesByIssue(issue, includeExisting));
+                }
+
+                if (candidateReleases.Any())
+                {
+                    return candidateReleases;
+                }
+            }
+
             // Try embedded metadata first, then download client title, then filename
             var issueTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
 
