@@ -28,12 +28,9 @@ COPY src/ ./src/
 RUN dotnet restore ./src/Panelarr.sln && \
     dotnet publish ./src/NzbDrone.Console/Panelarr.Console.csproj \
         -c Release \
+        -f net10.0 \
         -r linux-${TARGETARCH:-x64} \
         --self-contained false \
-        -o /build \
-        --no-restore 2>/dev/null || \
-    dotnet publish ./src/NzbDrone.Console/Panelarr.Console.csproj \
-        -c Release \
         -o /build \
         --no-restore
 
