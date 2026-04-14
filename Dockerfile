@@ -33,7 +33,7 @@ RUN dotnet restore ./src/Panelarr.sln && \
         --self-contained false \
         -o /build \
         --no-restore \
-        -p:AnalysisLevel=none
+        -p:RunAnalyzers=false
 
 # ── Runtime image ──────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
