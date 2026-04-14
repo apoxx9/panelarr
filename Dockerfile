@@ -10,7 +10,7 @@ FROM --platform=${BUILDPLATFORM:-linux/amd64} node:20-slim AS frontend
 
 WORKDIR /app
 
-COPY package.json yarn.lock .yarnrc ./
+COPY package.json yarn.lock .yarnrc tsconfig.json ./
 COPY frontend/ ./frontend/
 
 RUN yarn install --frozen-lockfile && yarn build
