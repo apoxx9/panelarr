@@ -1,0 +1,183 @@
+.header {
+  position: relative;
+  width: 100%;
+  height: 310px;
+  overflow: hidden;
+}
+
+.backdrop {
+  position: absolute;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(20px);
+  transform: scale(1.1);
+}
+
+.backdropOverlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: var(--black);
+  opacity: 0.6;
+}
+
+.headerContent {
+  display: flex;
+  padding: 30px;
+  width: 100%;
+  height: 100%;
+  color: var(--white);
+}
+
+.cover {
+  flex-shrink: 0;
+  margin-right: 35px;
+  height: 250px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.titleRow {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  flex: 0 0 auto;
+}
+
+.titleContainer {
+  display: flex;
+  margin-top: -5px;
+}
+
+.issueNumber {
+  font-weight: 700;
+  font-size: 50px;
+  line-height: 60px;
+  margin-right: 15px;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+.title {
+  font-weight: 300;
+  font-size: 50px;
+  line-height: 60px;
+}
+
+.toggleMonitoredContainer {
+  align-self: center;
+}
+
+.monitorToggleButton {
+  composes: toggleButton from '~Components/MonitorToggleButton.css';
+
+  width: 40px;
+
+  &:hover {
+    color: var(--iconButtonHoverLightColor);
+  }
+}
+
+.alternateTitlesIconContainer {
+  align-self: flex-end;
+  margin-left: 20px;
+}
+
+.details {
+  margin-bottom: 8px;
+  font-weight: 300;
+  font-size: 20px;
+}
+
+.seriesLink {
+  composes: link from '~Components/Link/Link.css';
+
+  margin-right: 15px;
+  color: var(--white);
+}
+
+.publisher {
+  margin-right: 15px;
+  opacity: 0.7;
+}
+
+
+.detailsLabel {
+  composes: label from '~Components/Label.css';
+
+  margin: 5px 10px 5px 0;
+}
+
+.sizeOnDisk,
+.qualityProfileName,
+.links,
+.tags {
+  margin-left: 8px;
+  font-weight: 300;
+  font-size: 17px;
+}
+
+.overview {
+  flex: 1 1 auto;
+  margin-top: 4px;
+  min-height: 0;
+  font-size: $intermediateFontSize;
+  overflow: hidden;
+}
+
+.overviewExpanded {
+  composes: overview;
+
+  overflow: auto;
+  flex-shrink: 0;
+}
+
+.overviewText {
+  white-space: pre-wrap;
+}
+
+.overviewToggle {
+  margin-left: 5px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--themePrimaryColor);
+  font-size: $intermediateFontSize;
+  cursor: pointer;
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+@media only screen and (max-width: $breakpointSmall) {
+  .headerContent {
+    padding: 15px;
+  }
+
+  .issueNumber {
+    font-size: 30px;
+    line-height: 30px;
+  }
+
+  .title {
+    font-weight: 300;
+    font-size: 30px;
+    line-height: 30px;
+  }
+}
+
+@media only screen and (max-width: $breakpointLarge) {
+  .cover {
+    display: none;
+  }
+}

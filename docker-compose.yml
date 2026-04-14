@@ -1,0 +1,101 @@
+version: "3.8"
+
+# Panelarr full stack: comic book management + indexer + download clients
+# Volumes are stored under ./data/ by default — change paths as needed.
+#
+# Usage:
+#   docker-compose up -d
+#   Panelarr UI: http://localhost:8787
+#   Prowlarr UI: http://localhost:9696
+#   SABnzbd UI:  http://localhost:8080
+#   qBittorrent: http://localhost:8090 (user: admin / pass: adminadmin)
+
+services:
+
+  panelarr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/apoxx9/panelarr:latest
+    container_name: panelarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./data/panelarr:/config
+      - ./data/comics:/comics
+      - ./data/downloads:/downloads
+    ports:
+      - "8787:8787"
+    restart: unless-stopped
+    depends_on:
+      - prowlarr
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8787/api/v1/system/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./data/prowlarr:/config
+    ports:
+      - "9696:9696"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9696/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./data/sabnzbd:/config
+      - ./data/downloads:/downloads
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - WEBUI_PORT=8090
+    volumes:
+      - ./data/qbittorrent:/config
+      - ./data/downloads:/downloads
+    ports:
+      - "8090:8090"
+      - "6881:6881"
+      - "6881:6881/udp"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

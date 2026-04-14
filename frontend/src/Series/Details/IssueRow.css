@@ -1,0 +1,51 @@
+.title {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.monitored {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  width: 3%;
+}
+
+.issueNumber {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  width: 3%;
+  font-weight: 700;
+}
+
+.position,
+.rating {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  width: 10%;
+}
+
+.status {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  width: 5%;
+}
+
+.releaseDate {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  width: 10%;
+}
+
+.pageCount {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  width: 8%;
+}
+
+.indexerFlags {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  width: 5%;
+}

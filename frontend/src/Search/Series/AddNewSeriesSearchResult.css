@@ -1,0 +1,247 @@
+.searchResult {
+  position: relative;
+  margin: 3px 0;
+  width: 100%;
+  color: inherit;
+}
+
+.underlay {
+  @add-mixin cover;
+
+  background-color: var(--addSeriesBackgroundColor);
+  border-radius: 4px;
+  transition: background 200ms, box-shadow 200ms;
+
+  &:hover {
+    background-color: var(--pageBackground);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+.overlay {
+  @add-mixin linkOverlay;
+
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  padding: 8px 12px;
+  min-height: 90px;
+  max-height: 130px;
+}
+
+.existsBadge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  background-color: #37bc9b;
+  color: #fff;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.posterContainer {
+  flex: 0 0 80px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.poster {
+  width: 80px;
+  height: auto;
+  max-height: 115px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.posterPlaceholder {
+  width: 80px;
+  height: 105px;
+  background-color: var(--inputBorderColor);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--disabledColor);
+  border-radius: 2px;
+}
+
+.placeholderLetter {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--disabledColor);
+  opacity: 0.7;
+  user-select: none;
+}
+
+.content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  min-width: 0;
+  gap: 3px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.year {
+  font-weight: 400;
+  margin-left: 5px;
+  color: var(--disabledColor);
+  font-size: 14px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--disabledColor);
+  line-height: 1.4;
+}
+
+.metaSeparator {
+  &::before {
+    content: '\00b7';
+    font-weight: bold;
+  }
+}
+
+.statusEnded {
+  color: var(--dangerColor);
+  font-weight: 500;
+}
+
+.statusContinuing {
+  color: #37bc9b;
+  font-weight: 500;
+}
+
+.publisherBadge {
+  background-color: rgba(55, 188, 155, 0.15);
+  color: #37bc9b;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.typeBadge {
+  background-color: rgba(93, 156, 236, 0.15);
+  color: #5d9cec;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.volumeBadge {
+  margin-left: 5px;
+  background-color: rgba(255, 206, 84, 0.2);
+  color: #c5a042;
+  padding: 0 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.overview {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--disabledColor);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.icons {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.addButton {
+  composes: link from '~Components/Link/Link.css';
+
+  color: #37bc9b;
+  transition: color 150ms;
+  pointer-events: all;
+
+  &:hover {
+    color: #2e9e82;
+  }
+}
+
+.externalLink {
+  composes: link from '~Components/Link/Link.css';
+
+  color: var(--disabledColor);
+  transition: color 150ms;
+
+  &:hover {
+    color: var(--textColor);
+  }
+}
+
+.externalLinkIcon {
+  /* no extra styles needed */
+}
+
+@media only screen and (max-width: $breakpointSmall) {
+  .overlay {
+    min-height: 80px;
+    max-height: none;
+    padding: 6px 8px;
+  }
+
+  .posterContainer {
+    flex: 0 0 60px;
+    margin-right: 8px;
+  }
+
+  .poster {
+    width: 60px;
+  }
+
+  .posterPlaceholder {
+    width: 60px;
+    height: 85px;
+  }
+
+  .name {
+    font-size: 14px;
+  }
+}

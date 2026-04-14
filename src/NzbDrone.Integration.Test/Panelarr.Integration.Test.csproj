@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Panelarr.Api.V1\Panelarr.Api.V1.csproj" />
+    <ProjectReference Include="..\NzbDrone.Test.Common\Panelarr.Test.Common.csproj" />
+  </ItemGroup>
+</Project>
