@@ -171,9 +171,7 @@ import_test/
 CLAUDE.md
 
 # Internal dev docs
-docs/BACKLOG.md
-docs/active-story.md
-docs/last-handoff.md
+docs/
 
 # Environment files
 .env

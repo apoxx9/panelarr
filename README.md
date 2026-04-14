@@ -72,7 +72,7 @@ The app will be available at `http://localhost:8787`.
 
 Panelarr inherits the full *arr infrastructure from Readarr — indexer protocols, download client APIs, quality profiles, release parsing, job scheduling, SignalR real-time updates, and more — with a comic-specific domain layer on top.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/PRD.md](docs/PRD.md) for detailed design documentation.
+The domain model maps Publisher > Series > Issue > ComicFile, replacing Readarr's Author > Book > Edition hierarchy with comic-native entities.
 
 ## Supported Platforms
 
