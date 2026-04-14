@@ -23,6 +23,7 @@ ARG TARGETARCH
 WORKDIR /app
 
 COPY src/ ./src/
+COPY Logo/ ./Logo/
 
 # Restore and publish for the target architecture
 RUN dotnet restore ./src/Panelarr.sln && \
