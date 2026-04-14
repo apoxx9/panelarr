@@ -47,7 +47,7 @@ Three major areas of work:
 
 ```bash
 killall -9 dotnet Panelarr 2>/dev/null; sleep 2
-cd /Users/lorenzonunez-estevez/Projects/panelarr/src
+cd src/
 dotnet run --project NzbDrone.Console --framework net10.0
 ```
 
@@ -55,7 +55,7 @@ App at http://localhost:8787 (auth: admin/admin)
 
 UI symlink: `ln -sf .../_output/UI .../_output/net10.0/UI`
 
-Config: `/Users/lorenzonunez-estevez/Library/Application Support/Panelarr/`
+Config: `~/.config/Panelarr/`
 
 ---
 

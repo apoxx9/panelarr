@@ -167,5 +167,12 @@ import_test/
 *.swo
 *.DotSettings.user
 
+# AI config
+CLAUDE.md
+
+# Environment files
+.env
+.env.*
+
 # macOS extras
 Thumbs.db
