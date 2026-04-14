@@ -170,6 +170,11 @@ import_test/
 # AI config
 CLAUDE.md
 
+# Internal dev docs
+docs/BACKLOG.md
+docs/active-story.md
+docs/last-handoff.md
+
 # Environment files
 .env
 .env.*

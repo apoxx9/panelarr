@@ -36,8 +36,8 @@ ARG PGID=1000
 LABEL maintainer="Panelarr Team" \
       org.opencontainers.image.title="Panelarr" \
       org.opencontainers.image.description="Comic book management application" \
-      org.opencontainers.image.url="https://github.com/Panelarr/Panelarr" \
-      org.opencontainers.image.source="https://github.com/Panelarr/Panelarr"
+      org.opencontainers.image.url="https://github.com/apoxx9/panelarr" \
+      org.opencontainers.image.source="https://github.com/apoxx9/panelarr"
 
 RUN groupadd -g "${PGID}" panelarr && \
     useradd -u "${PUID}" -g panelarr -m panelarr
