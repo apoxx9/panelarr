@@ -32,7 +32,8 @@ RUN dotnet restore ./src/Panelarr.sln && \
         -r linux-${TARGETARCH:-x64} \
         --self-contained false \
         -o /build \
-        --no-restore
+        --no-restore \
+        -p:AnalysisLevel=none
 
 # ── Runtime image ──────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
