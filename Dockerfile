@@ -49,8 +49,8 @@ LABEL maintainer="Panelarr Team" \
       org.opencontainers.image.url="https://github.com/apoxx9/panelarr" \
       org.opencontainers.image.source="https://github.com/apoxx9/panelarr"
 
-RUN groupadd -g "${PGID}" panelarr && \
-    useradd -u "${PUID}" -g panelarr -m panelarr
+RUN groupadd -f -g "${PGID}" panelarr && \
+    useradd -o -u "${PUID}" -g "${PGID}" -m panelarr
 
 # Install prerequisites
 RUN apt-get update && apt-get install -y \
