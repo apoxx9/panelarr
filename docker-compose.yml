@@ -16,7 +16,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: panelarr/panelarr:latest
+    image: ghcr.io/apoxx9/panelarr:latest
     container_name: panelarr
     environment:
       - PUID=1000

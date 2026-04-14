@@ -5,8 +5,18 @@ ARG BUILDPLATFORM
 ARG TARGETPLATFORM
 ARG TARGETARCH
 
-# ── Build stage ─────────────────────────────────────────────────────────────────
-FROM --platform=${BUILDPLATFORM:-linux/amd64} mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# ── Frontend build ─────────────────────────────────────────────────────────────
+FROM --platform=${BUILDPLATFORM:-linux/amd64} node:20-slim AS frontend
+
+WORKDIR /app
+
+COPY package.json yarn.lock .yarnrc ./
+COPY frontend/ ./frontend/
+
+RUN yarn install --frozen-lockfile && yarn build
+
+# ── Backend build ──────────────────────────────────────────────────────────────
+FROM --platform=${BUILDPLATFORM:-linux/amd64} mcr.microsoft.com/dotnet/sdk:10.0 AS backend
 
 ARG TARGETARCH
 
@@ -27,8 +37,8 @@ RUN dotnet restore ./src/Panelarr.sln && \
         -o /build \
         --no-restore
 
-# ── Runtime image ────────────────────────────────────────────────────────────────
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# ── Runtime image ──────────────────────────────────────────────────────────────
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 ARG PUID=1000
 ARG PGID=1000
@@ -49,7 +59,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --from=build /build .
+COPY --from=backend /build .
+COPY --from=frontend /app/_output/UI ./UI
 
 # Create data directory
 RUN mkdir -p /config /comics && \

@@ -31,7 +31,7 @@ Forked from [Readarr](https://github.com/Readarr/Readarr) (GPL v3) with a fully 
 ```yaml
 services:
   panelarr:
-    image: panelarr/panelarr:latest
+    image: ghcr.io/apoxx9/panelarr:latest
     container_name: panelarr
     environment:
       - PUID=1000
