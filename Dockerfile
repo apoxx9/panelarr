@@ -39,33 +39,31 @@ RUN dotnet restore ./src/Panelarr.sln && \
 # ── Runtime image ──────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
-ARG PUID=1000
-ARG PGID=1000
-
 LABEL maintainer="Panelarr Team" \
       org.opencontainers.image.title="Panelarr" \
       org.opencontainers.image.description="Comic book management application" \
       org.opencontainers.image.url="https://github.com/apoxx9/panelarr" \
       org.opencontainers.image.source="https://github.com/apoxx9/panelarr"
 
-RUN groupadd -f -g "${PGID}" panelarr && \
-    useradd -o -u "${PUID}" -g "${PGID}" -m panelarr
-
-# Install prerequisites
+# Install prerequisites + gosu for privilege drop
 RUN apt-get update && apt-get install -y \
     curl \
     sqlite3 \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
+
+# Create default panelarr user (entrypoint adjusts UID/GID at runtime)
+RUN groupadd -f -g 1000 panelarr && \
+    useradd -o -u 1000 -g 1000 -m panelarr
 
 WORKDIR /app
 COPY --from=backend /build .
 COPY --from=frontend /app/_output/UI ./UI
+COPY docker/entrypoint.sh /entrypoint.sh
 
-# Create data directory
-RUN mkdir -p /config /comics && \
-    chown -R panelarr:panelarr /config /comics /app
-
-USER panelarr
+# Create data directories
+RUN mkdir -p /config /comics /downloads && \
+    chown -R panelarr:panelarr /config /comics /downloads /app
 
 ENV PANELARR_CONFIG_DIR=/config \
     PANELARR_DATA_DIR=/config \
@@ -73,10 +71,10 @@ ENV PANELARR_CONFIG_DIR=/config \
 
 EXPOSE 8787
 
-VOLUME ["/config", "/comics"]
+VOLUME ["/config", "/comics", "/downloads"]
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8787/api/v1/system/status || exit 1
 
-ENTRYPOINT ["dotnet", "Panelarr.dll"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["--nobrowser", "--data=/config"]
