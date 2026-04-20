@@ -34,6 +34,14 @@ RUN dotnet restore ./src/Panelarr.sln && \
         --self-contained false \
         -o /build \
         --no-restore \
+        -p:RunAnalyzers=false && \
+    dotnet publish ./src/NzbDrone.Mono/Panelarr.Mono.csproj \
+        -c Release \
+        -f net10.0 \
+        -r linux-${TARGETARCH:-x64} \
+        --self-contained false \
+        -o /build \
+        --no-restore \
         -p:RunAnalyzers=false
 
 # ── Runtime image ──────────────────────────────────────────────────────────────
