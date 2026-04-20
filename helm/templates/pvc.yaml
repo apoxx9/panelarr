@@ -1,0 +1,35 @@
+{{- if .Values.persistence.config.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "panelarr.fullname" . }}-config
+  labels:
+    {{- include "panelarr.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.config.accessMode }}
+  {{- if .Values.persistence.config.storageClass }}
+  storageClassName: {{ .Values.persistence.config.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.config.size }}
+{{- end }}
+---
+{{- if and .Values.persistence.comics.enabled (not .Values.persistence.comics.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "panelarr.fullname" . }}-comics
+  labels:
+    {{- include "panelarr.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.comics.accessMode }}
+  {{- if .Values.persistence.comics.storageClass }}
+  storageClassName: {{ .Values.persistence.comics.storageClass }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.comics.size }}
+{{- end }}

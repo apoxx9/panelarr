@@ -1,0 +1,37 @@
+.issue {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  margin: 2px 4px;
+  border: 1px solid var(--borderColor);
+  border-radius: 4px;
+  background-color: var(--volumeBackgroundColor);
+  cursor: default;
+}
+
+.info {
+  padding: 0 4px;
+}
+
+.issueType {
+  padding: 0 4px;
+  border-width: 0 1px;
+  border-style: solid;
+  border-color: var(--borderColor);
+  background-color: var(--white);
+  color: var(--defaultColor);
+}
+
+.issues {
+  padding: 0 4px;
+  background-color: var(--issuesBackgroundColor);
+  color: var(--defaultColor);
+}
+
+.allIssues {
+  background-color: var(--successColor);
+}
+
+.missingWanted {
+  background-color: var(--dangerColor);
+}

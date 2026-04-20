@@ -1,0 +1,54 @@
+using System.Collections.Generic;
+using System.Linq;
+using NzbDrone.Common.Extensions;
+using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Profiles.Qualities;
+using NzbDrone.Core.Qualities;
+
+namespace NzbDrone.Core.Issues
+{
+    public interface IIssueCutoffService
+    {
+        PagingSpec<Issue> IssuesWhereCutoffUnmet(PagingSpec<Issue> pagingSpec);
+    }
+
+    public class IssueCutoffService : IIssueCutoffService
+    {
+        private readonly IIssueRepository _issueRepository;
+        private readonly IQualityProfileService _qualityProfileService;
+
+        public IssueCutoffService(IIssueRepository issueRepository, IQualityProfileService qualityProfileService)
+        {
+            _issueRepository = issueRepository;
+            _qualityProfileService = qualityProfileService;
+        }
+
+        public PagingSpec<Issue> IssuesWhereCutoffUnmet(PagingSpec<Issue> pagingSpec)
+        {
+            var qualitiesBelowCutoff = new List<QualitiesBelowCutoff>();
+            var profiles = _qualityProfileService.All();
+
+            //Get all items less than the cutoff
+            foreach (var profile in profiles)
+            {
+                var cutoff = profile.UpgradeAllowed ? profile.Cutoff : profile.FirstAllowedQuality().Id;
+                var cutoffIndex = profile.GetIndex(cutoff);
+                var belowCutoff = profile.Items.Take(cutoffIndex.Index).ToList();
+
+                if (belowCutoff.Any())
+                {
+                    qualitiesBelowCutoff.Add(new QualitiesBelowCutoff(profile.Id, belowCutoff.SelectMany(i => i.GetQualities().Select(q => q.Id))));
+                }
+            }
+
+            if (qualitiesBelowCutoff.Empty())
+            {
+                pagingSpec.Records = new List<Issue>();
+
+                return pagingSpec;
+            }
+
+            return _issueRepository.IssuesWhereCutoffUnmet(pagingSpec, qualitiesBelowCutoff);
+        }
+    }
+}
