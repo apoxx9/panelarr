@@ -1,10 +1,7 @@
-version: "3.8"
-
 # Panelarr full stack: comic book management + indexer + download clients
-# Volumes are stored under ./data/ by default — change paths as needed.
 #
 # Usage:
-#   docker-compose up -d
+#   docker compose up -d
 #   Panelarr UI: http://localhost:8787
 #   Prowlarr UI: http://localhost:9696
 #   SABnzbd UI:  http://localhost:8080
@@ -13,9 +10,6 @@ version: "3.8"
 services:
 
   panelarr:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: ghcr.io/apoxx9/panelarr:latest
     container_name: panelarr
     environment:

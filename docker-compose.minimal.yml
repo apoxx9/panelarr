@@ -1,0 +1,28 @@
+# Panelarr only — minimal setup
+#
+# Usage:
+#   docker compose -f docker-compose.minimal.yml up -d
+#   Panelarr UI: http://localhost:8787
+
+services:
+
+  panelarr:
+    image: ghcr.io/apoxx9/panelarr:latest
+    container_name: panelarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - ./config:/config
+      - ./comics:/comics
+      - ./downloads:/downloads
+    ports:
+      - "8787:8787"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8787/api/v1/system/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
