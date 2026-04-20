@@ -3,7 +3,7 @@ import styles from './LoadingMessage.css';
 
 const messages = [
   'Downloading more RAM',
-  'Now in Technicolor',
+  'Flipping to the next page...',
   'Previously on Panelarr...',
   'Bleep Bloop.',
   'Locating the required gigapixels to render...',
@@ -11,15 +11,15 @@ const messages = [
   'At least you\'re not on hold',
   'Hum something loud while others stare',
   'Loading humorous message... Please Wait',
-  'I could\'ve been faster in Python',
-  'Don\'t forget to return your library issues',
+  'Checking the pull list...',
+  'Bagging and boarding...',
   'Congratulations! You are the 1000th visitor.',
   'HELP! I\'m being held hostage and forced to write these stupid lines!',
-  'RE-calibrating the internet...',
+  'Scanning for missing issues...',
   'I\'ll be here all week',
-  'Don\'t forget to tip your waitress',
-  'Apply directly to the forehead',
-  'Loading Battlestation'
+  'Reading the fine print in the speech bubbles...',
+  'Organizing the long boxes...',
+  'To be continued...'
 ];
 
 let message = null;
