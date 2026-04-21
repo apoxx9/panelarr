@@ -431,6 +431,12 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("TrustCgnatIpAddresses", value); }
         }
 
+        public bool SetupCompleted
+        {
+            get { return GetValueBoolean("SetupCompleted", false); }
+            set { SetValue("SetupCompleted", value); }
+        }
+
         private string GetValue(string key)
         {
             return GetValue(key, string.Empty);

@@ -19,6 +19,7 @@ import { fetchStatus } from 'Store/Actions/systemActions';
 import { fetchTags } from 'Store/Actions/tagActions';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import createSystemStatusSelector from 'Store/Selectors/createSystemStatusSelector';
+import getPathWithUrlBase from 'Utilities/getPathWithUrlBase';
 import ErrorPage from './ErrorPage';
 import LoadingPage from './LoadingPage';
 import Page from './Page';
@@ -169,6 +170,7 @@ function createMapStateToProps() {
         isPopulated,
         isSmallScreen: dimensions.isSmallScreen,
         authenticationEnabled: systemStatus.authentication !== 'none',
+        setupCompleted: systemStatus.setupCompleted,
         enableColorImpairedMode
       };
     }
@@ -266,6 +268,7 @@ class PageConnector extends Component {
     const {
       isPopulated,
       hasError,
+      setupCompleted,
       dispatchFetchSeries,
       dispatchFetchIssues,
       dispatchFetchTags,
@@ -289,6 +292,13 @@ class PageConnector extends Component {
       );
     }
 
+    if (isPopulated && setupCompleted === false) {
+      window.location.href = getPathWithUrlBase('/setup');
+      return (
+        <LoadingPage />
+      );
+    }
+
     if (isPopulated) {
       return (
         <Page
@@ -307,6 +317,7 @@ class PageConnector extends Component {
 PageConnector.propTypes = {
   isPopulated: PropTypes.bool.isRequired,
   hasError: PropTypes.bool.isRequired,
+  setupCompleted: PropTypes.bool,
   isSidebarVisible: PropTypes.bool.isRequired,
   dispatchFetchSeries: PropTypes.func.isRequired,
   dispatchFetchIssues: PropTypes.func.isRequired,

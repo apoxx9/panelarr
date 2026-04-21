@@ -21,6 +21,7 @@ namespace Panelarr.Api.V1.System
         private readonly IPlatformInfo _platformInfo;
         private readonly IOsInfo _osInfo;
         private readonly IConfigFileProvider _configFileProvider;
+        private readonly IConfigService _configService;
         private readonly IMainDatabase _database;
         private readonly ILifecycleService _lifecycleService;
         private readonly IDeploymentInfoProvider _deploymentInfoProvider;
@@ -33,6 +34,7 @@ namespace Panelarr.Api.V1.System
                                 IPlatformInfo platformInfo,
                                 IOsInfo osInfo,
                                 IConfigFileProvider configFileProvider,
+                                IConfigService configService,
                                 IMainDatabase database,
                                 ILifecycleService lifecycleService,
                                 IDeploymentInfoProvider deploymentInfoProvider,
@@ -45,6 +47,7 @@ namespace Panelarr.Api.V1.System
             _platformInfo = platformInfo;
             _osInfo = osInfo;
             _configFileProvider = configFileProvider;
+            _configService = configService;
             _database = database;
             _lifecycleService = lifecycleService;
             _deploymentInfoProvider = deploymentInfoProvider;
@@ -88,7 +91,8 @@ namespace Panelarr.Api.V1.System
                 PackageVersion = _deploymentInfoProvider.PackageVersion,
                 PackageSeries = _deploymentInfoProvider.PackageSeries,
                 PackageUpdateMechanism = _deploymentInfoProvider.PackageUpdateMechanism,
-                PackageUpdateMechanismMessage = _deploymentInfoProvider.PackageUpdateMechanismMessage
+                PackageUpdateMechanismMessage = _deploymentInfoProvider.PackageUpdateMechanismMessage,
+                SetupCompleted = _configService.SetupCompleted
             };
         }
 
@@ -107,6 +111,13 @@ namespace Panelarr.Api.V1.System
         public object DuplicateRoutes()
         {
             return _detector.GetDuplicateEndpoints(_endpointData);
+        }
+
+        [HttpPost("setup/complete")]
+        public object CompleteSetup()
+        {
+            _configService.SetupCompleted = true;
+            return new { SetupCompleted = true };
         }
 
         [HttpPost("shutdown")]

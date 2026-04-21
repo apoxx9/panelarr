@@ -39,5 +39,6 @@ namespace Panelarr.Api.V1.System
         public string PackageSeries { get; set; }
         public UpdateMechanism PackageUpdateMechanism { get; set; }
         public string PackageUpdateMechanismMessage { get; set; }
+        public bool SetupCompleted { get; set; }
     }
 }

@@ -99,5 +99,8 @@ namespace NzbDrone.Core.Configuration
 
         CertificateValidationType CertificateValidation { get; }
         string ApplicationUrl { get; }
+
+        // Setup Wizard
+        bool SetupCompleted { get; set; }
     }
 }
