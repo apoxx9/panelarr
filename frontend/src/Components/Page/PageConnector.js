@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import { Redirect, withRouter } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import { fetchTranslations, saveDimensions, setIsSidebarVisible } from 'Store/Actions/appActions';
 import { fetchSeries } from 'Store/Actions/seriesActions';
@@ -293,9 +293,8 @@ class PageConnector extends Component {
     }
 
     if (isPopulated && setupCompleted === false) {
-      window.location.href = getPathWithUrlBase('/setup');
       return (
-        <LoadingPage />
+        <Redirect to={getPathWithUrlBase('/setup')} />
       );
     }
 

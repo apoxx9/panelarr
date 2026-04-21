@@ -32,7 +32,6 @@ import Logs from 'System/Logs/Logs';
 import Status from 'System/Status/Status';
 import Tasks from 'System/Tasks/Tasks';
 import Updates from 'System/Updates/Updates';
-import SetupWizardConnector from 'SetupWizard/SetupWizardConnector';
 import UnmappedFilesTableConnector from 'UnmappedFiles/UnmappedFilesTableConnector';
 import getPathWithUrlBase from 'Utilities/getPathWithUrlBase';
 import CutoffUnmetConnector from 'Wanted/CutoffUnmet/CutoffUnmetConnector';
@@ -258,10 +257,7 @@ function AppRoutes(props) {
         Setup Wizard
       */}
 
-      <Route
-        path="/setup"
-        component={SetupWizardConnector}
-      />
+
 
       {/*
         Not Found

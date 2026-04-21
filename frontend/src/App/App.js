@@ -2,8 +2,10 @@ import { ConnectedRouter } from 'connected-react-router';
 import PropTypes from 'prop-types';
 import React from 'react';
 import DocumentTitle from 'react-document-title';
+import { Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import PageConnector from 'Components/Page/PageConnector';
+import SetupWizardConnector from 'SetupWizard/SetupWizardConnector';
 import ApplyTheme from './ApplyTheme';
 import AppRoutes from './AppRoutes';
 
@@ -13,9 +15,19 @@ function App({ store, history }) {
       <Provider store={store}>
         <ConnectedRouter history={history}>
           <ApplyTheme>
-            <PageConnector>
-              <AppRoutes app={App} />
-            </PageConnector>
+            <Switch>
+              <Route
+                path="/setup"
+                component={SetupWizardConnector}
+              />
+              <Route
+                render={() => (
+                  <PageConnector>
+                    <AppRoutes app={App} />
+                  </PageConnector>
+                )}
+              />
+            </Switch>
           </ApplyTheme>
         </ConnectedRouter>
       </Provider>
