@@ -82,7 +82,7 @@ EXPOSE 8787
 VOLUME ["/config", "/comics", "/downloads"]
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8787/api/v1/system/status || exit 1
+    CMD curl -f http://localhost:8787/ping || exit 1
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["--nobrowser", "--data=/config"]
