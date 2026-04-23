@@ -73,6 +73,7 @@ class RootFolderStep extends Component {
       method: 'POST',
       dataType: 'json',
       data: JSON.stringify({
+        name: path.trim().split('/').filter(Boolean).pop() || 'Comics',
         path: path.trim()
       })
     });
