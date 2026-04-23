@@ -74,7 +74,10 @@ class RootFolderStep extends Component {
       dataType: 'json',
       data: JSON.stringify({
         name: path.trim().split('/').filter(Boolean).pop() || 'Comics',
-        path: path.trim()
+        path: path.trim(),
+        defaultMetadataProfileId: 1,
+        defaultQualityProfileId: 1,
+        defaultMonitorOption: 'all'
       })
     });
 
