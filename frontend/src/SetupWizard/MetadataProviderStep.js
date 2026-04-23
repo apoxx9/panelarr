@@ -12,6 +12,7 @@ class MetadataProviderStep extends Component {
     super(props, context);
 
     this.state = {
+      configId: null,
       metronUsername: '',
       metronPassword: '',
       comicVineApiKey: '',
@@ -42,6 +43,7 @@ class MetadataProviderStep extends Component {
 
     request.done((data) => {
       this.setState({
+        configId: data.id,
         metronUsername: data.metronUsername || '',
         metronPassword: data.metronPassword || '',
         comicVineApiKey: data.comicVineApiKey || '',
@@ -78,6 +80,7 @@ class MetadataProviderStep extends Component {
       method: 'PUT',
       dataType: 'json',
       data: JSON.stringify({
+        id: this.state.configId,
         metronUsername: this.state.metronUsername,
         metronPassword: this.state.metronPassword,
         comicVineApiKey: this.state.comicVineApiKey
@@ -124,12 +127,7 @@ class MetadataProviderStep extends Component {
     this.saveConfig(() => {
       const { request } = createAjaxRequest({
         url: '/config/metadataprovider/test',
-        method: 'POST',
-        dataType: 'json',
-        data: JSON.stringify({
-          metronUsername: this.state.metronUsername,
-          metronPassword: this.state.metronPassword
-        })
+        dataType: 'json'
       });
 
       request.done(() => {
@@ -169,11 +167,7 @@ class MetadataProviderStep extends Component {
     this.saveConfig(() => {
       const { request } = createAjaxRequest({
         url: '/config/metadataprovider/testcomicvine',
-        method: 'POST',
-        dataType: 'json',
-        data: JSON.stringify({
-          comicVineApiKey: this.state.comicVineApiKey
-        })
+        dataType: 'json'
       });
 
       request.done(() => {

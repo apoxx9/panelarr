@@ -26,6 +26,7 @@ class IndexerStep extends Component {
 
     this.state = {
       schemas: [],
+      existingIndexers: [],
       selectedSchemaIndex: -1,
       fields: [],
       name: '',
@@ -40,6 +41,7 @@ class IndexerStep extends Component {
 
   componentDidMount() {
     this.fetchSchema();
+    this.fetchExisting();
   }
 
   //
@@ -65,6 +67,17 @@ class IndexerStep extends Component {
         isFetchingSchema: false,
         saveError: 'Failed to load indexer schemas.'
       });
+    });
+  }
+
+  fetchExisting() {
+    const { request } = createAjaxRequest({
+      url: '/indexer',
+      dataType: 'json'
+    });
+
+    request.done((data) => {
+      this.setState({ existingIndexers: data || [] });
     });
   }
 
@@ -189,8 +202,16 @@ class IndexerStep extends Component {
     });
 
     request.done(() => {
-      this.setState({ isSaving: false });
-      this.props.onStepComplete();
+      this.setState({
+        isSaving: false,
+        selectedSchemaIndex: -1,
+        fields: [],
+        name: '',
+        testStatus: null,
+        testMessage: '',
+        saveError: null
+      });
+      this.fetchExisting();
     });
 
     request.fail((xhr) => {
@@ -263,6 +284,7 @@ class IndexerStep extends Component {
   render() {
     const {
       schemas,
+      existingIndexers,
       selectedSchemaIndex,
       fields,
       name,
@@ -295,6 +317,29 @@ class IndexerStep extends Component {
         </p>
 
         <div className={styles.formContainer}>
+          {
+            existingIndexers.length > 0 &&
+              <div className={styles.existingFolders}>
+                <div className={styles.existingFoldersTitle}>
+                  Configured Indexers
+                </div>
+
+                {
+                  existingIndexers.map((indexer) => {
+                    return (
+                      <div
+                        key={indexer.id}
+                        className={styles.folderItem}
+                      >
+                        <span className={styles.folderIcon}>&bull;</span>
+                        {indexer.name} ({indexer.implementationName})
+                      </div>
+                    );
+                  })
+                }
+              </div>
+          }
+
           <div className={styles.schemaSelector}>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Indexer Type</label>

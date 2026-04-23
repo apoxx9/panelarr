@@ -26,6 +26,7 @@ class DownloadClientStep extends Component {
 
     this.state = {
       schemas: [],
+      existingClients: [],
       selectedSchemaIndex: -1,
       fields: [],
       name: '',
@@ -40,6 +41,7 @@ class DownloadClientStep extends Component {
 
   componentDidMount() {
     this.fetchSchema();
+    this.fetchExisting();
   }
 
   //
@@ -65,6 +67,17 @@ class DownloadClientStep extends Component {
         isFetchingSchema: false,
         saveError: 'Failed to load download client schemas.'
       });
+    });
+  }
+
+  fetchExisting() {
+    const { request } = createAjaxRequest({
+      url: '/downloadclient',
+      dataType: 'json'
+    });
+
+    request.done((data) => {
+      this.setState({ existingClients: data || [] });
     });
   }
 
@@ -189,8 +202,16 @@ class DownloadClientStep extends Component {
     });
 
     request.done(() => {
-      this.setState({ isSaving: false });
-      this.props.onStepComplete();
+      this.setState({
+        isSaving: false,
+        selectedSchemaIndex: -1,
+        fields: [],
+        name: '',
+        testStatus: null,
+        testMessage: '',
+        saveError: null
+      });
+      this.fetchExisting();
     });
 
     request.fail((xhr) => {
@@ -263,6 +284,7 @@ class DownloadClientStep extends Component {
   render() {
     const {
       schemas,
+      existingClients,
       selectedSchemaIndex,
       fields,
       name,
@@ -295,6 +317,29 @@ class DownloadClientStep extends Component {
         </p>
 
         <div className={styles.formContainer}>
+          {
+            existingClients.length > 0 &&
+              <div className={styles.existingFolders}>
+                <div className={styles.existingFoldersTitle}>
+                  Configured Download Clients
+                </div>
+
+                {
+                  existingClients.map((client) => {
+                    return (
+                      <div
+                        key={client.id}
+                        className={styles.folderItem}
+                      >
+                        <span className={styles.folderIcon}>&bull;</span>
+                        {client.name} ({client.implementationName})
+                      </div>
+                    );
+                  })
+                }
+              </div>
+          }
+
           <div className={styles.schemaSelector}>
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>Client Type</label>

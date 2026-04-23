@@ -31,6 +31,7 @@ interface CssExports {
   'progressStepComplete': string;
   'schemaFields': string;
   'schemaSelector': string;
+  'spin': string;
   'spinner': string;
   'startButton': string;
   'stepContent': string;
