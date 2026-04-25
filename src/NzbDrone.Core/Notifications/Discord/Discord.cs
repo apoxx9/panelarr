@@ -115,7 +115,7 @@ namespace NzbDrone.Core.Notifications.Discord
             {
                 new ()
                 {
-                    Title = $"{deleteMessage.Issue.Series.Value.Name} - ${deleteMessage.Issue.Title}",
+                    Title = $"{deleteMessage.Issue.Series.Value.Name} - {deleteMessage.Issue.Title}",
                     Description = deleteMessage.DeletedFilesMessage
                 }
             };
@@ -131,7 +131,7 @@ namespace NzbDrone.Core.Notifications.Discord
             {
                 new ()
                 {
-                    Title = $"{deleteMessage.Issue.Series.Value.Name} - ${deleteMessage.Issue.Title} - file deleted",
+                    Title = $"{deleteMessage.Issue.Series.Value.Name} - {deleteMessage.Issue.Title} - file deleted",
                     Description = deleteMessage.ComicFile.Path
                 }
             };
@@ -169,7 +169,7 @@ namespace NzbDrone.Core.Notifications.Discord
                 }
             };
 
-            var payload = CreatePayload($"Track file tags updated: {message.Message}", attachments);
+            var payload = CreatePayload($"Comic file tags updated: {message.Message}", attachments);
 
             _proxy.SendPayload(payload, Settings);
         }

@@ -12,8 +12,8 @@ namespace NzbDrone.Core.HealthCheck.Checks
 {
     [CheckOn(typeof(SeriesDeletedEvent))]
     [CheckOn(typeof(SeriesMovedEvent))]
-    [CheckOn(typeof(TrackImportedEvent), CheckOnCondition.FailedOnly)]
-    [CheckOn(typeof(TrackImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
+    [CheckOn(typeof(ComicFileImportedEvent), CheckOnCondition.FailedOnly)]
+    [CheckOn(typeof(ComicFileImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
     public class RootFolderCheck : HealthCheckBase
     {
         private readonly ISeriesService _seriesService;

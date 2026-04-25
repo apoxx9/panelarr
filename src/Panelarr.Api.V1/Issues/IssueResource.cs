@@ -16,7 +16,7 @@ namespace Panelarr.Api.V1.Issues
         public string Title { get; set; }
         public string SeriesTitle { get; set; }
         public string Disambiguation { get; set; }
-        public float? IssueNumber { get; set; }
+        public string IssueNumber { get; set; }
         public string IssueType { get; set; }
         public string CoverArtUrl { get; set; }
         public int SeriesId { get; set; }
@@ -62,7 +62,7 @@ namespace Panelarr.Api.V1.Issues
                 SeriesId = model.SeriesId,
                 ForeignIssueId = model.ForeignIssueId,
                 TitleSlug = model.TitleSlug,
-                IssueNumber = model.IssueNumber > 0 ? model.IssueNumber : (float?)null,
+                IssueNumber = model.IssueNumber,
                 IssueType = model.IssueType != NzbDrone.Core.Issues.IssueType.Standard ? model.IssueType.ToString() : null,
                 CoverArtUrl = model.CoverArtUrl,
                 Monitored = model.Monitored,

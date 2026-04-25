@@ -12,7 +12,7 @@ using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.ProviderTests.DiskScanProviderTests
 {
-    public class GetAudioFilesFixture : CoreTest<DiskScanService>
+    public class GetComicFilesFixture : CoreTest<DiskScanService>
     {
         private readonly string _path = @"C:\Test\".AsOsAgnostic();
         private string[] _fileNames;

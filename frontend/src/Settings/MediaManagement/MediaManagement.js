@@ -22,12 +22,6 @@ const rescanAfterRefreshOptions = [
   { key: 'never', value: 'Never' }
 ];
 
-const allowFingerprintingOptions = [
-  { key: 'allFiles', value: 'Always' },
-  { key: 'newFiles', value: 'For new imports only' },
-  { key: 'never', value: 'Never' }
-];
-
 const downloadPropersAndRepacksOptions = [
   { key: 'preferAndUpgrade', value: 'Prefer and Upgrade' },
   { key: 'doNotUpgrade', value: 'Do not Upgrade Automatically' },
@@ -312,25 +306,6 @@ class MediaManagement extends Component {
                       values={rescanAfterRefreshOptions}
                       onChange={onInputChange}
                       {...settings.rescanAfterRefresh}
-                    />
-                  </FormGroup>
-
-                  <FormGroup
-                    advancedSettings={advancedSettings}
-                    isAdvanced={true}
-                  >
-                    <FormLabel>
-                      {translate('AllowFingerprinting')}
-                    </FormLabel>
-
-                    <FormInputGroup
-                      type={inputTypes.SELECT}
-                      name="allowFingerprinting"
-                      helpText={translate('AllowFingerprintingHelpText')}
-                      helpTextWarning={translate('AllowFingerprintingHelpTextWarning')}
-                      values={allowFingerprintingOptions}
-                      onChange={onInputChange}
-                      {...settings.allowFingerprinting}
                     />
                   </FormGroup>
 

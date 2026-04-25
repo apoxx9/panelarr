@@ -24,6 +24,17 @@
   font-size: 18px;
 }
 
+.yearInput {
+  composes: input from '~Components/Form/TextInput.css';
+
+  width: 100px;
+  height: 46px;
+  border-left: none;
+  border-radius: 0;
+  font-size: 18px;
+  text-align: center;
+}
+
 .clearLookupButton {
   border: 1px solid var(--inputBorderColor);
   border-left: none;

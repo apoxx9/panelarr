@@ -3,7 +3,7 @@
 interface CssExports {
   'bar': string;
   'handle': string;
-  'kilobitsPerSecond': string;
+  'megabytes': string;
   'quality': string;
   'qualityDefinition': string;
   'sizeInput': string;

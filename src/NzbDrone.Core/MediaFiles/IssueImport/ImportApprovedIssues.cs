@@ -131,7 +131,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
             _logger.Debug("Importing {0} files. Replace existing: {1}", qualifiedImports.Count, replaceExisting);
 
             var filesToAdd = new List<ComicFile>(qualifiedImports.Count);
-            var trackImportedEvents = new List<TrackImportedEvent>(qualifiedImports.Count);
+            var trackImportedEvents = new List<ComicFileImportedEvent>(qualifiedImports.Count);
 
             foreach (var importDecision in qualifiedImports)
             {
@@ -233,12 +233,12 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
 
                     // create all the import events here, but we can't publish until the comic files have been
                     // inserted and ids created
-                    trackImportedEvents.Add(new TrackImportedEvent(localTrack, comicFile, oldFiles, !localTrack.ExistingFile, downloadClientItem));
+                    trackImportedEvents.Add(new ComicFileImportedEvent(localTrack, comicFile, oldFiles, !localTrack.ExistingFile, downloadClientItem));
                 }
                 catch (RootFolderNotFoundException e)
                 {
                     _logger.Warn(e, "Couldn't import issue " + localTrack);
-                    _eventAggregator.PublishEvent(new TrackImportFailedEvent(e, localTrack, !localTrack.ExistingFile, downloadClientItem));
+                    _eventAggregator.PublishEvent(new ComicFileImportFailedEvent(e, localTrack, !localTrack.ExistingFile, downloadClientItem));
 
                     importResults.Add(new ImportResult(importDecision, "Failed to import issue, root folder missing."));
                 }
@@ -250,14 +250,14 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                 catch (UnauthorizedAccessException e)
                 {
                     _logger.Warn(e, "Couldn't import issue " + localTrack);
-                    _eventAggregator.PublishEvent(new TrackImportFailedEvent(e, localTrack, !localTrack.ExistingFile, downloadClientItem));
+                    _eventAggregator.PublishEvent(new ComicFileImportFailedEvent(e, localTrack, !localTrack.ExistingFile, downloadClientItem));
 
                     importResults.Add(new ImportResult(importDecision, "Failed to import issue, permissions error"));
                 }
                 catch (RecycleBinException e)
                 {
                     _logger.Warn(e, "Couldn't import issue " + localTrack);
-                    _eventAggregator.PublishEvent(new TrackImportFailedEvent(e, localTrack, !localTrack.ExistingFile, downloadClientItem));
+                    _eventAggregator.PublishEvent(new ComicFileImportFailedEvent(e, localTrack, !localTrack.ExistingFile, downloadClientItem));
 
                     importResults.Add(new ImportResult(importDecision, "Failed to import issue, unable to move existing file to the Recycle Bin."));
                 }

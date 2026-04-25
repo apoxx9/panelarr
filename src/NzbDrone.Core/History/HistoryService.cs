@@ -26,7 +26,7 @@ namespace NzbDrone.Core.History
         List<EntityHistory> GetByIssue(int issueId, EntityHistoryEventType? eventType);
         List<EntityHistory> Find(string downloadId, EntityHistoryEventType eventType);
         List<EntityHistory> FindByDownloadId(string downloadId);
-        string FindDownloadId(TrackImportedEvent trackedDownload);
+        string FindDownloadId(ComicFileImportedEvent trackedDownload);
         List<EntityHistory> Since(DateTime date, EntityHistoryEventType? eventType);
         void UpdateMany(IList<EntityHistory> items);
     }
@@ -34,7 +34,7 @@ namespace NzbDrone.Core.History
     public class HistoryService : IHistoryService,
                                   IHandle<IssueGrabbedEvent>,
                                   IHandle<IssueImportIncompleteEvent>,
-                                  IHandle<TrackImportedEvent>,
+                                  IHandle<ComicFileImportedEvent>,
                                   IHandle<DownloadFailedEvent>,
                                   IHandle<ComicFileDeletedEvent>,
                                   IHandle<ComicFileRenamedEvent>,
@@ -91,7 +91,7 @@ namespace NzbDrone.Core.History
             return _historyRepository.FindByDownloadId(downloadId);
         }
 
-        public string FindDownloadId(TrackImportedEvent trackedDownload)
+        public string FindDownloadId(ComicFileImportedEvent trackedDownload)
         {
             _logger.Debug("Trying to find downloadId for {0} from history", trackedDownload.ImportedIssue.Path);
 
@@ -208,7 +208,7 @@ namespace NzbDrone.Core.History
             }
         }
 
-        public void Handle(TrackImportedEvent message)
+        public void Handle(ComicFileImportedEvent message)
         {
             if (!message.NewDownload)
             {
@@ -273,7 +273,7 @@ namespace NzbDrone.Core.History
 
         public void Handle(ComicFileDeletedEvent message)
         {
-            if (message.Reason == DeleteMediaFileReason.NoLinkedEpisodes)
+            if (message.Reason == DeleteMediaFileReason.NoLinkedIssues)
             {
                 _logger.Debug("Removing issue file from DB as part of cleanup routine, not creating history event.");
                 return;

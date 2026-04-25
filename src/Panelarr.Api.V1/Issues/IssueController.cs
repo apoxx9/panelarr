@@ -29,7 +29,7 @@ namespace Panelarr.Api.V1.Issues
         IHandle<IssueUpdatedEvent>,
         IHandle<IssueDeletedEvent>,
         IHandle<IssueImportedEvent>,
-        IHandle<TrackImportedEvent>,
+        IHandle<ComicFileImportedEvent>,
         IHandle<ComicFileDeletedEvent>
     {
         protected readonly ISeriesService _seriesService;
@@ -61,7 +61,9 @@ namespace Panelarr.Api.V1.Issues
         public List<IssueResource> GetIssues([FromQuery] int? seriesId,
             [FromQuery] List<int> issueIds,
             [FromQuery] string titleSlug,
-            [FromQuery] bool includeAllSeriesIssues = false)
+            [FromQuery] bool includeAllSeriesIssues = false,
+            [FromQuery] int? page = null,
+            [FromQuery] int? pageSize = null)
         {
             if (!seriesId.HasValue && !issueIds.Any() && titleSlug.IsNullOrWhiteSpace())
             {
@@ -73,6 +75,12 @@ namespace Panelarr.Api.V1.Issues
                 foreach (var issue in issues)
                 {
                     issue.Series = seriesDict[issue.SeriesMetadataId];
+                }
+
+                if (page.HasValue && pageSize.HasValue)
+                {
+                    var skip = (page.Value - 1) * pageSize.Value;
+                    issues = issues.Skip(skip).Take(pageSize.Value).ToList();
                 }
 
                 return MapToResource(issues, false);
@@ -190,7 +198,7 @@ namespace Panelarr.Api.V1.Issues
         }
 
         [NonAction]
-        public void Handle(TrackImportedEvent message)
+        public void Handle(ComicFileImportedEvent message)
         {
             BroadcastResourceChange(ModelAction.Updated, message.IssueInfo.Issue.ToResource());
         }

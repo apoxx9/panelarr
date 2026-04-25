@@ -302,7 +302,7 @@ namespace NzbDrone.Core.Organizer
                 tokenHandlers["{Issue SeriesTitle}"] = m => seriesTitle;
             }
 
-            tokenHandlers["{Issue Number}"] = m => issue.IssueNumber.ToString(m.CustomFormat ?? "0.##");
+            tokenHandlers["{Issue Number}"] = m => issue.IssueNumber ?? "";
             tokenHandlers["{Issue Type}"] = m => issue.IssueType.ToString();
 
             var volumeNumber = issue.SeriesMetadata?.Value?.VolumeNumber;

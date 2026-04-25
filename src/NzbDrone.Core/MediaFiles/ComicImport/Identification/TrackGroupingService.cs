@@ -122,14 +122,6 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             const double seriesTagThreshold = 0.25;
             const double tagFuzz = 0.9;
 
-            // check that any Issue/Release MBID is unique
-            if (tracks.Select(x => x.FileTrackInfo.IssueMBId).Distinct().Count(x => x.IsNotNullOrWhiteSpace()) > 1 ||
-                tracks.Select(x => x.FileTrackInfo.ReleaseMBId).Distinct().Count(x => x.IsNotNullOrWhiteSpace()) > 1)
-            {
-                _logger.Trace("LooksLikeSingleRelease: MBIDs are not unique");
-                return false;
-            }
-
             // check that there's a common issue tag.
             var issueTags = tracks.Select(x => x.FileTrackInfo.IssueTitle);
             if (!HasCommonEntry(issueTags, issueTagThreshold, tagFuzz))

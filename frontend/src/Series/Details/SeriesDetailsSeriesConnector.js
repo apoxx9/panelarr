@@ -47,7 +47,7 @@ function createMapStateToProps() {
         sortedIssues = issuesInSeries.sort((a, b) => {
           const apos = positionMap[a.id] || '';
           const bpos = positionMap[b.id] || '';
-          return apos.localeCompare(bpos, undefined, { numeric: true, sensivity: 'base' });
+          return apos.localeCompare(bpos, undefined, { numeric: true, sensitivity: 'base' });
         });
       } else {
         sortedIssues = _.orderBy(issuesInSeries, effectiveSortKey, sortDir);

@@ -46,12 +46,6 @@ class SelectEditionRow extends Component {
       if (issueEdition.publisher) {
         extras.push(issueEdition.publisher);
       }
-      if (issueEdition.isbn13) {
-        extras.push(issueEdition.isbn13);
-      }
-      if (issueEdition.asin) {
-        extras.push(issueEdition.asin);
-      }
       if (issueEdition.format) {
         extras.push(issueEdition.format);
       }

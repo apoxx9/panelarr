@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using NLog;
@@ -27,19 +26,16 @@ namespace NzbDrone.Core.MediaFiles
         IExecute<RetagFilesCommand>,
         IExecute<RetagSeriesCommand>
     {
-        private readonly IAudioTagService _audioTagService;
         private readonly IComicInfoReaderService _comicInfoReaderService;
         private readonly IMediaFileService _mediaFileService;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
 
-        public MetadataTagService(IAudioTagService audioTagService,
-            IComicInfoReaderService comicInfoReaderService,
+        public MetadataTagService(IComicInfoReaderService comicInfoReaderService,
             IMediaFileService mediaFileService,
             IEventAggregator eventAggregator,
             Logger logger)
         {
-            _audioTagService = audioTagService;
             _comicInfoReaderService = comicInfoReaderService;
             _mediaFileService = mediaFileService;
             _eventAggregator = eventAggregator;
@@ -48,11 +44,6 @@ namespace NzbDrone.Core.MediaFiles
 
         public ParsedTrackInfo ReadTags(IFileInfo file)
         {
-            if (MediaFileExtensions.AudioExtensions.Contains(file.Extension))
-            {
-                return _audioTagService.ReadTags(file.FullName);
-            }
-
             return ReadComicTags(file);
         }
 
@@ -114,32 +105,27 @@ namespace NzbDrone.Core.MediaFiles
 
         public void WriteTags(ComicFile comicFile, bool newDownload, bool force = false)
         {
-            var extension = Path.GetExtension(comicFile.Path);
-            if (MediaFileExtensions.AudioExtensions.Contains(extension))
-            {
-                _audioTagService.WriteTags(comicFile, newDownload, force);
-            }
         }
 
         public void SyncTags(List<Issue> issues)
         {
-            _audioTagService.SyncTags(issues);
+            // Comic files use ComicInfo.xml embedded during import — no audio sync needed
         }
 
         public List<RetagComicFilePreview> GetRetagPreviewsBySeries(int seriesId)
         {
-            return _audioTagService.GetRetagPreviewsBySeries(seriesId);
+            // Comic file retag previews not yet implemented (requires ComicInfo.xml writer)
+            return new List<RetagComicFilePreview>();
         }
 
         public List<RetagComicFilePreview> GetRetagPreviewsByIssue(int issueId)
         {
-            return _audioTagService.GetRetagPreviewsByIssue(issueId);
+            // Comic file retag previews not yet implemented (requires ComicInfo.xml writer)
+            return new List<RetagComicFilePreview>();
         }
 
         public void Execute(RetagFilesCommand message)
         {
-            // Re-embed ComicInfo.xml for comic files
-            var comicFileIds = new List<int>();
             foreach (var fileId in message.Files)
             {
                 try
@@ -148,7 +134,6 @@ namespace NzbDrone.Core.MediaFiles
                     if (comicFile.ComicFormat != ComicFormat.Unknown)
                     {
                         _eventAggregator.PublishEvent(new ComicFileAddedEvent(comicFile));
-                        comicFileIds.Add(fileId);
                     }
                 }
                 catch (NzbDrone.Core.Datastore.ModelNotFoundException)
@@ -156,18 +141,23 @@ namespace NzbDrone.Core.MediaFiles
                     _logger.Warn("ComicFile {0} not found, skipping retag", fileId);
                 }
             }
-
-            // Only pass non-comic files to the audio tag service
-            var audioFiles = message.Files.Except(comicFileIds).ToList();
-            if (audioFiles.Any())
-            {
-                _audioTagService.RetagFiles(message);
-            }
         }
 
         public void Execute(RetagSeriesCommand message)
         {
-            _audioTagService.RetagSeries(message);
+            var allSeries = message.SeriesIds;
+
+            foreach (var seriesId in allSeries)
+            {
+                var comicFiles = _mediaFileService.GetFilesBySeries(seriesId);
+
+                _logger.Info("Re-tagging {0} comic files for series {1}", comicFiles.Count, seriesId);
+
+                foreach (var file in comicFiles.Where(x => x.ComicFormat != ComicFormat.Unknown))
+                {
+                    _eventAggregator.PublishEvent(new ComicFileAddedEvent(file));
+                }
+            }
         }
     }
 }

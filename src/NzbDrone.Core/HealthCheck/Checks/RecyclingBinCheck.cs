@@ -7,8 +7,8 @@ using NzbDrone.Core.MediaFiles.Events;
 namespace NzbDrone.Core.HealthCheck.Checks
 {
     [CheckOn(typeof(IssueImportedEvent), CheckOnCondition.FailedOnly)]
-    [CheckOn(typeof(TrackImportedEvent), CheckOnCondition.FailedOnly)]
-    [CheckOn(typeof(TrackImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
+    [CheckOn(typeof(ComicFileImportedEvent), CheckOnCondition.FailedOnly)]
+    [CheckOn(typeof(ComicFileImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
     public class RecyclingBinCheck : HealthCheckBase
     {
         private readonly IConfigService _configService;

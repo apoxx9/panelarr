@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Alert from 'Components/Alert';
+import NumberInput from 'Components/Form/NumberInput';
 import TextInput from 'Components/Form/TextInput';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
@@ -25,6 +26,7 @@ class AddNewItem extends Component {
 
     this.state = {
       term: props.term || '',
+      year: props.year || '',
       isFetching: false
     };
   }
@@ -33,7 +35,7 @@ class AddNewItem extends Component {
     const term = this.state.term;
 
     if (term) {
-      this.props.onSearchChange(term);
+      this.props.onSearchChange(term, this.state.year);
     }
   }
 
@@ -48,7 +50,7 @@ class AddNewItem extends Component {
         term,
         isFetching: true
       });
-      this.props.onSearchChange(term);
+      this.props.onSearchChange(term, this.state.year);
     } else if (isFetching !== prevProps.isFetching) {
       this.setState({
         isFetching
@@ -64,15 +66,25 @@ class AddNewItem extends Component {
 
     this.setState({ term: value, isFetching: hasValue }, () => {
       if (hasValue) {
-        this.props.onSearchChange(value);
+        this.props.onSearchChange(value, this.state.year);
       } else {
         this.props.onClearSearch();
       }
     });
   };
 
+  onYearInputChange = ({ value }) => {
+    this.setState({ year: value }, () => {
+      const term = this.state.term.trim();
+
+      if (term) {
+        this.props.onSearchChange(term, value);
+      }
+    });
+  };
+
   onClearSearchPress = () => {
-    this.setState({ term: '' });
+    this.setState({ term: '', year: '' });
     this.props.onClearSearch();
   };
 
@@ -109,6 +121,14 @@ class AddNewItem extends Component {
               onChange={this.onSearchInputChange}
             />
 
+            <TextInput
+              className={styles.yearInput}
+              name="yearBox"
+              value={this.state.year}
+              placeholder="Year"
+              onChange={this.onYearInputChange}
+            />
+
             <Button
               className={styles.clearLookupButton}
               onPress={this.onClearSearchPress}
@@ -135,7 +155,7 @@ class AddNewItem extends Component {
                 <Alert kind={kinds.WARNING}>{getErrorMessage(error)}</Alert>
 
                 <div>
-                  <Link to="https://wiki.servarr.com/panelarr/troubleshooting#invalid-response-received-from-metadata-api">
+                  <Link to="https://github.com/apoxx9/panelarr/wiki/troubleshooting#invalid-response-received-from-metadata-api">
                     {translate('WhySearchesCouldBeFailing')}
                   </Link>
                 </div>
@@ -179,7 +199,7 @@ class AddNewItem extends Component {
                   {translate('CouldntFindAnyResultsForTerm', [term])}
                 </div>
                 <div>
-                  You can also search by Metron ID for a series (e.g. series:128382) or issue (e.g. issue:656)
+                  {translate('SearchByMetronIdHelpText')}
                 </div>
               </div>
           }
@@ -192,7 +212,7 @@ class AddNewItem extends Component {
                   {translate('ItsEasyToAddANewSeriesOrIssueJustStartTypingTheNameOfTheItemYouWantToAdd')}
                 </div>
                 <div>
-                  You can also search by Metron ID for a series (e.g. series:128382) or issue (e.g. issue:656)
+                  {translate('SearchByMetronIdHelpText')}
                 </div>
               </div>
           }
@@ -224,6 +244,7 @@ class AddNewItem extends Component {
 
 AddNewItem.propTypes = {
   term: PropTypes.string,
+  year: PropTypes.string,
   isFetching: PropTypes.bool.isRequired,
   error: PropTypes.object,
   isAdding: PropTypes.bool.isRequired,

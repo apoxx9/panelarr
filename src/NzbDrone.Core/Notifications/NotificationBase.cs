@@ -12,8 +12,8 @@ namespace NzbDrone.Core.Notifications
     {
         protected const string ISSUE_GRABBED_TITLE = "Issue Grabbed";
         protected const string ISSUE_DOWNLOADED_TITLE = "Issue Downloaded";
-        protected const string AUTHOR_ADDED_TITLE = "Series Added";
-        protected const string AUTHOR_DELETED_TITLE = "Series Deleted";
+        protected const string SERIES_ADDED_TITLE = "Series Added";
+        protected const string SERIES_DELETED_TITLE = "Series Deleted";
         protected const string ISSUE_DELETED_TITLE = "Issue Deleted";
         protected const string ISSUE_FILE_DELETED_TITLE = "Issue File Deleted";
         protected const string HEALTH_ISSUE_TITLE = "Health Check Failure";
@@ -24,8 +24,8 @@ namespace NzbDrone.Core.Notifications
 
         protected const string ISSUE_GRABBED_TITLE_BRANDED = "Panelarr - " + ISSUE_GRABBED_TITLE;
         protected const string ISSUE_DOWNLOADED_TITLE_BRANDED = "Panelarr - " + ISSUE_DOWNLOADED_TITLE;
-        protected const string AUTHOR_ADDED_TITLE_BRANDED = "Panelarr - " + AUTHOR_ADDED_TITLE;
-        protected const string AUTHOR_DELETED_TITlE_BRANDED = "Panelarr - " + AUTHOR_DELETED_TITLE;
+        protected const string SERIES_ADDED_TITLE_BRANDED = "Panelarr - " + SERIES_ADDED_TITLE;
+        protected const string SERIES_DELETED_TITLE_BRANDED = "Panelarr - " + SERIES_DELETED_TITLE;
         protected const string ISSUE_DELETED_TITLE_BRANDED = "Panelarr - " + ISSUE_DELETED_TITLE;
         protected const string ISSUE_FILE_DELETED_TITLE_BRANDED = "Panelarr - " + ISSUE_FILE_DELETED_TITLE;
         protected const string HEALTH_ISSUE_TITLE_BRANDED = "Panelarr - " + HEALTH_ISSUE_TITLE;

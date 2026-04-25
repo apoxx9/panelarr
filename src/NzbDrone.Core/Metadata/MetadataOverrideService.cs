@@ -193,7 +193,7 @@ namespace NzbDrone.Core.Metadata
                     issue.Title = Convert.ToString(value);
                     break;
                 case "IssueNumber":
-                    issue.IssueNumber = Convert.ToSingle(value);
+                    issue.IssueNumber = Convert.ToString(value);
                     break;
                 case "IssueType":
                     if (Enum.TryParse<IssueType>(Convert.ToString(value), true, out var issueType))

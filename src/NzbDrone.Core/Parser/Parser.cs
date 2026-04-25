@@ -41,94 +41,79 @@ namespace NzbDrone.Core.Parser
 
         private static readonly Regex[] ReportIssueTitleRegex = new[]
         {
-            //ruTracker - (Genre) [Source]? Series - Discography
-            new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<series>.+?)(?: - )(?<discography>Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
+            // Tracker/ruTracker - (Genre) [Source]? Series - Compendium/Collection with year range
+            new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<series>.+?)(?: - )(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series - Discography with two years
-            new Regex(@"^(?<series>.+?)(?: - )(?:.+?)?(?<discography>Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
+            // Series - Compendium/Collection with two years
+            new Regex(@"^(?<series>.+?)(?:\s+-\s+)(?:.+?)?(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series - Discography with end year
-            new Regex(@"^(?<series>.+?)(?: - )(?:.+?)?(?<discography>Discography|Discografia).+?(?<endyear>\d{4})",
+            // Series - Compendium/Collection with end year
+            new Regex(@"^(?<series>.+?)(?: - )(?:.+?)?(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series Discography with two years
-            new Regex(@"^(?<series>.+?)\W*(?<discography>Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
+            // Tracker/ruTracker - (Genre) [Source]? Series - Compendium (no year range)
+            new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<series>.+?)(?: - )(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series Discography with end year
-            new Regex(@"^(?<series>.+?)\W*(?<discography>Discography|Discografia).+?(?<endyear>\d{4})",
+            // Series Compendium with volume: "Saga Compendium v01 (2019)"
+            new Regex(@"^(?<series>.+?\s+(?<discography>Compendium))\s+v\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series Discography
-            new Regex(@"^(?<series>.+?)\W*(?<discography>Discography|Discografia)",
+            // Series Compendium/Collection with two years
+            new Regex(@"^(?<series>.+?)\W*(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //MyAnonaMouse - Title by Series [lang / pdf]
-            new Regex(@"^(?<issue>.+)\bby\b(?<series>.+?)(?:\[|\()",
+            // Series Compendium/Collection with end year
+            new Regex(@"^(?<series>.+?)\W*(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //ruTracker - (Genre) [Source]? Series - Issue - Year
-            new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<series>.+?)(?: - )(?<issue>.+?)(?: - )(?<releaseyear>\d{4})",
+            // Series Compendium/Collection (no year)
+            new Regex(@"^(?<series>.+?)\W*(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series-Issue-Version-Source-Year
-            //ex. Imagine Dragons-Smoke And Mirrors-Deluxe Edition-2CD-FLAC-2015-JLM
-            new Regex(@"^(?<series>.+?)[-](?<issue>.+?)[-](?:[\(|\[]?)(?<version>.+?(?:Edition)?)(?:[\)|\]]?)[-](?<source>\d?CD|WEB).+?(?<releaseyear>\d{4})",
+            // GetComics/MAM - Title by Author [format] or (format)
+            new Regex(@"^(?<issue>.+?)\s*(?:\(.+?\)\s*)*\bby\b\s*(?<series>.+?)(?:\[|\()",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series-Issue-Source-Year
-            //ex. Dani_Sbert-Togheter-WEB-2017-FURY
-            new Regex(@"^(?<series>.+?)[-](?<issue>.+?)[-](?<source>\d?CD|WEB).+?(?<releaseyear>\d{4})",
+            // Tracker/ruTracker - (Genre) [Source]? Series - Issue - Year, Format
+            new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<series>.+?)(?: - )(?<issue>.+?)(?:(?: - )(?<releaseyear>\d{4})|,)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series - Issue (Year) Strict
-            new Regex(@"^(?:(?<series>.+?)(?: - )+)(?<issue>.+?)\W*(?:\(|\[).+?(?<releaseyear>\d{4})",
+            // Standard comic with issue number: Series NNN (Year) (Source) (Group).ext
+            new Regex(@"^(?<series>.+?)\s+(?<issue>\d{1,4})\s+\((?<releaseyear>\d{4})\)\s+\((?<source>[^)]+)\)(?:\s+\((?<releasegroup>[^)]+)\))?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series - Issue (Year)
-            new Regex(@"^(?:(?<series>.+?)(?: - )+)(?<issue>.+?)\W*(?:\(|\[)(?<releaseyear>\d{4})",
+            // Dot-separated comic: Series.Name.NNN.(Year).(Source).(Group).ext
+            new Regex(@"^(?<series>[\w.-]+?)\.(?<issue>(?:[A-Za-z]+\.)?\d{1,4})\.\((?<releaseyear>\d{4})\)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series - Issue - Year [something]
+            // Series - Title with volume: Hellboy Omnibus v01 - Seed of Destruction (Year)
+            new Regex(@"^(?<series>.+?\s+v\d+)\s+-\s+(?<issue>.+?)\s+\((?<releaseyear>\d{4})\)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Series - Issue/Title (Year) (Source)
+            new Regex(@"^(?<series>.+?)\s+-\s+(?<issue>.+?)\s+\((?<releaseyear>\d{4})\)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+            // Series - Issue/Title - Year [something]
             new Regex(@"^(?:(?<series>.+?)(?: - )+)(?<issue>.+?)\W*(?: - )(?<releaseyear>\d{4})\W*(?:\(|\[)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series - Issue [something] or Series - Issue (something)
+            // Series - Issue/Title [something] or (something)
             new Regex(@"^(?:(?<series>.+?)(?: - )+)(?<issue>.+?)\W*(?:\(|\[)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series - Issue Year
+            // Series - Issue/Title Year
             new Regex(@"^(?:(?<series>.+?)(?: - )+)(?<issue>.+?)\W*(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series-Issue (Year) Strict
-            //Hyphen no space between series and issue
-            new Regex(@"^(?:(?<series>.+?)(?:-)+)(?<issue>.+?)\W*(?:\(|\[).+?(?<releaseyear>\d{4})",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-
-            //Series-Issue (Year)
-            //Hyphen no space between series and issue
-            new Regex(@"^(?:(?<series>.+?)(?:-)+)(?<issue>.+?)\W*(?:\(|\[)(?<releaseyear>\d{4})",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-
-            //Series-Issue [something] or Series-Issue (something)
-            //Hyphen no space between series and issue
-            new Regex(@"^(?:(?<series>.+?)(?:-)+)(?<issue>.+?)\W*(?:\(|\[)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-
-            //Series-Issue-something-Year
-            new Regex(@"^(?:(?<series>.+?)(?:-)+)(?<issue>.+?)(?:-.+?)(?<releaseyear>\d{4})",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-
-            //Series-Issue Year
-            //Hyphen no space between series and issue
+            // Dash-separated: Series-Issue-Year-Source
             new Regex(@"^(?:(?<series>.+?)(?:-)+)(?:(?<issue>.+?)(?:-)+)(?<releaseyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            //Series - Year - Issue
-            // Hypen with no or more spaces between series/issue/year
+            // Dash-separated: Series-Year-Issue-Source
             new Regex(@"^(?:(?<series>.+?)(?:-))(?<releaseyear>\d{4})(?:-)(?<issue>[^-]+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
@@ -836,6 +821,14 @@ namespace NzbDrone.Core.Parser
             seriesName = RequestInfoRegex.Replace(seriesName, "").Trim(' ');
             issueTitle = RequestInfoRegex.Replace(issueTitle, "").Trim(' ');
             releaseVersion = RequestInfoRegex.Replace(releaseVersion, "").Trim(' ');
+
+            // Clean up dot-separated series names (e.g. "X-Men.Annual" -> "X-Men Annual")
+            // but preserve intentional hyphens
+            seriesName = seriesName.Trim('.', '-', ' ');
+            issueTitle = issueTitle.Trim('.', '-', ' ');
+
+            // Strip trailing volume indicator from series name (e.g. "Amazing Spider-Man v6" -> "Amazing Spider-Man")
+            seriesName = Regex.Replace(seriesName, @"\s+v\d+$", "", RegexOptions.IgnoreCase).Trim();
 
             int.TryParse(matchCollection[0].Groups["releaseyear"].Value, out var releaseYear);
 

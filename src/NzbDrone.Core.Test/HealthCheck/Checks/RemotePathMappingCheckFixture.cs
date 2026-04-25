@@ -176,7 +176,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         public void should_return_ok_on_book_imported_event()
         {
             GivenFolderExists(_downloadRootPath);
-            var importEvent = new TrackImportedEvent(new LocalIssue(), new ComicFile(), new List<ComicFile>(), true, new DownloadClientItem());
+            var importEvent = new ComicFileImportedEvent(new LocalIssue(), new ComicFile(), new List<ComicFile>(), true, new DownloadClientItem());
 
             Subject.Check(importEvent).ShouldBeOk();
         }
@@ -190,7 +190,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
             };
             GivenFileExists(localIssue.Path);
 
-            var importEvent = new TrackImportFailedEvent(new Exception(), localIssue, true, new DownloadClientItem());
+            var importEvent = new ComicFileImportFailedEvent(new Exception(), localIssue, true, new DownloadClientItem());
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "permissions-error");
         }
@@ -200,7 +200,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         {
             GivenFolderExists(_downloadItemPath);
 
-            var importEvent = new TrackImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new ComicFileImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "permissions-error");
         }
@@ -208,7 +208,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         public void should_return_permissions_error_on_book_import_failed_event_for_local_client_if_folder_does_not_exist()
         {
-            var importEvent = new TrackImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new ComicFileImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "permissions-error");
         }
@@ -217,7 +217,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         public void should_return_mapping_error_on_book_import_failed_event_for_remote_client_if_folder_does_not_exist()
         {
             _clientStatus.IsLocalhost = false;
-            var importEvent = new TrackImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new ComicFileImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "bad-remote-path-mapping");
         }
@@ -227,7 +227,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         {
             _clientStatus.IsLocalhost = false;
             _downloadItem.OutputPath = new OsPath("an invalid path");
-            var importEvent = new TrackImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new ComicFileImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "bad-remote-path-mapping");
         }
@@ -237,7 +237,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         {
             _clientStatus.IsLocalhost = true;
             _downloadItem.OutputPath = new OsPath("an invalid path");
-            var importEvent = new TrackImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new ComicFileImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "bad-download-client-settings");
         }
@@ -248,7 +248,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
             GivenDocker();
 
             _clientStatus.IsLocalhost = false;
-            var importEvent = new TrackImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new ComicFileImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeError(wikiFragment: "docker-bad-remote-path-mapping");
         }
@@ -260,7 +260,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
             _downloadClient.Setup(s => s.GetStatus())
                 .Throws(ex);
 
-            var importEvent = new TrackImportFailedEvent(null, null, true, _downloadItem);
+            var importEvent = new ComicFileImportFailedEvent(null, null, true, _downloadItem);
 
             Subject.Check(importEvent).ShouldBeOk();
 

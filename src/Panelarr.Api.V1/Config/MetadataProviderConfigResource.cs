@@ -5,8 +5,6 @@ namespace Panelarr.Api.V1.Config
 {
     public class MetadataProviderConfigResource : RestResource
     {
-        public WriteAudioTagsType WriteAudioTags { get; set; }
-        public bool ScrubAudioTags { get; set; }
         public WriteIssueTagsType WriteIssueTags { get; set; }
         public bool UpdateCovers { get; set; }
         public bool EmbedMetadata { get; set; }
@@ -23,8 +21,6 @@ namespace Panelarr.Api.V1.Config
         {
             return new MetadataProviderConfigResource
             {
-                WriteAudioTags = model.WriteAudioTags,
-                ScrubAudioTags = model.ScrubAudioTags,
                 WriteIssueTags = model.WriteIssueTags,
                 UpdateCovers = model.UpdateCovers,
                 EmbedMetadata = model.EmbedMetadata,

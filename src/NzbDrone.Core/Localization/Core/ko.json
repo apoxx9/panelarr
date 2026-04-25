@@ -679,7 +679,7 @@
     "UserAgentProvidedByTheAppThatCalledTheAPI": "API를 호출한 앱에서 제공하는 사용자 에이전트",
     "ApplicationURL": "애플리케이션 URL",
     "ApplicationUrlHelpText": "이 애플리케이션의 외부 URL - http(s)://, port 및 URL 기반 포함",
-    "Author": "저작자",
+    "Author": "시리즈",
     "ClickToChangeIndexerFlags": "인덱서 플래그를 변경하려면 클릭",
     "NotificationsPlexSettingsAuthToken": "인증 토큰",
     "SelectIndexerFlags": "인덱서 플래그 선택",

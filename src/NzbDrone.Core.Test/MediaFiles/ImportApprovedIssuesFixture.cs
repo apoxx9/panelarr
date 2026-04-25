@@ -132,12 +132,12 @@ namespace NzbDrone.Core.Test.MediaFiles
         }
 
         [Test]
-        public void should_publish_TrackImportedEvent_for_new_downloads()
+        public void should_publish_ComicFileImportedEvent_for_new_downloads()
         {
             Subject.Import(new List<ImportDecision<LocalIssue>> { _approvedDecisions.First() }, true);
 
             Mocker.GetMock<IEventAggregator>()
-                .Verify(v => v.PublishEvent(It.IsAny<TrackImportedEvent>()), Times.Once());
+                .Verify(v => v.PublishEvent(It.IsAny<ComicFileImportedEvent>()), Times.Once());
         }
 
         [Test]

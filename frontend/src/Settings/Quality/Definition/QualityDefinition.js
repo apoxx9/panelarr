@@ -126,11 +126,11 @@ class QualityDefinition extends Component {
       sliderMaxSize
     } = this.state;
 
-    const minBytes = minSize * 128;
-    const maxBytes = maxSize && maxSize * 128;
+    const minBytes = minSize * 1024 * 1024;
+    const maxBytes = maxSize && maxSize * 1024 * 1024;
 
-    const minRate = `${formatBytes(minBytes, true)}/s`;
-    const maxRate = maxBytes ? `${formatBytes(maxBytes, true)}/s` : 'Unlimited';
+    const minSizeLabel = `${formatBytes(minBytes)}`;
+    const maxSizeLabel = maxBytes ? `${formatBytes(maxBytes)}` : 'Unlimited';
 
     return (
       <div className={styles.qualityDefinition}>
@@ -166,13 +166,13 @@ class QualityDefinition extends Component {
             <div>
               <Popover
                 anchor={
-                  <Label kind={kinds.INFO}>{minRate}</Label>
+                  <Label kind={kinds.INFO}>{minSizeLabel}</Label>
                 }
                 title={translate('MinimumLimits')}
                 body={
                   <QualityDefinitionLimits
                     bytes={minBytes}
-                    message={translate('NoMinimumForAnyRuntime')}
+                    message={translate('NoMinimumFileSize')}
                   />
                 }
                 position={tooltipPositions.BOTTOM}
@@ -182,13 +182,13 @@ class QualityDefinition extends Component {
             <div>
               <Popover
                 anchor={
-                  <Label kind={kinds.WARNING}>{maxRate}</Label>
+                  <Label kind={kinds.WARNING}>{maxSizeLabel}</Label>
                 }
                 title={translate('MaximumLimits')}
                 body={
                   <QualityDefinitionLimits
                     bytes={maxBytes}
-                    message={translate('NoLimitForAnyRuntime')}
+                    message={translate('NoMaximumFileSize')}
                   />
                 }
                 position={tooltipPositions.BOTTOM}
@@ -199,7 +199,7 @@ class QualityDefinition extends Component {
 
         {
           advancedSettings &&
-            <div className={styles.kilobitsPerSecond}>
+            <div className={styles.megabytes}>
               <div>
                 Min
 

@@ -13,20 +13,20 @@ function QualityDefinitionLimits(props) {
     return <div>{message}</div>;
   }
 
-  const twenty = formatBytes(bytes * 20 * 60);
-  const fourtyFive = formatBytes(bytes * 45 * 60);
-  const sixty = formatBytes(bytes * 60 * 60);
+  const fiftyPages = formatBytes(bytes * 50);
+  const hundredPages = formatBytes(bytes * 100);
+  const twoHundredPages = formatBytes(bytes * 200);
 
   return (
     <div>
       <div>
-        {translate('20MinutesTwenty', [twenty])}
+        {translate('50PagesFifty', [fiftyPages])}
       </div>
       <div>
-        {translate('45MinutesFourtyFive', [fourtyFive])}
+        {translate('100PagesHundred', [hundredPages])}
       </div>
       <div>
-        {translate('60MinutesSixty', [sixty])}
+        {translate('200PagesTwoHundred', [twoHundredPages])}
       </div>
     </div>
   );

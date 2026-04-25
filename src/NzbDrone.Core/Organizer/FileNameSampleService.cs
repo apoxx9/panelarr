@@ -52,7 +52,7 @@ namespace NzbDrone.Core.Organizer
             _standardIssue = new Issue
             {
                 Title = "The Issue Title",
-                IssueNumber = 42f,
+                IssueNumber = "42",
                 ReleaseDate = System.DateTime.Today,
                 Series = _standardSeries,
                 SeriesMetadata = _standardSeries.Metadata.Value,

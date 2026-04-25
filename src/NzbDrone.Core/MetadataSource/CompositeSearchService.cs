@@ -35,6 +35,13 @@ namespace NzbDrone.Core.MetadataSource
 
         public List<Series> SearchForNewSeries(string title)
         {
+            return SearchForNewSeries(new MetadataSearchCriteria(title));
+        }
+
+        public List<Series> SearchForNewSeries(MetadataSearchCriteria criteria)
+        {
+            var title = criteria.Term;
+
             // ComicVine first — richer search data (images, publisher, issue count)
             var comicVineApiKey = _configService.ComicVineApiKey;
 
@@ -51,10 +58,14 @@ namespace NzbDrone.Core.MetadataSource
                             "ComicVine returned {0} results for: {1}",
                             cvResults.Count,
                             title);
-                        return SortByRelevance(MapComicVineResults(cvResults), title);
+                        return SortByRelevance(FilterByYear(MapComicVineResults(cvResults), criteria.Year), title);
                     }
 
                     _logger.Debug("No results from ComicVine for: {0}", title);
+                }
+                catch (NzbDrone.Common.Http.HttpException httpEx) when (httpEx.Response?.StatusCode == System.Net.HttpStatusCode.Unauthorized || httpEx.Response?.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    _logger.Error("ComicVine API key is invalid or expired. Please check your API key in Settings > Metadata.");
                 }
                 catch (Exception ex)
                 {
@@ -78,10 +89,14 @@ namespace NzbDrone.Core.MetadataSource
                             "Metron returned {0} results for: {1}",
                             results.Count,
                             title);
-                        return SortByRelevance(MapMetronResults(results), title);
+                        return SortByRelevance(FilterByYear(MapMetronResults(results), criteria.Year), title);
                     }
 
                     _logger.Debug("No results from Metron for: {0}", title);
+                }
+                catch (NzbDrone.Common.Http.HttpException httpEx) when (httpEx.Response?.StatusCode == System.Net.HttpStatusCode.Unauthorized || httpEx.Response?.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    _logger.Error("Metron credentials are invalid. Please check your username and password in Settings > Metadata.");
                 }
                 catch (Exception ex)
                 {
@@ -99,7 +114,22 @@ namespace NzbDrone.Core.MetadataSource
 
         public List<object> SearchForNewEntity(string title)
         {
-            return SearchForNewSeries(title).Cast<object>().ToList();
+            return SearchForNewEntity(new MetadataSearchCriteria(title));
+        }
+
+        public List<object> SearchForNewEntity(MetadataSearchCriteria criteria)
+        {
+            return SearchForNewSeries(criteria).Cast<object>().ToList();
+        }
+
+        private List<Series> FilterByYear(List<Series> results, int? year)
+        {
+            if (!year.HasValue)
+            {
+                return results;
+            }
+
+            return results.Where(s => s.Metadata.Value.Year == year.Value).ToList();
         }
 
         private List<Series> SortByRelevance(List<Series> results, string query)

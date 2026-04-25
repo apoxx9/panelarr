@@ -155,6 +155,8 @@ namespace NzbDrone.Core.Parser
                 case Codec.PDF:
                     return Quality.PDF;
                 case Codec.EPUB:
+                case Codec.MOBI:
+                case Codec.AZW3:
                     return Quality.EPUB;
                 default:
                     return Quality.Unknown;

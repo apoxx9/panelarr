@@ -27,21 +27,21 @@ namespace NzbDrone.Core.Download
         private readonly IEventAggregator _eventAggregator;
         private readonly IHistoryService _historyService;
         private readonly IProvideImportItemService _provideImportItemService;
-        private readonly IDownloadedIssuesImportService _downloadedTracksImportService;
+        private readonly IDownloadedIssuesImportService _downloadedIssuesImportService;
         private readonly ITrackedDownloadAlreadyImported _trackedDownloadAlreadyImported;
         private readonly Logger _logger;
 
         public CompletedDownloadService(IEventAggregator eventAggregator,
                                         IHistoryService historyService,
                                         IProvideImportItemService provideImportItemService,
-                                        IDownloadedIssuesImportService downloadedTracksImportService,
+                                        IDownloadedIssuesImportService downloadedIssuesImportService,
                                         ITrackedDownloadAlreadyImported trackedDownloadAlreadyImported,
                                         Logger logger)
         {
             _eventAggregator = eventAggregator;
             _historyService = historyService;
             _provideImportItemService = provideImportItemService;
-            _downloadedTracksImportService = downloadedTracksImportService;
+            _downloadedIssuesImportService = downloadedIssuesImportService;
             _trackedDownloadAlreadyImported = trackedDownloadAlreadyImported;
             _logger = logger;
         }
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Download
             trackedDownload.State = TrackedDownloadState.Importing;
 
             var outputPath = trackedDownload.ImportItem.OutputPath.FullPath;
-            var importResults = _downloadedTracksImportService.ProcessPath(outputPath, ImportMode.Auto, trackedDownload.RemoteIssue?.Series, trackedDownload.DownloadItem);
+            var importResults = _downloadedIssuesImportService.ProcessPath(outputPath, ImportMode.Auto, trackedDownload.RemoteIssue?.Series, trackedDownload.DownloadItem);
 
             if (importResults.Empty())
             {
@@ -137,27 +137,27 @@ namespace NzbDrone.Core.Download
                 return true;
             }
 
-            // Double check if all episodes were imported by checking the history if at least one
+            // Double check if all issues were imported by checking the history if at least one
             // file was imported. This will allow the decision engine to reject already imported
-            // episode files and still mark the download complete when all files are imported.
+            // issue files and still mark the download complete when all files are imported.
 
-            // EDGE CASE: This process relies on EpisodeIds being consistent between executions, if a series is updated
-            // and an episode is removed, but later comes back with a different ID then Sonarr will treat it as incomplete.
+            // EDGE CASE: This process relies on IssueIds being consistent between executions, if a series is updated
+            // and an issue is removed, but later comes back with a different ID then Panelarr will treat it as incomplete.
             // Since imports should be relatively fast and these types of data changes are infrequent this should be quite
             // safe, but commenting for future benefit.
-            var atLeastOneEpisodeImported = importResults.Any(c => c.Result == ImportResultType.Imported);
+            var atLeastOneIssueImported = importResults.Any(c => c.Result == ImportResultType.Imported);
 
             var historyItems = _historyService.FindByDownloadId(trackedDownload.DownloadItem.DownloadId)
                                               .OrderByDescending(h => h.Date)
                                               .ToList();
 
-            var allEpisodesImportedInHistory = _trackedDownloadAlreadyImported.IsImported(trackedDownload, historyItems);
+            var allIssuesImportedInHistory = _trackedDownloadAlreadyImported.IsImported(trackedDownload, historyItems);
 
-            if (allEpisodesImportedInHistory)
+            if (allIssuesImportedInHistory)
             {
                 // Log different error messages depending on the circumstances, but treat both as fully imported, because that's the reality.
                 // The second message shouldn't be logged in most cases, but continued reporting would indicate an ongoing issue.
-                if (atLeastOneEpisodeImported)
+                if (atLeastOneIssueImported)
                 {
                     _logger.Debug("All issues were imported in history for {0}", trackedDownload.DownloadItem.Title);
                 }

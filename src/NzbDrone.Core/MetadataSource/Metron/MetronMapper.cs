@@ -76,7 +76,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
                 Title = providerIssue.Title ?? string.Empty,
                 ReleaseDate = providerIssue.ReleaseDate,
                 SeriesMetadataId = seriesMetadataId,
-                IssueNumber = providerIssue.IssueNumber.HasValue ? (float)providerIssue.IssueNumber.Value : 0f,
+                IssueNumber = providerIssue.IssueNumber.HasValue ? providerIssue.IssueNumber.Value.ToString() : "0",
                 IssueType = MapIssueType(providerIssue.IssueType),
                 PageCount = providerIssue.PageCount ?? 0,
                 CoverArtUrl = providerIssue.CoverUrl ?? string.Empty,

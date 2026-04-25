@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.HistoryTests
                 DownloadId = "abcd"
             };
 
-            Subject.Handle(new TrackImportedEvent(localTrack, trackFile, new List<ComicFile>(), true, downloadClientItem));
+            Subject.Handle(new ComicFileImportedEvent(localTrack, trackFile, new List<ComicFile>(), true, downloadClientItem));
 
             Mocker.GetMock<IHistoryRepository>()
                 .Verify(v => v.Insert(It.Is<EntityHistory>(h => h.SourceTitle == Path.GetFileNameWithoutExtension(localTrack.Path))));

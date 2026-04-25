@@ -192,7 +192,7 @@ namespace NzbDrone.Core.Notifications.CustomScript
             var comicFile = message.ComicFile;
             var environmentVariables = new StringDictionary();
 
-            environmentVariables.Add("Panelarr_EventType", "TrackRetag");
+            environmentVariables.Add("Panelarr_EventType", "IssueRetag");
             environmentVariables.Add("Panelarr_Series_Id", series.Id.ToString());
             environmentVariables.Add("Panelarr_Series_Name", series.Metadata.Value.Name);
             environmentVariables.Add("Panelarr_Series_Path", series.Path);

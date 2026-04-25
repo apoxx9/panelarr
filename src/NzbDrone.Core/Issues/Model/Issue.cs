@@ -35,11 +35,14 @@ namespace NzbDrone.Core.Issues
         public DateTime? LastSearchTime { get; set; }
 
         // Comic-specific fields
-        public float IssueNumber { get; set; }
+        public string IssueNumber { get; set; }
+        public float SortOrder { get; set; }
         public IssueType IssueType { get; set; }
         public string CoverArtUrl { get; set; }
         public int PageCount { get; set; }
         public string Overview { get; set; }
+        public string VariantDescription { get; set; }
+        public int PrintingNumber { get; set; }
         public List<Credit> Credits { get; set; }
 
         // These are Panelarr generated/config

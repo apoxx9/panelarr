@@ -84,11 +84,15 @@ export const actionHandlers = handleThunks({
       abortCurrentRequest();
     }
 
+    const data = { term: payload.term };
+
+    if (payload.year) {
+      data.year = payload.year;
+    }
+
     const { request, abortRequest } = createAjaxRequest({
       url: '/search',
-      data: {
-        term: payload.term
-      }
+      data
     });
 
     abortCurrentRequest = abortRequest;

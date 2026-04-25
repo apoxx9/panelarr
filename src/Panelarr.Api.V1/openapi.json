@@ -1243,37 +1243,6 @@
         }
       }
     },
-    "/api/v1/bookshelf": {
-      "post": {
-        "tags": [
-          "Bookshelf"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BookshelfResource"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BookshelfResource"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/BookshelfResource"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/v1/calendar": {
       "get": {
         "tags": [
@@ -9510,46 +9479,6 @@
           },
           "monitored": {
             "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "BookshelfAuthorResource": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "monitored": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "books": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BookResource"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "BookshelfResource": {
-        "type": "object",
-        "properties": {
-          "authors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BookshelfAuthorResource"
-            },
-            "nullable": true
-          },
-          "monitoringOptions": {
-            "$ref": "#/components/schemas/MonitoringOptions"
-          },
-          "monitorNewItems": {
-            "$ref": "#/components/schemas/NewItemMonitorTypes"
           }
         },
         "additionalProperties": false

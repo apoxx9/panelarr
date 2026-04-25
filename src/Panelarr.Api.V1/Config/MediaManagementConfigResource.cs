@@ -16,7 +16,6 @@ namespace Panelarr.Api.V1.Config
         public FileDateType FileDate { get; set; }
         public bool WatchLibraryForChanges { get; set; }
         public RescanAfterRefreshType RescanAfterRefresh { get; set; }
-        public AllowFingerprinting AllowFingerprinting { get; set; }
 
         public bool SetPermissionsLinux { get; set; }
         public string ChmodFolder { get; set; }
@@ -44,7 +43,6 @@ namespace Panelarr.Api.V1.Config
                 FileDate = model.FileDate,
                 WatchLibraryForChanges = model.WatchLibraryForChanges,
                 RescanAfterRefresh = model.RescanAfterRefresh,
-                AllowFingerprinting = model.AllowFingerprinting,
 
                 SetPermissionsLinux = model.SetPermissionsLinux,
                 ChmodFolder = model.ChmodFolder,

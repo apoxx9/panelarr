@@ -31,7 +31,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                 writer.WriteAttributeString("xmlns", "xsi", null, "http://www.w3.org/2001/XMLSchema-instance");
 
                 WriteElement(writer, "Series", seriesMetadata?.Name);
-                WriteElement(writer, "Number", issue?.IssueNumber.ToString("0.##"));
+                WriteElement(writer, "Number", issue?.IssueNumber);
                 WriteElement(writer, "Year", seriesMetadata?.Year?.ToString());
                 WriteElement(writer, "Publisher", publisher?.Name);
                 WriteElement(writer, "PageCount", issue?.PageCount > 0 ? issue.PageCount.ToString() : null);
