@@ -36,7 +36,6 @@ namespace NzbDrone.Core.Configuration
         string ExtraFileExtensions { get; set; }
         bool WatchLibraryForChanges { get; set; }
         RescanAfterRefreshType RescanAfterRefresh { get; set; }
-        AllowFingerprinting AllowFingerprinting { get; set; }
 
         //Permissions (Media Management)
         bool SetPermissionsLinux { get; set; }
@@ -70,8 +69,6 @@ namespace NzbDrone.Core.Configuration
         string MetronUsername { get; set; }
         string MetronPassword { get; set; }
         string ComicVineApiKey { get; set; }
-        WriteAudioTagsType WriteAudioTags { get; set; }
-        bool ScrubAudioTags { get; set; }
         WriteIssueTagsType WriteIssueTags { get; set; }
         bool UpdateCovers { get; set; }
         bool EmbedMetadata { get; set; }

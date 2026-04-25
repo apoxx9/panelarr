@@ -114,7 +114,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             {
                 _logger.Debug("Matching series {0} by explicit issue number {1} from embedded metadata", series.SeriesMetadataId, explicitIssueNumber);
                 var allIssues = _issueService.GetIssuesBySeriesMetadataId(series.SeriesMetadataId);
-                var matchByNumber = allIssues.Where(x => x.IssueNumber == explicitIssueNumber).ToList();
+                var matchByNumber = allIssues.Where(x => x.IssueNumber == explicitIssueNumber.ToString("0.##")).ToList();
                 foreach (var issue in matchByNumber)
                 {
                     candidateReleases.AddRange(GetDbCandidatesByIssue(issue, includeExisting));
@@ -163,7 +163,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 {
                     _logger.Debug("Title match failed for series {0}, trying issue number {1}", series.SeriesMetadataId, issueNumber);
                     var allIssues = _issueService.GetIssuesBySeriesMetadataId(series.SeriesMetadataId);
-                    var matchByNumber = allIssues.Where(x => x.IssueNumber == issueNumber).ToList();
+                    var matchByNumber = allIssues.Where(x => x.IssueNumber == issueNumber.ToString("0.##")).ToList();
                     foreach (var issue in matchByNumber)
                     {
                         candidateReleases.AddRange(GetDbCandidatesByIssue(issue, includeExisting));

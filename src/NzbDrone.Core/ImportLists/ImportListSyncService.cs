@@ -113,9 +113,9 @@ namespace NzbDrone.Core.ImportLists
 
                 var importList = _importListFactory.Get(report.ImportListId);
 
-                if (report.Issue.IsNotNullOrWhiteSpace() || report.ForeignEditionId.IsNotNullOrWhiteSpace())
+                if (report.Issue.IsNotNullOrWhiteSpace() || report.ForeignIssueId.IsNotNullOrWhiteSpace())
                 {
-                    if (report.ForeignEditionId.IsNullOrWhiteSpace() || report.ForeignSeriesId.IsNullOrWhiteSpace() || report.ForeignIssueId.IsNullOrWhiteSpace())
+                    if (report.ForeignSeriesId.IsNullOrWhiteSpace() || report.ForeignIssueId.IsNullOrWhiteSpace())
                     {
                         MapIssueReport(report);
                     }
@@ -172,29 +172,6 @@ namespace NzbDrone.Core.ImportLists
                     report.ForeignIssueId = null;
                 }
             }
-            else if (report.ForeignEditionId.IsNotNullOrWhiteSpace())
-            {
-                try
-                {
-                    var mappedIssue = _issueInfoProxy.GetIssueInfo(report.ForeignEditionId);
-
-                    _logger.Trace($"Mapped {report.ForeignEditionId} to [{mappedIssue.Item2.ForeignIssueId}] {mappedIssue.Item2.Title}");
-
-                    report.ForeignIssueId = mappedIssue.Item2.ForeignIssueId;
-                    report.Issue = mappedIssue.Item2.Title;
-
-                    if (mappedIssue.Item3 != null && mappedIssue.Item3.Any())
-                    {
-                        report.Series ??= mappedIssue.Item3.First().Name;
-                        report.ForeignSeriesId ??= mappedIssue.Item3.First().ForeignSeriesId;
-                    }
-                }
-                catch (IssueNotFoundException)
-                {
-                    _logger.Debug($"Nothing found for edition [{report.ForeignEditionId}]");
-                    report.ForeignEditionId = null;
-                }
-            }
             else
             {
                 var searchTerm = $"{report.Issue} {report.Series}";
@@ -228,19 +205,19 @@ namespace NzbDrone.Core.ImportLists
 
             if (excludedIssue != null)
             {
-                _logger.Debug("{0} [{1}] Rejected due to list exclusion", report.ForeignEditionId, report.Issue);
+                _logger.Debug("{0} [{1}] Rejected due to list exclusion", report.ForeignIssueId, report.Issue);
                 return;
             }
 
             if (excludedSeries != null)
             {
-                _logger.Debug("{0} [{1}] Rejected due to list exclusion for parent series", report.ForeignEditionId, report.Issue);
+                _logger.Debug("{0} [{1}] Rejected due to list exclusion for parent series", report.ForeignIssueId, report.Issue);
                 return;
             }
 
             if (existingIssue != null)
             {
-                _logger.Debug("{0} [{1}] Rejected, Issue Exists in DB.  Ensuring Issue and Series monitored.", report.ForeignEditionId, report.Issue);
+                _logger.Debug("{0} [{1}] Rejected, Issue Exists in DB.  Ensuring Issue and Series monitored.", report.ForeignIssueId, report.Issue);
 
                 if (importList.ShouldMonitorExisting && importList.ShouldMonitor != ImportListMonitorType.None)
                 {

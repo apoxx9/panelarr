@@ -58,7 +58,9 @@ namespace NzbDrone.Core.MetadataSource.Metron
 
             var response = _cachedHttpClient.Get<MetronPagedResponse<MetronSeriesListItem>>(request, false, TimeSpan.FromHours(1));
 
-            return response.Resource?.Results ?? new List<MetronSeriesListItem>();
+            var results = response.Resource?.Results ?? new List<MetronSeriesListItem>();
+
+            return FetchAllPages(response.Resource, results, TimeSpan.FromHours(1));
         }
 
         public MetronSeriesDetail GetSeriesDetail(int id)
@@ -81,7 +83,9 @@ namespace NzbDrone.Core.MetadataSource.Metron
 
             var response = _cachedHttpClient.Get<MetronPagedResponse<MetronIssueListItem>>(request, true, TimeSpan.FromHours(12));
 
-            return response.Resource?.Results ?? new List<MetronIssueListItem>();
+            var results = response.Resource?.Results ?? new List<MetronIssueListItem>();
+
+            return FetchAllPages(response.Resource, results, TimeSpan.FromHours(12));
         }
 
         public MetronIssueDetail GetIssueDetail(int id)
@@ -93,6 +97,34 @@ namespace NzbDrone.Core.MetadataSource.Metron
             var response = _cachedHttpClient.Get<MetronIssueDetail>(request, true, TimeSpan.FromHours(12));
 
             return response.Resource;
+        }
+
+        private List<T> FetchAllPages<T>(MetronPagedResponse<T> firstPage, List<T> results, TimeSpan cacheDuration)
+        {
+            var nextUrl = firstPage?.Next;
+
+            while (!string.IsNullOrEmpty(nextUrl))
+            {
+                _rateLimiter.WaitForToken();
+
+                var request = new HttpRequest(nextUrl);
+                var username = _configService.MetronUsername;
+                var password = _configService.MetronPassword;
+                var credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
+                request.Headers.Set("Authorization", $"Basic {credentials}");
+                request.Headers.Set("Accept", "application/json");
+
+                var response = _cachedHttpClient.Get<MetronPagedResponse<T>>(request, true, cacheDuration);
+
+                if (response.Resource?.Results != null)
+                {
+                    results.AddRange(response.Resource.Results);
+                }
+
+                nextUrl = response.Resource?.Next;
+            }
+
+            return results;
         }
 
         public MetronPublisherDetail GetPublisherDetail(int id)

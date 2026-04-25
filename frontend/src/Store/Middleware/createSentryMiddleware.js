@@ -56,7 +56,7 @@ function identity(stuff) {
 }
 
 function stripUrlBase(frame) {
-  if (frame.filename && window.Radarr.urlBase) {
+  if (frame.filename && window.Panelarr.urlBase) {
     frame.filename = frame.filename.replace(window.Panelarr.urlBase, '');
   }
   return frame;

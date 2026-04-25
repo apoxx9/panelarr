@@ -84,7 +84,7 @@ namespace NzbDrone.Core.Test.ImportListTests
 
         private void WithIssueId()
         {
-            _importListReports.First().ForeignEditionId = "1234";
+            _importListReports.First().ForeignIssueId = "1234";
         }
 
         private void WithSecondIssue()
@@ -94,8 +94,7 @@ namespace NzbDrone.Core.Test.ImportListTests
                 Series = "Linkin Park",
                 ForeignSeriesId = "f59c5520-5f46-4d2c-b2c4-822eabf53419",
                 Issue = "Meteora 2",
-                ForeignEditionId = "5678",
-                ForeignIssueId = "8765"
+                ForeignIssueId = "5678"
             };
             _importListReports.Add(importListItem2);
         }

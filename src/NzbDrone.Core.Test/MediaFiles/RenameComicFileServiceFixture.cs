@@ -12,7 +12,7 @@ using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.MediaFiles
 {
-    public class RenameTrackFileServiceFixture : CoreTest<RenameComicFileService>
+    public class RenameComicFileServiceFixture : CoreTest<RenameComicFileService>
     {
         private Series _series;
         private List<ComicFile> _trackFiles;

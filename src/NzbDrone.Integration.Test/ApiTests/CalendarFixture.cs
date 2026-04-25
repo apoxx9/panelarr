@@ -9,7 +9,7 @@ using Panelarr.Api.V1.Issues;
 namespace NzbDrone.Integration.Test.ApiTests
 {
     [TestFixture]
-    [Ignore("Waiting for metadata to be back again", Until = "2026-01-15 00:00:00Z")]
+    [Ignore("Waiting for metadata to be back again", Until = "2027-01-15 00:00:00Z")]
     public class CalendarFixture : IntegrationTest
     {
         public ClientBase<IssueResource> Calendar;

@@ -72,6 +72,7 @@ class SeriesDetailsHeader extends Component {
       width,
       seriesName,
       year,
+      volumeNumber,
       disambiguation,
       ratings,
       path,
@@ -157,6 +158,13 @@ class SeriesDetailsHeader extends Component {
                     year ?
                       <span className={styles.year}>
                         ({year})
+                      </span> :
+                      null
+                  }
+                  {
+                    volumeNumber ?
+                      <span className={styles.year}>
+                        Volume {volumeNumber}
                       </span> :
                       null
                   }
@@ -357,6 +365,7 @@ SeriesDetailsHeader.propTypes = {
   width: PropTypes.number.isRequired,
   seriesName: PropTypes.string.isRequired,
   year: PropTypes.number,
+  volumeNumber: PropTypes.number,
   disambiguation: PropTypes.string,
   ratings: PropTypes.object.isRequired,
   path: PropTypes.string.isRequired,

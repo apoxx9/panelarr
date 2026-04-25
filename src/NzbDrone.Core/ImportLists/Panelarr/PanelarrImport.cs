@@ -68,7 +68,6 @@ namespace NzbDrone.Core.ImportLists.Panelarr
                     {
                         ForeignIssueId = remoteIssue.ForeignIssueId,
                         Issue = remoteIssue.Title,
-                        ForeignEditionId = remoteIssue.ForeignEditionId,
                         Series = remoteSeries.SeriesName,
                         ForeignSeriesId = remoteSeries.ForeignSeriesId
                     });

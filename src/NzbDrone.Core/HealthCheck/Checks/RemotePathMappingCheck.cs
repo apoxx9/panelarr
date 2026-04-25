@@ -21,8 +21,8 @@ namespace NzbDrone.Core.HealthCheck.Checks
     [CheckOn(typeof(ProviderUpdatedEvent<IDownloadClient>))]
     [CheckOn(typeof(ProviderDeletedEvent<IDownloadClient>))]
     [CheckOn(typeof(ModelEvent<RemotePathMapping>))]
-    [CheckOn(typeof(TrackImportedEvent), CheckOnCondition.FailedOnly)]
-    [CheckOn(typeof(TrackImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
+    [CheckOn(typeof(ComicFileImportedEvent), CheckOnCondition.FailedOnly)]
+    [CheckOn(typeof(ComicFileImportFailedEvent), CheckOnCondition.SuccessfulOnly)]
     public class RemotePathMappingCheck : HealthCheckBase, IProvideHealthCheckWithMessage
     {
         private readonly IDiskProvider _diskProvider;
@@ -123,9 +123,9 @@ namespace NzbDrone.Core.HealthCheck.Checks
                 return new HealthCheck(GetType());
             }
 
-            if (typeof(TrackImportFailedEvent).IsAssignableFrom(message.GetType()))
+            if (typeof(ComicFileImportFailedEvent).IsAssignableFrom(message.GetType()))
             {
-                var failureMessage = (TrackImportFailedEvent)message;
+                var failureMessage = (ComicFileImportFailedEvent)message;
 
                 // if we can see the file exists but the import failed then likely a permissions issue
                 if (failureMessage.IssueInfo != null)

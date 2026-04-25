@@ -20,22 +20,23 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
         {
             var qualityComparer = new QualityModelComparer(item.Issue?.Series.Value.QualityProfile);
 
-            // min quality of all new tracks
             var newMinQuality = item.LocalIssues.Select(x => x.Quality).OrderBy(x => x, qualityComparer).First();
             _logger.Debug("Min quality of new files: {0}", newMinQuality);
 
-            // get minimum quality of existing release
-            // var existingQualities = currentRelease.Value.Where(x => x.TrackFileId != 0).Select(x => x.TrackFile.Value.Quality);
-            // if (existingQualities.Any())
-            // {
-            //     var existingMinQuality = existingQualities.OrderBy(x => x, qualityComparer).First();
-            //     _logger.Debug("Min quality of existing files: {0}", existingMinQuality);
-            //     if (qualityComparer.Compare(existingMinQuality, newMinQuality) > 0)
-            //     {
-            //         _logger.Debug("This issue isn't a quality upgrade for all tracks. Skipping {0}", item);
-            //         return Decision.Reject("Not an upgrade for existing issue file(s)");
-            //     }
-            // }
+            var existingFiles = item.Issue?.ComicFiles?.Value;
+            if (existingFiles != null && existingFiles.Any())
+            {
+                var existingQualities = existingFiles.Select(x => x.Quality);
+                var existingMinQuality = existingQualities.OrderBy(x => x, qualityComparer).First();
+                _logger.Debug("Min quality of existing files: {0}", existingMinQuality);
+
+                if (qualityComparer.Compare(existingMinQuality, newMinQuality) > 0)
+                {
+                    _logger.Debug("This issue isn't a quality upgrade. Skipping {0}", item);
+                    return Decision.Reject("Not an upgrade for existing issue file(s)");
+                }
+            }
+
             return Decision.Accept();
         }
     }

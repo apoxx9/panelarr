@@ -234,13 +234,6 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("RescanAfterRefresh", value); }
         }
 
-        public AllowFingerprinting AllowFingerprinting
-        {
-            get { return GetValueEnum("AllowFingerprinting", AllowFingerprinting.NewFiles); }
-
-            set { SetValue("AllowFingerprinting", value); }
-        }
-
         public bool SetPermissionsLinux
         {
             get { return GetValueBoolean("SetPermissionsLinux", false); }
@@ -288,20 +281,6 @@ namespace NzbDrone.Core.Configuration
             get { return GetValue("ComicVineApiKey", ""); }
 
             set { SetValue("ComicVineApiKey", value); }
-        }
-
-        public WriteAudioTagsType WriteAudioTags
-        {
-            get { return GetValueEnum("WriteAudioTags", WriteAudioTagsType.No); }
-
-            set { SetValue("WriteAudioTags", value); }
-        }
-
-        public bool ScrubAudioTags
-        {
-            get { return GetValueBoolean("ScrubAudioTags", false); }
-
-            set { SetValue("ScrubAudioTags", value); }
         }
 
         public WriteIssueTagsType WriteIssueTags

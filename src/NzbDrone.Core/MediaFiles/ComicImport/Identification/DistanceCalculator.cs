@@ -76,6 +76,24 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 Logger.Trace("issue: '{0}' vs '{1}'; {2}", fileTitles.ConcatToString("' or '"), titleOptions.ConcatToString("' or '"), dist.NormalizedDistance());
             }
 
+            // Issue number — the most reliable matching signal for comics
+            var localIssueNumber = localTracks.MostCommon(x => x.FileTrackInfo.SeriesIndex) ?? "";
+            if (localIssueNumber.IsNotNullOrWhiteSpace())
+            {
+                var dbIssueNumber = issue.IssueNumber ?? "";
+                dist.AddString("issue_number", localIssueNumber, dbIssueNumber);
+                Logger.Trace("issue_number: '{0}' vs '{1}'; {2}", localIssueNumber, dbIssueNumber, dist.NormalizedDistance());
+            }
+
+            // Publisher
+            var localPublisher = localTracks.MostCommon(x => x.FileTrackInfo.Publisher) ?? "";
+            if (localPublisher.IsNotNullOrWhiteSpace() && issue.SeriesMetadata?.Value?.PublisherId != null)
+            {
+                // Only compare if we have publisher info from the file
+                dist.AddString("publisher", localPublisher, issue.SeriesMetadata.Value.Name);
+                Logger.Trace("publisher: '{0}'; {1}", localPublisher, dist.NormalizedDistance());
+            }
+
             // Year
             var localYear = localTracks.MostCommon(x => x.FileTrackInfo.Year);
             if (localYear > 0 && issue.ReleaseDate.HasValue)

@@ -126,13 +126,13 @@ namespace NzbDrone.Core.Parser
             {
                 if (searchCriteria != null)
                 {
-                    issueMatch = searchCriteria.Issues.FirstOrDefault(e => (int)e.IssueNumber == issueNum);
+                    issueMatch = searchCriteria.Issues.FirstOrDefault(e => int.TryParse(e.IssueNumber, out var n) && n == issueNum);
                 }
 
                 if (issueMatch == null)
                 {
                     var seriesIssues = _issueService.GetIssuesBySeries(series.Id);
-                    issueMatch = seriesIssues.FirstOrDefault(e => (int)e.IssueNumber == issueNum);
+                    issueMatch = seriesIssues.FirstOrDefault(e => int.TryParse(e.IssueNumber, out var n) && n == issueNum);
                 }
             }
 
@@ -301,7 +301,7 @@ namespace NzbDrone.Core.Parser
 
                 if (searchCriteria?.Issues != null)
                 {
-                    var byNumber = searchCriteria.Issues.Where(b => (float)b.IssueNumber == issueNum).ToList();
+                    var byNumber = searchCriteria.Issues.Where(b => float.TryParse(b.IssueNumber, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var n) && n == issueNum).ToList();
                     if (byNumber.Any())
                     {
                         return byNumber;
@@ -309,7 +309,7 @@ namespace NzbDrone.Core.Parser
                 }
 
                 var allIssues = _issueService.GetIssuesBySeries(series.Id);
-                var matched = allIssues.Where(i => (float)i.IssueNumber == issueNum).ToList();
+                var matched = allIssues.Where(i => float.TryParse(i.IssueNumber, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var n) && n == issueNum).ToList();
 
                 if (matched.Any())
                 {

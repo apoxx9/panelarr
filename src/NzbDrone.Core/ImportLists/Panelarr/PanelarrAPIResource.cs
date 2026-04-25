@@ -15,26 +15,15 @@ namespace NzbDrone.Core.ImportLists.Panelarr
         public HashSet<int> Tags { get; set; }
     }
 
-    public class PanelarrEdition
-    {
-        public string Title { get; set; }
-        public string ForeignEditionId { get; set; }
-        public string Overview { get; set; }
-        public List<MediaCover.MediaCover> Images { get; set; }
-        public bool Monitored { get; set; }
-    }
-
     public class PanelarrIssue
     {
         public string Title { get; set; }
         public string ForeignIssueId { get; set; }
-        public string ForeignEditionId { get; set; }
         public string Overview { get; set; }
         public List<MediaCover.MediaCover> Images { get; set; }
         public bool Monitored { get; set; }
         public PanelarrSeries Series { get; set; }
         public int SeriesId { get; set; }
-        public List<PanelarrEdition> Editions { get; set; }
     }
 
     public class PanelarrProfile

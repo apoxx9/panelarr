@@ -17,7 +17,7 @@ using NzbDrone.Test.Common;
 namespace NzbDrone.Core.Test.MediaFiles.TrackFileMovingServiceTests
 {
     [TestFixture]
-    public class MoveTrackFileFixture : CoreTest<ComicFileMovingService>
+    public class MoveComicFileFixture : CoreTest<ComicFileMovingService>
     {
         private Series _series;
         private ComicFile _trackFile;

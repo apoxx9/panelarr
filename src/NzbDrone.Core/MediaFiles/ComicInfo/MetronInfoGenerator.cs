@@ -66,7 +66,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                 // Issue details
                 if (issue != null)
                 {
-                    WriteElement(writer, "Number", issue.IssueNumber.ToString("0.##"));
+                    WriteElement(writer, "Number", issue.IssueNumber);
                     WriteElement(writer, "Title", issue.Title);
 
                     if (seriesMetadata?.Genres != null && seriesMetadata.Genres.Any())

@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Notifications
             // Comic grab format: "Grabbed: {Series} #{IssueNumber} - {Title}"
             var issueDescriptions = issues.Select(e =>
             {
-                var issueNum = e.IssueNumber.ToString("0.##");
+                var issueNum = e.IssueNumber;
                 return string.IsNullOrWhiteSpace(e.Title)
                     ? $"#{issueNum}"
                     : $"#{issueNum} - {e.Title}";
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Notifications
         {
             // Comic import format: "Imported: {Series} #{IssueNumber} - {Title} [{Quality}]"
             var quality = tracks.FirstOrDefault()?.Quality?.Quality?.ToString() ?? "Unknown";
-            var issueNum = issue.IssueNumber.ToString("0.##");
+            var issueNum = issue.IssueNumber;
             var title = string.IsNullOrWhiteSpace(issue.Title)
                 ? string.Empty
                 : $" - {issue.Title}";
@@ -94,7 +94,7 @@ namespace NzbDrone.Core.Notifications
             return text.IsNullOrWhiteSpace() ? "<missing>" : text;
         }
 
-        private string GetTrackRetagMessage(Series series, ComicFile comicFile, Dictionary<string, Tuple<string, string>> diff)
+        private string GetIssueRetagMessage(Series series, ComicFile comicFile, Dictionary<string, Tuple<string, string>> diff)
         {
             return string.Format("{0}:\n{1}",
                                  comicFile.Path,
@@ -182,7 +182,7 @@ namespace NzbDrone.Core.Notifications
             {
                 var oldQuality = message.OldFiles.First()?.Quality?.Quality?.ToString() ?? "Unknown";
                 var newQuality = message.ImportedIssues.FirstOrDefault()?.Quality?.Quality?.ToString() ?? "Unknown";
-                var issueNum = message.Issue.IssueNumber.ToString("0.##");
+                var issueNum = message.Issue.IssueNumber;
                 var title = string.IsNullOrWhiteSpace(message.Issue.Title)
                     ? string.Empty
                     : $" - {message.Issue.Title}";
@@ -433,7 +433,7 @@ namespace NzbDrone.Core.Notifications
         {
             var retagMessage = new IssueRetagMessage
             {
-                Message = GetTrackRetagMessage(message.Series, message.ComicFile, message.Diff),
+                Message = GetIssueRetagMessage(message.Series, message.ComicFile, message.Diff),
                 Series = message.Series,
                 Issue = message.ComicFile.Issue?.Value,
                 ComicFile = message.ComicFile,

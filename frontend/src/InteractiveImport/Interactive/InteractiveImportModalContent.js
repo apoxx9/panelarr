@@ -187,8 +187,6 @@ class InteractiveImportModalContent extends Component {
       .map((x) => x.issue)
       .value();
 
-    console.log(issuesImported);
-
     this.setState({
       issuesImported,
       isConfirmImportModalOpen: true

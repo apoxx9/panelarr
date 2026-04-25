@@ -29,12 +29,12 @@ namespace NzbDrone.Core.Notifications.Telegram
 
         public override void OnSeriesAdded(Series series)
         {
-            _proxy.SendNotification(AUTHOR_ADDED_TITLE, series.Name, Settings);
+            _proxy.SendNotification(SERIES_ADDED_TITLE, series.Name, Settings);
         }
 
         public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
-            _proxy.SendNotification(AUTHOR_DELETED_TITLE, deleteMessage.Message, Settings);
+            _proxy.SendNotification(SERIES_DELETED_TITLE, deleteMessage.Message, Settings);
         }
 
         public override void OnIssueDelete(IssueDeleteMessage deleteMessage)

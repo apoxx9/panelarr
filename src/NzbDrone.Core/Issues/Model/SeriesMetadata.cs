@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Core.Datastore;
 
 namespace NzbDrone.Core.Issues
 {
@@ -26,6 +27,7 @@ namespace NzbDrone.Core.Issues
         public int? Year { get; set; }
         public int? VolumeNumber { get; set; }
         public int? PublisherId { get; set; }
+        public LazyLoaded<Publisher> Publisher { get; set; }
         public List<MediaCover.MediaCover> Images { get; set; }
         public List<Links> Links { get; set; }
         public List<string> Genres { get; set; }

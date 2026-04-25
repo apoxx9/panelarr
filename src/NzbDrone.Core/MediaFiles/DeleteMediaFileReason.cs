@@ -5,7 +5,7 @@ namespace NzbDrone.Core.MediaFiles
         MissingFromDisk,
         Manual,
         Upgrade,
-        NoLinkedEpisodes,
+        NoLinkedIssues,
         ManualOverride
     }
 }

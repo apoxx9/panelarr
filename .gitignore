@@ -169,6 +169,9 @@ import_test/
 
 # AI config
 CLAUDE.md
+_bmad/
+_bmad-output/
+.claude/skills/
 
 # Internal dev docs
 docs/

@@ -48,28 +48,28 @@ namespace NzbDrone.Core.Notifications.Email
         {
             var body = $"{series.Name} added to library.";
 
-            SendEmail(Settings, AUTHOR_ADDED_TITLE_BRANDED, body);
+            SendEmail(Settings, SERIES_ADDED_TITLE_BRANDED, body);
         }
 
         public override void OnSeriesDelete(SeriesDeleteMessage deleteMessage)
         {
             var body = deleteMessage.Message;
 
-            SendEmail(Settings, AUTHOR_DELETED_TITlE_BRANDED, body);
+            SendEmail(Settings, SERIES_DELETED_TITLE_BRANDED, body);
         }
 
         public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
         {
             var body = deleteMessage.Message;
 
-            SendEmail(Settings, AUTHOR_DELETED_TITlE_BRANDED, body);
+            SendEmail(Settings, SERIES_DELETED_TITLE_BRANDED, body);
         }
 
         public override void OnComicFileDelete(ComicFileDeleteMessage deleteMessage)
         {
             var body = deleteMessage.Message;
 
-            SendEmail(Settings, AUTHOR_DELETED_TITlE_BRANDED, body);
+            SendEmail(Settings, SERIES_DELETED_TITLE_BRANDED, body);
         }
 
         public override void OnHealthIssue(HealthCheck.HealthCheck message)

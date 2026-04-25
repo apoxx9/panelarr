@@ -105,7 +105,7 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             LogInaccessiblePathError(path);
-            _eventAggregator.PublishEvent(new TrackImportFailedEvent(null, null, true, downloadClientItem));
+            _eventAggregator.PublishEvent(new ComicFileImportFailedEvent(null, null, true, downloadClientItem));
 
             return new List<ImportResult>();
         }

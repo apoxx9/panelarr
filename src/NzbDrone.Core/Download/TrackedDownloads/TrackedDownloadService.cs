@@ -260,9 +260,9 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 
         private void UpdateCachedItem(TrackedDownload trackedDownload)
         {
-            var parsedEpisodeInfo = Parser.Parser.ParseIssueTitle(trackedDownload.DownloadItem.Title);
+            var parsedIssueInfo = Parser.Parser.ParseIssueTitle(trackedDownload.DownloadItem.Title);
 
-            trackedDownload.RemoteIssue = parsedEpisodeInfo == null ? null : _parsingService.Map(parsedEpisodeInfo, 0, new[] { 0 });
+            trackedDownload.RemoteIssue = parsedIssueInfo == null ? null : _parsingService.Map(parsedIssueInfo, 0, new[] { 0 });
         }
 
         private static TrackedDownloadState GetStateFromHistory(DownloadHistoryEventType eventType)
@@ -286,11 +286,11 @@ namespace NzbDrone.Core.Download.TrackedDownloads
         {
             var needsToUpdate = false;
 
-            foreach (var episode in message.Removed)
+            foreach (var issue in message.Removed)
             {
                 var cachedItems = _cache.Values.Where(t =>
                                             t.RemoteIssue?.Issues != null &&
-                                            t.RemoteIssue.Issues.Any(e => e.Id == episode.Id))
+                                            t.RemoteIssue.Issues.Any(e => e.Id == issue.Id))
                                         .ToList();
 
                 if (cachedItems.Any())

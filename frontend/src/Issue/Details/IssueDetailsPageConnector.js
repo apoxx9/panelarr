@@ -95,13 +95,11 @@ class IssueDetailsPageConnector extends Component {
       );
     }
 
-    if (!isFetching && isPopulated && this.state.hasMounted) {
-      return (
-        <IssueDetailsConnector
-          titleSlug={titleSlug}
-        />
-      );
-    }
+    return (
+      <IssueDetailsConnector
+        titleSlug={titleSlug}
+      />
+    );
   }
 }
 

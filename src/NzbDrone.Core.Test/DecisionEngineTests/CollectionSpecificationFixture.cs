@@ -13,7 +13,7 @@ using NzbDrone.Core.Test.Framework;
 namespace NzbDrone.Core.Test.DecisionEngineTests
 {
     [TestFixture]
-    public class DiscographySpecificationFixture : CoreTest<DiscographySpecification>
+    public class CollectionSpecificationFixture : CoreTest<DiscographySpecification>
     {
         private RemoteIssue _remoteIssue;
 

@@ -64,7 +64,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
     }
 
     [TestFixture]
-    public class TrackGroupingServiceFixture : CoreTest<TrackGroupingService>
+    public class IssueGroupingServiceFixture : CoreTest<TrackGroupingService>
     {
         private List<LocalIssue> GivenTracks(string root, string series, string issue, int count)
         {
@@ -74,8 +74,6 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
                 .With(f => f.Series = new List<string> { series })
                 .With(f => f.SeriesTitle = series)
                 .With(f => f.IssueTitle = issue)
-                .With(f => f.IssueMBId = null)
-                .With(f => f.ReleaseMBId = null)
                 .Build();
 
             var tracks = fileInfos.Select(x => Builder<LocalIssue>
@@ -116,8 +114,6 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
                 .CreateListOfSize<ParsedTrackInfo>(count)
                 .All()
                 .With(f => f.IssueTitle = "issue")
-                .With(f => f.IssueMBId = null)
-                .With(f => f.ReleaseMBId = null)
                 .Build();
 
             var tracks = fileInfos.Select(x => Builder<LocalIssue>

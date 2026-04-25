@@ -6,5 +6,6 @@ namespace NzbDrone.Core.MetadataSource
     public interface ISearchForNewSeries
     {
         List<Series> SearchForNewSeries(string title);
+        List<Series> SearchForNewSeries(MetadataSearchCriteria criteria);
     }
 }
