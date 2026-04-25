@@ -91,6 +91,11 @@ class IndexerStep extends Component {
       implementation: schema.implementation,
       implementationName: schema.implementationName,
       configContract: schema.configContract,
+      protocol: schema.protocol || 'unknown',
+      priority: 25,
+      enableRss: true,
+      enableAutomaticSearch: true,
+      enableInteractiveSearch: true,
       fields: fields.map((field) => ({
         name: field.name,
         value: field.value

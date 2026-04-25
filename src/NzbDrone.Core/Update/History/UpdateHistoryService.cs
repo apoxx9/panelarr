@@ -69,11 +69,10 @@ namespace NzbDrone.Core.Update.History
             {
                 history = _repository.LastInstalled();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.Warn(ex, "Cleaning corrupted update history");
-                _repository.Purge();
-                history = null;
+                _logger.Debug("UpdateHistory table not available, skipping update history tracking");
+                return;
             }
 
             if (history == null || history.Version != BuildInfo.Version)

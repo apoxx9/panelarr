@@ -91,6 +91,10 @@ class DownloadClientStep extends Component {
       implementation: schema.implementation,
       implementationName: schema.implementationName,
       configContract: schema.configContract,
+      protocol: schema.protocol || 'unknown',
+      priority: 1,
+      removeCompletedDownloads: true,
+      removeFailedDownloads: true,
       fields: fields.map((field) => ({
         name: field.name,
         value: field.value
