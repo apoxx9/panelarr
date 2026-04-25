@@ -1,0 +1,410 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR.Client;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
+using NUnit.Framework;
+using NzbDrone.Common.EnvironmentInfo;
+using NzbDrone.Core.MediaFiles.IssueImport.Manual;
+using NzbDrone.Core.Qualities;
+using NzbDrone.Integration.Test.Client;
+using NzbDrone.SignalR;
+using NzbDrone.Test.Common;
+using NzbDrone.Test.Common.Categories;
+using Panelarr.Api.V1.Blocklist;
+using Panelarr.Api.V1.Config;
+using Panelarr.Api.V1.DownloadClient;
+using Panelarr.Api.V1.History;
+using Panelarr.Api.V1.Profiles.Quality;
+using Panelarr.Api.V1.RootFolders;
+using Panelarr.Api.V1.Series;
+using Panelarr.Api.V1.System.Tasks;
+using Panelarr.Api.V1.Tags;
+using RestSharp;
+using RestSharp.Serializers.SystemTextJson;
+
+namespace NzbDrone.Integration.Test
+{
+    [IntegrationTest]
+    public abstract class IntegrationTestBase
+    {
+        protected RestClient RestClient { get; private set; }
+
+        public ClientBase<BlocklistResource> Blocklist;
+        public CommandClient Commands;
+        public ClientBase<TaskResource> Tasks;
+        public DownloadClientClient DownloadClients;
+        public IssueClient Issues;
+        public ClientBase<HistoryResource> History;
+        public ClientBase<HostConfigResource> HostConfig;
+        public IndexerClient Indexers;
+        public LogsClient Logs;
+        public ClientBase<NamingConfigResource> NamingConfig;
+        public NotificationClient Notifications;
+        public ClientBase<QualityProfileResource> Profiles;
+        public ReleaseClient Releases;
+        public ReleasePushClient ReleasePush;
+        public ClientBase<RootFolderResource> RootFolders;
+        public SeriesClient Series;
+        public ClientBase<TagResource> Tags;
+        public WantedClient WantedMissing;
+        public WantedClient WantedCutoffUnmet;
+
+        private List<SignalRMessage> _signalRReceived;
+
+        private HubConnection _signalrConnection;
+
+        protected IEnumerable<SignalRMessage> SignalRMessages => _signalRReceived;
+
+        public IntegrationTestBase()
+        {
+            new StartupContext();
+
+            LogManager.Configuration = new LoggingConfiguration();
+            var consoleTarget = new ConsoleTarget { Layout = "${level}: ${message} ${exception}" };
+            LogManager.Configuration.AddTarget(consoleTarget.GetType().Name, consoleTarget);
+            LogManager.Configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, consoleTarget));
+        }
+
+        public string TempDirectory { get; private set; }
+
+        public abstract string SeriesRootFolder { get; }
+
+        protected abstract string RootUrl { get; }
+
+        protected abstract string ApiKey { get; }
+
+        protected abstract void StartTestTarget();
+
+        protected abstract void InitializeTestTarget();
+
+        protected abstract void StopTestTarget();
+
+        [OneTimeSetUp]
+        public void SmokeTestSetup()
+        {
+            StartTestTarget();
+            InitRestClients();
+            InitializeTestTarget();
+        }
+
+        protected virtual void InitRestClients()
+        {
+            RestClient = new RestClient(RootUrl + "api/v1/");
+            RestClient.AddDefaultHeader("Authentication", ApiKey);
+            RestClient.AddDefaultHeader("X-Api-Key", ApiKey);
+            RestClient.UseSystemTextJson();
+
+            Blocklist = new ClientBase<BlocklistResource>(RestClient, ApiKey);
+            Commands = new CommandClient(RestClient, ApiKey);
+            Tasks = new ClientBase<TaskResource>(RestClient, ApiKey, "system/task");
+            DownloadClients = new DownloadClientClient(RestClient, ApiKey);
+            Issues = new IssueClient(RestClient, ApiKey);
+            History = new ClientBase<HistoryResource>(RestClient, ApiKey);
+            HostConfig = new ClientBase<HostConfigResource>(RestClient, ApiKey, "config/host");
+            Indexers = new IndexerClient(RestClient, ApiKey);
+            Logs = new LogsClient(RestClient, ApiKey);
+            NamingConfig = new ClientBase<NamingConfigResource>(RestClient, ApiKey, "config/naming");
+            Notifications = new NotificationClient(RestClient, ApiKey);
+            Profiles = new ClientBase<QualityProfileResource>(RestClient, ApiKey);
+            Releases = new ReleaseClient(RestClient, ApiKey);
+            ReleasePush = new ReleasePushClient(RestClient, ApiKey);
+            RootFolders = new ClientBase<RootFolderResource>(RestClient, ApiKey);
+            Series = new SeriesClient(RestClient, ApiKey);
+            Tags = new ClientBase<TagResource>(RestClient, ApiKey);
+            WantedMissing = new WantedClient(RestClient, ApiKey, "wanted/missing");
+            WantedCutoffUnmet = new WantedClient(RestClient, ApiKey, "wanted/cutoff");
+        }
+
+        [OneTimeTearDown]
+        public void SmokeTestTearDown()
+        {
+            StopTestTarget();
+        }
+
+        [SetUp]
+        public void IntegrationSetUp()
+        {
+            TempDirectory = Path.Combine(TestContext.CurrentContext.TestDirectory, "_test_" + TestBase.GetUID());
+
+            // Wait for things to get quiet, otherwise the previous test might influence the current one.
+            Commands.WaitAll();
+        }
+
+        [TearDown]
+        public async Task IntegrationTearDown()
+        {
+            if (_signalrConnection != null)
+            {
+                await _signalrConnection.StopAsync();
+
+                _signalrConnection = null;
+                _signalRReceived = new List<SignalRMessage>();
+            }
+
+            if (Directory.Exists(TempDirectory))
+            {
+                try
+                {
+                    Directory.Delete(TempDirectory, true);
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        public string GetTempDirectory(params string[] args)
+        {
+            var path = Path.Combine(TempDirectory, Path.Combine(args));
+
+            Directory.CreateDirectory(path);
+
+            return path;
+        }
+
+        protected async Task ConnectSignalR()
+        {
+            _signalRReceived = new List<SignalRMessage>();
+            _signalrConnection = new HubConnectionBuilder()
+                .WithUrl("http://localhost:8787/signalr/messages", options =>
+                    {
+                        options.AccessTokenProvider = () => Task.FromResult(ApiKey);
+                    })
+                .Build();
+
+            var cts = new CancellationTokenSource();
+
+            _signalrConnection.Closed += e =>
+            {
+                cts.Cancel();
+                return Task.CompletedTask;
+            };
+
+            _signalrConnection.On<SignalRMessage>("receiveMessage", (message) =>
+            {
+                _signalRReceived.Add(message);
+            });
+
+            var connected = false;
+            var retryCount = 0;
+
+            while (!connected)
+            {
+                try
+                {
+                    await _signalrConnection.StartAsync();
+                    connected = true;
+                    break;
+                }
+                catch
+                {
+                    if (retryCount > 25)
+                    {
+                        Assert.Fail("Couldn't establish signalR connection");
+                    }
+                }
+
+                retryCount++;
+                Thread.Sleep(200);
+            }
+        }
+
+        public static void WaitForCompletion(Func<bool> predicate, int timeout = 10000, int interval = 500)
+        {
+            var count = timeout / interval;
+            for (var i = 0; i < count; i++)
+            {
+                if (predicate())
+                {
+                    return;
+                }
+
+                Thread.Sleep(interval);
+            }
+
+            if (predicate())
+            {
+                return;
+            }
+
+            Assert.Fail("Timed on wait");
+        }
+
+        public SeriesResource EnsureSeries(string seriesId, string goodreadsEditionId, string seriesName, bool? monitored = null)
+        {
+            var result = Series.All().FirstOrDefault(v => v.ForeignSeriesId == seriesId);
+
+            if (result == null)
+            {
+                var lookup = Series.Lookup("edition:" + goodreadsEditionId);
+                var series = lookup.First();
+                series.QualityProfileId = 1;
+                series.Path = Path.Combine(SeriesRootFolder, series.SeriesName);
+                series.Monitored = true;
+                series.AddOptions = new Core.Issues.AddSeriesOptions();
+                Directory.CreateDirectory(series.Path);
+
+                result = Series.Post(series);
+                Commands.WaitAll();
+                WaitForCompletion(() => Issues.GetIssuesInSeries(result.Id).Count > 0);
+            }
+
+            var changed = false;
+
+            if (result.RootFolderPath != SeriesRootFolder)
+            {
+                changed = true;
+                result.RootFolderPath = SeriesRootFolder;
+                result.Path = Path.Combine(SeriesRootFolder, result.SeriesName);
+            }
+
+            if (monitored.HasValue)
+            {
+                if (result.Monitored != monitored.Value)
+                {
+                    result.Monitored = monitored.Value;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                result.NextIssue = result.LastIssue = null;
+                Series.Put(result);
+            }
+
+            return result;
+        }
+
+        public void EnsureNoSeries(string panelarrId, string authorTitle)
+        {
+            var result = Series.All().FirstOrDefault(v => v.ForeignSeriesId == panelarrId);
+
+            if (result != null)
+            {
+                Series.Delete(result.Id);
+            }
+        }
+
+        public void EnsureComicFile(SeriesResource series, int issueId, string foreignEditionId, Quality quality)
+        {
+            var result = Issues.GetIssuesInSeries(series.Id).Single(v => v.Id == issueId);
+
+            // if (result.ComicFile == null)
+            if (true)
+            {
+                var path = Path.Combine(SeriesRootFolder, series.SeriesName, "Track.mp3");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                File.WriteAllText(path, "Fake Track");
+
+                Commands.PostAndWait(new ManualImportCommand
+                {
+                    Files = new List<ManualImportFile>
+                    {
+                            new ManualImportFile
+                            {
+                                Path = path,
+                                SeriesId = series.Id,
+                                IssueId = issueId,
+                                Quality = new QualityModel(quality)
+                            }
+                    }
+                });
+                Commands.WaitAll();
+
+                var track = Issues.GetIssuesInSeries(series.Id).Single(x => x.Id == issueId);
+
+                // track.ComicFileId.Should().NotBe(0);
+            }
+        }
+
+        public QualityProfileResource EnsureProfileCutoff(int profileId, Quality cutoff, bool upgradeAllowed)
+        {
+            var needsUpdate = false;
+            var profile = Profiles.Get(profileId);
+
+            if (profile.Cutoff != cutoff.Id)
+            {
+                profile.Cutoff = cutoff.Id;
+                needsUpdate = true;
+            }
+
+            if (profile.UpgradeAllowed != upgradeAllowed)
+            {
+                profile.UpgradeAllowed = upgradeAllowed;
+                needsUpdate = true;
+            }
+
+            if (needsUpdate)
+            {
+                profile = Profiles.Put(profile);
+            }
+
+            return profile;
+        }
+
+        public TagResource EnsureTag(string tagLabel)
+        {
+            var tag = Tags.All().FirstOrDefault(v => v.Label == tagLabel);
+
+            if (tag == null)
+            {
+                tag = Tags.Post(new TagResource { Label = tagLabel });
+            }
+
+            return tag;
+        }
+
+        public void EnsureNoTag(string tagLabel)
+        {
+            var tag = Tags.All().FirstOrDefault(v => v.Label == tagLabel);
+
+            if (tag != null)
+            {
+                Tags.Delete(tag.Id);
+            }
+        }
+
+        public DownloadClientResource EnsureDownloadClient(bool enabled = true)
+        {
+            var client = DownloadClients.All().FirstOrDefault(v => v.Name == "Test UsenetBlackhole");
+
+            if (client == null)
+            {
+                var schema = DownloadClients.Schema().First(v => v.Implementation == "UsenetBlackhole");
+
+                schema.Enable = enabled;
+                schema.Name = "Test UsenetBlackhole";
+                schema.Fields.First(v => v.Name == "watchFolder").Value = GetTempDirectory("Download", "UsenetBlackhole", "Watch");
+                schema.Fields.First(v => v.Name == "nzbFolder").Value = GetTempDirectory("Download", "UsenetBlackhole", "Nzb");
+
+                client = DownloadClients.Post(schema);
+            }
+            else if (client.Enable != enabled)
+            {
+                client.Enable = enabled;
+
+                client = DownloadClients.Put(client);
+            }
+
+            return client;
+        }
+
+        public void EnsureNoDownloadClient()
+        {
+            var clients = DownloadClients.All();
+
+            foreach (var client in clients)
+            {
+                DownloadClients.Delete(client.Id);
+            }
+        }
+    }
+}

@@ -1,0 +1,121 @@
+import _ from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { createSelector } from 'reselect';
+import * as commandNames from 'Commands/commandNames';
+import withCurrentPage from 'Components/withCurrentPage';
+import { deleteIssueFile, deleteIssueFiles, fetchIssueFiles, setIssueFilesSort, setIssueFilesTableOption } from 'Store/Actions/issueFileActions';
+import { executeCommand } from 'Store/Actions/commandActions';
+import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
+import createCommandExecutingSelector from 'Store/Selectors/createCommandExecutingSelector';
+import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
+import { registerPagePopulator, unregisterPagePopulator } from 'Utilities/pagePopulator';
+import UnmappedFilesTable from './UnmappedFilesTable';
+
+function createMapStateToProps() {
+  return createSelector(
+    createClientSideCollectionSelector('issueFiles'),
+    createCommandExecutingSelector(commandNames.RESCAN_FOLDERS),
+    createDimensionsSelector(),
+    (
+      issueFiles,
+      isScanningFolders,
+      dimensionsState
+    ) => {
+      // issueFiles could pick up mapped entries via signalR so filter again here
+      const {
+        items,
+        ...otherProps
+      } = issueFiles;
+
+      const unmappedFiles = _.filter(items, { issueId: 0 });
+
+      return {
+        items: unmappedFiles,
+        ...otherProps,
+        isScanningFolders,
+        isSmallScreen: dimensionsState.isSmallScreen
+      };
+    }
+  );
+}
+
+function createMapDispatchToProps(dispatch, props) {
+  return {
+    onTableOptionChange(payload) {
+      dispatch(setIssueFilesTableOption(payload));
+    },
+
+    onSortPress(sortKey) {
+      dispatch(setIssueFilesSort({ sortKey }));
+    },
+
+    fetchUnmappedFiles() {
+      dispatch(fetchIssueFiles({ unmapped: true }));
+    },
+
+    deleteUnmappedFile(id) {
+      dispatch(deleteIssueFile({ id }));
+    },
+
+    deleteUnmappedFiles(issueFileIds) {
+      dispatch(deleteIssueFiles({ issueFileIds }));
+    },
+
+    onAddMissingSeriesPress() {
+      dispatch(executeCommand({
+        name: commandNames.RESCAN_FOLDERS,
+        addNewSeries: true,
+        filter: 'matched'
+      }));
+    }
+  };
+}
+
+class UnmappedFilesTableConnector extends Component {
+
+  //
+  // Lifecycle
+
+  componentDidMount() {
+    registerPagePopulator(this.repopulate, ['issueFileUpdated']);
+
+    this.repopulate();
+  }
+
+  componentWillUnmount() {
+    unregisterPagePopulator(this.repopulate);
+  }
+
+  //
+  // Control
+
+  repopulate = () => {
+    this.props.fetchUnmappedFiles();
+  };
+
+  //
+  // Render
+
+  render() {
+    return (
+      <UnmappedFilesTable
+        {...this.props}
+      />
+    );
+  }
+}
+
+UnmappedFilesTableConnector.propTypes = {
+  isSmallScreen: PropTypes.bool.isRequired,
+  onSortPress: PropTypes.func.isRequired,
+  onTableOptionChange: PropTypes.func.isRequired,
+  fetchUnmappedFiles: PropTypes.func.isRequired,
+  deleteUnmappedFile: PropTypes.func.isRequired,
+  deleteUnmappedFiles: PropTypes.func.isRequired
+};
+
+export default withCurrentPage(
+  connect(createMapStateToProps, createMapDispatchToProps)(UnmappedFilesTableConnector)
+);

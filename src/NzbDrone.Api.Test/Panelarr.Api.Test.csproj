@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="NBuilder" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NzbDrone.Core\Panelarr.Core.csproj" />
+    <ProjectReference Include="..\NzbDrone.Test.Common\Panelarr.Test.Common.csproj" />
+    <ProjectReference Include="..\Panelarr.Http\Panelarr.Http.csproj" />
+  </ItemGroup>
+</Project>

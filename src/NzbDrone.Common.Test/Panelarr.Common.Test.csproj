@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NzbDrone.Host\Panelarr.Host.csproj" />
+    <ProjectReference Include="..\NzbDrone.Test.Common\Panelarr.Test.Common.csproj" />
+    <ProjectReference Include="..\NzbDrone.Test.Dummy\Panelarr.Test.Dummy.csproj" />
+  </ItemGroup>
+</Project>

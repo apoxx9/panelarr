@@ -1,0 +1,362 @@
+.wizard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #1e1e2e;
+  padding: 20px;
+}
+
+.card {
+  background-color: #2a2a3e;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  max-width: 700px;
+  width: 100%;
+  padding: 40px;
+  color: #e0e0e0;
+}
+
+.progressBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+  gap: 8px;
+}
+
+.progressStep {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #444;
+  transition: background-color 0.3s ease;
+}
+
+.progressStepActive {
+  composes: progressStep;
+  background-color: #9b6bbf;
+}
+
+.progressStepComplete {
+  composes: progressStep;
+  background-color: #7b4fa2;
+}
+
+.progressLine {
+  width: 30px;
+  height: 3px;
+  background-color: #444;
+  transition: background-color 0.3s ease;
+}
+
+.progressLineComplete {
+  composes: progressLine;
+  background-color: #9b6bbf;
+}
+
+.stepContent {
+  min-height: 300px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #3a3a4e;
+}
+
+.buttonsRight {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.buttonPrimary {
+  composes: button;
+  background-color: #9b6bbf;
+  color: #fff;
+}
+
+.buttonPrimary:hover {
+  background-color: #8a5aae;
+}
+
+.buttonPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.buttonSecondary {
+  composes: button;
+  background-color: #3a3a4e;
+  color: #e0e0e0;
+}
+
+.buttonSecondary:hover {
+  background-color: #4a4a5e;
+}
+
+.buttonSkip {
+  composes: button;
+  background-color: transparent;
+  color: #999;
+}
+
+.buttonSkip:hover {
+  color: #ccc;
+}
+
+/* Welcome step */
+.welcomeContainer {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.logo {
+  width: 120px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.welcomeTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.welcomeDescription {
+  font-size: 16px;
+  color: #aaa;
+  line-height: 1.6;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Step headers */
+.stepTitle {
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.stepDescription {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 24px;
+}
+
+/* Form overrides for dark theme */
+.formContainer {
+  margin-top: 16px;
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formLabel {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+  margin-bottom: 6px;
+}
+
+.formInput {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: #1e1e2e;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #e0e0e0;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #9b6bbf;
+}
+
+.formSelect {
+  composes: formInput;
+  appearance: auto;
+}
+
+.helpText {
+  font-size: 12px;
+  color: #777;
+  margin-top: 4px;
+}
+
+/* Test button */
+.testButtonContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.testButton {
+  composes: button;
+  padding: 6px 16px;
+  font-size: 12px;
+  background-color: #3a3a4e;
+  color: #e0e0e0;
+}
+
+.testButton:hover {
+  background-color: #4a4a5e;
+}
+
+.testButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.testSuccess {
+  color: #4caf50;
+  font-size: 13px;
+}
+
+.testFailure {
+  color: #f44336;
+  font-size: 13px;
+}
+
+.testSpinner {
+  color: #9b6bbf;
+  font-size: 13px;
+}
+
+/* Root folder list */
+.existingFolders {
+  margin-top: 16px;
+}
+
+.existingFoldersTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+  margin-bottom: 8px;
+}
+
+.folderItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #1e1e2e;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #aaa;
+}
+
+.folderIcon {
+  color: #9b6bbf;
+}
+
+/* Schema selector */
+.schemaSelector {
+  margin-bottom: 20px;
+}
+
+.schemaFields {
+  margin-top: 16px;
+}
+
+/* Complete step */
+.completeContainer {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.completeTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+.completeDescription {
+  font-size: 15px;
+  color: #aaa;
+  margin-bottom: 30px;
+}
+
+.summaryList {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto 30px;
+  max-width: 400px;
+  text-align: left;
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #3a3a4e;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.summaryIcon {
+  font-size: 16px;
+}
+
+.summaryIconComplete {
+  composes: summaryIcon;
+  color: #4caf50;
+}
+
+.summaryIconSkipped {
+  composes: summaryIcon;
+  color: #666;
+}
+
+.startButton {
+  composes: button;
+  padding: 14px 40px;
+  font-size: 16px;
+  background-color: #9b6bbf;
+  color: #fff;
+}
+
+.startButton:hover {
+  background-color: #8a5aae;
+}
+
+.error {
+  color: #f44336;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
