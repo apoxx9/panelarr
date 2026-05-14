@@ -213,8 +213,8 @@ namespace NzbDrone.Core.Test.MetadataSource
             var criteria = new MetadataSearchCriteria("Batman", 2020);
             var result = Subject.SearchForNewSeries(criteria);
 
-            result.Should().HaveCount(1);
-            result.First().Metadata.Value.Year.Should().Be(2020);
+            result.Should().HaveCount(2);
+            result.First().Metadata.Value.Year.Should().Be(2020); // 2020 is closer to requested year
         }
 
         [Test]

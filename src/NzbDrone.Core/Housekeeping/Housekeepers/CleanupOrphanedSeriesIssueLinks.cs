@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
                              WHERE ""Id"" IN (
                              SELECT ""SeriesGroupLink"".""Id"" FROM ""SeriesGroupLink""
                              LEFT OUTER JOIN ""SeriesGroup""
-                             ON ""SeriesGroupLink"".""SeriesId"" = ""SeriesGroup"".""Id""
+                             ON ""SeriesGroupLink"".""SeriesGroupId"" = ""SeriesGroup"".""Id""
                              WHERE ""SeriesGroup"".""Id"" IS NULL)");
         }
     }

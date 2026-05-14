@@ -50,8 +50,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
             var qualityComparer = new QualityModelComparer(item.Series.QualityProfile);
 
             // If new file quality is higher than every existing file → it's an upgrade → accept.
+            var itemQuality = item.Quality ?? new QualityModel(Qualities.Quality.Unknown);
             var allExistingAreLower = existingFiles.All(f =>
-                qualityComparer.Compare(item.Quality, f.Quality) > 0);
+                qualityComparer.Compare(itemQuality, f.Quality ?? new QualityModel(Qualities.Quality.Unknown)) > 0);
 
             if (allExistingAreLower)
             {

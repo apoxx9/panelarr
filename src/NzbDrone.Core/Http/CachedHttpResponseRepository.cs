@@ -19,9 +19,7 @@ namespace NzbDrone.Core.Http
 
         public CachedHttpResponse FindByUrl(string url)
         {
-            var edition = Query(x => x.Url == url).SingleOrDefault();
-
-            return edition;
+            return Query(x => x.Url == url).FirstOrDefault();
         }
     }
 }
