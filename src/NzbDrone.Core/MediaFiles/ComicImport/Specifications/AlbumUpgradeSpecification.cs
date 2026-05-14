@@ -20,13 +20,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
         {
             var qualityComparer = new QualityModelComparer(item.Issue?.Series.Value.QualityProfile);
 
-            var newMinQuality = item.LocalIssues.Select(x => x.Quality).OrderBy(x => x, qualityComparer).First();
+            var newMinQuality = item.LocalIssues.Select(x => x.Quality ?? new QualityModel(Qualities.Quality.Unknown)).OrderBy(x => x, qualityComparer).First();
             _logger.Debug("Min quality of new files: {0}", newMinQuality);
 
             var existingFiles = item.Issue?.ComicFiles?.Value;
             if (existingFiles != null && existingFiles.Any())
             {
-                var existingQualities = existingFiles.Select(x => x.Quality);
+                var existingQualities = existingFiles.Select(x => x.Quality ?? new QualityModel(Qualities.Quality.Unknown));
                 var existingMinQuality = existingQualities.OrderBy(x => x, qualityComparer).First();
                 _logger.Debug("Min quality of existing files: {0}", existingMinQuality);
 

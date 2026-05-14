@@ -11,7 +11,7 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
     public interface IComicVineApiClient
     {
         List<ComicVineVolumeSummary> SearchSeries(string query);
-        List<ComicVineVolumeSummary> SearchVolumes(string query);
+        List<ComicVineVolumeSummary> SearchVolumes(string query, int? year = null);
         ComicVineVolumeDetail GetVolume(int id);
         List<ComicVineIssueSummary> GetIssues(int volumeId);
         ComicVineIssueDetail GetIssue(int id);
@@ -64,14 +64,18 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
             return response.Resource?.Results ?? new List<ComicVineVolumeSummary>();
         }
 
-        public List<ComicVineVolumeSummary> SearchVolumes(string query)
+        public List<ComicVineVolumeSummary> SearchVolumes(string query, int? year = null)
         {
             _rateLimiter.WaitForToken();
 
+            var filter = year.HasValue
+                ? $"name:{query},start_year:{year.Value}"
+                : $"name:{query}";
+
             var request = BuildRequest("volumes");
             request.Url = request.Url
-                .AddQueryParam("filter", $"name:{query}")
-                .AddQueryParam("field_list", "id,name,start_year,publisher,image,count_of_issues");
+                .AddQueryParam("filter", filter)
+                .AddQueryParam("field_list", "id,name,start_year,publisher,image,count_of_issues,deck,description");
 
             var response = _cachedHttpClient.Get<ComicVineResponse<List<ComicVineVolumeSummary>>>(request, false, TimeSpan.FromHours(1));
 

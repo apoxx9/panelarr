@@ -140,7 +140,13 @@ class SeriesDetails extends Component {
     });
   };
 
-  onDeleteSeriesModalClose = () => {
+  onDeleteSeriesModalClose = (deleted) => {
+    if (deleted) {
+      // Series was deleted — redirect to series list since this page no longer has data
+      window.location = `${window.Panelarr.urlBase}/`;
+      return;
+    }
+
     this.setState({ isDeleteSeriesModalOpen: false });
   };
 

@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Alert from 'Components/Alert';
-import NumberInput from 'Components/Form/NumberInput';
 import TextInput from 'Components/Form/TextInput';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
@@ -16,6 +15,18 @@ import AddNewSeriesSearchResultConnector from './Series/AddNewSeriesSearchResult
 import AddNewIssueSearchResultConnector from './Issue/AddNewIssueSearchResultConnector';
 import styles from './AddNewItem.css';
 
+function parseDisambiguation(disambiguation) {
+  if (!disambiguation) {
+    return { publisher: '', issueCount: 0 };
+  }
+
+  const parts = disambiguation.split('|');
+  return {
+    publisher: parts[0] || '',
+    issueCount: parts[1] ? parseInt(parts[1]) || 0 : 0
+  };
+}
+
 class AddNewItem extends Component {
 
   //
@@ -26,8 +37,10 @@ class AddNewItem extends Component {
 
     this.state = {
       term: props.term || '',
-      year: props.year || '',
-      isFetching: false
+      isFetching: false,
+      sortKey: null,
+      sortDir: 'asc',
+      filterText: ''
     };
   }
 
@@ -35,7 +48,7 @@ class AddNewItem extends Component {
     const term = this.state.term;
 
     if (term) {
-      this.props.onSearchChange(term, this.state.year);
+      this.props.onSearchChange(term);
     }
   }
 
@@ -50,7 +63,7 @@ class AddNewItem extends Component {
         term,
         isFetching: true
       });
-      this.props.onSearchChange(term, this.state.year);
+      this.props.onSearchChange(term);
     } else if (isFetching !== prevProps.isFetching) {
       this.setState({
         isFetching
@@ -64,32 +77,212 @@ class AddNewItem extends Component {
   onSearchInputChange = ({ value }) => {
     const hasValue = !!value.trim();
 
-    this.setState({ term: value, isFetching: hasValue }, () => {
+    this.setState({ term: value, isFetching: hasValue, filterText: '' }, () => {
       if (hasValue) {
-        this.props.onSearchChange(value, this.state.year);
+        this.props.onSearchChange(value);
       } else {
         this.props.onClearSearch();
       }
     });
   };
 
-  onYearInputChange = ({ value }) => {
-    this.setState({ year: value }, () => {
-      const term = this.state.term.trim();
-
-      if (term) {
-        this.props.onSearchChange(term, value);
-      }
-    });
-  };
-
   onClearSearchPress = () => {
-    this.setState({ term: '', year: '' });
+    this.setState({ term: '', filterText: '' });
     this.props.onClearSearch();
   };
 
+  onFilterChange = ({ value }) => {
+    this.setState({ filterText: value });
+  };
+
+  onSortPress = (key) => {
+    this.setState((state) => {
+      if (state.sortKey === key) {
+        return { sortDir: state.sortDir === 'asc' ? 'desc' : 'asc' };
+      }
+
+      return { sortKey: key, sortDir: 'asc' };
+    });
+  };
+
+  //
+  // Helpers
+
+  getSortedAndFiltered(seriesItems) {
+    const { sortKey, sortDir, filterText } = this.state;
+    const filterLower = filterText.toLowerCase().trim();
+
+    let items = seriesItems;
+
+    // Client-side filter
+    if (filterLower) {
+      items = items.filter((item) => {
+        const series = item.series;
+        const { publisher } = parseDisambiguation(series.disambiguation);
+        const name = (series.seriesName || '').toLowerCase();
+        const pub = publisher.toLowerCase();
+        const year = String(series.year || '');
+        const status = (series.status || '').toLowerCase();
+
+        return name.includes(filterLower) ||
+               pub.includes(filterLower) ||
+               year.includes(filterLower) ||
+               status.includes(filterLower);
+      });
+    }
+
+    // Sort
+    if (sortKey) {
+      items = [...items].sort((a, b) => {
+        const sa = a.series;
+        const sb = b.series;
+        const { publisher: pubA, issueCount: countA } = parseDisambiguation(sa.disambiguation);
+        const { publisher: pubB, issueCount: countB } = parseDisambiguation(sb.disambiguation);
+
+        let valA, valB;
+
+        switch (sortKey) {
+          case 'name':
+            valA = (sa.seriesName || '').toLowerCase();
+            valB = (sb.seriesName || '').toLowerCase();
+            return sortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+          case 'year':
+            valA = sa.year || 0;
+            valB = sb.year || 0;
+            break;
+          case 'publisher':
+            valA = pubA.toLowerCase();
+            valB = pubB.toLowerCase();
+            return sortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+          case 'issues':
+            valA = countA;
+            valB = countB;
+            break;
+          case 'status':
+            valA = (sa.status || '').toLowerCase();
+            valB = (sb.status || '').toLowerCase();
+            return sortDir === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+          default:
+            return 0;
+        }
+
+        if (sortDir === 'asc') {
+          return valA - valB;
+        }
+
+        return valB - valA;
+      });
+    }
+
+    return items;
+  }
+
   //
   // Render
+
+  renderSortIcon(key) {
+    const { sortKey, sortDir } = this.state;
+
+    if (sortKey !== key) {
+      return <Icon name={icons.SORT} size={10} className={styles.sortIcon} />;
+    }
+
+    return (
+      <Icon
+        name={sortDir === 'asc' ? icons.SORT_ASCENDING : icons.SORT_DESCENDING}
+        size={10}
+        className={styles.sortIconActive}
+      />
+    );
+  }
+
+  renderSeriesTable(seriesItems) {
+    if (!seriesItems.length) {
+      return null;
+    }
+
+    const sortedItems = this.getSortedAndFiltered(seriesItems);
+
+    return (
+      <div className={styles.tableContainer}>
+        <div className={styles.tableControls}>
+          <TextInput
+            className={styles.filterInput}
+            name="filterBox"
+            value={this.state.filterText}
+            placeholder="Filter results (e.g. DC, 2023, Continuing...)"
+            onChange={this.onFilterChange}
+          />
+          <span className={styles.resultCount}>
+            {sortedItems.length} of {seriesItems.length} results
+          </span>
+        </div>
+
+        <table className={styles.resultsTable} aria-label="Search results">
+          <thead>
+            <tr>
+              <th className={styles.posterHeader} />
+              <th className={styles.nameHeader} onClick={() => this.onSortPress('name')}>
+                Series {this.renderSortIcon('name')}
+              </th>
+              <th className={styles.yearHeader} onClick={() => this.onSortPress('year')}>
+                Year {this.renderSortIcon('year')}
+              </th>
+              <th className={styles.publisherHeader} onClick={() => this.onSortPress('publisher')}>
+                Publisher {this.renderSortIcon('publisher')}
+              </th>
+              <th className={styles.issueCountHeader} onClick={() => this.onSortPress('issues')}>
+                Issues {this.renderSortIcon('issues')}
+              </th>
+              <th className={styles.statusHeader} onClick={() => this.onSortPress('status')}>
+                Status {this.renderSortIcon('status')}
+              </th>
+              <th className={styles.actionHeader} />
+            </tr>
+          </thead>
+          <tbody>
+            {sortedItems.map((item) => {
+              const series = item.series;
+              return (
+                <AddNewSeriesSearchResultConnector
+                  key={item.id}
+                  {...series}
+                />
+              );
+            })}
+          </tbody>
+        </table>
+
+        {sortedItems.length === 0 && seriesItems.length > 0 &&
+          <div className={styles.message}>
+            No results match your filter. Try a different term.
+          </div>
+        }
+      </div>
+    );
+  }
+
+  renderIssueResults(issueItems) {
+    if (!issueItems.length) {
+      return null;
+    }
+
+    return (
+      <div className={styles.searchResults}>
+        {issueItems.map((item) => {
+          const issue = item.issue;
+          return (
+            <AddNewIssueSearchResultConnector
+              key={item.id}
+              isExistingIssue={'id' in issue && issue.id !== 0}
+              isExistingSeries={'id' in issue.series && issue.series.id !== 0}
+              {...issue}
+            />
+          );
+        })}
+      </div>
+    );
+  }
 
   render() {
     const {
@@ -100,6 +293,9 @@ class AddNewItem extends Component {
 
     const term = this.state.term;
     const isFetching = this.state.isFetching;
+
+    const seriesItems = items.filter((i) => i.series);
+    const issueItems = items.filter((i) => i.issue);
 
     return (
       <PageContent title={translate('AddNewItem')}>
@@ -116,17 +312,9 @@ class AddNewItem extends Component {
               className={styles.searchInput}
               name="searchBox"
               value={term}
-              placeholder={translate('SearchBoxPlaceHolder')}
+              placeholder="Search by name (e.g. Batman, Ben 10, Spider-Man)"
               autoFocus={true}
               onChange={this.onSearchInputChange}
-            />
-
-            <TextInput
-              className={styles.yearInput}
-              name="yearBox"
-              value={this.state.year}
-              placeholder="Year"
-              onChange={this.onYearInputChange}
             />
 
             <Button
@@ -164,31 +352,9 @@ class AddNewItem extends Component {
 
           {
             !isFetching && !error && !!items.length &&
-              <div className={styles.searchResults}>
-                {
-                  items.map((item) => {
-                    if (item.series) {
-                      const series = item.series;
-                      return (
-                        <AddNewSeriesSearchResultConnector
-                          key={item.id}
-                          {...series}
-                        />
-                      );
-                    } else if (item.issue) {
-                      const issue = item.issue;
-                      return (
-                        <AddNewIssueSearchResultConnector
-                          key={item.id}
-                          isExistingIssue={'id' in issue && issue.id !== 0}
-                          isExistingSeries={'id' in issue.series && issue.series.id !== 0}
-                          {...issue}
-                        />
-                      );
-                    }
-                    return null;
-                  })
-                }
+              <div>
+                {this.renderSeriesTable(seriesItems)}
+                {this.renderIssueResults(issueItems)}
               </div>
           }
 
@@ -244,7 +410,6 @@ class AddNewItem extends Component {
 
 AddNewItem.propTypes = {
   term: PropTypes.string,
-  year: PropTypes.string,
   isFetching: PropTypes.bool.isRequired,
   error: PropTypes.object,
   isAdding: PropTypes.bool.isRequired,

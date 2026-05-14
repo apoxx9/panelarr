@@ -42,23 +42,31 @@ namespace NzbDrone.Core.MetadataSource
         {
             var title = criteria.Term;
 
-            // ComicVine first — richer search data (images, publisher, issue count)
+            // ComicVine first — use filter API for precise name matching
             var comicVineApiKey = _configService.ComicVineApiKey;
 
             if (!string.IsNullOrWhiteSpace(comicVineApiKey))
             {
                 try
                 {
-                    _logger.Info("Searching ComicVine for: {0}", title);
-                    var cvResults = _comicVineClient.SearchSeries(title);
+                    _logger.Info("Searching ComicVine for: {0}{1}", title, criteria.Year.HasValue ? $" (year: {criteria.Year})" : "");
+
+                    // Use /volumes filter API (like Mylar) for precise name matching
+                    var cvResults = criteria.Year.HasValue
+                        ? _comicVineClient.SearchVolumes(title, criteria.Year.Value)
+                        : _comicVineClient.SearchVolumes(title);
+
+                    // Fall back to /search if filter returns nothing (handles partial matches)
+                    if (!cvResults.Any())
+                    {
+                        _logger.Debug("No filter results, falling back to search API for: {0}", title);
+                        cvResults = _comicVineClient.SearchSeries(title);
+                    }
 
                     if (cvResults.Any())
                     {
-                        _logger.Debug(
-                            "ComicVine returned {0} results for: {1}",
-                            cvResults.Count,
-                            title);
-                        return SortByRelevance(FilterByYear(MapComicVineResults(cvResults), criteria.Year), title);
+                        _logger.Debug("ComicVine returned {0} results for: {1}", cvResults.Count, title);
+                        return MapComicVineResults(cvResults);
                     }
 
                     _logger.Debug("No results from ComicVine for: {0}", title);
@@ -85,11 +93,8 @@ namespace NzbDrone.Core.MetadataSource
 
                     if (results.Any())
                     {
-                        _logger.Debug(
-                            "Metron returned {0} results for: {1}",
-                            results.Count,
-                            title);
-                        return SortByRelevance(FilterByYear(MapMetronResults(results), criteria.Year), title);
+                        _logger.Debug("Metron returned {0} results for: {1}", results.Count, title);
+                        return MapMetronResults(results);
                     }
 
                     _logger.Debug("No results from Metron for: {0}", title);
@@ -120,64 +125,6 @@ namespace NzbDrone.Core.MetadataSource
         public List<object> SearchForNewEntity(MetadataSearchCriteria criteria)
         {
             return SearchForNewSeries(criteria).Cast<object>().ToList();
-        }
-
-        private List<Series> FilterByYear(List<Series> results, int? year)
-        {
-            if (!year.HasValue)
-            {
-                return results;
-            }
-
-            return results.Where(s => s.Metadata.Value.Year == year.Value).ToList();
-        }
-
-        private List<Series> SortByRelevance(List<Series> results, string query)
-        {
-            var queryLower = query.ToLowerInvariant().Trim();
-            var queryWords = queryLower.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            return results
-                .Select(s => new { Series = s, Score = ScoreRelevance(s.Name?.ToLowerInvariant() ?? "", queryLower, queryWords) })
-                .OrderByDescending(x => x.Score)
-                .Select(x => x.Series)
-                .ToList();
-        }
-
-        private static int ScoreRelevance(string name, string query, string[] queryWords)
-        {
-            // Exact match
-            if (name == query)
-            {
-                return 100;
-            }
-
-            // Starts with query
-            if (name.StartsWith(query))
-            {
-                return 80;
-            }
-
-            // Contains exact query as substring
-            if (name.Contains(query))
-            {
-                return 60;
-            }
-
-            // Contains all query words
-            if (queryWords.All(w => name.Contains(w)))
-            {
-                return 40;
-            }
-
-            // Contains some query words
-            var matchCount = queryWords.Count(w => name.Contains(w));
-            if (matchCount > 0)
-            {
-                return 10 + (matchCount * 10 / queryWords.Length);
-            }
-
-            return 0;
         }
 
         private List<Series> MapMetronResults(List<Metron.Resources.MetronSeriesListItem> results)

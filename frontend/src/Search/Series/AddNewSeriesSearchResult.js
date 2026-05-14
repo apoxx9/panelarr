@@ -3,8 +3,6 @@ import React, { Component } from 'react';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import { icons } from 'Helpers/Props';
-import stripHtml from 'Utilities/String/stripHtml';
-import translate from 'Utilities/String/translate';
 import AddNewSeriesModal from './AddNewSeriesModal';
 import styles from './AddNewSeriesSearchResult.css';
 
@@ -62,63 +60,43 @@ class AddNewSeriesSearchResult extends Component {
       year,
       disambiguation,
       status,
-      seriesType,
-      volumeNumber,
       overview,
-      ratings,
       folder,
       images,
       remotePoster,
       statistics,
-      isExistingSeries,
-      isSmallScreen
+      isExistingSeries
     } = this.props;
 
     // Parse disambiguation: "Publisher|IssueCount" or just "Publisher"
-    let publisherName = null;
+    let publisherName = '';
     let providerIssueCount = 0;
 
     if (disambiguation) {
       const parts = disambiguation.split('|');
-      publisherName = parts[0] || null;
+      publisherName = parts[0] || '';
       if (parts[1]) {
         providerIssueCount = parseInt(parts[1]) || 0;
       }
     }
 
-    // Issue count: prefer statistics (from DB), fall back to provider data
     const issueCount = (statistics && statistics.issueCount > 0) ? statistics.issueCount : providerIssueCount;
 
     const {
       isNewAddSeriesModalOpen
     } = this.state;
 
-    const linkProps = isExistingSeries ? { to: `/series/${titleSlug}` } : { onPress: this.onPress };
+    const statusMap = {
+      continuing: { label: 'Continuing', class: styles.statusContinuing },
+      ended: { label: 'Ended', class: styles.statusEnded },
+      cancelled: { label: 'Cancelled', class: styles.statusCancelled },
+      hiatus: { label: 'Hiatus', class: styles.statusCancelled }
+    };
+    const statusInfo = statusMap[(status || '').toLowerCase()] || { label: '—', class: styles.statusUnknown };
+    const statusLabel = statusInfo.label;
+    const statusClass = statusInfo.class;
 
-    // Extract year from folder name or series name if year prop is not available
-    // Folder format: "Series Name (YYYY)" or series name includes "(YYYY)"
-    let displayYear = year;
-
-    if (!displayYear && folder) {
-      const match = folder.match(/\((\d{4})\)/);
-
-      if (match) {
-        displayYear = parseInt(match[1]);
-      }
-    }
-
-    if (!displayYear && seriesName) {
-      const match = seriesName.match(/\((\d{4})\)/);
-
-      if (match) {
-        displayYear = parseInt(match[1]);
-      }
-    }
-
-    const statusLabel = status === 'ended' ? 'Ended' : 'Continuing';
-    const statusClass = status === 'ended' ? styles.statusEnded : styles.statusContinuing;
-
-    // Get poster URL - prefer remotePoster, fall back to image array
+    // Get poster URL
     let posterUrl = remotePoster;
 
     if (!posterUrl && images && images.length > 0) {
@@ -129,130 +107,91 @@ class AddNewSeriesSearchResult extends Component {
       }
     }
 
-    const overviewText = overview ? stripHtml(overview) : null;
     const externalLink = getExternalLink(foreignSeriesId);
 
-    // Build a clean display name: strip year from name if already shown separately
-    let displayName = seriesName;
-
-    if (displayYear && seriesName.includes(`(${displayYear})`)) {
-      displayName = seriesName.replace(`(${displayYear})`, '').trim();
-    }
-
     return (
-      <div className={styles.searchResult}>
-        <Link
-          className={styles.underlay}
-          {...linkProps}
-        />
+      <tr className={isExistingSeries ? styles.existingRow : styles.row}>
+        <td className={styles.posterCell}>
+          {
+            posterUrl ?
+              <img
+                className={styles.thumbnail}
+                src={posterUrl}
+                alt={seriesName}
+                loading="lazy"
+              /> :
+              <div className={styles.thumbnailPlaceholder}>
+                {seriesName ? seriesName.charAt(0).toUpperCase() : '?'}
+              </div>
+          }
+        </td>
 
-        <div className={styles.overlay}>
+        <td className={styles.nameCell}>
           {
             isExistingSeries ?
-              <div className={styles.existsBadge}>
+              <Link to={`/series/${titleSlug}`} className={styles.seriesLink}>
+                {seriesName}
+              </Link> :
+              <Link onPress={this.onPress} className={styles.seriesLink}>
+                {seriesName}
+              </Link>
+          }
+          {
+            isExistingSeries &&
+              <Icon
+                className={styles.existsIcon}
+                name={icons.CHECK_CIRCLE}
+                size={12}
+                title="Already in library"
+              />
+          }
+        </td>
+
+        <td className={styles.yearCell}>
+          {year || '—'}
+        </td>
+
+        <td className={styles.publisherCell}>
+          {publisherName || '—'}
+        </td>
+
+        <td className={styles.issueCountCell}>
+          {issueCount || '—'}
+        </td>
+
+        <td className={styles.statusCell}>
+          <span className={statusClass}>
+            {statusLabel}
+          </span>
+        </td>
+
+        <td className={styles.actionCell}>
+          {
+            !isExistingSeries &&
+              <Link
+                className={styles.addButton}
+                onPress={this.onPress}
+                title="Add Series"
+              >
                 <Icon
-                  name={icons.CHECK_CIRCLE}
-                  size={14}
+                  name={icons.ADD}
+                  size={16}
                 />
-              </div> :
-              null
+              </Link>
           }
 
-          <div className={styles.posterContainer}>
-            {
-              posterUrl ?
-                <img
-                  className={styles.poster}
-                  src={posterUrl}
-                  alt={seriesName}
-                  loading="lazy"
-                /> :
-                <div className={styles.posterPlaceholder}>
-                  <span className={styles.placeholderLetter}>
-                    {seriesName ? seriesName.charAt(0).toUpperCase() : '?'}
-                  </span>
-                </div>
-            }
-          </div>
-
-          <div className={styles.content}>
-            <div className={styles.titleRow}>
-              <div className={styles.name}>
-                {displayName}
-
-                {
-                  displayYear ?
-                    <span className={styles.year}>
-                      ({displayYear})
-                    </span> :
-                    null
-                }
-
-                {
-                  !!volumeNumber &&
-                    <span className={styles.volumeBadge}>V{volumeNumber}</span>
-                }
-              </div>
-            </div>
-
-            <div className={styles.metaRow}>
-              {
-                !!publisherName &&
-                  <span className={styles.publisherBadge}>
-                    {publisherName}
-                  </span>
-              }
-
-              {
-                issueCount > 0 ?
-                  <span>{issueCount} {issueCount === 1 ? 'issue' : 'issues'}</span> :
-                  null
-              }
-
-              {
-                !!seriesType &&
-                  <span className={styles.typeBadge}>
-                    {seriesType}
-                  </span>
-              }
-            </div>
-
-            {
-              overviewText ?
-                <div className={styles.overview}>
-                  {overviewText}
-                </div> :
-                null
-            }
-          </div>
-
-          <div className={styles.icons}>
-            {
-              !isExistingSeries &&
-                <Link
-                  className={styles.addButton}
-                  onPress={this.onPress}
-                >
-                  <Icon
-                    name={icons.ADD}
-                    size={18}
-                  />
-                </Link>
-            }
-
-            <Link
-              className={styles.externalLink}
-              to={externalLink}
-              onPress={this.onExternalLinkPress}
-            >
-              <Icon
-                className={styles.externalLinkIcon}
-                name={icons.EXTERNAL_LINK}
-                size={16}
-              />
-            </Link>
-          </div>
-        </div>
+          <Link
+            className={styles.externalLink}
+            to={externalLink}
+            onPress={this.onExternalLinkPress}
+            title="View on metadata provider"
+          >
+            <Icon
+              name={icons.EXTERNAL_LINK}
+              size={14}
+            />
+          </Link>
+        </td>
 
         <AddNewSeriesModal
           isOpen={isNewAddSeriesModalOpen && !isExistingSeries}
@@ -265,7 +204,7 @@ class AddNewSeriesSearchResult extends Component {
           images={images}
           onModalClose={this.onAddSeriesModalClose}
         />
-      </div>
+      </tr>
     );
   }
 }

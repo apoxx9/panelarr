@@ -31,6 +31,11 @@ namespace Panelarr.Api.V1.Search
         [HttpGet]
         public object Search([FromQuery] string term, [FromQuery] int? year)
         {
+            if (string.IsNullOrWhiteSpace(term))
+            {
+                return new List<SearchResource>();
+            }
+
             var criteria = new NzbDrone.Core.MetadataSource.MetadataSearchCriteria(term, year);
             var searchResults = _searchProxy.SearchForNewEntity(criteria);
             return MapToResource(searchResults).ToList();

@@ -24,23 +24,114 @@
   font-size: 18px;
 }
 
-.yearInput {
-  composes: input from '~Components/Form/TextInput.css';
-
-  width: 100px;
-  height: 46px;
-  border-left: none;
-  border-radius: 0;
-  font-size: 18px;
-  text-align: center;
-}
-
 .clearLookupButton {
   border: 1px solid var(--inputBorderColor);
   border-left: none;
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+.tableContainer {
+  margin-top: 15px;
+}
+
+.tableControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
+.filterInput {
+  composes: input from '~Components/Form/TextInput.css';
+
+  max-width: 350px;
+  height: 32px;
+  font-size: 13px;
+}
+
+.resultCount {
+  font-size: 12px;
+  color: var(--themeDarkColor);
+  white-space: nowrap;
+}
+
+.resultsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.resultsTable thead {
+  border-bottom: 2px solid var(--borderColor);
+}
+
+.resultsTable th {
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--themeDarkColor);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.resultsTable th:hover {
+  color: var(--linkColor);
+}
+
+.sortIcon {
+  margin-left: 4px;
+  opacity: 0.3;
+}
+
+.sortIconActive {
+  margin-left: 4px;
+  opacity: 1;
+  color: var(--linkColor);
+}
+
+.posterHeader {
+  width: 50px;
+  cursor: default !important;
+}
+
+.posterHeader:hover {
+  color: var(--themeDarkColor) !important;
+}
+
+.nameHeader {
+  min-width: 200px;
+}
+
+.yearHeader {
+  width: 70px;
+}
+
+.publisherHeader {
+  width: 140px;
+}
+
+.issueCountHeader {
+  width: 80px;
+  text-align: center !important;
+}
+
+.statusHeader {
+  width: 100px;
+}
+
+.actionHeader {
+  width: 50px;
+  cursor: default !important;
+}
+
+.actionHeader:hover {
+  color: var(--themeDarkColor) !important;
 }
 
 .message {
@@ -63,4 +154,28 @@
 
 .searchResults {
   margin-top: 15px;
+}
+
+@media only screen and (max-width: 768px) {
+  .publisherHeader,
+  .statusHeader {
+    display: none;
+  }
+
+  .nameHeader {
+    min-width: 120px;
+  }
+
+  .searchInput {
+    font-size: 16px;
+  }
+
+  .tableControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterInput {
+    max-width: none;
+  }
 }

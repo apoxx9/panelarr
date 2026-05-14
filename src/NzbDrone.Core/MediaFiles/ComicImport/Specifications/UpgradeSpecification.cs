@@ -36,9 +36,12 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
             var downloadPropersAndRepacks = _configService.DownloadPropersAndRepacks;
             var qualityComparer = new QualityModelComparer(item.Series.QualityProfile);
 
+            var itemQuality = item.Quality ?? new QualityModel(Qualities.Quality.Unknown);
+
             foreach (var comicFile in files)
             {
-                var qualityCompare = qualityComparer.Compare(item.Quality.Quality, comicFile.Quality.Quality);
+                var fileQuality = comicFile.Quality ?? new QualityModel(Qualities.Quality.Unknown);
+                var qualityCompare = qualityComparer.Compare(itemQuality.Quality, fileQuality.Quality);
 
                 if (qualityCompare < 0)
                 {
