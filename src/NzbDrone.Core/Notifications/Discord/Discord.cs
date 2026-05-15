@@ -217,7 +217,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Series = new DiscordSeries
                     {
                         Name = Settings.Series.IsNullOrWhiteSpace() ? Environment.MachineName : Settings.Series,
-                        IconUrl = "https://raw.githubusercontent.com/Panelarr/Panelarr/develop/Logo/256.png"
+                        IconUrl = "https://raw.githubusercontent.com/apoxx9/panelarr/main/Logo/256.png"
                     },
                     Title = APPLICATION_UPDATE_TITLE,
                     Timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"),
