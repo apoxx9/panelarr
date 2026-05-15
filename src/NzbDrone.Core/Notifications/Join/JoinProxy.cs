@@ -93,8 +93,8 @@ namespace NzbDrone.Core.Notifications.Join
             var request = requestBuilder.AddQueryParam("apikey", settings.ApiKey)
                           .AddQueryParam("title", title)
                           .AddQueryParam("text", message)
-                          .AddQueryParam("icon", "https://cdn.rawgit.com/Panelarr/Panelarr/develop/Logo/256.png") // Use the Panelarr logo.
-                          .AddQueryParam("smallicon", "https://cdn.rawgit.com/Panelarr/Panelarr/develop/Logo/96-Outline-White.png") // 96x96px with outline at 88x88px on a transparent background.
+                          .AddQueryParam("icon", "https://raw.githubusercontent.com/apoxx9/panelarr/main/Logo/256.png")
+                          .AddQueryParam("smallicon", "https://raw.githubusercontent.com/apoxx9/panelarr/main/Logo/96.png")
                           .AddQueryParam("priority", settings.Priority)
                           .Build();
 
