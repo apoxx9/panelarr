@@ -188,7 +188,9 @@ namespace NzbDrone.Host
                 });
 
                 // Require auth on everything except those marked [AllowAnonymous]
-                options.FallbackPolicy = new AuthorizationPolicyBuilder("API")
+                // Include both API key and Forms (cookie) schemes so browser requests
+                // get redirected to /login instead of returning 401
+                options.FallbackPolicy = new AuthorizationPolicyBuilder("API", NzbDrone.Core.Authentication.AuthenticationType.Forms.ToString())
                 .RequireAuthenticatedUser()
                 .Build();
             });
