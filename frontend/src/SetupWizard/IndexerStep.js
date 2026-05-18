@@ -433,6 +433,15 @@ class IndexerStep extends Component {
             saveError &&
               <div className={styles.error}>{saveError}</div>
           }
+
+          <div style={{ marginTop: 24, textAlign: 'right' }}>
+            <button
+              className={styles.buttonPrimary}
+              onClick={this.props.onStepComplete}
+            >
+              {existingIndexers.length > 0 ? 'Next' : 'Skip'}
+            </button>
+          </div>
         </div>
       </div>
     );
