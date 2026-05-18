@@ -234,8 +234,14 @@ class SetupWizard extends Component {
       canNext = stepValidation[STEP_ROOT_FOLDER];
     }
 
-    // For schema-driven steps, Next just advances (the save button in the step handles saving)
-    const showNext = currentStep !== STEP_INDEXER && currentStep !== STEP_DOWNLOAD_CLIENT;
+    // Determine the correct Next action for the current step
+    let onNextClick = this.onNext;
+
+    if (currentStep === STEP_INDEXER) {
+      onNextClick = this.onIndexerStepComplete;
+    } else if (currentStep === STEP_DOWNLOAD_CLIENT) {
+      onNextClick = this.onDownloadClientStepComplete;
+    }
 
     return (
       <div className={styles.buttons}>
@@ -252,26 +258,13 @@ class SetupWizard extends Component {
         </div>
 
         <div className={styles.buttonsRight}>
-          {
-            showSkip &&
-              <button
-                className={styles.buttonSkip}
-                onClick={this.onSkip}
-              >
-                Skip
-              </button>
-          }
-
-          {
-            showNext &&
-              <button
-                className={styles.buttonPrimary}
-                onClick={this.onNext}
-                disabled={!canNext}
-              >
-                Next
-              </button>
-          }
+          <button
+            className={styles.buttonPrimary}
+            onClick={onNextClick}
+            disabled={!canNext}
+          >
+            Next
+          </button>
         </div>
       </div>
     );
