@@ -272,6 +272,7 @@ namespace NzbDrone.Host
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseMiddleware<Panelarr.Http.Middleware.LoginRedirectMiddleware>();
             app.UseResponseCompression();
             app.Properties["host.AppName"] = BuildInfo.AppName;
 
