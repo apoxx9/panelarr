@@ -30,6 +30,13 @@ namespace Panelarr.Http.Frontend
             return MapResource("login");
         }
 
+        [AllowAnonymous]
+        [HttpGet("setup")]
+        public IActionResult SetupPage()
+        {
+            return MapResource("setup");
+        }
+
         [EnableCors("AllowGet")]
         [AllowAnonymous]
         [HttpGet("content/{**path:regex(^(?!/*api/).*)}")]
