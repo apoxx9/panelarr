@@ -1,14 +1,26 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { connect } from 'react-redux';
+import { createSelector } from 'reselect';
 import Button from 'Components/Link/Button';
 import { kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import styles from './NoSeries.css';
 
+function createMapStateToProps() {
+  return createSelector(
+    (state) => state.settings.rootFolders.items,
+    (rootFolders) => ({
+      hasRootFolders: rootFolders && rootFolders.length > 0
+    })
+  );
+}
+
 function NoSeries(props) {
   const {
     totalItems,
-    itemType
+    itemType,
+    hasRootFolders
   } = props;
 
   if (totalItems > 0) {
@@ -24,17 +36,23 @@ function NoSeries(props) {
   return (
     <div>
       <div className={styles.message}>
-        {`No ${itemType} found, to get started you'll want to add a new series or issue or add an existing library location (Root Folder) and update.`}
+        {hasRootFolders
+          ? 'No series found. Add a new series to get started.'
+          : `No ${itemType} found, to get started you'll want to add a new series or issue or add an existing library location (Root Folder) and update.`
+        }
       </div>
 
-      <div className={styles.buttonContainer}>
-        <Button
-          to="/settings/mediamanagement"
-          kind={kinds.PRIMARY}
-        >
-          {translate('AddRootFolder')}
-        </Button>
-      </div>
+      {
+        !hasRootFolders &&
+          <div className={styles.buttonContainer}>
+            <Button
+              to="/settings/mediamanagement"
+              kind={kinds.PRIMARY}
+            >
+              {translate('AddRootFolder')}
+            </Button>
+          </div>
+      }
 
       <div className={styles.buttonContainer}>
         <Button
@@ -50,11 +68,12 @@ function NoSeries(props) {
 
 NoSeries.propTypes = {
   totalItems: PropTypes.number.isRequired,
-  itemType: PropTypes.string.isRequired
+  itemType: PropTypes.string.isRequired,
+  hasRootFolders: PropTypes.bool.isRequired
 };
 
 NoSeries.defaultProps = {
   itemType: 'series'
 };
 
-export default NoSeries;
+export default connect(createMapStateToProps)(NoSeries);
