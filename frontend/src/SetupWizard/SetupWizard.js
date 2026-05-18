@@ -117,12 +117,12 @@ class SetupWizard extends Component {
     });
 
     request.done(() => {
-      window.location.href = getPathWithUrlBase('/login');
+      window.location.href = getPathWithUrlBase('/');
     });
 
     request.fail(() => {
       // Even if the call fails, redirect so user isn't stuck
-      window.location.href = getPathWithUrlBase('/login');
+      window.location.href = getPathWithUrlBase('/');
     });
   };
 
