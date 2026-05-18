@@ -1,0 +1,14 @@
+_output/
+_tests/
+_artifacts/
+_temp*/
+node_modules/
+.git/
+.vs/
+docs/
+tests/
+_bmad/
+_bmad-output/
+.claude/
+*.md
+!README.md
