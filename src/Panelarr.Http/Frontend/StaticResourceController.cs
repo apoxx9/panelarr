@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
+using Panelarr.Http.Authentication;
 using Panelarr.Http.Extensions;
 using Panelarr.Http.Frontend.Mappers;
 
@@ -11,6 +12,7 @@ namespace Panelarr.Http.Frontend
 {
     [Authorize(Policy = "UI")]
     [ApiController]
+    [AllowCookieRedirect]
     public class StaticResourceController : Controller
     {
         private readonly IEnumerable<IMapHttpRequestsToDisk> _requestMappers;

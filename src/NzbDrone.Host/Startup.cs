@@ -188,9 +188,7 @@ namespace NzbDrone.Host
                 });
 
                 // Require auth on everything except those marked [AllowAnonymous]
-                // Include both API key and Forms (cookie) schemes so browser requests
-                // get redirected to /login instead of returning 401
-                options.FallbackPolicy = new AuthorizationPolicyBuilder("API", NzbDrone.Core.Authentication.AuthenticationType.Forms.ToString())
+                options.FallbackPolicy = new AuthorizationPolicyBuilder("API")
                 .RequireAuthenticatedUser()
                 .Build();
             });
@@ -272,7 +270,6 @@ namespace NzbDrone.Host
 
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseMiddleware<Panelarr.Http.Middleware.LoginRedirectMiddleware>();
             app.UseResponseCompression();
             app.Properties["host.AppName"] = BuildInfo.AppName;
 
