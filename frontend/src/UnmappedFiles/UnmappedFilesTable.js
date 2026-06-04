@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Alert from 'Components/Alert';
+import Icon from 'Components/Icon';
+import Button from 'Components/Link/Button';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
@@ -164,6 +166,63 @@ class UnmappedFilesTable extends Component {
     );
   };
 
+  //
+  // Render
+
+  renderEmptyState() {
+    const { emptyState } = this.props;
+
+    if (emptyState === 'noRootFolders') {
+      return (
+        <Alert kind={kinds.INFO}>
+          <div>{translate('UnmappedFilesNoRootFolders')}</div>
+          <Button
+            kind={kinds.PRIMARY}
+            to="/settings/mediamanagement"
+          >
+            <Icon name={icons.FOLDER_OPEN} />
+            &nbsp;
+            {translate('AddRootFolder')}
+          </Button>
+        </Alert>
+      );
+    }
+
+    if (emptyState === 'noSeries') {
+      return (
+        <Alert kind={kinds.INFO}>
+          <div>{translate('UnmappedFilesNoSeries')}</div>
+          <Button
+            kind={kinds.PRIMARY}
+            to="/add/search"
+          >
+            <Icon name={icons.ADD} />
+            &nbsp;
+            {translate('AddNewSeries')}
+          </Button>
+        </Alert>
+      );
+    }
+
+    if (emptyState === 'noFilesFound') {
+      return (
+        <Alert kind={kinds.INFO}>
+          {translate('UnmappedFilesNoFilesFound')}
+        </Alert>
+      );
+    }
+
+    if (emptyState === 'allMatched') {
+      return (
+        <Alert kind={kinds.SUCCESS}>
+          {translate('UnmappedFilesAllMatched')}
+        </Alert>
+      );
+    }
+
+    return null;
+  }
+
   render() {
 
     const {
@@ -180,6 +239,7 @@ class UnmappedFilesTable extends Component {
       isScanningFolders,
       onAddMissingSeriesPress,
       deleteUnmappedFiles,
+      emptyState,
       ...otherProps
     } = this.props;
 
@@ -191,6 +251,7 @@ class UnmappedFilesTable extends Component {
     } = this.state;
 
     const selectedFileIds = this.getSelectedIds();
+    const hasUnmappedFiles = isPopulated && !error && !!items.length;
 
     return (
       <PageContent title={translate('UnmappedFiles')}>
@@ -199,7 +260,7 @@ class UnmappedFilesTable extends Component {
             <PageToolbarButton
               label={translate('AddMissing')}
               iconName={icons.ADD_MISSING_SERIES_LIST}
-              isDisabled={isPopulated && !error && !items.length}
+              isDisabled={!hasUnmappedFiles}
               isSpinning={isScanningFolders}
               onPress={onAddMissingSeriesPress}
             />
@@ -231,19 +292,17 @@ class UnmappedFilesTable extends Component {
           registerScroller={this.setScrollerRef}
         >
           {
-            isFetching && !isPopulated &&
+            (isFetching && !isPopulated) &&
               <LoadingIndicator />
           }
 
           {
-            isPopulated && !error && !items.length &&
-              <Alert kind={kinds.INFO}>
-                Success! My work is done, all files on disk are matched to known issues.
-              </Alert>
+            isPopulated && !error && !items.length && emptyState &&
+              this.renderEmptyState()
           }
 
           {
-            isPopulated && !error && !!items.length && scroller &&
+            hasUnmappedFiles && scroller &&
               <VirtualTable
                 items={items}
                 columns={columns}
@@ -289,7 +348,8 @@ UnmappedFilesTable.propTypes = {
   deleteUnmappedFile: PropTypes.func.isRequired,
   deleteUnmappedFiles: PropTypes.func.isRequired,
   isScanningFolders: PropTypes.bool.isRequired,
-  onAddMissingSeriesPress: PropTypes.func.isRequired
+  onAddMissingSeriesPress: PropTypes.func.isRequired,
+  emptyState: PropTypes.string
 };
 
 export default UnmappedFilesTable;
