@@ -2,8 +2,10 @@ name: 'Lock threads'
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * *'
+  # Disabled: dessant/lock-threads has a bug with GITHUB_TOKEN length > 100 chars
+  # Re-enable when upstream fix is available
+  # schedule:
+  #   - cron: '0 0 * * *'
 
 jobs:
   lock:
