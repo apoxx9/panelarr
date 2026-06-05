@@ -70,6 +70,26 @@ namespace NzbDrone.Core.Parser
             @"\(([^)]+)\)\s*$",
             RegexOptions.Compiled);
 
+        // Square bracket sections: [CBZ], [ENG / CBR], [VIP], etc.
+        private static readonly Regex SquareBracketRegex = new Regex(
+            @"\[[^\]]*\]",
+            RegexOptions.Compiled);
+
+        // Format tag inside square brackets: [CBZ], [CBR], [PDF], [EPUB], [CB7]
+        private static readonly Regex BracketFormatRegex = new Regex(
+            @"\[(CBZ|CBR|CB7|PDF|EPUB)\]",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // "by Author Name" suffix — word-boundary "by" followed by text, up to bracket/paren/end
+        private static readonly Regex ByAuthorRegex = new Regex(
+            @"\bby\s+[A-Z][^[\]()]*",
+            RegexOptions.Compiled);
+
+        // Issue range: "Issues 1-50", "Issues 1- 50", "Issue 1-25"
+        private static readonly Regex IssueRangeRegex = new Regex(
+            @"\bIssues?\s+\d+\s*[-–]\s*\d+",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         public static ParsedComicInfo ParseRelease(string title)
         {
             if (title.IsNullOrWhiteSpace())
@@ -98,6 +118,33 @@ namespace NzbDrone.Core.Parser
             var name = result.Format != ComicFormat.Unknown
                 ? Path.GetFileNameWithoutExtension(title)
                 : title;
+
+            // Extract format from square bracket tags if not found from extension (e.g. "[CBZ]")
+            if (result.Format == ComicFormat.Unknown)
+            {
+                var bracketFormat = BracketFormatRegex.Match(name);
+                if (bracketFormat.Success)
+                {
+                    result.Format = bracketFormat.Groups[1].Value.ToUpper() switch
+                    {
+                        "CBZ" => ComicFormat.CBZ,
+                        "CBR" => ComicFormat.CBR,
+                        "CB7" => ComicFormat.CB7,
+                        "PDF" => ComicFormat.PDF,
+                        "EPUB" => ComicFormat.EPUB,
+                        _ => ComicFormat.Unknown
+                    };
+                }
+            }
+
+            // Strip square bracket sections (metadata tags common in torrent releases)
+            name = SquareBracketRegex.Replace(name, " ");
+
+            // Strip "by Author" suffix (torrent naming convention)
+            name = ByAuthorRegex.Replace(name, " ");
+
+            // Normalize whitespace after stripping
+            name = Regex.Replace(name, @"\s{2,}", " ").Trim();
 
             // Extract year(s)
             var yearMatches = YearRegex.Matches(name);
@@ -212,6 +259,17 @@ namespace NzbDrone.Core.Parser
                 }
             }
 
+            // Bail out if no comic-specific signals were found — this avoids false positives
+            // on music/audiobook release titles that would be handled by the generic parser
+            if (result.Format == ComicFormat.Unknown &&
+                !result.Year.HasValue &&
+                !result.IssueNumber.HasValue &&
+                !result.VolumeNumber.HasValue &&
+                result.Source == null)
+            {
+                return null;
+            }
+
             // Extract series title — everything before the first issue/volume marker or first parenthetical
             result.SeriesTitle = ExtractSeriesTitle(name, result);
 
@@ -286,6 +344,13 @@ namespace NzbDrone.Core.Parser
             if (issueMatch.Success && issueMatch.Index < cutoff)
             {
                 cutoff = issueMatch.Index;
+            }
+
+            // Check for issue range patterns (Issues 1-50, Issues 1- 50)
+            var issueRangeMatch = IssueRangeRegex.Match(name);
+            if (issueRangeMatch.Success && issueRangeMatch.Index < cutoff)
+            {
+                cutoff = issueRangeMatch.Index;
             }
 
             // Check for scene-style 3-digit number — but only the one that was

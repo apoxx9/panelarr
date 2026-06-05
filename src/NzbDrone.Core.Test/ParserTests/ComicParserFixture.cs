@@ -86,13 +86,20 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Something.cb7", ComicFormat.CB7)]
         [TestCase("Something.pdf", ComicFormat.PDF)]
         [TestCase("Something.epub", ComicFormat.EPUB)]
-        [TestCase("Something", ComicFormat.Unknown)]
         public void should_detect_format(string releaseTitle, ComicFormat expectedFormat)
         {
             var result = ComicParser.ParseRelease(releaseTitle);
 
             result.Should().NotBeNull();
             result.Format.Should().Be(expectedFormat);
+        }
+
+        [Test]
+        public void should_return_null_for_title_with_no_comic_signals()
+        {
+            var result = ComicParser.ParseRelease("Something");
+
+            result.Should().BeNull();
         }
 
         // -------------------------------------------------------------------
@@ -148,6 +155,40 @@ namespace NzbDrone.Core.Test.ParserTests
 
             result.Should().NotBeNull();
             result.Year.Should().Be(expectedYear);
+        }
+
+        // -------------------------------------------------------------------
+        // Torrent/MAM release title formats
+        // -------------------------------------------------------------------
+        [TestCase("Saga (2012) Issues 1- 50 [CBZ] by Brian K Vaughan, Fiona Staples [ENG / CBZ] [VIP]", "Saga")]
+        [TestCase("Vampirella - Year One (2022) by Christopher Priest [ENG / CBR]", "Vampirella - Year One")]
+        [TestCase("Captain America [1-25][2012][Remender][ComicRack Metadata][CBZ] by Rick Remender", "Captain America")]
+        [TestCase("Saga 067 (2024) (c2c) by Brian K Vaughan [cbr]", "Saga")]
+        public void should_parse_torrent_release_title(string releaseTitle, string expectedSeries)
+        {
+            var result = ComicParser.ParseRelease(releaseTitle);
+
+            result.Should().NotBeNull();
+            result.SeriesTitle.Should().Be(expectedSeries);
+        }
+
+        [Test]
+        public void should_detect_format_from_bracket_tag()
+        {
+            var result = ComicParser.ParseRelease("Saga (2012) Issues 1- 50 [CBZ] by Brian K Vaughan [ENG / CBZ] [VIP]");
+
+            result.Should().NotBeNull();
+            result.Format.Should().Be(ComicFormat.CBZ);
+        }
+
+        [Test]
+        public void should_strip_by_author_from_series_title()
+        {
+            var result = ComicParser.ParseRelease("Vampirella - Year One (2022) by Christopher Priest [ENG / CBR]");
+
+            result.Should().NotBeNull();
+            result.SeriesTitle.Should().NotContain("Christopher Priest");
+            result.Year.Should().Be(2022);
         }
 
         // -------------------------------------------------------------------

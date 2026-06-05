@@ -73,47 +73,73 @@ namespace NzbDrone.Core.DecisionEngine
 
                 try
                 {
-                    var parsedIssueInfo = Parser.Parser.ParseIssueTitle(report.Title);
+                    // Try comic-specific parser first (handles torrent/MAM release titles)
+                    var parsedComicInfo = ComicParser.ParseRelease(report.Title);
+                    RemoteIssue remoteIssue = null;
+                    ParsedIssueInfo parsedIssueInfo = null;
 
-                    if (parsedIssueInfo == null)
+                    if (parsedComicInfo != null && parsedComicInfo.SeriesTitle.IsNotNullOrWhiteSpace())
                     {
-                        if (searchCriteria != null)
+                        remoteIssue = _parsingService.MapComicRelease(parsedComicInfo, searchCriteria);
+
+                        if (remoteIssue != null)
                         {
-                            parsedIssueInfo = Parser.Parser.ParseIssueTitleWithSearchCriteria(report.Title,
-                                                                                              searchCriteria.Series,
-                                                                                              searchCriteria.Issues);
-                        }
-                        else
-                        {
-                            // try parsing fuzzy
-                            parsedIssueInfo = _parsingService.ParseIssueTitleFuzzy(report.Title);
+                            remoteIssue.Release = report;
+
+                            if (remoteIssue.ParsedIssueInfo?.Quality?.Quality == Quality.Unknown)
+                            {
+                                remoteIssue.ParsedIssueInfo.Quality = QualityParser.ParseQuality(report.Title, null, report.Categories);
+                            }
+
+                            parsedIssueInfo = remoteIssue.ParsedIssueInfo;
                         }
                     }
 
-                    if (parsedIssueInfo != null && !parsedIssueInfo.SeriesName.IsNullOrWhiteSpace())
+                    // Fall back to generic parser if comic parser didn't find a series
+                    if (remoteIssue == null || remoteIssue.Series == null)
                     {
-                        var remoteIssue = _parsingService.Map(parsedIssueInfo, searchCriteria);
-                        remoteIssue.Release = report;
+                        parsedIssueInfo = Parser.Parser.ParseIssueTitle(report.Title);
 
-                        _aggregationService.Augment(remoteIssue);
-
-                        // try parsing again using the search criteria, in case it parsed but parsed incorrectly
-                        if ((remoteIssue.Series == null || remoteIssue.Issues.Empty()) && searchCriteria != null)
+                        if (parsedIssueInfo == null)
                         {
-                            _logger.Debug("Series/Issue null for {0}, reparsing with search criteria", report.Title);
-                            var parsedIssueInfoWithCriteria = Parser.Parser.ParseIssueTitleWithSearchCriteria(report.Title,
-                                                                                                                searchCriteria.Series,
-                                                                                                                searchCriteria.Issues);
-
-                            if (parsedIssueInfoWithCriteria != null && parsedIssueInfoWithCriteria.SeriesName.IsNotNullOrWhiteSpace())
+                            if (searchCriteria != null)
                             {
-                                remoteIssue = _parsingService.Map(parsedIssueInfoWithCriteria, searchCriteria);
+                                parsedIssueInfo = Parser.Parser.ParseIssueTitleWithSearchCriteria(report.Title,
+                                                                                                  searchCriteria.Series,
+                                                                                                  searchCriteria.Issues);
+                            }
+                            else
+                            {
+                                parsedIssueInfo = _parsingService.ParseIssueTitleFuzzy(report.Title);
                             }
                         }
 
+                        if (parsedIssueInfo != null && !parsedIssueInfo.SeriesName.IsNullOrWhiteSpace())
+                        {
+                            remoteIssue = _parsingService.Map(parsedIssueInfo, searchCriteria);
+                            remoteIssue.Release = report;
+
+                            _aggregationService.Augment(remoteIssue);
+
+                            if ((remoteIssue.Series == null || remoteIssue.Issues.Empty()) && searchCriteria != null)
+                            {
+                                _logger.Debug("Series/Issue null for {0}, reparsing with search criteria", report.Title);
+                                var parsedIssueInfoWithCriteria = Parser.Parser.ParseIssueTitleWithSearchCriteria(report.Title,
+                                                                                                                    searchCriteria.Series,
+                                                                                                                    searchCriteria.Issues);
+
+                                if (parsedIssueInfoWithCriteria != null && parsedIssueInfoWithCriteria.SeriesName.IsNotNullOrWhiteSpace())
+                                {
+                                    remoteIssue = _parsingService.Map(parsedIssueInfoWithCriteria, searchCriteria);
+                                }
+                            }
+                        }
+                    }
+
+                    if (remoteIssue != null && remoteIssue.ParsedIssueInfo != null)
+                    {
                         remoteIssue.Release = report;
 
-                        // parse quality again with title and category if unknown
                         if (remoteIssue.ParsedIssueInfo.Quality.Quality == Quality.Unknown)
                         {
                             remoteIssue.ParsedIssueInfo.Quality = QualityParser.ParseQuality(report.Title, null, report.Categories);
@@ -123,7 +149,6 @@ namespace NzbDrone.Core.DecisionEngine
                         {
                             decision = new DownloadDecision(remoteIssue, new Rejection("Unknown Series"));
 
-                            // shove in the searched series in case of forced download in interactive search
                             if (searchCriteria != null)
                             {
                                 remoteIssue.Series = searchCriteria.Series;
@@ -134,7 +159,6 @@ namespace NzbDrone.Core.DecisionEngine
                         {
                             if (searchCriteria != null)
                             {
-                                // For interactive search, use the searched issues directly
                                 remoteIssue.Issues = searchCriteria.Issues;
                             }
                             else
@@ -154,7 +178,7 @@ namespace NzbDrone.Core.DecisionEngine
                         }
                     }
 
-                    if (searchCriteria != null)
+                    if (searchCriteria != null && decision == null)
                     {
                         if (parsedIssueInfo == null)
                         {
@@ -166,29 +190,7 @@ namespace NzbDrone.Core.DecisionEngine
 
                         if (parsedIssueInfo.SeriesName.IsNullOrWhiteSpace())
                         {
-                            var remoteIssue = new RemoteIssue
-                            {
-                                Release = report,
-                                ParsedIssueInfo = parsedIssueInfo
-                            };
-
-                            decision = new DownloadDecision(remoteIssue, new Rejection("Unable to parse release"));
-                        }
-                    }
-
-                    if (searchCriteria != null)
-                    {
-                        if (parsedIssueInfo == null)
-                        {
-                            parsedIssueInfo = new ParsedIssueInfo
-                            {
-                                Quality = QualityParser.ParseQuality(report.Title, null, report.Categories)
-                            };
-                        }
-
-                        if (parsedIssueInfo.SeriesName.IsNullOrWhiteSpace())
-                        {
-                            var remoteIssue = new RemoteIssue
+                            remoteIssue = new RemoteIssue
                             {
                                 Release = report,
                                 ParsedIssueInfo = parsedIssueInfo
