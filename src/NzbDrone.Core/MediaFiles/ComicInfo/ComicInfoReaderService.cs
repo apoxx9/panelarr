@@ -35,6 +35,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
     {
         List<ComicMetadataResult> ReadMetadata(ComicFile comicFile);
         ComicInfoIdentification ReadIdentificationFromPath(string path);
+        ComicMetadataResult ParseXmlContent(string xmlContent, string source);
     }
 
     public class ComicInfoReaderService : IComicInfoReaderService
@@ -215,6 +216,17 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
             }
 
             return results;
+        }
+
+        public ComicMetadataResult ParseXmlContent(string xmlContent, string source)
+        {
+            if (string.IsNullOrWhiteSpace(xmlContent))
+            {
+                return null;
+            }
+
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(xmlContent));
+            return ParseXml(stream, source);
         }
 
         private ComicMetadataResult ParseXml(Stream stream, string source)

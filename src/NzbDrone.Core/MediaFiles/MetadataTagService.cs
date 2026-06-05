@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace NzbDrone.Core.MediaFiles
         void WriteTags(ComicFile comicFile, bool newDownload, bool force = false);
         void SyncTags(List<Issue> issues);
         List<RetagComicFilePreview> GetRetagPreviewsBySeries(int seriesId);
-        List<RetagComicFilePreview> GetRetagPreviewsByIssue(int seriesId);
+        List<RetagComicFilePreview> GetRetagPreviewsByIssue(int issueId);
     }
 
     public class MetadataTagService : IMetadataTagService,
@@ -27,17 +28,29 @@ namespace NzbDrone.Core.MediaFiles
         IExecute<RetagSeriesCommand>
     {
         private readonly IComicInfoReaderService _comicInfoReaderService;
+        private readonly IComicInfoGenerator _comicInfoGenerator;
+        private readonly IComicInfoEmbedService _comicInfoEmbedService;
         private readonly IMediaFileService _mediaFileService;
+        private readonly IIssueService _issueService;
+        private readonly IPublisherService _publisherService;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
 
         public MetadataTagService(IComicInfoReaderService comicInfoReaderService,
+            IComicInfoGenerator comicInfoGenerator,
+            IComicInfoEmbedService comicInfoEmbedService,
             IMediaFileService mediaFileService,
+            IIssueService issueService,
+            IPublisherService publisherService,
             IEventAggregator eventAggregator,
             Logger logger)
         {
             _comicInfoReaderService = comicInfoReaderService;
+            _comicInfoGenerator = comicInfoGenerator;
+            _comicInfoEmbedService = comicInfoEmbedService;
             _mediaFileService = mediaFileService;
+            _issueService = issueService;
+            _publisherService = publisherService;
             _eventAggregator = eventAggregator;
             _logger = logger;
         }
@@ -105,6 +118,7 @@ namespace NzbDrone.Core.MediaFiles
 
         public void WriteTags(ComicFile comicFile, bool newDownload, bool force = false)
         {
+            _comicInfoEmbedService.EmbedMetadata(comicFile);
         }
 
         public void SyncTags(List<Issue> issues)
@@ -114,14 +128,106 @@ namespace NzbDrone.Core.MediaFiles
 
         public List<RetagComicFilePreview> GetRetagPreviewsBySeries(int seriesId)
         {
-            // Comic file retag previews not yet implemented (requires ComicInfo.xml writer)
-            return new List<RetagComicFilePreview>();
+            var comicFiles = _mediaFileService.GetFilesBySeries(seriesId);
+
+            return GetRetagPreviews(comicFiles);
         }
 
         public List<RetagComicFilePreview> GetRetagPreviewsByIssue(int issueId)
         {
-            // Comic file retag previews not yet implemented (requires ComicInfo.xml writer)
-            return new List<RetagComicFilePreview>();
+            var comicFiles = _mediaFileService.GetFilesByIssue(issueId);
+
+            return GetRetagPreviews(comicFiles);
+        }
+
+        private List<RetagComicFilePreview> GetRetagPreviews(List<ComicFile> comicFiles)
+        {
+            var previews = new List<RetagComicFilePreview>();
+
+            foreach (var comicFile in comicFiles)
+            {
+                if (comicFile.IssueId == 0 || comicFile.ComicFormat != Issues.ComicFormat.CBZ)
+                {
+                    continue;
+                }
+
+                if (!System.IO.File.Exists(comicFile.Path))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    var preview = GetRetagPreview(comicFile);
+                    if (preview != null)
+                    {
+                        previews.Add(preview);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to generate retag preview for {0}", comicFile.Path);
+                }
+            }
+
+            return previews;
+        }
+
+        private RetagComicFilePreview GetRetagPreview(ComicFile comicFile)
+        {
+            // Read current embedded ComicInfo.xml fields
+            var currentResults = _comicInfoReaderService.ReadMetadata(comicFile);
+            var currentFields = currentResults
+                .FirstOrDefault(r => r.Source.Equals("ComicInfo.xml", StringComparison.OrdinalIgnoreCase))
+                ?.Fields ?? new Dictionary<string, string>();
+
+            // Generate what the new ComicInfo.xml would contain
+            var issue = _issueService.GetIssue(comicFile.IssueId);
+            if (issue == null)
+            {
+                return null;
+            }
+
+            var seriesMetadata = issue.SeriesMetadata?.Value;
+            Publisher publisher = null;
+
+            if (seriesMetadata?.PublisherId.HasValue == true)
+            {
+                publisher = _publisherService.GetPublisher(seriesMetadata.PublisherId.Value);
+            }
+
+            var newXml = _comicInfoGenerator.Generate(issue, seriesMetadata, publisher);
+            var newResult = _comicInfoReaderService.ParseXmlContent(newXml, "ComicInfo.xml");
+            var newFields = newResult?.Fields ?? new Dictionary<string, string>();
+
+            // Diff field by field
+            var allKeys = currentFields.Keys.Union(newFields.Keys).Distinct();
+            var changes = new Dictionary<string, Tuple<string, string>>();
+
+            foreach (var key in allKeys)
+            {
+                currentFields.TryGetValue(key, out var oldVal);
+                newFields.TryGetValue(key, out var newVal);
+
+                if (!string.Equals(oldVal ?? string.Empty, newVal ?? string.Empty, StringComparison.Ordinal))
+                {
+                    changes[key] = Tuple.Create(oldVal ?? string.Empty, newVal ?? string.Empty);
+                }
+            }
+
+            if (!changes.Any())
+            {
+                return null;
+            }
+
+            return new RetagComicFilePreview
+            {
+                SeriesId = issue.SeriesId,
+                IssueId = comicFile.IssueId,
+                ComicFileId = comicFile.Id,
+                Path = comicFile.Path,
+                Changes = changes
+            };
         }
 
         public void Execute(RetagFilesCommand message)
