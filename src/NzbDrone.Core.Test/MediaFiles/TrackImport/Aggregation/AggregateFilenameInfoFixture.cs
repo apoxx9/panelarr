@@ -41,18 +41,18 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Aggregation.Aggregators
         {
             var release = GivenTracks(new List<string>
             {
-                    "Adele - 19 - 101 - Daydreamer.mp3",
-                    "Adele - 19 - 102 - Best for Last.mp3",
-                    "Adele - 19 - 103 - Chasing Pavements.mp3",
-                    "Adele - 19 - 203 - That's It, I Quit, I'm Moving On.mp3"
+                    "Batman - 2016 - 101 - I Am Gotham Part 1.cbz",
+                    "Batman - 2016 - 102 - I Am Gotham Part 2.cbz",
+                    "Batman - 2016 - 103 - I Am Gotham Part 3.cbz",
+                    "Batman - 2016 - 203 - Night of the Monster Men.cbz"
             }, @"C:\incoming".AsOsAgnostic());
 
             Subject.Aggregate(release, true);
 
-            VerifyData(release.LocalIssues[0], "Adele", "Daydreamer", 1, 1);
-            VerifyData(release.LocalIssues[1], "Adele", "Best for Last", 2, 1);
-            VerifyData(release.LocalIssues[2], "Adele", "Chasing Pavements", 3, 1);
-            VerifyData(release.LocalIssues[3], "Adele", "That's It, I Quit, I'm Moving On", 3, 2);
+            VerifyData(release.LocalIssues[0], "Batman", "I Am Gotham Part 1", 1, 1);
+            VerifyData(release.LocalIssues[1], "Batman", "I Am Gotham Part 2", 2, 1);
+            VerifyData(release.LocalIssues[2], "Batman", "I Am Gotham Part 3", 3, 1);
+            VerifyData(release.LocalIssues[3], "Batman", "Night of the Monster Men", 3, 2);
         }
 
         public static class TestCaseFactory

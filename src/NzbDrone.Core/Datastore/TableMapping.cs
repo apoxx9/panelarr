@@ -116,9 +116,6 @@ namespace NzbDrone.Core.Datastore
 
             Mapper.Entity<SeriesGroup>("SeriesGroup").RegisterModel()
                 .Ignore(s => s.ForeignSeriesId)
-                .Ignore(s => s.Numbered)
-                .Ignore(s => s.WorkCount)
-                .Ignore(s => s.PrimaryWorkCount)
                 .LazyLoad(s => s.LinkItems,
                           (db, series) => db.Query<SeriesGroupLink>(new SqlBuilder(db.DatabaseType).Where<SeriesGroupLink>(s => s.SeriesGroupId == series.Id)).ToList(),
                           s => s.Id > 0)

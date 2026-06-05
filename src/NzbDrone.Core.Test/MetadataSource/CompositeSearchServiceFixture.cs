@@ -86,12 +86,20 @@ namespace NzbDrone.Core.Test.MetadataSource
         private void GivenComicVineReturnsResults()
         {
             Mocker.GetMock<IComicVineApiClient>()
+                .Setup(s => s.SearchVolumes(It.IsAny<string>(), It.IsAny<int?>()))
+                .Returns(_comicVineResults);
+
+            Mocker.GetMock<IComicVineApiClient>()
                 .Setup(s => s.SearchSeries(It.IsAny<string>()))
                 .Returns(_comicVineResults);
         }
 
         private void GivenComicVineReturnsEmpty()
         {
+            Mocker.GetMock<IComicVineApiClient>()
+                .Setup(s => s.SearchVolumes(It.IsAny<string>(), It.IsAny<int?>()))
+                .Returns(new List<ComicVineVolumeSummary>());
+
             Mocker.GetMock<IComicVineApiClient>()
                 .Setup(s => s.SearchSeries(It.IsAny<string>()))
                 .Returns(new List<ComicVineVolumeSummary>());
@@ -124,7 +132,7 @@ namespace NzbDrone.Core.Test.MetadataSource
             result.Should().NotBeEmpty();
 
             Mocker.GetMock<IComicVineApiClient>()
-                .Verify(v => v.SearchSeries("Batman"), Times.Once());
+                .Verify(v => v.SearchVolumes("Batman", null), Times.Once());
 
             Mocker.GetMock<IMetronApiClient>()
                 .Verify(v => v.SearchSeries(It.IsAny<string>()), Times.Never());
@@ -143,7 +151,7 @@ namespace NzbDrone.Core.Test.MetadataSource
             result.Should().NotBeEmpty();
 
             Mocker.GetMock<IComicVineApiClient>()
-                .Verify(v => v.SearchSeries("Batman"), Times.Once());
+                .Verify(v => v.SearchVolumes("Batman", null), Times.Once());
 
             Mocker.GetMock<IMetronApiClient>()
                 .Verify(v => v.SearchSeries("Batman"), Times.Once());
@@ -186,7 +194,7 @@ namespace NzbDrone.Core.Test.MetadataSource
             };
 
             Mocker.GetMock<IComicVineApiClient>()
-                .Setup(s => s.SearchSeries(It.IsAny<string>()))
+                .Setup(s => s.SearchVolumes(It.IsAny<string>(), It.IsAny<int?>()))
                 .Returns(mixedResults);
 
             var result = Subject.SearchForNewSeries("Batman");
@@ -207,14 +215,14 @@ namespace NzbDrone.Core.Test.MetadataSource
             };
 
             Mocker.GetMock<IComicVineApiClient>()
-                .Setup(s => s.SearchSeries(It.IsAny<string>()))
+                .Setup(s => s.SearchVolumes(It.IsAny<string>(), It.IsAny<int?>()))
                 .Returns(mixedResults);
 
             var criteria = new MetadataSearchCriteria("Batman", 2020);
             var result = Subject.SearchForNewSeries(criteria);
 
             result.Should().HaveCount(2);
-            result.First().Metadata.Value.Year.Should().Be(2020); // 2020 is closer to requested year
+            result.First().Metadata.Value.Year.Should().Be(2020);
         }
 
         [Test]

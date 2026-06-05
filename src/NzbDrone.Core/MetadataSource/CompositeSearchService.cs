@@ -66,7 +66,7 @@ namespace NzbDrone.Core.MetadataSource
                     if (cvResults.Any())
                     {
                         _logger.Debug("ComicVine returned {0} results for: {1}", cvResults.Count, title);
-                        return MapComicVineResults(cvResults);
+                        return SortByRelevance(MapComicVineResults(cvResults), title, criteria.Year);
                     }
 
                     _logger.Debug("No results from ComicVine for: {0}", title);
@@ -147,6 +147,47 @@ namespace NzbDrone.Core.MetadataSource
 
                 return series;
             }).ToList();
+        }
+
+        private List<Series> SortByRelevance(List<Series> results, string searchTerm, int? searchYear)
+        {
+            var term = searchTerm.ToLowerInvariant();
+
+            return results.OrderBy(s =>
+            {
+                var name = (s.Name ?? string.Empty).ToLowerInvariant();
+
+                // Exact match first
+                if (name == term)
+                {
+                    return 0;
+                }
+
+                // Starts with search term
+                if (name.StartsWith(term))
+                {
+                    return 1;
+                }
+
+                // Contains search term
+                if (name.Contains(term))
+                {
+                    return 2;
+                }
+
+                return 3;
+            })
+            .ThenBy(s =>
+            {
+                // If year specified, prefer matching year
+                if (searchYear.HasValue && s.Metadata?.Value?.Year.HasValue == true)
+                {
+                    return Math.Abs(s.Metadata.Value.Year.Value - searchYear.Value);
+                }
+
+                return 0;
+            })
+            .ToList();
         }
 
         private List<Series> MapComicVineResults(List<ComicVine.Resources.ComicVineVolumeSummary> results)

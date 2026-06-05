@@ -253,7 +253,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_only_include_reports_for_requested_books()
+        public void should_only_include_reports_for_requested_issues()
         {
             var series = Builder<Series>.CreateNew().Build();
 
@@ -268,7 +268,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             var reports = issues.Select(v =>
                 new ReleaseInfo()
                 {
-                    Title = string.Format("{0}-{1}[FLAC][2017][DRONE]", series.Name, v.Title)
+                    Title = string.Format("{0} - {1} (2024)", series.Name, v.Title)
                 }).ToList();
 
             Mocker.GetMock<IParsingService>()

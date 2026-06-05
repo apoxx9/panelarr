@@ -15,10 +15,6 @@ namespace NzbDrone.Core.Issues
         // Alias for ForeignSeriesGroupId for callers that use the old name
         public string ForeignSeriesId => ForeignSeriesGroupId;
 
-        // Stub properties for callers that reference these
-        public bool Numbered { get; set; }
-        public int WorkCount { get; set; }
-        public int PrimaryWorkCount { get; set; }
         public LazyLoaded<List<Issue>> Issues { get; set; }
 
         public override void UseMetadataFrom(SeriesGroup other)

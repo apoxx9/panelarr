@@ -63,10 +63,7 @@ namespace NzbDrone.Core.Parser.Model
                             {
                                 ForeignSeriesGroupId = l.SeriesGroup.Value.ForeignSeriesGroupId,
                                 Title = l.SeriesGroup.Value.Title,
-                                Description = l.SeriesGroup.Value.Description,
-                                Numbered = l.SeriesGroup.Value.Numbered,
-                                WorkCount = l.SeriesGroup.Value.WorkCount,
-                                PrimaryWorkCount = l.SeriesGroup.Value.PrimaryWorkCount
+                                Description = l.SeriesGroup.Value.Description
                             },
                             IsPrimary = l.IsPrimary,
                             Position = l.Position,
