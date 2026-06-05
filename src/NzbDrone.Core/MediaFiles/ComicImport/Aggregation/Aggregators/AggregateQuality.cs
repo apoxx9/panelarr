@@ -1,4 +1,5 @@
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 {
@@ -18,7 +19,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
                 quality = localTrack.DownloadClientIssueInfo?.Quality;
             }
 
-            localTrack.Quality = quality;
+            localTrack.Quality = quality ?? new QualityModel(Quality.Unknown);
             return localTrack;
         }
     }

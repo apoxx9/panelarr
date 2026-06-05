@@ -14,7 +14,7 @@ namespace NzbDrone.Core.Parser.Model
 
             // A dummy distance, will be replaced
             Distance = new Distance();
-            Distance.Add("book_id", 1.0);
+            Distance.Add("comic_id", 1.0);
         }
 
         public LocalEdition(List<LocalIssue> tracks)
@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Parser.Model
 
             // A dummy distance, will be replaced
             Distance = new Distance();
-            Distance.Add("book_id", 1.0);
+            Distance.Add("comic_id", 1.0);
         }
 
         public List<LocalIssue> LocalIssues { get; set; }
