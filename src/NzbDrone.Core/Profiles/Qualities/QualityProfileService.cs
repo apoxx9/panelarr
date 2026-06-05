@@ -191,6 +191,7 @@ namespace NzbDrone.Core.Profiles.Qualities
             {
                 Name = name,
                 Cutoff = profileCutoff,
+                UpgradeAllowed = true,
                 Items = items,
                 MinFormatScore = 0,
                 CutoffFormatScore = 0,
