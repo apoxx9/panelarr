@@ -1,11 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
-import SeriesHistoryTable from 'Series/History/SeriesHistoryTable';
-import DeleteIssueModal from 'Issue/Delete/DeleteIssueModal';
-import EditIssueModalConnector from 'Issue/Edit/EditIssueModalConnector';
-import IssueFileEditorTable from 'IssueFile/Editor/IssueFileEditorTable';
-import IssueMetadataTable from './IssueMetadataTable';
 import IconButton from 'Components/Link/IconButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
@@ -18,10 +13,15 @@ import SwipeHeaderConnector from 'Components/Swipe/SwipeHeaderConnector';
 import { icons } from 'Helpers/Props';
 import InteractiveSearchFilterMenuConnector from 'InteractiveSearch/InteractiveSearchFilterMenuConnector';
 import InteractiveSearchTable from 'InteractiveSearch/InteractiveSearchTable';
+import DeleteIssueModal from 'Issue/Delete/DeleteIssueModal';
+import EditIssueModalConnector from 'Issue/Edit/EditIssueModalConnector';
+import IssueFileEditorTable from 'IssueFile/Editor/IssueFileEditorTable';
 import OrganizePreviewModalConnector from 'Organize/OrganizePreviewModalConnector';
-import RetagPreviewModalConnector from 'Retag/RetagPreviewModalConnector';
+import SeriesHistoryTable from 'Series/History/SeriesHistoryTable';
+// RetagPreviewModalConnector removed — retag preview not yet implemented for comics
 import translate from 'Utilities/String/translate';
 import IssueDetailsHeaderConnector from './IssueDetailsHeaderConnector';
+import IssueMetadataTable from './IssueMetadataTable';
 import styles from './IssueDetails.css';
 
 class IssueDetails extends Component {
@@ -34,7 +34,6 @@ class IssueDetails extends Component {
 
     this.state = {
       isOrganizeModalOpen: false,
-      isRetagModalOpen: false,
       isEditIssueModalOpen: false,
       isDeleteIssueModalOpen: false,
       selectedTabIndex: 0
@@ -50,14 +49,6 @@ class IssueDetails extends Component {
 
   onOrganizeModalClose = () => {
     this.setState({ isOrganizeModalOpen: false });
-  };
-
-  onRetagPress = () => {
-    this.setState({ isRetagModalOpen: true });
-  };
-
-  onRetagModalClose = () => {
-    this.setState({ isRetagModalOpen: false });
   };
 
   onEditIssuePress = () => {
@@ -110,7 +101,6 @@ class IssueDetails extends Component {
 
     const {
       isOrganizeModalOpen,
-      isRetagModalOpen,
       isEditIssueModalOpen,
       isDeleteIssueModalOpen,
       selectedTabIndex
@@ -143,13 +133,6 @@ class IssueDetails extends Component {
               iconName={icons.ORGANIZE}
               isDisabled={!hasIssueFiles}
               onPress={this.onOrganizePress}
-            />
-
-            <PageToolbarButton
-              label={translate('PreviewRetag')}
-              iconName={icons.RETAG}
-              isDisabled={!hasIssueFiles}
-              onPress={this.onRetagPress}
             />
 
             <PageToolbarSeparator />
@@ -315,13 +298,6 @@ class IssueDetails extends Component {
             seriesId={series.id}
             issueId={id}
             onModalClose={this.onOrganizeModalClose}
-          />
-
-          <RetagPreviewModalConnector
-            isOpen={isRetagModalOpen}
-            seriesId={series.id}
-            issueId={id}
-            onModalClose={this.onRetagModalClose}
           />
 
           <EditIssueModalConnector

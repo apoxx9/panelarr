@@ -1,10 +1,12 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import Alert from 'Components/Alert';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
-import { sortDirections } from 'Helpers/Props';
+import { kinds, sortDirections } from 'Helpers/Props';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
+import translate from 'Utilities/String/translate';
 import getToggledRange from 'Utilities/Table/getToggledRange';
 import IssueRowConnector from './IssueRowConnector';
 import styles from './SeriesDetailsSeason.css';
@@ -90,6 +92,14 @@ class SeriesDetailsSeason extends Component {
     let titleColumns = columns;
     if (!isEditorActive) {
       titleColumns = columns.filter((x) => x.name !== 'select');
+    }
+
+    if (!items.length) {
+      return (
+        <Alert kind={kinds.INFO}>
+          {translate('NoIssuesFound')}
+        </Alert>
+      );
     }
 
     return (

@@ -4,12 +4,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { toggleIssuesMonitored } from 'Store/Actions/issueActions';
 import { executeCommand } from 'Store/Actions/commandActions';
+import { toggleIssuesMonitored } from 'Store/Actions/issueActions';
 import { setSeriesSort, setSeriesTableOption } from 'Store/Actions/seriesCollectionActions';
-import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
+import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import SeriesDetailsSeries from './SeriesDetailsSeries';
 
@@ -76,7 +76,7 @@ const mapDispatchToProps = {
   executeCommand
 };
 
-class SeriesDetailsSeasonConnector extends Component {
+class SeriesDetailsSeriesConnector extends Component {
 
   //
   // Listeners
@@ -111,7 +111,7 @@ class SeriesDetailsSeasonConnector extends Component {
   }
 }
 
-SeriesDetailsSeasonConnector.propTypes = {
+SeriesDetailsSeriesConnector.propTypes = {
   seriesId: PropTypes.number.isRequired,
   toggleIssuesMonitored: PropTypes.func.isRequired,
   setSeriesTableOption: PropTypes.func.isRequired,
@@ -119,4 +119,4 @@ SeriesDetailsSeasonConnector.propTypes = {
   executeCommand: PropTypes.func.isRequired
 };
 
-export default connect(createMapStateToProps, mapDispatchToProps)(SeriesDetailsSeasonConnector);
+export default connect(createMapStateToProps, mapDispatchToProps)(SeriesDetailsSeriesConnector);

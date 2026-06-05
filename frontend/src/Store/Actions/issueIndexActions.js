@@ -5,11 +5,11 @@ import { createThunk, handleThunks } from 'Store/thunks';
 import sortByName from 'Utilities/Array/sortByName';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import { set, updateItem } from './baseActions';
-import { filterPredicates, filters, sortPredicates } from './issueActions';
 import createHandleActions from './Creators/createHandleActions';
 import createSetClientSideCollectionFilterReducer from './Creators/Reducers/createSetClientSideCollectionFilterReducer';
 import createSetClientSideCollectionSortReducer from './Creators/Reducers/createSetClientSideCollectionSortReducer';
 import createSetTableOptionReducer from './Creators/Reducers/createSetTableOptionReducer';
+import { filterPredicates, filters, sortPredicates } from './issueActions';
 
 //
 // Variables
@@ -94,7 +94,7 @@ export const defaultState = {
     },
     {
       name: 'qualityProfileId',
-      label: 'Format Profile',
+      label: 'Quality Profile',
       isSortable: true,
       isVisible: true
     },
@@ -179,13 +179,8 @@ export const defaultState = {
       const predicate = filterTypePredicates[type];
 
       return predicate(item.series.seriesName, filterValue);
-    },
-
-    anyEditionOk: function(item, filterValue, type) {
-      const predicate = filterTypePredicates[type];
-
-      return predicate(item.anyEditionOk, filterValue);
     }
+
   },
 
   filterBuilderProps: [
@@ -206,10 +201,9 @@ export const defaultState = {
       valueType: filterBuilderValueTypes.BOOL
     },
 
-
     {
       name: 'qualityProfileId',
-      label: 'Format Profile',
+      label: 'Quality Profile',
       type: filterBuilderTypes.EXACT,
       valueType: filterBuilderValueTypes.QUALITY_PROFILE
     },

@@ -6,13 +6,11 @@ import FormInputGroup from 'Components/Form/FormInputGroup';
 import FormLabel from 'Components/Form/FormLabel';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
-
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import { inputTypes } from 'Helpers/Props';
-
 import translate from 'Utilities/String/translate';
 
 class EditIssueModalContent extends Component {
@@ -71,9 +69,6 @@ class EditIssueModalContent extends Component {
               />
             </FormGroup>
 
-
-
-
           </Form>
         </ModalBody>
         <ModalFooter>
@@ -102,9 +97,6 @@ EditIssueModalContent.propTypes = {
   seriesName: PropTypes.string.isRequired,
   statistics: PropTypes.object.isRequired,
   item: PropTypes.object.isRequired,
-  isFetching: PropTypes.bool.isRequired,
-  error: PropTypes.object,
-  isPopulated: PropTypes.bool.isRequired,
   isSaving: PropTypes.bool.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onSavePress: PropTypes.func.isRequired,

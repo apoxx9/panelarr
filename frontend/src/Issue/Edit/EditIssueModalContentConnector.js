@@ -4,36 +4,26 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { saveIssue, setIssueValue } from 'Store/Actions/issueActions';
-import { saveEditions } from 'Store/Actions/editionActions';
-import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createIssueSelector from 'Store/Selectors/createIssueSelector';
+import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import selectSettings from 'Store/Selectors/selectSettings';
 import EditIssueModalContent from './EditIssueModalContent';
 
 function createMapStateToProps() {
   return createSelector(
     (state) => state.issues,
-    (state) => state.editions,
     createIssueSelector(),
     createSeriesSelector(),
-    (issueState, editionState, issue, series) => {
+    (issueState, issue, series) => {
       const {
         isSaving,
         saveError,
         pendingChanges
       } = issueState;
 
-      const {
-        isFetching,
-        isPopulated,
-        error
-      } = editionState;
-
       const issueSettings = _.pick(issue, [
-        'monitored',
-        'anyEditionOk'
+        'monitored'
       ]);
-      issueSettings.editions = editionState.items;
 
       const settings = selectSettings(issueSettings, pendingChanges, saveError);
 
@@ -42,9 +32,6 @@ function createMapStateToProps() {
         seriesName: series.seriesName,
         issueType: issue.issueType,
         statistics: issue.statistics,
-        isFetching,
-        isPopulated,
-        error,
         isSaving,
         saveError,
         item: settings.settings,
@@ -56,8 +43,7 @@ function createMapStateToProps() {
 
 const mapDispatchToProps = {
   dispatchSetIssueValue: setIssueValue,
-  dispatchSaveIssue: saveIssue,
-  dispatchSaveEditions: saveEditions
+  dispatchSaveIssue: saveIssue
 };
 
 class EditIssueModalContentConnector extends Component {
@@ -82,9 +68,6 @@ class EditIssueModalContentConnector extends Component {
     this.props.dispatchSaveIssue({
       id: this.props.issueId
     });
-    this.props.dispatchSaveEditions({
-      id: this.props.issueId
-    });
   };
 
   //
@@ -107,7 +90,6 @@ EditIssueModalContentConnector.propTypes = {
   saveError: PropTypes.object,
   dispatchSetIssueValue: PropTypes.func.isRequired,
   dispatchSaveIssue: PropTypes.func.isRequired,
-  dispatchSaveEditions: PropTypes.func.isRequired,
   onModalClose: PropTypes.func.isRequired
 };
 

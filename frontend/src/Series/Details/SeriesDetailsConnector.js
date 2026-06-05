@@ -5,18 +5,16 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
-import { toggleSeriesMonitored } from 'Store/Actions/seriesActions';
+import { executeCommand } from 'Store/Actions/commandActions';
 import { clearIssueFiles, fetchIssueFiles } from 'Store/Actions/issueFileActions';
 import { saveIssueEditor } from 'Store/Actions/issueIndexActions';
-import { executeCommand } from 'Store/Actions/commandActions';
 import { clearQueueDetails, fetchQueueDetails } from 'Store/Actions/queueActions';
 import { cancelFetchReleases, clearReleases } from 'Store/Actions/releaseActions';
+import { fetchSeries, toggleSeriesMonitored } from 'Store/Actions/seriesActions';
 import { clearSeries } from 'Store/Actions/seriesCollectionActions';
-import { fetchSeries } from 'Store/Actions/seriesActions';
 import createAllSeriesSelector from 'Store/Selectors/createAllSeriesSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
-import createSortedSectionSelector from 'Store/Selectors/createSortedSectionSelector';
 import { findCommand, isCommandExecuting } from 'Utilities/Command';
 import { registerPagePopulator, unregisterPagePopulator } from 'Utilities/pagePopulator';
 import SeriesDetails from './SeriesDetails';
@@ -164,14 +162,7 @@ function createMapStateToProps() {
       const isFetching = isIssuesFetching || isSeriesFetching || isIssueFilesFetching;
       const isPopulated = isIssuesPopulated && isSeriesPopulated && isIssueFilesPopulated;
 
-      const alternateTitles = _.reduce(series.alternateTitles, (acc, alternateTitle) => {
-        if ((alternateTitle.seasonNumber === -1 || alternateTitle.seasonNumber === undefined) &&
-            (alternateTitle.sceneSeasonNumber === -1 || alternateTitle.sceneSeasonNumber === undefined)) {
-          acc.push(alternateTitle.title);
-        }
-
-        return acc;
-      }, []);
+      const alternateTitles = (series.alternateTitles || []).map((at) => at.title);
 
       return {
         ...series,

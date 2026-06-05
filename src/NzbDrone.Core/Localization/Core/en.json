@@ -726,6 +726,7 @@
   "50PagesFifty": "50 Pages: {0}",
   "100PagesHundred": "100 Pages: {0}",
   "200PagesTwoHundred": "200 Pages: {0}",
+  "NoIssuesFound": "No issues found for this series. Refresh metadata to check for new issues.",
   "NoMissingItems": "No missing items",
   "NoName": "Do not show name",
   "NoResultsFound": "No results found",
