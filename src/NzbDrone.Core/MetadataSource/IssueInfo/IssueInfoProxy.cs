@@ -6,6 +6,7 @@ using LazyCache.Providers;
 using Microsoft.Extensions.Caching.Memory;
 using NLog;
 using NzbDrone.Common.Cache;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MetadataSource.Metron;
@@ -17,6 +18,7 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
     {
         private readonly ISeriesService _seriesService;
         private readonly IIssueService _issueService;
+        private readonly IPublisherService _publisherService;
         private readonly Logger _logger;
         private readonly ICached<HashSet<string>> _cache;
         private readonly CachingService _seriesCache;
@@ -25,6 +27,7 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
 
         public IssueInfoProxy(ISeriesService seriesService,
                              IIssueService issueService,
+                             IPublisherService publisherService,
                              IMetadataProvider metadataProvider,
                              IMetronMapper metronMapper,
                              Logger logger,
@@ -32,6 +35,7 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
         {
             _seriesService = seriesService;
             _issueService = issueService;
+            _publisherService = publisherService;
             _metadataProvider = metadataProvider;
             _metronMapper = metronMapper;
             _cache = cacheManager.GetCache<HashSet<string>>(GetType());
@@ -94,6 +98,29 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
             }
 
             var (metadata, series) = _metronMapper.MapSeries(providerSeries);
+
+            // Create or find publisher entity if the provider gave us one
+            if (providerSeries.ForeignPublisherId.IsNotNullOrWhiteSpace())
+            {
+                var existingPublisher = _publisherService.FindByForeignId(providerSeries.ForeignPublisherId);
+                if (existingPublisher != null)
+                {
+                    metadata.PublisherId = existingPublisher.Id;
+                }
+                else
+                {
+                    var pubName = providerSeries.PublisherName?.Split('|')[0]?.Trim() ?? "Unknown";
+                    var newPublisher = new Publisher
+                    {
+                        ForeignPublisherId = providerSeries.ForeignPublisherId,
+                        Name = pubName,
+                        CleanName = pubName.ToLowerInvariant().Replace(" ", "")
+                    };
+
+                    newPublisher = _publisherService.AddPublisher(newPublisher);
+                    metadata.PublisherId = newPublisher.Id;
+                }
+            }
 
             var issues = new List<Issue>();
             if (providerSeries.Issues != null)

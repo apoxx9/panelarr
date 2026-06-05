@@ -57,6 +57,11 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
 
         private void EmbedComicInfo(ComicFile comicFile)
         {
+            if (comicFile.IssueId == 0)
+            {
+                return;
+            }
+
             if (comicFile.ComicFormat != Issues.ComicFormat.CBZ)
             {
                 _logger.Debug("Skipping ComicInfo.xml embedding for non-CBZ file: {0}", comicFile.Path);

@@ -97,16 +97,37 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
 
         public List<ComicVineIssueSummary> GetIssues(int volumeId)
         {
-            _rateLimiter.WaitForToken();
+            var allIssues = new List<ComicVineIssueSummary>();
+            var offset = 0;
+            const int limit = 100;
 
-            var request = BuildRequest("issues");
-            request.Url = request.Url
-                .AddQueryParam("filter", $"volume:{volumeId}")
-                .AddQueryParam("field_list", "id,name,issue_number,cover_date,image");
+            while (true)
+            {
+                _rateLimiter.WaitForToken();
 
-            var response = _cachedHttpClient.Get<ComicVineResponse<List<ComicVineIssueSummary>>>(request, true, TimeSpan.FromHours(12));
+                var request = BuildRequest("issues");
+                request.Url = request.Url
+                    .AddQueryParam("filter", $"volume:{volumeId}")
+                    .AddQueryParam("field_list", "id,name,issue_number,cover_date,image")
+                    .AddQueryParam("offset", offset.ToString());
 
-            return response.Resource?.Results ?? new List<ComicVineIssueSummary>();
+                var response = _cachedHttpClient.Get<ComicVineResponse<List<ComicVineIssueSummary>>>(request, true, TimeSpan.FromHours(12));
+
+                var results = response.Resource?.Results ?? new List<ComicVineIssueSummary>();
+                allIssues.AddRange(results);
+
+                var total = response.Resource?.NumberOfTotalResults ?? 0;
+
+                if (allIssues.Count >= total || results.Count == 0)
+                {
+                    break;
+                }
+
+                offset += limit;
+                _logger.Debug("Fetching next page of issues for volume {0} (offset: {1}, total: {2})", volumeId, offset, total);
+            }
+
+            return allIssues;
         }
 
         public ComicVineIssueDetail GetIssue(int id)

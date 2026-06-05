@@ -40,6 +40,11 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
 
         private void PopulateCredits(ComicFile comicFile)
         {
+            if (comicFile.IssueId == 0)
+            {
+                return;
+            }
+
             var issue = comicFile.Issue?.Value ?? _issueService.GetIssue(comicFile.IssueId);
             if (issue == null)
             {

@@ -15,8 +15,8 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 
         private static readonly List<Tuple<string, string>> CharsAndSeps = new List<Tuple<string, string>>
         {
-            Tuple.Create(@"a-z0-9,\(\)\.&’’\s", @"\s_\-#"),
-            Tuple.Create(@"a-z0-9,\(\)\.\&’’_", @"\s\-#")
+            Tuple.Create(@"a-z0-9,\(\)\.&’’\s", @"\s_-"),
+            Tuple.Create(@"a-z0-9,\(\)\.\&’’_", @"\s-")
         };
 
         private static Regex[] Patterns(string chars, string sep)
