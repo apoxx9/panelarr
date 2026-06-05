@@ -38,6 +38,10 @@ namespace Panelarr.Api.V1.Issues
         public string RemoteCover { get; set; }
         public DateTime? LastSearchTime { get; set; }
 
+        // Metadata override tracking
+        public bool IsOverridden { get; set; }
+        public string OverriddenFields { get; set; }
+
         //Hiding this so people don't think its usable (only used to set the initial state)
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         [SwaggerIgnore]
@@ -86,7 +90,9 @@ namespace Panelarr.Api.V1.Issues
                 Links = model.Links ?? new List<Links>(),
                 Ratings = model.Ratings ?? new Ratings(),
                 Added = model.Added,
-                LastSearchTime = model.LastSearchTime
+                LastSearchTime = model.LastSearchTime,
+                IsOverridden = model.IsOverridden,
+                OverriddenFields = model.OverriddenFields
             };
         }
 

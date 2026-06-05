@@ -168,6 +168,8 @@ export const SET_SERIES_VALUE = 'series/setSeriesValue';
 export const SAVE_SERIES = 'series/saveSeries';
 export const DELETE_SERIES = 'series/deleteSeries';
 
+export const SAVE_SERIES_OVERRIDE = 'series/saveSeriesOverride';
+export const CLEAR_SERIES_OVERRIDE = 'series/clearSeriesOverride';
 export const TOGGLE_SERIES_MONITORED = 'series/toggleSeriesMonitored';
 export const TOGGLE_ISSUE_MONITORED = 'series/toggleIssueMonitored';
 export const UPDATE_ISSUE_MONITORED = 'series/updateIssueMonitored';
@@ -202,6 +204,8 @@ export const deleteSeries = createThunk(DELETE_SERIES, (payload) => {
   };
 });
 
+export const saveSeriesOverride = createThunk(SAVE_SERIES_OVERRIDE);
+export const clearSeriesOverride = createThunk(CLEAR_SERIES_OVERRIDE);
 export const toggleSeriesMonitored = createThunk(TOGGLE_SERIES_MONITORED);
 export const toggleIssueMonitored = createThunk(TOGGLE_ISSUE_MONITORED);
 export const updateIssueMonitor = createThunk(UPDATE_ISSUE_MONITORED);
@@ -232,6 +236,49 @@ export const actionHandlers = handleThunks({
   [FETCH_SERIES]: createFetchHandler(section, '/series'),
   [SAVE_SERIES]: createSaveProviderHandler(section, '/series', { getAjaxOptions: getSaveAjaxOptions }),
   [DELETE_SERIES]: createRemoveItemHandler(section, '/series'),
+
+  [SAVE_SERIES_OVERRIDE]: (getState, payload, dispatch) => {
+    const { id, fields } = payload;
+
+    dispatch(updateItem({ id, section, isSaving: true }));
+
+    const promise = createAjaxRequest({
+      url: `/series/${id}/override`,
+      method: 'PUT',
+      data: JSON.stringify(fields),
+      dataType: 'json',
+      contentType: 'application/json'
+    }).request;
+
+    promise.done(() => {
+      dispatch(fetchSeries());
+      dispatch(updateItem({ id, section, isSaving: false }));
+    });
+
+    promise.fail((xhr) => {
+      dispatch(updateItem({ id, section, isSaving: false }));
+    });
+  },
+
+  [CLEAR_SERIES_OVERRIDE]: (getState, payload, dispatch) => {
+    const { id } = payload;
+
+    dispatch(updateItem({ id, section, isSaving: true }));
+
+    const promise = createAjaxRequest({
+      url: `/series/${id}/override`,
+      method: 'DELETE'
+    }).request;
+
+    promise.done(() => {
+      dispatch(fetchSeries());
+      dispatch(updateItem({ id, section, isSaving: false }));
+    });
+
+    promise.fail((xhr) => {
+      dispatch(updateItem({ id, section, isSaving: false }));
+    });
+  },
 
   [TOGGLE_SERIES_MONITORED]: (getState, payload, dispatch) => {
     const {

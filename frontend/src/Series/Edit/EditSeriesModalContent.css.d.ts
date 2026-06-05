@@ -3,6 +3,9 @@
 interface CssExports {
   'deleteButton': string;
   'labelIcon': string;
+  'metadataHeader': string;
+  'metadataSection': string;
+  'overriddenBadge': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

@@ -64,7 +64,13 @@ class EditSeriesModalContent extends Component {
       item,
       isSaving,
       originalPath,
+      overview,
+      year,
+      isOverridden,
+      overriddenFields,
+      metadataOverrides,
       onInputChange,
+      onMetadataChange,
       onModalClose,
       onDeleteSeriesPress,
       ...otherProps
@@ -77,6 +83,8 @@ class EditSeriesModalContent extends Component {
       path,
       tags
     } = item;
+
+    const overridden = (overriddenFields || '').split(',').filter(Boolean);
 
     return (
       <ModalContent onModalClose={onModalClose}>
@@ -163,6 +171,59 @@ class EditSeriesModalContent extends Component {
                 onChange={onInputChange}
               />
             </FormGroup>
+
+            <div className={styles.metadataSection}>
+              <div className={styles.metadataHeader}>
+                Metadata Overrides
+                {isOverridden &&
+                  <span className={styles.overriddenBadge}>
+                    {overridden.length} field(s) overridden
+                  </span>
+                }
+              </div>
+
+              <FormGroup>
+                <FormLabel>
+                  Series Name
+                </FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.TEXT}
+                  name="seriesName"
+                  value={metadataOverrides.seriesName !== undefined ? metadataOverrides.seriesName : seriesName}
+                  helpText={overridden.includes('Name') ? 'Currently overridden' : 'Change to override provider metadata'}
+                  onChange={onMetadataChange}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>
+                  Year
+                </FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.NUMBER}
+                  name="year"
+                  value={metadataOverrides.year !== undefined ? metadataOverrides.year : (year || '')}
+                  helpText={overridden.includes('Year') ? 'Currently overridden' : 'Change to override provider metadata'}
+                  onChange={onMetadataChange}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>
+                  Overview
+                </FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.TEXT}
+                  name="overview"
+                  value={metadataOverrides.overview !== undefined ? metadataOverrides.overview : (overview || '')}
+                  helpText={overridden.includes('Overview') ? 'Currently overridden' : 'Change to override provider metadata'}
+                  onChange={onMetadataChange}
+                />
+              </FormGroup>
+            </div>
           </Form>
         </ModalBody>
         <ModalFooter>
@@ -208,7 +269,13 @@ EditSeriesModalContent.propTypes = {
   isSaving: PropTypes.bool.isRequired,
   isPathChanging: PropTypes.bool.isRequired,
   originalPath: PropTypes.string.isRequired,
+  overview: PropTypes.string,
+  year: PropTypes.number,
+  isOverridden: PropTypes.bool,
+  overriddenFields: PropTypes.string,
+  metadataOverrides: PropTypes.object.isRequired,
   onInputChange: PropTypes.func.isRequired,
+  onMetadataChange: PropTypes.func.isRequired,
   onSavePress: PropTypes.func.isRequired,
   onModalClose: PropTypes.func.isRequired,
   onDeleteSeriesPress: PropTypes.func.isRequired

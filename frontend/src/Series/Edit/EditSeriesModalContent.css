@@ -7,3 +7,25 @@
 .labelIcon {
   margin-left: 8px;
 }
+
+.metadataSection {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid var(--borderColor);
+}
+
+.metadataHeader {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.overriddenBadge {
+  font-size: 12px;
+  font-weight: normal;
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background-color: var(--warningColor);
+  color: var(--white);
+}

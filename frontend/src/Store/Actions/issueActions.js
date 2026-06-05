@@ -280,6 +280,8 @@ export const SET_ISSUE_VALUE = 'issues/setIssueValue';
 export const SAVE_ISSUE = 'issues/saveIssue';
 export const DELETE_ISSUE = 'issues/deleteIssue';
 export const DELETE_SERIES_ISSUES_LIST = 'issues/deleteSeriesIssues';
+export const SAVE_ISSUE_OVERRIDE = 'issues/saveIssueOverride';
+export const CLEAR_ISSUE_OVERRIDE = 'issues/clearIssueOverride';
 export const TOGGLE_ISSUE_MONITORED = 'issues/toggleIssueMonitored';
 export const TOGGLE_ISSUES_LIST_MONITORED = 'issues/toggleIssuesMonitored';
 
@@ -294,6 +296,8 @@ export const toggleIssueMonitored = createThunk(TOGGLE_ISSUE_MONITORED);
 export const toggleIssuesMonitored = createThunk(TOGGLE_ISSUES_LIST_MONITORED);
 
 export const saveIssue = createThunk(SAVE_ISSUE);
+export const saveIssueOverride = createThunk(SAVE_ISSUE_OVERRIDE);
+export const clearIssueOverride = createThunk(CLEAR_ISSUE_OVERRIDE);
 
 export const deleteIssue = createThunk(DELETE_ISSUE, (payload) => {
   return {
@@ -368,6 +372,72 @@ export const actionHandlers = handleThunks({
 
   [SAVE_ISSUE]: createSaveProviderHandler(section, '/issue'),
   [DELETE_ISSUE]: createRemoveItemHandler(section, '/issue'),
+
+  [SAVE_ISSUE_OVERRIDE]: function(getState, payload, dispatch) {
+    const { id, fields } = payload;
+
+    dispatch(updateItem({ id, section, isSaving: true }));
+
+    const promise = createAjaxRequest({
+      url: `/issue/${id}/override`,
+      method: 'PUT',
+      data: JSON.stringify(fields),
+      dataType: 'json',
+      contentType: 'application/json'
+    }).request;
+
+    promise.done(() => {
+      // Re-fetch issues to get updated metadata
+      const issue = _.find(getState().issues.items, { id });
+      if (issue) {
+        dispatch(set({ section, isFetching: true }));
+        const { request } = createAjaxRequest({ url: '/issue', data: { seriesId: issue.seriesId }, traditional: true });
+        request.done((data) => {
+          const oldIssues = getState().issues.items.filter((x) => x.seriesId !== issue.seriesId);
+          dispatch(batchActions([
+            update({ section, data: oldIssues.concat(data) }),
+            set({ section, isFetching: false, isPopulated: true, error: null })
+          ]));
+        });
+      }
+      dispatch(updateItem({ id, section, isSaving: false }));
+    });
+
+    promise.fail(() => {
+      dispatch(updateItem({ id, section, isSaving: false }));
+    });
+  },
+
+  [CLEAR_ISSUE_OVERRIDE]: function(getState, payload, dispatch) {
+    const { id } = payload;
+
+    dispatch(updateItem({ id, section, isSaving: true }));
+
+    const promise = createAjaxRequest({
+      url: `/issue/${id}/override`,
+      method: 'DELETE'
+    }).request;
+
+    promise.done(() => {
+      const issue = _.find(getState().issues.items, { id });
+      if (issue) {
+        dispatch(set({ section, isFetching: true }));
+        const { request } = createAjaxRequest({ url: '/issue', data: { seriesId: issue.seriesId }, traditional: true });
+        request.done((data) => {
+          const oldIssues = getState().issues.items.filter((x) => x.seriesId !== issue.seriesId);
+          dispatch(batchActions([
+            update({ section, data: oldIssues.concat(data) }),
+            set({ section, isFetching: false, isPopulated: true, error: null })
+          ]));
+        });
+      }
+      dispatch(updateItem({ id, section, isSaving: false }));
+    });
+
+    promise.fail(() => {
+      dispatch(updateItem({ id, section, isSaving: false }));
+    });
+  },
 
   [DELETE_SERIES_ISSUES_LIST]: function(getState, payload, dispatch) {
     const { seriesId } = payload;

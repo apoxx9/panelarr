@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { saveIssue, setIssueValue } from 'Store/Actions/issueActions';
+import { saveIssue, saveIssueOverride, setIssueValue } from 'Store/Actions/issueActions';
 import createIssueSelector from 'Store/Selectors/createIssueSelector';
 import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import selectSettings from 'Store/Selectors/selectSettings';
@@ -30,8 +30,13 @@ function createMapStateToProps() {
       return {
         title: issue.title,
         seriesName: series.seriesName,
+        issueNumber: issue.issueNumber,
+        releaseDate: issue.releaseDate,
+        pageCount: issue.pageCount,
         issueType: issue.issueType,
         statistics: issue.statistics,
+        isOverridden: issue.isOverridden,
+        overriddenFields: issue.overriddenFields,
         isSaving,
         saveError,
         item: settings.settings,
@@ -43,13 +48,22 @@ function createMapStateToProps() {
 
 const mapDispatchToProps = {
   dispatchSetIssueValue: setIssueValue,
-  dispatchSaveIssue: saveIssue
+  dispatchSaveIssue: saveIssue,
+  dispatchSaveIssueOverride: saveIssueOverride
 };
 
 class EditIssueModalContentConnector extends Component {
 
   //
   // Lifecycle
+
+  constructor(props, context) {
+    super(props, context);
+
+    this.state = {
+      metadataOverrides: {}
+    };
+  }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.isSaving && !this.props.isSaving && !this.props.saveError) {
@@ -64,7 +78,38 @@ class EditIssueModalContentConnector extends Component {
     this.props.dispatchSetIssueValue({ name, value });
   };
 
+  onMetadataChange = ({ name, value }) => {
+    this.setState((state) => ({
+      metadataOverrides: {
+        ...state.metadataOverrides,
+        [name]: value
+      }
+    }));
+  };
+
   onSavePress = () => {
+    const { metadataOverrides } = this.state;
+
+    if (Object.keys(metadataOverrides).length > 0) {
+      const fieldMap = {
+        title: 'Title',
+        issueNumber: 'IssueNumber',
+        releaseDate: 'ReleaseDate',
+        pageCount: 'PageCount'
+      };
+
+      const fields = {};
+      for (const [key, value] of Object.entries(metadataOverrides)) {
+        const backendKey = fieldMap[key] || key;
+        fields[backendKey] = value;
+      }
+
+      this.props.dispatchSaveIssueOverride({
+        id: this.props.issueId,
+        fields
+      });
+    }
+
     this.props.dispatchSaveIssue({
       id: this.props.issueId
     });
@@ -77,7 +122,9 @@ class EditIssueModalContentConnector extends Component {
     return (
       <EditIssueModalContent
         {...this.props}
+        metadataOverrides={this.state.metadataOverrides}
         onInputChange={this.onInputChange}
+        onMetadataChange={this.onMetadataChange}
         onSavePress={this.onSavePress}
       />
     );
@@ -90,6 +137,7 @@ EditIssueModalContentConnector.propTypes = {
   saveError: PropTypes.object,
   dispatchSetIssueValue: PropTypes.func.isRequired,
   dispatchSaveIssue: PropTypes.func.isRequired,
+  dispatchSaveIssueOverride: PropTypes.func.isRequired,
   onModalClose: PropTypes.func.isRequired
 };
 

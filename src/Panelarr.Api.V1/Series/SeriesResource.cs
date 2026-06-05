@@ -58,6 +58,10 @@ namespace Panelarr.Api.V1.Series
         public string PublisherName { get; set; }
 
         public SeriesStatisticsResource Statistics { get; set; }
+
+        // Metadata override tracking
+        public bool IsOverridden { get; set; }
+        public string OverriddenFields { get; set; }
     }
 
     public static class SeriesResourceMapper
@@ -108,6 +112,9 @@ namespace Panelarr.Api.V1.Series
                 SeriesType = model.Metadata.Value.SeriesType == NzbDrone.Core.Issues.SeriesType.Single ? null : model.Metadata.Value.SeriesType.ToString(),
                 VolumeNumber = model.Metadata.Value.VolumeNumber,
                 PublisherName = publisherName,
+
+                IsOverridden = model.Metadata.Value.IsOverridden,
+                OverriddenFields = model.Metadata.Value.OverriddenFields,
 
                 Statistics = new SeriesStatisticsResource()
             };
