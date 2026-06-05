@@ -155,7 +155,20 @@ namespace NzbDrone.Core.MediaFiles
                 AddNewSeries = addNewSeries
             };
 
-            var decisions = _importDecisionMaker.GetImportDecisions(mediaFileList, null, null, config);
+            // When scanning for a specific series, pass it as an override so the
+            // identification service can match files directly against that series'
+            // issues instead of relying solely on filename parsing.
+            IdentificationOverrides idOverrides = null;
+            if (seriesIds.Count == 1)
+            {
+                var series = _seriesService.GetSeries(seriesIds.First());
+                if (series != null)
+                {
+                    idOverrides = new IdentificationOverrides { Series = series };
+                }
+            }
+
+            var decisions = _importDecisionMaker.GetImportDecisions(mediaFileList, idOverrides, null, config);
 
             decisionsStopwatch.Stop();
             _logger.Debug("Import decisions complete [{0}]", decisionsStopwatch.Elapsed);

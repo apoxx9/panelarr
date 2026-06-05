@@ -15,8 +15,8 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 
         private static readonly List<Tuple<string, string>> CharsAndSeps = new List<Tuple<string, string>>
         {
-            Tuple.Create(@"a-z0-9,\(\)\.&'’\s", @"\s_-"),
-            Tuple.Create(@"a-z0-9,\(\)\.\&'’_", @"\s-")
+            Tuple.Create(@"a-z0-9,\(\)\.&’’\s", @"\s_\-#"),
+            Tuple.Create(@"a-z0-9,\(\)\.\&’’_", @"\s\-#")
         };
 
         private static Regex[] Patterns(string chars, string sep)
@@ -183,6 +183,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 
                     _logger.Debug("Got track number from filename: {0}", tracknum);
                     track.FileTrackInfo.TrackNumbers = new[] { tracknum };
+
+                    // Also set SeriesIndex so the identification pipeline can match
+                    // against Issue.IssueNumber
+                    if (track.FileTrackInfo.SeriesIndex.IsNullOrWhiteSpace())
+                    {
+                        track.FileTrackInfo.SeriesIndex = tracknum.ToString();
+                    }
                 }
             }
         }
