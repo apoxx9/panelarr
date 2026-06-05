@@ -374,7 +374,7 @@ These are cross-cutting flows that span multiple pages/endpoints. Each journey m
 - **Journey:** Issue has file at lower quality → search finds better quality release → grabbed → imported → old file replaced
 - **Status:** `PASS` (tested 2026-06-05)
 - **Audit notes:** Imported CBR file (weight 30) for Saga #1 with CBZ cutoff (weight 40). Quality detection correct, file below cutoff confirmed. Quality definitions correctly ranked: Unknown(1) < PDF(10) < EPUB(20) < CBR(30) < CBZ Web(35) < CBZ(40) < CB7(45) < CBZ HD(50). Search returns CBZ releases that would be upgrades. Import and replacement mechanism verified in Journey 11.4.
-- **Known issue:** Cutoff Unmet page query returns 0 results despite CBR file being below CBZ cutoff — inherited DB query issue, needs investigation.
+- **Fixed:** Cutoff Unmet page was returning 0 results because default quality profile had `UpgradeAllowed=false`. Fixed by setting `UpgradeAllowed=true` in the profile seed. Existing installations need to toggle this on manually in Settings > Profiles.
 
 ### 11.8 Failed Download Handling
 - **Journey:** Download fails → marked as failed in history → series/issue re-searched → new release grabbed → blocklist updated
