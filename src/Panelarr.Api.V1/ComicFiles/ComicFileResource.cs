@@ -21,7 +21,7 @@ namespace Panelarr.Api.V1.ComicFiles
         public MediaInfoResource MediaInfo { get; set; }
 
         public bool QualityCutoffNotMet { get; set; }
-        public ParsedTrackInfo AudioTags { get; set; }
+        public ParsedTrackInfo FileTags { get; set; }
     }
 
     public static class ComicFileResourceMapper

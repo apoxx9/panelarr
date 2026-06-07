@@ -46,7 +46,7 @@ class FileDetailsConnector extends Component {
     const item = _.find(items, { id });
     const errorMessage = getErrorMessage(error, 'Unable to load manual import items');
 
-    if (isFetching || !item.fileTags) {
+    if (isFetching || !item) {
       return (
         <LoadingIndicator />
       );
@@ -56,9 +56,15 @@ class FileDetailsConnector extends Component {
       );
     }
 
+    const fileTags = {
+      quality: item.quality ? item.quality.quality.name : undefined,
+      size: item.size,
+      dateAdded: item.dateAdded
+    };
+
     return (
       <FileDetails
-        fileTags={item.fileTags}
+        fileTags={fileTags}
         filename={item.path}
       />
     );

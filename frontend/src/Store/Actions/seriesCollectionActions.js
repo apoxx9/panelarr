@@ -24,6 +24,7 @@ export const defaultState = {
   sortKey: 'position',
   sortDirection: sortDirections.ASCENDING,
   items: [],
+  pendingChanges: {},
 
   columns: [
     {

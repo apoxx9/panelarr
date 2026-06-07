@@ -24,7 +24,7 @@ namespace Panelarr.Api.V1.ManualImport
         public string DownloadId { get; set; }
         public int IndexerFlags { get; set; }
         public IEnumerable<Rejection> Rejections { get; set; }
-        public ParsedTrackInfo AudioTags { get; set; }
+        public ParsedTrackInfo FileTags { get; set; }
         public bool AdditionalFile { get; set; }
         public bool ReplaceExistingFiles { get; set; }
         public bool DisableReleaseSwitching { get; set; }
@@ -56,7 +56,7 @@ namespace Panelarr.Api.V1.ManualImport
                 IndexerFlags = model.IndexerFlags,
                 Rejections = model.Rejections,
 
-                AudioTags = model.Tags,
+                FileTags = model.Tags,
                 AdditionalFile = model.AdditionalFile,
                 ReplaceExistingFiles = model.ReplaceExistingFiles,
                 DisableReleaseSwitching = model.DisableReleaseSwitching

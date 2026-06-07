@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { saveInteractiveImportItem, updateInteractiveImportItem } from 'Store/Actions/interactiveImportActions';
+import { fetchSeries } from 'Store/Actions/seriesActions';
 import createAllSeriesSelector from 'Store/Selectors/createAllSeriesSelector';
 import SelectSeriesModalContent from './SelectSeriesModalContent';
 
@@ -29,11 +30,19 @@ function createMapStateToProps() {
 }
 
 const mapDispatchToProps = {
+  fetchSeries,
   updateInteractiveImportItem,
   saveInteractiveImportItem
 };
 
 class SelectSeriesModalContentConnector extends Component {
+
+  //
+  // Lifecycle
+
+  componentDidMount() {
+    this.props.fetchSeries();
+  }
 
   //
   // Listeners
@@ -73,6 +82,7 @@ class SelectSeriesModalContentConnector extends Component {
 SelectSeriesModalContentConnector.propTypes = {
   ids: PropTypes.arrayOf(PropTypes.number).isRequired,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
+  fetchSeries: PropTypes.func.isRequired,
   saveInteractiveImportItem: PropTypes.func.isRequired,
   updateInteractiveImportItem: PropTypes.func.isRequired,
   onModalClose: PropTypes.func.isRequired

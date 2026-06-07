@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NzbDrone.Core\Panelarr.Core.csproj" />
     <ProjectReference Include="..\NzbDrone.Test.Common\Panelarr.Test.Common.csproj" />
+    <ProjectReference Include="..\Panelarr.Api.V1\Panelarr.Api.V1.csproj" />
     <ProjectReference Include="..\Panelarr.Http\Panelarr.Http.csproj" />
   </ItemGroup>
 </Project>

@@ -5,7 +5,7 @@ namespace Panelarr.Api.V1.ComicFiles
 {
     public class ComicFileListResource
     {
-        public List<int> ComicFileIds { get; set; }
+        public List<int> IssueFileIds { get; set; }
         public QualityModel Quality { get; set; }
     }
 }

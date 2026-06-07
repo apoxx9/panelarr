@@ -67,7 +67,7 @@ namespace Panelarr.Api.V1.ComicFiles
         protected override ComicFileResource GetResourceById(int id)
         {
             var resource = MapToResource(_mediaFileService.Get(id));
-            resource.AudioTags = _metadataTagService.ReadTags((FileInfoBase)new FileInfo(resource.Path));
+            resource.FileTags = _metadataTagService.ReadTags((FileInfoBase)new FileInfo(resource.Path));
             return resource;
         }
 
@@ -137,7 +137,7 @@ namespace Panelarr.Api.V1.ComicFiles
         [HttpPut("editor")]
         public IActionResult SetQuality([FromBody] ComicFileListResource resource)
         {
-            var comicFiles = _mediaFileService.Get(resource.ComicFileIds);
+            var comicFiles = _mediaFileService.Get(resource.IssueFileIds);
 
             foreach (var comicFile in comicFiles)
             {
@@ -175,7 +175,7 @@ namespace Panelarr.Api.V1.ComicFiles
         [HttpDelete("bulk")]
         public object DeleteComicFiles([FromBody] ComicFileListResource resource)
         {
-            var comicFiles = _mediaFileService.Get(resource.ComicFileIds);
+            var comicFiles = _mediaFileService.Get(resource.IssueFileIds);
 
             foreach (var comicFile in comicFiles)
             {
