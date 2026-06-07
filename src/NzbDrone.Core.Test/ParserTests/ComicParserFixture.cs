@@ -253,5 +253,30 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Should().NotBeNull();
             result.ReleaseTitle.Should().Be(title);
         }
+
+        // -------------------------------------------------------------------
+        // Hash-prefixed issue numbers (#N) — common comic filename convention
+        // -------------------------------------------------------------------
+        [TestCase("Batman #45.cbz", "Batman", 45f, null)]
+        [TestCase("Amazing Spider-Man #123 (2020).cbz", "Amazing Spider-Man", 123f, 2020)]
+        [TestCase("The Walking Dead #100.cbr", "The Walking Dead", 100f, null)]
+        [TestCase("Spider-Man 2099 #3 (2020).cbz", "Spider-Man 2099", 3f, 2020)]
+        [TestCase("X-Men #1 (1991) (Digital) (Empire).cbz", "X-Men", 1f, 1991)]
+        [TestCase("Batman #45 (2016) (Digital) (Zone-Empire).cbz", "Batman", 45f, 2016)]
+        [TestCase("Saga #54.cbz", "Saga", 54f, null)]
+        [TestCase("100 Bullets #50.cbz", "100 Bullets", 50f, null)]
+        public void should_parse_hash_prefixed_issue_number(string filename, string expectedSeries, float expectedIssue, int? expectedYear)
+        {
+            var result = ComicParser.ParseRelease(filename);
+
+            result.Should().NotBeNull();
+            result.SeriesTitle.Should().Be(expectedSeries);
+            result.IssueNumber.Should().Be(expectedIssue);
+
+            if (expectedYear.HasValue)
+            {
+                result.Year.Should().Be(expectedYear.Value);
+            }
+        }
     }
 }
