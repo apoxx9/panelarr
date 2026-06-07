@@ -51,10 +51,6 @@ $hoverScale: 1.05;
   font-weight: 700;
 }
 
-.nextAiring {
-  text-align: center;
-  font-size: $smallFontSize;
-}
 
 .title {
   @add-mixin truncate;

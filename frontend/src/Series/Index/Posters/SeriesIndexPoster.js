@@ -84,7 +84,6 @@ class SeriesIndexPoster extends Component {
       monitored,
       titleSlug,
       status,
-      nextAiring,
       statistics = {},
       images,
       posterWidth,
@@ -236,20 +235,6 @@ class SeriesIndexPoster extends Component {
 
 
           {
-            nextAiring &&
-              <div className={styles.nextAiring}>
-                {
-                  getRelativeDate(
-                    nextAiring,
-                    shortDateFormat,
-                    showRelativeDates,
-                    {
-                      timeFormat,
-                      timeForToday: true
-                    }
-                  )
-                }
-              </div>
           }
           <SeriesIndexPosterInfo
             issueCount={issueCount}
@@ -287,7 +272,6 @@ SeriesIndexPoster.propTypes = {
   monitored: PropTypes.bool.isRequired,
   status: PropTypes.string.isRequired,
   titleSlug: PropTypes.string.isRequired,
-  nextAiring: PropTypes.string,
   statistics: PropTypes.object.isRequired,
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
   posterWidth: PropTypes.number.isRequired,

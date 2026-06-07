@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import RetagSeriesModal from 'Series/Editor/AudioTags/RetagSeriesModal';
+import RetagSeriesModal from 'Series/Editor/Retag/RetagSeriesModal';
 import SeriesEditorFooter from 'Series/Editor/SeriesEditorFooter';
 import OrganizeSeriesModal from 'Series/Editor/Organize/OrganizeSeriesModal';
 import NoSeries from 'Series/NoSeries';

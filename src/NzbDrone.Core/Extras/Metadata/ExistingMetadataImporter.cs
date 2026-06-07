@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Extras.Metadata
                     {
                         var localTrack = new LocalIssue
                         {
-                            FileTrackInfo = Parser.Parser.ParseMusicPath(possibleMetadataFile),
+                            FileTrackInfo = Parser.Parser.ParseFilePath(possibleMetadataFile),
                             Series = series,
                             Path = possibleMetadataFile
                         };

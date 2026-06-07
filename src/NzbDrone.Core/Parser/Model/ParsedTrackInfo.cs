@@ -15,16 +15,12 @@ namespace NzbDrone.Core.Parser.Model
         public string SeriesIndex { get; set; }
         public string ForeignIssueId { get; set; }
         public int DiscNumber { get; set; }
-        public IsoCountry Country { get; set; }
         public uint Year { get; set; }
         public string Publisher { get; set; }
-        public string Label { get; set; }
-        public string Source { get; set; }
         public string Disambiguation { get; set; }
         public QualityModel Quality { get; set; }
         public MediaInfoModel MediaInfo { get; set; }
         public int[] TrackNumbers { get; set; }
-        public string Language { get; set; }
         public string ReleaseGroup { get; set; }
         public string ReleaseHash { get; set; }
 

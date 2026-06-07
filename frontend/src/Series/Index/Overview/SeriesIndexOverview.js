@@ -89,7 +89,6 @@ class SeriesIndexOverview extends Component {
       monitored,
       status,
       titleSlug,
-      nextAiring,
       statistics = {},
       images,
       posterWidth,
@@ -239,7 +238,6 @@ class SeriesIndexOverview extends Component {
               <SeriesIndexOverviewInfo
                 height={overviewHeight}
                 monitored={monitored}
-                nextAiring={nextAiring}
                 issueCount={issueCount}
                 sizeOnDisk={sizeOnDisk}
                 qualityProfile={qualityProfile}
@@ -279,7 +277,6 @@ SeriesIndexOverview.propTypes = {
   monitored: PropTypes.bool.isRequired,
   status: PropTypes.string.isRequired,
   titleSlug: PropTypes.string.isRequired,
-  nextAiring: PropTypes.string,
   statistics: PropTypes.object.isRequired,
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
   posterWidth: PropTypes.number.isRequired,

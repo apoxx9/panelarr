@@ -169,7 +169,6 @@ function getInfoRowProps(row, props) {
 function SeriesIndexOverviewInfo(props) {
   const {
     height,
-    nextAiring,
     showRelativeDates,
     shortDateFormat,
     longDateFormat,
@@ -182,23 +181,6 @@ function SeriesIndexOverviewInfo(props) {
 
   return (
     <div className={styles.infos}>
-      {
-        !!nextAiring &&
-          <SeriesIndexOverviewInfoRow
-            title={formatDateTime(nextAiring, longDateFormat, timeFormat)}
-            iconName={icons.SCHEDULED}
-            label={getRelativeDate(
-              nextAiring,
-              shortDateFormat,
-              showRelativeDates,
-              {
-                timeFormat,
-                timeForToday: true
-              }
-            )}
-          />
-      }
-
       {
         rows.map((row) => {
           if (!isVisible(row, props)) {
@@ -234,7 +216,6 @@ SeriesIndexOverviewInfo.propTypes = {
   showPath: PropTypes.bool.isRequired,
   showSizeOnDisk: PropTypes.bool.isRequired,
   monitored: PropTypes.bool.isRequired,
-  nextAiring: PropTypes.string,
   qualityProfile: PropTypes.object.isRequired,
   lastIssue: PropTypes.object,
   added: PropTypes.string,

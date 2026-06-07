@@ -8,7 +8,6 @@ interface CssExports {
   'editorSelect': string;
   'ended': string;
   'link': string;
-  'nextAiring': string;
   'overlayTitle': string;
   'poster': string;
   'posterContainer': string;

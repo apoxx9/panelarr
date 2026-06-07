@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Extras.Others
 
                 var localTrack = new LocalIssue
                 {
-                    FileTrackInfo = Parser.Parser.ParseMusicPath(possibleExtraFile),
+                    FileTrackInfo = Parser.Parser.ParseFilePath(possibleExtraFile),
                     Series = series,
                     Path = possibleExtraFile
                 };

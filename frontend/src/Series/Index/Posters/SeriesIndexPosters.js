@@ -41,12 +41,10 @@ function calculateRowHeight(posterHeight, sortKey, isSmallScreen, posterOptions)
     showQualityProfile
   } = posterOptions;
 
-  const nextAiringHeight = 19;
 
   const heights = [
     posterHeight,
     detailedProgressBar ? detailedProgressBarHeight : progressBarHeight,
-    nextAiringHeight,
     isSmallScreen ? columnPaddingSmallScreen : columnPadding
   ];
 
@@ -63,8 +61,6 @@ function calculateRowHeight(posterHeight, sortKey, isSmallScreen, posterOptions)
   }
 
   switch (sortKey) {
-    case 'seasons':
-    case 'previousAiring':
     case 'added':
     case 'path':
     case 'sizeOnDisk':

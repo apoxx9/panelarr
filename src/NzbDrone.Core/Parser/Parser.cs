@@ -214,7 +214,7 @@ namespace NzbDrone.Core.Parser
 
         private static readonly Regex AfterDashRegex = new Regex(@"[-:].*", RegexOptions.Compiled);
 
-        public static ParsedTrackInfo ParseMusicPath(string path)
+        public static ParsedTrackInfo ParseFilePath(string path)
         {
             var fileInfo = new FileInfo(path);
 

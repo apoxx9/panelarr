@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             const string path = @"C:\Test\Doctor.Who.2005.s01e01.internal.bdrip.x264-archivist.mkv";
 
-            Parser.Parser.ParseMusicPath(path).ReleaseGroup.Should().Be("archivist");
+            Parser.Parser.ParseFilePath(path).ReleaseGroup.Should().Be("archivist");
         }
 
         [TestCase("Olafur.Arnalds-Remember-WEB-2018-SKGTV English", "SKGTV")]
