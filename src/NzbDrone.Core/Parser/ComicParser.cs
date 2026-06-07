@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using NLog;
@@ -132,9 +133,10 @@ namespace NzbDrone.Core.Parser
                 name = title;
             }
 
-            // Normalize separators: underscores → spaces, dots not between digits → spaces
+            // Normalize separators: underscores → spaces, dots → spaces (except fractional issues like 1.5)
+            // Preserves dots between 1-2 digits (fractional issues), replaces all others
             name = name.Replace('_', ' ');
-            name = Regex.Replace(name, @"(?<!\d)\.(?!\d)", " ");
+            name = Regex.Replace(name, @"(?<!\d)\.|\.(?!\d)|(?<=\d{3,})\.", " ");
 
             // Extract format from square bracket tags if not found from extension (e.g. "[CBZ]")
             if (result.Format == ComicFormat.Unknown)
@@ -170,19 +172,6 @@ namespace NzbDrone.Core.Parser
                 if (int.TryParse(yearMatches[0].Groups[1].Value, out var year))
                 {
                     result.Year = year;
-                }
-            }
-
-            // Fallback: bare year (not in parentheses) when no parenthesized year found
-            if (!result.Year.HasValue)
-            {
-                var bareYear = BareYearRegex.Match(name);
-                if (bareYear.Success && int.TryParse(bareYear.Groups[0].Value, out var bareYearVal))
-                {
-                    if (bareYearVal >= 1930 && bareYearVal <= 2030)
-                    {
-                        result.Year = bareYearVal;
-                    }
                 }
             }
 
@@ -240,7 +229,7 @@ namespace NzbDrone.Core.Parser
                 result.IssueType == IssueType.Special || result.IssueType == IssueType.OneShot)
             {
                 var issueMatch = IssueNumberRegex.Match(name);
-                if (issueMatch.Success && float.TryParse(issueMatch.Groups[1].Value, out var issueNum))
+                if (issueMatch.Success && float.TryParse(issueMatch.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var issueNum))
                 {
                     result.IssueNumber = issueNum;
                 }
@@ -254,7 +243,7 @@ namespace NzbDrone.Core.Parser
                     {
                         // Prefer the last match (closest to year/end of string)
                         var bestMatch = sceneMatches[sceneMatches.Count - 1];
-                        if (float.TryParse(bestMatch.Groups[1].Value, out var sceneNum))
+                        if (float.TryParse(bestMatch.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var sceneNum))
                         {
                             result.IssueNumber = sceneNum;
                         }
@@ -392,7 +381,7 @@ namespace NzbDrone.Core.Parser
                 for (var i = sceneMatches.Count - 1; i >= 0; i--)
                 {
                     var sm = sceneMatches[i];
-                    if (float.TryParse(sm.Groups[1].Value, out var num) &&
+                    if (float.TryParse(sm.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var num) &&
                         num == parsed.IssueNumber.Value &&
                         sm.Index < cutoff)
                     {

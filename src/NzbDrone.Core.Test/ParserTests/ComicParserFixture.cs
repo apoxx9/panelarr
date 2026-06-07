@@ -242,6 +242,67 @@ namespace NzbDrone.Core.Test.ParserTests
         }
 
         // -------------------------------------------------------------------
+        // Separator normalization (underscores, dots)
+        // -------------------------------------------------------------------
+        [TestCase("Batman_045_(2020)_(Digital)_(Zone-Empire).cbz", "Batman", 45f, 2020)]
+        [TestCase("Amazing_Spider-Man_015_(2022).cbz", "Amazing Spider-Man", 15f, 2022)]
+        [TestCase("Batman.045.2020.Digital.Zone-Empire.cbz", "Batman", 45f, null)]
+        public void should_parse_with_separator_normalization(string filename, string expectedSeries, float expectedIssue, int? expectedYear)
+        {
+            var result = ComicParser.ParseRelease(filename);
+
+            result.Should().NotBeNull();
+            result.SeriesTitle.Should().Be(expectedSeries);
+            result.IssueNumber.Should().Be(expectedIssue);
+
+            if (expectedYear.HasValue)
+            {
+                result.Year.Should().Be(expectedYear.Value);
+            }
+        }
+
+        // -------------------------------------------------------------------
+        // Publisher prefix stripping
+        // -------------------------------------------------------------------
+        [TestCase("DC Comics - Batman #45 (2020).cbz", "Batman", 45f)]
+        [TestCase("Marvel - Amazing Spider-Man #123.cbz", "Amazing Spider-Man", 123f)]
+        [TestCase("Image Comics - Saga #54 (2023).cbz", "Saga", 54f)]
+        public void should_strip_publisher_prefix(string filename, string expectedSeries, float expectedIssue)
+        {
+            var result = ComicParser.ParseRelease(filename);
+
+            result.Should().NotBeNull();
+            result.SeriesTitle.Should().Be(expectedSeries);
+            result.IssueNumber.Should().Be(expectedIssue);
+        }
+
+        // -------------------------------------------------------------------
+        // Slash in series names (e.g. Spider-Man/Deadpool)
+        // -------------------------------------------------------------------
+        [Test]
+        public void should_handle_slash_in_series_name()
+        {
+            var result = ComicParser.ParseRelease("Spider-Man/Deadpool #1.cbz");
+
+            result.Should().NotBeNull();
+            result.SeriesTitle.Should().Be("Spider-Man/Deadpool");
+            result.IssueNumber.Should().Be(1f);
+        }
+
+        // -------------------------------------------------------------------
+        // Year ranges: (2011-2012), (2016-)
+        // -------------------------------------------------------------------
+        [TestCase("Batman - The Court of Owls (2011-2012) (TPB).cbz", 2011)]
+        [TestCase("Batman (2016-) 045 (2020) (Digital).cbz", 2016)]
+        public void should_parse_year_range(string filename, int expectedYear)
+        {
+            var result = ComicParser.ParseRelease(filename);
+
+            result.Should().NotBeNull();
+            result.Year.Should().Be(expectedYear);
+        }
+
+        // -------------------------------------------------------------------
         // ReleaseTitle is preserved
         // -------------------------------------------------------------------
         [Test]
@@ -265,6 +326,9 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Batman #45 (2016) (Digital) (Zone-Empire).cbz", "Batman", 45f, 2016)]
         [TestCase("Saga #54.cbz", "Saga", 54f, null)]
         [TestCase("100 Bullets #50.cbz", "100 Bullets", 50f, null)]
+        [TestCase("2000 AD #2300.cbz", "2000 AD", 2300f, null)]
+        [TestCase("Batman #0.cbz", "Batman", 0f, null)]
+        [TestCase("Batman #1.5.cbz", "Batman", 1.5f, null)]
         public void should_parse_hash_prefixed_issue_number(string filename, string expectedSeries, float expectedIssue, int? expectedYear)
         {
             var result = ComicParser.ParseRelease(filename);

@@ -27,8 +27,6 @@ namespace Panelarr.Api.V1.Indexers
         public string ReleaseHash { get; set; }
         public string Title { get; set; }
         public bool Discography { get; set; }
-        public bool SceneSource { get; set; }
-        public string AirDate { get; set; }
         public string SeriesName { get; set; }
         public string IssueTitle { get; set; }
         public bool Approved { get; set; }

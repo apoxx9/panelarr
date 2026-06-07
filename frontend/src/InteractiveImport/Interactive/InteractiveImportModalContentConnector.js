@@ -132,7 +132,6 @@ class InteractiveImportModalContentConnector extends Component {
         const {
           series,
           issue,
-          foreignEditionId,
           quality,
           indexerFlags,
           disableReleaseSwitching
@@ -157,7 +156,6 @@ class InteractiveImportModalContentConnector extends Component {
           path: item.path,
           seriesId: series.id,
           issueId: issue.id,
-          foreignEditionId,
           quality,
           indexerFlags,
           downloadId: this.props.downloadId,
