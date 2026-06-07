@@ -30,9 +30,9 @@ namespace NzbDrone.Core.Parser
             @"\b(?:v|[Vv]ol\.?\s*)(\d{1,2})\b",
             RegexOptions.Compiled);
 
-        // Year in parentheses: (2022)
+        // Year in parentheses: (2022), (2011-2012), (2016-)
         private static readonly Regex YearRegex = new Regex(
-            @"\((\d{4})\)",
+            @"\((\d{4})(?:\s*[-–]\s*\d{0,4})?\)",
             RegexOptions.Compiled);
 
         // Limited series: 01 (of 04), 01 of 04
@@ -52,12 +52,12 @@ namespace NzbDrone.Core.Parser
 
         // TPB/HC/Omnibus detection
         private static readonly Regex CollectedEditionRegex = new Regex(
-            @"\b(?:TPB|Trade\s*Paperback|HC|Hardcover|Omnibus|One.?Shot)\b",
+            @"\b(?:TPB|Trade\s*Paperback|HC|Hardcover|Omnibus|Compendium|One.?Shot)\b",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Source detection
         private static readonly Regex SourceRegex = new Regex(
-            @"\b(?:Digital|Print|Scan|c2c|noads)\b",
+            @"\b(?:Digital|Print|Scan|c2c|noads|Webrip|Web[-\s]?Rip)\b",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         // Release group (typically last parenthetical containing known group indicators)
@@ -85,9 +85,14 @@ namespace NzbDrone.Core.Parser
             @"\bby\s+[A-Z][^[\]()]*",
             RegexOptions.Compiled);
 
-        // Issue range: "Issues 1-50", "Issues 1- 50", "Issue 1-25"
+        // Issue range: "Issues 1-50", "Issues 1- 50", "Issue 1-25", "#1-5"
         private static readonly Regex IssueRangeRegex = new Regex(
-            @"\bIssues?\s+\d+\s*[-–]\s*\d+",
+            @"(?:\bIssues?\s+|#)\d+\s*[-–]\s*\d+",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // Known publisher prefixes that should be stripped from series titles
+        private static readonly Regex PublisherPrefixRegex = new Regex(
+            @"^(?:DC\s*Comics|Marvel(?:\s*Comics)?|Image(?:\s*Comics)?|Dark\s*Horse(?:\s*Comics)?|IDW(?:\s*Publishing)?|Boom!?\s*Studios|Dynamite(?:\s*Entertainment)?|Valiant(?:\s*Comics)?|Oni\s*Press|Vertigo|Aftershock|Titan\s*Comics|Archie\s*Comics)\s*[-–]\s*",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static ParsedComicInfo ParseRelease(string title)
@@ -114,10 +119,22 @@ namespace NzbDrone.Core.Parser
                 _ => ComicFormat.Unknown
             };
 
-            // Strip extension for parsing
-            var name = result.Format != ComicFormat.Unknown
-                ? Path.GetFileNameWithoutExtension(title)
-                : title;
+            // Strip extension for parsing — avoid Path.GetFileNameWithoutExtension which
+            // treats '/' as a directory separator, destroying series names like "Spider-Man/Deadpool"
+            string name;
+            if (result.Format != ComicFormat.Unknown)
+            {
+                var lastDot = title.LastIndexOf('.');
+                name = lastDot > 0 ? title.Substring(0, lastDot) : title;
+            }
+            else
+            {
+                name = title;
+            }
+
+            // Normalize separators: underscores → spaces, dots not between digits → spaces
+            name = name.Replace('_', ' ');
+            name = Regex.Replace(name, @"(?<!\d)\.(?!\d)", " ");
 
             // Extract format from square bracket tags if not found from extension (e.g. "[CBZ]")
             if (result.Format == ComicFormat.Unknown)
@@ -156,6 +173,19 @@ namespace NzbDrone.Core.Parser
                 }
             }
 
+            // Fallback: bare year (not in parentheses) when no parenthesized year found
+            if (!result.Year.HasValue)
+            {
+                var bareYear = BareYearRegex.Match(name);
+                if (bareYear.Success && int.TryParse(bareYear.Groups[0].Value, out var bareYearVal))
+                {
+                    if (bareYearVal >= 1930 && bareYearVal <= 2030)
+                    {
+                        result.Year = bareYearVal;
+                    }
+                }
+            }
+
             // Detect collected edition type
             var collectedMatch = CollectedEditionRegex.Match(name);
             if (collectedMatch.Success)
@@ -169,7 +199,7 @@ namespace NzbDrone.Core.Parser
                 {
                     result.IssueType = IssueType.Hardcover;
                 }
-                else if (token.Contains("omnibus"))
+                else if (token.Contains("omnibus") || token.Contains("compendium"))
                 {
                     result.IssueType = IssueType.Omnibus;
                 }
@@ -387,6 +417,9 @@ namespace NzbDrone.Core.Parser
             }
 
             var stripped = name.Substring(0, cutoff).Trim();
+
+            // Strip publisher prefix if present (e.g. "DC Comics - Batman" → "Batman")
+            stripped = PublisherPrefixRegex.Replace(stripped, "");
 
             // Remove Annual/Special markers (keep them in IssueType, strip from title)
             stripped = AnnualRegex.Replace(stripped, " ").Trim();

@@ -57,7 +57,7 @@ export const defaultState = {
     },
     {
       key: 'discography-pack',
-      label: 'Discography',
+      label: 'Complete Series',
       filters: [
         {
           key: 'discography',
@@ -68,7 +68,7 @@ export const defaultState = {
     },
     {
       key: 'not-discography-pack',
-      label: 'Not Discography',
+      label: 'Single Issue',
       filters: [
         {
           key: 'discography',

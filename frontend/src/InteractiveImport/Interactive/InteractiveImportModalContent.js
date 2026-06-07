@@ -235,7 +235,7 @@ class InteractiveImportModalContent extends Component {
   };
 
   onGetIssueMappingPress = () => {
-    this.props.saveInteractiveImportItem({ id: this.getSelectedIds() });
+    this.props.saveInteractiveImportItem({ ids: this.getSelectedIds() });
   };
 
   onSelectModalClose = () => {
@@ -380,7 +380,7 @@ class InteractiveImportModalContent extends Component {
 
                   <MenuContent>
                     <SelectedMenuItem
-                      name={replaceExistingFiles.COMBINE}
+                      name={replaceExistingFilesOptions.COMBINE}
                       isSelected={!replaceExistingFiles}
                       onPress={this.onReplaceExistingFilesChange}
                     >

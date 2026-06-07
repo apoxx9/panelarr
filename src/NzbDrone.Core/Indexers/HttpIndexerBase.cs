@@ -377,7 +377,7 @@ namespace NzbDrone.Core.Indexers
                     ex.Response.Content.Contains("not support the requested query"))
                 {
                     _logger.Warn(ex, "Indexer does not support the query");
-                    return new ValidationFailure(string.Empty, "Indexer does not support the current query. Check if the categories and or searching for seasons/episodes are supported. Check the log for more details.");
+                    return new ValidationFailure(string.Empty, "Indexer does not support the current query. Check if the categories and/or searching for series/issues are supported. Check the log for more details.");
                 }
 
                 _logger.Warn(ex, "Unable to connect to indexer");

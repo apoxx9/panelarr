@@ -16,7 +16,7 @@ namespace Panelarr.Api.V1.Issues
         public int SeriesId { get; set; }
         public int IssueId { get; set; }
         public List<int> TrackNumbers { get; set; }
-        public int ComicFileId { get; set; }
+        public int IssueFileId { get; set; }
         public string Path { get; set; }
         public List<TagDifference> Changes { get; set; }
     }
@@ -35,7 +35,7 @@ namespace Panelarr.Api.V1.Issues
                 SeriesId = model.SeriesId,
                 IssueId = model.IssueId,
                 TrackNumbers = model.TrackNumbers.ToList(),
-                ComicFileId = model.ComicFileId,
+                IssueFileId = model.ComicFileId,
                 Path = model.Path,
                 Changes = model.Changes.Select(x => new TagDifference
                 {

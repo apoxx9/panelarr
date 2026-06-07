@@ -171,7 +171,6 @@ export const DELETE_SERIES = 'series/deleteSeries';
 export const SAVE_SERIES_OVERRIDE = 'series/saveSeriesOverride';
 export const CLEAR_SERIES_OVERRIDE = 'series/clearSeriesOverride';
 export const TOGGLE_SERIES_MONITORED = 'series/toggleSeriesMonitored';
-export const TOGGLE_ISSUE_MONITORED = 'series/toggleIssueMonitored';
 export const UPDATE_ISSUE_MONITORED = 'series/updateIssueMonitored';
 
 //
@@ -207,7 +206,6 @@ export const deleteSeries = createThunk(DELETE_SERIES, (payload) => {
 export const saveSeriesOverride = createThunk(SAVE_SERIES_OVERRIDE);
 export const clearSeriesOverride = createThunk(CLEAR_SERIES_OVERRIDE);
 export const toggleSeriesMonitored = createThunk(TOGGLE_SERIES_MONITORED);
-export const toggleIssueMonitored = createThunk(TOGGLE_ISSUE_MONITORED);
 export const updateIssueMonitor = createThunk(UPDATE_ISSUE_MONITORED);
 
 export const setSeriesValue = createAction(SET_SERIES_VALUE, (payload) => {
@@ -318,66 +316,6 @@ export const actionHandlers = handleThunks({
         id,
         section,
         isSaving: false
-      }));
-    });
-  },
-
-  [TOGGLE_ISSUE_MONITORED]: function(getState, payload, dispatch) {
-    const {
-      seriesId: id,
-      seasonNumber,
-      monitored
-    } = payload;
-
-    const series = _.find(getState().series.items, { id });
-    const seasons = _.cloneDeep(series.seasons);
-    const season = _.find(seasons, { seasonNumber });
-
-    season.isSaving = true;
-
-    dispatch(updateItem({
-      id,
-      section,
-      seasons
-    }));
-
-    season.monitored = monitored;
-
-    const promise = createAjaxRequest({
-      url: `/series/${id}`,
-      method: 'PUT',
-      data: JSON.stringify({
-        ...series,
-        seasons
-      }),
-      dataType: 'json'
-    }).request;
-
-    promise.done((data) => {
-      const issues = _.filter(getState().issues.items, { seriesId: id, seasonNumber });
-
-      dispatch(batchActions([
-        updateItem({
-          id,
-          section,
-          ...data
-        }),
-
-        ...issues.map((issue) => {
-          return updateItem({
-            id: issue.id,
-            section: 'issues',
-            monitored
-          });
-        })
-      ]));
-    });
-
-    promise.fail((xhr) => {
-      dispatch(updateItem({
-        id,
-        section,
-        seasons: series.seasons
       }));
     });
   },

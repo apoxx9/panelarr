@@ -8,7 +8,7 @@ namespace Panelarr.Api.V1.Issues
     {
         public int SeriesId { get; set; }
         public int IssueId { get; set; }
-        public int ComicFileId { get; set; }
+        public int IssueFileId { get; set; }
         public string ExistingPath { get; set; }
         public string NewPath { get; set; }
     }
@@ -26,7 +26,7 @@ namespace Panelarr.Api.V1.Issues
             {
                 SeriesId = model.SeriesId,
                 IssueId = model.IssueId,
-                ComicFileId = model.ComicFileId,
+                IssueFileId = model.ComicFileId,
                 ExistingPath = model.ExistingPath,
                 NewPath = model.NewPath
             };
