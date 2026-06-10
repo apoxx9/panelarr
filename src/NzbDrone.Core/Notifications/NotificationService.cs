@@ -66,10 +66,10 @@ namespace NzbDrone.Core.Notifications
                                     qualityString);
         }
 
-        private string GetIssueDownloadMessage(Series series, Issue issue, List<ComicFile> tracks)
+        private string GetIssueDownloadMessage(Series series, Issue issue, List<ComicFile> comicFiles)
         {
             // Comic import format: "Imported: {Series} #{IssueNumber} - {Title} [{Quality}]"
-            var quality = tracks.FirstOrDefault()?.Quality?.Quality?.ToString() ?? "Unknown";
+            var quality = comicFiles.FirstOrDefault()?.Quality?.Quality?.ToString() ?? "Unknown";
             var issueNum = issue.IssueNumber;
             var title = string.IsNullOrWhiteSpace(issue.Title)
                 ? string.Empty

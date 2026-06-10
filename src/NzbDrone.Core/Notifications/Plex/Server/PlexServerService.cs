@@ -122,7 +122,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
                 }
             }
 
-            _logger.Debug("Unable to find matching section location, updating all Music sections");
+            _logger.Debug("Unable to find matching section location, updating all library sections");
 
             foreach (var section in sections)
             {
@@ -154,7 +154,7 @@ namespace NzbDrone.Core.Notifications.Plex.Server
 
                 if (sections.Empty())
                 {
-                    return new ValidationFailure("Host", "At least one Music library is required");
+                    return new ValidationFailure("Host", "At least one library is required");
                 }
             }
             catch (PlexAuthenticationException ex)

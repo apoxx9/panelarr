@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Notifications.Webhook
 
         public WebhookImportPayload BuildOnReleaseImportPayload(IssueDownloadMessage message)
         {
-            var trackFiles = message.ComicFiles;
+            var comicFiles = message.ComicFiles;
 
             var payload = new WebhookImportPayload
             {
@@ -46,7 +46,7 @@ namespace NzbDrone.Core.Notifications.Webhook
                 InstanceName = _configFileProvider.InstanceName,
                 Series = new WebhookSeries(message.Series),
                 Issue = new WebhookIssue(message.Issue),
-                ComicFiles = trackFiles.ConvertAll(x => new WebhookComicFile(x)),
+                ComicFiles = comicFiles.ConvertAll(x => new WebhookComicFile(x)),
                 IsUpgrade = message.OldFiles.Any(),
                 DownloadClient = message.DownloadClientInfo?.Name,
                 DownloadClientType = message.DownloadClientInfo?.Type,

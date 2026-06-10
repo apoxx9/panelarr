@@ -130,16 +130,16 @@ namespace NzbDrone.Core.HealthCheck.Checks
                 // if we can see the file exists but the import failed then likely a permissions issue
                 if (failureMessage.IssueInfo != null)
                 {
-                    var trackPath = failureMessage.IssueInfo.Path;
-                    if (_diskProvider.FileExists(trackPath))
+                    var issuePath = failureMessage.IssueInfo.Path;
+                    if (_diskProvider.FileExists(issuePath))
                     {
-                        return new HealthCheck(GetType(), HealthCheckResult.Error, string.Format(_localizationService.GetLocalizedString("RemotePathMappingCheckDownloadPermissions"), trackPath), "#permissions-error");
+                        return new HealthCheck(GetType(), HealthCheckResult.Error, string.Format(_localizationService.GetLocalizedString("RemotePathMappingCheckDownloadPermissions"), issuePath), "#permissions-error");
                     }
                     else
                     {
                         // If the file doesn't exist but TrackInfo is not null then the message is coming from
                         // ImportApprovedIssues and the file must have been removed part way through processing
-                        return new HealthCheck(GetType(), HealthCheckResult.Error, string.Format(_localizationService.GetLocalizedString("RemotePathMappingCheckFileRemoved"), trackPath), "#remote-path-file-removed");
+                        return new HealthCheck(GetType(), HealthCheckResult.Error, string.Format(_localizationService.GetLocalizedString("RemotePathMappingCheckFileRemoved"), issuePath), "#remote-path-file-removed");
                     }
                 }
 

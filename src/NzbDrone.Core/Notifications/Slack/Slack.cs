@@ -107,7 +107,7 @@ namespace NzbDrone.Core.Notifications.Slack
                              {
                                  new Attachment
                                  {
-                                     Title =  $"${deleteMessage.Issue.Series.Value.Name} - ${deleteMessage.Issue.Title}",
+                                     Title =  $"{deleteMessage.Issue.Series.Value.Name} - {deleteMessage.Issue.Title}",
                                      Text = deleteMessage.DeletedFilesMessage
                                  }
                              };
@@ -123,7 +123,7 @@ namespace NzbDrone.Core.Notifications.Slack
                              {
                                  new Attachment
                                  {
-                                     Title =  $"${deleteMessage.Issue.Series.Value.Name} - ${deleteMessage.Issue.Title} - file deleted",
+                                     Title =  $"{deleteMessage.Issue.Series.Value.Name} - {deleteMessage.Issue.Title} - file deleted",
                                      Text = deleteMessage.ComicFile.Path
                                  }
                              };
