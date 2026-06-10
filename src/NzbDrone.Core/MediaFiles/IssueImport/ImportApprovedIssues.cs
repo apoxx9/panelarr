@@ -159,7 +159,6 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                         DateAdded = DateTime.UtcNow,
                         ReleaseGroup = localTrack.ReleaseGroup,
                         Quality = localTrack.Quality,
-                        MediaInfo = localTrack.FileTrackInfo.MediaInfo,
                         IssueId = localTrack.Issue.Id,
                         Series = localTrack.Series,
                         Issue = localTrack.Issue,

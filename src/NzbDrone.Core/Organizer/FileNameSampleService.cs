@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Organizer
@@ -73,22 +72,12 @@ namespace NzbDrone.Core.Organizer
                 }
             };
 
-            var mediaInfo = new MediaInfoModel()
-            {
-                AudioFormat = "Flac Audio",
-                AudioChannels = 2,
-                AudioBitrate = 875,
-                AudioBits = 24,
-                AudioSampleRate = 44100
-            };
-
             _singleComicFile = new ComicFile
             {
                 Quality = new QualityModel(Quality.CBZ, new Revision(2)),
                 Path = "/comics/The.Series.Name.042.CBZ",
                 SceneName = "The.Series.Name.042",
                 ReleaseGroup = "RlsGrp",
-                MediaInfo = mediaInfo,
                 Issue = _standardIssue,
                 Part = 1,
                 PartCount = 1
@@ -100,7 +89,6 @@ namespace NzbDrone.Core.Organizer
                 Path = "/comics/The.Series.Name.042.CBZ",
                 SceneName = "The.Series.Name.042",
                 ReleaseGroup = "RlsGrp",
-                MediaInfo = mediaInfo,
                 Issue = _standardIssue,
                 Part = 1,
                 PartCount = 2

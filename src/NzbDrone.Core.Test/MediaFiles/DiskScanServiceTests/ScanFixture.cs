@@ -538,10 +538,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                 .With(x => x.Modified = new DateTime(2019, 2, 1))
                 .With(x => x.Size = 100)
                 .With(x => x.Quality = new QualityModel(Quality.CBR))
-                .With(x => x.FileTrackInfo = new ParsedTrackInfo
-                {
-                    MediaInfo = Builder<MediaInfoModel>.CreateNew().Build()
-                })
+                .With(x => x.FileTrackInfo = new ParsedTrackInfo())
                 .Build();
 
             Mocker.GetMock<IMakeImportDecision>()
@@ -556,8 +553,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                                           l[0].Path == localTrack.Path &&
                                           l[0].Modified == localTrack.Modified &&
                                           l[0].Size == localTrack.Size &&
-                                          l[0].Quality.Equals(localTrack.Quality) &&
-                                          l[0].MediaInfo.AudioFormat == localTrack.FileTrackInfo.MediaInfo.AudioFormat)),
+                                          l[0].Quality.Equals(localTrack.Quality))),
                         Times.Once());
         }
     }

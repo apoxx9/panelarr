@@ -193,7 +193,6 @@ namespace NzbDrone.Core.MediaFiles
                     Modified = decision.Item.Modified,
                     DateAdded = DateTime.UtcNow,
                     Quality = decision.Item.Quality,
-                    MediaInfo = decision.Item.FileTrackInfo.MediaInfo,
                     IssueId = decision.Item.Issue?.Id ?? 0,
                     ComicFormat = GetComicFormat(decision.Item.Path)
                 })
@@ -219,7 +218,6 @@ namespace NzbDrone.Core.MediaFiles
                 {
                     x.File.Size = x.Item.Size;
                     x.File.Modified = x.Item.Modified;
-                    x.File.MediaInfo = x.Item.FileTrackInfo.MediaInfo;
                     x.File.Quality = x.Item.Quality;
                     return x.File;
                 })

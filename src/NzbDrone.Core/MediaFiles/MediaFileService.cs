@@ -30,7 +30,6 @@ namespace NzbDrone.Core.MediaFiles
         List<ComicFile> GetFilesWithBasePath(string path);
         List<ComicFile> GetFileWithPath(List<string> path);
         ComicFile GetFileWithPath(string path);
-        void UpdateMediaInfo(List<ComicFile> comicFiles);
     }
 
     public class MediaFileService : IMediaFileService,
@@ -194,11 +193,6 @@ namespace NzbDrone.Core.MediaFiles
         public List<ComicFile> GetUnmappedFiles()
         {
             return _mediaFileRepository.GetUnmappedFiles();
-        }
-
-        public void UpdateMediaInfo(List<ComicFile> comicFiles)
-        {
-            _mediaFileRepository.SetFields(comicFiles, t => t.MediaInfo);
         }
 
         public void Handle(SeriesMovedEvent message)

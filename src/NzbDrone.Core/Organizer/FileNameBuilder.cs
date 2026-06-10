@@ -105,7 +105,6 @@ namespace NzbDrone.Core.Organizer
             AddIssueTokens(tokenHandlers, issue);
             AddComicFileTokens(tokenHandlers, comicFile);
             AddQualityTokens(tokenHandlers, series, comicFile);
-            AddMediaInfoTokens(tokenHandlers, comicFile);
             AddCustomFormats(tokenHandlers, series, comicFile, customFormats);
 
             var splitPatterns = pattern.Split(new char[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
@@ -346,11 +345,6 @@ namespace NzbDrone.Core.Organizer
             tokenHandlers["{Quality Proper}"] = m => qualityProper;
 
             //tokenHandlers["{Quality Real}"] = m => qualityReal;
-        }
-
-        private void AddMediaInfoTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, ComicFile comicFile)
-        {
-            // No media-info tokens for comic files — audio metadata is not relevant.
         }
 
         private void AddCustomFormats(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Series series, ComicFile comicFile, List<CustomFormat> customFormats = null)

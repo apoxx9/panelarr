@@ -18,7 +18,6 @@ namespace Panelarr.Api.V1.ComicFiles
         public QualityModel Quality { get; set; }
         public int QualityWeight { get; set; }
         public int? IndexerFlags { get; set; }
-        public MediaInfoResource MediaInfo { get; set; }
 
         public bool QualityCutoffNotMet { get; set; }
         public ParsedTrackInfo FileTags { get; set; }
@@ -55,8 +54,7 @@ namespace Panelarr.Api.V1.ComicFiles
                 Size = model.Size,
                 DateAdded = model.DateAdded,
                 Quality = model.Quality,
-                QualityWeight = QualityWeight(model.Quality),
-                MediaInfo = model.MediaInfo.ToResource()
+                QualityWeight = QualityWeight(model.Quality)
             };
         }
 
@@ -78,7 +76,6 @@ namespace Panelarr.Api.V1.ComicFiles
                 DateAdded = model.DateAdded,
                 Quality = model.Quality,
                 QualityWeight = QualityWeight(model.Quality),
-                MediaInfo = model.MediaInfo.ToResource(),
                 QualityCutoffNotMet = upgradableSpecification.QualityCutoffNotMet(series.QualityProfile.Value, model.Quality),
                 IndexerFlags = (int)model.IndexerFlags
             };
