@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using NzbDrone.Core.Parser;
 
 namespace NzbDrone.Core.Issues
 {
@@ -39,12 +40,24 @@ namespace NzbDrone.Core.Issues
 
         public Publisher AddPublisher(Publisher publisher)
         {
+            EnsureCleanName(publisher);
+
             return _publisherRepository.Insert(publisher);
         }
 
         public Publisher UpdatePublisher(Publisher publisher)
         {
+            EnsureCleanName(publisher);
+
             return _publisherRepository.Update(publisher);
+        }
+
+        private static void EnsureCleanName(Publisher publisher)
+        {
+            if (string.IsNullOrWhiteSpace(publisher.CleanName))
+            {
+                publisher.CleanName = publisher.Name.CleanSeriesName();
+            }
         }
 
         public void DeletePublisher(int id)

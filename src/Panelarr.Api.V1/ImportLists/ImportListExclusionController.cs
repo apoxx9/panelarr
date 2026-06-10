@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Core.ImportLists.Exclusions;
-using NzbDrone.Core.Validation;
 using NzbDrone.Http.REST.Attributes;
 using Panelarr.Http;
 using Panelarr.Http.REST;
@@ -15,12 +14,12 @@ namespace Panelarr.Api.V1.ImportLists
         private readonly IImportListExclusionService _importListExclusionService;
 
         public ImportListExclusionController(IImportListExclusionService importListExclusionService,
-                                         ImportListExclusionExistsValidator importListExclusionExistsValidator,
-                                         GuidValidator guidValidator)
+                                         ImportListExclusionExistsValidator importListExclusionExistsValidator)
         {
             _importListExclusionService = importListExclusionService;
 
-            SharedValidator.RuleFor(c => c.ForeignId).NotEmpty().SetValidator(guidValidator).SetValidator(importListExclusionExistsValidator);
+            // Comic foreign ids (cv-*, metron ids) are not GUIDs — no GuidValidator here.
+            SharedValidator.RuleFor(c => c.ForeignId).NotEmpty().SetValidator(importListExclusionExistsValidator);
             SharedValidator.RuleFor(c => c.SeriesName).NotEmpty();
         }
 
