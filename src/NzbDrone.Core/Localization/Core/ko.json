@@ -746,7 +746,6 @@
     "CustomFormatsSpecificationRegularExpression": "일반 표현",
     "CustomFormatsSpecificationRegularExpressionHelpText": "사용자 정의 형식 정규표현식은 대소문자를 구분하지 않습니다",
     "DeleteRootFolder": "루트 폴더 삭제",
-    "WriteTagsNo": "절대",
     "BypassIfAboveCustomFormatScoreHelpText": "구성된 최소 사용자 정의 형식 점수보다 출시 점수가 높을 경우 무시를 활성화합니다",
     "DashOrSpaceDashDependingOnName": "이름에 따라 대시 또는 띄어쓰고 대시",
     "BypassIfAboveCustomFormatScore": "사용자 정의 형식 점수보다 높으면 무시",

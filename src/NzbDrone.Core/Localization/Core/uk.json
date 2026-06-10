@@ -554,7 +554,6 @@
   "SettingsRemotePathMappingLocalPathHelpText": "Шлях, який має використовувати {appName} для локального доступу до віддаленого шляху",
   "ShortDateFormat": "Короткий формат дати",
   "ShowRelativeDates": "Показати відносні дати",
-  "WriteTagsNo": "Ніколи",
   "LogLevelvalueTraceTraceLoggingShouldOnlyBeEnabledTemporarily": "Журнал трасування слід увімкнути лише тимчасово",
   "LongDateFormat": "Довгий формат дати",
   "PanelarrSupportsAnyDownloadClient": "{appName} підтримує багато популярних торрент-клієнтів і клієнтів для завантаження через Usenet.",
@@ -647,12 +646,10 @@
   "AppUpdated": "{appName} Оновлено",
   "ApplyChanges": "Застосувати зміни",
   "AllResultsAreHiddenByTheAppliedFilter": "Всі результати приховані фільтром",
-  "TrackTitle": "Назва Треку",
   "Yes": "Так",
   "WhatsNew": "Що нового ?",
   "AddNewItem": "Додати Новий Елемент",
   "AddMissing": "Додати відсутні",
-  "TrackNumber": "Номер треку",
   "AppUpdatedVersion": "{appName} оновлено до версії `{version}`. Щоб отримати останні зміни, потрібно перезавантажити {appName}",
   "AutomaticUpdatesDisabledDocker": "Автоматичні оновлення не підтримуються безпосередньо під час використання механізму оновлення Docker. Вам потрібно буде оновити зображення контейнера за межами {appName} або скористатися сценарієм",
   "ConnectionLostReconnect": "{appName} спробує підключитися автоматично, або ви можете натиснути «Перезавантажити» нижче.",
@@ -856,9 +853,6 @@
   "AddNewAuthorRootFolderHelpText": "Вкладена папка \"{0}\" буде створена автоматично",
   "WriteBookTagsHelpTextWarning": "Вибір \"Усі файли\" змінить існуючі файли під час їх імпорту.",
   "ForeignId": "Зовнішній ідентифікатор",
-  "AudioFileMetadata": "Записувати метадані до аудіофайлів",
   "OnDownloadFailureHelpText": "При помилці завантаження",
-  "WriteAudioTags": "Тегувати аудіофайли метаданими",
-  "SearchForNewItems": "Пошук нових елементів",
-  "WriteAudioTagsScrub": "Очистити існуючі теги"
+  "SearchForNewItems": "Пошук нових елементів"
 }

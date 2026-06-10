@@ -648,7 +648,6 @@
   "InteractiveSearchModalHeader": "Interaktiv søgning",
   "Theme": "Tema",
   "Publisher": "Udgiver",
-  "CatalogNumber": "katalognummer",
   "FailedLoadingSearchResults": "Kunne ikke indlæse søgeresultater. Prøv igen.",
   "AuthBasic": "Grundlæggende (pop op-browser)",
   "AuthForm": "Formularer (login-side)",

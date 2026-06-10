@@ -676,7 +676,6 @@
     "BypassIfAboveCustomFormatScore": "Пропусни, ако е над рейтинга на персонализирания формат",
     "AppUpdated": "{appName} Актуализиран",
     "AppUpdatedVersion": "{appName} е актуализиранa до версия `{version}`, за да получите най-новите промени, ще трябва да презаредите {appName}",
-    "CatalogNumber": "каталожен номер",
     "AutoAdd": "Автоматично добавяне",
     "CustomFormatsSpecificationRegularExpression": "Регулярни изрази",
     "CustomFormatsSpecificationRegularExpressionHelpText": "Персонализираният формат RegEx не е чувствителен към главни и малки букви",

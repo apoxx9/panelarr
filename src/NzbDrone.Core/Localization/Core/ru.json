@@ -580,7 +580,6 @@
   "AllowedLanguages": "Разрешенные языки",
   "ApplicationURL": "URL-адрес приложения",
   "ApplicationUrlHelpText": "Внешний URL-адрес этого приложения, включая http(s)://, порт и базовый URL-адрес",
-  "WriteTagsNo": "Никогда",
   "ImportListExclusions": "Исключения из списка импорта",
   "ManualImportSelectEdition": "Ручной импорт - выбрать фильм",
   "HardlinkCopyFiles": "Жесткая ссылка/Копирование файлов",
