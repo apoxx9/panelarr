@@ -11,7 +11,6 @@ namespace Panelarr.Api.V1.ManualImport
         public string Name { get; set; }
         public int? SeriesId { get; set; }
         public int? IssueId { get; set; }
-        public string ForeignEditionId { get; set; }
         public QualityModel Quality { get; set; }
         public string ReleaseGroup { get; set; }
         public int IndexerFlags { get; set; }

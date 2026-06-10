@@ -217,23 +217,12 @@ export const setSeriesValue = createAction(SET_SERIES_VALUE, (payload) => {
 });
 
 //
-// Helpers
-
-function getSaveAjaxOptions({ ajaxOptions, payload }) {
-  if (payload.moveFolder) {
-    ajaxOptions.url = `${ajaxOptions.url}?moveFolder=true`;
-  }
-
-  return ajaxOptions;
-}
-
-//
 // Action Handlers
 
 export const actionHandlers = handleThunks({
 
   [FETCH_SERIES]: createFetchHandler(section, '/series'),
-  [SAVE_SERIES]: createSaveProviderHandler(section, '/series', { getAjaxOptions: getSaveAjaxOptions }),
+  [SAVE_SERIES]: createSaveProviderHandler(section, '/series'),
   [DELETE_SERIES]: createRemoveItemHandler(section, '/series'),
 
   [SAVE_SERIES_OVERRIDE]: (getState, payload, dispatch) => {

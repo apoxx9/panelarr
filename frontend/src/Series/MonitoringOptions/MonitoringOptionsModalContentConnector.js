@@ -40,10 +40,6 @@ class MonitoringOptionsModalContentConnector extends Component {
   //
   // Listeners
 
-  onInputChange = ({ name, value }) => {
-    this.setState({ name, value });
-  };
-
   onSavePress = ({ monitor }) => {
     this.props.dispatchUpdateMonitoringOptions({
       id: this.props.seriesId,
@@ -58,7 +54,6 @@ class MonitoringOptionsModalContentConnector extends Component {
     return (
       <MonitoringOptionsModalContent
         {...this.props}
-        onInputChange={this.onInputChange}
         onSavePress={this.onSavePress}
       />
     );
