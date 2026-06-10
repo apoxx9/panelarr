@@ -11,7 +11,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
         {
             var downloadClientInfo = localIssue.DownloadClientIssueInfo;
 
-            if (downloadClientInfo != null && !downloadClientInfo.Discography)
+            if (downloadClientInfo != null && !downloadClientInfo.IsCollection)
             {
                 return Parser.Parser.RemoveFileExtension(downloadClientInfo.ReleaseTitle);
             }
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
 
             var folderTitle = localIssue.FolderTrackInfo?.ReleaseTitle;
 
-            if (localIssue.FolderTrackInfo?.Discography == false &&
+            if (localIssue.FolderTrackInfo?.IsCollection == false &&
                 folderTitle.IsNotNullOrWhiteSpace() &&
                 SceneChecker.IsSceneTitle(folderTitle))
             {

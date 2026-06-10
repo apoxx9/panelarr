@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
             _localEpisode.DownloadClientIssueInfo = new ParsedIssueInfo
             {
                 ReleaseTitle = _seasonName,
-                Discography = true
+                IsCollection = true
             };
 
             _localEpisode.Path = Path.Combine(@"C:\Test\Unsorted TV", _seasonName, _episodeName)
@@ -102,7 +102,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
             _localEpisode.FolderTrackInfo = new ParsedIssueInfo
             {
                 ReleaseTitle = _seasonName,
-                Discography = true
+                IsCollection = true
             };
 
             SceneNameCalculator.GetSceneName(_localEpisode).Should()
@@ -118,7 +118,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
             _localEpisode.FolderTrackInfo = new ParsedIssueInfo
             {
                 ReleaseTitle = _seasonName,
-                Discography = false
+                IsCollection = false
             };
 
             SceneNameCalculator.GetSceneName(_localEpisode).Should()

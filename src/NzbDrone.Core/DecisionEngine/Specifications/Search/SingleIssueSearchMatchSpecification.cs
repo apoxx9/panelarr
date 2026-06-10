@@ -32,7 +32,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.Search
 
             if (!remoteIssue.ParsedIssueInfo.IssueTitle.Any())
             {
-                _logger.Debug("Full discography result during single issue search, skipping.");
+                _logger.Debug("Collection pack result during single issue search, skipping.");
                 return Decision.Reject("Full series pack");
             }
 

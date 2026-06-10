@@ -11,9 +11,9 @@ namespace NzbDrone.Core.Parser.Model
         public SeriesTitleInfo SeriesTitleInfo { get; set; }
         public QualityModel Quality { get; set; }
         public string ReleaseDate { get; set; }
-        public bool Discography { get; set; }
-        public int DiscographyStart { get; set; }
-        public int DiscographyEnd { get; set; }
+        public bool IsCollection { get; set; }
+        public int CollectionStart { get; set; }
+        public int CollectionEnd { get; set; }
         public string ReleaseGroup { get; set; }
         public string ReleaseHash { get; set; }
         public string ReleaseVersion { get; set; }

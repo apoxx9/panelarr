@@ -95,13 +95,13 @@ namespace NzbDrone.Core.DecisionEngine
 
         private int CompareIssueCount(DownloadDecision x, DownloadDecision y)
         {
-            var discographyCompare = CompareBy(x.RemoteIssue,
+            var collectionCompare = CompareBy(x.RemoteIssue,
                 y.RemoteIssue,
-                remoteIssue => remoteIssue.ParsedIssueInfo.Discography);
+                remoteIssue => remoteIssue.ParsedIssueInfo.IsCollection);
 
-            if (discographyCompare != 0)
+            if (collectionCompare != 0)
             {
-                return discographyCompare;
+                return collectionCompare;
             }
 
             return CompareByReverse(x.RemoteIssue, y.RemoteIssue, remoteIssue => remoteIssue.Issues.Count);

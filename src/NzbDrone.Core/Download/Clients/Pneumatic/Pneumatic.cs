@@ -38,9 +38,9 @@ namespace NzbDrone.Core.Download.Clients.Pneumatic
             var url = remoteIssue.Release.DownloadUrl;
             var title = remoteIssue.Release.Title;
 
-            if (remoteIssue.ParsedIssueInfo.Discography)
+            if (remoteIssue.ParsedIssueInfo.IsCollection)
             {
-                throw new NotSupportedException("Discography releases are not supported with Pneumatic.");
+                throw new NotSupportedException("Collection releases are not supported with Pneumatic.");
             }
 
             title = FileNameBuilder.CleanFileName(title);

@@ -131,9 +131,9 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Usagi Yojimbo 001 (2024) (Digital).cbz", "Usagi Yojimbo", "001")]
         [TestCase("Bone - Complete Collection (2004) (Digital) (Minutemen-Midas).cbz", "Bone", "Complete Collection")]
         [TestCase("Black Hammer 001 (2016) (Digital) (Mephisto-Empire).cbz", "Black Hammer", "001")]
-        [TestCase("Saga Compendium v01 (2019) (Digital) (Shan-Empire).cbz", "Saga Compendium", "Discography", true)]
-        [TestCase("Invincible - Complete Compendium 2003-2018 (Digital)", "Invincible", "Discography", true)]
-        [TestCase("Walking Dead - Complete Series 2003-2019 (168 issues)(digital)", "Walking Dead", "Discography", true)]
+        [TestCase("Saga Compendium v01 (2019) (Digital) (Shan-Empire).cbz", "Saga Compendium", "Complete Collection", true)]
+        [TestCase("Invincible - Complete Compendium 2003-2018 (Digital)", "Invincible", "Complete Collection", true)]
+        [TestCase("Walking Dead - Complete Series 2003-2019 (168 issues)(digital)", "Walking Dead", "Complete Collection", true)]
         [TestCase("Preacher 001 (1995) (Digital) (Minutemen-Midas).cbz", "Preacher", "001")]
         [TestCase("Fables-2002-The Last Castle-Digital", "Fables", "The Last Castle")]
         [TestCase("Fables-The Last Castle-2002-Digital", "Fables", "The Last Castle")]
@@ -152,21 +152,21 @@ namespace NzbDrone.Core.Test.ParserTests
 
         //[TestCase("(Superhero) Batman(Frank Miller) - Compendium, 23 issues - 1986-2001, CBZ(digital), lossless")]
         //[TestCase("(Superhero) Spider-Man(Todd McFarlane) - Compendium(14 vols) [1990-2010], CBZ(digital), lossless")]
-        [TestCase("(Superhero) [Digital] X-Men - Compendium - 1991-2015 (36 releases, 32 vols), CBZ(digital), lossless", "X-Men", "Discography", true)]
+        [TestCase("(Superhero) [Digital] X-Men - Compendium - 1991-2015 (36 releases, 32 vols), CBZ(digital), lossless", "X-Men", "Complete Collection", true)]
 
         //[TestCase("(Superhero / Action) Deadpool - One of the Sta(2014) + Ocean(2014), CBZ, Digital", "Deadpool", "")]
-        [TestCase("(Superhero) Spawn - Compendium(46 vols) [1992 - 2024], CBZ(digital), lossless", "Spawn", "Discography", true)]
-        [TestCase("(Superhero) [Digital] Savage Dragon - Compendium(6 vols), 1992-2016, CBZ(digital), lossless", "Savage Dragon", "Discography", true)]
+        [TestCase("(Superhero) Spawn - Compendium(46 vols) [1992 - 2024], CBZ(digital), lossless", "Spawn", "Complete Collection", true)]
+        [TestCase("(Superhero) [Digital] Savage Dragon - Compendium(6 vols), 1992-2016, CBZ(digital), lossless", "Savage Dragon", "Complete Collection", true)]
         [TestCase("Saga - The now now - 2024 [CBZ]", "Saga", "The now now")]
 
         //Regex Works on below, but ParseIssueMatchCollection cleans the "..." and converts it to spaces
         // [TestCase("Batman - ...The Long Halloween (2024) [CBZ Digital]", "Batman", "...The Long Halloween")]
-        public void should_parse_series_name_and_book_title(string postTitle, string name, string title, bool discography = false)
+        public void should_parse_series_name_and_book_title(string postTitle, string name, string title, bool isCollection = false)
         {
             var parseResult = Parser.Parser.ParseIssueTitle(postTitle);
             parseResult.SeriesName.Should().Be(name);
             parseResult.IssueTitle.Should().Be(title);
-            parseResult.Discography.Should().Be(discography);
+            parseResult.IsCollection.Should().Be(isCollection);
         }
 
         [TestCase("Walking Dead - Walking Dead Digital")]
@@ -188,12 +188,12 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("Invincible - Complete Compendium 2003-2018 (144 issues)(digital)", 2003, 2018)]
         [TestCase("Preacher - Complete Omnibus [1995] [Anthology]", 0, 1995)]
         [TestCase("Saga Compendium v01 Completa Digital @256", 0, 0)]
-        public void should_parse_year_or_year_range_from_discography(string releaseTitle, int startyear, int endyear)
+        public void should_parse_year_or_year_range_from_collection(string releaseTitle, int startyear, int endyear)
         {
             var parseResult = Parser.Parser.ParseIssueTitle(releaseTitle);
-            parseResult.Discography.Should().BeTrue();
-            parseResult.DiscographyStart.Should().Be(startyear);
-            parseResult.DiscographyEnd.Should().Be(endyear);
+            parseResult.IsCollection.Should().BeTrue();
+            parseResult.CollectionStart.Should().Be(startyear);
+            parseResult.CollectionEnd.Should().Be(endyear);
         }
 
         [TestCase("Abba", "Abba", "Walking Dead  Walking Dead Digital")]

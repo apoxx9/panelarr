@@ -99,21 +99,21 @@ namespace NzbDrone.Core.Parser
 
             Issue issueMatch = null;
 
-            if (parsedIssueInfo.Discography)
+            if (parsedIssueInfo.IsCollection)
             {
-                if (parsedIssueInfo.DiscographyStart > 0)
+                if (parsedIssueInfo.CollectionStart > 0)
                 {
                     return _issueService.SeriesIssuesBetweenDates(series,
-                        new DateTime(parsedIssueInfo.DiscographyStart, 1, 1),
-                        new DateTime(parsedIssueInfo.DiscographyEnd, 12, 31),
+                        new DateTime(parsedIssueInfo.CollectionStart, 1, 1),
+                        new DateTime(parsedIssueInfo.CollectionEnd, 12, 31),
                         false);
                 }
 
-                if (parsedIssueInfo.DiscographyEnd > 0)
+                if (parsedIssueInfo.CollectionEnd > 0)
                 {
                     return _issueService.SeriesIssuesBetweenDates(series,
                         new DateTime(1800, 1, 1),
-                        new DateTime(parsedIssueInfo.DiscographyEnd, 12, 31),
+                        new DateTime(parsedIssueInfo.CollectionEnd, 12, 31),
                         false);
                 }
 

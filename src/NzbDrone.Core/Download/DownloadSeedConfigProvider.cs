@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Download
         public class CachedSeedConfiguration
         {
             public int IndexerId { get; set; }
-            public bool Discography { get; set; }
+            public bool IsCollection { get; set; }
         }
 
         private readonly ICached<CachedSeedConfiguration> _cacheDownloads;
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Download
                 return null;
             }
 
-            var seedConfig = _indexerSeedConfigProvider.GetSeedConfiguration(cachedConfig.IndexerId, cachedConfig.Discography);
+            var seedConfig = _indexerSeedConfigProvider.GetSeedConfiguration(cachedConfig.IndexerId, cachedConfig.IsCollection);
 
             return seedConfig;
         }
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Download
             return new CachedSeedConfiguration
             {
                 IndexerId = historyItem.IndexerId,
-                Discography = parsedIssueInfo.Discography
+                IsCollection = parsedIssueInfo.IsCollection
             };
         }
     }

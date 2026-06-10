@@ -86,10 +86,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
         }
 
         [Test]
-        public void should_throw_if_discography_download()
+        public void should_throw_if_collection_download()
         {
-            _remoteIssue.Release.Title = "Alien Ant Farm - Discography";
-            _remoteIssue.ParsedIssueInfo.Discography = true;
+            _remoteIssue.Release.Title = "Walking Dead - Complete Series 2003-2019";
+            _remoteIssue.ParsedIssueInfo.IsCollection = true;
 
             Assert.ThrowsAsync<NotSupportedException>(async () => await Subject.Download(_remoteIssue, _indexer));
         }

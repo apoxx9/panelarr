@@ -26,7 +26,7 @@ namespace Panelarr.Api.V1.Indexers
         public string SubGroup { get; set; }
         public string ReleaseHash { get; set; }
         public string Title { get; set; }
-        public bool Discography { get; set; }
+        public bool IsCollection { get; set; }
         public string SeriesName { get; set; }
         public string IssueTitle { get; set; }
         public bool Approved { get; set; }
@@ -91,7 +91,7 @@ namespace Panelarr.Api.V1.Indexers
                 Title = releaseInfo.Title,
                 SeriesName = parsedIssueInfo.SeriesName,
                 IssueTitle = parsedIssueInfo.IssueTitle,
-                Discography = parsedIssueInfo.Discography,
+                IsCollection = parsedIssueInfo.IsCollection,
                 Approved = model.Approved,
                 TemporarilyRejected = model.TemporarilyRejected,
                 Rejected = model.Rejected,

@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.IndexerTests
         }
 
         [Test]
-        public void should_return_discography_time_for_discography_packs()
+        public void should_return_collection_seed_time_for_collection_packs()
         {
             var settings = new TorznabSettings();
             settings.SeedCriteria.DiscographySeedTime = 10;
@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Test.IndexerTests
                 },
                 ParsedIssueInfo = new ParsedIssueInfo
                 {
-                    Discography = true
+                    IsCollection = true
                 }
             });
 

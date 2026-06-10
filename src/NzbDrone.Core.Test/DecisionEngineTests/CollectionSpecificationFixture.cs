@@ -13,7 +13,7 @@ using NzbDrone.Core.Test.Framework;
 namespace NzbDrone.Core.Test.DecisionEngineTests
 {
     [TestFixture]
-    public class CollectionSpecificationFixture : CoreTest<DiscographySpecification>
+    public class CollectionSpecificationFixture : CoreTest<CollectionSpecification>
     {
         private RemoteIssue _remoteIssue;
 
@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             {
                 ParsedIssueInfo = new ParsedIssueInfo
                 {
-                    Discography = true
+                    IsCollection = true
                 },
                 Issues = Builder<Issue>.CreateListOfSize(3)
                                            .All()
@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 Series = series,
                 Release = new ReleaseInfo
                 {
-                    Title = "Series.Discography.1978.2005.FLAC-RlsGrp"
+                    Title = "Series.Compendium.1978.2005.CBZ-RlsGrp"
                 }
             };
 
@@ -44,9 +44,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_return_true_if_is_not_a_discography()
+        public void should_return_true_if_is_not_a_collection()
         {
-            _remoteIssue.ParsedIssueInfo.Discography = false;
+            _remoteIssue.ParsedIssueInfo.IsCollection = false;
             _remoteIssue.Issues.Last().ReleaseDate = DateTime.UtcNow.AddDays(+2);
             Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }

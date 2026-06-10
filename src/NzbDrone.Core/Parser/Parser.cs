@@ -42,35 +42,35 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex[] ReportIssueTitleRegex = new[]
         {
             // Tracker/ruTracker - (Genre) [Source]? Series - Compendium/Collection with year range
-            new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<series>.+?)(?: - )(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
+            new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<series>.+?)(?: - )(?<collection>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Series - Compendium/Collection with two years
-            new Regex(@"^(?<series>.+?)(?:\s+-\s+)(?:.+?)?(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
+            new Regex(@"^(?<series>.+?)(?:\s+-\s+)(?:.+?)?(?<collection>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Series - Compendium/Collection with end year
-            new Regex(@"^(?<series>.+?)(?: - )(?:.+?)?(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<endyear>\d{4})",
+            new Regex(@"^(?<series>.+?)(?: - )(?:.+?)?(?<collection>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Tracker/ruTracker - (Genre) [Source]? Series - Compendium (no year range)
-            new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<series>.+?)(?: - )(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia)",
+            new Regex(@"^(?:\(.+?\))(?:\W*(?:\[(?<source>.+?)\]))?\W*(?<series>.+?)(?: - )(?<collection>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Series Compendium with volume: "Saga Compendium v01 (2019)"
-            new Regex(@"^(?<series>.+?\s+(?<discography>Compendium))\s+v\d+",
+            new Regex(@"^(?<series>.+?\s+(?<collection>Compendium))\s+v\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Series Compendium/Collection with two years
-            new Regex(@"^(?<series>.+?)\W*(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
+            new Regex(@"^(?<series>.+?)\W*(?<collection>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<startyear>\d{4}).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Series Compendium/Collection with end year
-            new Regex(@"^(?<series>.+?)\W*(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<endyear>\d{4})",
+            new Regex(@"^(?<series>.+?)\W*(?<collection>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia).+?(?<endyear>\d{4})",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Series Compendium/Collection (no year)
-            new Regex(@"^(?<series>.+?)\W*(?<discography>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia)",
+            new Regex(@"^(?<series>.+?)\W*(?<collection>Compendium|Complete\s+Omnibus|Complete\s+Series|Discography|Discografia)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // GetComics/MAM - Title by Author [format] or (format)
@@ -845,23 +845,23 @@ namespace NzbDrone.Core.Parser
             result.ReleaseDate = releaseYear.ToString();
             result.ReleaseVersion = releaseVersion;
 
-            if (matchCollection[0].Groups["discography"].Success)
+            if (matchCollection[0].Groups["collection"].Success)
             {
                 int.TryParse(matchCollection[0].Groups["startyear"].Value, out var discStart);
                 int.TryParse(matchCollection[0].Groups["endyear"].Value, out var discEnd);
-                result.Discography = true;
+                result.IsCollection = true;
 
                 if (discStart > 0 && discEnd > 0)
                 {
-                    result.DiscographyStart = discStart;
-                    result.DiscographyEnd = discEnd;
+                    result.CollectionStart = discStart;
+                    result.CollectionEnd = discEnd;
                 }
                 else if (discEnd > 0)
                 {
-                    result.DiscographyEnd = discEnd;
+                    result.CollectionEnd = discEnd;
                 }
 
-                result.IssueTitle = "Discography";
+                result.IssueTitle = "Complete Collection";
             }
 
             Logger.Debug("Issue Parsed. {0}", result);

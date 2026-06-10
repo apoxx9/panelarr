@@ -7,11 +7,11 @@ using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.DecisionEngine.Specifications
 {
-    public class DiscographySpecification : IDecisionEngineSpecification
+    public class CollectionSpecification : IDecisionEngineSpecification
     {
         private readonly Logger _logger;
 
-        public DiscographySpecification(Logger logger)
+        public CollectionSpecification(Logger logger)
         {
             _logger = logger;
         }
@@ -21,7 +21,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         public virtual Decision IsSatisfiedBy(RemoteIssue subject, SearchCriteriaBase searchCriteria)
         {
-            if (subject.ParsedIssueInfo.Discography)
+            if (subject.ParsedIssueInfo.IsCollection)
             {
                 _logger.Debug("Checking if all issues in collection release have released. {0}", subject.Release.Title);
 

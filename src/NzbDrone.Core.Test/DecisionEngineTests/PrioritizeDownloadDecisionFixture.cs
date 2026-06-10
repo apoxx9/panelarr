@@ -192,35 +192,35 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_prefer_discography_pack_above_single_book()
+        public void should_prefer_collection_pack_above_single_issue()
         {
             var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1), GivenIssue(2) }, new QualityModel(Quality.CBZ_HD));
             var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD));
 
-            remoteIssue1.ParsedIssueInfo.Discography = true;
+            remoteIssue1.ParsedIssueInfo.IsCollection = true;
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
             decisions.Add(new DownloadDecision(remoteIssue2));
 
             var qualifiedReports = Subject.PrioritizeDecisions(decisions);
-            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Discography.Should().BeTrue();
+            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.IsCollection.Should().BeTrue();
         }
 
         [Test]
-        public void should_prefer_quality_over_discography_pack()
+        public void should_prefer_quality_over_collection_pack()
         {
             var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1), GivenIssue(2) }, new QualityModel(Quality.CBR));
             var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD));
 
-            remoteIssue1.ParsedIssueInfo.Discography = true;
+            remoteIssue1.ParsedIssueInfo.IsCollection = true;
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
             decisions.Add(new DownloadDecision(remoteIssue2));
 
             var qualifiedReports = Subject.PrioritizeDecisions(decisions);
-            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Discography.Should().BeFalse();
+            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.IsCollection.Should().BeFalse();
         }
 
         [Test]

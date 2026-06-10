@@ -56,22 +56,22 @@ export const defaultState = {
       filters: []
     },
     {
-      key: 'discography-pack',
+      key: 'collection-pack',
       label: 'Complete Series',
       filters: [
         {
-          key: 'discography',
+          key: 'isCollection',
           value: true,
           type: filterTypes.EQUAL
         }
       ]
     },
     {
-      key: 'not-discography-pack',
+      key: 'not-collection-pack',
       label: 'Single Issue',
       filters: [
         {
-          key: 'discography',
+          key: 'isCollection',
           value: false,
           type: filterTypes.EQUAL
         }

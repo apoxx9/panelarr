@@ -125,12 +125,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_return_false_if_all_books_are_not_monitored_for_discography_pack_release()
+        public void should_return_false_if_all_issues_are_not_monitored_for_collection_pack_release()
         {
             WithSecondIssueUnmonitored();
             _parseResultMulti.ParsedIssueInfo = new ParsedIssueInfo()
             {
-                Discography = true
+                IsCollection = true
             };
 
             _monitoredIssueSpecification.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeFalse();

@@ -19,7 +19,6 @@ namespace NzbDrone.Core.Parser.Model
         public string Publisher { get; set; }
         public string Disambiguation { get; set; }
         public QualityModel Quality { get; set; }
-        public MediaInfoModel MediaInfo { get; set; }
         public int[] TrackNumbers { get; set; }
         public string ReleaseGroup { get; set; }
         public string ReleaseHash { get; set; }
