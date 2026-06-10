@@ -2,7 +2,29 @@
 
 ## Session 14 Summary
 
-Deep-audit session with three parallel audit agents (frontend health, backend contracts, localization) plus live E2E sweeps (every API endpoint, every frontend route, SPA navigation sequences). Found and fixed a **showstopper navigation bug** the route-by-route audits had missed, resolved the long-documented dual-section Redux landmine at its root, cleaned 598 stale locale entries, and completed two Priority-2 cleanups (Discography rename, MediaInfo removal).
+Two audit rounds. **Round 1**: three parallel audit agents (frontend health, backend contracts, localization) plus live E2E sweeps (every API endpoint, every frontend route, SPA navigation sequences) — found and fixed a **showstopper navigation bug**, resolved the dual-section Redux landmine at its root, cleaned 598 stale locale entries, completed two Priority-2 cleanups (Discography rename, MediaInfo removal). **Round 2**: four more agents on previously-unaudited surfaces (command contracts, write-path POST/PUT/DELETE contracts, notification/import-list payloads, modal flows) plus live write-endpoint testing and a new modal interaction sweep — found and fixed two broken write endpoints and a broken Slack notification.
+
+## Round 2 — write paths, commands, notifications, modals
+
+### Bugs found by live write-path testing (34 endpoint operations exercised)
+
+1. **Import list exclusions could never be created**: `ImportListExclusionController` validated `ForeignId` with `GuidValidator` — a Lidarr/MusicBrainz remnant. Comic ids (`cv-*`, metron) aren't GUIDs, so every POST failed validation. Validator dropped (class deleted, now unused). Verified live: POST now 201.
+2. **Publisher create/update 500'd**: `CleanName` was never computed on the API path, violating a NOT NULL constraint (metadata-sync paths compute it themselves). `PublisherService` now derives it from `Name`. Verified live: POST now 201, cleanName computed.
+
+### Bugs found by audit agents (verified before fixing)
+
+3. **Slack delete notifications rendered `${...}` literally** — `$"${a} - ${b}"` instead of `$"{a} - {b}"` in `OnIssueDelete`/`OnComicFileDelete`.
+4. **Plex messages said "Music library"** (validation failure + log) — the section filter itself was already adapted to show/movie types; messages now generic.
+5. **Folder-select modal checked `this.path`** instead of `this.props.path` (harmless today because the parent gates rendering, but wrong; same oddity exists upstream in Readarr).
+6. **Dead code removed**: `editionActions.js` (registered an `editions` store section with no backend route and no consumers), `IssueEditionSelectInputConnector`, `ManualImportUpdateResource.ForeignEditionId`, MonitoringOptions connector's broken unused `onInputChange`, `seriesActions.getSaveAjaxOptions` (the save handler never invokes `options.getAjaxOptions`).
+
+### Verified clean by round-2 audit
+
+- **All 27 frontend command names** match backend Command classes (case-insensitive binding; payload property names all bind).
+- **All 14 major write-path contracts** (series/issue editors, monitor toggles, manual import, queue ops, release grab, mark-as-failed, blocklist, issueshelf, organize/retag commands, overrides, provider saves) verified aligned on both sides.
+- **CustomScript env vars** properly `Panelarr_`-prefixed; Discord/Webhook payloads use comic terminology; calendar feed clean; ImportListSyncService maps Series correctly.
+- **Newznab default categories `{7030, 7020, 8010}`** are correct (7030 Comics, 7020 EBook, 8010 Other/Misc — deliberate Readarr inheritance; an agent flagged 8010 as "undefined" but it's the standard Misc category).
+- **`tests/modal-sweep.js` (new)**: 11 modal flows (edit/organize/retag/monitoring/delete, interactive search, manual import, series editor, 3 add-provider modals) — zero console errors, page errors or failed API calls.
 
 ### Headline fix: app hang after leaving Series Detail
 
@@ -70,13 +92,15 @@ Same `PanelarrCloudRequestBuilder.Services` URL backs the donations/services end
 
 ## Test Results
 
-- **Core: 2,267 passed, 0 failed** (was 2,264; +3 new localization guard tests)
+- **Core: 2,265 passed, 0 failed** (net of +3 localization guard tests, −2 deleted GuidValidator tests)
 - **API: 14 passed, 0 failed** (was 9; +5 new contract tests, one consolidated)
 - Common: 618 passed; 3 failures are network-download tests (environmental, sandboxed network — `should_download_file*`)
 - Automation (Selenium) / Integration projects: not part of session test baseline (need chromedriver / live env)
 - Frontend: lint clean, build clean
 - `tests/smoke-test.js`: **36/36 pass** (run with `NODE_PATH=$(npm root -g)` for puppeteer)
-- `tests/ui-sweep.js` (**new**): visits all 34 routes + SPA navigation sequences, captures console/page/network errors — clean except the known `/system/updates` 500
+- `tests/ui-sweep.js` (**new**): visits all 34 routes + SPA navigation sequences — clean except the known `/system/updates` 500
+- `tests/modal-sweep.js` (**new**): 11 modal interaction flows — clean
+- Live write-path exercise: 34 mutating operations across commands, editors, overrides, CRUD and config endpoints — all pass after fixes
 
 ## Uncommitted / Push status
 
