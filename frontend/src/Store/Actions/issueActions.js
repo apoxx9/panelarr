@@ -193,6 +193,7 @@ export const defaultState = {
   sortKey: 'releaseDate',
   sortDirection: sortDirections.DESCENDING,
   items: [],
+  itemMap: {},
   pendingChanges: {},
   sortPredicates: {
     rating: function(item) {
@@ -555,7 +556,8 @@ export const reducers = createHandleActions({
       isFetching: false,
       isPopulated: false,
       error: null,
-      items: []
+      items: [],
+      itemMap: {}
     });
   }
 

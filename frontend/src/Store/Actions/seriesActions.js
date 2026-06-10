@@ -155,6 +155,7 @@ export const defaultState = {
   isSaving: false,
   saveError: null,
   items: [],
+  itemMap: {},
   sortKey: 'sortName',
   sortDirection: sortDirections.ASCENDING,
   pendingChanges: {}

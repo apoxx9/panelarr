@@ -1,6 +1,5 @@
 import * as app from './appActions';
 import * as series from './seriesActions';
-import * as seriesCollection from './seriesCollectionActions';
 import * as seriesDetails from './seriesDetailsActions';
 import * as seriesHistory from './seriesHistoryActions';
 import * as seriesIndex from './seriesIndexActions';
@@ -33,7 +32,6 @@ import * as wanted from './wantedActions';
 export default [
   app,
   series,
-  seriesCollection,
   seriesDetails,
   seriesHistory,
   seriesIndex,

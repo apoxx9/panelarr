@@ -6,7 +6,7 @@ function createSeriesSelector() {
     (state) => state.series.itemMap,
     (state) => state.series.items,
     (seriesId, itemMap, allSeries) => {
-      return allSeries[itemMap[seriesId]];
+      return itemMap ? allSeries[itemMap[seriesId]] : undefined;
     }
   );
 }

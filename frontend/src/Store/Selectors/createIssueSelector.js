@@ -6,7 +6,7 @@ function createIssueSelector() {
     (state) => state.issues.itemMap,
     (state) => state.issues.items,
     (issueId, itemMap, allIssues) => {
-      return allIssues[itemMap[issueId]];
+      return itemMap ? allIssues[itemMap[issueId]] : undefined;
     }
   );
 }

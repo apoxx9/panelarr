@@ -11,7 +11,6 @@ import { saveIssueEditor } from 'Store/Actions/issueIndexActions';
 import { clearQueueDetails, fetchQueueDetails } from 'Store/Actions/queueActions';
 import { cancelFetchReleases, clearReleases } from 'Store/Actions/releaseActions';
 import { fetchSeries, toggleSeriesMonitored } from 'Store/Actions/seriesActions';
-import { clearSeries } from 'Store/Actions/seriesCollectionActions';
 import createAllSeriesSelector from 'Store/Selectors/createAllSeriesSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
@@ -197,7 +196,6 @@ function createMapStateToProps() {
 
 const mapDispatchToProps = {
   fetchSeries,
-  clearSeries,
   saveIssueEditor,
   fetchIssueFiles,
   clearIssueFiles,
@@ -264,7 +262,6 @@ class SeriesDetailsConnector extends Component {
 
   unpopulate = () => {
     this.props.cancelFetchReleases();
-    this.props.clearSeries();
     this.props.clearIssueFiles();
     this.props.clearQueueDetails();
     this.props.clearReleases();
@@ -323,7 +320,6 @@ SeriesDetailsConnector.propTypes = {
   isRenamingFiles: PropTypes.bool.isRequired,
   isRenamingSeries: PropTypes.bool.isRequired,
   fetchSeries: PropTypes.func.isRequired,
-  clearSeries: PropTypes.func.isRequired,
   saveIssueEditor: PropTypes.func.isRequired,
   fetchIssueFiles: PropTypes.func.isRequired,
   clearIssueFiles: PropTypes.func.isRequired,

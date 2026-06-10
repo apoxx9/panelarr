@@ -253,7 +253,7 @@ IssueRow.propTypes = {
   seriesTitle: PropTypes.string.isRequired,
   seriesName: PropTypes.string.isRequired,
   position: PropTypes.string,
-  issueNumber: PropTypes.number,
+  issueNumber: PropTypes.string,
   pageCount: PropTypes.number,
   ratings: PropTypes.object.isRequired,
   indexerFlags: PropTypes.number.isRequired,

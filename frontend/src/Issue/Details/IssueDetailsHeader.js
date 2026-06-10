@@ -298,7 +298,7 @@ IssueDetailsHeader.propTypes = {
   width: PropTypes.number.isRequired,
   titleSlug: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
-  issueNumber: PropTypes.number,
+  issueNumber: PropTypes.string,
   seriesTitle: PropTypes.string.isRequired,
   pageCount: PropTypes.number,
   overview: PropTypes.string,

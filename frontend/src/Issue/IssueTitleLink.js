@@ -16,7 +16,7 @@ function IssueTitleLink({ titleSlug, title, issueNumber, disambiguation }) {
 IssueTitleLink.propTypes = {
   titleSlug: PropTypes.string.isRequired,
   title: PropTypes.string,
-  issueNumber: PropTypes.number,
+  issueNumber: PropTypes.string,
   disambiguation: PropTypes.string
 };
 

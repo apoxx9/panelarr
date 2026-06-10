@@ -31,7 +31,6 @@ import toggleSelected from 'Utilities/Table/toggleSelected';
 import InteractiveImportModal from '../../InteractiveImport/InteractiveImportModal';
 import SeriesDetailsHeaderConnector from './SeriesDetailsHeaderConnector';
 import SeriesDetailsSeasonConnector from './SeriesDetailsSeasonConnector';
-import SeriesDetailsSeriesConnector from './SeriesDetailsSeriesConnector';
 import styles from './SeriesDetails.css';
 
 function getExpandedState(newState) {
