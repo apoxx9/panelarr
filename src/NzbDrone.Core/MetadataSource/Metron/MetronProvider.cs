@@ -6,7 +6,7 @@ using NzbDrone.Core.MetadataSource.Provider;
 
 namespace NzbDrone.Core.MetadataSource.Metron
 {
-    public class MetronProvider : IMetadataProvider
+    public class MetronProvider
     {
         private readonly IMetronApiClient _client;
         private readonly Logger _logger;
@@ -47,7 +47,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
                 return null;
             }
 
-            var issues = _client.GetIssuesBySeries(id);
+            var issues = _client.GetIssuesBySeries(id).Select(MapListIssue).ToList();
 
             return new ProviderSeries
             {
@@ -62,8 +62,10 @@ namespace NzbDrone.Core.MetadataSource.Metron
                 ForeignPublisherId = detail.Publisher?.Id.ToString(),
                 PublisherName = detail.Publisher?.Name,
                 Genres = detail.Genres?.Select(g => g.Name).ToList() ?? new List<string>(),
-                ImageUrl = detail.Image,
-                Issues = issues.Select(MapListIssue).ToList()
+
+                // Metron's series detail exposes no image — use the first issue cover.
+                ImageUrl = detail.Image ?? issues.FirstOrDefault(i => i.CoverUrl.IsNotNullOrWhiteSpace())?.CoverUrl,
+                Issues = issues
             };
         }
 

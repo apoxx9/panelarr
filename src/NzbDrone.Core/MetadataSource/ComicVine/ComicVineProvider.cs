@@ -6,7 +6,7 @@ using NzbDrone.Core.MetadataSource.Provider;
 
 namespace NzbDrone.Core.MetadataSource.ComicVine
 {
-    public class ComicVineProvider : IMetadataProvider
+    public class ComicVineProvider
     {
         private readonly IComicVineApiClient _client;
         private readonly Logger _logger;
@@ -153,8 +153,13 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
                 return null;
             }
 
-            var raw = foreignId.StartsWith("cv:") ? foreignId.Substring(3) : foreignId;
-            return int.TryParse(raw, out var id) ? id : (int?)null;
+            // Bare numeric ids are Metron ids — only the cv: prefix is ours.
+            if (!foreignId.StartsWith("cv:"))
+            {
+                return null;
+            }
+
+            return int.TryParse(foreignId.Substring(3), out var id) ? id : (int?)null;
         }
 
         private static int? TryParseYear(string year)

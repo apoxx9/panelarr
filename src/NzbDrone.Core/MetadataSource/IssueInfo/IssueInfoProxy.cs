@@ -47,6 +47,8 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
             {
                 DefaultCacheDurationSeconds = 60
             };
+
+            _logger.Debug("Metadata provider implementation: {0}", metadataProvider.GetType().Name);
         }
 
         public HashSet<string> GetChangedSeries(DateTime startTime)
