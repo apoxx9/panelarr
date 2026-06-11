@@ -85,24 +85,6 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             return tracks;
         }
 
-        private List<LocalIssue> GivenTracksWithNoTags(string root, int count)
-        {
-            var outp = new List<LocalIssue>();
-
-            for (var i = 0; i < count; i++)
-            {
-                var track = Builder<LocalIssue>
-                    .CreateNew()
-                    .With(y => y.FileTagInfo = new ParsedFileTagInfo())
-                    .With(y => y.Path = Path.Combine(root, $"{i}.jpg"))
-                    .Build();
-                outp.Add(track);
-            }
-
-            return outp;
-        }
-
-        [Repeat(100)]
         private List<LocalIssue> GivenVaTracks(string root, string issue, int count)
         {
             var settings = new BuilderSettings();
@@ -123,6 +105,34 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
                                           .Build()).ToList();
 
             return tracks;
+        }
+
+        // Comics never group multiple archives into one item: two variants of
+        // the same issue in one scan must each get their own decision.
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(10)]
+        public void every_file_should_be_its_own_release(int count)
+        {
+            var tracks = GivenTracks(@"C:\comics\incoming".AsOsAgnostic(), "series", "issue", count);
+
+            var output = Subject.GroupTracks(tracks);
+
+            output.Should().HaveCount(count);
+            output.Should().OnlyContain(e => e.LocalIssues.Count == 1);
+        }
+
+        [Test]
+        public void same_issue_variants_in_one_folder_should_not_fuse()
+        {
+            var dir = @"C:\comics\incoming\Saga (2012)".AsOsAgnostic();
+            var tracks = GivenTracks(dir, "Saga", "Chapter Three", 1);
+            tracks.AddRange(GivenTracks(dir, "Saga", "Chapter Three", 1));
+
+            var output = Subject.GroupTracks(tracks);
+
+            output.Should().HaveCount(2);
+            output.SelectMany(e => e.LocalIssues).Should().BeEquivalentTo(tracks);
         }
 
         [TestCase(1)]
@@ -184,208 +194,6 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         {
             var tracks = GivenTracks(@"C:\comics\incoming".AsOsAgnostic(), series, "issue", 10);
             TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-        }
-
-        [TestCase(1)]
-        [TestCase(2)]
-        [TestCase(10)]
-        public void should_group_single_author_book(int count)
-        {
-            var tracks = GivenTracks(@"C:\comics\incoming".AsOsAgnostic(), "series", "issue", count);
-            var output = Subject.GroupTracks(tracks);
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
-
-            output.Count.Should().Be(1);
-            output[0].LocalIssues.Count.Should().Be(count);
-        }
-
-        [TestCase("cd")]
-        [TestCase("disc")]
-        [TestCase("disk")]
-        public void should_group_multi_disc_release(string mediaName)
-        {
-            var tracks = GivenTracks($"C:\\comics\\incoming\\series - issue\\{mediaName} 1".AsOsAgnostic(), "series", "issue", 10);
-            tracks.AddRange(GivenTracks($"C:\\comics\\incoming\\series - issue\\{mediaName} 2".AsOsAgnostic(), "series", "issue", 5));
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
-
-            var output = Subject.GroupTracks(tracks);
-            output.Count.Should().Be(1);
-            output[0].LocalIssues.Count.Should().Be(15);
-        }
-
-        [Test]
-        public void should_not_group_two_different_books_by_same_author()
-        {
-            var tracks = GivenTracks($"C:\\comics\\incoming\\series - book1".AsOsAgnostic(), "series", "book1", 10);
-            tracks.AddRange(GivenTracks($"C:\\comics\\incoming\\series - book2".AsOsAgnostic(), "series", "book2", 5));
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
-
-            var output = Subject.GroupTracks(tracks);
-            output.Count.Should().Be(2);
-            output[0].LocalIssues.Count.Should().Be(10);
-            output[1].LocalIssues.Count.Should().Be(5);
-        }
-
-        [Test]
-        public void should_group_books_with_typos()
-        {
-            var tracks = GivenTracks($"C:\\comics\\incoming\\series - issue".AsOsAgnostic(), "series", "Rastaman Vibration (Remastered)", 10);
-            tracks.AddRange(GivenTracks($"C:\\comics\\incoming\\series - issue".AsOsAgnostic(), "series", "Rastaman Vibration (Remastered", 5));
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
-
-            var output = Subject.GroupTracks(tracks);
-            output.Count.Should().Be(1);
-            output[0].LocalIssues.Count.Should().Be(15);
-        }
-
-        [Test]
-        public void should_not_group_two_different_tracks_in_same_directory()
-        {
-            var tracks = GivenTracks($"C:\\comics\\incoming".AsOsAgnostic(), "series", "book1", 1);
-            tracks.AddRange(GivenTracks($"C:\\comics\\incoming".AsOsAgnostic(), "series", "book2", 1));
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
-
-            var output = Subject.GroupTracks(tracks);
-            output.Count.Should().Be(2);
-            output[0].LocalIssues.Count.Should().Be(1);
-            output[1].LocalIssues.Count.Should().Be(1);
-        }
-
-        [Test]
-        public void should_separate_two_books_in_same_directory()
-        {
-            var tracks = GivenTracks($"C:\\comics\\incoming\\series discog".AsOsAgnostic(), "series", "book1", 10);
-            tracks.AddRange(GivenTracks($"C:\\comics\\incoming\\series disog".AsOsAgnostic(), "series", "book2", 5));
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
-
-            var output = Subject.GroupTracks(tracks);
-            output.Count.Should().Be(2);
-            output[0].LocalIssues.Count.Should().Be(10);
-            output[1].LocalIssues.Count.Should().Be(5);
-        }
-
-        [Test]
-        public void should_separate_many_books_in_same_directory()
-        {
-            var tracks = new List<LocalIssue>();
-            for (var i = 0; i < 100; i++)
-            {
-                tracks.AddRange(GivenTracks($"C:\\comics".AsOsAgnostic(), "series" + i, "issue" + i, 10));
-            }
-
-            // don't test various allSeries here because it's designed to only work if there's a common issue
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
-
-            var output = Subject.GroupTracks(tracks);
-            output.Count.Should().Be(100);
-            output.Select(x => x.LocalIssues.Count).Distinct().Should().BeEquivalentTo(new List<int> { 10 });
-        }
-
-        [Test]
-        public void should_separate_two_books_by_different_series_in_same_directory()
-        {
-            var tracks = GivenTracks($"C:\\comics\\incoming".AsOsAgnostic(), "author1", "book1", 10);
-            tracks.AddRange(GivenTracks($"C:\\comics\\incoming".AsOsAgnostic(), "author2", "book2", 5));
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
-
-            var output = Subject.GroupTracks(tracks);
-            output.Count.Should().Be(2);
-            output[0].LocalIssues.Count.Should().Be(10);
-            output[1].LocalIssues.Count.Should().Be(5);
-        }
-
-        [Ignore("TODO: fix")]
-        [Test]
-        [Repeat(100)]
-        public void should_group_va_release()
-        {
-            var tracks = GivenVaTracks(@"C:\comics\incoming".AsOsAgnostic(), "issue", 10);
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(true);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
-
-            var output = Subject.GroupTracks(tracks);
-            output.Count.Should().Be(1);
-            output[0].LocalIssues.Count.Should().Be(10);
-        }
-
-        [Test]
-        public void should_not_group_two_books_by_different_series_with_same_title()
-        {
-            var tracks = GivenTracks($"C:\\comics\\incoming\\issue".AsOsAgnostic(), "author1", "issue", 10);
-            tracks.AddRange(GivenTracks($"C:\\comics\\incoming\\issue".AsOsAgnostic(), "author2", "issue", 5));
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
-
-            var output = Subject.GroupTracks(tracks);
-
-            output.Count.Should().Be(2);
-            output[0].LocalIssues.Count.Should().Be(10);
-            output[1].LocalIssues.Count.Should().Be(5);
-        }
-
-        [Test]
-        public void should_not_fail_if_all_tags_null()
-        {
-            var tracks = GivenTracksWithNoTags($"C:\\comics\\incoming\\issue".AsOsAgnostic(), 10);
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
-
-            var output = Subject.GroupTracks(tracks);
-            output.Count.Should().Be(1);
-            output[0].LocalIssues.Count.Should().Be(10);
-        }
-
-        [Test]
-        public void should_not_fail_if_some_tags_null()
-        {
-            var tracks = GivenTracks($"C:\\comics\\incoming\\issue".AsOsAgnostic(), "author1", "issue", 10);
-            tracks.AddRange(GivenTracksWithNoTags($"C:\\comics\\incoming\\issue".AsOsAgnostic(), 2));
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(true);
-
-            var output = Subject.GroupTracks(tracks);
-            output.Count.Should().Be(1);
-            output[0].LocalIssues.Count.Should().Be(12);
-        }
-
-        [Test]
-        public void should_cope_with_one_book_in_subfolder_of_another()
-        {
-            var tracks = GivenTracks($"C:\\comics\\incoming\\issue".AsOsAgnostic(), "author1", "issue", 10);
-            tracks.AddRange(GivenTracks($"C:\\comics\\incoming\\issue\\anotherbook".AsOsAgnostic(), "author2", "book2", 10));
-
-            TrackGroupingService.IsVariousSeries(tracks).Should().Be(false);
-            TrackGroupingService.LooksLikeSingleRelease(tracks).Should().Be(false);
-
-            var output = Subject.GroupTracks(tracks);
-
-            foreach (var group in output)
-            {
-                TestLogger.Debug($"*** group {group} ***");
-                TestLogger.Debug(string.Join("\n", group.LocalIssues.Select(x => x.Path)));
-            }
-
-            output.Count.Should().Be(2);
-            output[0].LocalIssues.Count.Should().Be(10);
-            output[1].LocalIssues.Count.Should().Be(10);
         }
     }
 }

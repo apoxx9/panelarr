@@ -193,7 +193,12 @@ namespace NzbDrone.Core.MediaFiles
                     Modified = decision.Item.Modified,
                     DateAdded = DateTime.UtcNow,
                     Quality = decision.Item.Quality,
-                    IssueId = decision.Item.Issue?.Id ?? 0,
+
+                    // Everything left here was NOT imported (rejected or
+                    // unidentified). Persisting a rejected file with a live
+                    // IssueId would make it look like the issue's file and
+                    // exclude it from re-evaluation on future rescans.
+                    IssueId = 0,
                     ComicFormat = GetComicFormat(decision.Item.Path)
                 })
                 .ToList();
