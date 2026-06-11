@@ -14,7 +14,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
             // a non-null Unknown — that must not mask the extension fallback.
             var candidates = new[]
             {
-                localTrack.FileTrackInfo?.Quality,
+                localTrack.FileTagInfo?.Quality,
                 localTrack.FolderTrackInfo?.Quality,
                 localTrack.DownloadClientIssueInfo?.Quality,
                 QualityFromExtension(localTrack.Path)

@@ -279,7 +279,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
             item.IndexerFlags = (int)decision.Item.IndexerFlags;
             item.Size = _diskProvider.GetFileSize(decision.Item.Path);
             item.Rejections = decision.Rejections;
-            item.Tags = decision.Item.FileTrackInfo;
+            item.Tags = decision.Item.FileTagInfo;
             item.AdditionalFile = decision.Item.AdditionalFile;
             item.ReplaceExistingFiles = replaceExistingFiles;
             item.DisableReleaseSwitching = disableReleaseSwitching;
@@ -309,14 +309,14 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
 
                     var fileRootFolder = _rootFolderService.GetBestRootFolder(file.Path);
                     var fileInfo = _diskProvider.GetFileInfo(file.Path);
-                    var fileTrackInfo = _metadataTagService.ReadTags(fileInfo) ?? new ParsedTrackInfo();
+                    var fileTrackInfo = _metadataTagService.ReadTags(fileInfo) ?? new ParsedFileTagInfo();
 
                     var localTrack = new LocalIssue
                     {
                         ExistingFile = fileRootFolder != null,
-                        FileTrackInfo = fileTrackInfo,
+                        FileTagInfo = fileTrackInfo,
                         Path = file.Path,
-                        Part = fileTrackInfo.TrackNumbers.Any() ? fileTrackInfo.TrackNumbers.First() : 1,
+                        Part = fileTrackInfo.PartNumbers.Any() ? fileTrackInfo.PartNumbers.First() : 1,
                         PartCount = importIssueId.Count(),
                         Size = fileInfo.Length,
                         Modified = fileInfo.LastWriteTimeUtc,

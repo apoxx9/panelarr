@@ -26,7 +26,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Manual
         public List<CustomFormat> CustomFormats { get; set; }
         public int IndexerFlags { get; set; }
         public IEnumerable<Rejection> Rejections { get; set; }
-        public ParsedTrackInfo Tags { get; set; }
+        public ParsedFileTagInfo Tags { get; set; }
         public bool AdditionalFile { get; set; }
         public bool ReplaceExistingFiles { get; set; }
         public bool DisableReleaseSwitching { get; set; }

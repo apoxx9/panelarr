@@ -7,7 +7,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
     public class BasicLocalTrack
     {
         public string Path { get; set; }
-        public ParsedTrackInfo FileTrackInfo { get; set; }
+        public ParsedFileTagInfo FileTagInfo { get; set; }
     }
 
     public class SeriesTestCase

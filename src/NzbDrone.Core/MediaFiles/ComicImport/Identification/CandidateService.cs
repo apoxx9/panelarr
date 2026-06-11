@@ -108,7 +108,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             var candidateReleases = new List<CandidateEdition>();
 
             // If we have an explicit issue number from embedded ComicInfo, use it first — most reliable
-            var issueIndexTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.SeriesIndex) ?? "";
+            var issueIndexTag = localEdition.LocalIssues.MostCommon(x => x.FileTagInfo.SeriesIndex) ?? "";
             if (issueIndexTag.IsNotNullOrWhiteSpace()
                 && float.TryParse(issueIndexTag, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var explicitIssueNumber))
             {
@@ -127,7 +127,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             }
 
             // Try embedded metadata first, then download client title, then filename
-            var issueTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
+            var issueTag = localEdition.LocalIssues.MostCommon(x => x.FileTagInfo.IssueTitle) ?? "";
 
             if (issueTag.IsNullOrWhiteSpace())
             {
@@ -136,7 +136,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
             if (issueTag.IsNullOrWhiteSpace())
             {
-                issueTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.CleanTitle) ?? "";
+                issueTag = localEdition.LocalIssues.MostCommon(x => x.FileTagInfo.CleanTitle) ?? "";
             }
 
             if (issueTag.IsNullOrWhiteSpace())
@@ -190,7 +190,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 }
             }
 
-            var seriesTags = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.Series) ?? new List<string>();
+            var seriesTags = localEdition.LocalIssues.MostCommon(x => x.FileTagInfo.Series) ?? new List<string>();
             if (seriesTags.Any())
             {
                 var variants = DistanceCalculator.GetSeriesVariants(seriesTags.Where(x => x.IsNotNullOrWhiteSpace()).ToList());
@@ -235,7 +235,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             else
             {
                 // the most common list of allSeries reported by a file
-                var allSeries = localEdition.LocalIssues.Select(x => x.FileTrackInfo.Series.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
+                var allSeries = localEdition.LocalIssues.Select(x => x.FileTagInfo.Series.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
                     .GroupBy(x => x.ConcatToString())
                     .OrderByDescending(x => x.Count())
                     .First()
@@ -243,7 +243,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 seriesTags.AddRange(allSeries);
             }
 
-            var issueTag = localEdition.LocalIssues.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
+            var issueTag = localEdition.LocalIssues.MostCommon(x => x.FileTagInfo.IssueTitle) ?? "";
 
             // If no valid series or issue tags, stop
             if (!seriesTags.Any() || issueTag.IsNullOrWhiteSpace())

@@ -171,13 +171,13 @@ namespace NzbDrone.Core.MediaFiles
 
             var cleanedUpName = GetCleanedUpFolderName(directoryInfo.Name);
             var folderInfo = Parser.Parser.ParseIssueTitle(directoryInfo.Name);
-            var trackInfo = new ParsedTrackInfo { };
+            var trackInfo = new ParsedFileTagInfo { };
 
             if (folderInfo != null)
             {
                 _logger.Debug("{0} folder quality: {1}", cleanedUpName, folderInfo.Quality);
 
-                trackInfo = new ParsedTrackInfo
+                trackInfo = new ParsedFileTagInfo
                 {
                     IssueTitle = folderInfo.IssueTitle,
                     Series = new List<string> { folderInfo.SeriesName },

@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             {
                 new LocalIssue
                 {
-                    FileTrackInfo = new ParsedTrackInfo
+                    FileTagInfo = new ParsedFileTagInfo
                     {
                         Series = new List<string> { "Saga" },
                         SeriesIndex = seriesIndex,

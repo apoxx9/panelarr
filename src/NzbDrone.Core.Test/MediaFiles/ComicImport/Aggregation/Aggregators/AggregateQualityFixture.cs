@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Test.MediaFiles.ComicImport.Aggregation.Aggregators
             var localIssue = new LocalIssue
             {
                 Path = @"C:\comics\Saga 003.cbz".AsOsAgnostic(),
-                FileTrackInfo = new ParsedTrackInfo { Quality = new QualityModel(Quality.CBR) }
+                FileTagInfo = new ParsedFileTagInfo { Quality = new QualityModel(Quality.CBR) }
             };
 
             Subject.Aggregate(localIssue, false).Quality.Quality.Should().Be(Quality.CBR);

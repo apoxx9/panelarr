@@ -111,7 +111,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 Path = x.Path,
                 Size = x.Size,
                 Modified = x.Modified,
-                FileTrackInfo = _metadataTagService.ReadTags((FileInfoBase)new FileInfo(x.Path)),
+                FileTagInfo = _metadataTagService.ReadTags((FileInfoBase)new FileInfo(x.Path)),
                 ExistingFile = true,
                 AdditionalFile = true,
                 Quality = x.Quality

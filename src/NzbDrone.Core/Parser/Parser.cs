@@ -214,11 +214,11 @@ namespace NzbDrone.Core.Parser
 
         private static readonly Regex AfterDashRegex = new Regex(@"[-:].*", RegexOptions.Compiled);
 
-        public static ParsedTrackInfo ParseFilePath(string path)
+        public static ParsedFileTagInfo ParseFilePath(string path)
         {
             var fileInfo = new FileInfo(path);
 
-            ParsedTrackInfo result = null;
+            ParsedFileTagInfo result = null;
 
             Logger.Debug("Attempting to parse issue info using directory and file names. {0}", fileInfo.Directory.Name);
             result = ParseTitle(fileInfo.Directory.Name + " " + fileInfo.Name);
@@ -232,7 +232,7 @@ namespace NzbDrone.Core.Parser
             return result;
         }
 
-        public static ParsedTrackInfo ParseTitle(string title)
+        public static ParsedFileTagInfo ParseTitle(string title)
         {
             try
             {
@@ -738,7 +738,7 @@ namespace NzbDrone.Core.Parser
             return intermediateTitle;
         }
 
-        private static ParsedTrackInfo ParseMatchMusicCollection(MatchCollection matchCollection)
+        private static ParsedFileTagInfo ParseMatchMusicCollection(MatchCollection matchCollection)
         {
             var seriesName = matchCollection[0].Groups["series"].Value./*Removed for cases like Will.I.Am Replace('.', ' ').*/Replace('_', ' ');
             seriesName = RequestInfoRegex.Replace(seriesName, "").Trim(' ');
@@ -783,7 +783,7 @@ namespace NzbDrone.Core.Parser
 
             seriesName = seriesName.Trim(' ');
 
-            var result = new ParsedTrackInfo();
+            var result = new ParsedFileTagInfo();
 
             result.Series = new List<string> { seriesName };
 

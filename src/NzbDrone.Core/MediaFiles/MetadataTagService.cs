@@ -16,7 +16,7 @@ namespace NzbDrone.Core.MediaFiles
 {
     public interface IMetadataTagService
     {
-        ParsedTrackInfo ReadTags(IFileInfo file);
+        ParsedFileTagInfo ReadTags(IFileInfo file);
         void WriteTags(ComicFile comicFile, bool newDownload, bool force = false);
         void SyncTags(List<Issue> issues);
         List<RetagComicFilePreview> GetRetagPreviewsBySeries(int seriesId);
@@ -55,14 +55,14 @@ namespace NzbDrone.Core.MediaFiles
             _logger = logger;
         }
 
-        public ParsedTrackInfo ReadTags(IFileInfo file)
+        public ParsedFileTagInfo ReadTags(IFileInfo file)
         {
             return ReadComicTags(file);
         }
 
-        private ParsedTrackInfo ReadComicTags(IFileInfo file)
+        private ParsedFileTagInfo ReadComicTags(IFileInfo file)
         {
-            var info = new ParsedTrackInfo();
+            var info = new ParsedFileTagInfo();
 
             try
             {

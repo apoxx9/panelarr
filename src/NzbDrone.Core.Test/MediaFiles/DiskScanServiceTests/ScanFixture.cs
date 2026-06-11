@@ -397,7 +397,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                               Series = _series,
                               Path = x.FullName,
                               Modified = x.LastWriteTimeUtc,
-                              FileTrackInfo = new ParsedTrackInfo()
+                              FileTagInfo = new ParsedFileTagInfo()
                           })
                           .Select(x => new ImportDecision<LocalIssue>(x, new Rejection("Reject")))
                           .ToList());
@@ -538,7 +538,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                 .With(x => x.Modified = new DateTime(2019, 2, 1))
                 .With(x => x.Size = 100)
                 .With(x => x.Quality = new QualityModel(Quality.CBR))
-                .With(x => x.FileTrackInfo = new ParsedTrackInfo())
+                .With(x => x.FileTagInfo = new ParsedFileTagInfo())
                 .Build();
 
             Mocker.GetMock<IMakeImportDecision>()

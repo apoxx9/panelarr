@@ -128,7 +128,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
 
             Mocker.GetMock<IMetadataTagService>()
                 .Setup(s => s.ReadTags(It.IsAny<IFileInfo>()))
-                .Returns(new ParsedTrackInfo());
+                .Returns(new ParsedFileTagInfo());
 
             Mocker.GetMock<IHistoryService>()
                 .Setup(x => x.FindByDownloadId(It.IsAny<string>()))

@@ -163,7 +163,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             var tracks = testcase.Tracks.Select(x => new LocalIssue
             {
                 Path = x.Path.AsOsAgnostic(),
-                FileTrackInfo = x.FileTrackInfo
+                FileTagInfo = x.FileTagInfo
             }).ToList();
 
             var config = new ImportDecisionMakerConfig

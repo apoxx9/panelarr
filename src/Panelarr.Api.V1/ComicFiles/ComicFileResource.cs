@@ -20,7 +20,7 @@ namespace Panelarr.Api.V1.ComicFiles
         public int? IndexerFlags { get; set; }
 
         public bool QualityCutoffNotMet { get; set; }
-        public ParsedTrackInfo FileTags { get; set; }
+        public ParsedFileTagInfo FileTags { get; set; }
     }
 
     public static class ComicFileResourceMapper

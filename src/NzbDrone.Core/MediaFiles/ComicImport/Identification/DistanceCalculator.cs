@@ -29,7 +29,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             var dist = new Distance();
 
             // the most common list of allSeries reported by a file
-            var fileSeries = localTracks.Select(x => x.FileTrackInfo.Series.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
+            var fileSeries = localTracks.Select(x => x.FileTagInfo.Series.Where(a => a.IsNotNullOrWhiteSpace()).ToList())
                 .GroupBy(x => x.ConcatToString())
                 .OrderByDescending(x => x.Count())
                 .First()
@@ -44,7 +44,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             // (e.g. unreleased issue) should not penalize the match
             if (issue.Title.IsNotNullOrWhiteSpace())
             {
-                var title = localTracks.MostCommon(x => x.FileTrackInfo.IssueTitle) ?? "";
+                var title = localTracks.MostCommon(x => x.FileTagInfo.IssueTitle) ?? "";
                 var titleOptions = new List<string> { issue.Title };
                 if (titleOptions[0].Contains("#"))
                 {
@@ -80,7 +80,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             // Issue number — the most reliable matching signal for comics.
             // Normalize both sides so padded ("003") and trailing-zero ("1.50")
             // forms compare equal, matching the candidate-lookup normalization.
-            var localIssueNumber = localTracks.MostCommon(x => x.FileTrackInfo.SeriesIndex) ?? "";
+            var localIssueNumber = localTracks.MostCommon(x => x.FileTagInfo.SeriesIndex) ?? "";
             if (localIssueNumber.IsNotNullOrWhiteSpace())
             {
                 var dbIssueNumber = issue.IssueNumber ?? "";
@@ -90,7 +90,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
             // Publisher — compare against the actual publisher name (never the
             // series name), and only when both sides have one.
-            var localPublisher = localTracks.MostCommon(x => x.FileTrackInfo.Publisher) ?? "";
+            var localPublisher = localTracks.MostCommon(x => x.FileTagInfo.Publisher) ?? "";
             var dbPublisher = issue.SeriesMetadata?.Value?.Publisher?.Value?.Name;
             if (localPublisher.IsNotNullOrWhiteSpace() && dbPublisher.IsNotNullOrWhiteSpace())
             {
@@ -99,7 +99,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             }
 
             // Year
-            var localYear = localTracks.MostCommon(x => x.FileTrackInfo.Year);
+            var localYear = localTracks.MostCommon(x => x.FileTagInfo.Year);
             if (localYear > 0 && issue.ReleaseDate.HasValue)
             {
                 var issueYear = issue.ReleaseDate?.Year ?? 0;

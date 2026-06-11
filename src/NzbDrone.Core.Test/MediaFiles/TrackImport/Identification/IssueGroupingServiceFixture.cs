@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
     {
         private List<LocalIssue> GivenTracks(string root, string series, string issue, int count)
         {
-            var fileInfos = Builder<ParsedTrackInfo>
+            var fileInfos = Builder<ParsedFileTagInfo>
                 .CreateListOfSize(count)
                 .All()
                 .With(f => f.Series = new List<string> { series })
@@ -78,7 +78,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
 
             var tracks = fileInfos.Select(x => Builder<LocalIssue>
                                           .CreateNew()
-                                          .With(y => y.FileTrackInfo = x)
+                                          .With(y => y.FileTagInfo = x)
                                           .With(y => y.Path = Path.Combine(root, x.Title))
                                           .Build()).ToList();
 
@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             {
                 var track = Builder<LocalIssue>
                     .CreateNew()
-                    .With(y => y.FileTrackInfo = new ParsedTrackInfo())
+                    .With(y => y.FileTagInfo = new ParsedFileTagInfo())
                     .With(y => y.Path = Path.Combine(root, $"{i}.mp3"))
                     .Build();
                 outp.Add(track);
@@ -106,19 +106,19 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         private List<LocalIssue> GivenVaTracks(string root, string issue, int count)
         {
             var settings = new BuilderSettings();
-            settings.SetPropertyNamerFor<ParsedTrackInfo>(new RandomValueNamerShortStrings(settings));
+            settings.SetPropertyNamerFor<ParsedFileTagInfo>(new RandomValueNamerShortStrings(settings));
 
             var builder = new Builder(settings);
 
             var fileInfos = builder
-                .CreateListOfSize<ParsedTrackInfo>(count)
+                .CreateListOfSize<ParsedFileTagInfo>(count)
                 .All()
                 .With(f => f.IssueTitle = "issue")
                 .Build();
 
             var tracks = fileInfos.Select(x => Builder<LocalIssue>
                                           .CreateNew()
-                                          .With(y => y.FileTrackInfo = x)
+                                          .With(y => y.FileTagInfo = x)
                                           .With(y => y.Path = Path.Combine(@"C:\music\incoming".AsOsAgnostic(), x.Title))
                                           .Build()).ToList();
 

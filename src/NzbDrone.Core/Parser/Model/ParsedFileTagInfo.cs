@@ -5,7 +5,7 @@ using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Parser.Model
 {
-    public class ParsedTrackInfo
+    public class ParsedFileTagInfo
     {
         public string Title { get; set; }
         public string CleanTitle { get; set; }
@@ -19,23 +19,23 @@ namespace NzbDrone.Core.Parser.Model
         public string Publisher { get; set; }
         public string Disambiguation { get; set; }
         public QualityModel Quality { get; set; }
-        public int[] TrackNumbers { get; set; }
+        public int[] PartNumbers { get; set; }
         public string ReleaseGroup { get; set; }
         public string ReleaseHash { get; set; }
 
-        public ParsedTrackInfo()
+        public ParsedFileTagInfo()
         {
             Series = new List<string>();
-            TrackNumbers = new int[0];
+            PartNumbers = new int[0];
         }
 
         public override string ToString()
         {
             var trackString = "[Unknown Track]";
 
-            if (TrackNumbers != null && TrackNumbers.Any())
+            if (PartNumbers != null && PartNumbers.Any())
             {
-                trackString = string.Format("{0}", string.Join("-", TrackNumbers.Select(c => c.ToString("00"))));
+                trackString = string.Format("{0}", string.Join("-", PartNumbers.Select(c => c.ToString("00"))));
             }
 
             return string.Format("{0} - {1} - {2}:{3} {4}: {5}", Series.ConcatToString(" & "), IssueTitle, DiscNumber, trackString, Title, Quality);

@@ -112,10 +112,10 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
                     DownloadClientIssueInfo = downloadClientItemInfo,
                     FolderTrackInfo = folderInfo,
                     Path = file.FullName,
-                    Part = fileTrackInfo.TrackNumbers.Any() ? fileTrackInfo.TrackNumbers.First() : 1,
+                    Part = fileTrackInfo.PartNumbers.Any() ? fileTrackInfo.PartNumbers.First() : 1,
                     Size = file.Length,
                     Modified = file.LastWriteTimeUtc,
-                    FileTrackInfo = fileTrackInfo,
+                    FileTagInfo = fileTrackInfo,
                     AdditionalFile = false
                 };
 
@@ -231,7 +231,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport
 
             if (localIssue.Issue == null)
             {
-                decision = new ImportDecision<LocalIssue>(localIssue, new Rejection($"Couldn't parse issue from: {localIssue.FileTrackInfo}"));
+                decision = new ImportDecision<LocalIssue>(localIssue, new Rejection($"Couldn't parse issue from: {localIssue.FileTagInfo}"));
             }
             else
             {

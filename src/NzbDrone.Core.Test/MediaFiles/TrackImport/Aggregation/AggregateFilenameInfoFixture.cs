@@ -20,9 +20,9 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Aggregation.Aggregators
             var tracks = files.Select(x => new LocalIssue
             {
                 Path = Path.Combine(root, x),
-                FileTrackInfo = new ParsedTrackInfo
+                FileTagInfo = new ParsedFileTagInfo
                 {
-                    TrackNumbers = new[] { 0 },
+                    PartNumbers = new[] { 0 },
                 }
             }).ToList();
             return new LocalEdition(tracks);
@@ -30,10 +30,10 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Aggregation.Aggregators
 
         private void VerifyData(LocalIssue track, string series, string title, int trackNum, int disc)
         {
-            track.FileTrackInfo.SeriesTitle.Should().Be(series);
-            track.FileTrackInfo.IssueTitle.Should().Be(title);
-            track.FileTrackInfo.TrackNumbers[0].Should().Be(trackNum);
-            track.FileTrackInfo.DiscNumber.Should().Be(disc);
+            track.FileTagInfo.SeriesTitle.Should().Be(series);
+            track.FileTagInfo.IssueTitle.Should().Be(title);
+            track.FileTagInfo.PartNumbers[0].Should().Be(trackNum);
+            track.FileTagInfo.DiscNumber.Should().Be(disc);
         }
 
         [Test]
@@ -163,7 +163,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Aggregation.Aggregators
         {
             for (var i = 1; i <= tracks.Count; i++)
             {
-                var info = tracks[i - 1].FileTrackInfo;
+                var info = tracks[i - 1].FileTagInfo;
 
                 if (tokens.Contains("series"))
                 {

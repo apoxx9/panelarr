@@ -56,7 +56,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
             // If anything didn't get grouped correctly, try grouping by Issue (to pick up VA)
             var unprocessed2 = new List<LocalIssue>();
-            foreach (var group in unprocessed.GroupBy(x => x.FileTrackInfo.IssueTitle))
+            foreach (var group in unprocessed.GroupBy(x => x.FileTagInfo.IssueTitle))
             {
                 _logger.Debug("Falling back to grouping by issue tag");
                 var tracks = group.ToList();
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             }
 
             // Finally fall back to grouping by Issue/Series pair
-            foreach (var group in unprocessed2.GroupBy(x => new { x.FileTrackInfo.SeriesTitle, x.FileTrackInfo.IssueTitle }))
+            foreach (var group in unprocessed2.GroupBy(x => new { x.FileTagInfo.SeriesTitle, x.FileTagInfo.IssueTitle }))
             {
                 _logger.Debug("Falling back to grouping by issue+series tag");
                 releases.Add(new LocalEdition(group.ToList()));
@@ -123,7 +123,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             const double tagFuzz = 0.9;
 
             // check that there's a common issue tag.
-            var issueTags = tracks.Select(x => x.FileTrackInfo.IssueTitle);
+            var issueTags = tracks.Select(x => x.FileTagInfo.IssueTitle);
             if (!HasCommonEntry(issueTags, issueTagThreshold, tagFuzz))
             {
                 _logger.Trace("LooksLikeSingleRelease: No common issue tag");
@@ -133,7 +133,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             // If not various allSeries, make sure allSeries are sensible
             if (!IsVariousSeries(tracks))
             {
-                var seriesTags = tracks.Select(x => x.FileTrackInfo.SeriesTitle);
+                var seriesTags = tracks.Select(x => x.FileTagInfo.SeriesTitle);
                 if (!HasCommonEntry(seriesTags, seriesTagThreshold, tagFuzz))
                 {
                     _logger.Trace("LooksLikeSingleRelease: No common series tag");
@@ -152,7 +152,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             const double seriesTagThreshold = 0.75;
             const double tagFuzz = 0.9;
 
-            var seriesTags = tracks.Select(x => x.FileTrackInfo.SeriesTitle).ToList();
+            var seriesTags = tracks.Select(x => x.FileTagInfo.SeriesTitle).ToList();
 
             if (!HasCommonEntry(seriesTags, seriesTagThreshold, tagFuzz))
             {

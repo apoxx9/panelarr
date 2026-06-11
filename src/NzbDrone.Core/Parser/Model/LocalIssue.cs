@@ -12,7 +12,7 @@ namespace NzbDrone.Core.Parser.Model
         public int PartCount { get; set; }
         public long Size { get; set; }
         public DateTime Modified { get; set; }
-        public ParsedTrackInfo FileTrackInfo { get; set; }
+        public ParsedFileTagInfo FileTagInfo { get; set; }
         public ParsedIssueInfo FolderTrackInfo { get; set; }
         public ParsedIssueInfo DownloadClientIssueInfo { get; set; }
         public Series Series { get; set; }

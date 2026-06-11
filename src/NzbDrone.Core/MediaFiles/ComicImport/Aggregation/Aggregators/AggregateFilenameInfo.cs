@@ -58,8 +58,8 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
         public LocalEdition Aggregate(LocalEdition release, bool others)
         {
             var tracks = release.LocalIssues;
-            if (tracks.Any(x => x.FileTrackInfo.IssueTitle.IsNullOrWhiteSpace())
-                || tracks.Any(x => x.FileTrackInfo.SeriesTitle.IsNullOrWhiteSpace()))
+            if (tracks.Any(x => x.FileTagInfo.IssueTitle.IsNullOrWhiteSpace())
+                || tracks.Any(x => x.FileTagInfo.SeriesTitle.IsNullOrWhiteSpace()))
             {
                 _logger.Debug("Missing data in tags, trying filename augmentation");
                 foreach (var charSep in CharsAndSeps)
@@ -147,10 +147,10 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 
                 foreach (var track in matches.Keys)
                 {
-                    if (track.FileTrackInfo.SeriesTitle.IsNullOrWhiteSpace())
+                    if (track.FileTagInfo.SeriesTitle.IsNullOrWhiteSpace())
                     {
-                        track.FileTrackInfo.Series = new List<string> { series };
-                        track.FileTrackInfo.SeriesTitle = series;
+                        track.FileTagInfo.Series = new List<string> { series };
+                        track.FileTagInfo.SeriesTitle = series;
                     }
                 }
             }
@@ -163,32 +163,32 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
             // Apply the title and track
             foreach (var track in matches.Keys)
             {
-                if (track.FileTrackInfo.IssueTitle.IsNullOrWhiteSpace())
+                if (track.FileTagInfo.IssueTitle.IsNullOrWhiteSpace())
                 {
                     var title = matches[track].Groups[titleField].Value.Trim();
                     _logger.Debug("Got title from filename: {0}", title);
-                    track.FileTrackInfo.IssueTitle = title;
+                    track.FileTagInfo.IssueTitle = title;
                 }
 
-                var trackNums = track.FileTrackInfo.TrackNumbers;
+                var trackNums = track.FileTagInfo.PartNumbers;
                 if (keys.Contains("track") && (trackNums.Count() == 0 || trackNums.First() == 0))
                 {
                     var tracknum = Convert.ToInt32(matches[track].Groups["track"].Value);
                     if (tracknum > 100)
                     {
-                        track.FileTrackInfo.DiscNumber = tracknum / 100;
+                        track.FileTagInfo.DiscNumber = tracknum / 100;
                         _logger.Debug("Got disc number from filename: {0}", tracknum / 100);
                         tracknum = tracknum % 100;
                     }
 
                     _logger.Debug("Got track number from filename: {0}", tracknum);
-                    track.FileTrackInfo.TrackNumbers = new[] { tracknum };
+                    track.FileTagInfo.PartNumbers = new[] { tracknum };
 
                     // Also set SeriesIndex so the identification pipeline can match
                     // against Issue.IssueNumber
-                    if (track.FileTrackInfo.SeriesIndex.IsNullOrWhiteSpace())
+                    if (track.FileTagInfo.SeriesIndex.IsNullOrWhiteSpace())
                     {
-                        track.FileTrackInfo.SeriesIndex = tracknum.ToString();
+                        track.FileTagInfo.SeriesIndex = tracknum.ToString();
                     }
                 }
             }

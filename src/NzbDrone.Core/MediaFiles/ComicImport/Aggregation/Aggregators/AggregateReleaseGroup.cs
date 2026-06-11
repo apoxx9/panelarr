@@ -16,7 +16,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 
             if (releaseGroup.IsNullOrWhiteSpace())
             {
-                releaseGroup = localTrack.FileTrackInfo?.ReleaseGroup;
+                releaseGroup = localTrack.FileTagInfo?.ReleaseGroup;
             }
 
             localTrack.ReleaseGroup = releaseGroup;

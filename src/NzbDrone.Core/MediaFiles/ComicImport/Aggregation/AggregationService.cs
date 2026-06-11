@@ -36,7 +36,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation
         {
             if (localTrack.DownloadClientIssueInfo == null &&
                 localTrack.FolderTrackInfo == null &&
-                localTrack.FileTrackInfo == null)
+                localTrack.FileTagInfo == null)
             {
                 if (MediaFileExtensions.AllExtensions.Contains(Path.GetExtension(localTrack.Path)))
                 {

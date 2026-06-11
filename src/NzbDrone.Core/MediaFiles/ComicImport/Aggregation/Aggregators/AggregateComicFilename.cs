@@ -24,7 +24,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 
         public LocalIssue Aggregate(LocalIssue localTrack, bool otherFiles)
         {
-            var fileTrackInfo = localTrack.FileTrackInfo;
+            var fileTrackInfo = localTrack.FileTagInfo;
 
             // Only augment when embedded tags are missing
             if (fileTrackInfo == null ||
@@ -60,9 +60,9 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
             }
 
             if (parsed.IssueNumber.HasValue &&
-                (!fileTrackInfo.TrackNumbers.Any() || fileTrackInfo.TrackNumbers.First() == 0))
+                (!fileTrackInfo.PartNumbers.Any() || fileTrackInfo.PartNumbers.First() == 0))
             {
-                fileTrackInfo.TrackNumbers = new[] { (int)parsed.IssueNumber.Value };
+                fileTrackInfo.PartNumbers = new[] { (int)parsed.IssueNumber.Value };
 
                 if (fileTrackInfo.SeriesIndex.IsNullOrWhiteSpace())
                 {
