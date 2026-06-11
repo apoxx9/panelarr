@@ -28,6 +28,10 @@ class MetadataProviderStep extends Component {
 
   componentDidMount() {
     this.fetchConfig();
+
+    // Let the wizard save this step's settings when the user clicks Next —
+    // otherwise credentials typed here would be silently discarded.
+    this.props.onRegisterSave(this.saveConfig);
   }
 
   //
@@ -72,7 +76,7 @@ class MetadataProviderStep extends Component {
     this.props.onValidationChange(hasMetron || hasComicVine);
   }
 
-  saveConfig(callback) {
+  saveConfig = (callback) => {
     this.setState({ isSaving: true, error: null });
 
     const { request } = createAjaxRequest({
@@ -101,7 +105,7 @@ class MetadataProviderStep extends Component {
         error: 'Failed to save metadata provider settings.'
       });
     });
-  }
+  };
 
   //
   // Listeners
@@ -196,10 +200,6 @@ class MetadataProviderStep extends Component {
         });
       });
     });
-  };
-
-  onSave = () => {
-    this.saveConfig();
   };
 
   //
@@ -342,7 +342,8 @@ class MetadataProviderStep extends Component {
 }
 
 MetadataProviderStep.propTypes = {
-  onValidationChange: PropTypes.func.isRequired
+  onValidationChange: PropTypes.func.isRequired,
+  onRegisterSave: PropTypes.func.isRequired
 };
 
 export default MetadataProviderStep;

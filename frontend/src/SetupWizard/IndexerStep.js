@@ -77,7 +77,10 @@ class IndexerStep extends Component {
     });
 
     request.done((data) => {
-      this.setState({ existingIndexers: data || [] });
+      const existingIndexers = data || [];
+
+      this.setState({ existingIndexers });
+      this.props.onConfiguredChange(existingIndexers.length > 0);
     });
   }
 
@@ -441,7 +444,7 @@ class IndexerStep extends Component {
 }
 
 IndexerStep.propTypes = {
-  onStepComplete: PropTypes.func.isRequired
+  onConfiguredChange: PropTypes.func.isRequired
 };
 
 export default IndexerStep;

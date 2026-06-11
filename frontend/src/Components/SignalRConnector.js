@@ -281,7 +281,11 @@ class SignalRConnector extends Component {
         updateOnly: true,
         ...body.resource
       });
+      return;
     }
+
+    // created/deleted carry no usable partial update — refetch the list
+    this.props.dispatchFetchRootFolders();
   };
 
   handleTag = (body) => {

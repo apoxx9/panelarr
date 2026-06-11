@@ -34,40 +34,48 @@ class SetupWizard extends Component {
         [STEP_METADATA]: false,
         [STEP_ROOT_FOLDER]: false
       },
-      // Track which configurable steps were completed (for summary)
+      // Which configurable steps actually have something configured
+      // (shown in the completion summary)
       completedSteps: [false, false, false, false]
     };
+
+    this._saveMetadata = null;
   }
 
   //
   // Listeners
 
   onNext = () => {
-    const { currentStep, completedSteps } = this.state;
+    const { currentStep } = this.state;
 
-    // Mark current step as completed when moving forward via Next
-    if (currentStep === STEP_METADATA) {
-      completedSteps[0] = true;
-    } else if (currentStep === STEP_ROOT_FOLDER) {
-      completedSteps[1] = true;
+    // The metadata step's settings live in its own form — persist them when
+    // advancing, and only advance (and mark configured) if the save succeeds.
+    if (currentStep === STEP_METADATA && this._saveMetadata) {
+      this._saveMetadata(() => {
+        this.markCompleted(0);
+        this.goToStep(currentStep + 1);
+      });
+
+      return;
     }
 
-    this.setState({
-      currentStep: Math.min(currentStep + 1, STEP_COUNT - 1),
-      completedSteps: [...completedSteps]
-    });
+    if (currentStep === STEP_ROOT_FOLDER) {
+      this.markCompleted(1);
+    }
+
+    this.goToStep(currentStep + 1);
   };
 
   onBack = () => {
-    this.setState({
-      currentStep: Math.max(this.state.currentStep - 1, 0)
-    });
+    this.goToStep(this.state.currentStep - 1);
   };
 
   onSkip = () => {
-    this.setState({
-      currentStep: Math.min(this.state.currentStep + 1, STEP_COUNT - 1)
-    });
+    this.goToStep(this.state.currentStep + 1);
+  };
+
+  onRegisterMetadataSave = (saveFn) => {
+    this._saveMetadata = saveFn;
   };
 
   onValidationChange = (stepIndex, isValid) => {
@@ -87,24 +95,12 @@ class SetupWizard extends Component {
     this.onValidationChange(STEP_ROOT_FOLDER, isValid);
   };
 
-  onIndexerStepComplete = () => {
-    const completedSteps = [...this.state.completedSteps];
-    completedSteps[2] = true;
-
-    this.setState({
-      currentStep: STEP_DOWNLOAD_CLIENT,
-      completedSteps
-    });
+  onIndexerConfiguredChange = (isConfigured) => {
+    this.markCompleted(2, isConfigured);
   };
 
-  onDownloadClientStepComplete = () => {
-    const completedSteps = [...this.state.completedSteps];
-    completedSteps[3] = true;
-
-    this.setState({
-      currentStep: STEP_COMPLETE,
-      completedSteps
-    });
+  onDownloadClientConfiguredChange = (isConfigured) => {
+    this.markCompleted(3, isConfigured);
   };
 
   onComplete = () => {
@@ -125,6 +121,24 @@ class SetupWizard extends Component {
       window.location.href = getPathWithUrlBase('/');
     });
   };
+
+  //
+  // Control
+
+  goToStep(step) {
+    this.setState({
+      currentStep: Math.min(Math.max(step, 0), STEP_COUNT - 1)
+    });
+  }
+
+  markCompleted(summaryIndex, isCompleted = true) {
+    this.setState((prevState) => {
+      const completedSteps = [...prevState.completedSteps];
+      completedSteps[summaryIndex] = isCompleted;
+
+      return { completedSteps };
+    });
+  }
 
   //
   // Render
@@ -177,6 +191,7 @@ class SetupWizard extends Component {
         return (
           <MetadataProviderStep
             onValidationChange={this.onMetadataValidationChange}
+            onRegisterSave={this.onRegisterMetadataSave}
           />
         );
 
@@ -190,14 +205,14 @@ class SetupWizard extends Component {
       case STEP_INDEXER:
         return (
           <IndexerStep
-            onStepComplete={this.onIndexerStepComplete}
+            onConfiguredChange={this.onIndexerConfiguredChange}
           />
         );
 
       case STEP_DOWNLOAD_CLIENT:
         return (
           <DownloadClientStep
-            onStepComplete={this.onDownloadClientStepComplete}
+            onConfiguredChange={this.onDownloadClientConfiguredChange}
           />
         );
 
@@ -216,15 +231,19 @@ class SetupWizard extends Component {
   }
 
   renderButtons() {
-    const { currentStep, stepValidation } = this.state;
+    const { currentStep, stepValidation, completedSteps } = this.state;
 
-    // No buttons on welcome (just Next) or complete step (has its own button)
+    // No buttons on complete step (has its own button)
     if (currentStep === STEP_COMPLETE) {
       return null;
     }
 
     const showBack = currentStep > STEP_WELCOME;
-    const showSkip = currentStep === STEP_INDEXER || currentStep === STEP_DOWNLOAD_CLIENT;
+
+    // Optional steps offer Skip until something has been configured
+    const showSkip =
+      (currentStep === STEP_INDEXER && !completedSteps[2]) ||
+      (currentStep === STEP_DOWNLOAD_CLIENT && !completedSteps[3]);
 
     let canNext = true;
 
@@ -232,15 +251,6 @@ class SetupWizard extends Component {
       canNext = stepValidation[STEP_METADATA];
     } else if (currentStep === STEP_ROOT_FOLDER) {
       canNext = stepValidation[STEP_ROOT_FOLDER];
-    }
-
-    // Determine the correct Next action for the current step
-    let onNextClick = this.onNext;
-
-    if (currentStep === STEP_INDEXER) {
-      onNextClick = this.onIndexerStepComplete;
-    } else if (currentStep === STEP_DOWNLOAD_CLIENT) {
-      onNextClick = this.onDownloadClientStepComplete;
     }
 
     return (
@@ -258,13 +268,26 @@ class SetupWizard extends Component {
         </div>
 
         <div className={styles.buttonsRight}>
-          <button
-            className={styles.buttonPrimary}
-            onClick={onNextClick}
-            disabled={!canNext}
-          >
-            Next
-          </button>
+          {
+            showSkip &&
+              <button
+                className={styles.buttonSecondary}
+                onClick={this.onSkip}
+              >
+                Skip
+              </button>
+          }
+
+          {
+            !showSkip &&
+              <button
+                className={styles.buttonPrimary}
+                onClick={this.onNext}
+                disabled={!canNext}
+              >
+                Next
+              </button>
+          }
         </div>
       </div>
     );

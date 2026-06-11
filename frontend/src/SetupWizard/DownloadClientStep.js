@@ -77,7 +77,10 @@ class DownloadClientStep extends Component {
     });
 
     request.done((data) => {
-      this.setState({ existingClients: data || [] });
+      const existingClients = data || [];
+
+      this.setState({ existingClients });
+      this.props.onConfiguredChange(existingClients.length > 0);
     });
   }
 
@@ -440,7 +443,7 @@ class DownloadClientStep extends Component {
 }
 
 DownloadClientStep.propTypes = {
-  onStepComplete: PropTypes.func.isRequired
+  onConfiguredChange: PropTypes.func.isRequired
 };
 
 export default DownloadClientStep;
