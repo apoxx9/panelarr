@@ -58,12 +58,12 @@ Deep audit round 3 on the seven never-audited layers (SignalR, refresh/import pi
 2. ~~B4~~ **DONE in session 15 addendum** — was: rejected-but-identified files are persisted with live IssueId and excluded from future Matched rescans until mtime changes. Touching DiskScanService persistence semantics; design first.
 3. **Quality ladder questions**: CB7 (45) ranks above CBZ (40) — upgrades to a worse-supported container; CBZ_Web/CBZ_HD unreachable (no real-world tokens map to them); default profile allows Unknown; parser assumes CBZ for unknown-quality search results (Parser.cs:343) → same release shows different quality in search vs RSS. All one "quality model rethink" discussion.
 4. **Q4 — no source-tag quality detection**: "(Digital)", "c2c", "(Scan)", "(f)"/"(Fixed)" aren't parsed into anything. Related to #3.
-5. **A2 — publishers never updated/orphan-cleaned on refresh** (name changes at provider don't propagate; empty publishers linger).
+5. ~~A2~~ **DONE** — refresh now propagates provider publisher renames (also repairs old 'Unknown' placeholders) and a CleanupOrphanedPublishers housekeeper removes unreferenced provider-created publishers (user-created ones are kept).
 6. **A4** — duplicate ForeignIssueId across metadata rows aborts series refresh via SingleOrDefault (fragility, needs repair path).
-7. **D3 — PendingRelease.AdditionalInfo not persisted** (release-source tracking lost on restart; needs migration 010 adding the column).
-8. **F12 — SearchForNewIssue always returns []** (dead feature; search-by-issue never worked).
-9. **F14** — CV API key is embedded in cached-response URLs in the cache DB (hygiene); CV pagination assumes page size 100.
-10. **S1 — handleCalendar orphan handler** (backend never broadcasts `calendar`; upstream-identical dead code).
+7. ~~D3~~ **DONE** — migration 011 adds the AdditionalInfo column; the class is an embedded document now.
+8. ~~F12~~ **DONE** — SearchForNewIssue fetches the full (cached) issue list of the best series match with best-title-first ordering; import-list items without foreign ids can map again, as can remote candidate lookup.
+9. ~~F14~~ **DONE** — cache keys redact api keys (no plaintext secret in cache.db, no orphan rows on key rotation) and CV pagination pins limit=100 explicitly.
+10. ~~S1~~ **DONE** — orphan handler removed.
 11. **Metron live verification**: dev-instance Metron credentials are invalid placeholders — the contract fixes are locked to the serializer source, but a real-credential smoke test would be good (add real creds and add/refresh one Metron series).
 
 ## Decisions made (end of Session 15)

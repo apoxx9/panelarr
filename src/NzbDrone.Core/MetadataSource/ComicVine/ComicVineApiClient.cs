@@ -109,6 +109,7 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
                 request.Url = request.Url
                     .AddQueryParam("filter", $"volume:{volumeId}")
                     .AddQueryParam("field_list", "id,name,issue_number,cover_date,image")
+                    .AddQueryParam("limit", limit.ToString())
                     .AddQueryParam("offset", offset.ToString());
 
                 var response = _cachedHttpClient.Get<ComicVineResponse<List<ComicVineIssueSummary>>>(request, true, TimeSpan.FromHours(12));

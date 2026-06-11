@@ -109,14 +109,25 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
             // Create or find publisher entity if the provider gave us one
             if (providerSeries.ForeignPublisherId.IsNotNullOrWhiteSpace())
             {
+                var providerPublisherName = providerSeries.PublisherName?.Split('|')[0]?.Trim();
+
                 var existingPublisher = _publisherService.FindByForeignId(providerSeries.ForeignPublisherId);
                 if (existingPublisher != null)
                 {
                     metadata.PublisherId = existingPublisher.Id;
+
+                    // Propagate provider-side renames (and repair the 'Unknown'
+                    // placeholders earlier versions stored for Metron publishers)
+                    if (providerPublisherName.IsNotNullOrWhiteSpace() && existingPublisher.Name != providerPublisherName)
+                    {
+                        existingPublisher.Name = providerPublisherName;
+                        existingPublisher.CleanName = providerPublisherName.CleanSeriesName();
+                        _publisherService.UpdatePublisher(existingPublisher);
+                    }
                 }
                 else
                 {
-                    var pubName = providerSeries.PublisherName?.Split('|')[0]?.Trim() ?? "Unknown";
+                    var pubName = providerPublisherName ?? "Unknown";
                     var newPublisher = new Publisher
                     {
                         ForeignPublisherId = providerSeries.ForeignPublisherId,
@@ -226,31 +237,41 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
             {
                 _logger.Debug("Searching for new issue: title={0}, series={1}", title, series);
 
-                var query = title?.Trim() ?? string.Empty;
-                if (series != null)
+                var query = $"{title} {series}".Trim();
+
+                if (query.IsNullOrWhiteSpace())
                 {
-                    query += " " + series;
+                    return new List<Issue>();
                 }
 
-                var results = _metadataProvider.SearchSeries(query.Trim());
+                var results = _metadataProvider.SearchSeries(query);
+
+                // The combined query often carries issue-specific noise
+                // ("#3", numbers); retry with just the series part.
+                if ((results == null || !results.Any()) && series.IsNotNullOrWhiteSpace() && series.Trim() != query)
+                {
+                    results = _metadataProvider.SearchSeries(series.Trim());
+                }
+
                 if (results == null || !results.Any())
                 {
                     return new List<Issue>();
                 }
 
-                var issues = new List<Issue>();
-                foreach (var result in results)
+                // Search results carry no issue lists — fetch the full (cached)
+                // series for the best match; trying every result would hammer
+                // rate-limited providers.
+                var fullSeries = GetSeriesInfo(results.First().ForeignSeriesId);
+                var issues = fullSeries.Issues?.Value ?? new List<Issue>();
+
+                // Best title matches first, for consumers that take the top hit
+                if (title.IsNotNullOrWhiteSpace())
                 {
-                    var (metadata, mappedSeries) = _metronMapper.MapSeries(result);
-                    if (mappedSeries?.Issues?.Value != null)
-                    {
-                        foreach (var issue in mappedSeries.Issues.Value)
-                        {
-                            issue.SeriesMetadata = metadata;
-                            issue.Series = mappedSeries;
-                            issues.Add(issue);
-                        }
-                    }
+                    var cleanTitle = title.CleanSeriesName() ?? string.Empty;
+
+                    issues = issues.OrderByDescending(i => i.CleanTitle == cleanTitle)
+                                   .ThenByDescending(i => i.CleanTitle.IsNotNullOrWhiteSpace() && cleanTitle.Contains(i.CleanTitle))
+                                   .ToList();
                 }
 
                 return issues;

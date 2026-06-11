@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Download.Pending
         public RemoteIssue RemoteIssue { get; set; }
     }
 
-    public class PendingReleaseAdditionalInfo
+    public class PendingReleaseAdditionalInfo : IEmbeddedDocument
     {
         public ReleaseSourceType ReleaseSource { get; set; }
     }

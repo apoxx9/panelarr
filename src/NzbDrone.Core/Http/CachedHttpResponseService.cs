@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Common.Http;
 
@@ -27,9 +28,15 @@ namespace NzbDrone.Core.Http
             _logger = logger;
         }
 
+        // Credentials must not leak into (or fragment) the cache: the key is
+        // the URL with any api key parameter redacted, so rotating a key
+        // neither orphans rows nor stores the secret in the cache DB.
+        private static readonly Regex ApiKeyRegex = new (@"(?<=\b(?:api_?key)=)[^&]+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         public HttpResponse Get(HttpRequest request, bool useCache, TimeSpan ttl)
         {
-            var cached = _repo.FindByUrl(request.Url.ToString());
+            var cacheKey = ApiKeyRegex.Replace(request.Url.ToString(), "REDACTED");
+            var cached = _repo.FindByUrl(cacheKey);
 
             if (useCache && cached != null && cached.Expiry > DateTime.UtcNow)
             {
@@ -45,7 +52,7 @@ namespace NzbDrone.Core.Http
                 {
                     cached = new CachedHttpResponse
                     {
-                        Url = request.Url.ToString(),
+                        Url = cacheKey,
                     };
                 }
 

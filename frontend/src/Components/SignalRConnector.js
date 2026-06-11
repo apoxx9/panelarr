@@ -149,15 +149,9 @@ class SignalRConnector extends Component {
     console.error(`signalR: Unable to find handler for ${name}`);
   };
 
-  handleCalendar = (body) => {
-    if (body.action === 'updated') {
-      this.props.dispatchUpdateItem({
-        section: 'calendar',
-        updateOnly: true,
-        ...body.resource
-      });
-    }
-  };
+  // There is no 'calendar' broadcast: CalendarController emits plain 'issue'
+  // frames (handled below) and calendar freshness comes from the repopulate
+  // hooks registered by CalendarConnector.
 
   handleCommand = (body) => {
     if (body.action === 'sync') {
