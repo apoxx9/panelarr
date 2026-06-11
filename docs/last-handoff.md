@@ -66,6 +66,14 @@ Deep audit round 3 on the seven never-audited layers (SignalR, refresh/import pi
 10. ~~S1~~ **DONE** — orphan handler removed.
 11. **Metron live verification**: dev-instance Metron credentials are invalid placeholders — the contract fixes are locked to the serializer source, but a real-credential smoke test would be good (add real creds and add/refresh one Metron series).
 
+## Next feature (decided in addendum): Tagged Library Import
+
+**docs/tagged-library-import.md** — the Mylar migration path, prioritized AHEAD
+of Publisher UI. Phase 1: surface the ComicVine issue ids ComicTagger embeds in
+Web/Notes and use them as an exact-id identification fast path. Phase 2:
+"Import existing library" flow on /unmapped — scan, propose series (exact/
+probable confidence), confirm, rate-limit-aware background bulk add + import.
+
 ## Decisions made (end of Session 15)
 
 1. **Update mechanism**: implement a GitHub-releases update *check* against apoxx9/panelarr (banner + release notes, no in-app auto-install; Docker pulls images). Kills the permanent `/system/updates` 500. The same dead `panelarr.servarr.com` URL backs donations/services — address while in there.
