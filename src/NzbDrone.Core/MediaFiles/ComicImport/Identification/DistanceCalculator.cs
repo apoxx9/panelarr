@@ -6,6 +6,7 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation;
 using NzbDrone.Core.Issues;
+using NzbDrone.Core.MetadataSource.Provider;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
@@ -76,22 +77,25 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 Logger.Trace("issue: '{0}' vs '{1}'; {2}", fileTitles.ConcatToString("' or '"), titleOptions.ConcatToString("' or '"), dist.NormalizedDistance());
             }
 
-            // Issue number — the most reliable matching signal for comics
+            // Issue number — the most reliable matching signal for comics.
+            // Normalize both sides so padded ("003") and trailing-zero ("1.50")
+            // forms compare equal, matching the candidate-lookup normalization.
             var localIssueNumber = localTracks.MostCommon(x => x.FileTrackInfo.SeriesIndex) ?? "";
             if (localIssueNumber.IsNotNullOrWhiteSpace())
             {
                 var dbIssueNumber = issue.IssueNumber ?? "";
-                dist.AddString("issue_number", localIssueNumber, dbIssueNumber);
+                dist.AddString("issue_number", NormalizeIssueNumber(localIssueNumber), NormalizeIssueNumber(dbIssueNumber));
                 Logger.Trace("issue_number: '{0}' vs '{1}'; {2}", localIssueNumber, dbIssueNumber, dist.NormalizedDistance());
             }
 
-            // Publisher
+            // Publisher — compare against the actual publisher name (never the
+            // series name), and only when both sides have one.
             var localPublisher = localTracks.MostCommon(x => x.FileTrackInfo.Publisher) ?? "";
-            if (localPublisher.IsNotNullOrWhiteSpace() && issue.SeriesMetadata?.Value?.PublisherId != null)
+            var dbPublisher = issue.SeriesMetadata?.Value?.Publisher?.Value?.Name;
+            if (localPublisher.IsNotNullOrWhiteSpace() && dbPublisher.IsNotNullOrWhiteSpace())
             {
-                // Only compare if we have publisher info from the file
-                dist.AddString("publisher", localPublisher, issue.SeriesMetadata.Value.Name);
-                Logger.Trace("publisher: '{0}'; {1}", localPublisher, dist.NormalizedDistance());
+                dist.AddString("publisher", localPublisher, dbPublisher);
+                Logger.Trace("publisher: '{0}' vs '{1}'; {2}", localPublisher, dbPublisher, dist.NormalizedDistance());
             }
 
             // Year
@@ -115,6 +119,11 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             }
 
             return dist;
+        }
+
+        private static string NormalizeIssueNumber(string number)
+        {
+            return IssueNumberNormalizer.Normalize(number) ?? string.Empty;
         }
 
         public static List<string> GetSeriesVariants(List<string> fileSeries)

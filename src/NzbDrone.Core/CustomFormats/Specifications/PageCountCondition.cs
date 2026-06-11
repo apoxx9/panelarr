@@ -32,7 +32,7 @@ namespace NzbDrone.Core.CustomFormats
 
         protected override bool IsSatisfiedByWithoutNegate(CustomFormatInput input)
         {
-            var pages = input.ImageCount ?? input.ComicFile?.ImageCount;
+            var pages = input.ImageCount;
 
             if (pages == null)
             {

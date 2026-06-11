@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.IssueImport.Identification;
+using NzbDrone.Core.Parser.Model;
 using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
@@ -9,6 +11,74 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
     [TestFixture]
     public class DistanceCalculatorFixture : TestBase
     {
+        private static List<LocalIssue> GivenLocalTracks(string seriesIndex, string publisher = null)
+        {
+            return new List<LocalIssue>
+            {
+                new LocalIssue
+                {
+                    FileTrackInfo = new ParsedTrackInfo
+                    {
+                        Series = new List<string> { "Saga" },
+                        SeriesIndex = seriesIndex,
+                        Publisher = publisher
+                    }
+                }
+            };
+        }
+
+        private static Issue GivenDbIssue(string issueNumber, string publisherName = null)
+        {
+            var metadata = new SeriesMetadata
+            {
+                Name = "Saga",
+                PublisherId = publisherName != null ? 1 : null,
+                Publisher = publisherName != null ? new Publisher { Name = publisherName } : null
+            };
+
+            return new Issue
+            {
+                IssueNumber = issueNumber,
+                Title = string.Empty,
+                SeriesMetadata = metadata
+            };
+        }
+
+        [TestCase("003", "3")]
+        [TestCase("3", "3")]
+        [TestCase("0.50", "0.5")]
+        public void issue_number_padding_should_not_add_distance(string fileNumber, string dbNumber)
+        {
+            var dist = DistanceCalculator.IssueDistance(GivenLocalTracks(fileNumber), GivenDbIssue(dbNumber));
+
+            dist.NormalizedDistance().Should().Be(0.0);
+        }
+
+        [Test]
+        public void publisher_should_compare_against_publisher_name_not_series_name()
+        {
+            // "Image" vs series name "Saga" used to incur a guaranteed penalty
+            var dist = DistanceCalculator.IssueDistance(GivenLocalTracks("3", "Image"), GivenDbIssue("3", "Image"));
+
+            dist.NormalizedDistance().Should().Be(0.0);
+        }
+
+        [Test]
+        public void publisher_should_not_be_compared_when_db_publisher_unknown()
+        {
+            var dist = DistanceCalculator.IssueDistance(GivenLocalTracks("3", "Image"), GivenDbIssue("3"));
+
+            dist.NormalizedDistance().Should().Be(0.0);
+        }
+
+        [Test]
+        public void mismatched_publisher_should_add_distance()
+        {
+            var dist = DistanceCalculator.IssueDistance(GivenLocalTracks("3", "Marvel"), GivenDbIssue("3", "Image"));
+
+            dist.NormalizedDistance().Should().BeGreaterThan(0.0);
+        }
+
         [Test]
         public void should_reverse_single_reversed_author()
         {

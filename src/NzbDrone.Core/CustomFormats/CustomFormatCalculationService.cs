@@ -188,7 +188,11 @@ namespace NzbDrone.Core.CustomFormats
                 Series = series,
                 Size = comicFile.Size,
                 IndexerFlags = comicFile.IndexerFlags,
-                Filename = Path.GetFileName(comicFile.Path)
+                Filename = Path.GetFileName(comicFile.Path),
+
+                // 0 means the archive was never inspected — treat as unknown
+                ImageCount = comicFile.ImageCount > 0 ? comicFile.ImageCount : null,
+                ImageQualityScore = comicFile.ImageQualityScore > 0 ? comicFile.ImageQualityScore : null
             };
 
             return ParseCustomFormat(input, allCustomFormats);

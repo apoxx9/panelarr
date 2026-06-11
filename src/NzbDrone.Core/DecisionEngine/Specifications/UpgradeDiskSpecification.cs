@@ -1,6 +1,5 @@
 using System.Linq;
 using NLog;
-using NzbDrone.Common.Cache;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Parser.Model;
@@ -14,7 +13,6 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         private readonly Logger _logger;
 
         public UpgradeDiskSpecification(UpgradableSpecification qualityUpgradableSpecification,
-                                        ICacheManager cacheManager,
                                         ICustomFormatCalculationService formatService,
                                         Logger logger)
         {
@@ -32,7 +30,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             {
                 if (file == null)
                 {
-                    return Decision.Accept();
+                    continue;
                 }
 
                 var customFormats = _formatService.ParseCustomFormat(file);

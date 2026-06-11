@@ -1,5 +1,4 @@
 using NzbDrone.Core.Issues;
-using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.CustomFormats
@@ -12,33 +11,10 @@ namespace NzbDrone.Core.CustomFormats
         public IndexerFlags IndexerFlags { get; set; }
         public string Filename { get; set; }
 
-        // Comic-specific fields populated when evaluating an existing ComicFile
-        public ComicFile ComicFile { get; set; }
+        // Comic-specific fields, populated when evaluating an existing ComicFile
+        // whose archive has been inspected; null = unknown (remote releases,
+        // uninspected files) and comic conditions will not match.
         public float? ImageQualityScore { get; set; }
         public int? ImageCount { get; set; }
-        public string ComicSource { get; set; }
-
-        // public CustomFormatInput(ParsedEpisodeInfo episodeInfo, SeriesGroup series)
-        // {
-        //     EpisodeInfo = episodeInfo;
-        //     SeriesGroup = series;
-        // }
-        //
-        // public CustomFormatInput(ParsedEpisodeInfo episodeInfo, SeriesGroup series, long size, List<Language> languages)
-        // {
-        //     EpisodeInfo = episodeInfo;
-        //     SeriesGroup = series;
-        //     Size = size;
-        //     Languages = languages;
-        // }
-        //
-        // public CustomFormatInput(ParsedEpisodeInfo episodeInfo, SeriesGroup series, long size, List<Language> languages, string filename)
-        // {
-        //     EpisodeInfo = episodeInfo;
-        //     SeriesGroup = series;
-        //     Size = size;
-        //     Languages = languages;
-        //     Filename = filename;
-        // }
     }
 }

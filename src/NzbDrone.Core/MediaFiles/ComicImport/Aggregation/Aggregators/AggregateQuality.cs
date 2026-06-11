@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
@@ -8,24 +9,21 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
     {
         public LocalIssue Aggregate(LocalIssue localTrack, bool otherFiles)
         {
-            var quality = localTrack.FileTrackInfo?.Quality;
-
-            if (quality == null)
+            // Prefer the first source that detected a real quality. Comic release
+            // names usually carry no format token, so folder/client titles parse to
+            // a non-null Unknown — that must not mask the extension fallback.
+            var candidates = new[]
             {
-                quality = localTrack.FolderTrackInfo?.Quality;
-            }
+                localTrack.FileTrackInfo?.Quality,
+                localTrack.FolderTrackInfo?.Quality,
+                localTrack.DownloadClientIssueInfo?.Quality,
+                QualityFromExtension(localTrack.Path)
+            };
 
-            if (quality == null)
-            {
-                quality = localTrack.DownloadClientIssueInfo?.Quality;
-            }
+            localTrack.Quality = candidates.FirstOrDefault(q => q != null && q.Quality != Quality.Unknown)
+                                 ?? candidates.FirstOrDefault(q => q != null)
+                                 ?? new QualityModel(Quality.Unknown);
 
-            if (quality == null)
-            {
-                quality = QualityFromExtension(localTrack.Path);
-            }
-
-            localTrack.Quality = quality ?? new QualityModel(Quality.Unknown);
             return localTrack;
         }
 

@@ -50,7 +50,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Specifications
                 }
 
                 if (qualityCompare == 0 && downloadPropersAndRepacks != ProperDownloadTypes.DoNotPrefer &&
-                    item.Quality.Revision.CompareTo(comicFile.Quality.Revision) < 0)
+                    itemQuality.Revision.CompareTo(fileQuality.Revision) < 0)
                 {
                     _logger.Debug("This file isn't a quality upgrade for all issues. Skipping {0}", item.Path);
                     return Decision.Reject("Not an upgrade for existing issue file(s)");

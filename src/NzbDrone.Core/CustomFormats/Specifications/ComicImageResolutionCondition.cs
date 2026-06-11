@@ -33,7 +33,7 @@ namespace NzbDrone.Core.CustomFormats
 
         protected override bool IsSatisfiedByWithoutNegate(CustomFormatInput input)
         {
-            var score = input.ImageQualityScore ?? input.ComicFile?.ImageQualityScore;
+            var score = input.ImageQualityScore;
 
             if (score == null)
             {
