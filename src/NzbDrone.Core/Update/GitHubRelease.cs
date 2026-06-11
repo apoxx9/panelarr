@@ -1,0 +1,42 @@
+using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+
+namespace NzbDrone.Core.Update
+{
+    public class GitHubRelease
+    {
+        [JsonProperty("tag_name")]
+        public string TagName { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("body")]
+        public string Body { get; set; }
+
+        [JsonProperty("html_url")]
+        public string HtmlUrl { get; set; }
+
+        [JsonProperty("published_at")]
+        public DateTime? PublishedAt { get; set; }
+
+        [JsonProperty("draft")]
+        public bool Draft { get; set; }
+
+        [JsonProperty("prerelease")]
+        public bool Prerelease { get; set; }
+
+        [JsonProperty("assets")]
+        public List<GitHubReleaseAsset> Assets { get; set; }
+    }
+
+    public class GitHubReleaseAsset
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("browser_download_url")]
+        public string BrowserDownloadUrl { get; set; }
+    }
+}

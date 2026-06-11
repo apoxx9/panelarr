@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using NzbDrone.Common.Cloud;
+using System.Linq;
+using NLog;
 using NzbDrone.Common.EnvironmentInfo;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
-using NzbDrone.Core.Analytics;
-using NzbDrone.Core.Datastore;
+using NzbDrone.Core.Http;
 
 namespace NzbDrone.Core.Update
 {
@@ -15,77 +15,139 @@ namespace NzbDrone.Core.Update
         List<UpdatePackage> GetRecentUpdates(string branch, Version currentVersion, Version previousVersion = null);
     }
 
+    // Update information comes from GitHub releases (there is no panelarr
+    // cloud service). This is a check-only provider: releases without a
+    // platform package asset can be surfaced but not auto-installed.
     public class UpdatePackageProvider : IUpdatePackageProvider
     {
-        private readonly IHttpClient _httpClient;
-        private readonly IHttpRequestBuilderFactory _requestBuilder;
-        private readonly IPlatformInfo _platformInfo;
-        private readonly IAnalyticsService _analyticsService;
-        private readonly IMainDatabase _mainDatabase;
+        private const string ReleasesUrl = "https://api.github.com/repos/apoxx9/panelarr/releases?per_page=20";
 
-        public UpdatePackageProvider(IHttpClient httpClient, IPanelarrCloudRequestBuilder requestBuilder, IAnalyticsService analyticsService, IPlatformInfo platformInfo, IMainDatabase mainDatabase)
+        private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(30);
+
+        private readonly ICachedHttpResponseService _cachedHttpClient;
+        private readonly Logger _logger;
+
+        public UpdatePackageProvider(ICachedHttpResponseService cachedHttpClient, Logger logger)
         {
-            _platformInfo = platformInfo;
-            _analyticsService = analyticsService;
-            _requestBuilder = requestBuilder.Services;
-            _httpClient = httpClient;
-            _mainDatabase = mainDatabase;
+            _cachedHttpClient = cachedHttpClient;
+            _logger = logger;
         }
 
         public UpdatePackage GetLatestUpdate(string branch, Version currentVersion)
         {
-            var request = _requestBuilder.Create()
-                                         .Resource("/update/{branch}")
-                                         .AddQueryParam("version", currentVersion)
-                                         .AddQueryParam("os", OsInfo.Os.ToString().ToLowerInvariant())
-                                         .AddQueryParam("arch", RuntimeInformation.OSArchitecture)
-                                         .AddQueryParam("runtime", "netcore")
-                                         .AddQueryParam("runtimeVer", _platformInfo.Version)
-                                         .AddQueryParam("dbType", _mainDatabase.DatabaseType)
-                                         .AddQueryParam("includeMajorVersion", true)
-                                         .SetSegment("branch", branch);
+            return GetRecentUpdates(branch, currentVersion)
+                .Where(p => p.Version > currentVersion)
+                .OrderByDescending(p => p.Version)
+                .FirstOrDefault();
+        }
 
-            if (_analyticsService.IsEnabled)
+        public List<UpdatePackage> GetRecentUpdates(string branch, Version currentVersion, Version previousVersion = null)
+        {
+            try
             {
-                // Send if the system is active so we know which versions to deprecate/ignore
-                request.AddQueryParam("active", _analyticsService.InstallIsActive.ToString().ToLower());
+                var request = new HttpRequest(ReleasesUrl);
+                request.Headers.Accept = "application/vnd.github+json";
+
+                var releases = _cachedHttpClient.Get<List<GitHubRelease>>(request, true, CacheDuration).Resource;
+
+                return releases.Where(r => !r.Draft && !r.Prerelease)
+                               .Select(r => MapRelease(r, branch))
+                               .Where(p => p != null)
+                               .OrderByDescending(p => p.Version)
+                               .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "Unable to fetch update information from GitHub");
+                return new List<UpdatePackage>();
+            }
+        }
+
+        private UpdatePackage MapRelease(GitHubRelease release, string branch)
+        {
+            var tag = release.TagName?.TrimStart('v', 'V');
+
+            if (tag.IsNullOrWhiteSpace() || !Version.TryParse(tag, out var version))
+            {
+                _logger.Debug("Skipping GitHub release with unparsable tag '{0}'", release.TagName);
+                return null;
             }
 
-            var update = _httpClient.Get<UpdatePackageAvailable>(request.Build()).Resource;
+            var asset = FindPackageAsset(release);
 
-            if (!update.Available)
+            return new UpdatePackage
+            {
+                Version = version,
+                ReleaseDate = release.PublishedAt ?? DateTime.UtcNow,
+                Branch = branch,
+                Url = asset?.BrowserDownloadUrl ?? release.HtmlUrl,
+                FileName = asset?.Name,
+                Hash = null,
+                Changes = ParseChanges(release.Body)
+            };
+        }
+
+        // A future packaged release would attach per-OS archives; until then
+        // releases carry no installable asset and FileName stays null.
+        private static GitHubReleaseAsset FindPackageAsset(GitHubRelease release)
+        {
+            if (release.Assets == null)
             {
                 return null;
             }
 
-            return update.UpdatePackage;
+            var os = OsInfo.Os.ToString().ToLowerInvariant();
+
+            return release.Assets.FirstOrDefault(a => a.Name != null &&
+                                                      a.Name.ToLowerInvariant().Contains(os) &&
+                                                      (a.Name.EndsWith(".zip") || a.Name.EndsWith(".tar.gz")));
         }
 
-        public List<UpdatePackage> GetRecentUpdates(string branch, Version currentVersion, Version previousVersion)
+        // Buckets markdown bullet lines under New/Fixed using any
+        // "New|Features|Added|Changes" / "Fix..." headings; bullets before
+        // any heading count as New.
+        private static UpdateChanges ParseChanges(string body)
         {
-            var request = _requestBuilder.Create()
-                                         .Resource("/update/{branch}/changes")
-                                         .AddQueryParam("version", currentVersion)
-                                         .AddQueryParam("os", OsInfo.Os.ToString().ToLowerInvariant())
-                                         .AddQueryParam("arch", RuntimeInformation.OSArchitecture)
-                                         .AddQueryParam("runtime", "netcore")
-                                         .AddQueryParam("runtimeVer", _platformInfo.Version)
-                                         .SetSegment("branch", branch);
-
-            if (previousVersion != null && previousVersion != currentVersion)
+            if (body.IsNullOrWhiteSpace())
             {
-                request.AddQueryParam("prevVersion", previousVersion);
+                return null;
             }
 
-            if (_analyticsService.IsEnabled)
+            var changes = new UpdateChanges();
+            var current = changes.New;
+
+            foreach (var rawLine in body.Split('\n'))
             {
-                // Send if the system is active so we know which versions to deprecate/ignore
-                request.AddQueryParam("active", _analyticsService.InstallIsActive.ToString().ToLower());
+                var line = rawLine.Trim();
+
+                if (line.StartsWith("#"))
+                {
+                    var heading = line.TrimStart('#').Trim().ToLowerInvariant();
+
+                    if (heading.Contains("fix"))
+                    {
+                        current = changes.Fixed;
+                    }
+                    else if (heading.Contains("new") || heading.Contains("feature") || heading.Contains("added") || heading.Contains("change"))
+                    {
+                        current = changes.New;
+                    }
+
+                    continue;
+                }
+
+                if (line.StartsWith("- ") || line.StartsWith("* "))
+                {
+                    current.Add(line.Substring(2).Trim());
+                }
             }
 
-            var updates = _httpClient.Get<List<UpdatePackage>>(request.Build());
+            if (!changes.New.Any() && !changes.Fixed.Any())
+            {
+                return null;
+            }
 
-            return updates.Resource;
+            return changes;
         }
     }
 }

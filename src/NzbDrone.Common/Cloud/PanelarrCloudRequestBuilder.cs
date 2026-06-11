@@ -4,7 +4,6 @@ namespace NzbDrone.Common.Cloud
 {
     public interface IPanelarrCloudRequestBuilder
     {
-        IHttpRequestBuilderFactory Services { get; }
         IHttpRequestBuilderFactory Metadata { get; }
     }
 
@@ -12,16 +11,12 @@ namespace NzbDrone.Common.Cloud
     {
         public PanelarrCloudRequestBuilder()
         {
-            Services = new HttpRequestBuilder("https://panelarr.servarr.com/v1/")
-                .CreateFactory();
-
             // Panelarr uses ComicVine/Metron directly for metadata.
-            // This endpoint is reserved for a future Panelarr metadata proxy.
+            // This endpoint is reserved for a future Panelarr metadata proxy;
+            // updates and health pings use GitHub instead.
             Metadata = new HttpRequestBuilder("https://panelarr.servarr.com/v1/metadata/{route}")
                 .CreateFactory();
         }
-
-        public IHttpRequestBuilderFactory Services { get; }
 
         public IHttpRequestBuilderFactory Metadata { get; }
     }

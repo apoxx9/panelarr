@@ -81,6 +81,14 @@ namespace NzbDrone.Core.Update
 
         private bool InstallUpdate(UpdatePackage updatePackage)
         {
+            // Updates are distributed as GitHub releases; without a packaged
+            // platform asset there is nothing to download and install.
+            if (updatePackage.FileName.IsNullOrWhiteSpace())
+            {
+                _logger.ProgressInfo("Panelarr {0} is available but in-app updating is not supported; see {1}", updatePackage.Version, updatePackage.Url);
+                return false;
+            }
+
             EnsureAppDataSafety();
 
             if (_configFileProvider.UpdateMechanism != UpdateMechanism.Script)
