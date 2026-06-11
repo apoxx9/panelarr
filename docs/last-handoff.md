@@ -1,136 +1,92 @@
-# Last Handoff — 2026-06-10 (End of Session 14)
+# Last Handoff — 2026-06-11 (End of Session 15)
 
-## Session 14 Summary
+## Session 15 Summary
 
-Two audit rounds. **Round 1**: three parallel audit agents (frontend health, backend contracts, localization) plus live E2E sweeps (every API endpoint, every frontend route, SPA navigation sequences) — found and fixed a **showstopper navigation bug**, resolved the dual-section Redux landmine at its root, cleaned 598 stale locale entries, completed two Priority-2 cleanups (Discography rename, MediaInfo removal). **Round 2**: four more agents on previously-unaudited surfaces (command contracts, write-path POST/PUT/DELETE contracts, notification/import-list payloads, modal flows) plus live write-endpoint testing and a new modal interaction sweep — found and fixed two broken write endpoints and a broken Slack notification.
+Deep audit round 3 on the seven never-audited layers (SignalR, refresh/import pipeline, quality engine, database layer, metadata mappers, backup/restore, setup wizard) using five parallel audit agents plus live testing. ~30 findings, ~25 confirmed and fixed; agent accuracy was high this round (one false alarm of note, which inverted into a different real bug). All Priority 2 cleanup completed. 8 commits, all local, **not pushed**.
 
-## Round 2 — write paths, commands, notifications, modals
+## Live tests (all PASS after fixes)
 
-### Bugs found by live write-path testing (34 endpoint operations exercised)
+- **Backup/restore round-trip**: backup → marker tag added → restore → restart → tag rolled back, library byte-identical (2 series / 35 issues / 9 files / profiles / root folders).
+- **Setup wizard on wiped AppData**: full first-run walkthrough; after fixes the CV key persists, summary is honest, Skip works (see below).
+- **SignalR live**: websocket frames captured during RefreshSeries — every broadcast has a matching handler; second-tab updates work without reload.
+- **Upgrade decisions live** (manual-import evaluation API): CBR over existing CBZ rejected "Not an upgrade"; CB7 (higher rung) accepted; same-size copy rejected by same-file check.
+- **Housekeeping**: runs with zero errors (previously failed every run — see D1).
+- **No-change refresh is now a no-op**: previously every refresh re-saved and re-broadcast *every issue* forever (see the date bug below).
 
-1. **Import list exclusions could never be created**: `ImportListExclusionController` validated `ForeignId` with `GuidValidator` — a Lidarr/MusicBrainz remnant. Comic ids (`cv-*`, metron) aren't GUIDs, so every POST failed validation. Validator dropped (class deleted, now unused). Verified live: POST now 201.
-2. **Publisher create/update 500'd**: `CleanName` was never computed on the API path, violating a NOT NULL constraint (metadata-sync paths compute it themselves). `PublisherService` now derives it from `Name`. Verified live: POST now 201, cleanName computed.
+## Fixed this session (by layer)
 
-### Bugs found by audit agents (verified before fixing)
+### Database (commit 73f2004)
+- **CleanupOrphanedSeriesIssueLinks** joined `Issues` on nonexistent `SeriesGroupLink.IssueId` → "no such column" on every housekeeping run (verified live, then fixed to join SeriesMetadata; gained its missing test fixture).
+- `SeriesGroupLink.Issue` HasOne mapping joined Issue PK against SeriesMetadataId — removed (property is in-memory only).
+- `SeriesMetadata.Publisher` lazy-load registered (was dead).
+- CleanupUnusedTags now counts `RootFolders.DefaultTags` — root-folder-default tags no longer deleted.
 
-3. **Slack delete notifications rendered `${...}` literally** — `$"${a} - ${b}"` instead of `$"{a} - {b}"` in `OnIssueDelete`/`OnComicFileDelete`.
-4. **Plex messages said "Music library"** (validation failure + log) — the section filter itself was already adapted to show/movie types; messages now generic.
-5. **Folder-select modal checked `this.path`** instead of `this.props.path` (harmless today because the parent gates rendering, but wrong; same oddity exists upstream in Readarr).
-6. **Dead code removed**: `editionActions.js` (registered an `editions` store section with no backend route and no consumers), `IssueEditionSelectInputConnector`, `ManualImportUpdateResource.ForeignEditionId`, MonitoringOptions connector's broken unused `onInputChange`, `seriesActions.getSaveAjaxOptions` (the save handler never invokes `options.getAjaxOptions`).
+### Metadata providers / refresh (commit 4fd8bff) — biggest batch
+- **Metron API contract was wrong in 5 places** (verified against Metron-Project/metron serializers + mokkari, locked by new raw-JSON contract fixture `MetronResourceContractFixture`): issue list titles come under `"issue"` not `"issue_name"`; detail titles under `"title"`/`"name"` (story-title array!); page count under `"page"`; series list has **no publisher field**; status strings are Cancelled/**Completed**/Hiatus/Ongoing; series types are "Single Issue"/"Limited Series"/"Annual Series"/"Digital Chapters"/… — old switch matched almost none.
+- **Issue numbers survived as strings**: ProviderIssue.IssueNumber was `int?` → "0.5"/"1a" became "0", "003" lost padding. Now string with shared `IssueNumberNormalizer` ("003"→"3", "0.50"→"0.5", "1a" untouched).
+- **Cover dates pinned to UTC** — they parsed as local midnight, shifted on the DB round-trip, and made *every* issue compare as changed on *every* refresh → permanent re-save + SignalR broadcast flood. `SortOrder` (dead field, populated only by migration 009) also participated in equality and is now set by the mapper and merged.
+- Metron publishers were stored as "Unknown" (PublisherName never mapped); VolumeNumber was assigned the CV issue count; Metron covers now populate from the list endpoint.
+- **Unconfigured ComicVine now throws a clear IssueInfoException instead of returning null** (null = "not found" = deletes file-less series on refresh — the audit predicted deletion; live testing showed exception-wrapping accidentally prevented it, but the not-found pass-throughs in IssueInfoProxy were dead, so genuine provider 404 handling never worked; both ends fixed).
+- Scheduled RefreshSeries refreshed *nothing* when LastExecutionTime was null or >14 days old (`updatedSeries` initialized to empty set instead of null).
+- RefreshIssueService NRE guards; Metron rate limiter day-bucket actually enforces + minute-window race fixed; composite search skips unconfigured Metron and falls back to CV on Metron errors; CV HTML stripping decodes entities and runs on search path too; Publisher CleanName same algorithm everywhere; Issue.UseMetadataFrom keeps detail-sourced Overview/CoverArtUrl/PageCount when list-mapped remote is blank (and PrepareExistingChild backfills pre-compare).
 
-### Verified clean by round-2 audit
+### Quality engine / import identification (commit 232b5ed)
+- **Comic custom-format conditions were dead** (PageCount, ComicImageResolution — CustomFormatInput comic fields never populated). Now fed from inspected ComicFiles (0 = uninspected = unknown); never-populated ComicFile/ComicSource input fields deleted.
+- **AggregateQuality**: folder/client titles parsing to non-null Unknown masked the extension fallback → downloads imported as Unknown quality (re-download loop risk). Now prefers first known quality.
+- **DistanceCalculator compared the file's publisher tag against the series name** (copy-paste bug — guaranteed penalty pushing ComicInfo-tagged files over the 0.20 rejection threshold; this plus the no-fallback gap was the Saga 003 mystery, now root-caused in AUDIT.md 11.6). Also normalized issue numbers in distance scoring ("003" vs "3" no longer hard-rejects).
+- Import UpgradeSpecification NRE on null DB quality; UpgradeDiskSpecification accepted whole release on null file (now skips) + unused ICacheManager removed.
 
-- **All 27 frontend command names** match backend Command classes (case-insensitive binding; payload property names all bind).
-- **All 14 major write-path contracts** (series/issue editors, monitor toggles, manual import, queue ops, release grab, mark-as-failed, blocklist, issueshelf, organize/retag commands, overrides, provider saves) verified aligned on both sides.
-- **CustomScript env vars** properly `Panelarr_`-prefixed; Discord/Webhook payloads use comic terminology; calendar feed clean; ImportListSyncService maps Series correctly.
-- **Newznab default categories `{7030, 7020, 8010}`** are correct (7030 Comics, 7020 EBook, 8010 Other/Misc — deliberate Readarr inheritance; an agent flagged 8010 as "undefined" but it's the standard Misc category).
-- **`tests/modal-sweep.js` (new)**: 11 modal flows (edit/organize/retag/monitoring/delete, interactive search, manual import, series editor, 3 add-provider modals) — zero console errors, page errors or failed API calls.
+### Setup wizard + SignalR frontend (commit 574a8a4)
+- Metadata credentials were **silently discarded unless a Test button was clicked**; wizard now saves on Next, advances only on success (verified live).
+- Completion summary showed ✓ for everything; now indexer/download-client steps report actual configured state, skipped steps show "Skipped".
+- Skip button now renders on optional steps (showSkip was computed but unused).
+- SignalR `rootfolder` created/deleted broadcasts now refetch the list (were dropped; fetchRootFolders wiring was dead).
 
-### Headline fix: app hang after leaving Series Detail
+### Cleanup (commits 6063e43, 5c6fc35, 4f668ce)
+- **ParsedTrackInfo → ParsedFileTagInfo**, TrackNumbers → PartNumbers, LocalIssue.FileTrackInfo → FileTagInfo (API JSON only changes the unconsumed trackNumbers key).
+- **All frontend lint errors fixed** (135 pre-existing, surfaced by eslint plugin drift: 104 import-order autofixes + unused vars/imports/propTypes across 15 files). `yarn lint` is clean again.
+- **Test fixture migration**: 68 test files moved from music/TV data to comic data (agent-executed; inputs+expectations translated together; feed samples / identification JSON corpus / fuzzy-match negatives deliberately left). Hadouken default category "panelarr-music" → "panelarr".
+- SeriesGroup Readarr stubs (Numbered/WorkCount/PrimaryWorkCount): already gone — stale handoff item.
 
-**Bug:** Navigating Library → Series Detail → anywhere else froze the whole app on the "Checking the pull list..." loading screen until a full browser reload. Root cause chain:
+## Audit findings NOT fixed (deferred / design)
 
-1. `SeriesDetailsConnector.unpopulate()` dispatched `clearSeries()` on unmount — a botched port of Readarr's `clearBooks()` (which clears the *sub-items* section, not the global collection).
-2. `PageConnector` gates the entire app render on `state.series.isPopulated`; once cleared it renders `<LoadingPage />` forever (its `componentDidMount` fetch never re-runs).
+1. **B3 — music-era track grouping** can fuse two variants of one issue in a single scan into one "edition"; only one imports, the other silently skips ("already imported"). Needs design: comics should probably never group multiple archive files into one item.
+2. **B4 — rejected-but-identified files** are persisted with live IssueId and excluded from future Matched rescans until mtime changes. Touching DiskScanService persistence semantics; design first.
+3. **Quality ladder questions**: CB7 (45) ranks above CBZ (40) — upgrades to a worse-supported container; CBZ_Web/CBZ_HD unreachable (no real-world tokens map to them); default profile allows Unknown; parser assumes CBZ for unknown-quality search results (Parser.cs:343) → same release shows different quality in search vs RSS. All one "quality model rethink" discussion.
+4. **Q4 — no source-tag quality detection**: "(Digital)", "c2c", "(Scan)", "(f)"/"(Fixed)" aren't parsed into anything. Related to #3.
+5. **A2 — publishers never updated/orphan-cleaned on refresh** (name changes at provider don't propagate; empty publishers linger).
+6. **A4** — duplicate ForeignIssueId across metadata rows aborts series refresh via SingleOrDefault (fragility, needs repair path).
+7. **D3 — PendingRelease.AdditionalInfo not persisted** (release-source tracking lost on restart; needs migration 010 adding the column).
+8. **F12 — SearchForNewIssue always returns []** (dead feature; search-by-issue never worked).
+9. **F14** — CV API key is embedded in cached-response URLs in the cache DB (hygiene); CV pagination assumes page size 100.
+10. **S1 — handleCalendar orphan handler** (backend never broadcasts `calendar`; upstream-identical dead code).
+11. **Metron live verification**: dev-instance Metron credentials are invalid placeholders — the contract fixes are locked to the serializer source, but a real-credential smoke test would be good (add real creds and add/refresh one Metron series).
 
-Previous audits missed it because they tested routes with direct URL loads (full remount) — only SPA click-navigation triggers it. **The new `tests/ui-sweep.js` now covers SPA navigation sequences.**
+## Decisions made (end of Session 15)
 
-**Fix:** removed `clearSeries()` from the unmount path, then resolved the root cause: `seriesCollectionActions.js` (the Readarr "book series" remnant sharing `section = 'series'` with `seriesActions.js`) is now **deleted** along with its only consumer, the dead never-rendered `SeriesDetailsSeries(Connector)` components. `createReducers.js` keys reducers by section name, so the duplicate had been silently *replacing* the real series reducers/defaultState — that landmine is gone for good.
+1. **Update mechanism**: implement a GitHub-releases update *check* against apoxx9/panelarr (banner + release notes, no in-app auto-install; Docker pulls images). Kills the permanent `/system/updates` 500. The same dead `panelarr.servarr.com` URL backs donations/services — address while in there.
+2. **Quality model**: full comic-native rethink is the next session's main project — parse source tags ((Digital), c2c, (Scan), (Fixed)) into qualities, fix ladder ordering (CB7 vs CBZ, unreachable CBZ_Web/CBZ_HD), remove the search-path CBZ assumption.
+3. **Import semantics**: fix both B3 (never fuse multiple archives into one item) and B4 (persist rejected files as unmapped so rescans re-evaluate).
 
-### Other fixes
+## Test results (final)
 
-- `itemMap` added to series/issues defaultState, reset in `CLEAR_ISSUES_LIST`, and `createSeriesSelector`/`createIssueSelector` guard against undefined itemMap.
-- `issueNumber` PropTypes corrected to `string` (backend sends string — "0.5", "1a") in IssueRow, IssueTitleLink, IssueDetailsHeader — was spamming console errors on Series Detail and Issue Detail.
-- Deleted `frontend/src/IssueFile/MediaInfoConnector.js` — unused AND imported a non-existent `./MediaInfo` module.
-
-### Localization cleanup (Priority 1)
-
-- **598 stale entries deleted** across 26 locale files: 531 orphan keys (not in en.json — dead Readarr/Lidarr translations) + 67 values still saying album/artist/MusicBrainz/Calibre/etc.
-- Safe because `LocalizationService` merges en.json **first**, then overlays the locale — deleted keys fall back to English instead of showing music terminology.
-- en.json verified clean (0 contaminated values).
-- **New guard tests** in `LocalizationCleanlinessFixture`: forbidden-term scan of every locale, orphan-key scan, en.json cleanliness. Contamination can't silently return.
-
-### Discography → IsCollection rename (Priority 2)
-
-- `ParsedIssueInfo.Discography/DiscographyStart/DiscographyEnd` → `IsCollection/CollectionStart/CollectionEnd` across 18 files.
-- `DiscographySpecification` → `CollectionSpecification` (file renamed; test fixture already had the new name).
-- `ReleaseResource.Discography` → `IsCollection` (API surface) + frontend release filter keys updated (`discography` → `isCollection`, filter ids → `collection-pack`/`not-collection-pack`).
-- Parser sentinel title "Discography" → "Complete Collection".
-- **Kept:** `SeedCriteriaSettings.DiscographySeedTime` — serialized into provider settings JSON in existing installs' DBs; renaming would break saved indexer settings. UI label already reads "Collection Seed Time". Also kept regex alternation `Discography|Discografia` (matches real release titles).
-
-### MediaInfo audio plumbing removed (Priority 2)
-
-All of it was dead end-to-end (nothing ever populated it; zero formatter callers):
-- Deleted `MediaInfoModel.cs`, `MediaInfoFormatter.cs`, `MediaInfoResource.cs`.
-- Removed `MediaInfo` property from `ComicFile`, `ParsedTrackInfo`, `ComicFileResource` + mapper, `DiskScanService`, `ImportApprovedIssues`, `FileNameSampleService`; removed dead `MediaFileService.UpdateMediaInfo()` and no-op `FileNameBuilder.AddMediaInfoTokens()`.
-- DB column `MediaInfo` in `001_initial_schema` left alone (orphan column is harmless; migrations are immutable).
-
-### Contract tests expanded (Priority 1)
-
-New `ResourceRemnantContractFixture` (8 contract tests total now, up from 6):
-- **Assembly-wide reflective guard**: every `RestResource` in Panelarr.Api.V1 scanned for 23 forbidden Lidarr/Readarr property names (audioTags, discography, artistName, bookId, trackNumber, ...).
-- Queue/History/Release resources verified against the exact properties QueueRow.js / HistoryRow.js / interactive search read.
-- `release_resource_should_have_isCollection_not_discography` guards the rename.
-
-### Audit findings triaged as NOT bugs
-
-- `NotImplementedException` in Queue/Health/Release `GetResourceById` — upstream *arr design; `[NonAction]`-blocked, frontend only fetches lists.
-- `config/importlist` 404 — frontend never calls it.
-- Notification/Metadata bulk `UpdateProvider`/`DeleteProviders` NotImplemented — upstream behavior, no frontend callers.
-
----
-
-## Known issue flagged for a decision (NOT fixed — design choice)
-
-**`/system/updates` permanently 500s**: the update check hits `https://panelarr.servarr.com/v1/` (`PanelarrCloudRequestBuilder.cs`), a domain that doesn't exist for this fork. Every install's System → Updates page shows an error banner forever (the page handles the error gracefully, but updates can never work). Options:
-1. Implement a GitHub-releases-based update provider (`apoxx9/panelarr` releases / ghcr).
-2. Hide the Updates page / disable the update check for Docker installs (Docker users update via image pulls anyway).
-
-Same `PanelarrCloudRequestBuilder.Services` URL backs the donations/services endpoint — also dead.
-
----
-
-## Test Results
-
-- **Core: 2,265 passed, 0 failed** (net of +3 localization guard tests, −2 deleted GuidValidator tests)
-- **API: 14 passed, 0 failed** (was 9; +5 new contract tests, one consolidated)
-- Common: 618 passed; 3 failures are network-download tests (environmental, sandboxed network — `should_download_file*`)
-- Automation (Selenium) / Integration projects: not part of session test baseline (need chromedriver / live env)
-- Frontend: lint clean, build clean
-- `tests/smoke-test.js`: **36/36 pass** (run with `NODE_PATH=$(npm root -g)` for puppeteer)
-- `tests/ui-sweep.js` (**new**): visits all 34 routes + SPA navigation sequences — clean except the known `/system/updates` 500
-- `tests/modal-sweep.js` (**new**): 11 modal interaction flows — clean
-- Live write-path exercise: 34 mutating operations across commands, editors, overrides, CRUD and config endpoints — all pass after fixes
+- **Core: 2,322 passed, 0 failed, 73 skipped** (+57 new tests: housekeeper fixture, Metron contract + mapper, IssueNumberNormalizer, AggregateQuality, comic conditions, CompositeMetadataProvider guard, DistanceCalculator publisher/number, Issue metadata merge)
+- **API: 14 passed, 0 failed**; Common: 618 passed, 3 failed (environmental network downloads — baseline)
+- `yarn lint` **clean** (was 135 errors at session start from plugin drift); `yarn build` clean
+- smoke-test 36/36; ui-sweep clean except known /system/updates 500; modal-sweep clean (11 flows)
 
 ## Uncommitted / Push status
 
-All Session 14 work committed locally. **Not pushed** (per workflow: ask before pushing, scan for sensitive data first).
+8 commits local (73f2004..4f668ce + this doc). **Not pushed** — scan for sensitive data and ask before pushing, per workflow.
 
----
-
-## What Could Be Next
-
-### Remaining cleanup
-1. **Test fixture data migration** — 51 test files still use music/TV data (`.mp3`, Adele, Battlestar Galactica, `my.video.mkv`, "Season 1" paths in ScanFixture)
-2. **`ParsedTrackInfo` class rename** → `ParsedFileTagInfo` or similar (exposed as `FileTags`, name is a Lidarr remnant; `TrackNumbers[]` property still inside)
-3. **SeriesGroup stub cleanup** — Readarr stubs (Numbered, WorkCount, PrimaryWorkCount) on SeriesGroupResource
-
-### Features (need design discussion first)
-1. **Update mechanism decision** (see flagged issue above)
-2. **Publisher management UI** — API-only CRUD today
-3. **Metadata override UI polish** — per-field clear buttons, visual indicators
-
-## How to Run
+## How to run
 
 ```bash
 cd panelarr
-dotnet build src/Panelarr.sln
-yarn build
+dotnet build src/Panelarr.sln && yarn build
 dotnet run --project src/NzbDrone.Console --framework net10.0
-
-# Smoke + UI sweep (needs global puppeteer)
+# App at http://localhost:8787
 NODE_PATH=$(npm root -g) node tests/smoke-test.js
 NODE_PATH=$(npm root -g) node tests/ui-sweep.js
+NODE_PATH=$(npm root -g) node tests/modal-sweep.js
 ```
-
-App at http://localhost:8787
