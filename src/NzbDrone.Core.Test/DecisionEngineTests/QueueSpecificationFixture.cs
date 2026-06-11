@@ -185,9 +185,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_when_qualities_are_the_same_with_higher_custom_format_score()
         {
-            _remoteIssue.CustomFormats = new List<CustomFormat> { new CustomFormat("My Format", new ReleaseTitleSpecification { Value = "MP3" }) { Id = 1 } };
+            _remoteIssue.CustomFormats = new List<CustomFormat> { new CustomFormat("My Format", new ReleaseTitleSpecification { Value = "CBZ" }) { Id = 1 } };
 
-            var lowFormat = new List<CustomFormat> { new CustomFormat("Bad Format", new ReleaseTitleSpecification { Value = "MP3" }) { Id = 2 } };
+            var lowFormat = new List<CustomFormat> { new CustomFormat("Bad Format", new ReleaseTitleSpecification { Value = "CBZ" }) { Id = 2 } };
 
             CustomFormatsTestHelpers.GivenCustomFormats(_remoteIssue.CustomFormats.First(), lowFormat.First());
 

@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
                 Port = 2222,
                 Username = "admin",
                 Password = "pass",
-                MusicCategory = "music",
+                MusicCategory = "comics",
                 RecentTvPriority = (int)NzbgetPriority.High
             };
 
@@ -42,16 +42,16 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
             {
                 FileSizeLo = 1000,
                 RemainingSizeLo = 10,
-                Category = "music",
-                NzbName = "Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN",
+                Category = "comics",
+                NzbName = "Saga Vol 01 (2012) (Digital) (Empire)",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } }
             };
 
             _failed = new NzbgetHistoryItem
             {
                 FileSizeLo = 1000,
-                Category = "music",
-                Name = "Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN",
+                Category = "comics",
+                Name = "Saga Vol 01 (2012) (Digital) (Empire)",
                 DestDir = "somedirectory",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } },
                 ParStatus = "Some Error",
@@ -65,9 +65,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
             _completed = new NzbgetHistoryItem
             {
                 FileSizeLo = 1000,
-                Category = "music",
-                Name = "Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN",
-                DestDir = "/remote/mount/music/Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN",
+                Category = "comics",
+                Name = "Saga Vol 01 (2012) (Digital) (Empire)",
+                DestDir = "/remote/mount/comics/Saga Vol 01 (2012) (Digital) (Empire)",
                 Parameters = new List<NzbgetParameter> { new NzbgetParameter { Name = "drone", Value = "id" } },
                 ParStatus = "SUCCESS",
                 UnpackStatus = "NONE",
@@ -79,8 +79,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
 
             _downloadClientItem = Builder<DownloadClientItem>
                                   .CreateNew()
-                                  .With(d => d.DownloadId = "_Droned.S01E01.Pilot.1080p.WEB-DL-DRONE_0")
-                                  .With(d => d.OutputPath = new OsPath("/remote/mount/tv/Droned.S01E01.Pilot.1080p.WEB-DL-DRONE".AsOsAgnostic()))
+                                  .With(d => d.DownloadId = "_Saga.Vol.01.2012.Digital.Comic-DRONE_0")
+                                  .With(d => d.OutputPath = new OsPath("/remote/mount/comics/Saga.Vol.01.2012.Digital.Comic-DRONE".AsOsAgnostic()))
                                   .Build();
 
             Mocker.GetMock<INzbgetProxy>()
@@ -95,8 +95,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
                 .Returns("14.0");
 
             _configItems = new Dictionary<string, string>();
-            _configItems.Add("Category1.Name", "music");
-            _configItems.Add("Category1.DestDir", @"/remote/mount/music");
+            _configItems.Add("Category1.Name", "comics");
+            _configItems.Add("Category1.DestDir", @"/remote/mount/comics");
 
             Mocker.GetMock<INzbgetProxy>()
                 .Setup(v => v.GetConfig(It.IsAny<NzbgetSettings>()))
@@ -381,7 +381,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
 
             result.IsLocalhost.Should().BeTrue();
             result.OutputRootFolders.Should().NotBeNull();
-            result.OutputRootFolders.First().Should().Be(@"/remote/mount/music");
+            result.OutputRootFolders.First().Should().Be(@"/remote/mount/comics");
         }
 
         [Test]
@@ -403,14 +403,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
         {
             Mocker.GetMock<IRemotePathMappingService>()
                 .Setup(v => v.RemapRemoteToLocal("127.0.0.1", It.IsAny<OsPath>()))
-                .Returns(new OsPath(@"O:\mymount\Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN".AsOsAgnostic()));
+                .Returns(new OsPath(@"O:\mymount\Saga Vol 01 (2012) (Digital) (Empire)".AsOsAgnostic()));
 
             GivenQueue(null);
             GivenHistory(_completed);
 
             var result = Subject.GetItems().Single();
 
-            result.OutputPath.Should().Be(@"O:\mymount\Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN".AsOsAgnostic());
+            result.OutputPath.Should().Be(@"O:\mymount\Saga Vol 01 (2012) (Digital) (Empire)".AsOsAgnostic());
         }
 
         [Test]
@@ -461,7 +461,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
         [Test]
         public void should_use_final_dir_when_set_instead_of_dest_dir()
         {
-            _completed.FinalDir = "/remote/mount/music2/Some.Series-Some.Issue.FLAC.2018-DRONE";
+            _completed.FinalDir = "/remote/mount/comics2/Saga.Vol.01.2012.Digital-DRONE";
 
             GivenQueue(null);
             GivenHistory(_completed);

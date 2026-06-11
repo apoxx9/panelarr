@@ -15,7 +15,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileDeletionService
     [TestFixture]
     public class DeleteComicFileFixture : CoreTest<Core.MediaFiles.MediaFileDeletionService>
     {
-        private static readonly string RootFolder = @"C:\Test\Music";
+        private static readonly string RootFolder = @"C:\Test\Comics";
         private Series _series;
         private ComicFile _trackFile;
 

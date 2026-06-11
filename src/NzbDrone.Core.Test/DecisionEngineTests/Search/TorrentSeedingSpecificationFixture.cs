@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
                 Release = new TorrentInfo
                 {
                     IndexerId = 1,
-                    Title = "Series - Issue [FLAC-RlsGrp]",
+                    Title = "Series - Issue [CBZ-RlsGrp]",
                     Seeders = 0
                 }
             };
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.Search
             _remoteIssue.Release = new ReleaseInfo
             {
                 IndexerId = 1,
-                Title = "Series - Issue [FLAC-RlsGrp]"
+                Title = "Series - Issue [CBZ-RlsGrp]"
             };
 
             Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();

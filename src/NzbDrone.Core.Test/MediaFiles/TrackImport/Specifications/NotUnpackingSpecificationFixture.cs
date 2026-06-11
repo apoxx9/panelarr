@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
 
             _localTrack = new LocalIssue
             {
-                Path = @"C:\Test\Unsorted Music\Kid.Rock\Kid.Rock.Cowboy.mp3".AsOsAgnostic(),
+                Path = @"C:\Test\Unsorted Comics\Saga\Saga.003.2012.Digital-Empire.cbz".AsOsAgnostic(),
                 Size = 100,
                 Series = Builder<Series>.CreateNew().Build()
             };
@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
 
         private void GivenInWorkingFolder()
         {
-            _localTrack.Path = @"C:\Test\Unsorted Music\_UNPACK_Kid.Rock\someSubFolder\Kid.Rock.Cowboy.mp3".AsOsAgnostic();
+            _localTrack.Path = @"C:\Test\Unsorted Comics\_UNPACK_Saga\someSubFolder\Saga.003.2012.Digital-Empire.cbz".AsOsAgnostic();
         }
 
         private void GivenLastWriteTimeUtc(DateTime time)

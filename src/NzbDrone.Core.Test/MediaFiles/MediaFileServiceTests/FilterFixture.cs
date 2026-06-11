@@ -36,9 +36,9 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
         {
             var files = GivenFiles(new[]
                 {
-                    "C:\\file1.avi".AsOsAgnostic(),
-                    "C:\\file2.avi".AsOsAgnostic(),
-                    "C:\\file3.avi".AsOsAgnostic()
+                    "C:\\file1.cbz".AsOsAgnostic(),
+                    "C:\\file2.cbz".AsOsAgnostic(),
+                    "C:\\file3.cbz".AsOsAgnostic()
                 });
 
             Mocker.GetMock<IMediaFileRepository>()
@@ -54,9 +54,9 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
         {
             var files = GivenFiles(new[]
                 {
-                    "C:\\file1.avi".AsOsAgnostic(),
-                    "C:\\file2.avi".AsOsAgnostic(),
-                    "C:\\file3.avi".AsOsAgnostic()
+                    "C:\\file1.cbz".AsOsAgnostic(),
+                    "C:\\file2.cbz".AsOsAgnostic(),
+                    "C:\\file3.cbz".AsOsAgnostic()
                 });
 
             Mocker.GetMock<IMediaFileRepository>()
@@ -76,9 +76,9 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
         {
             var files = GivenFiles(new[]
                 {
-                    "C:\\file1.avi".AsOsAgnostic(),
-                    "C:\\file2.avi".AsOsAgnostic(),
-                    "C:\\file3.avi".AsOsAgnostic()
+                    "C:\\file1.cbz".AsOsAgnostic(),
+                    "C:\\file2.cbz".AsOsAgnostic(),
+                    "C:\\file3.cbz".AsOsAgnostic()
                 });
 
             Mocker.GetMock<IMediaFileRepository>()
@@ -87,13 +87,13 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                 {
                     new ComicFile
                     {
-                        Path = "C:\\file2.avi".AsOsAgnostic(),
+                        Path = "C:\\file2.cbz".AsOsAgnostic(),
                         Modified = _lastWrite
                     }
                 });
 
             Subject.FilterUnchangedFiles(files, filter).Should().HaveCount(2);
-            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().NotContain("C:\\file2.avi".AsOsAgnostic());
+            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().NotContain("C:\\file2.cbz".AsOsAgnostic());
         }
 
         [TestCase(FilterFilesType.Known)]
@@ -104,9 +104,9 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             var files = GivenFiles(new[]
                 {
-                    "C:\\file1.avi".AsOsAgnostic(),
+                    "C:\\file1.cbz".AsOsAgnostic(),
                     "C:\\FILE2.avi".AsOsAgnostic(),
-                    "C:\\file3.avi".AsOsAgnostic()
+                    "C:\\file3.cbz".AsOsAgnostic()
                 });
 
             Mocker.GetMock<IMediaFileRepository>()
@@ -115,13 +115,13 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                 {
                     new ComicFile
                     {
-                        Path = "C:\\file2.avi".AsOsAgnostic(),
+                        Path = "C:\\file2.cbz".AsOsAgnostic(),
                         Modified = _lastWrite
                     }
                 });
 
             Subject.FilterUnchangedFiles(files, filter).Should().HaveCount(2);
-            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().NotContain("C:\\file2.avi".AsOsAgnostic());
+            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().NotContain("C:\\file2.cbz".AsOsAgnostic());
         }
 
         [TestCase(FilterFilesType.Known)]
@@ -132,9 +132,9 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
 
             var files = GivenFiles(new[]
                 {
-                    "C:\\file1.avi".AsOsAgnostic(),
+                    "C:\\file1.cbz".AsOsAgnostic(),
                     "C:\\FILE2.avi".AsOsAgnostic(),
-                    "C:\\file3.avi".AsOsAgnostic()
+                    "C:\\file3.cbz".AsOsAgnostic()
                 });
 
             Mocker.GetMock<IMediaFileRepository>()
@@ -143,7 +143,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                 {
                     new ComicFile
                     {
-                        Path = "C:\\file2.avi".AsOsAgnostic(),
+                        Path = "C:\\file2.cbz".AsOsAgnostic(),
                         Modified = _lastWrite
                     }
                 });
@@ -173,9 +173,9 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
         [TestCase(FilterFilesType.Matched)]
         public void filter_should_not_return_existing_file_if_size_unchanged(FilterFilesType filter)
         {
-            FileSystem.AddFile("C:\\file1.avi".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
-            FileSystem.AddFile("C:\\file2.avi".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
-            FileSystem.AddFile("C:\\file3.avi".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file1.cbz".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file2.cbz".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file3.cbz".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
 
             var files = FileSystem.AllFiles.Select(x => DiskProvider.GetFileInfo(x)).ToList();
 
@@ -185,22 +185,22 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                 {
                     new ComicFile
                     {
-                        Path = "C:\\file2.avi".AsOsAgnostic(),
+                        Path = "C:\\file2.cbz".AsOsAgnostic(),
                         Size = 10,
                         Modified = _lastWrite
                     }
                 });
 
             Subject.FilterUnchangedFiles(files, filter).Should().HaveCount(2);
-            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().NotContain("C:\\file2.avi".AsOsAgnostic());
+            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().NotContain("C:\\file2.cbz".AsOsAgnostic());
         }
 
         [TestCase(FilterFilesType.Matched)]
         public void filter_unmatched_should_return_existing_file_if_unmatched(FilterFilesType filter)
         {
-            FileSystem.AddFile("C:\\file1.avi".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
-            FileSystem.AddFile("C:\\file2.avi".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
-            FileSystem.AddFile("C:\\file3.avi".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file1.cbz".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file2.cbz".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file3.cbz".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
 
             var files = FileSystem.AllFiles.Select(x => DiskProvider.GetFileInfo(x)).ToList();
 
@@ -210,7 +210,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                 {
                     new ComicFile
                     {
-                        Path = "C:\\file2.avi".AsOsAgnostic(),
+                        Path = "C:\\file2.cbz".AsOsAgnostic(),
                         Size = 10,
                         Modified = _lastWrite,
                         Issue = new LazyLoaded<Issue>(null)
@@ -218,15 +218,15 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                 });
 
             Subject.FilterUnchangedFiles(files, filter).Should().HaveCount(3);
-            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().Contain("C:\\file2.avi".AsOsAgnostic());
+            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().Contain("C:\\file2.cbz".AsOsAgnostic());
         }
 
         [TestCase(FilterFilesType.Matched)]
         public void filter_unmatched_should_not_return_existing_file_if_matched(FilterFilesType filter)
         {
-            FileSystem.AddFile("C:\\file1.avi".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
-            FileSystem.AddFile("C:\\file2.avi".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
-            FileSystem.AddFile("C:\\file3.avi".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file1.cbz".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file2.cbz".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file3.cbz".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
 
             var files = FileSystem.AllFiles.Select(x => DiskProvider.GetFileInfo(x)).ToList();
 
@@ -236,7 +236,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                 {
                     new ComicFile
                     {
-                        Path = "C:\\file2.avi".AsOsAgnostic(),
+                        Path = "C:\\file2.cbz".AsOsAgnostic(),
                         Size = 10,
                         Modified = _lastWrite,
                         Issue = Builder<Issue>.CreateNew().Build()
@@ -244,16 +244,16 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                 });
 
             Subject.FilterUnchangedFiles(files, filter).Should().HaveCount(2);
-            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().NotContain("C:\\file2.avi".AsOsAgnostic());
+            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().NotContain("C:\\file2.cbz".AsOsAgnostic());
         }
 
         [TestCase(FilterFilesType.Known)]
         [TestCase(FilterFilesType.Matched)]
         public void filter_should_return_existing_file_if_size_changed(FilterFilesType filter)
         {
-            FileSystem.AddFile("C:\\file1.avi".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
-            FileSystem.AddFile("C:\\file2.avi".AsOsAgnostic(), new MockFileData("".PadRight(11)) { LastWriteTime = _lastWrite });
-            FileSystem.AddFile("C:\\file3.avi".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file1.cbz".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file2.cbz".AsOsAgnostic(), new MockFileData("".PadRight(11)) { LastWriteTime = _lastWrite });
+            FileSystem.AddFile("C:\\file3.cbz".AsOsAgnostic(), new MockFileData("".PadRight(10)) { LastWriteTime = _lastWrite });
 
             var files = FileSystem.AllFiles.Select(x => DiskProvider.GetFileInfo(x)).ToList();
 
@@ -263,14 +263,14 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                 {
                     new ComicFile
                     {
-                        Path = "C:\\file2.avi".AsOsAgnostic(),
+                        Path = "C:\\file2.cbz".AsOsAgnostic(),
                         Size = 10,
                         Modified = _lastWrite
                     }
                 });
 
             Subject.FilterUnchangedFiles(files, filter).Should().HaveCount(3);
-            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().Contain("C:\\file2.avi".AsOsAgnostic());
+            Subject.FilterUnchangedFiles(files, filter).Select(x => x.FullName).Should().Contain("C:\\file2.cbz".AsOsAgnostic());
         }
     }
 }

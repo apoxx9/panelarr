@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.ImportListTests
         {
             var importListItem1 = new ImportListItemInfo
             {
-                Series = "Linkin Park"
+                Series = "Saga"
             };
 
             _importListReports = new List<ImportListItemInfo> { importListItem1 };
@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Test.ImportListTests
                 .Returns<string>(id => Tuple.Create(
                     "edition-" + id,
                     new Issue { ForeignIssueId = "4321", Title = "Mapped Issue" },
-                    new List<SeriesMetadata> { new SeriesMetadata { ForeignSeriesId = "f59c5520-5f46-4d2c-b2c4-822eabf53419", Name = "Linkin Park" } }));
+                    new List<SeriesMetadata> { new SeriesMetadata { ForeignSeriesId = "f59c5520-5f46-4d2c-b2c4-822eabf53419", Name = "Saga" } }));
 
             Mocker.GetMock<IAddIssueService>()
                 .Setup(v => v.AddIssues(It.IsAny<List<Issue>>(), false))
@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Test.ImportListTests
 
         private void WithIssue()
         {
-            _importListReports.First().Issue = "Meteora";
+            _importListReports.First().Issue = "The Brand New World";
         }
 
         private void WithSeriesId()
@@ -91,9 +91,9 @@ namespace NzbDrone.Core.Test.ImportListTests
         {
             var importListItem2 = new ImportListItemInfo
             {
-                Series = "Linkin Park",
+                Series = "Saga",
                 ForeignSeriesId = "f59c5520-5f46-4d2c-b2c4-822eabf53419",
-                Issue = "Meteora 2",
+                Issue = "The Brand New World 2",
                 ForeignIssueId = "5678"
             };
             _importListReports.Add(importListItem2);

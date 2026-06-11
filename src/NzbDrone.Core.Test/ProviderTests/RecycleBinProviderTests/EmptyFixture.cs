@@ -22,7 +22,7 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
                     .Returns(new[] { @"C:\Test\RecycleBin\Folder1", @"C:\Test\RecycleBin\Folder2", @"C:\Test\RecycleBin\Folder3" });
 
             Mocker.GetMock<IDiskProvider>().Setup(s => s.GetFiles(RecycleBin, false))
-                    .Returns(new[] { @"C:\Test\RecycleBin\File1.avi", @"C:\Test\RecycleBin\File2.mkv" });
+                    .Returns(new[] { @"C:\Test\RecycleBin\File1.cbz", @"C:\Test\RecycleBin\File2.cbr" });
         }
 
         [Test]

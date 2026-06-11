@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.Blackhole
     [TestFixture]
     public class ScanWatchFolderFixture : CoreTest<ScanWatchFolder>
     {
-        protected readonly string _title = "Radiohead - Scotch Mist [2008-FLAC-Lossless]";
+        protected readonly string _title = "Saga - The Brand New World [2012-CBZ-Digital]";
         protected string _completedDownloadFolder = @"c:\blackhole\completed".AsOsAgnostic();
 
         protected void GivenCompletedItem()
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.Blackhole
 
             Mocker.GetMock<IDiskProvider>()
                 .Setup(c => c.GetFiles(targetDir, true))
-                .Returns(new[] { Path.Combine(targetDir, "somefile.flac") });
+                .Returns(new[] { Path.Combine(targetDir, "somefile.cbz") });
 
             Mocker.GetMock<IDiskProvider>()
                 .Setup(c => c.GetFileSize(It.IsAny<string>()))

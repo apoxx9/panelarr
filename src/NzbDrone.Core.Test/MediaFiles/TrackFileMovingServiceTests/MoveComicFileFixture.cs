@@ -27,12 +27,12 @@ namespace NzbDrone.Core.Test.MediaFiles.TrackFileMovingServiceTests
         public void Setup()
         {
             _series = Builder<Series>.CreateNew()
-                                     .With(s => s.Path = @"C:\Test\Music\Series".AsOsAgnostic())
+                                     .With(s => s.Path = @"C:\Test\Comics\Saga (2012)".AsOsAgnostic())
                                      .Build();
 
             _trackFile = Builder<ComicFile>.CreateNew()
                                                .With(f => f.Path = null)
-                                               .With(f => f.Path = Path.Combine(_series.Path, @"Issue\File.mp3"))
+                                               .With(f => f.Path = Path.Combine(_series.Path, @"Issue\File.cbz"))
                                                .Build();
 
             _localtrack = Builder<LocalIssue>.CreateNew()
@@ -46,13 +46,13 @@ namespace NzbDrone.Core.Test.MediaFiles.TrackFileMovingServiceTests
 
             Mocker.GetMock<IBuildFileNames>()
                   .Setup(s => s.BuildComicFilePath(It.IsAny<Series>(), It.IsAny<Issue>(), It.IsAny<string>(), It.IsAny<string>()))
-                  .Returns(@"C:\Test\Music\Series\Issue\File Name.mp3".AsOsAgnostic());
+                  .Returns(@"C:\Test\Comics\Saga (2012)\Issue\File Name.cbz".AsOsAgnostic());
 
             Mocker.GetMock<IBuildFileNames>()
                   .Setup(s => s.BuildIssuePath(It.IsAny<Series>()))
-                  .Returns(@"C:\Test\Music\Series\Issue".AsOsAgnostic());
+                  .Returns(@"C:\Test\Comics\Saga (2012)\Issue".AsOsAgnostic());
 
-            var rootFolder = @"C:\Test\Music\".AsOsAgnostic();
+            var rootFolder = @"C:\Test\Comics\".AsOsAgnostic();
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FolderExists(rootFolder))
                   .Returns(true);

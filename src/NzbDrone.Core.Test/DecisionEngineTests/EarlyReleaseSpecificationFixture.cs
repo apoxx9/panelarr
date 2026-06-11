@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 Release = new TorrentInfo
                 {
                     IndexerId = 1,
-                    Title = "Series - Issue [FLAC-RlsGrp]",
+                    Title = "Series - Issue [CBZ-RlsGrp]",
                     PublishDate = DateTime.Today
                 }
             };

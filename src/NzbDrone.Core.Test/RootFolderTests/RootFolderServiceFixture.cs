@@ -37,7 +37,7 @@ namespace NzbDrone.Core.Test.RootFolderTests
                 .Returns(false);
         }
 
-        [TestCase("D:\\Music\\")]
+        [TestCase("D:\\Comics\\")]
         [TestCase("//server//folder")]
         public void should_be_able_to_add_root_dir(string path)
         {
@@ -75,9 +75,9 @@ namespace NzbDrone.Core.Test.RootFolderTests
         [Test]
         public void adding_duplicated_root_folder_should_throw()
         {
-            Mocker.GetMock<IRootFolderRepository>().Setup(c => c.All()).Returns(new List<RootFolder> { new RootFolder { Path = "C:\\Music".AsOsAgnostic() } });
+            Mocker.GetMock<IRootFolderRepository>().Setup(c => c.All()).Returns(new List<RootFolder> { new RootFolder { Path = "C:\\Comics".AsOsAgnostic() } });
 
-            Assert.Throws<InvalidOperationException>(() => Subject.Add(new RootFolder { Path = @"C:\Music".AsOsAgnostic() }));
+            Assert.Throws<InvalidOperationException>(() => Subject.Add(new RootFolder { Path = @"C:\Comics".AsOsAgnostic() }));
         }
 
         [Test]
@@ -87,7 +87,7 @@ namespace NzbDrone.Core.Test.RootFolderTests
                   .Setup(m => m.FolderWritable(It.IsAny<string>()))
                   .Returns(false);
 
-            Assert.Throws<UnauthorizedAccessException>(() => Subject.Add(new RootFolder { Path = @"C:\Music".AsOsAgnostic() }));
+            Assert.Throws<UnauthorizedAccessException>(() => Subject.Add(new RootFolder { Path = @"C:\Comics".AsOsAgnostic() }));
         }
     }
 }

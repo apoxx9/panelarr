@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
     public class PneumaticProviderFixture : CoreTest<Pneumatic>
     {
         private const string _nzbUrl = "http://www.nzbs.com/url";
-        private const string _title = "30.Rock.S01E05.hdtv.xvid-LoL";
+        private const string _title = "Saga.005.2012.Digital-Empire";
         private string _pneumaticFolder;
         private string _strmFolder;
         private string _nzbPath;
@@ -53,7 +53,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
                 Mocker.Resolve<Logger>());
 
             _downloadClientItem = Builder<DownloadClientItem>
-                                  .CreateNew().With(d => d.DownloadId = "_Droned.S01E01.Pilot.1080p.WEB-DL-DRONE_0")
+                                  .CreateNew().With(d => d.DownloadId = "_Saga.Vol.01.2012.Digital.Comic-DRONE_0")
                                   .Build();
 
             Subject.Definition = new DownloadClientDefinition();

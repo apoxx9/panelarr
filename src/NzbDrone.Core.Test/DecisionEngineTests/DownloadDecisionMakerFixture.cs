@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _failDelayed1.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), null)).Returns(Decision.Reject("failDelayed1"));
             _failDelayed1.SetupGet(c => c.Priority).Returns(SpecificationPriority.Disk);
 
-            _reports = new List<ReleaseInfo> { new ReleaseInfo { Title = "Coldplay-A Head Full Of Dreams-CD-FLAC-2015-PERFECT" } };
+            _reports = new List<ReleaseInfo> { new ReleaseInfo { Title = "East of West-The Promise-TPB-CBZ-2015-EMPIRE" } };
             _remoteIssue = new RemoteIssue
             {
                 Series = new Series(),
@@ -228,9 +228,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _reports = new List<ReleaseInfo>
                 {
-                    new ReleaseInfo { Title = "Coldplay-A Head Full Of Dreams-CD-FLAC-2015-PERFECT" },
-                    new ReleaseInfo { Title = "Coldplay-A Head Full Of Dreams-CD-FLAC-2015-PERFECT" },
-                    new ReleaseInfo { Title = "Coldplay-A Head Full Of Dreams-CD-FLAC-2015-PERFECT" }
+                    new ReleaseInfo { Title = "East of West-The Promise-TPB-CBZ-2015-EMPIRE" },
+                    new ReleaseInfo { Title = "East of West-The Promise-TPB-CBZ-2015-EMPIRE" },
+                    new ReleaseInfo { Title = "East of West-The Promise-TPB-CBZ-2015-EMPIRE" }
                 };
 
             Subject.GetRssDecision(_reports);
@@ -332,7 +332,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             _reports = new List<ReleaseInfo>
                 {
-                    new ReleaseInfo { Title = "Alien Ant Farm - TruAnt (FLAC) DRONE" },
+                    new ReleaseInfo { Title = "East of West-The Promise-TPB-CBZ-2015-EMPIRE" },
                 };
 
             Subject.GetRssDecision(_reports).Should().HaveCount(1);

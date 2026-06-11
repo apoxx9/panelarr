@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
 
             _localTrack = new LocalTrack
             {
-                Path = @"C:\Test\Imagine Dragons\Imagine.Dragons.Song.1.mp3",
+                Path = @"C:\Test\Batman (2016)\Batman.001.2016.Digital-Empire.cbz",
                 Quality = new QualityModel(Quality.CBR, new Revision(version: 1)),
                 Series = _series,
                 Issue = _issue

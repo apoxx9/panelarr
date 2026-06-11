@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         {
             _series = Builder<Series>.CreateListOfSize(1)
                 .All()
-                .With(c => c.Path = "C:\\Music\\".AsOsAgnostic())
+                .With(c => c.Path = "C:\\Comics\\".AsOsAgnostic())
                 .Build().ToList();
 
             _metadata = Builder<MetadataFile>.CreateListOfSize(1)
@@ -91,7 +91,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         public void should_delete_html_images()
         {
-            var imagePath = "C:\\Music\\Issue\\image.jpg".AsOsAgnostic();
+            var imagePath = "C:\\Comics\\Issue\\image.jpg".AsOsAgnostic();
             _metadata.First().LastUpdated = new DateTime(2014, 12, 29);
             _metadata.First().RelativePath = "Issue\\image.jpg".AsOsAgnostic();
             _metadata.First().Type = MetadataType.SeriesImage;
@@ -109,7 +109,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         public void should_delete_empty_images()
         {
-            var imagePath = "C:\\Music\\Issue\\image.jpg".AsOsAgnostic();
+            var imagePath = "C:\\Comics\\Issue\\image.jpg".AsOsAgnostic();
             _metadata.First().LastUpdated = new DateTime(2014, 12, 29);
             _metadata.First().Type = MetadataType.IssueImage;
             _metadata.First().RelativePath = "Issue\\image.jpg".AsOsAgnostic();
@@ -127,7 +127,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         public void should_not_delete_non_html_files()
         {
-            var imagePath = "C:\\Music\\Issue\\image.jpg".AsOsAgnostic();
+            var imagePath = "C:\\Comics\\Issue\\image.jpg".AsOsAgnostic();
             _metadata.First().LastUpdated = new DateTime(2014, 12, 29);
             _metadata.First().RelativePath = "Issue\\image.jpg".AsOsAgnostic();
 

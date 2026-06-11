@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 },
                 Release = new ReleaseInfo
                 {
-                    Title = "Dexter.S08E01.EDITED.WEBRip.x264-KYR"
+                    Title = "Saga.003.2012.EDITED.WEBRip.Digital-Empire"
                 }
             };
 
@@ -92,8 +92,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         [TestCase("EdiTED")]
         [TestCase("webrip")]
-        [TestCase("X264")]
-        [TestCase("X264,NOTTHERE")]
+        [TestCase("DIGItal")]
+        [TestCase("DIGItal,NOTTHERE")]
         public void should_ignore_case_when_matching_required(string required)
         {
             GivenRestictions(required.Split(',').ToList(), new List<string>());
@@ -103,8 +103,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         [TestCase("EdiTED")]
         [TestCase("webrip")]
-        [TestCase("X264")]
-        [TestCase("X264,NOTTHERE")]
+        [TestCase("DIGItal")]
+        [TestCase("DIGItal,NOTTHERE")]
         public void should_ignore_case_when_matching_ignored(string ignored)
         {
             GivenRestictions(new List<string>(), ignored.Split(',').ToList());
@@ -115,7 +115,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_be_false_when_release_contains_one_restricted_word_and_one_required_word()
         {
-            _remoteIssue.Release.Title = "[ www.Speed.cd ] - Katy Perry - Witness (2017) MP3 [320 kbps] ";
+            _remoteIssue.Release.Title = "[ www.Speed.cd ] - Saga Vol 01 (2017) CBZ [320 dpi] ";
 
             Mocker.GetMock<IReleaseProfileService>()
                   .Setup(s => s.EnabledForTags(It.IsAny<HashSet<int>>(), It.IsAny<int>()))

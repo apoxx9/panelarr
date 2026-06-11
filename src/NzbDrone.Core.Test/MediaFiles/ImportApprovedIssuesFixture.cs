@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             var series = Builder<Series>.CreateNew()
                                         .With(e => e.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() })
-                                        .With(s => s.Path = @"C:\Test\Music\Alien Ant Farm".AsOsAgnostic())
+                                        .With(s => s.Path = @"C:\Test\Comics\East of West (2013)".AsOsAgnostic())
                                         .Build();
 
             var issue = Builder<Issue>.CreateNew()
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                                            Series = series,
                                            Issue = issue,
                                            Part = 1,
-                                           Path = Path.Combine(series.Path, "Alien Ant Farm - 01 - Pilot.mp3"),
+                                           Path = Path.Combine(series.Path, "East of West 001 (2013) (Digital) (Empire).cbz"),
                                            Quality = new QualityModel(Quality.CBR),
                                            FileTagInfo = new ParsedFileTagInfo
                                            {
@@ -165,7 +165,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                     Series = lqDecision.Item.Series,
                     Issue = lqDecision.Item.Issue,
                     Part = 1,
-                    Path = @"C:\Test\Music\Alien Ant Farm\Alien Ant Farm - 01 - Pilot.mp3".AsOsAgnostic(),
+                    Path = @"C:\Test\Comics\East of West (2013)\East of West 001 (2013) (Digital) (Empire).cbz".AsOsAgnostic(),
                     Quality = new QualityModel(Quality.CBZ),
                     Size = 1.Megabytes(),
                     FileTagInfo = new ParsedFileTagInfo
@@ -197,7 +197,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                     Series = fileDecision.Item.Series,
                     Issue = fileDecision.Item.Issue,
                     Part = 1,
-                    Path = @"C:\Test\Music\Alien Ant Farm\Alien Ant Farm - 01 - Pilot.mp3".AsOsAgnostic(),
+                    Path = @"C:\Test\Comics\East of West (2013)\East of West 001 (2013) (Digital) (Empire).cbz".AsOsAgnostic(),
                     Quality = new QualityModel(Quality.CBR),
                     Size = 80.Megabytes()
                 });

@@ -22,8 +22,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests
     public abstract class DownloadClientFixtureBase<TSubject> : CoreTest<TSubject>
         where TSubject : class, IDownloadClient
     {
-        protected readonly string _title = "Droned.S01E01.Pilot.1080p.WEB-DL-DRONE";
-        protected readonly string _downloadUrl = "http://somewhere.com/Droned.S01E01.Pilot.1080p.WEB-DL-DRONE.ext";
+        protected readonly string _title = "Saga.Vol.01.2012.Digital.Comic-DRONE";
+        protected readonly string _downloadUrl = "http://somewhere.com/Saga.Vol.01.2012.Digital.Comic-DRONE.ext";
 
         [SetUp]
         public void SetupBase()

@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Test.NotificationTests
                 {
                     new ComicFile
                     {
-                        Path = Path.Combine(_rootPath, "file1.S01E01E02.mkv")
+                        Path = Path.Combine(_rootPath, "Saga 001-002 (2012) (Digital) (Empire).cbz")
                     }
                 },
 
@@ -42,11 +42,11 @@ namespace NzbDrone.Core.Test.NotificationTests
                 {
                     new ComicFile
                     {
-                        Path = Path.Combine(_rootPath, "file1.S01E01.mkv")
+                        Path = Path.Combine(_rootPath, "Saga 001 (2012) (Digital) (Empire).cbz")
                     },
                     new ComicFile
                     {
-                        Path = Path.Combine(_rootPath, "file1.S01E02.mkv")
+                        Path = Path.Combine(_rootPath, "Saga 002 (2012) (Digital) (Empire).cbz")
                     }
                 }
             };
@@ -77,10 +77,10 @@ namespace NzbDrone.Core.Test.NotificationTests
             Subject.OnReleaseImport(_upgrade);
 
             Mocker.GetMock<ISynologyIndexerProxy>()
-                .Verify(v => v.DeleteFile(@"C:\Test\file1.S01E01.mkv".AsOsAgnostic()), Times.Once());
+                .Verify(v => v.DeleteFile(@"C:\Test\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic()), Times.Once());
 
             Mocker.GetMock<ISynologyIndexerProxy>()
-                .Verify(v => v.DeleteFile(@"C:\Test\file1.S01E02.mkv".AsOsAgnostic()), Times.Once());
+                .Verify(v => v.DeleteFile(@"C:\Test\Saga 002 (2012) (Digital) (Empire).cbz".AsOsAgnostic()), Times.Once());
         }
 
         [Test]
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Test.NotificationTests
             Subject.OnReleaseImport(_upgrade);
 
             Mocker.GetMock<ISynologyIndexerProxy>()
-                .Verify(v => v.AddFile(@"C:\Test\file1.S01E01E02.mkv".AsOsAgnostic()), Times.Once());
+                .Verify(v => v.AddFile(@"C:\Test\Saga 001-002 (2012) (Digital) (Empire).cbz".AsOsAgnostic()), Times.Once());
         }
 
         [Test]

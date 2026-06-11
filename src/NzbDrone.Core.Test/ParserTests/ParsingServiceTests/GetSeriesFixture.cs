@@ -12,7 +12,7 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         [Test]
         public void should_use_passed_in_title_when_it_cannot_be_parsed()
         {
-            const string title = "30 Rock";
+            const string title = "Saga";
 
             Subject.GetSeries(title);
 
@@ -23,7 +23,7 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         [Test]
         public void should_use_parsed_series_title()
         {
-            const string title = "30 Rock - Get Some [FLAC]";
+            const string title = "Saga - The Brand New World [CBZ]";
 
             Subject.GetSeries(title);
 

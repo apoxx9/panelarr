@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
             var completed = Builder<DownloadClientItem>.CreateNew()
                                                     .With(h => h.Status = DownloadItemStatus.Completed)
                                                     .With(h => h.OutputPath = new OsPath(@"C:\DropFolder\MyDownload".AsOsAgnostic()))
-                                                    .With(h => h.Title = "Drone.S01E01.HDTV")
+                                                    .With(h => h.Title = "Saga.003.2012.Digital-Empire")
                                                     .Build();
 
             var remoteIssue = BuildRemoteIssue();
@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                   .Returns(new EntityHistory());
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetSeries("Drone.S01E01.HDTV"))
+                  .Setup(s => s.GetSeries("Saga.003.2012.Digital-Empire"))
                   .Returns(remoteIssue.Series);
         }
 
@@ -87,14 +87,14 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
             _trackedDownload.DownloadItem.Title = "Droned Pilot"; // Set a badly named download
             Mocker.GetMock<IHistoryService>()
                   .Setup(s => s.MostRecentForDownloadId(It.Is<string>(i => i == "1234")))
-                  .Returns(new EntityHistory() { SourceTitle = "Droned S01E01" });
+                  .Returns(new EntityHistory() { SourceTitle = "Saga 004 (2012)" });
 
             Mocker.GetMock<IParsingService>()
                   .Setup(s => s.GetSeries(It.IsAny<string>()))
                   .Returns((Series)null);
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetSeries("Droned S01E01"))
+                  .Setup(s => s.GetSeries("Saga 004 (2012)"))
                   .Returns(BuildRemoteIssue().Series);
         }
 
@@ -164,7 +164,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
         {
             _trackedDownload.RemoteIssue.Series = null;
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetSeries("Drone.S01E01.HDTV"))
+                  .Setup(s => s.GetSeries("Saga.003.2012.Digital-Empire"))
                   .Returns((Series)null);
 
             Subject.Check(_trackedDownload);

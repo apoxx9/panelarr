@@ -186,7 +186,7 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         {
             var localIssue = new LocalIssue
             {
-                Path = Path.Combine(_downloadItemPath, "file.mp3")
+                Path = Path.Combine(_downloadItemPath, "file.cbz")
             };
             GivenFileExists(localIssue.Path);
 

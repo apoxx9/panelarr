@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WithoutRecycleBin();
 
-            var path = @"C:\Test\TV\30 Rock\S01E01.avi".AsOsAgnostic();
+            var path = @"C:\Test\Comics\Saga (2012)\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic();
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFile(path);
 
@@ -40,11 +40,11 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WithRecycleBin();
 
-            var path = @"C:\Test\TV\30 Rock\S01E01.avi".AsOsAgnostic();
+            var path = @"C:\Test\Comics\Saga (2012)\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic();
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFile(path);
 
-            Mocker.GetMock<IDiskTransferService>().Verify(v => v.TransferFile(path, @"C:\Test\Recycle Bin\S01E01.avi".AsOsAgnostic(), TransferMode.Move, false), Times.Once());
+            Mocker.GetMock<IDiskTransferService>().Verify(v => v.TransferFile(path, @"C:\Test\Recycle Bin\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic(), TransferMode.Move, false), Times.Once());
         }
 
         [Test]
@@ -52,15 +52,15 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WithRecycleBin();
 
-            var path = @"C:\Test\TV\30 Rock\S01E01.avi".AsOsAgnostic();
+            var path = @"C:\Test\Comics\Saga (2012)\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>()
-                .Setup(v => v.FileExists(@"C:\Test\Recycle Bin\S01E01.avi".AsOsAgnostic()))
+                .Setup(v => v.FileExists(@"C:\Test\Recycle Bin\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic()))
                 .Returns(true);
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFile(path);
 
-            Mocker.GetMock<IDiskTransferService>().Verify(v => v.TransferFile(path, @"C:\Test\Recycle Bin\S01E01_2.avi".AsOsAgnostic(), TransferMode.Move, false), Times.Once());
+            Mocker.GetMock<IDiskTransferService>().Verify(v => v.TransferFile(path, @"C:\Test\Recycle Bin\Saga 001 (2012) (Digital) (Empire)_2.cbz".AsOsAgnostic(), TransferMode.Move, false), Times.Once());
         }
 
         [Test]
@@ -68,11 +68,11 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WindowsOnly();
             WithRecycleBin();
-            var path = @"C:\Test\TV\30 Rock\S01E01.avi".AsOsAgnostic();
+            var path = @"C:\Test\Comics\Saga (2012)\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic();
 
             Mocker.Resolve<RecycleBinProvider>().DeleteFile(path);
 
-            Mocker.GetMock<IDiskProvider>().Verify(v => v.FileSetLastWriteTime(@"C:\Test\Recycle Bin\S01E01.avi".AsOsAgnostic(), It.IsAny<DateTime>()), Times.Once());
+            Mocker.GetMock<IDiskProvider>().Verify(v => v.FileSetLastWriteTime(@"C:\Test\Recycle Bin\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic(), It.IsAny<DateTime>()), Times.Once());
         }
 
         [Test]
@@ -80,11 +80,11 @@ namespace NzbDrone.Core.Test.ProviderTests.RecycleBinProviderTests
         {
             WithRecycleBin();
 
-            var path = @"C:\Test\TV\30 Rock\S01E01.avi".AsOsAgnostic();
+            var path = @"C:\Test\Comics\Saga (2012)\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic();
 
-            Mocker.Resolve<RecycleBinProvider>().DeleteFile(path, "30 Rock");
+            Mocker.Resolve<RecycleBinProvider>().DeleteFile(path, "Saga (2012)");
 
-            Mocker.GetMock<IDiskTransferService>().Verify(v => v.TransferFile(path, @"C:\Test\Recycle Bin\30 Rock\S01E01.avi".AsOsAgnostic(), TransferMode.Move, false), Times.Once());
+            Mocker.GetMock<IDiskTransferService>().Verify(v => v.TransferFile(path, @"C:\Test\Recycle Bin\Saga (2012)\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic(), TransferMode.Move, false), Times.Once());
         }
     }
 }

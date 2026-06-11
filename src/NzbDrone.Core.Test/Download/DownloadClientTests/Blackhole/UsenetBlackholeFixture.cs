@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.Blackhole
 
             _downloadClientItem = Builder<DownloadClientItem>
                                   .CreateNew()
-                                  .With(d => d.DownloadId = "_Droned.S01E01.Pilot.1080p.WEB-DL-DRONE_0")
+                                  .With(d => d.DownloadId = "_Saga.Vol.01.2012.Digital.Comic-DRONE_0")
                                   .With(d => d.OutputPath = new OsPath(Path.Combine(_completedDownloadFolder, _title)))
                                   .Build();
 
@@ -76,7 +76,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.Blackhole
 
             Mocker.GetMock<IDiskProvider>()
                 .Setup(c => c.GetFiles(targetDir, true))
-                .Returns(new[] { Path.Combine(targetDir, "somefile.flac") });
+                .Returns(new[] { Path.Combine(targetDir, "somefile.cbz") });
 
             Mocker.GetMock<IDiskProvider>()
                 .Setup(c => c.GetFileSize(It.IsAny<string>()))
@@ -134,8 +134,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.Blackhole
         [Test]
         public async Task Download_should_replace_illegal_characters_in_title()
         {
-            var illegalTitle = "Radiohead - Scotch Mist [2008/FLAC/Lossless]";
-            var expectedFilename = Path.Combine(_blackholeFolder, "Radiohead - Scotch Mist [2008+FLAC+Lossless]" + Path.GetExtension(_filePath));
+            var illegalTitle = "Saga - The Brand New World [2012/CBZ/Digital]";
+            var expectedFilename = Path.Combine(_blackholeFolder, "Saga - The Brand New World [2012+CBZ+Digital]" + Path.GetExtension(_filePath));
 
             var remoteIssue = CreateRemoteIssue();
             remoteIssue.Release.Title = illegalTitle;

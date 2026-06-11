@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                             Timeleft = TimeSpan.FromSeconds(10),
                             Category = "tv",
                             Id = "sabnzbd_nzb12345",
-                            Title = "Droned.S01E01.Pilot.1080p.WEB-DL-DRONE"
+                            Title = "Saga.Vol.01.2012.Digital.Comic-DRONE"
                         }
                     }
             };
@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                             Size = 1000,
                             Category = "tv",
                             Id = "sabnzbd_nzb12345",
-                            Title = "Droned.S01E01.Pilot.1080p.WEB-DL-DRONE"
+                            Title = "Saga.Vol.01.2012.Digital.Comic-DRONE"
                         }
                     }
             };
@@ -85,8 +85,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                             Size = 1000,
                             Category = "tv",
                             Id = "sabnzbd_nzb12345",
-                            Title = "Droned.S01E01.Pilot.1080p.WEB-DL-DRONE",
-                            Storage = "/remote/mount/vv/Droned.S01E01.Pilot.1080p.WEB-DL-DRONE"
+                            Title = "Saga.Vol.01.2012.Digital.Comic-DRONE",
+                            Storage = "/remote/mount/vv/Saga.Vol.01.2012.Digital.Comic-DRONE"
                         }
                     }
             };
@@ -373,10 +373,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
                   .Verify(v => v.DownloadNzb(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(), (int)SabnzbdPriority.High, It.IsAny<SabnzbdSettings>()), Times.Once());
         }
 
-        [TestCase(@"Droned.S01E01.Pilot.1080p.WEB-DL-DRONE", @"Droned.S01E01_Pilot_1080p_WEB-DL-DRONE.mkv")]
-        [TestCase(@"Droned.S01E01.Pilot.1080p.WEB-DL-DRONE", @"SubDir\Droned.S01E01_Pilot_1080p_WEB-DL-DRONE.mkv")]
-        [TestCase(@"Droned.S01E01.Pilot.1080p.WEB-DL-DRONE.mkv", @"SubDir\Droned.S01E01_Pilot_1080p_WEB-DL-DRONE.mkv")]
-        [TestCase(@"Droned.S01E01.Pilot.1080p.WEB-DL-DRONE.mkv", @"SubDir\SubDir\Droned.S01E01_Pilot_1080p_WEB-DL-DRONE.mkv")]
+        [TestCase(@"Saga.Vol.01.2012.Digital.Comic-DRONE", @"Saga.Vol.01_2012_Digital_Comic-DRONE.cbz")]
+        [TestCase(@"Saga.Vol.01.2012.Digital.Comic-DRONE", @"SubDir\Saga.Vol.01_2012_Digital_Comic-DRONE.cbz")]
+        [TestCase(@"Saga.Vol.01.2012.Digital.Comic-DRONE.cbz", @"SubDir\Saga.Vol.01_2012_Digital_Comic-DRONE.cbz")]
+        [TestCase(@"Saga.Vol.01.2012.Digital.Comic-DRONE.cbz", @"SubDir\SubDir\Saga.Vol.01_2012_Digital_Comic-DRONE.cbz")]
         public void should_return_path_to_jobfolder(string title, string storage)
         {
             _completed.Items.First().Title = title;
@@ -395,14 +395,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         {
             Mocker.GetMock<IRemotePathMappingService>()
                 .Setup(v => v.RemapRemoteToLocal("127.0.0.1", It.IsAny<OsPath>()))
-                .Returns(new OsPath(@"O:\mymount\Droned.S01E01.Pilot.1080p.WEB-DL-DRONE".AsOsAgnostic()));
+                .Returns(new OsPath(@"O:\mymount\Saga.Vol.01.2012.Digital.Comic-DRONE".AsOsAgnostic()));
 
             GivenQueue(null);
             GivenHistory(_completed);
 
             var result = Subject.GetItems().Single();
 
-            result.OutputPath.Should().Be(@"O:\mymount\Droned.S01E01.Pilot.1080p.WEB-DL-DRONE".AsOsAgnostic());
+            result.OutputPath.Should().Be(@"O:\mymount\Saga.Vol.01.2012.Digital.Comic-DRONE".AsOsAgnostic());
         }
 
         [Test]
@@ -421,14 +421,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         [Test]
         public void should_not_blow_up_if_storage_doesnt_have_jobfolder()
         {
-            _completed.Items.First().Storage = @"C:\sorted\somewhere\asdfasdf\asdfasdf.mkv".AsOsAgnostic();
+            _completed.Items.First().Storage = @"C:\sorted\somewhere\asdfasdf\asdfasdf.cbz".AsOsAgnostic();
 
             GivenQueue(null);
             GivenHistory(_completed);
 
             var result = Subject.GetItems().Single();
 
-            result.OutputPath.Should().Be(@"C:\sorted\somewhere\asdfasdf\asdfasdf.mkv".AsOsAgnostic());
+            result.OutputPath.Should().Be(@"C:\sorted\somewhere\asdfasdf\asdfasdf.cbz".AsOsAgnostic());
         }
 
         [TestCase(@"Y:\nzbget\root", @"completed\downloads", @"vv", @"Y:\nzbget\root\completed\downloads", @"Y:\nzbget\root\completed\downloads\vv")]
@@ -647,7 +647,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         [Test]
         public void should_remove_output_path_folder_when_deleting_a_completed_item_and_delete_data_is_true()
         {
-            var path = @"C:\Test\SeriesGroup.Title.S01E01".AsOsAgnostic();
+            var path = @"C:\Test\Saga.003.2012.Digital-Empire".AsOsAgnostic();
             _downloadClientItem.OutputPath = new OsPath(path);
 
             Mocker.GetMock<IDiskProvider>()
@@ -671,7 +671,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         [Test]
         public void should_remove_output_path_file_when_deleting_a_completed_item_and_delete_data_is_true()
         {
-            var path = @"C:\Test\SeriesGroup.Title.S01E01.mkv".AsOsAgnostic();
+            var path = @"C:\Test\Saga.003.2012.Digital-Empire.cbz".AsOsAgnostic();
             _downloadClientItem.OutputPath = new OsPath(path);
 
             Mocker.GetMock<IDiskProvider>()
@@ -699,7 +699,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         [Test]
         public void should_not_remove_output_path_file_when_deleting_a_completed_item_and_delete_data_is_true_if_it_does_not_exist()
         {
-            var path = @"C:\Test\SeriesGroup.Title.S01E01.mkv".AsOsAgnostic();
+            var path = @"C:\Test\Saga.003.2012.Digital-Empire.cbz".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FolderExists(path))
@@ -726,7 +726,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.SabnzbdTests
         [Test]
         public void should_not_remove_output_path_file_when_deleting_a_completed_item_and_delete_data_is_false()
         {
-            var path = @"C:\Test\SeriesGroup.Title.S01E01.mkv".AsOsAgnostic();
+            var path = @"C:\Test\Saga.003.2012.Digital-Empire.cbz".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.FolderExists(path))

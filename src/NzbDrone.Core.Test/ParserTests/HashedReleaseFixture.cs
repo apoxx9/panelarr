@@ -13,71 +13,71 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             new object[]
             {
-                @"C:\Test\Some.Hashed.Release.(256kbps)-Mercury\0e895c37245186812cb08aab1529cf8ee389dd05.mp3".AsOsAgnostic(),
+                @"C:\Test\Some.Hashed.Release.(2012).(Digital)-Mercury\0e895c37245186812cb08aab1529cf8ee389dd05.cbr".AsOsAgnostic(),
                 "Some Hashed Release",
                 Quality.CBR,
                 "Mercury"
             },
             new object[]
             {
-                @"C:\Test-[256]\0e895c37245186812cb08aab1529cf8ee389dd05\Some.Hashed.Release.S01E01.720p.WEB-DL.AAC2.0.H.264-Mercury.mp3".AsOsAgnostic(),
+                @"C:\Test-[256]\0e895c37245186812cb08aab1529cf8ee389dd05\Some.Hashed.Release.003.2012.Digital.WEB-Mercury.cbr".AsOsAgnostic(),
                 "Some Hashed Release",
                 Quality.CBR,
                 "Mercury"
             },
             new object[]
             {
-                @"C:\Test\Fake.Dir.S01E01-Test\yrucreM-462.H.0.2CAA.LD-BEW.p027.10E10S.esaeleR.dehsaH.emoS.mp3".AsOsAgnostic(),
+                @"C:\Test\Fake.Dir.003-Test\yrucreM-BEW.latigiD.2102.300.esaeleR.dehsaH.emoS.cbr".AsOsAgnostic(),
                 "Some Hashed Release",
                 Quality.CBR,
                 "Mercury"
             },
             new object[]
             {
-                @"C:\Test\Fake.Dir.S01E01-Test\yrucreM-LN 1.5DD LD-BEW P0801 10E10S esaeleR dehsaH emoS.mp3".AsOsAgnostic(),
+                @"C:\Test\Fake.Dir.003-Test\yrucreM-BEW latigiD 2102 300 esaeleR dehsaH emoS.cbr".AsOsAgnostic(),
                 "Some Hashed Release",
                 Quality.CBR,
                 "Mercury"
             },
             new object[]
             {
-                @"C:\Test\Weeds.S01E10.DVDRip.XviD-Panelarr\AHFMZXGHEWD660.mp3".AsOsAgnostic(),
-                "Weeds",
+                @"C:\Test\East.of.West.010.2013.Digital-Panelarr\AHFMZXGHEWD660.cbr".AsOsAgnostic(),
+                "East of West",
                 Quality.CBR,
                 "Panelarr"
             },
             new object[]
             {
-                @"C:\Test\Deadwood.S02E12.1080p.BluRay.x264-Panelarr\Backup_72023S02-12.mp3".AsOsAgnostic(),
-                "Deadwood",
+                @"C:\Test\Saga.012.2013.Digital-Panelarr\Backup_72023S02-12.cbr".AsOsAgnostic(),
+                "Saga",
                 Quality.CBR,
                 null
             },
             new object[]
             {
-                @"C:\Test\Grimm S04E08 Chupacabra 720p WEB-DL DD5 1 H 264-ECI\123.mp3".AsOsAgnostic(),
-                "Grimm",
+                @"C:\Test\Monstress 008 Chupacabra 2016 Digital WEB-ECI\123.cbr".AsOsAgnostic(),
+                "Monstress",
                 Quality.CBR,
                 "ECI"
             },
             new object[]
             {
-                @"C:\Test\Grimm S04E08 Chupacabra 720p WEB-DL DD5 1 H 264-ECI\abc.mp3".AsOsAgnostic(),
-                "Grimm",
+                @"C:\Test\Monstress 008 Chupacabra 2016 Digital WEB-ECI\abc.cbr".AsOsAgnostic(),
+                "Monstress",
                 Quality.CBR,
                 "ECI"
             },
             new object[]
             {
-                @"C:\Test\Grimm S04E08 Chupacabra 720p WEB-DL DD5 1 H 264-ECI\b00bs.mp3".AsOsAgnostic(),
-                "Grimm",
+                @"C:\Test\Monstress 008 Chupacabra 2016 Digital WEB-ECI\b00bs.cbr".AsOsAgnostic(),
+                "Monstress",
                 Quality.CBR,
                 "ECI"
             },
             new object[]
             {
-                @"C:\Test\The.Good.Wife.S02E23.720p.HDTV.x264-NZBgeek/cgajsofuejsa501.mp3".AsOsAgnostic(),
-                "The Good Wife",
+                @"C:\Test\Paper.Girls.023.2016.Digital-NZBgeek/cgajsofuejsa501.cbr".AsOsAgnostic(),
+                "Paper Girls",
                 Quality.CBR,
                 "NZBgeek"
             }

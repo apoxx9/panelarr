@@ -81,7 +81,7 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Should().Be(correct);
         }
 
-        [TestCase("Discovery TV - Gold Rush : 02 Road From Hell [S04].mp4")]
+        [TestCase("Image Comics - Saga : 02 Road From Hell [v04].cbz")]
         public void should_clean_up_invalid_path_characters(string postTitle)
         {
             Parser.Parser.ParseIssueTitle(postTitle);
@@ -196,7 +196,7 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.CollectionEnd.Should().Be(endyear);
         }
 
-        [TestCase("Abba", "Abba", "Walking Dead  Walking Dead Digital")]
+        [TestCase("Akira", "Akira", "Walking Dead  Walking Dead Digital")]
         [TestCase("Anthony Horowitz", "Oblivion", "The Elder Scrolls IV Oblivion+Expansions")]
         [TestCase("Danielle Steel", "Zoya", "DanielleSteelZoya.zip")]
         [TestCase("Stephen King", "It", "Stephen Kingston - Spirit Doll (retail) (azw3)")]
@@ -221,13 +221,13 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.IssueTitle.Should().Be(expectedIssue);
         }
 
-        [TestCase("Ed Sheeran", "I See Fire", "Ed Sheeran I See Fire[Mimp3.eu].mp3 FLAC")]
-        [TestCase("Ed Sheeran", "Divide", "Ed Sheeran   ? Divide FLAC")]
-        [TestCase("Ed Sheeran", "+", "Ed Sheeran + FLAC")]
+        [TestCase("Jeff Lemire", "I See Fire", "Jeff Lemire I See Fire[Micbz.eu].cbz CBZ")]
+        [TestCase("Jeff Lemire", "Divide", "Jeff Lemire   ? Divide CBZ")]
+        [TestCase("Jeff Lemire", "+", "Jeff Lemire + CBZ")]
 
         //[TestCase("Glasvegas", @"EUPHORIC /// HEARTBREAK \\\", @"EUPHORIC /// HEARTBREAK \\\ FLAC")] // slashes not being escaped properly
-        [TestCase("XXXTENTACION", "?", "XXXTENTACION ? FLAC")]
-        [TestCase("Hey", "BŁYSK", "Hey - BŁYSK FLAC")]
+        [TestCase("Descender", "?", "Descender ? CBZ")]
+        [TestCase("Thorgal", "BŁYSK", "Thorgal - BŁYSK CBZ")]
         public void should_escape_books(string series, string issue, string releaseTitle)
         {
             GivenSearchCriteria(series, issue);
@@ -235,10 +235,10 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.IssueTitle.Should().Be(issue);
         }
 
-        [TestCase("???", "Issue", "??? Issue FLAC")]
-        [TestCase("+", "Issue", "+ Issue FLAC")]
-        [TestCase(@"/\", "Issue", @"/\ Issue FLAC")]
-        [TestCase("+44", "When Your Heart Stops Beating", "+44 When Your Heart Stops Beating FLAC")]
+        [TestCase("???", "Issue", "??? Issue CBZ")]
+        [TestCase("+", "Issue", "+ Issue CBZ")]
+        [TestCase(@"/\", "Issue", @"/\ Issue CBZ")]
+        [TestCase("+44", "When Your Heart Stops Beating", "+44 When Your Heart Stops Beating CBZ")]
         public void should_escape_authors(string series, string issue, string releaseTitle)
         {
             GivenSearchCriteria(series, issue);

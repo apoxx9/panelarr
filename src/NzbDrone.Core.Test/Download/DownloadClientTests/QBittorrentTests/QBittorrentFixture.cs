@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
                 Port = 2222,
                 Username = "admin",
                 Password = "pass",
-                MusicCategory = "music"
+                MusicCategory = "comics"
             };
 
             Mocker.GetMock<ITorrentFileInfoReader>()
@@ -299,7 +299,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             var torrent = new QBittorrentTorrent
             {
                 Hash = "HASH",
-                Name = @"Droned.S01E01.Test\'s.1080p.WEB-DL-DRONE.mkv",
+                Name = @"Saga.Vol.01.Test\'s.2012.Digital.Comic-DRONE.cbz",
                 Size = 1000,
                 Progress = 0.7,
                 Eta = 8640000,
@@ -310,7 +310,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
 
             var file = new QBittorrentTorrentFile
             {
-                Name = "Droned.S01E01.Tests.1080p.WEB-DL-DRONE.mkv"
+                Name = "Saga.Vol.01.Tests.2012.Digital.Comic-DRONE.cbz"
             };
 
             GivenTorrents(new List<QBittorrentTorrent> { torrent });
@@ -332,7 +332,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             var torrent = new QBittorrentTorrent
             {
                 Hash = "HASH",
-                Name = @"Droned.S01E01.Test\'s.1080p.WEB-DL-DRONE",
+                Name = @"Saga.Vol.01.Test\'s.2012.Digital.Comic-DRONE",
                 Size = 1000,
                 Progress = 0.7,
                 Eta = 8640000,
@@ -343,7 +343,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
 
             var file = new QBittorrentTorrentFile
             {
-                Name = "Folder/Droned.S01E01.Tests.1080p.WEB-DL-DRONE.mkv"
+                Name = "Folder/Saga.Vol.01.Tests.2012.Digital.Comic-DRONE.cbz"
             };
 
             GivenTorrents(new List<QBittorrentTorrent> { torrent });
@@ -365,7 +365,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             var torrent = new QBittorrentTorrent
             {
                 Hash = "HASH",
-                Name = @"Droned.S01.\1/2",
+                Name = @"Saga.Vol.01.\1/2",
                 Size = 1000,
                 Progress = 0.7,
                 Eta = 8640000,
@@ -378,11 +378,11 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             {
                 new QBittorrentTorrentFile
                 {
-                    Name = @"Droned.S01.12\E01.mkv".AsOsAgnostic()
+                    Name = @"Saga.Vol.01.12\Pt01.cbz".AsOsAgnostic()
                 },
                 new QBittorrentTorrentFile
                 {
-                    Name = @"Droned.S01.12\E02.mkv".AsOsAgnostic()
+                    Name = @"Saga.Vol.01.12\Pt02.cbz".AsOsAgnostic()
                 }
             };
 
@@ -396,7 +396,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
 
             var result = Subject.GetImportItem(item, null);
 
-            result.OutputPath.FullPath.Should().Be(Path.Combine(torrent.SavePath, "Droned.S01.12"));
+            result.OutputPath.FullPath.Should().Be(Path.Combine(torrent.SavePath, "Saga.Vol.01.12"));
         }
 
         [TestCase("pausedUP")]
@@ -406,14 +406,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             var torrent = new QBittorrentTorrent
             {
                 Hash = "HASH",
-                Name = @"Droned.S01.\1/2",
+                Name = @"Saga.Vol.01.\1/2",
                 Size = 1000,
                 Progress = 0.7,
                 Eta = 8640000,
                 State = state,
                 Label = "",
                 SavePath = @"C:\Torrents".AsOsAgnostic(),
-                ContentPath = @"C:\Torrents\Droned.S01.12".AsOsAgnostic()
+                ContentPath = @"C:\Torrents\Saga.Vol.01.12".AsOsAgnostic()
             };
 
             GivenTorrents(new List<QBittorrentTorrent> { torrent });
@@ -579,7 +579,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
             Mocker.GetMock<IQBittorrentProxy>()
                 .Setup(s => s.GetLabels(It.IsAny<QBittorrentSettings>()))
                 .Returns(new Dictionary<string, QBittorrentLabel>
-                    { { "music", new QBittorrentLabel { Name = "music", SavePath = "//server/store/downloads" } } });
+                    { { "comics", new QBittorrentLabel { Name = "comics", SavePath = "//server/store/downloads" } } });
 
             var result = Subject.GetStatus();
 
@@ -922,7 +922,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
         [TestCase("stoppedUP")]
         public void should_get_category_from_the_category_if_set(string state)
         {
-            const string category = "music-panelarr";
+            const string category = "comics-panelarr";
             GivenGlobalSeedLimits(1.0f);
 
             var torrent = new QBittorrentTorrent
@@ -948,7 +948,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
         [TestCase("stoppedUP")]
         public void should_get_category_from_the_label_if_the_category_is_not_available(string state)
         {
-            const string category = "music-panelarr";
+            const string category = "comics-panelarr";
             GivenGlobalSeedLimits(1.0f);
 
             var torrent = new QBittorrentTorrent

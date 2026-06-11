@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
 
         protected string _serialNumber = "SERIALNUMBER";
         protected string _category = "panelarr";
-        protected string _musicDirectory = @"music/Series";
+        protected string _musicDirectory = @"comics/Saga (2012)";
         protected string _defaultDestination = "somepath";
         protected OsPath _physicalPath = new OsPath("/mnt/sdb1/mydata");
 
@@ -184,7 +184,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
                 Status = DownloadStationTaskStatus.Seeding,
                 Type = DownloadStationTaskType.BT.ToString(),
                 Username = "admin",
-                Title = "a.mkv",
+                Title = "a.cbz",
                 Additional = new DownloadStationTaskAdditional
                 {
                     Detail = new Dictionary<string, string>
@@ -232,7 +232,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
                 Status = DownloadStationTaskStatus.Finished,
                 Type = DownloadStationTaskType.BT.ToString(),
                 Username = "admin",
-                Title = "a.mkv",
+                Title = "a.cbz",
                 Additional = new DownloadStationTaskAdditional
                 {
                     Detail = new Dictionary<string, string>

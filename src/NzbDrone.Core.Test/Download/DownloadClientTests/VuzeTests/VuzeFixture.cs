@@ -331,7 +331,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.VuzeTests
         {
             WindowsOnly();
 
-            var fileName = _title + ".mkv";
+            var fileName = _title + ".cbz";
             _downloading.Name = fileName;
             _downloading.DownloadDir = @"C:/Downloads";
 

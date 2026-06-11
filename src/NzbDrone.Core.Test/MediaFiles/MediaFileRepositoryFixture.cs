@@ -45,9 +45,9 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .TheRest()
                 .With(c => c.IssueId = 0)
                 .TheFirst(1)
-                .With(c => c.Path = @"C:\Test\Path\Series\somefile1.flac".AsOsAgnostic())
+                .With(c => c.Path = @"C:\Test\Path\Series\somefile1.cbz".AsOsAgnostic())
                 .TheNext(1)
-                .With(c => c.Path = @"C:\Test\Path\Series\somefile2.flac".AsOsAgnostic())
+                .With(c => c.Path = @"C:\Test\Path\Series\somefile2.cbz".AsOsAgnostic())
                 .BuildListOfNew();
             Db.InsertMany(files);
         }
@@ -91,9 +91,9 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .With(c => c.Id = 0)
                 .With(c => c.Quality = new QualityModel(Quality.CBR))
                 .TheFirst(1)
-                .With(c => c.Path = @"C:\Test\Path2\Series\somefile1.flac".AsOsAgnostic())
+                .With(c => c.Path = @"C:\Test\Path2\Series\somefile1.cbz".AsOsAgnostic())
                 .TheNext(1)
-                .With(c => c.Path = @"C:\Test\Path2\Series\somefile2.flac".AsOsAgnostic())
+                .With(c => c.Path = @"C:\Test\Path2\Series\somefile2.cbz".AsOsAgnostic())
                 .BuildListOfNew();
             Db.InsertMany(files);
 
@@ -105,7 +105,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         public void get_file_by_path()
         {
             VerifyData();
-            var file = Subject.GetFileWithPath(@"C:\Test\Path\Series\somefile2.flac".AsOsAgnostic());
+            var file = Subject.GetFileWithPath(@"C:\Test\Path\Series\somefile2.cbz".AsOsAgnostic());
 
             file.Should().NotBeNull();
             file.Issue.IsLoaded.Should().BeTrue();

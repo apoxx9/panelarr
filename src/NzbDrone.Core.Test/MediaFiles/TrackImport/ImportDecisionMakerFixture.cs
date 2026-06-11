@@ -101,7 +101,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
                 Series = _series,
                 Quality = _quality,
                 Issue = new Issue(),
-                Path = @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV.avi".AsOsAgnostic()
+                Path = @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire.cbz".AsOsAgnostic()
             };
 
             _idOverrides = new IdentificationOverrides
@@ -111,7 +111,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
 
             _idConfig = new ImportDecisionMakerConfig();
 
-            GivenAudioFiles(new List<string> { @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV.avi".AsOsAgnostic() });
+            GivenAudioFiles(new List<string> { @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire.cbz".AsOsAgnostic() });
 
             Mocker.GetMock<IIdentificationService>()
                 .Setup(s => s.Identify(It.IsAny<List<LocalIssue>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerConfig>()))
@@ -297,9 +297,9 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
 
             GivenAudioFiles(new[]
                 {
-                    @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV".AsOsAgnostic(),
-                    @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV".AsOsAgnostic(),
-                    @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV".AsOsAgnostic()
+                    @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire".AsOsAgnostic(),
+                    @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire".AsOsAgnostic(),
+                    @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire".AsOsAgnostic()
                 });
 
             var decisions = Subject.GetImportDecisions(_fileInfos, _idOverrides, null, _idConfig);
@@ -317,9 +317,9 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
 
             GivenAudioFiles(new[]
                 {
-                    @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV".AsOsAgnostic(),
-                    @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV".AsOsAgnostic(),
-                    @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV".AsOsAgnostic()
+                    @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire".AsOsAgnostic(),
+                    @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire".AsOsAgnostic(),
+                    @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire".AsOsAgnostic()
                 });
 
             Mocker.GetMock<IIdentificationService>()
@@ -345,9 +345,9 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
 
             GivenAudioFiles(new[]
                 {
-                    @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV".AsOsAgnostic(),
-                    @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV".AsOsAgnostic(),
-                    @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV".AsOsAgnostic()
+                    @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire".AsOsAgnostic(),
+                    @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire".AsOsAgnostic(),
+                    @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire".AsOsAgnostic()
                 });
 
             var decisions = Subject.GetImportDecisions(_fileInfos, _idOverrides, null, _idConfig);
@@ -368,7 +368,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
 
             GivenAudioFiles(new[]
                 {
-                    @"C:\Test\Unsorted\The.Office.S03E115.DVDRip.XviD-OSiTV".AsOsAgnostic()
+                    @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire".AsOsAgnostic()
                 });
 
             Subject.GetImportDecisions(_fileInfos, _idOverrides, null, _idConfig).Should().HaveCount(1);

@@ -200,7 +200,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [TestCase("_FAILED_")]
         public void should_remove_unpack_from_folder_name(string prefix)
         {
-            var folderName = "Alien Ant Farm - Truant (2003)";
+            var folderName = "East of West - The Promise (2013)";
             FileSystem.AddDirectory(string.Format(@"C:\drop\{0}{1}", prefix, folderName).AsOsAgnostic());
 
             Subject.ProcessRootFolder(DiskProvider.GetDirectoryInfo(_droneFactory));
@@ -215,7 +215,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         [Test]
         public void should_return_importresult_on_unknown_author()
         {
-            var fileName = @"C:\folder\file.mkv".AsOsAgnostic();
+            var fileName = @"C:\folder\file.cbz".AsOsAgnostic();
             FileSystem.AddFile(fileName, new MockFileData(string.Empty));
 
             var result = Subject.ProcessPath(fileName);

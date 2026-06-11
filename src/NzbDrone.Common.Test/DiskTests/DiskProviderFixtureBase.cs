@@ -235,7 +235,7 @@ namespace NzbDrone.Common.Test.DiskTests
         [Test]
         public void GetParentFolder_should_remove_trailing_slash_before_getting_parent_folder()
         {
-            var path = @"C:\Test\Music\".AsOsAgnostic();
+            var path = @"C:\Test\Comics\".AsOsAgnostic();
             var parent = @"C:\Test".AsOsAgnostic();
 
             Subject.GetParentFolder(path).Should().Be(parent);

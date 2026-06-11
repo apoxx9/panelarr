@@ -100,7 +100,7 @@ namespace NzbDrone.Common.Test
         [Test]
         public void should_return_true_when_folder_is_parent_of_another_folder()
         {
-            var path = @"C:\Test\Music".AsOsAgnostic();
+            var path = @"C:\Test\Comics".AsOsAgnostic();
 
             _parent.IsParentPath(path).Should().BeTrue();
         }
@@ -108,15 +108,15 @@ namespace NzbDrone.Common.Test
         [Test]
         public void should_return_true_when_folder_is_parent_of_a_file()
         {
-            var path = @"C:\Test\30.Rock.S01E01.Pilot.avi".AsOsAgnostic();
+            var path = @"C:\Test\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic();
 
             _parent.IsParentPath(path).Should().BeTrue();
         }
 
         [TestCase(@"C:\Test\", @"C:\Test\mydir")]
         [TestCase(@"C:\Test\", @"C:\Test\mydir\")]
-        [TestCase(@"C:\Test", @"C:\Test\30.Rock.S01E01.Pilot.avi")]
-        [TestCase(@"C:\", @"C:\Test\30.Rock.S01E01.Pilot.avi")]
+        [TestCase(@"C:\Test", @"C:\Test\Saga 001 (2012) (Digital) (Empire).cbz")]
+        [TestCase(@"C:\", @"C:\Test\Saga 001 (2012) (Digital) (Empire).cbz")]
         public void path_should_be_parent(string parentPath, string childPath)
         {
             parentPath.AsOsAgnostic().IsParentPath(childPath.AsOsAgnostic()).Should().BeTrue();
@@ -293,13 +293,13 @@ namespace NzbDrone.Common.Test
         public void GetAncestorFolders_should_return_all_ancestors_in_path_Windows()
         {
             WindowsOnly();
-            var path = @"C:\Test\Music\Series Title";
+            var path = @"C:\Test\Comics\Series Title";
             var result = path.GetAncestorFolders();
 
             result.Count.Should().Be(4);
             result[0].Should().Be(@"C:\");
             result[1].Should().Be(@"Test");
-            result[2].Should().Be(@"Music");
+            result[2].Should().Be(@"Comics");
             result[3].Should().Be(@"Series Title");
         }
 
@@ -307,13 +307,13 @@ namespace NzbDrone.Common.Test
         public void GetAncestorFolders_should_return_all_ancestors_in_path_Linux()
         {
             PosixOnly();
-            var path = @"/Test/Music/Series Title";
+            var path = @"/Test/Comics/Series Title";
             var result = path.GetAncestorFolders();
 
             result.Count.Should().Be(4);
             result[0].Should().Be(@"/");
             result[1].Should().Be(@"Test");
-            result[2].Should().Be(@"Music");
+            result[2].Should().Be(@"Comics");
             result[3].Should().Be(@"Series Title");
         }
     }

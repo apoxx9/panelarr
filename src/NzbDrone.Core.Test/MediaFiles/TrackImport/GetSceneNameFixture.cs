@@ -16,15 +16,15 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
     public class GetSceneNameFixture : CoreTest
     {
         private LocalIssue _localEpisode;
-        private string _seasonName = "artist.title-album.title.FLAC-ingot";
-        private string _episodeName = "artist.title-album.title.FLAC-ingot";
+        private string _seasonName = "Saga.003.2012.Digital.Comic-Empire";
+        private string _episodeName = "Saga.003.2012.Digital.Comic-Empire";
 
         [SetUp]
         public void Setup()
         {
             var series = Builder<Series>.CreateNew()
                                         .With(e => e.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() })
-                                        .With(s => s.Path = @"C:\Test\Music\Artist Title".AsOsAgnostic())
+                                        .With(s => s.Path = @"C:\Test\Comics\Saga (2012)".AsOsAgnostic())
                                         .Build();
 
             var episode = Builder<Issue>.CreateNew()
@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
             {
                 Series = series,
                 Issue = episode,
-                Path = Path.Combine(series.Path, "01 Some Body Loves.mkv"),
+                Path = Path.Combine(series.Path, "Saga 001 (2012) (Digital) (Empire).cbz"),
                 Quality = new QualityModel(Quality.CBZ_HD),
                 ReleaseGroup = "DRONE"
             };
@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
                 IsCollection = true
             };
 
-            _localEpisode.Path = Path.Combine(@"C:\Test\Unsorted TV", _seasonName, _episodeName)
+            _localEpisode.Path = Path.Combine(@"C:\Test\Unsorted Comics", _seasonName, _episodeName)
                                      .AsOsAgnostic();
 
             SceneNameCalculator.GetSceneName(_localEpisode).Should()
@@ -71,7 +71,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
         [Test]
         public void should_not_use_file_name_as_scenename_if_it_doesnt_look_like_scenename()
         {
-            _localEpisode.Path = Path.Combine(@"C:\Test\Unsorted TV", _episodeName, "aaaaa.mkv")
+            _localEpisode.Path = Path.Combine(@"C:\Test\Unsorted Comics", _episodeName, "aaaaa.cbz")
                                      .AsOsAgnostic();
 
             SceneNameCalculator.GetSceneName(_localEpisode).Should()
@@ -81,7 +81,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
         [Test]
         public void should_not_use_folder_name_as_scenename_if_it_doesnt_look_like_scenename()
         {
-            _localEpisode.Path = Path.Combine(@"C:\Test\Unsorted TV", _episodeName, "aaaaa.mkv")
+            _localEpisode.Path = Path.Combine(@"C:\Test\Unsorted Comics", _episodeName, "aaaaa.cbz")
                                      .AsOsAgnostic();
 
             _localEpisode.FolderTrackInfo = new ParsedIssueInfo
@@ -96,7 +96,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
         [Test]
         public void should_not_use_folder_name_as_scenename_if_it_is_for_a_full_season()
         {
-            _localEpisode.Path = Path.Combine(@"C:\Test\Unsorted TV", _episodeName, "aaaaa.mkv")
+            _localEpisode.Path = Path.Combine(@"C:\Test\Unsorted Comics", _episodeName, "aaaaa.cbz")
                                      .AsOsAgnostic();
 
             _localEpisode.FolderTrackInfo = new ParsedIssueInfo
@@ -112,7 +112,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
         [Test]
         public void should_not_use_folder_name_as_scenename_if_there_are_other_video_files()
         {
-            _localEpisode.Path = Path.Combine(@"C:\Test\Unsorted TV", _episodeName, "aaaaa.mkv")
+            _localEpisode.Path = Path.Combine(@"C:\Test\Unsorted Comics", _episodeName, "aaaaa.cbz")
                                      .AsOsAgnostic();
 
             _localEpisode.FolderTrackInfo = new ParsedIssueInfo

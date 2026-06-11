@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
                 Host = "127.0.0.1",
                 Port = 2222,
                 ApiKey = "1234-ABCD",
-                MusicCategory = "Music",
+                MusicCategory = "Comics",
                 RecentTvPriority = (int)NzbgetPriority.High
             };
 
@@ -42,16 +42,16 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
                 Id = RandomNumber,
                 DownloadedSize = 1000,
                 TotalDownloadSize = 10,
-                GroupName = "Music",
-                UiTitle = "Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN"
+                GroupName = "Comics",
+                UiTitle = "Saga Vol 01 (2012) (Digital) (Empire)"
             };
 
             _failed = new NzbVortexQueueItem
             {
                 DownloadedSize = 1000,
                 TotalDownloadSize = 1000,
-                GroupName = "Music",
-                UiTitle = "Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN",
+                GroupName = "Comics",
+                UiTitle = "Saga Vol 01 (2012) (Digital) (Empire)",
                 DestinationPath = "somedirectory",
                 State = NzbVortexStateType.UncompressFailed,
             };
@@ -60,9 +60,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
             {
                 DownloadedSize = 1000,
                 TotalDownloadSize = 1000,
-                GroupName = "Music",
-                UiTitle = "Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN",
-                DestinationPath = "/remote/mount/music/Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN",
+                GroupName = "Comics",
+                UiTitle = "Saga Vol 01 (2012) (Digital) (Empire)",
+                DestinationPath = "/remote/mount/comics/Saga Vol 01 (2012) (Digital) (Empire)",
                 State = NzbVortexStateType.Done
             };
         }
@@ -239,13 +239,13 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
         {
             Mocker.GetMock<IRemotePathMappingService>()
                   .Setup(v => v.RemapRemoteToLocal("127.0.0.1", It.IsAny<OsPath>()))
-                  .Returns(new OsPath(@"O:\mymount\Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN".AsOsAgnostic()));
+                  .Returns(new OsPath(@"O:\mymount\Saga Vol 01 (2012) (Digital) (Empire)".AsOsAgnostic()));
 
             GivenQueue(_completed);
 
             var result = Subject.GetItems().Single();
 
-            result.OutputPath.Should().Be(@"O:\mymount\Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN".AsOsAgnostic());
+            result.OutputPath.Should().Be(@"O:\mymount\Saga Vol 01 (2012) (Digital) (Empire)".AsOsAgnostic());
         }
 
         [Test]
@@ -257,14 +257,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
 
             Mocker.GetMock<INzbVortexProxy>()
                   .Setup(s => s.GetFiles(It.IsAny<int>(), It.IsAny<NzbVortexSettings>()))
-                  .Returns(new List<NzbVortexFile> { new NzbVortexFile { FileName = "Fall Out Boy - Make America Psyco Again - Track 1.flac" } });
+                  .Returns(new List<NzbVortexFile> { new NzbVortexFile { FileName = "Saga 001 (2012) (Digital) (Empire).cbz" } });
 
             _completed.State = NzbVortexStateType.Done;
             GivenQueue(_completed);
 
             var result = Subject.GetItems().Single();
 
-            result.OutputPath.Should().Be(@"O:\mymount\Fall Out Boy - Make America Psyco Again - Track 1.flac".AsOsAgnostic());
+            result.OutputPath.Should().Be(@"O:\mymount\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic());
         }
 
         [Test]
@@ -278,8 +278,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbVortexTests
                   .Setup(s => s.GetFiles(It.IsAny<int>(), It.IsAny<NzbVortexSettings>()))
                   .Returns(new List<NzbVortexFile>
                            {
-                               new NzbVortexFile { FileName = "Fall Out Boy - Make America Psyco Again - Track 1.flac" },
-                               new NzbVortexFile { FileName = "Fall Out Boy-Make America Psycho Again-CD-FLAC-2015-FORSAKEN.nfo" }
+                               new NzbVortexFile { FileName = "Saga 001 (2012) (Digital) (Empire).cbz" },
+                               new NzbVortexFile { FileName = "Saga.001.2012.Digital-Empire.nfo" }
                            });
 
             _completed.State = NzbVortexStateType.Done;

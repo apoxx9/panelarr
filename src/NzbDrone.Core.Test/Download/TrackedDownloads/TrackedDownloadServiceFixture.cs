@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
                     new EntityHistory()
                     {
                          DownloadId = "35238",
-                         SourceTitle = "Audio Series - Audio Issue [2018 - FLAC]",
+                         SourceTitle = "Saga - The Brand New World [2018 - CBZ]",
                          SeriesId = 5,
                          IssueId = 4,
                     }
@@ -45,13 +45,13 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
                 Issues = new List<Issue> { new Issue { Id = 4 } },
                 ParsedIssueInfo = new ParsedIssueInfo()
                 {
-                    IssueTitle = "Audio Issue",
-                    SeriesName = "Audio Series"
+                    IssueTitle = "The Brand New World",
+                    SeriesName = "Saga"
                 }
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.Is<ParsedIssueInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
+                  .Setup(s => s.Map(It.Is<ParsedIssueInfo>(i => i.IssueTitle == "The Brand New World" && i.SeriesName == "Saga"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
                   .Returns(remoteIssue);
 
             var client = new DownloadClientDefinition()
@@ -92,13 +92,13 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
                 Issues = new List<Issue> { new Issue { Id = 4 } },
                 ParsedIssueInfo = new ParsedIssueInfo()
                 {
-                    IssueTitle = "Audio Issue",
-                    SeriesName = "Audio Series"
+                    IssueTitle = "The Brand New World",
+                    SeriesName = "Saga"
                 }
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.Map(It.Is<ParsedIssueInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
+                  .Setup(s => s.Map(It.Is<ParsedIssueInfo>(i => i.IssueTitle == "The Brand New World" && i.SeriesName == "Saga"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
                   .Returns(remoteIssue);
 
             var client = new DownloadClientDefinition()
@@ -109,7 +109,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var item = new DownloadClientItem()
             {
-                Title = "Audio Series - Audio Issue [2018 - FLAC]",
+                Title = "Saga - The Brand New World [2018 - CBZ]",
                 DownloadId = "35238",
                 DownloadClientInfo = new DownloadClientItemClientInfo
                 {
@@ -125,7 +125,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             // simulate deletion - issue no longer maps
             Mocker.GetMock<IParsingService>()
-                .Setup(s => s.Map(It.Is<ParsedIssueInfo>(i => i.IssueTitle == "Audio Issue" && i.SeriesName == "Audio Series"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
+                .Setup(s => s.Map(It.Is<ParsedIssueInfo>(i => i.IssueTitle == "The Brand New World" && i.SeriesName == "Saga"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
                 .Returns(default(RemoteIssue));
 
             // handle deletion event
@@ -148,7 +148,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
                 Issues = new List<Issue> { new Issue { Id = 4 } },
                 ParsedIssueInfo = new ParsedIssueInfo()
                 {
-                    IssueTitle = "TV SeriesGroup"
+                    IssueTitle = "Saga"
                 }
             };
 
@@ -168,7 +168,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var item = new DownloadClientItem()
             {
-                Title = "TV SeriesGroup - S01E01",
+                Title = "Saga - 001 [2012 - CBZ]",
                 DownloadId = "12345",
                 DownloadClientInfo = new DownloadClientItemClientInfo
                 {
@@ -204,7 +204,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
                 Issues = new List<Issue> { new Issue { Id = 4 } },
                 ParsedIssueInfo = new ParsedIssueInfo()
                 {
-                    IssueTitle = "TV SeriesGroup",
+                    IssueTitle = "Saga",
                 }
             };
 
@@ -224,7 +224,7 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
 
             var item = new DownloadClientItem()
             {
-                Title = "TV SeriesGroup - S01E01",
+                Title = "Saga - 001 [2012 - CBZ]",
                 DownloadId = "12345",
                 DownloadClientInfo = new DownloadClientItemClientInfo
                 {

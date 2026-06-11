@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
             var completed = Builder<DownloadClientItem>.CreateNew()
                                                     .With(h => h.Status = DownloadItemStatus.Completed)
                                                     .With(h => h.OutputPath = new OsPath(@"C:\DropFolder\MyDownload".AsOsAgnostic()))
-                                                    .With(h => h.Title = "Drone.S01E01.HDTV")
+                                                    .With(h => h.Title = "Saga.003.2012.Digital-Empire")
                                                     .Build();
 
             var remoteIssue = BuildRemoteIssue();
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                   .Returns(new EntityHistory());
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(s => s.GetSeries("Drone.S01E01.HDTV"))
+                  .Setup(s => s.GetSeries("Saga.003.2012.Digital-Empire"))
                   .Returns(remoteIssue.Series);
 
             Mocker.GetMock<IHistoryService>()
@@ -93,14 +93,14 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
             _trackedDownload.DownloadItem.Title = "Droned Pilot"; // Set a badly named download
             Mocker.GetMock<IHistoryService>()
                .Setup(s => s.MostRecentForDownloadId(It.Is<string>(i => i == "1234")))
-               .Returns(new EntityHistory() { SourceTitle = "Droned S01E01" });
+               .Returns(new EntityHistory() { SourceTitle = "Saga 004 (2012)" });
 
             Mocker.GetMock<IParsingService>()
                .Setup(s => s.GetSeries(It.IsAny<string>()))
                .Returns((Series)null);
 
             Mocker.GetMock<IParsingService>()
-                .Setup(s => s.GetSeries("Droned S01E01"))
+                .Setup(s => s.GetSeries("Saga 004 (2012)"))
                 .Returns(BuildRemoteIssue().Series);
         }
 
@@ -120,11 +120,11 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                            {
                                new ImportResult(
                                    new ImportDecision<LocalIssue>(
-                                       new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic() }, new Rejection("Rejected!")), "Test Failure"),
+                                       new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic() }, new Rejection("Rejected!")), "Test Failure"),
 
                                new ImportResult(
                                    new ImportDecision<LocalIssue>(
-                                       new LocalIssue { Path = @"C:\TestPath\Droned.S01E02.mkv".AsOsAgnostic() }, new Rejection("Rejected!")), "Test Failure")
+                                       new LocalIssue { Path = @"C:\TestPath\Saga.002.2012.Digital-Empire.cbz".AsOsAgnostic() }, new Rejection("Rejected!")), "Test Failure")
                            });
 
             Subject.Import(_trackedDownload);
@@ -144,11 +144,11 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                            {
                                new ImportResult(
                                    new ImportDecision<LocalIssue>(
-                                       new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic() }, new Rejection("Rejected!")), "Test Failure"),
+                                       new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic() }, new Rejection("Rejected!")), "Test Failure"),
 
                                new ImportResult(
                                    new ImportDecision<LocalIssue>(
-                                       new LocalIssue { Path = @"C:\TestPath\Droned.S01E02.mkv".AsOsAgnostic() }, new Rejection("Rejected!")), "Test Failure")
+                                       new LocalIssue { Path = @"C:\TestPath\Saga.002.2012.Digital-Empire.cbz".AsOsAgnostic() }, new Rejection("Rejected!")), "Test Failure")
                            });
 
             _trackedDownload.RemoteIssue.Issues.Clear();
@@ -177,8 +177,8 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                   .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Series>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                            {
-                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic() }), "Test Failure"),
-                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic() }), "Test Failure")
+                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic() }), "Test Failure"),
+                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic() }), "Test Failure")
                            });
 
             Subject.Import(_trackedDownload);
@@ -200,8 +200,8 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                   .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Series>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                            {
-                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic(), Series = _series })),
-                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic(), Series = _series }), "Test Failure")
+                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic(), Series = _series })),
+                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic(), Series = _series }), "Test Failure")
                            });
 
             Mocker.GetMock<IHistoryService>()
@@ -227,11 +227,11 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                   .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Series>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                            {
-                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic() })),
-                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic() })),
-                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic() }), "Test Failure"),
-                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic() }), "Test Failure"),
-                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic() }), "Test Failure")
+                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic() })),
+                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic() })),
+                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic() }), "Test Failure"),
+                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic() }), "Test Failure"),
+                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic() }), "Test Failure")
                            });
 
             var history = Builder<EntityHistory>.CreateListOfSize(2)
@@ -261,9 +261,9 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                 .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Series>(), It.IsAny<DownloadClientItem>()))
                 .Returns(new List<ImportResult>
                 {
-                    new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv" })),
-                    new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv" }), "Test Failure"),
-                    new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv" }), "Test Failure")
+                    new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz" })),
+                    new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz" }), "Test Failure"),
+                    new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz" }), "Test Failure")
                 });
 
             var history = Builder<EntityHistory>.CreateListOfSize(2)
@@ -296,11 +296,11 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                            {
                                new ImportResult(
                                    new ImportDecision<LocalIssue>(
-                                       new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic(), Series = _series })),
+                                       new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic(), Series = _series })),
 
                                new ImportResult(
                                    new ImportDecision<LocalIssue>(
-                                       new LocalIssue { Path = @"C:\TestPath\Droned.S01E02.mkv".AsOsAgnostic(), Series = _series }))
+                                       new LocalIssue { Path = @"C:\TestPath\Saga.002.2012.Digital-Empire.cbz".AsOsAgnostic(), Series = _series }))
                            });
 
             Subject.Import(_trackedDownload);
@@ -321,11 +321,11 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                 {
                     new ImportResult(
                         new ImportDecision<LocalIssue>(
-                            new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv", Issue = issues[0], Series = _series })),
+                            new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz", Issue = issues[0], Series = _series })),
 
                     new ImportResult(
                         new ImportDecision<LocalIssue>(
-                            new LocalIssue { Path = @"C:\TestPath\Droned.S01E02.mkv", Issue = issues[1], Series = _series }), "Test Failure")
+                            new LocalIssue { Path = @"C:\TestPath\Saga.002.2012.Digital-Empire.cbz", Issue = issues[1], Series = _series }), "Test Failure")
                 });
 
             var history = Builder<EntityHistory>.CreateListOfSize(2)
@@ -356,7 +356,7 @@ namespace NzbDrone.Core.Test.Download.CompletedDownloadServiceTests
                   .Setup(v => v.ProcessPath(It.IsAny<string>(), It.IsAny<ImportMode>(), It.IsAny<Series>(), It.IsAny<DownloadClientItem>()))
                   .Returns(new List<ImportResult>
                            {
-                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Droned.S01E01.mkv".AsOsAgnostic(), Series = _series }))
+                               new ImportResult(new ImportDecision<LocalIssue>(new LocalIssue { Path = @"C:\TestPath\Saga.001.2012.Digital-Empire.cbz".AsOsAgnostic(), Series = _series }))
                            });
 
             Subject.Import(_trackedDownload);

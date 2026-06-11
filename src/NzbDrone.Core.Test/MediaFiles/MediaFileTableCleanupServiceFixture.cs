@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                   .ToList();
 
             _series = Builder<Series>.CreateNew()
-                                     .With(s => s.Path = @"C:\Test\Music\Series".AsOsAgnostic())
+                                     .With(s => s.Path = @"C:\Test\Comics\Saga (2012)".AsOsAgnostic())
                                      .Build();
         }
 

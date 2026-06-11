@@ -8,20 +8,20 @@ namespace NzbDrone.Core.Test.OrganizerTests
     [TestFixture]
     public class CleanFilenameFixture : CoreTest
     {
-        [TestCase("Law & Order: Criminal Intent - S10E07 - Icarus [HDTV-720p]", "Law & Order - Criminal Intent - S10E07 - Icarus [HDTV-720p]")]
+        [TestCase("Batman: White Knight - 007 - Icarus [Digital]", "Batman - White Knight - 007 - Icarus [Digital]")]
         public void should_replaace_invalid_characters(string name, string expectedName)
         {
             FileNameBuilder.CleanFileName(name).Should().Be(expectedName);
         }
 
-        [TestCase(".hack s01e01", "hack s01e01")]
+        [TestCase(".hack 001", "hack 001")]
         public void should_remove_periods_from_start(string name, string expectedName)
         {
             FileNameBuilder.CleanFileName(name).Should().Be(expectedName);
         }
 
-        [TestCase(" SeriesGroup Title - S01E01 - Episode Title", "SeriesGroup Title - S01E01 - Episode Title")]
-        [TestCase("SeriesGroup Title - S01E01 - Episode Title ", "SeriesGroup Title - S01E01 - Episode Title")]
+        [TestCase(" Saga - 001 - Issue Title", "Saga - 001 - Issue Title")]
+        [TestCase("Saga - 001 - Issue Title ", "Saga - 001 - Issue Title")]
         public void should_remove_spaces_from_start_and_end(string name, string expectedName)
         {
             FileNameBuilder.CleanFileName(name).Should().Be(expectedName);

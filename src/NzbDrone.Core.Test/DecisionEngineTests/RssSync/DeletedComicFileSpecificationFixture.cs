@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 new ComicFile
                 {
                     Id = 1,
-                    Path = "/My.Series.S01E01.mp3",
+                    Path = "/East.of.West.001.cbz",
                     Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)),
                     DateAdded = DateTime.Now,
                     IssueId = 1
@@ -42,7 +42,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 new ComicFile
                 {
                     Id = 2,
-                    Path = "/My.Series.S01E02.mp3",
+                    Path = "/East.of.West.002.cbz",
                     Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)),
                     DateAdded = DateTime.Now,
                     IssueId = 2
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 
             var fakeSeries = Builder<Series>.CreateNew()
                          .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.CBZ_HD.Id })
-                         .With(c => c.Path = @"C:\Music\My.Series".AsOsAgnostic())
+                         .With(c => c.Path = @"C:\Comics\East of West".AsOsAgnostic())
                          .Build();
 
             _parseResultMulti = new RemoteIssue

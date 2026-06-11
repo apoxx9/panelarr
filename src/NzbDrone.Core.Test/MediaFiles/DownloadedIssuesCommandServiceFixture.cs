@@ -20,8 +20,8 @@ namespace NzbDrone.Core.Test.MediaFiles
     [TestFixture]
     public class DownloadedIssuesCommandServiceFixture : FileSystemTest<DownloadedIssuesCommandService>
     {
-        private string _downloadFolder = "c:\\drop_other\\Show.S01E01\\".AsOsAgnostic();
-        private string _downloadFile = "c:\\drop_other\\Show.S01E01.mkv".AsOsAgnostic();
+        private string _downloadFolder = "c:\\drop_other\\Saga.003.2012.Digital-Empire\\".AsOsAgnostic();
+        private string _downloadFile = "c:\\drop_other\\Saga.003.2012.Digital-Empire.cbz".AsOsAgnostic();
 
         private TrackedDownload _trackedDownload;
 

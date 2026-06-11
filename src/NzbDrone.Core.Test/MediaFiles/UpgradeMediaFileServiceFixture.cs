@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Test.MediaFiles
     {
         private ComicFile _trackFile;
         private LocalIssue _localTrack;
-        private string _rootPath = @"C:\Test\Music\Series".AsOsAgnostic();
+        private string _rootPath = @"C:\Test\Comics\Saga (2012)".AsOsAgnostic();
 
         [SetUp]
         public void Setup()
@@ -60,7 +60,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                               new ComicFile
                               {
                                   Id = 1,
-                                  Path = Path.Combine(_rootPath, @"Season 01\30.rock.s01e01.avi"),
+                                  Path = Path.Combine(_rootPath, @"Volume 01\Saga 001 (2012) (Digital) (Empire).cbz"),
                               }
                           }))
                 .Build();

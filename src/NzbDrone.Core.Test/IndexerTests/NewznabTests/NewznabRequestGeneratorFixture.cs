@@ -25,8 +25,8 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             _singleIssueSearchCriteria = new IssueSearchCriteria
             {
-                Series = new Issues.Series { Name = "Alien Ant Farm" },
-                IssueTitle = "TruANT"
+                Series = new Issues.Series { Name = "East of West" },
+                IssueTitle = "The Promise"
             };
 
             _capabilities = new NewznabCapabilities();
@@ -59,8 +59,8 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetAllTiers().First().First();
 
-            page.Url.Query.Should().Contain("series=Alien%20Ant%20Farm");
-            page.Url.Query.Should().Contain("title=TruANT");
+            page.Url.Query.Should().Contain("series=East%20of%20West");
+            page.Url.Query.Should().Contain("title=The%20Promise");
         }
 
         [Test]
@@ -70,14 +70,14 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
             _capabilities.SupportedComicSearchParameters = new[] { "q", "series", "title" };
 
             // _capabilities.IssueTextSearchEngine = "raw";
-            _singleIssueSearchCriteria.IssueTitle = "Daisy Jones & The Six";
+            _singleIssueSearchCriteria.IssueTitle = "Batman & Robin";
 
             var results = Subject.GetSearchRequests(_singleIssueSearchCriteria);
             results.Tiers.Should().Be(1);
 
             var pageTier = results.GetTier(0).First().First();
 
-            pageTier.Url.Query.Should().Contain("q=Daisy%20Jones%20%26%20The%20Six");
+            pageTier.Url.Query.Should().Contain("q=Batman%20%26%20Robin");
             pageTier.Url.Query.Should().NotContain(" & ");
             pageTier.Url.Query.Should().Contain("%26");
         }
@@ -88,14 +88,14 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
             _capabilities.SupportedComicSearchParameters = new[] { "q", "series", "title" };
 
             // _capabilities.IssueTextSearchEngine = "sphinx";
-            _singleIssueSearchCriteria.IssueTitle = "Daisy Jones & The Six";
+            _singleIssueSearchCriteria.IssueTitle = "Batman & Robin";
 
             var results = Subject.GetSearchRequests(_singleIssueSearchCriteria);
             results.Tiers.Should().Be(2);
 
             var pageTier = results.GetTier(0).First().First();
 
-            pageTier.Url.Query.Should().Contain("q=Daisy%20Jones%20The%20Six");
+            pageTier.Url.Query.Should().Contain("q=Batman%20Robin");
             pageTier.Url.Query.Should().NotContain("and");
             pageTier.Url.Query.Should().NotContain(" & ");
             pageTier.Url.Query.Should().NotContain("%26");

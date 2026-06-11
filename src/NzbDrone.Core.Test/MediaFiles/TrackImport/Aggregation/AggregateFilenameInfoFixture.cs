@@ -153,7 +153,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Aggregation.Aggregators
                     }
                 }
 
-                outp.Add(string.Join(fieldSeparator, components) + ".mp3");
+                outp.Add(string.Join(fieldSeparator, components) + ".cbz");
             }
 
             return outp;

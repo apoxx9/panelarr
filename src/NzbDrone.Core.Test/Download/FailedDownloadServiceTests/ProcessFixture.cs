@@ -27,7 +27,7 @@ namespace NzbDrone.Core.Test.Download.FailedDownloadServiceTests
             var completed = Builder<DownloadClientItem>.CreateNew()
                                                     .With(h => h.Status = DownloadItemStatus.Completed)
                                                     .With(h => h.OutputPath = new OsPath(@"C:\DropFolder\MyDownload".AsOsAgnostic()))
-                                                    .With(h => h.Title = "Drone.DroneTheIssue.FLAC")
+                                                    .With(h => h.Title = "Saga.003.2012.Digital-Empire")
                                                     .Build();
 
             _grabHistory = Builder<EntityHistory>.CreateListOfSize(2).BuildList();

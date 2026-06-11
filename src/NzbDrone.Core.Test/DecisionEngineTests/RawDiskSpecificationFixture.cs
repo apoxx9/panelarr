@@ -34,9 +34,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_return_true_if_flac()
+        public void should_return_true_if_cbz()
         {
-            WithContainer("FLAC");
+            WithContainer("CBZ");
             Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 

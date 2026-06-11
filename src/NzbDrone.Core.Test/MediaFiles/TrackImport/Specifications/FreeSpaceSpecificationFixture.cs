@@ -23,15 +23,15 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
         [SetUp]
         public void Setup()
         {
-            _rootFolder = @"C:\Test\Music".AsOsAgnostic();
+            _rootFolder = @"C:\Test\Comics".AsOsAgnostic();
 
             _series = Builder<Series>.CreateNew()
-                                     .With(s => s.Path = Path.Combine(_rootFolder, "Alice in Chains"))
+                                     .With(s => s.Path = Path.Combine(_rootFolder, "Saga (2012)"))
                                      .Build();
 
             _localTrack = new LocalIssue
             {
-                Path = @"C:\Test\Unsorted\Alice in Chains\Alice in Chains - track1.mp3".AsOsAgnostic(),
+                Path = @"C:\Test\Unsorted\Saga (2012)\Saga 001 (2012) (Digital) (Empire).cbz".AsOsAgnostic(),
                 Issue = new Issue(),
                 Series = _series
             };

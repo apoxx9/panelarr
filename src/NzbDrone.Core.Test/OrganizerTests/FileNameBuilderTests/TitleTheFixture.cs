@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _series = Builder<Series>
                     .CreateNew()
-                    .With(s => s.Name = "Alien Ant Farm")
+                    .With(s => s.Name = "East of West")
                     .Build();
 
             var series = Builder<SeriesGroup>

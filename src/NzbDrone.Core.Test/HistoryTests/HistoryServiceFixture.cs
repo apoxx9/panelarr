@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Test.HistoryTests
             {
                 Series = series,
                 Issue = new Issue(),
-                Path = @"C:\Test\Unsorted\Series.01.Hymn.mp3"
+                Path = @"C:\Test\Unsorted\Saga.003.2012.Digital-Empire.cbz"
             };
 
             var downloadClientItem = new DownloadClientItem
