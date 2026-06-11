@@ -126,11 +126,15 @@ namespace NzbDrone.Core.Datastore
                                                          .Where<SeriesGroup>(s => s.Id == series.Id)).ToList(),
                           s => s.Id > 0);
 
+            // SeriesGroupLink.Issue is only populated in-memory by the refresh pipeline;
+            // links reference SeriesMetadata, so there is no per-link issue row to load.
             Mapper.Entity<SeriesGroupLink>("SeriesGroupLink").RegisterModel()
-                  .HasOne(l => l.Issue, l => l.SeriesMetadataId)
                   .HasOne(l => l.SeriesGroup, l => l.SeriesGroupId);
 
-            Mapper.Entity<SeriesMetadata>("SeriesMetadata").RegisterModel();
+            Mapper.Entity<SeriesMetadata>("SeriesMetadata").RegisterModel()
+                  .LazyLoad(m => m.Publisher,
+                            (db, metadata) => db.Query<Publisher>(new SqlBuilder(db.DatabaseType).Where<Publisher>(p => p.Id == metadata.PublisherId)).SingleOrDefault(),
+                            m => m.PublisherId > 0);
 
             Mapper.Entity<Issue>("Issues").RegisterModel()
                 .Ignore(x => x.SeriesId)

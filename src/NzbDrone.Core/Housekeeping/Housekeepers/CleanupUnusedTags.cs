@@ -19,8 +19,18 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
         public void Clean()
         {
             using var mapper = _database.OpenConnection();
-            var usedTags = new[] { "Series", "Notifications", "DelayProfiles", "ReleaseProfiles", "ImportLists", "Indexers", "DownloadClients" }
-                .SelectMany(v => GetUsedTags(v, mapper))
+            var usedTags = new[]
+                {
+                    ("Series", "Tags"),
+                    ("Notifications", "Tags"),
+                    ("DelayProfiles", "Tags"),
+                    ("ReleaseProfiles", "Tags"),
+                    ("ImportLists", "Tags"),
+                    ("Indexers", "Tags"),
+                    ("DownloadClients", "Tags"),
+                    ("RootFolders", "DefaultTags")
+                }
+                .SelectMany(v => GetUsedTags(v.Item1, v.Item2, mapper))
                 .Distinct()
                 .ToArray();
 
@@ -43,9 +53,9 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
             }
         }
 
-        private int[] GetUsedTags(string table, IDbConnection mapper)
+        private int[] GetUsedTags(string table, string column, IDbConnection mapper)
         {
-            return mapper.Query<List<int>>($"SELECT DISTINCT \"Tags\" FROM \"{table}\" WHERE NOT \"Tags\" = '[]' AND NOT \"Tags\" IS NULL")
+            return mapper.Query<List<int>>($"SELECT DISTINCT \"{column}\" FROM \"{table}\" WHERE NOT \"{column}\" = '[]' AND NOT \"{column}\" IS NULL")
                 .SelectMany(x => x)
                 .Distinct()
                 .ToArray();

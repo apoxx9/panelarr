@@ -18,9 +18,9 @@ namespace NzbDrone.Core.Housekeeping.Housekeepers
             mapper.Execute(@"DELETE FROM ""SeriesGroupLink""
                             WHERE ""Id"" IN (
                             SELECT ""SeriesGroupLink"".""Id"" FROM ""SeriesGroupLink""
-                            LEFT OUTER JOIN ""Issues""
-                            ON ""SeriesGroupLink"".""IssueId"" = ""Issues"".""Id""
-                            WHERE ""Issues"".""Id"" IS NULL)");
+                            LEFT OUTER JOIN ""SeriesMetadata""
+                            ON ""SeriesGroupLink"".""SeriesMetadataId"" = ""SeriesMetadata"".""Id""
+                            WHERE ""SeriesMetadata"".""Id"" IS NULL)");
 
             mapper.Execute(@"DELETE FROM ""SeriesGroupLink""
                              WHERE ""Id"" IN (
