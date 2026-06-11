@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NLog;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Core.MetadataSource.Provider;
 
 namespace NzbDrone.Core.MetadataSource.Metron
@@ -22,12 +23,14 @@ namespace NzbDrone.Core.MetadataSource.Metron
 
             var results = _client.SearchSeries(title);
 
+            // Metron's series list responses carry no publisher; it is only
+            // available from the series detail endpoint.
             return results.Select(r => new ProviderSeries
             {
                 ForeignSeriesId = r.Id.ToString(),
                 Name = r.Name,
                 Year = r.YearBegan,
-                ForeignPublisherId = r.Publisher?.Id.ToString()
+                IssueCount = r.IssueCount
             }).ToList();
         }
 
@@ -55,16 +58,12 @@ namespace NzbDrone.Core.MetadataSource.Metron
                 Status = detail.Status,
                 SeriesType = detail.SeriesType?.Name,
                 Year = detail.YearBegan,
+                VolumeNumber = detail.Volume,
                 ForeignPublisherId = detail.Publisher?.Id.ToString(),
+                PublisherName = detail.Publisher?.Name,
                 Genres = detail.Genres?.Select(g => g.Name).ToList() ?? new List<string>(),
                 ImageUrl = detail.Image,
-                Issues = issues.Select(i => new ProviderIssue
-                {
-                    ForeignIssueId = i.Id.ToString(),
-                    Title = i.IssueName,
-                    ReleaseDate = i.CoverDate,
-                    IssueNumber = ParseIssueNumber(i.Number)
-                }).ToList()
+                Issues = issues.Select(MapListIssue).ToList()
             };
         }
 
@@ -90,13 +89,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
 
             var issues = _client.GetIssuesBySeries(id);
 
-            return issues.Select(i => new ProviderIssue
-            {
-                ForeignIssueId = i.Id.ToString(),
-                Title = i.IssueName,
-                ReleaseDate = i.CoverDate,
-                IssueNumber = ParseIssueNumber(i.Number)
-            }).ToList();
+            return issues.Select(MapListIssue).ToList();
         }
 
         public ProviderIssue GetIssueInfo(string foreignIssueId)
@@ -115,13 +108,41 @@ namespace NzbDrone.Core.MetadataSource.Metron
             return new ProviderIssue
             {
                 ForeignIssueId = detail.Id.ToString(),
-                Title = detail.IssueName,
+                Title = detail.CollectionTitle.IsNotNullOrWhiteSpace()
+                    ? detail.CollectionTitle
+                    : detail.StoryTitles?.FirstOrDefault(),
                 Overview = detail.Description,
-                ReleaseDate = detail.CoverDate,
-                IssueNumber = ParseIssueNumber(detail.Number),
+                ReleaseDate = AsUtcDate(detail.CoverDate),
+                IssueNumber = IssueNumberNormalizer.Normalize(detail.Number),
                 PageCount = detail.PageCount,
                 CoverUrl = detail.Image
             };
+        }
+
+        // The list endpoint's "issue" field is the composed display name
+        // ("Series (Year) #Num"), not a story title — leave Title unset.
+        private static ProviderIssue MapListIssue(Resources.MetronIssueListItem i)
+        {
+            return new ProviderIssue
+            {
+                ForeignIssueId = i.Id.ToString(),
+                ReleaseDate = AsUtcDate(i.CoverDate),
+                IssueNumber = IssueNumberNormalizer.Normalize(i.Number),
+                CoverUrl = i.Image
+            };
+        }
+
+        // Date-only JSON values deserialize with Kind=Unspecified and shift on the
+        // UTC round-trip through the DB; pin them to UTC so refresh comparisons
+        // are stable.
+        private static System.DateTime? AsUtcDate(System.DateTime? date)
+        {
+            if (!date.HasValue)
+            {
+                return null;
+            }
+
+            return System.DateTime.SpecifyKind(date.Value, System.DateTimeKind.Utc);
         }
 
         public ProviderPublisher GetPublisher(string foreignPublisherId)
@@ -144,16 +165,6 @@ namespace NzbDrone.Core.MetadataSource.Metron
                 Description = detail.Description,
                 ImageUrl = detail.Image
             };
-        }
-
-        private static int? ParseIssueNumber(string number)
-        {
-            if (string.IsNullOrWhiteSpace(number))
-            {
-                return null;
-            }
-
-            return int.TryParse(number, out var n) ? n : (int?)null;
         }
     }
 }

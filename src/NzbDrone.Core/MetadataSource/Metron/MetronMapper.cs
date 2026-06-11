@@ -35,7 +35,7 @@ namespace NzbDrone.Core.MetadataSource.Metron
                 Status = MapSeriesStatus(providerSeries.Status),
                 SeriesType = MapSeriesType(providerSeries.SeriesType),
                 Year = providerSeries.Year,
-                VolumeNumber = providerSeries.IssueCount,
+                VolumeNumber = providerSeries.VolumeNumber,
                 Genres = providerSeries.Genres ?? new List<string>()
             };
 
@@ -76,7 +76,8 @@ namespace NzbDrone.Core.MetadataSource.Metron
                 Title = providerIssue.Title ?? string.Empty,
                 ReleaseDate = providerIssue.ReleaseDate,
                 SeriesMetadataId = seriesMetadataId,
-                IssueNumber = providerIssue.IssueNumber.HasValue ? providerIssue.IssueNumber.Value.ToString() : "0",
+                IssueNumber = providerIssue.IssueNumber ?? string.Empty,
+                SortOrder = ParseSortOrder(providerIssue.IssueNumber),
                 IssueType = MapIssueType(providerIssue.IssueType),
                 PageCount = providerIssue.PageCount ?? 0,
                 CoverArtUrl = providerIssue.CoverUrl ?? string.Empty,
@@ -114,29 +115,55 @@ namespace NzbDrone.Core.MetadataSource.Metron
             }
         }
 
+        // Numeric sort key matching migration 009's backfill (old float issue
+        // numbers); non-numeric numbers ("1a") sort by their leading number.
+        private static float ParseSortOrder(string issueNumber)
+        {
+            if (string.IsNullOrWhiteSpace(issueNumber))
+            {
+                return 0;
+            }
+
+            if (float.TryParse(issueNumber, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var n))
+            {
+                return n;
+            }
+
+            var leading = new string(issueNumber.TakeWhile(c => char.IsDigit(c) || c == '.').ToArray());
+
+            return float.TryParse(leading, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var ln) ? ln : 0;
+        }
+
+        // Metron statuses are Django choice display strings:
+        // Cancelled, Completed, Hiatus, Ongoing.
         private static SeriesStatusType MapSeriesStatus(string status)
         {
             return status?.ToLower() switch
             {
                 "ended" => SeriesStatusType.Ended,
                 "cancelled" => SeriesStatusType.Ended,
+                "completed" => SeriesStatusType.Ended,
                 "hiatus" => SeriesStatusType.Continuing,
                 _ => SeriesStatusType.Continuing
             };
         }
 
+        // Metron series types (comicsdb/fixtures/series_type.yaml): One-Shot,
+        // Annual Series, Hardcover, Graphic Novel, Trade Paperback, Limited Series,
+        // Digital Chapters, Single Issue, Omnibus.
         private static SeriesType MapSeriesType(string seriesType)
         {
             return seriesType?.ToLower() switch
             {
-                "ongoing" => SeriesType.Single,
-                "mini-series" => SeriesType.Limited,
-                "annual" => SeriesType.Annual,
+                "single issue" or "ongoing" => SeriesType.Single,
+                "limited series" or "mini-series" => SeriesType.Limited,
+                "annual series" or "annual" => SeriesType.Annual,
                 "tpb" or "trade paperback" => SeriesType.TPB,
                 "hardcover" => SeriesType.Hardcover,
                 "omnibus" => SeriesType.Omnibus,
                 "one-shot" or "oneshot" => SeriesType.OneShot,
                 "graphic novel" => SeriesType.GraphicNovel,
+                "digital chapters" => SeriesType.Single,
                 _ => SeriesType.Single
             };
         }

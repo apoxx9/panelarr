@@ -26,59 +26,50 @@ namespace NzbDrone.Core.MetadataSource.Metron
             _semaphore.Wait();
             try
             {
-                var now = DateTime.UtcNow;
-
-                // Refill minute bucket if window elapsed
-                if ((now - _minuteWindowStart).TotalMilliseconds >= PerMinuteWindowMs)
+                // Loop instead of one-shot sleeps: windows are only refilled when
+                // they have actually elapsed, and waking threads re-check state so
+                // concurrent sleepers can't grant themselves fresh windows.
+                while (true)
                 {
-                    _minuteTokens = PerMinuteLimit;
-                    _minuteWindowStart = now;
-                }
+                    var now = DateTime.UtcNow;
 
-                // Refill day bucket if 24h elapsed
-                if ((now - _dayWindowStart).TotalHours >= 24)
-                {
-                    _dayTokens = PerDayLimit;
-                    _dayWindowStart = now;
-                }
-
-                // Wait if minute bucket empty
-                if (_minuteTokens <= 0)
-                {
-                    var waitMs = (int)(PerMinuteWindowMs - (now - _minuteWindowStart).TotalMilliseconds) + 100;
-                    if (waitMs > 0)
+                    if ((now - _minuteWindowStart).TotalMilliseconds >= PerMinuteWindowMs)
                     {
-                        _semaphore.Release();
-                        Thread.Sleep(waitMs);
-                        _semaphore.Wait();
+                        _minuteTokens = PerMinuteLimit;
+                        _minuteWindowStart = now;
                     }
 
-                    // After sleeping, reset the window
-                    _minuteTokens = PerMinuteLimit;
-                    _minuteWindowStart = DateTime.UtcNow;
-                }
-
-                // Wait if daily bucket empty
-                if (_dayTokens <= 0)
-                {
-                    var waitMs = (int)((24 * 3600 * 1000) - (DateTime.UtcNow - _dayWindowStart).TotalMilliseconds) + 100;
-                    if (waitMs > 0 && waitMs < 3600_000)
-                    {
-                        _semaphore.Release();
-                        Thread.Sleep(Math.Min(waitMs, 60_000));
-                        _semaphore.Wait();
-                    }
-
-                    // Check if window rolled over
-                    if ((DateTime.UtcNow - _dayWindowStart).TotalHours >= 24)
+                    if ((now - _dayWindowStart).TotalHours >= 24)
                     {
                         _dayTokens = PerDayLimit;
-                        _dayWindowStart = DateTime.UtcNow;
+                        _dayWindowStart = now;
                     }
-                }
 
-                _minuteTokens--;
-                _dayTokens--;
+                    if (_minuteTokens > 0 && _dayTokens > 0)
+                    {
+                        _minuteTokens--;
+                        _dayTokens--;
+                        return;
+                    }
+
+                    // Sleep toward the earliest window that frees a token, in
+                    // capped slices so day-limit waits stay responsive.
+                    int waitMs;
+                    if (_minuteTokens <= 0 && _dayTokens > 0)
+                    {
+                        waitMs = (int)(PerMinuteWindowMs - (now - _minuteWindowStart).TotalMilliseconds) + 100;
+                    }
+                    else
+                    {
+                        waitMs = (int)((24d * 3600 * 1000) - (now - _dayWindowStart).TotalMilliseconds) + 100;
+                    }
+
+                    waitMs = Math.Clamp(waitMs, 100, 60_000);
+
+                    _semaphore.Release();
+                    Thread.Sleep(waitMs);
+                    _semaphore.Wait();
+                }
             }
             finally
             {

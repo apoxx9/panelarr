@@ -11,6 +11,7 @@ using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MetadataSource.Metron;
 using NzbDrone.Core.MetadataSource.Provider;
+using NzbDrone.Core.Parser;
 
 namespace NzbDrone.Core.MetadataSource.IssueInfo
 {
@@ -79,6 +80,12 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
             {
                 throw;
             }
+            catch (SeriesNotFoundException)
+            {
+                // Must reach RefreshSeriesService unwrapped so genuine provider 404s
+                // are handled as "removed from metadata" rather than a transient error.
+                throw;
+            }
             catch (Exception e)
             {
                 _logger.Warn(e, "Unexpected error getting series info: {0}", foreignSeriesId);
@@ -114,7 +121,7 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
                     {
                         ForeignPublisherId = providerSeries.ForeignPublisherId,
                         Name = pubName,
-                        CleanName = pubName.ToLowerInvariant().Replace(" ", "")
+                        CleanName = pubName.CleanSeriesName()
                     };
 
                     newPublisher = _publisherService.AddPublisher(newPublisher);
@@ -198,6 +205,12 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
             }
             catch (IssueInfoException)
             {
+                throw;
+            }
+            catch (IssueNotFoundException)
+            {
+                // Must reach RefreshIssueService unwrapped so genuine provider 404s
+                // are handled as "removed from metadata" rather than a transient error.
                 throw;
             }
             catch (Exception e)

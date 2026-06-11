@@ -128,6 +128,7 @@ namespace NzbDrone.Core.Issues
             if (!IsProtectedField(overridden, "IssueNumber"))
             {
                 IssueNumber = other.IssueNumber;
+                SortOrder = other.SortOrder;
             }
 
             if (!IsProtectedField(overridden, "IssueType"))
@@ -135,19 +136,22 @@ namespace NzbDrone.Core.Issues
                 IssueType = other.IssueType;
             }
 
+            // Refresh maps issues from the providers' list endpoints, which omit
+            // covers/page counts/descriptions; keep detail-sourced values rather
+            // than letting a refresh blank them (mirrors SeriesMetadata.Overview).
             if (!IsProtectedField(overridden, "CoverArtUrl"))
             {
-                CoverArtUrl = other.CoverArtUrl;
+                CoverArtUrl = other.CoverArtUrl.IsNullOrWhiteSpace() ? CoverArtUrl : other.CoverArtUrl;
             }
 
             if (!IsProtectedField(overridden, "PageCount"))
             {
-                PageCount = other.PageCount;
+                PageCount = other.PageCount == 0 ? PageCount : other.PageCount;
             }
 
             if (!IsProtectedField(overridden, "Overview"))
             {
-                Overview = other.Overview;
+                Overview = other.Overview.IsNullOrWhiteSpace() ? Overview : other.Overview;
             }
         }
 

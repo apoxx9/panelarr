@@ -93,6 +93,10 @@ namespace NzbDrone.Core.Issues
             {
                 _logger.Error($"Could not find issue with id {issue.ForeignIssueId}");
             }
+            catch (SeriesNotFoundException)
+            {
+                _logger.Error($"Could not find the series for issue with id {issue.ForeignIssueId}");
+            }
 
             return null;
         }
@@ -111,7 +115,7 @@ namespace NzbDrone.Core.Issues
             if (issue == null)
             {
                 data = GetSkyhookData(local);
-                issue = data.Issues.Value.SingleOrDefault(x => x.ForeignIssueId == local.ForeignIssueId);
+                issue = data?.Issues?.Value?.SingleOrDefault(x => x.ForeignIssueId == local.ForeignIssueId);
             }
 
             result.Entity = issue;
@@ -297,6 +301,12 @@ namespace NzbDrone.Core.Issues
         public bool RefreshIssueInfo(Issue issue)
         {
             var data = GetSkyhookData(issue);
+
+            if (data == null)
+            {
+                _logger.Error("Couldn't refresh issue {0}: no longer resolvable at the metadata provider", issue);
+                return false;
+            }
 
             return RefreshIssueInfo(issue, data.Issues, data, false);
         }

@@ -265,6 +265,24 @@ namespace NzbDrone.Core.Issues
             local.SeriesMetadataId = entity.Metadata.Value.Id;
 
             remote.UseDbFieldsFrom(local);
+
+            // Provider list endpoints omit covers/page counts/descriptions; backfill
+            // from the local issue so a no-change refresh compares as unchanged
+            // (matching Issue.UseMetadataFrom, which keeps these when blank).
+            if (remote.Overview.IsNullOrWhiteSpace())
+            {
+                remote.Overview = local.Overview;
+            }
+
+            if (remote.CoverArtUrl.IsNullOrWhiteSpace())
+            {
+                remote.CoverArtUrl = local.CoverArtUrl;
+            }
+
+            if (remote.PageCount == 0)
+            {
+                remote.PageCount = local.PageCount;
+            }
         }
 
         protected override void ProcessChildren(Series entity, SortedChildren children)
@@ -394,7 +412,9 @@ namespace NzbDrone.Core.Issues
                 var allSeries = _seriesService.GetAllSeries().OrderBy(c => c.Name).ToList();
                 var seriesIds = allSeries.Select(x => x.Id).ToList();
 
-                var updatedSeries = new HashSet<string>();
+                // Null means "no delta information — fall back to per-series staleness checks".
+                // An empty (non-null) set would skip every series below.
+                HashSet<string> updatedSeries = null;
 
                 if (message.LastExecutionTime.HasValue && message.LastExecutionTime.Value.AddDays(14) > DateTime.UtcNow)
                 {

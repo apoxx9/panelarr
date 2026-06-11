@@ -100,7 +100,7 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
                 ForeignIssueId = "cv:" + detail.Id,
                 Title = detail.Name,
                 Overview = StripHtml(detail.Description),
-                IssueNumber = TryParseIssueNumber(detail.IssueNumber),
+                IssueNumber = IssueNumberNormalizer.Normalize(detail.IssueNumber),
                 ReleaseDate = TryParseDate(detail.CoverDate),
                 CoverUrl = detail.Image?.MediumUrl
             };
@@ -140,7 +140,7 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
             {
                 ForeignIssueId = "cv:" + i.Id,
                 Title = i.Name,
-                IssueNumber = TryParseIssueNumber(i.IssueNumber),
+                IssueNumber = IssueNumberNormalizer.Normalize(i.IssueNumber),
                 ReleaseDate = TryParseDate(i.CoverDate),
                 CoverUrl = i.Image?.OriginalUrl ?? i.Image?.MediumUrl
             };
@@ -162,16 +162,6 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
             return int.TryParse(year, out var y) ? y : (int?)null;
         }
 
-        private static int? TryParseIssueNumber(string number)
-        {
-            if (string.IsNullOrWhiteSpace(number))
-            {
-                return null;
-            }
-
-            return int.TryParse(number, out var n) ? n : (int?)null;
-        }
-
         private static DateTime? TryParseDate(string date)
         {
             if (string.IsNullOrWhiteSpace(date))
@@ -179,18 +169,25 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
                 return null;
             }
 
-            return DateTime.TryParse(date, out var d) ? d : (DateTime?)null;
+            // Parse as UTC: cover dates parsed as local midnight shift on the
+            // UTC round-trip through the DB and then never compare equal to a
+            // freshly-parsed value, making every refresh re-save every issue.
+            return DateTime.TryParse(date, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal, out var d)
+                ? d
+                : (DateTime?)null;
         }
 
-        private static string StripHtml(string html)
+        // Also used by CompositeSearchService so search results match refreshed data.
+        internal static string StripHtml(string html)
         {
             if (string.IsNullOrWhiteSpace(html))
             {
                 return html;
             }
 
-            // Very lightweight HTML strip — just remove tags
-            return System.Text.RegularExpressions.Regex.Replace(html, "<[^>]+>", string.Empty).Trim();
+            // Very lightweight HTML strip — remove tags, then decode entities
+            var stripped = System.Text.RegularExpressions.Regex.Replace(html, "<[^>]+>", string.Empty);
+            return System.Net.WebUtility.HtmlDecode(stripped).Trim();
         }
     }
 }

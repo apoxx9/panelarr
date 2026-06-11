@@ -33,8 +33,8 @@ namespace NzbDrone.Core.Test.MetadataSource
 
             _metronResults = new List<MetronSeriesListItem>
             {
-                new MetronSeriesListItem { Id = 10, Name = "Batman", YearBegan = 2016, Publisher = new MetronIdName { Id = 1, Name = "DC Comics" } },
-                new MetronSeriesListItem { Id = 11, Name = "Batman Beyond", YearBegan = 2020, Publisher = new MetronIdName { Id = 1, Name = "DC Comics" } }
+                new MetronSeriesListItem { Id = 10, Name = "Batman", YearBegan = 2016 },
+                new MetronSeriesListItem { Id = 11, Name = "Batman Beyond", YearBegan = 2020 }
             };
 
             Mocker.GetMock<IConfigService>()

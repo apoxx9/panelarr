@@ -4,6 +4,9 @@ using Newtonsoft.Json;
 
 namespace NzbDrone.Core.MetadataSource.Metron.Resources
 {
+    // Field names follow Metron's v1.0 API serializers
+    // (github.com/Metron-Project/metron, api/v1_0/serializers).
+
     // --- Pagination wrapper ---
     public class MetronPagedResponse<T>
     {
@@ -21,6 +24,8 @@ namespace NzbDrone.Core.MetadataSource.Metron.Resources
     }
 
     // --- Series resources ---
+    // List serializer fields: id, series, year_began, year_end, volume, issue_count, modified.
+    // Note: no publisher in list responses.
     public class MetronSeriesListItem
     {
         [JsonProperty("id")]
@@ -35,8 +40,8 @@ namespace NzbDrone.Core.MetadataSource.Metron.Resources
         [JsonProperty("year_began")]
         public int? YearBegan { get; set; }
 
-        [JsonProperty("publisher")]
-        public MetronIdName Publisher { get; set; }
+        [JsonProperty("issue_count")]
+        public int? IssueCount { get; set; }
     }
 
     public class MetronSeriesDetail
@@ -56,6 +61,7 @@ namespace NzbDrone.Core.MetadataSource.Metron.Resources
         [JsonProperty("year_began")]
         public int? YearBegan { get; set; }
 
+        // Display string from Django IntegerChoices: Cancelled, Completed, Hiatus, Ongoing.
         [JsonProperty("status")]
         public string Status { get; set; }
 
@@ -76,6 +82,8 @@ namespace NzbDrone.Core.MetadataSource.Metron.Resources
     }
 
     // --- Issue resources ---
+    // List serializer fields: id, series, number, issue, cover_date, store_date, image,
+    // cover_hash, modified. "issue" is the composed display name ("Series (Year) #Num").
     public class MetronIssueListItem
     {
         [JsonProperty("id")]
@@ -84,11 +92,14 @@ namespace NzbDrone.Core.MetadataSource.Metron.Resources
         [JsonProperty("number")]
         public string Number { get; set; }
 
-        [JsonProperty("issue_name")]
-        public string IssueName { get; set; }
+        [JsonProperty("issue")]
+        public string DisplayName { get; set; }
 
         [JsonProperty("cover_date")]
         public DateTime? CoverDate { get; set; }
+
+        [JsonProperty("image")]
+        public string Image { get; set; }
     }
 
     public class MetronIssueDetail
@@ -99,8 +110,13 @@ namespace NzbDrone.Core.MetadataSource.Metron.Resources
         [JsonProperty("number")]
         public string Number { get; set; }
 
-        [JsonProperty("issue_name")]
-        public string IssueName { get; set; }
+        // Collection title — set for TPBs/collections, usually null for single issues.
+        [JsonProperty("title")]
+        public string CollectionTitle { get; set; }
+
+        // Story titles within the issue.
+        [JsonProperty("name")]
+        public List<string> StoryTitles { get; set; }
 
         [JsonProperty("cover_date")]
         public DateTime? CoverDate { get; set; }
@@ -108,7 +124,7 @@ namespace NzbDrone.Core.MetadataSource.Metron.Resources
         [JsonProperty("desc")]
         public string Description { get; set; }
 
-        [JsonProperty("page_count")]
+        [JsonProperty("page")]
         public int? PageCount { get; set; }
 
         [JsonProperty("image")]

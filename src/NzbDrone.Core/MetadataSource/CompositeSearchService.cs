@@ -133,13 +133,15 @@ namespace NzbDrone.Core.MetadataSource
 
             return results.Select(r =>
             {
+                // Metron's series list responses carry no publisher or image;
+                // those only come from the detail endpoint after adding.
                 var providerSeries = new Provider.ProviderSeries
                 {
                     ForeignSeriesId = r.Id.ToString(),
                     Name = r.Name,
                     Year = r.YearBegan,
-                    ForeignPublisherId = r.Publisher?.Id.ToString(),
-                    PublisherName = r.Publisher?.Name
+                    VolumeNumber = r.Volume,
+                    IssueCount = r.IssueCount
                 };
 
                 var (metadata, series) = _mapper.MapSeries(providerSeries);
@@ -207,7 +209,7 @@ namespace NzbDrone.Core.MetadataSource
                     ForeignPublisherId = r.Publisher != null ? "cv:" + r.Publisher.Id : null,
                     PublisherName = count > 0 ? $"{pub}|{count}" : pub,
                     IssueCount = count,
-                    Overview = r.Deck ?? r.Description,
+                    Overview = ComicVine.ComicVineProvider.StripHtml(r.Deck ?? r.Description),
                     ImageUrl = r.Image?.OriginalUrl ?? r.Image?.MediumUrl
                 };
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NLog;
@@ -31,10 +32,24 @@ namespace NzbDrone.Core.MetadataSource
         }
 
         private bool IsComicVineConfigured => !string.IsNullOrWhiteSpace(_configService.ComicVineApiKey);
+        private bool IsMetronConfigured => !string.IsNullOrWhiteSpace(_configService.MetronUsername) &&
+                                           !string.IsNullOrWhiteSpace(_configService.MetronPassword);
 
         public List<ProviderSeries> SearchSeries(string title)
         {
-            var results = _metron.SearchSeries(title);
+            var results = new List<ProviderSeries>();
+
+            if (IsMetronConfigured)
+            {
+                try
+                {
+                    results = _metron.SearchSeries(title);
+                }
+                catch (Exception e)
+                {
+                    _logger.Warn(e, "Metron search failed for '{0}'", title);
+                }
+            }
 
             if (results.Any())
             {
@@ -54,7 +69,8 @@ namespace NzbDrone.Core.MetadataSource
         {
             if (IsCvId(foreignSeriesId))
             {
-                return IsComicVineConfigured ? _comicVine.GetSeriesInfo(foreignSeriesId) : null;
+                EnsureComicVineConfigured(foreignSeriesId);
+                return _comicVine.GetSeriesInfo(foreignSeriesId);
             }
 
             return _metron.GetSeriesInfo(foreignSeriesId);
@@ -69,7 +85,8 @@ namespace NzbDrone.Core.MetadataSource
         {
             if (IsCvId(foreignSeriesId))
             {
-                return IsComicVineConfigured ? _comicVine.GetIssues(foreignSeriesId) : new List<ProviderIssue>();
+                EnsureComicVineConfigured(foreignSeriesId);
+                return _comicVine.GetIssues(foreignSeriesId);
             }
 
             return _metron.GetIssues(foreignSeriesId);
@@ -79,7 +96,8 @@ namespace NzbDrone.Core.MetadataSource
         {
             if (IsCvId(foreignIssueId))
             {
-                return IsComicVineConfigured ? _comicVine.GetIssueInfo(foreignIssueId) : null;
+                EnsureComicVineConfigured(foreignIssueId);
+                return _comicVine.GetIssueInfo(foreignIssueId);
             }
 
             return _metron.GetIssueInfo(foreignIssueId);
@@ -89,7 +107,8 @@ namespace NzbDrone.Core.MetadataSource
         {
             if (IsCvId(foreignPublisherId))
             {
-                return IsComicVineConfigured ? _comicVine.GetPublisher(foreignPublisherId) : null;
+                EnsureComicVineConfigured(foreignPublisherId);
+                return _comicVine.GetPublisher(foreignPublisherId);
             }
 
             return _metron.GetPublisher(foreignPublisherId);
@@ -103,6 +122,16 @@ namespace NzbDrone.Core.MetadataSource
         private static bool IsCvId(string foreignId)
         {
             return foreignId != null && foreignId.StartsWith("cv:");
+        }
+
+        // Returning null here would be indistinguishable from "not found at the provider",
+        // which deletes file-less series on refresh. A missing key must surface as an error.
+        private void EnsureComicVineConfigured(string foreignId)
+        {
+            if (!IsComicVineConfigured)
+            {
+                throw new IssueInfo.IssueInfoException("Cannot fetch '{0}': it is a ComicVine id but no ComicVine API key is configured", foreignId);
+            }
         }
     }
 }
