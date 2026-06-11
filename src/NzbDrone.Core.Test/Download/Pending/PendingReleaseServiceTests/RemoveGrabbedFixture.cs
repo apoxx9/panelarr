@@ -41,12 +41,12 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
             _profile = new QualityProfile
             {
                 Name = "Test",
-                Cutoff = Quality.CBR.Id,
+                Cutoff = Quality.Scan.Id,
                 Items = new List<QualityProfileQualityItem>
                                    {
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBR },
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBR },
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBZ_HD }
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.Scan },
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.Scan },
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.Digital }
                                    },
             };
 
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
             _release = Builder<ReleaseInfo>.CreateNew().Build();
 
             _parsedIssueInfo = Builder<ParsedIssueInfo>.CreateNew().Build();
-            _parsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _parsedIssueInfo.Quality = new QualityModel(Quality.Scan);
 
             _remoteIssue = new RemoteIssue();
             _remoteIssue.Issues = new List<Issue> { _issue };
@@ -120,7 +120,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
         [Test]
         public void should_delete_if_the_grabbed_quality_is_the_higher()
         {
-            GivenHeldRelease(new QualityModel(Quality.CBR));
+            GivenHeldRelease(new QualityModel(Quality.Scan));
 
             Subject.Handle(new IssueGrabbedEvent(_remoteIssue));
 
@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
         [Test]
         public void should_not_delete_if_the_grabbed_quality_is_the_lower()
         {
-            GivenHeldRelease(new QualityModel(Quality.CBZ_HD));
+            GivenHeldRelease(new QualityModel(Quality.Digital));
 
             Subject.Handle(new IssueGrabbedEvent(_remoteIssue));
 

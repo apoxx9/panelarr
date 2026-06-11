@@ -48,7 +48,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
 
             _trackFile = Builder<ComicFile>.CreateNew()
-                .With(e => e.Quality = new QualityModel(Quality.CBR))
+                .With(e => e.Quality = new QualityModel(Quality.Scan))
                 .With(e => e.ReleaseGroup = "PanelarrTest")
                 .Build();
 

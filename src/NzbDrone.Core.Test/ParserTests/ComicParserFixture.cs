@@ -232,13 +232,32 @@ namespace NzbDrone.Core.Test.ParserTests
         // Quality is set based on format
         // -------------------------------------------------------------------
         [Test]
-        public void should_set_quality_from_format()
+        public void should_set_quality_from_source_tag()
         {
             var result = ComicParser.ParseRelease("Batman 2016 001 (2016) (Digital) (Zone-Empire).cbz");
 
             result.Should().NotBeNull();
             result.Quality.Should().NotBeNull();
-            result.Quality.Quality.Should().Be(Quality.CBZ);
+            result.Quality.Quality.Should().Be(Quality.Digital);
+        }
+
+        [Test]
+        public void untagged_release_should_be_archive_quality()
+        {
+            var result = ComicParser.ParseRelease("Batman 2016 001 (2016) (Zone-Empire).cbz");
+
+            result.Should().NotBeNull();
+            result.Quality.Quality.Should().Be(Quality.Archive);
+        }
+
+        [Test]
+        public void fixed_marker_should_bump_revision()
+        {
+            var result = ComicParser.ParseRelease("Saga 003 (2012) (Digital) (f) (Zone-Empire).cbz");
+
+            result.Should().NotBeNull();
+            result.Quality.Quality.Should().Be(Quality.Digital);
+            result.Quality.Revision.Version.Should().Be(2);
         }
 
         // -------------------------------------------------------------------

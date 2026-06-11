@@ -70,14 +70,19 @@ namespace NzbDrone.Core.Qualities
             return !Equals(left, right);
         }
 
+        // Quality means SOURCE fidelity, not container: paper sources rank
+        // below unknown provenance, unknown below known-digital sources.
+        // Container preference (.cbz vs .cbr) belongs to custom formats.
+        // Ids 3-7 were the retired container qualities (CBR/CBZ/CB7/Web/HD);
+        // migration 010 remapped them — do not reuse those ids.
         public static Quality Unknown => new Quality(0, "Unknown");
         public static Quality PDF => new Quality(1, "PDF");
         public static Quality EPUB => new Quality(2, "EPUB");
-        public static Quality CBR => new Quality(3, "CBR");
-        public static Quality CBZ => new Quality(4, "CBZ");
-        public static Quality CB7 => new Quality(5, "CB7");
-        public static Quality CBZ_Web => new Quality(6, "CBZ Web");
-        public static Quality CBZ_HD => new Quality(7, "CBZ HD");
+        public static Quality Scan => new Quality(8, "Scan");
+        public static Quality C2C => new Quality(9, "C2C");
+        public static Quality Archive => new Quality(10, "Archive");
+        public static Quality WebRip => new Quality(11, "WebRip");
+        public static Quality Digital => new Quality(12, "Digital");
 
         static Quality()
         {
@@ -86,11 +91,11 @@ namespace NzbDrone.Core.Qualities
                 Unknown,
                 PDF,
                 EPUB,
-                CBR,
-                CBZ,
-                CB7,
-                CBZ_Web,
-                CBZ_HD
+                Scan,
+                C2C,
+                Archive,
+                WebRip,
+                Digital
             };
 
             AllLookup = new Quality[All.Select(v => v.Id).Max() + 1];
@@ -104,11 +109,11 @@ namespace NzbDrone.Core.Qualities
                 new QualityDefinition(Quality.Unknown)  { Weight = 1,  MinSize = 0, MaxSize = null, GroupWeight = 1 },
                 new QualityDefinition(Quality.PDF)      { Weight = 10, MinSize = 0, MaxSize = null, GroupWeight = 10 },
                 new QualityDefinition(Quality.EPUB)     { Weight = 20, MinSize = 0, MaxSize = null, GroupWeight = 20 },
-                new QualityDefinition(Quality.CBR)      { Weight = 30, MinSize = 0, MaxSize = null, GroupWeight = 30 },
-                new QualityDefinition(Quality.CBZ_Web)  { Weight = 35, MinSize = 0, MaxSize = null, GroupWeight = 35 },
-                new QualityDefinition(Quality.CBZ)      { Weight = 40, MinSize = 0, MaxSize = null, GroupWeight = 40 },
-                new QualityDefinition(Quality.CB7)      { Weight = 45, MinSize = 0, MaxSize = null, GroupWeight = 45 },
-                new QualityDefinition(Quality.CBZ_HD)   { Weight = 50, MinSize = 0, MaxSize = null, GroupWeight = 50 },
+                new QualityDefinition(Quality.Scan)     { Weight = 30, MinSize = 0, MaxSize = null, GroupWeight = 30 },
+                new QualityDefinition(Quality.C2C)      { Weight = 35, MinSize = 0, MaxSize = null, GroupWeight = 35 },
+                new QualityDefinition(Quality.Archive)  { Weight = 40, MinSize = 0, MaxSize = null, GroupWeight = 40 },
+                new QualityDefinition(Quality.WebRip)   { Weight = 45, MinSize = 0, MaxSize = null, GroupWeight = 45 },
+                new QualityDefinition(Quality.Digital)  { Weight = 50, MinSize = 0, MaxSize = null, GroupWeight = 50 },
             };
         }
 

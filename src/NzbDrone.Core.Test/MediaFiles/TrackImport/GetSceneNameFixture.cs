@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
                 Series = series,
                 Issue = episode,
                 Path = Path.Combine(series.Path, "Saga 001 (2012) (Digital) (Empire).cbz"),
-                Quality = new QualityModel(Quality.CBZ_HD),
+                Quality = new QualityModel(Quality.Digital),
                 ReleaseGroup = "DRONE"
             };
         }

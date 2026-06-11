@@ -16,11 +16,11 @@ namespace NzbDrone.Core.Test.Qualities
                         new object[] { 0, Quality.Unknown },
                         new object[] { 1, Quality.PDF },
                         new object[] { 2, Quality.EPUB },
-                        new object[] { 3, Quality.CBR },
-                        new object[] { 4, Quality.CBZ },
-                        new object[] { 5, Quality.CB7 },
-                        new object[] { 6, Quality.CBZ_Web },
-                        new object[] { 7, Quality.CBZ_HD },
+                        new object[] { 8, Quality.Scan },
+                        new object[] { 9, Quality.C2C },
+                        new object[] { 10, Quality.Archive },
+                        new object[] { 11, Quality.WebRip },
+                        new object[] { 12, Quality.Digital },
                 };
 
         public static object[] ToIntCases =
@@ -28,11 +28,11 @@ namespace NzbDrone.Core.Test.Qualities
                         new object[] { Quality.Unknown, 0 },
                         new object[] { Quality.PDF, 1 },
                         new object[] { Quality.EPUB, 2 },
-                        new object[] { Quality.CBR, 3 },
-                        new object[] { Quality.CBZ, 4 },
-                        new object[] { Quality.CB7, 5 },
-                        new object[] { Quality.CBZ_Web, 6 },
-                        new object[] { Quality.CBZ_HD, 7 },
+                        new object[] { Quality.Scan, 8 },
+                        new object[] { Quality.C2C, 9 },
+                        new object[] { Quality.Archive, 10 },
+                        new object[] { Quality.WebRip, 11 },
+                        new object[] { Quality.Digital, 12 },
                 };
 
         [Test]
@@ -58,11 +58,11 @@ namespace NzbDrone.Core.Test.Qualities
                 Quality.Unknown,
                 Quality.PDF,
                 Quality.EPUB,
-                Quality.CBR,
-                Quality.CBZ_Web,
-                Quality.CBZ,
-                Quality.CB7,
-                Quality.CBZ_HD
+                Quality.Scan,
+                Quality.C2C,
+                Quality.Archive,
+                Quality.WebRip,
+                Quality.Digital
             };
 
             if (allowed.Length == 0)

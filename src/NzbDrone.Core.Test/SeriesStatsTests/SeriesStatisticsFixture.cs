@@ -38,7 +38,7 @@ namespace NzbDrone.Core.Test.SeriesStatsTests
                 .With(x => x.Id = 0)
                 .With(e => e.Series = _series)
                 .With(e => e.IssueId = _issue.Id)
-                .With(e => e.Quality = new QualityModel(Quality.CBR))
+                .With(e => e.Quality = new QualityModel(Quality.Scan))
                 .BuildList();
         }
 

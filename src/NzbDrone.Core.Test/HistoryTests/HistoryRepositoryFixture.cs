@@ -29,13 +29,13 @@ namespace NzbDrone.Core.Test.HistoryTests
         public void should_get_download_history()
         {
             var historyBluray = Builder<EntityHistory>.CreateNew()
-                .With(c => c.Quality = new QualityModel(Quality.CBR))
+                .With(c => c.Quality = new QualityModel(Quality.Scan))
                 .With(c => c.SeriesId = 12)
                 .With(c => c.EventType = EntityHistoryEventType.Grabbed)
                 .BuildNew();
 
             var historyDvd = Builder<EntityHistory>.CreateNew()
-                .With(c => c.Quality = new QualityModel(Quality.CBZ))
+                .With(c => c.Quality = new QualityModel(Quality.Archive))
                 .With(c => c.SeriesId = 12)
                 .With(c => c.EventType = EntityHistoryEventType.Grabbed)
              .BuildNew();
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.HistoryTests
             Subject.Insert(historyBluray);
             Subject.Insert(historyDvd);
 
-            var downloadHistory = Subject.FindDownloadHistory(12, new QualityModel(Quality.CBR));
+            var downloadHistory = Subject.FindDownloadHistory(12, new QualityModel(Quality.Scan));
 
             downloadHistory.Should().HaveCount(1);
         }

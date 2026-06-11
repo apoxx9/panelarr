@@ -74,7 +74,7 @@ namespace NzbDrone.Core.Organizer
 
             _singleComicFile = new ComicFile
             {
-                Quality = new QualityModel(Quality.CBZ, new Revision(2)),
+                Quality = new QualityModel(Quality.Digital, new Revision(2)),
                 Path = "/comics/The.Series.Name.042.CBZ",
                 SceneName = "The.Series.Name.042",
                 ReleaseGroup = "RlsGrp",
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.Organizer
 
             _multiComicFile = new ComicFile
             {
-                Quality = new QualityModel(Quality.CBZ, new Revision(2)),
+                Quality = new QualityModel(Quality.Digital, new Revision(2)),
                 Path = "/comics/The.Series.Name.042.CBZ",
                 SceneName = "The.Series.Name.042",
                 ReleaseGroup = "RlsGrp",

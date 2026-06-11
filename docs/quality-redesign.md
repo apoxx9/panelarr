@@ -1,7 +1,23 @@
 # Quality Model Redesign — Source-Based Ladder
 
-Design agreed end of Session 15 (2026-06-11). Implementation is the main project
-for Session 16.
+Design agreed end of Session 15 (2026-06-11). **IMPLEMENTED in the Session 15
+addendum** — all checklist items done and live-verified. Two deviations the spec
+missed, found during verification:
+
+1. **History/Blocklist/PendingReleases rows could not be left untouched**:
+   `Quality.FindById` throws on retired ids, so loading any old row crashed
+   (live: /activity/history 500'd). Migration 010 weight-maps their stored ids
+   (CBR→Scan, CBZ Web→C2C, CBZ→Archive, CB7→WebRip, CBZ HD→Digital). The same
+   applies to QualityDefinitions rows — the startup reconciler crashes loading
+   retired ids before it can delete them, so the migration deletes them.
+2. **Filename source tags now feed the import side too**: AggregateQuality
+   parses the extension-stripped filename (so ".cbz" can't read as a token)
+   between embedded tags and folder/client titles, and keeps the filename's
+   fix-marker revision even when quality comes from the extension fallback.
+
+Live verification (manual-import evaluation vs an existing Archive file):
+untagged → Archive/accept; (Digital) → Digital/accept upgrade; (Digital) (f) →
+Digital rev2; (Scan) → Scan/reject "Not an upgrade".
 
 ## Why
 

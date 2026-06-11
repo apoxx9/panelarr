@@ -9,29 +9,77 @@ namespace NzbDrone.Core.Test.ParserTests
     [TestFixture]
     public class QualityParserFixture : CoreTest
     {
-        public static object[] SelfQualityParserCases =
+        // Source tags rank a release
+        [TestCase("Saga 003 (2012) (Digital) (Zone-Empire)", "Digital")]
+        [TestCase("Batman 001 (2016) (Webrip) (The Last Kryptonian-DCP)", "WebRip")]
+        [TestCase("Batman 001 (2016) (Web-Rip)", "WebRip")]
+        [TestCase("Spawn 001 (1992) (c2c) (Glorith-HD)", "C2C")]
+        [TestCase("Spawn 001 (1992) (Cover to Cover)", "C2C")]
+        [TestCase("X-Men 100 (1976) (Scan)", "Scan")]
+        [TestCase("X-Men 100 (1976) (scanned)", "Scan")]
+        [TestCase("X-Men 100 (1976) (Print)", "Scan")]
+        public void should_parse_source_quality(string title, string expected)
         {
-            new object[] { Quality.CBR },
-            new object[] { Quality.CBZ_HD },
-            new object[] { Quality.EPUB },
-            new object[] { Quality.CBZ },
-            new object[] { Quality.PDF },
-            new object[] { Quality.CB7 }
-        };
-
-        [Test]
-        [TestCaseSource(nameof(SelfQualityParserCases))]
-        public void parsing_our_own_quality_enum_name(Quality quality)
-        {
-            var fileName = string.Format("Some issue [{0}]", quality.Name);
-            var result = QualityParser.ParseQuality(fileName);
-            result.Quality.Should().Be(quality);
+            QualityParser.ParseQuality(title).Quality.Name.Should().Be(expected);
         }
 
-        [Test]
-        public void should_parse_null_quality_description_as_unknown()
+        // Digital wins regardless of token position
+        [TestCase("Saga 003 (Scan) (Digital)")]
+        [TestCase("Saga 003 (Digital) (Scan)")]
+        public void digital_should_win_over_other_tokens(string title)
         {
-            QualityParser.ParseCodec(null, null).Should().Be(Codec.Unknown);
+            QualityParser.ParseQuality(title).Quality.Should().Be(Quality.Digital);
+        }
+
+        // Bare container tokens only tell us it's an archive of unknown source
+        [TestCase("Batman 001 [CBZ]")]
+        [TestCase("Batman 001 [CBR]")]
+        [TestCase("Batman 001 CB7")]
+        public void container_tokens_should_parse_as_archive(string title)
+        {
+            QualityParser.ParseQuality(title).Quality.Should().Be(Quality.Archive);
+        }
+
+        [TestCase("Batman 001 (2016).cbz")]
+        [TestCase("Batman 001 (2016).cbr")]
+        [TestCase("Batman 001 (2016).cb7")]
+        public void archive_extensions_should_parse_as_archive(string title)
+        {
+            QualityParser.ParseQuality(title).Quality.Should().Be(Quality.Archive);
+        }
+
+        [TestCase("Batman 001 (2016).pdf", "PDF")]
+        [TestCase("Some issue [PDF]", "PDF")]
+        [TestCase("Some issue [EPUB]", "EPUB")]
+        [TestCase("Some issue [MOBI]", "EPUB")]
+        [TestCase("Some issue [AZW3]", "EPUB")]
+        public void format_locked_releases_should_parse_to_format_rung(string title, string expected)
+        {
+            QualityParser.ParseQuality(title).Quality.Name.Should().Be(expected);
+        }
+
+        [TestCase("Some random title without extension")]
+        [TestCase("Unknown format file")]
+        public void should_parse_unknown_quality(string title)
+        {
+            QualityParser.ParseQuality(title).Quality.Should().Be(Quality.Unknown);
+        }
+
+        // Comic fix-releases map onto the revision system
+        [TestCase("Saga 003 (2012) (Digital) (f) (Zone-Empire)", 2)]
+        [TestCase("Saga 003 (2012) (Digital) (Fixed)", 2)]
+        [TestCase("Saga 003 (2012) (Digital) (f2)", 3)]
+        public void fixed_markers_should_bump_revision(string title, int expectedVersion)
+        {
+            var result = QualityParser.ParseQuality(title);
+            result.Quality.Should().Be(Quality.Digital);
+            result.Revision.Version.Should().Be(expectedVersion);
+        }
+
+        [TestCase("Saga 003 (2012) (Digital)")]
+        public void no_fix_marker_should_be_v1(string title)
+        {
+            QualityParser.ParseQuality(title).Revision.Version.Should().Be(1);
         }
 
         [TestCase("Series Title - Issue Title 2017 REPACK PDF aAF", true)]
@@ -44,40 +92,10 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Revision.IsRepack.Should().Be(isRepack);
         }
 
-        public static object[] ExtensionQualityCases =
-        {
-            new object[] { "Batman 001 (2016).cbz", Quality.CBZ },
-            new object[] { "Batman 001 (2016).cbr", Quality.CBR },
-            new object[] { "Batman 001 (2016).cb7", Quality.CB7 },
-            new object[] { "Batman 001 (2016).pdf", Quality.PDF },
-        };
-
-        [Test]
-        [TestCaseSource(nameof(ExtensionQualityCases))]
-        public void should_parse_quality_from_extension(string title, Quality expected)
-        {
-            var result = QualityParser.ParseQuality(title);
-            result.Quality.Should().Be(expected);
-        }
-
-        [TestCase("Some random title without extension")]
-        [TestCase("Unknown format file")]
-        public void should_parse_unknown_quality(string title)
-        {
-            var result = QualityParser.ParseQuality(title);
-            result.Quality.Should().Be(Quality.Unknown);
-        }
-
         [TestCase("Some issue [PDF]")]
         public void should_parse_quality_from_name(string title)
         {
             QualityParser.ParseQuality(title).QualityDetectionSource.Should().Be(QualityDetectionSource.Name);
-        }
-
-        private void ParseAndVerifyQuality(string name, string desc, int bitrate, Quality quality, int sampleSize = 0)
-        {
-            var result = QualityParser.ParseQuality(name);
-            result.Quality.Should().Be(quality);
         }
     }
 }

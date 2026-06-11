@@ -33,8 +33,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             CustomFormatsTestHelpers.GivenCustomFormats();
 
-            _firstFile = new ComicFile { Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 2)), DateAdded = DateTime.Now };
-            _secondFile = new ComicFile { Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 2)), DateAdded = DateTime.Now };
+            _firstFile = new ComicFile { Quality = new QualityModel(Quality.Digital, new Revision(version: 2)), DateAdded = DateTime.Now };
+            _secondFile = new ComicFile { Quality = new QualityModel(Quality.Digital, new Revision(version: 2)), DateAdded = DateTime.Now };
 
             var singleIssueList = new List<Issue> { new Issue { ComicFiles = new List<ComicFile>() } };
             var doubleIssueList = new List<Issue> { new Issue { ComicFiles = new List<ComicFile>() }, new Issue { ComicFiles = new List<ComicFile>() }, new Issue { ComicFiles = new List<ComicFile>() } };
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                          .With(c => c.QualityProfile = new QualityProfile
                          {
                              UpgradeAllowed = true,
-                             Cutoff = Quality.CBR.Id,
+                             Cutoff = Quality.Scan.Id,
                              Items = Qualities.QualityFixture.GetDefaultQualities(),
                              FormatItems = CustomFormatsTestHelpers.GetSampleFormatItems("None"),
                              MinFormatScore = 0,
@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parseResultMulti = new RemoteIssue
             {
                 Series = fakeSeries,
-                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.Scan, new Revision(version: 2)) },
                 Issues = doubleIssueList,
                 CustomFormats = new List<CustomFormat>()
             };
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _parseResultSingle = new RemoteIssue
             {
                 Series = fakeSeries,
-                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.Scan, new Revision(version: 2)) },
                 Issues = singleIssueList,
                 CustomFormats = new List<CustomFormat>()
             };
@@ -77,12 +77,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void WithFirstFileUpgradable()
         {
-            _firstFile.Quality = new QualityModel(Quality.CBR);
+            _firstFile.Quality = new QualityModel(Quality.Scan);
         }
 
         private void WithSecondFileUpgradable()
         {
-            _secondFile.Quality = new QualityModel(Quality.CBR);
+            _secondFile.Quality = new QualityModel(Quality.Scan);
         }
 
         [Test]
@@ -125,9 +125,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_not_be_upgradable_if_qualities_are_the_same()
         {
-            _firstFile.Quality = new QualityModel(Quality.CBR);
-            _secondFile.Quality = new QualityModel(Quality.CBR);
-            _parseResultSingle.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _firstFile.Quality = new QualityModel(Quality.Scan);
+            _secondFile.Quality = new QualityModel(Quality.Scan);
+            _parseResultSingle.ParsedIssueInfo.Quality = new QualityModel(Quality.Scan);
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
 
@@ -153,7 +153,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Returns(new List<CustomFormat>());
 
             WithFirstFileUpgradable();
-            _parseResultSingle.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _parseResultSingle.ParsedIssueInfo.Quality = new QualityModel(Quality.Scan);
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
         }
     }

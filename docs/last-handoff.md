@@ -69,7 +69,7 @@ Deep audit round 3 on the seven never-audited layers (SignalR, refresh/import pi
 ## Decisions made (end of Session 15)
 
 1. **Update mechanism**: implement a GitHub-releases update *check* against apoxx9/panelarr (banner + release notes, no in-app auto-install; Docker pulls images). Kills the permanent `/system/updates` 500. The same dead `panelarr.servarr.com` URL backs donations/services — address while in there.
-2. **Quality model**: full comic-native rethink is the next session's main project — **design agreed and specced in docs/quality-redesign.md** (source ladder Scan < C2C < Archive < WebRip < Digital, HD via custom formats, (f)→revision, migration 010 plan, defaults) — parse source tags ((Digital), c2c, (Scan), (Fixed)) into qualities, fix ladder ordering (CB7 vs CBZ, unreachable CBZ_Web/CBZ_HD), remove the search-path CBZ assumption.
+2. **Quality model**: **IMPLEMENTED** (see docs/quality-redesign.md, now updated with verification results and two spec deviations) — source ladder live, migration 010 verified on the dev DB, full suite + all sweeps green (source ladder Scan < C2C < Archive < WebRip < Digital, HD via custom formats, (f)→revision, migration 010 plan, defaults) — parse source tags ((Digital), c2c, (Scan), (Fixed)) into qualities, fix ladder ordering (CB7 vs CBZ, unreachable CBZ_Web/CBZ_HD), remove the search-path CBZ assumption.
 3. **Import semantics**: B3 and B4 — **DONE** (commit 54d3dbc, verified live): every comic archive is its own edition (music grouping machinery deleted; quality-ordered import keeps exactly one winner per issue with a visible result for the rest), and files that were not imported are always persisted unmapped so rescans re-evaluate them.
 
 ## Test results (final)

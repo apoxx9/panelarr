@@ -31,14 +31,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         {
             Mocker.Resolve<UpgradableSpecification>();
 
-            _firstFile = new ComicFile { Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)), DateAdded = DateTime.Now };
-            _secondFile = new ComicFile { Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)), DateAdded = DateTime.Now };
+            _firstFile = new ComicFile { Quality = new QualityModel(Quality.Digital, new Revision(version: 1)), DateAdded = DateTime.Now };
+            _secondFile = new ComicFile { Quality = new QualityModel(Quality.Digital, new Revision(version: 1)), DateAdded = DateTime.Now };
 
             var singleIssueList = new List<Issue> { new Issue { }, new Issue { } };
             var doubleIssueList = new List<Issue> { new Issue { }, new Issue { }, new Issue { } };
 
             var fakeSeries = Builder<Series>.CreateNew()
-                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.CBZ_HD.Id })
+                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.Digital.Id })
                          .Build();
 
             Mocker.GetMock<IMediaFileService>()
@@ -48,14 +48,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _parseResultMulti = new RemoteIssue
             {
                 Series = fakeSeries,
-                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.Scan, new Revision(version: 2)) },
                 Issues = doubleIssueList
             };
 
             _parseResultSingle = new RemoteIssue
             {
                 Series = fakeSeries,
-                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.Scan, new Revision(version: 2)) },
                 Issues = singleIssueList
             };
         }
@@ -68,7 +68,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_return_false_when_trackFile_was_added_more_than_7_days_ago()
         {
-            _firstFile.Quality.Quality = Quality.CBR;
+            _firstFile.Quality.Quality = Quality.Scan;
 
             _firstFile.DateAdded = DateTime.Today.AddDays(-30);
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
@@ -77,8 +77,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_return_false_when_first_trackFile_was_added_more_than_7_days_ago()
         {
-            _firstFile.Quality.Quality = Quality.CBR;
-            _secondFile.Quality.Quality = Quality.CBR;
+            _firstFile.Quality.Quality = Quality.Scan;
+            _secondFile.Quality.Quality = Quality.Scan;
 
             _firstFile.DateAdded = DateTime.Today.AddDays(-30);
             Subject.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeFalse();
@@ -87,8 +87,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_return_false_when_second_trackFile_was_added_more_than_7_days_ago()
         {
-            _firstFile.Quality.Quality = Quality.CBR;
-            _secondFile.Quality.Quality = Quality.CBR;
+            _firstFile.Quality.Quality = Quality.Scan;
+            _secondFile.Quality.Quality = Quality.Scan;
 
             _secondFile.DateAdded = DateTime.Today.AddDays(-30);
             Subject.IsSatisfiedBy(_parseResultMulti, null).Accepted.Should().BeFalse();
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 .Setup(s => s.DownloadPropersAndRepacks)
                 .Returns(ProperDownloadTypes.DoNotUpgrade);
 
-            _firstFile.Quality.Quality = Quality.CBR;
+            _firstFile.Quality.Quality = Quality.Scan;
 
             _firstFile.DateAdded = DateTime.Today;
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeFalse();
@@ -132,7 +132,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.PreferAndUpgrade);
 
-            _firstFile.Quality.Quality = Quality.CBR;
+            _firstFile.Quality.Quality = Quality.Scan;
 
             _firstFile.DateAdded = DateTime.Today;
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();
@@ -145,7 +145,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotPrefer);
 
-            _firstFile.Quality.Quality = Quality.CBR;
+            _firstFile.Quality.Quality = Quality.Scan;
 
             _firstFile.DateAdded = DateTime.Today;
             Subject.IsSatisfiedBy(_parseResultSingle, null).Accepted.Should().BeTrue();

@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.Blocklisting
             {
                 SeriesId = 12345,
                 IssueIds = new List<int> { 1 },
-                Quality = new QualityModel(Quality.CBR),
+                Quality = new QualityModel(Quality.Scan),
                 SourceTitle = "series.name.issue.title",
                 DownloadClient = "SabnzbdClient",
                 DownloadId = "Sabnzbd_nzo_2dfh73k"

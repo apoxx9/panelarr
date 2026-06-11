@@ -12,9 +12,10 @@ namespace NzbDrone.Core.MediaFiles
         {
             _comicExtensions = new Dictionary<string, Quality>(StringComparer.OrdinalIgnoreCase)
             {
-                { ".cbz", Quality.CBZ },
-                { ".cbr", Quality.CBR },
-                { ".cb7", Quality.CB7 },
+                // extension says container, not source — an untagged archive
+                { ".cbz", Quality.Archive },
+                { ".cbr", Quality.Archive },
+                { ".cb7", Quality.Archive },
                 { ".pdf", Quality.PDF },
                 { ".epub", Quality.EPUB },
             };

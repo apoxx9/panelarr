@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
             _localTrack = new LocalTrack
             {
                 Path = @"C:\Test\Batman (2016)\Batman.001.2016.Digital-Empire.cbz",
-                Quality = new QualityModel(Quality.CBR, new Revision(version: 1)),
+                Quality = new QualityModel(Quality.Scan, new Revision(version: 1)),
                 Series = _series,
                 Issue = _issue
             };
@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.CBR, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.Scan, new Revision(version: 1))
                                                                                 }))
                                                      .Build()
                                                      .ToList();
@@ -84,7 +84,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.CBR, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.Scan, new Revision(version: 1))
                                                                                 }))
                                                      .Build()
                                                      .ToList();
@@ -101,7 +101,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.Digital, new Revision(version: 1))
                                                                                 }))
                                                      .Build()
                                                      .ToList();
@@ -118,7 +118,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.Digital, new Revision(version: 1))
                                                                                 }))
                                                      .Build()
                                                      .ToList();
@@ -135,14 +135,14 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.CBR, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.Scan, new Revision(version: 1))
                                                                                 }))
                                                      .TheNext(1)
                                                      .With(e => e.TrackFileId = 2)
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                                                 new TrackFile
                                                                                 {
-                                                                                    Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1))
+                                                                                    Quality = new QualityModel(Quality.Digital, new Revision(version: 1))
                                                                                 }))
                                                      .Build()
                                                      .ToList();
@@ -163,7 +163,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                          new TrackFile
                                                          {
-                                                             Quality = new QualityModel(Quality.CBR, new Revision(version: 2))
+                                                             Quality = new QualityModel(Quality.Scan, new Revision(version: 2))
                                                          }))
                                                      .Build()
                                                      .ToList();
@@ -184,7 +184,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                          new TrackFile
                                                          {
-                                                             Quality = new QualityModel(Quality.CBR, new Revision(version: 2))
+                                                             Quality = new QualityModel(Quality.Scan, new Revision(version: 2))
                                                          }))
                                                      .Build()
                                                      .ToList();
@@ -199,7 +199,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotPrefer);
 
-            _localTrack.Quality = new QualityModel(Quality.CBZ_HD);
+            _localTrack.Quality = new QualityModel(Quality.Digital);
 
             _localTrack.Tracks = Builder<Track>.CreateListOfSize(1)
                                                      .All()
@@ -207,7 +207,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Specifications
                                                      .With(e => e.TrackFile = new LazyLoaded<TrackFile>(
                                                          new TrackFile
                                                          {
-                                                             Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 2))
+                                                             Quality = new QualityModel(Quality.Digital, new Revision(version: 2))
                                                          }))
                                                      .Build()
                                                      .ToList();

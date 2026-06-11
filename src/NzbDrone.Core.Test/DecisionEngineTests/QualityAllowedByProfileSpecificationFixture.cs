@@ -18,14 +18,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         public static object[] AllowedTestCases =
         {
-            new object[] { Quality.CBR },
-            new object[] { Quality.CBR },
-            new object[] { Quality.CBR }
+            new object[] { Quality.Scan },
+            new object[] { Quality.Scan },
+            new object[] { Quality.Scan }
         };
 
         public static object[] DeniedTestCases =
         {
-            new object[] { Quality.CBZ_HD },
+            new object[] { Quality.Digital },
             new object[] { Quality.Unknown }
         };
 
@@ -33,13 +33,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void Setup()
         {
             var fakeSeries = Builder<Series>.CreateNew()
-                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.CBR.Id })
+                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.Scan.Id })
                          .Build();
 
             _remoteIssue = new RemoteIssue
             {
                 Series = fakeSeries,
-                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.Scan, new Revision(version: 2)) },
             };
         }
 
@@ -48,7 +48,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_allow_if_quality_is_defined_in_profile(Quality qualityType)
         {
             _remoteIssue.ParsedIssueInfo.Quality.Quality = qualityType;
-            _remoteIssue.Series.QualityProfile.Value.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.CBR, Quality.CBR, Quality.CBR);
+            _remoteIssue.Series.QualityProfile.Value.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.Scan, Quality.Scan, Quality.Scan);
 
             Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_not_allow_if_quality_is_not_defined_in_profile(Quality qualityType)
         {
             _remoteIssue.ParsedIssueInfo.Quality.Quality = qualityType;
-            _remoteIssue.Series.QualityProfile.Value.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.CBR, Quality.CBR, Quality.CBR);
+            _remoteIssue.Series.QualityProfile.Value.Items = Qualities.QualityFixture.GetDefaultQualities(Quality.Scan, Quality.Scan, Quality.Scan);
 
             Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
         }

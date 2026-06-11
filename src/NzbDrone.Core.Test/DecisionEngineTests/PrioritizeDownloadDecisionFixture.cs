@@ -73,8 +73,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_put_reals_before_non_reals()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR, new Revision(version: 1, real: 0)));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR, new Revision(version: 1, real: 1)));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan, new Revision(version: 1, real: 0)));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan, new Revision(version: 1, real: 1)));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
@@ -87,8 +87,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_put_propers_before_non_propers()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR, new Revision(version: 1)));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR, new Revision(version: 2)));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan, new Revision(version: 1)));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan, new Revision(version: 2)));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
@@ -101,24 +101,24 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_put_higher_quality_before_lower()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
             decisions.Add(new DownloadDecision(remoteIssue2));
 
             var qualifiedReports = Subject.PrioritizeDecisions(decisions);
-            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Quality.Quality.Should().Be(Quality.CBR);
+            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Quality.Quality.Should().Be(Quality.Scan);
         }
 
         [Test]
         public void should_order_by_age_then_largest_rounded_to_200mb()
         {
-            var remoteIssueSd = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), size: 100.Megabytes(), age: 1);
-            var remoteIssueHdSmallOld = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), size: 1200.Megabytes(), age: 1000);
-            var remoteIssueSmallYoung = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), size: 1250.Megabytes(), age: 10);
-            var remoteIssueHdLargeYoung = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), size: 3000.Megabytes(), age: 1);
+            var remoteIssueSd = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), size: 100.Megabytes(), age: 1);
+            var remoteIssueHdSmallOld = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), size: 1200.Megabytes(), age: 1000);
+            var remoteIssueSmallYoung = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), size: 1250.Megabytes(), age: 10);
+            var remoteIssueHdLargeYoung = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), size: 3000.Megabytes(), age: 1);
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssueSd));
@@ -133,8 +133,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_order_by_youngest()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), age: 10);
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), age: 5);
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), age: 10);
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), age: 5);
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
@@ -147,8 +147,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_not_throw_if_no_books_are_found()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), size: 500.Megabytes());
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), size: 500.Megabytes());
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), size: 500.Megabytes());
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), size: 500.Megabytes());
 
             remoteIssue1.Issues = new List<Issue>();
 
@@ -164,8 +164,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenPreferredDownloadProtocol(DownloadProtocol.Usenet);
 
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), downloadProtocol: DownloadProtocol.Torrent);
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), downloadProtocol: DownloadProtocol.Usenet);
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), downloadProtocol: DownloadProtocol.Torrent);
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), downloadProtocol: DownloadProtocol.Usenet);
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
@@ -180,8 +180,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenPreferredDownloadProtocol(DownloadProtocol.Torrent);
 
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), downloadProtocol: DownloadProtocol.Torrent);
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR), downloadProtocol: DownloadProtocol.Usenet);
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), downloadProtocol: DownloadProtocol.Torrent);
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan), downloadProtocol: DownloadProtocol.Usenet);
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
@@ -194,8 +194,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_collection_pack_above_single_issue()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1), GivenIssue(2) }, new QualityModel(Quality.CBZ_HD));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1), GivenIssue(2) }, new QualityModel(Quality.Digital));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital));
 
             remoteIssue1.ParsedIssueInfo.IsCollection = true;
 
@@ -210,8 +210,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_quality_over_collection_pack()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1), GivenIssue(2) }, new QualityModel(Quality.CBR));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1), GivenIssue(2) }, new QualityModel(Quality.Scan));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital));
 
             remoteIssue1.ParsedIssueInfo.IsCollection = true;
 
@@ -226,8 +226,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_single_book_over_multi_book()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1), GivenIssue(2) }, new QualityModel(Quality.CBR));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1), GivenIssue(2) }, new QualityModel(Quality.Scan));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
@@ -240,8 +240,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_releases_with_more_seeders()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
 
             var torrentInfo1 = new TorrentInfo();
             torrentInfo1.PublishDate = DateTime.Now;
@@ -266,8 +266,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_releases_with_more_peers_given_equal_number_of_seeds()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
 
             var torrentInfo1 = new TorrentInfo();
             torrentInfo1.PublishDate = DateTime.Now;
@@ -293,8 +293,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_releases_with_more_peers_no_seeds()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
 
             var torrentInfo1 = new TorrentInfo();
             torrentInfo1.PublishDate = DateTime.Now;
@@ -321,8 +321,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_first_release_if_peers_and_size_are_too_similar()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
 
             var torrentInfo1 = new TorrentInfo();
             torrentInfo1.PublishDate = DateTime.Now;
@@ -350,8 +350,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_first_release_if_age_and_size_are_too_similar()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
 
             remoteIssue1.Release.PublishDate = DateTime.UtcNow.AddDays(-100);
             remoteIssue1.Release.Size = 200.Megabytes();
@@ -370,8 +370,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_prefer_quality_over_the_number_of_peers()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Archive));
 
             var torrentInfo1 = new TorrentInfo();
             torrentInfo1.PublishDate = DateTime.Now;
@@ -399,22 +399,22 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_put_higher_quality_before_lower_always()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBR));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
             decisions.Add(new DownloadDecision(remoteIssue2));
 
             var qualifiedReports = Subject.PrioritizeDecisions(decisions);
-            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Quality.Quality.Should().Be(Quality.CBR);
+            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Quality.Quality.Should().Be(Quality.Scan);
         }
 
         [Test]
         public void should_prefer_higher_score_over_lower_score()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital));
 
             remoteIssue1.CustomFormatScore = 10;
             remoteIssue2.CustomFormatScore = 0;
@@ -434,8 +434,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.PreferAndUpgrade);
 
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD, new Revision(1)));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD, new Revision(2)));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital, new Revision(1)));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital, new Revision(2)));
 
             remoteIssue1.CustomFormatScore = 10;
             remoteIssue2.CustomFormatScore = 0;
@@ -455,8 +455,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotUpgrade);
 
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD, new Revision(1)));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD, new Revision(2)));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital, new Revision(1)));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital, new Revision(2)));
 
             remoteIssue1.CustomFormatScore = 10;
             remoteIssue2.CustomFormatScore = 0;
@@ -476,8 +476,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotPrefer);
 
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD, new Revision(1)));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD, new Revision(2)));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital, new Revision(1)));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital, new Revision(2)));
 
             remoteIssue1.CustomFormatScore = 10;
             remoteIssue2.CustomFormatScore = 0;
@@ -487,7 +487,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             decisions.Add(new DownloadDecision(remoteIssue2));
 
             var qualifiedReports = Subject.PrioritizeDecisions(decisions);
-            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Quality.Quality.Should().Be(Quality.CBZ_HD);
+            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Quality.Quality.Should().Be(Quality.Digital);
             qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Quality.Revision.Version.Should().Be(1);
             qualifiedReports.First().RemoteIssue.CustomFormatScore.Should().Be(10);
         }
@@ -495,9 +495,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void sort_download_decisions_based_on_indexer_priority()
         {
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ, new Revision(1)), indexerPriority: 25);
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ, new Revision(1)), indexerPriority: 50);
-            var remoteIssue3 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ, new Revision(1)), indexerPriority: 1);
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Archive, new Revision(1)), indexerPriority: 25);
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Archive, new Revision(1)), indexerPriority: 50);
+            var remoteIssue3 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Archive, new Revision(1)), indexerPriority: 1);
 
             var decisions = new List<DownloadDecision>();
             decisions.AddRange(new[] { new DownloadDecision(remoteIssue1), new DownloadDecision(remoteIssue2), new DownloadDecision(remoteIssue3) });
@@ -512,9 +512,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void ensure_download_decisions_indexer_priority_is_not_perfered_over_quality()
         {
             var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.EPUB, new Revision(1)), indexerPriority: 25);
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ, new Revision(1)), indexerPriority: 50);
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Archive, new Revision(1)), indexerPriority: 50);
             var remoteIssue3 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.PDF, new Revision(1)), indexerPriority: 1);
-            var remoteIssue4 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ, new Revision(1)), indexerPriority: 25);
+            var remoteIssue4 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Archive, new Revision(1)), indexerPriority: 25);
 
             var decisions = new List<DownloadDecision>();
             decisions.AddRange(new[] { new DownloadDecision(remoteIssue1), new DownloadDecision(remoteIssue2), new DownloadDecision(remoteIssue3), new DownloadDecision(remoteIssue4) });
@@ -533,8 +533,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Setup(s => s.DownloadPropersAndRepacks)
                   .Returns(ProperDownloadTypes.DoNotPrefer);
 
-            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD, new Revision(1, 0)));
-            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.CBZ_HD, new Revision(1, 1)));
+            var remoteIssue1 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital, new Revision(1, 0)));
+            var remoteIssue2 = GivenRemoteIssue(new List<Issue> { GivenIssue(1) }, new QualityModel(Quality.Digital, new Revision(1, 1)));
 
             remoteIssue1.CustomFormatScore = 10;
             remoteIssue2.CustomFormatScore = 0;
@@ -545,7 +545,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             var qualifiedReports = Subject.PrioritizeDecisions(decisions);
 
-            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Quality.Quality.Should().Be(Quality.CBZ_HD);
+            qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Quality.Quality.Should().Be(Quality.Digital);
             qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Quality.Revision.Version.Should().Be(1);
             qualifiedReports.First().RemoteIssue.ParsedIssueInfo.Quality.Revision.Real.Should().Be(0);
             qualifiedReports.First().RemoteIssue.CustomFormatScore.Should().Be(10);

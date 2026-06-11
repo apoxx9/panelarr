@@ -30,11 +30,11 @@ const caseOptions = [
 const fileNameTokens = [
   {
     token: '{Series Name} - {Issue Title} - {Quality Full}',
-    example: 'Series Name - Issue Title - CBZ Proper'
+    example: 'Series Name - Issue Title - Digital Proper'
   },
   {
     token: '{Series.Name}.{Issue.Title}.{Quality.Full}',
-    example: 'Series.Name.Issue.Title.CBZ'
+    example: 'Series.Name.Issue.Title.Digital'
   },
   {
     token: '{Series Name} - {Issue Title}{ (PartNumber)}',
@@ -99,8 +99,8 @@ const releaseDateTokens = [
 ];
 
 const qualityTokens = [
-  { token: '{Quality Full}', example: 'CBZ Proper' },
-  { token: '{Quality Title}', example: 'CBZ' }
+  { token: '{Quality Full}', example: 'Digital Proper' },
+  { token: '{Quality Title}', example: 'Digital' }
 ];
 
 const otherTokens = [
@@ -109,7 +109,7 @@ const otherTokens = [
 ];
 
 const originalTokens = [
-  { token: '{Original Title}', example: 'Series.Name.Issue.Name.2018.CBZ-EVOLVE' },
+  { token: '{Original Title}', example: 'Series.Name.Issue.Name.2018.Digital-EVOLVE' },
   { token: '{Original Filename}', example: '01 - issue name' }
 ];
 

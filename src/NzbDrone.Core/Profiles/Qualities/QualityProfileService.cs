@@ -98,16 +98,15 @@ namespace NzbDrone.Core.Profiles.Qualities
 
             _logger.Info("Setting up default quality profiles");
 
+            // Unknown/PDF/EPUB are deliberately not allowed by default —
+            // unparsable releases and non-archive formats are opt-in.
             AddDefaultProfile("Comic",
-                Quality.CBZ,
-                Quality.Unknown,
-                Quality.PDF,
-                Quality.EPUB,
-                Quality.CBR,
-                Quality.CBZ_Web,
-                Quality.CBZ,
-                Quality.CB7,
-                Quality.CBZ_HD);
+                Quality.Digital,
+                Quality.Scan,
+                Quality.C2C,
+                Quality.Archive,
+                Quality.WebRip,
+                Quality.Digital);
         }
 
         public void Handle(CustomFormatAddedEvent message)

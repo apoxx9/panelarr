@@ -15,70 +15,70 @@ namespace NzbDrone.Core.Test.ParserTests
             {
                 @"C:\Test\Some.Hashed.Release.(2012).(Digital)-Mercury\0e895c37245186812cb08aab1529cf8ee389dd05.cbr".AsOsAgnostic(),
                 "Some Hashed Release",
-                Quality.CBR,
+                Quality.Scan,
                 "Mercury"
             },
             new object[]
             {
                 @"C:\Test-[256]\0e895c37245186812cb08aab1529cf8ee389dd05\Some.Hashed.Release.003.2012.Digital.WEB-Mercury.cbr".AsOsAgnostic(),
                 "Some Hashed Release",
-                Quality.CBR,
+                Quality.Scan,
                 "Mercury"
             },
             new object[]
             {
                 @"C:\Test\Fake.Dir.003-Test\yrucreM-BEW.latigiD.2102.300.esaeleR.dehsaH.emoS.cbr".AsOsAgnostic(),
                 "Some Hashed Release",
-                Quality.CBR,
+                Quality.Scan,
                 "Mercury"
             },
             new object[]
             {
                 @"C:\Test\Fake.Dir.003-Test\yrucreM-BEW latigiD 2102 300 esaeleR dehsaH emoS.cbr".AsOsAgnostic(),
                 "Some Hashed Release",
-                Quality.CBR,
+                Quality.Scan,
                 "Mercury"
             },
             new object[]
             {
                 @"C:\Test\East.of.West.010.2013.Digital-Panelarr\AHFMZXGHEWD660.cbr".AsOsAgnostic(),
                 "East of West",
-                Quality.CBR,
+                Quality.Scan,
                 "Panelarr"
             },
             new object[]
             {
                 @"C:\Test\Saga.012.2013.Digital-Panelarr\Backup_72023S02-12.cbr".AsOsAgnostic(),
                 "Saga",
-                Quality.CBR,
+                Quality.Scan,
                 null
             },
             new object[]
             {
                 @"C:\Test\Monstress 008 Chupacabra 2016 Digital WEB-ECI\123.cbr".AsOsAgnostic(),
                 "Monstress",
-                Quality.CBR,
+                Quality.Scan,
                 "ECI"
             },
             new object[]
             {
                 @"C:\Test\Monstress 008 Chupacabra 2016 Digital WEB-ECI\abc.cbr".AsOsAgnostic(),
                 "Monstress",
-                Quality.CBR,
+                Quality.Scan,
                 "ECI"
             },
             new object[]
             {
                 @"C:\Test\Monstress 008 Chupacabra 2016 Digital WEB-ECI\b00bs.cbr".AsOsAgnostic(),
                 "Monstress",
-                Quality.CBR,
+                Quality.Scan,
                 "ECI"
             },
             new object[]
             {
                 @"C:\Test\Paper.Girls.023.2016.Digital-NZBgeek/cgajsofuejsa501.cbr".AsOsAgnostic(),
                 "Paper Girls",
-                Quality.CBR,
+                Quality.Scan,
                 "NZBgeek"
             }
         };

@@ -342,9 +342,12 @@ namespace NzbDrone.Core.Parser
 
                     comicResult.Quality = QualityParser.ParseQuality(title);
 
+                    // A title that parses as a comic but carries no source tag is an
+                    // archive of unknown source — never Unknown, so untagged releases
+                    // and untagged files stay comparable. Keep the parsed revision.
                     if (comicResult.Quality?.Quality == Qualities.Quality.Unknown)
                     {
-                        comicResult.Quality = new QualityModel(Qualities.Quality.CBZ);
+                        comicResult.Quality.Quality = Qualities.Quality.Archive;
                     }
 
                     Logger.Debug("Parsed comic title: {0} - {1} quality: {2}", comicSeriesName, comicResult.IssueTitle, comicResult.Quality);
@@ -476,9 +479,10 @@ namespace NzbDrone.Core.Parser
 
                     result.Quality = QualityParser.ParseQuality(title);
 
+                    // Untagged comic release => archive of unknown source (see above)
                     if (result.Quality?.Quality == Quality.Unknown)
                     {
-                        result.Quality = new QualityModel(Quality.CBZ);
+                        result.Quality.Quality = Quality.Archive;
                     }
 
                     return result;

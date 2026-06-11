@@ -62,7 +62,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _trackFile = Builder<ComicFile>.CreateNew()
                 .With(e => e.Part = 1)
                 .With(e => e.PartCount = 1)
-                .With(e => e.Quality = new QualityModel(Quality.CBR))
+                .With(e => e.Quality = new QualityModel(Quality.Scan))
                 .With(e => e.ReleaseGroup = "PanelarrTest")
                 .Build();
 
@@ -349,7 +349,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Quality Title}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("CBR");
+                   .Should().Be("Scan");
         }
 
         [Test]
@@ -358,7 +358,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Series Name} - {Issue Title} - [{Quality Title}]";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("Paper Girls - Final Days - [CBR]");
+                   .Should().Be("Paper Girls - Final Days - [Scan]");
         }
 
         [Test]
@@ -438,7 +438,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Series.Name}{_Issue.Title_}{Quality.Title}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("Paper.Girls_Final.Days_CBR");
+                   .Should().Be("Paper.Girls_Final.Days_Scan");
         }
 
         [Test]
@@ -492,7 +492,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Quality Title} {Quality Proper}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("CBR");
+                   .Should().Be("Scan");
         }
 
         [Test]
@@ -501,7 +501,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Series Name} - {Issue Title} [{Quality Title}] {[Quality Proper]}";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("Paper Girls - Final Days [CBR]");
+                   .Should().Be("Paper Girls - Final Days [Scan]");
         }
 
         [Test]
@@ -510,7 +510,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = "{Series Name} - {Issue Title} [{Quality Full}]";
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("Paper Girls - Final Days [CBR]");
+                   .Should().Be("Paper Girls - Final Days [Scan]");
         }
 
         [TestCase(' ')]
@@ -522,7 +522,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}", separator);
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be("CBR");
+                   .Should().Be("Scan");
         }
 
         [TestCase(' ')]
@@ -534,7 +534,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardIssueFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}{0}{{Issue{0}Title}}", separator);
 
             Subject.BuildComicFileName(_series, _issue, _trackFile)
-                   .Should().Be(string.Format("CBR{0}Final{0}Days", separator));
+                   .Should().Be(string.Format("Scan{0}Final{0}Days", separator));
         }
 
         [Test]

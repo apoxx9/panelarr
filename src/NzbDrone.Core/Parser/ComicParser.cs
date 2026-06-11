@@ -292,10 +292,36 @@ namespace NzbDrone.Core.Parser
             // Extract series title — everything before the first issue/volume marker or first parenthetical
             result.SeriesTitle = ExtractSeriesTitle(name, result);
 
-            // Set quality based on format
-            result.Quality = new QualityModel(MapFormatToQuality(result.Format));
+            result.Quality = ParseQualityFrom(name, result);
 
             return result;
+        }
+
+        // Quality means source fidelity: the source tag ranks the release, the
+        // container format only matters for PDF/EPUB (the format itself is the
+        // limitation). A comic archive with no source tag is Quality.Archive —
+        // never Unknown, so untagged releases and untagged files stay comparable.
+        private static QualityModel ParseQualityFrom(string name, ParsedComicInfo parsed)
+        {
+            var quality = QualityParser.ParseQualityModifiers(name, name.Replace('_', ' ').Trim().ToLower());
+
+            if (parsed.Format == ComicFormat.PDF)
+            {
+                quality.Quality = Quality.PDF;
+                return quality;
+            }
+
+            if (parsed.Format == ComicFormat.EPUB)
+            {
+                quality.Quality = Quality.EPUB;
+                return quality;
+            }
+
+            var source = QualityParser.ParseSourceQuality(name);
+
+            quality.Quality = source == Quality.Unknown ? Quality.Archive : source;
+
+            return quality;
         }
 
         // Bare year (not in parentheses): 2016, 1986, etc.
@@ -426,19 +452,6 @@ namespace NzbDrone.Core.Parser
             stripped = stripped.TrimEnd('-', '_', ' ');
 
             return stripped.IsNullOrWhiteSpace() ? name : stripped;
-        }
-
-        private static Quality MapFormatToQuality(ComicFormat format)
-        {
-            return format switch
-            {
-                ComicFormat.CBZ => Quality.CBZ,
-                ComicFormat.CBR => Quality.CBR,
-                ComicFormat.CB7 => Quality.CB7,
-                ComicFormat.PDF => Quality.PDF,
-                ComicFormat.EPUB => Quality.EPUB,
-                _ => Quality.Unknown
-            };
         }
     }
 }

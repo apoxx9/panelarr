@@ -62,7 +62,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             {
                 Series = new Series(),
                 Issues = new List<Issue> { new Issue() },
-                ParsedIssueInfo = Builder<ParsedIssueInfo>.CreateNew().With(x => x.Quality = new QualityModel(Quality.CBZ_HD)).Build()
+                ParsedIssueInfo = Builder<ParsedIssueInfo>.CreateNew().With(x => x.Quality = new QualityModel(Quality.Digital)).Build()
             };
 
             Mocker.GetMock<IParsingService>()

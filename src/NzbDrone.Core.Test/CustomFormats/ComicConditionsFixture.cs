@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Test.CustomFormats
             return new ComicFile
             {
                 Path = "/comics/Saga/Saga TPB 01.cbz",
-                Quality = new QualityModel(Quality.CBZ),
+                Quality = new QualityModel(Quality.Archive),
                 ImageCount = imageCount,
                 ImageQualityScore = imageQualityScore
             };

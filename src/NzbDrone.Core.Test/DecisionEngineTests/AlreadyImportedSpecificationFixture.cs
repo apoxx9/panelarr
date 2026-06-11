@@ -44,10 +44,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _series = Builder<Series>.CreateNew()
                                      .Build();
 
-            _firstFile = new ComicFile { Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 2)), DateAdded = DateTime.Now };
+            _firstFile = new ComicFile { Quality = new QualityModel(Quality.Digital, new Revision(version: 2)), DateAdded = DateTime.Now };
 
-            _mp3 = new QualityModel(Quality.CBR, new Revision(version: 1));
-            _flac = new QualityModel(Quality.CBZ_HD, new Revision(version: 1));
+            _mp3 = new QualityModel(Quality.Scan, new Revision(version: 1));
+            _flac = new QualityModel(Quality.Digital, new Revision(version: 1));
 
             _remoteIssue = new RemoteIssue
             {

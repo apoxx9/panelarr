@@ -94,7 +94,7 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport
                 .With(x => x.Series = _series)
                 .Build();
 
-            _quality = new QualityModel(Quality.CBR);
+            _quality = new QualityModel(Quality.Scan);
 
             _localTrack = new LocalIssue
             {

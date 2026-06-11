@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             var fakeArtist = Builder<Series>.CreateNew()
                 .With(c => c.QualityProfile = new QualityProfile
                 {
-                    Cutoff = Quality.CBZ_HD.Id,
+                    Cutoff = Quality.Digital.Id,
                     MinFormatScore = 1
                 })
                 .Build();
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _remoteAlbum = new RemoteIssue
             {
                 Series = fakeArtist,
-                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.Scan, new Revision(version: 2)) },
             };
 
             CustomFormatsTestHelpers.GivenCustomFormats(_format1, _format2);

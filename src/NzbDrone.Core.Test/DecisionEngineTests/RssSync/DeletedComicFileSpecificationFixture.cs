@@ -34,7 +34,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 {
                     Id = 1,
                     Path = "/East.of.West.001.cbz",
-                    Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)),
+                    Quality = new QualityModel(Quality.Digital, new Revision(version: 1)),
                     DateAdded = DateTime.Now,
                     IssueId = 1
                 };
@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 {
                     Id = 2,
                     Path = "/East.of.West.002.cbz",
-                    Quality = new QualityModel(Quality.CBZ_HD, new Revision(version: 1)),
+                    Quality = new QualityModel(Quality.Digital, new Revision(version: 1)),
                     DateAdded = DateTime.Now,
                     IssueId = 2
                 };
@@ -56,21 +56,21 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             };
 
             var fakeSeries = Builder<Series>.CreateNew()
-                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.CBZ_HD.Id })
+                         .With(c => c.QualityProfile = new QualityProfile { Cutoff = Quality.Digital.Id })
                          .With(c => c.Path = @"C:\Comics\East of West".AsOsAgnostic())
                          .Build();
 
             _parseResultMulti = new RemoteIssue
             {
                 Series = fakeSeries,
-                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.Scan, new Revision(version: 2)) },
                 Issues = doubleIssueList
             };
 
             _parseResultSingle = new RemoteIssue
             {
                 Series = fakeSeries,
-                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.CBR, new Revision(version: 2)) },
+                ParsedIssueInfo = new ParsedIssueInfo { Quality = new QualityModel(Quality.Scan, new Revision(version: 2)) },
                 Issues = singleIssueList
             };
 

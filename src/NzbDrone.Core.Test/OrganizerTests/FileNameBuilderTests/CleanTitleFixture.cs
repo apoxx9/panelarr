@@ -46,7 +46,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                     .With(s => s.SeriesMetadata = _series.Metadata.Value)
                     .With(s => s.SeriesLinks = seriesLink)
                     .Build();
-            _trackFile = new ComicFile { Quality = new QualityModel(Quality.CBR), ReleaseGroup = "PanelarrTest" };
+            _trackFile = new ComicFile { Quality = new QualityModel(Quality.Scan), ReleaseGroup = "PanelarrTest" };
 
             _namingConfig = NamingConfig.Default;
             _namingConfig.RenameComics = true;

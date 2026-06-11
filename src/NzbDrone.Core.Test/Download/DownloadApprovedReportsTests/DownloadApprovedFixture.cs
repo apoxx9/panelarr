@@ -62,7 +62,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_download_report_if_book_was_not_already_downloaded()
         {
             var issues = new List<Issue> { GetIssue(1) };
-            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.CBR));
+            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue));
@@ -75,7 +75,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_only_download_book_once()
         {
             var issues = new List<Issue> { GetIssue(1) };
-            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.CBR));
+            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue));
@@ -90,11 +90,11 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         {
             var remoteIssue1 = GetRemoteIssue(
                                                     new List<Issue> { GetIssue(1) },
-                                                    new QualityModel(Quality.CBR));
+                                                    new QualityModel(Quality.Scan));
 
             var remoteIssue2 = GetRemoteIssue(
                                                     new List<Issue> { GetIssue(1), GetIssue(2) },
-                                                    new QualityModel(Quality.CBR));
+                                                    new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
@@ -108,7 +108,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_return_downloaded_reports()
         {
             var issues = new List<Issue> { GetIssue(1) };
-            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.CBR));
+            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue));
@@ -123,11 +123,11 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         {
             var remoteIssue1 = GetRemoteIssue(
                                                     new List<Issue> { GetIssue(1) },
-                                                    new QualityModel(Quality.CBR));
+                                                    new QualityModel(Quality.Scan));
 
             var remoteIssue2 = GetRemoteIssue(
                                                     new List<Issue> { GetIssue(2) },
-                                                    new QualityModel(Quality.CBR));
+                                                    new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
@@ -143,15 +143,15 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         {
             var remoteIssue1 = GetRemoteIssue(
                                                     new List<Issue> { GetIssue(1) },
-                                                    new QualityModel(Quality.CBR));
+                                                    new QualityModel(Quality.Scan));
 
             var remoteIssue2 = GetRemoteIssue(
                                                     new List<Issue> { GetIssue(2) },
-                                                    new QualityModel(Quality.CBR));
+                                                    new QualityModel(Quality.Scan));
 
             var remoteIssue3 = GetRemoteIssue(
                                                     new List<Issue> { GetIssue(2) },
-                                                    new QualityModel(Quality.CBR));
+                                                    new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue1));
@@ -167,7 +167,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_not_add_to_downloaded_list_when_download_fails()
         {
             var issues = new List<Issue> { GetIssue(1) };
-            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.CBR));
+            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue));
@@ -195,7 +195,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_not_grab_if_pending()
         {
             var issues = new List<Issue> { GetIssue(1) };
-            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.CBR));
+            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue, new Rejection("Failure!", RejectionType.Temporary)));
@@ -208,7 +208,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_not_add_to_pending_if_book_was_grabbed()
         {
             var issues = new List<Issue> { GetIssue(1) };
-            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.CBR));
+            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue));
@@ -222,7 +222,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_add_to_pending_even_if_already_added_to_pending()
         {
             var issues = new List<Issue> { GetIssue(1) };
-            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.CBR));
+            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue, new Rejection("Failure!", RejectionType.Temporary)));
@@ -236,7 +236,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_add_to_failed_if_already_failed_for_that_protocol()
         {
             var issues = new List<Issue> { GetIssue(1) };
-            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.CBR));
+            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue));
@@ -253,8 +253,8 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_not_add_to_failed_if_failed_for_a_different_protocol()
         {
             var issues = new List<Issue> { GetIssue(1) };
-            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.CBR), DownloadProtocol.Usenet);
-            var remoteIssue2 = GetRemoteIssue(issues, new QualityModel(Quality.CBR), DownloadProtocol.Torrent);
+            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.Scan), DownloadProtocol.Usenet);
+            var remoteIssue2 = GetRemoteIssue(issues, new QualityModel(Quality.Scan), DownloadProtocol.Torrent);
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue));
@@ -272,7 +272,7 @@ namespace NzbDrone.Core.Test.Download.DownloadApprovedReportsTests
         public async Task should_add_to_rejected_if_release_unavailable_on_indexer()
         {
             var issues = new List<Issue> { GetIssue(1) };
-            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.CBR));
+            var remoteIssue = GetRemoteIssue(issues, new QualityModel(Quality.Scan));
 
             var decisions = new List<DownloadDecision>();
             decisions.Add(new DownloadDecision(remoteIssue));

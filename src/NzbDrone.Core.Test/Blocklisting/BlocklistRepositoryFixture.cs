@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.Blocklisting
             {
                 SeriesId = 12345,
                 IssueIds = new List<int> { 1 },
-                Quality = new QualityModel(Quality.CBZ_HD),
+                Quality = new QualityModel(Quality.Digital),
                 SourceTitle = "series.name.issue.title",
                 Date = DateTime.UtcNow
             };

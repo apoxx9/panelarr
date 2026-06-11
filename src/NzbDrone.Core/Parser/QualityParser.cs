@@ -22,11 +22,23 @@ namespace NzbDrone.Core.Parser
         private static readonly Regex VersionRegex = new (@"\d[-._ ]?v(?<version>\d)[-._ ]|\[v(?<version>\d)\]",
                                                                 RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // Comic fix-release markers: "(f)", "(f2)", "(Fixed)"
+        private static readonly Regex FixedRegex = new (@"\((?:f(?<fixversion>\d)?|fixed)\)",
+                                                                RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         private static readonly Regex RealRegex = new (@"\b(?<real>REAL)\b",
                                                                 RegexOptions.Compiled);
 
-        private static readonly Regex CodecRegex = new (@"\b(?:(?<CBZ_HD>CBZ\s*HD)|(?<CBZ_Web>CBZ\s*Web)|(?<CBZ>CBZ)|(?<CBR>CBR)|(?<CB7>CB7)|(?<PDF>PDF)|(?<MOBI>MOBI)|(?<EPUB>EPUB)|(?<AZW3>AZW3?))\b",
-                                                             RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        // Source tags rank a release; bare container tokens (CBZ/CBR/CB7) only
+        // tell us it's an archive of unknown source. Checked in priority
+        // order so "Digital" wins regardless of token position.
+        private static readonly Regex DigitalRegex = new (@"\bdigital\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex WebRipRegex = new (@"\bweb[-_. ]?rip\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex C2cRegex = new (@"\b(?:c2c|cover[ ._-]to[ ._-]cover)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex ScanRegex = new (@"\b(?:scan(?:ned)?|print)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex ArchiveTokenRegex = new (@"\b(?:cbz|cbr|cb7)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex PdfTokenRegex = new (@"\bpdf\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex EpubTokenRegex = new (@"\b(?:epub|mobi|azw3?)\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public static QualityModel ParseQuality(string name, string desc = null, List<int> categories = null)
         {
@@ -42,10 +54,7 @@ namespace NzbDrone.Core.Parser
 
             if (desc.IsNotNullOrWhiteSpace())
             {
-                var descCodec = ParseCodec(desc, "");
-                Logger.Trace($"Got codec {descCodec}");
-
-                result.Quality = FindQuality(descCodec);
+                result.Quality = ParseSourceQuality(desc.ToLowerInvariant());
 
                 if (result.Quality != Quality.Unknown)
                 {
@@ -54,9 +63,7 @@ namespace NzbDrone.Core.Parser
                 }
             }
 
-            var codec = ParseCodec(normalizedName, name);
-
-            result.Quality = FindQuality(codec);
+            result.Quality = ParseSourceQuality(normalizedName);
 
             //Based on extension
             if (result.Quality == Quality.Unknown && !name.ContainsInvalidPathChars())
@@ -76,94 +83,52 @@ namespace NzbDrone.Core.Parser
             return result;
         }
 
-        public static Codec ParseCodec(string name, string origName)
+        public static Quality ParseSourceQuality(string name)
         {
             if (name.IsNullOrWhiteSpace())
             {
-                return Codec.Unknown;
+                return Quality.Unknown;
             }
 
-            var match = CodecRegex.Match(name);
-
-            if (!match.Success)
+            if (DigitalRegex.IsMatch(name))
             {
-                return Codec.Unknown;
+                return Quality.Digital;
             }
 
-            if (match.Groups["CBZ_HD"].Success)
+            if (WebRipRegex.IsMatch(name))
             {
-                return Codec.CBZ_HD;
+                return Quality.WebRip;
             }
 
-            if (match.Groups["CBZ_Web"].Success)
+            if (C2cRegex.IsMatch(name))
             {
-                return Codec.CBZ_Web;
+                return Quality.C2C;
             }
 
-            if (match.Groups["CBZ"].Success)
+            if (ScanRegex.IsMatch(name))
             {
-                return Codec.CBZ;
+                return Quality.Scan;
             }
 
-            if (match.Groups["CBR"].Success)
+            if (ArchiveTokenRegex.IsMatch(name))
             {
-                return Codec.CBR;
+                return Quality.Archive;
             }
 
-            if (match.Groups["CB7"].Success)
+            if (PdfTokenRegex.IsMatch(name))
             {
-                return Codec.CB7;
+                return Quality.PDF;
             }
 
-            if (match.Groups["PDF"].Success)
+            if (EpubTokenRegex.IsMatch(name))
             {
-                return Codec.PDF;
+                return Quality.EPUB;
             }
 
-            if (match.Groups["EPUB"].Success)
-            {
-                return Codec.EPUB;
-            }
-
-            if (match.Groups["MOBI"].Success)
-            {
-                return Codec.MOBI;
-            }
-
-            if (match.Groups["AZW3"].Success)
-            {
-                return Codec.AZW3;
-            }
-
-            return Codec.Unknown;
+            return Quality.Unknown;
         }
 
-        private static Quality FindQuality(Codec codec)
-        {
-            switch (codec)
-            {
-                case Codec.CBZ_HD:
-                    return Quality.CBZ_HD;
-                case Codec.CBZ_Web:
-                    return Quality.CBZ_Web;
-                case Codec.CBZ:
-                    return Quality.CBZ;
-                case Codec.CBR:
-                    return Quality.CBR;
-                case Codec.CB7:
-                    return Quality.CB7;
-                case Codec.PDF:
-                    return Quality.PDF;
-                case Codec.EPUB:
-                case Codec.MOBI:
-                case Codec.AZW3:
-                    return Quality.EPUB;
-                default:
-                    return Quality.Unknown;
-            }
-        }
-
-        private static QualityModel ParseQualityModifiers(string name, string normalizedName)
+        internal static QualityModel ParseQualityModifiers(string name, string normalizedName)
         {
             var result = new QualityModel { Quality = Quality.Unknown };
 
@@ -185,6 +150,18 @@ namespace NzbDrone.Core.Parser
                 result.Revision.Version = Convert.ToInt32(versionRegexResult.Groups["version"].Value);
             }
 
+            var fixedRegexResult = FixedRegex.Match(normalizedName);
+
+            if (fixedRegexResult.Success)
+            {
+                // "(f)" is the first fix (v2), "(f2)" the second (v3)
+                var fixNumber = fixedRegexResult.Groups["fixversion"].Success
+                    ? Convert.ToInt32(fixedRegexResult.Groups["fixversion"].Value)
+                    : 1;
+
+                result.Revision.Version = Math.Max(result.Revision.Version, fixNumber + 1);
+            }
+
             //TODO: re-enable this when we have a reliable way to determine real
             var realRegexResult = RealRegex.Matches(name);
 
@@ -195,19 +172,5 @@ namespace NzbDrone.Core.Parser
 
             return result;
         }
-    }
-
-    public enum Codec
-    {
-        CBZ,
-        CBZ_HD,
-        CBZ_Web,
-        CBR,
-        CB7,
-        PDF,
-        EPUB,
-        MOBI,
-        AZW3,
-        Unknown
     }
 }

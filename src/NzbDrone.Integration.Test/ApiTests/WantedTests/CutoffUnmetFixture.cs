@@ -29,9 +29,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(2)]
         public void cutoff_should_have_monitored_items()
         {
-            EnsureProfileCutoff(1, Quality.CBZ, true);
+            EnsureProfileCutoff(1, Quality.Archive, true);
             var series = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray", true);
-            EnsureComicFile(series, 1, "43765115", Quality.CBR);
+            EnsureComicFile(series, 1, "43765115", Quality.Scan);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "releaseDate", "desc");
 
@@ -42,9 +42,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(2)]
         public void cutoff_should_not_have_unmonitored_items()
         {
-            EnsureProfileCutoff(1, Quality.CBZ, true);
+            EnsureProfileCutoff(1, Quality.Archive, true);
             var series = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray", false);
-            EnsureComicFile(series, 1, "43765115", Quality.CBR);
+            EnsureComicFile(series, 1, "43765115", Quality.Scan);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "releaseDate", "desc");
 
@@ -55,9 +55,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(2)]
         public void cutoff_should_have_author()
         {
-            EnsureProfileCutoff(1, Quality.CBZ, true);
+            EnsureProfileCutoff(1, Quality.Archive, true);
             var series = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray", true);
-            EnsureComicFile(series, 1, "43765115", Quality.CBR);
+            EnsureComicFile(series, 1, "43765115", Quality.Scan);
 
             var result = WantedCutoffUnmet.GetPagedIncludeSeries(0, 15, "releaseDate", "desc", includeSeries: true);
 
@@ -69,9 +69,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(2)]
         public void cutoff_should_not_have_author()
         {
-            EnsureProfileCutoff(1, Quality.CBZ, true);
+            EnsureProfileCutoff(1, Quality.Archive, true);
             var series = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray", true);
-            EnsureComicFile(series, 1, "43765115", Quality.CBR);
+            EnsureComicFile(series, 1, "43765115", Quality.Scan);
 
             var result = WantedCutoffUnmet.GetPagedIncludeSeries(0, 15, "releaseDate", "desc", includeSeries: false);
 
@@ -82,9 +82,9 @@ namespace NzbDrone.Integration.Test.ApiTests.WantedTests
         [Order(2)]
         public void cutoff_should_have_unmonitored_items()
         {
-            EnsureProfileCutoff(1, Quality.CBZ, true);
+            EnsureProfileCutoff(1, Quality.Archive, true);
             var series = EnsureSeries("14586394", "43765115", "Andrew Hunter Murray", false);
-            EnsureComicFile(series, 1, "43765115", Quality.CBR);
+            EnsureComicFile(series, 1, "43765115", Quality.Scan);
 
             var result = WantedCutoffUnmet.GetPaged(0, 15, "releaseDate", "desc", "monitored", false);
 

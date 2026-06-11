@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Test.Qualities
 
         private void GivenCustomProfile()
         {
-            Subject = new QualityModelComparer(new QualityProfile { Items = QualityFixture.GetDefaultQualities(Quality.CBZ, Quality.CBR) });
+            Subject = new QualityModelComparer(new QualityProfile { Items = QualityFixture.GetDefaultQualities(Quality.Archive, Quality.Scan) });
         }
 
         private void GivenGroupedProfile()
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.Qualities
                                           new QualityProfileQualityItem
                                           {
                                               Allowed = false,
-                                              Quality = Quality.CBR
+                                              Quality = Quality.Scan
                                           },
                                           new QualityProfileQualityItem
                                           {
@@ -46,14 +46,14 @@ namespace NzbDrone.Core.Test.Qualities
                                                           new QualityProfileQualityItem
                                                           {
                                                               Allowed = true,
-                                                              Quality = Quality.CBZ
+                                                              Quality = Quality.Archive
                                                           }
                                                       }
                                           },
                                           new QualityProfileQualityItem
                                           {
                                               Allowed = true,
-                                              Quality = Quality.CBZ_HD
+                                              Quality = Quality.Digital
                                           }
                                       }
             };
@@ -66,8 +66,8 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenDefaultProfile();
 
-            var first = new QualityModel(Quality.CBZ_HD);
-            var second = new QualityModel(Quality.CBR);
+            var first = new QualityModel(Quality.Digital);
+            var second = new QualityModel(Quality.Scan);
 
             var compare = Subject.Compare(first, second);
 
@@ -79,8 +79,8 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenDefaultProfile();
 
-            var first = new QualityModel(Quality.CBR);
-            var second = new QualityModel(Quality.CBZ_HD);
+            var first = new QualityModel(Quality.Scan);
+            var second = new QualityModel(Quality.Digital);
 
             var compare = Subject.Compare(first, second);
 
@@ -92,8 +92,8 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenDefaultProfile();
 
-            var first = new QualityModel(Quality.CBR, new Revision(version: 2));
-            var second = new QualityModel(Quality.CBR, new Revision(version: 1));
+            var first = new QualityModel(Quality.Scan, new Revision(version: 2));
+            var second = new QualityModel(Quality.Scan, new Revision(version: 1));
 
             var compare = Subject.Compare(first, second);
 
@@ -105,8 +105,8 @@ namespace NzbDrone.Core.Test.Qualities
         {
             GivenCustomProfile();
 
-            var first = new QualityModel(Quality.CBR);
-            var second = new QualityModel(Quality.CBZ);
+            var first = new QualityModel(Quality.Scan);
+            var second = new QualityModel(Quality.Archive);
 
             var compare = Subject.Compare(first, second);
 
@@ -119,7 +119,7 @@ namespace NzbDrone.Core.Test.Qualities
             GivenGroupedProfile();
 
             var first = new QualityModel(Quality.EPUB);
-            var second = new QualityModel(Quality.CBZ);
+            var second = new QualityModel(Quality.Archive);
 
             var compare = Subject.Compare(first, second);
 
@@ -132,7 +132,7 @@ namespace NzbDrone.Core.Test.Qualities
             GivenGroupedProfile();
 
             var first = new QualityModel(Quality.EPUB);
-            var second = new QualityModel(Quality.CBZ);
+            var second = new QualityModel(Quality.Archive);
 
             var compare = Subject.Compare(first, second, true);
 

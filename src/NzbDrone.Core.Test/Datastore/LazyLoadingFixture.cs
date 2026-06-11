@@ -21,7 +21,7 @@ namespace NzbDrone.Core.Test.Datastore
             var profile = new QualityProfile
             {
                 Name = "Test",
-                Cutoff = Quality.CBR.Id,
+                Cutoff = Quality.Scan.Id,
                 Items = Qualities.QualityFixture.GetDefaultQualities()
             };
 

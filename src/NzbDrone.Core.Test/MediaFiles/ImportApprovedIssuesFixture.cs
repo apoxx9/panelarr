@@ -59,7 +59,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                                            Issue = issue,
                                            Part = 1,
                                            Path = Path.Combine(series.Path, "East of West 001 (2013) (Digital) (Empire).cbz"),
-                                           Quality = new QualityModel(Quality.CBR),
+                                           Quality = new QualityModel(Quality.Scan),
                                            FileTagInfo = new ParsedFileTagInfo
                                            {
                                                ReleaseGroup = "DRONE"
@@ -156,7 +156,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         public void should_import_higher_quality_files_first()
         {
             var lqDecision = _approvedDecisions.First();
-            lqDecision.Item.Quality = new QualityModel(Quality.CBR);
+            lqDecision.Item.Quality = new QualityModel(Quality.Scan);
             lqDecision.Item.Size = 10.Megabytes();
 
             var hqDecision = new ImportDecision<LocalIssue>(
@@ -166,7 +166,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                     Issue = lqDecision.Item.Issue,
                     Part = 1,
                     Path = @"C:\Test\Comics\East of West (2013)\East of West 001 (2013) (Digital) (Empire).cbz".AsOsAgnostic(),
-                    Quality = new QualityModel(Quality.CBZ),
+                    Quality = new QualityModel(Quality.Archive),
                     Size = 1.Megabytes(),
                     FileTagInfo = new ParsedFileTagInfo
                     {
@@ -198,7 +198,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                     Issue = fileDecision.Item.Issue,
                     Part = 1,
                     Path = @"C:\Test\Comics\East of West (2013)\East of West 001 (2013) (Digital) (Empire).cbz".AsOsAgnostic(),
-                    Quality = new QualityModel(Quality.CBR),
+                    Quality = new QualityModel(Quality.Scan),
                     Size = 80.Megabytes()
                 });
 

@@ -48,10 +48,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 
             _profile.Items = new List<QualityProfileQualityItem>();
             _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.PDF });
-            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBZ });
-            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBR });
+            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.Archive });
+            _profile.Items.Add(new QualityProfileQualityItem { Allowed = true, Quality = Quality.Scan });
 
-            _profile.Cutoff = Quality.CBZ.Id;
+            _profile.Cutoff = Quality.Archive.Id;
 
             _remoteIssue.ParsedIssueInfo = new ParsedIssueInfo();
             _remoteIssue.Release = new ReleaseInfo();
@@ -101,7 +101,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_false_when_system_invoked_search_and_release_is_younger_than_delay()
         {
-            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.Scan);
             _remoteIssue.Release.PublishDate = DateTime.UtcNow;
 
             _delayProfile.UsenetDelay = 720;
@@ -121,7 +121,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         public void should_be_false_when_quality_is_last_allowed_in_profile_and_bypass_disabled()
         {
             _remoteIssue.Release.PublishDate = DateTime.UtcNow;
-            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.Scan);
 
             _delayProfile.UsenetDelay = 720;
 
@@ -135,7 +135,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
             _delayProfile.BypassIfHighestQuality = true;
 
             _remoteIssue.Release.PublishDate = DateTime.UtcNow;
-            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.Scan);
 
             Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
@@ -143,7 +143,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_true_when_release_is_older_than_delay()
         {
-            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.Scan);
             _remoteIssue.Release.PublishDate = DateTime.UtcNow.AddHours(-10);
 
             _delayProfile.UsenetDelay = 60;
@@ -154,7 +154,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_false_when_release_is_younger_than_delay()
         {
-            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.Scan);
             _remoteIssue.Release.PublishDate = DateTime.UtcNow;
 
             _delayProfile.UsenetDelay = 720;
@@ -165,10 +165,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_true_when_release_is_a_proper_for_existing_book()
         {
-            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR, new Revision(version: 2));
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.Scan, new Revision(version: 2));
             _remoteIssue.Release.PublishDate = DateTime.UtcNow;
 
-            GivenExistingFile(new QualityModel(Quality.CBR));
+            GivenExistingFile(new QualityModel(Quality.Scan));
             GivenUpgradeForExistingFile();
 
             Mocker.GetMock<IUpgradableSpecification>()
@@ -183,10 +183,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_true_when_release_is_a_real_for_existing_book()
         {
-            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBR, new Revision(real: 1));
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.Scan, new Revision(real: 1));
             _remoteIssue.Release.PublishDate = DateTime.UtcNow;
 
-            GivenExistingFile(new QualityModel(Quality.CBR));
+            GivenExistingFile(new QualityModel(Quality.Scan));
             GivenUpgradeForExistingFile();
 
             Mocker.GetMock<IUpgradableSpecification>()
@@ -201,7 +201,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_be_false_when_release_is_proper_for_existing_book_of_different_quality()
         {
-            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.CBZ, new Revision(version: 2));
+            _remoteIssue.ParsedIssueInfo.Quality = new QualityModel(Quality.Archive, new Revision(version: 2));
             _remoteIssue.Release.PublishDate = DateTime.UtcNow;
 
             GivenExistingFile(new QualityModel(Quality.PDF));

@@ -16,12 +16,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     {
         public static object[] IsUpgradeTestCases =
         {
-            new object[] { Quality.CBZ, 1, Quality.CBZ, 2, Quality.CBZ, true },
-            new object[] { Quality.CBR, 1, Quality.CBR, 2, Quality.CBR, true },
-            new object[] { Quality.CBR, 1, Quality.CBR, 1, Quality.CBR, false },
-            new object[] { Quality.CBR, 1, Quality.CBZ, 2, Quality.CBR, true },
-            new object[] { Quality.CBZ, 1, Quality.CBR, 2, Quality.CBZ, false },
-            new object[] { Quality.CBR, 1, Quality.CBR, 1, Quality.CBR, false }
+            new object[] { Quality.Archive, 1, Quality.Archive, 2, Quality.Archive, true },
+            new object[] { Quality.Scan, 1, Quality.Scan, 2, Quality.Scan, true },
+            new object[] { Quality.Scan, 1, Quality.Scan, 1, Quality.Scan, false },
+            new object[] { Quality.Scan, 1, Quality.Archive, 2, Quality.Scan, true },
+            new object[] { Quality.Archive, 1, Quality.Scan, 2, Quality.Archive, false },
+            new object[] { Quality.Scan, 1, Quality.Scan, 1, Quality.Scan, false }
         };
 
         private void GivenAutoDownloadPropers(ProperDownloadTypes type)
@@ -64,9 +64,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradable(
                         profile,
-                        new QualityModel(Quality.CBR, new Revision(version: 1)),
+                        new QualityModel(Quality.Scan, new Revision(version: 1)),
                         new List<CustomFormat>(),
-                        new QualityModel(Quality.CBR, new Revision(version: 2)),
+                        new QualityModel(Quality.Scan, new Revision(version: 2)),
                         new List<CustomFormat>())
                     .Should().BeTrue();
         }
@@ -83,9 +83,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradable(
                         profile,
-                        new QualityModel(Quality.CBR, new Revision(version: 1)),
+                        new QualityModel(Quality.Scan, new Revision(version: 1)),
                         new List<CustomFormat>(),
-                        new QualityModel(Quality.CBR, new Revision(version: 2)),
+                        new QualityModel(Quality.Scan, new Revision(version: 2)),
                         new List<CustomFormat>())
                     .Should().BeFalse();
         }

@@ -41,12 +41,12 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
             _profile = new QualityProfile
             {
                 Name = "Test",
-                Cutoff = Quality.CBR.Id,
+                Cutoff = Quality.Scan.Id,
                 Items = new List<QualityProfileQualityItem>
                                    {
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBR },
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBR },
-                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.CBR }
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.Scan },
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.Scan },
+                                       new QualityProfileQualityItem { Allowed = true, Quality = Quality.Scan }
                                    },
             };
 
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.Download.Pending.PendingReleaseServiceTests
             _release = Builder<ReleaseInfo>.CreateNew().Build();
 
             _parsedIssueInfo = Builder<ParsedIssueInfo>.CreateNew().Build();
-            _parsedIssueInfo.Quality = new QualityModel(Quality.CBR);
+            _parsedIssueInfo.Quality = new QualityModel(Quality.Scan);
 
             _remoteIssue = new RemoteIssue();
             _remoteIssue.Issues = new List<Issue> { _issue };
