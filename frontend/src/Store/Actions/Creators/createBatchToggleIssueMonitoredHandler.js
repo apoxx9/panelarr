@@ -1,5 +1,5 @@
-import updateIssues from 'Utilities/Issue/updateIssues';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
+import updateIssues from 'Utilities/Issue/updateIssues';
 import getSectionState from 'Utilities/State/getSectionState';
 
 function createBatchToggleIssueMonitoredHandler(section, fetchHandler) {

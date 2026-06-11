@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Grid, WindowScroller } from 'react-virtualized';
-import IssueIndexItemConnector from 'Issue/Index/IssueIndexItemConnector';
 import Measure from 'Components/Measure';
+import IssueIndexItemConnector from 'Issue/Index/IssueIndexItemConnector';
 import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';

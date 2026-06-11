@@ -1,18 +1,17 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import TextTruncate from 'react-text-truncate';
-import SeriesPoster from 'Series/SeriesPoster';
-import { getSeriesStatusDetails } from 'Series/SeriesStatus';
 import HeartRating from 'Components/HeartRating';
 import Icon from 'Components/Icon';
 import Label from 'Components/Label';
 import Marquee from 'Components/Marquee';
 import Measure from 'Components/Measure';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
-import ProgressBar from 'Components/ProgressBar';
 import Popover from 'Components/Tooltip/Popover';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import { icons, kinds, sizes, tooltipPositions } from 'Helpers/Props';
+import SeriesPoster from 'Series/SeriesPoster';
+import { getSeriesStatusDetails } from 'Series/SeriesStatus';
 import QualityProfileName from 'Settings/Profiles/Quality/QualityProfileName';
 import fonts from 'Styles/Variables/fonts';
 import formatBytes from 'Utilities/Number/formatBytes';
@@ -92,9 +91,7 @@ class SeriesDetailsHeader extends Component {
 
     const {
       issueFileCount,
-      sizeOnDisk,
-      availableIssueCount = 0,
-      totalIssueCount = 0
+      sizeOnDisk
     } = statistics;
 
     const {

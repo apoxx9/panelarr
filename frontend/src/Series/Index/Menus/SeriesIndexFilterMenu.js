@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import SeriesIndexFilterModalConnector from 'Series/Index/SeriesIndexFilterModalConnector';
 import FilterMenu from 'Components/Menu/FilterMenu';
 import { align } from 'Helpers/Props';
+import SeriesIndexFilterModalConnector from 'Series/Index/SeriesIndexFilterModalConnector';
 
 function SeriesIndexFilterMenu(props) {
   const {

@@ -168,11 +168,7 @@ function getInfoRowProps(row, props) {
 
 function SeriesIndexOverviewInfo(props) {
   const {
-    height,
-    showRelativeDates,
-    shortDateFormat,
-    longDateFormat,
-    timeFormat
+    height
   } = props;
 
   let shownRows = 1;

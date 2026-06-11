@@ -1,8 +1,8 @@
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { fetchHistory, markAsFailed } from 'Store/Actions/historyActions';
-import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createIssueSelector from 'Store/Selectors/createIssueSelector';
+import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import SeriesHistoryRow from './SeriesHistoryRow';
 
 function createMapStateToProps() {

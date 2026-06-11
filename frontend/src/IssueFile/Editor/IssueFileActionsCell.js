@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import FileDetailsModal from 'IssueFile/FileDetailsModal';
 import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import { icons, kinds } from 'Helpers/Props';
+import FileDetailsModal from 'IssueFile/FileDetailsModal';
 import translate from 'Utilities/String/translate';
 import styles from './IssueFileActionsCell.css';
 

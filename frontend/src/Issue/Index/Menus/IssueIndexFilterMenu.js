@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import IssueIndexFilterModalConnector from 'Issue/Index/IssueIndexFilterModalConnector';
 import FilterMenu from 'Components/Menu/FilterMenu';
 import { align } from 'Helpers/Props';
+import IssueIndexFilterModalConnector from 'Issue/Index/IssueIndexFilterModalConnector';
 
 function IssueIndexFilterMenu(props) {
   const {

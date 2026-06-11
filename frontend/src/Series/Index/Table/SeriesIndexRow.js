@@ -1,11 +1,6 @@
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesBanner from 'Series/SeriesBanner';
-import SeriesNameLink from 'Series/SeriesNameLink';
-import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
-import EditSeriesModalConnector from 'Series/Edit/EditSeriesModalConnector';
-import IssueTitleLink from 'Issue/IssueTitleLink';
 import HeartRating from 'Components/HeartRating';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
@@ -16,11 +11,16 @@ import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
 import TagListConnector from 'Components/TagListConnector';
 import { icons } from 'Helpers/Props';
-import getProgressBarKind from 'Utilities/Series/getProgressBarKind';
+import IssueTitleLink from 'Issue/IssueTitleLink';
+import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
+import EditSeriesModalConnector from 'Series/Edit/EditSeriesModalConnector';
+import SeriesBanner from 'Series/SeriesBanner';
+import SeriesNameLink from 'Series/SeriesNameLink';
 import formatBytes from 'Utilities/Number/formatBytes';
+import getProgressBarKind from 'Utilities/Series/getProgressBarKind';
 import translate from 'Utilities/String/translate';
-import SeriesStatusCell from './SeriesStatusCell';
 import hasGrowableColumns from './hasGrowableColumns';
+import SeriesStatusCell from './SeriesStatusCell';
 import styles from './SeriesIndexRow.css';
 
 class SeriesIndexRow extends Component {
@@ -90,7 +90,6 @@ class SeriesIndexRow extends Component {
       qualityProfile,
       nextIssue,
       lastIssue,
-      added,
       statistics = {},
       genres,
       ratings,
@@ -438,6 +437,8 @@ SeriesIndexRow.propTypes = {
   status: PropTypes.string.isRequired,
   seriesName: PropTypes.string.isRequired,
   seriesNameLastFirst: PropTypes.string.isRequired,
+  disambiguation: PropTypes.string,
+  year: PropTypes.number,
   titleSlug: PropTypes.string.isRequired,
   qualityProfile: PropTypes.object.isRequired,
   nextIssue: PropTypes.object,

@@ -5,8 +5,8 @@ import SpinnerButton from 'Components/Link/SpinnerButton';
 import PageContentFooter from 'Components/Page/PageContentFooter';
 import { kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
-import IssueEditorFooterLabel from './IssueEditorFooterLabel';
 import DeleteIssueModal from './Delete/DeleteIssueModal';
+import IssueEditorFooterLabel from './IssueEditorFooterLabel';
 import styles from './IssueEditorFooter.css';
 
 const NO_CHANGE = 'noChange';

@@ -5,10 +5,10 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
 import { executeCommand } from 'Store/Actions/commandActions';
-import createIssueSeriesSelector from 'Store/Selectors/createIssueSeriesSelector';
+import createExecutingCommandsSelector from 'Store/Selectors/createExecutingCommandsSelector';
 import createIssueQualityProfileSelector from 'Store/Selectors/createIssueQualityProfileSelector';
 import createIssueSelector from 'Store/Selectors/createIssueSelector';
-import createExecutingCommandsSelector from 'Store/Selectors/createExecutingCommandsSelector';
+import createIssueSeriesSelector from 'Store/Selectors/createIssueSeriesSelector';
 
 function selectShowSearchAction() {
   return createSelector(

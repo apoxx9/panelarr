@@ -161,8 +161,6 @@ class SeriesIndexOverviewOptionsModalContent extends Component {
       showTitle,
       detailedProgressBar,
       size,
-      showMonitored,
-      showQualityProfile,
       showLastIssue,
       showAdded,
       showIssueCount,

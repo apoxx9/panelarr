@@ -4,12 +4,12 @@ import { filterBuilderTypes, filterBuilderValueTypes, filterTypePredicates, sort
 import { createThunk, handleThunks } from 'Store/thunks';
 import sortByName from 'Utilities/Array/sortByName';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
-import { filterPredicates, filters, sortPredicates } from './seriesActions';
 import { set, updateItem } from './baseActions';
 import createHandleActions from './Creators/createHandleActions';
 import createSetClientSideCollectionFilterReducer from './Creators/Reducers/createSetClientSideCollectionFilterReducer';
 import createSetClientSideCollectionSortReducer from './Creators/Reducers/createSetClientSideCollectionSortReducer';
 import createSetTableOptionReducer from './Creators/Reducers/createSetTableOptionReducer';
+import { filterPredicates, filters, sortPredicates } from './seriesActions';
 
 //
 // Variables

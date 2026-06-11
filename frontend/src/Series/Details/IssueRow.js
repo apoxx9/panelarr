@@ -1,17 +1,16 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import IssueSearchCellConnector from 'Issue/IssueSearchCellConnector';
-import IssueTitleLink from 'Issue/IssueTitleLink';
-import IndexerFlags from 'Issue/IndexerFlags';
 import Icon from 'Components/Icon';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
-
 import RelativeDateCellConnector from 'Components/Table/Cells/RelativeDateCellConnector';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
 import TableRow from 'Components/Table/TableRow';
 import Popover from 'Components/Tooltip/Popover';
 import { icons, kinds, tooltipPositions } from 'Helpers/Props';
+import IndexerFlags from 'Issue/IndexerFlags';
+import IssueSearchCellConnector from 'Issue/IssueSearchCellConnector';
+import IssueTitleLink from 'Issue/IssueTitleLink';
 import translate from 'Utilities/String/translate';
 import IssueStatus from './IssueStatus';
 import styles from './IssueRow.css';
@@ -67,8 +66,6 @@ class IssueRow extends Component {
       seriesName,
       position,
       issueNumber,
-      pageCount,
-      ratings,
       isSaving,
       seriesMonitored,
       titleSlug,

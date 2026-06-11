@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { toggleSeriesMonitored } from 'Store/Actions/seriesActions';
 import { toggleIssuesMonitored } from 'Store/Actions/issueActions';
+import { toggleSeriesMonitored } from 'Store/Actions/seriesActions';
 import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import IssueshelfRow from './IssueshelfRow';
 

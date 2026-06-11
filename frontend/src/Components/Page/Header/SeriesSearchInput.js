@@ -7,9 +7,9 @@ import keyboardShortcuts, { shortcuts } from 'Components/keyboardShortcuts';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
-import SeriesSearchResult from './SeriesSearchResult';
-import IssueSearchResult from './IssueSearchResult';
 import FuseWorker from './fuse.worker';
+import IssueSearchResult from './IssueSearchResult';
+import SeriesSearchResult from './SeriesSearchResult';
 import styles from './SeriesSearchInput.css';
 
 const ADD_NEW_TYPE = 'addNew';

@@ -3,8 +3,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { toggleIssuesMonitored } from 'Store/Actions/issueActions';
-import createIssueSelector from 'Store/Selectors/createIssueSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
+import createIssueSelector from 'Store/Selectors/createIssueSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import IssueDetailsHeader from './IssueDetailsHeader';
 

@@ -1,16 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs';
-import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
-import EditSeriesModalConnector from 'Series/Edit/EditSeriesModalConnector';
-import SeriesHistoryTable from 'Series/History/SeriesHistoryTable';
-import MonitoringOptionsModal from 'Series/MonitoringOptions/MonitoringOptionsModal';
-import IssueEditorFooter from 'Issue/Editor/IssueEditorFooter';
-import IssueFileEditorTable from 'IssueFile/Editor/IssueFileEditorTable';
 import Alert from 'Components/Alert';
 import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
-import Link from 'Components/Link/Link';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
@@ -22,8 +15,14 @@ import SwipeHeaderConnector from 'Components/Swipe/SwipeHeaderConnector';
 import { align, icons, kinds, sizes } from 'Helpers/Props';
 import InteractiveSearchFilterMenuConnector from 'InteractiveSearch/InteractiveSearchFilterMenuConnector';
 import InteractiveSearchTable from 'InteractiveSearch/InteractiveSearchTable';
+import IssueEditorFooter from 'Issue/Editor/IssueEditorFooter';
+import IssueFileEditorTable from 'IssueFile/Editor/IssueFileEditorTable';
 import OrganizePreviewModalConnector from 'Organize/OrganizePreviewModalConnector';
 import RetagPreviewModalConnector from 'Retag/RetagPreviewModalConnector';
+import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
+import EditSeriesModalConnector from 'Series/Edit/EditSeriesModalConnector';
+import SeriesHistoryTable from 'Series/History/SeriesHistoryTable';
+import MonitoringOptionsModal from 'Series/MonitoringOptions/MonitoringOptionsModal';
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import selectAll from 'Utilities/Table/selectAll';
@@ -235,8 +234,6 @@ class SeriesDetails extends Component {
       issueFilesError,
       hasIssues,
       hasMonitoredIssues,
-      hasSeries,
-      series,
       hasIssueFiles,
       previousSeries,
       nextSeries,
@@ -267,7 +264,6 @@ class SeriesDetails extends Component {
       selectedState,
       allExpanded,
       allCollapsed,
-      expandedState,
       selectedTabIndex
     } = this.state;
 
@@ -523,7 +519,6 @@ class SeriesDetails extends Component {
                 </Tabs>
             }
           </div>
-
 
           <OrganizePreviewModalConnector
             isOpen={isOrganizeModalOpen}

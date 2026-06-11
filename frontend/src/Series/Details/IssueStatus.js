@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import IssueQuality from 'Issue/IssueQuality';
 import Label from 'Components/Label';
 import { kinds } from 'Helpers/Props';
+import IssueQuality from 'Issue/IssueQuality';
 import translate from 'Utilities/String/translate';
 import styles from './IssueStatus.css';
 

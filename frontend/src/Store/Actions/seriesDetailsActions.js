@@ -2,9 +2,9 @@ import { createAction } from 'redux-actions';
 import { sortDirections } from 'Helpers/Props';
 import { createThunk, handleThunks } from 'Store/thunks';
 import { set } from './baseActions';
-import { filterPredicates, sortPredicates } from './issueActions';
 import createHandleActions from './Creators/createHandleActions';
 import createSetClientSideCollectionSortReducer from './Creators/Reducers/createSetClientSideCollectionSortReducer';
+import { filterPredicates, sortPredicates } from './issueActions';
 
 //
 // Variables

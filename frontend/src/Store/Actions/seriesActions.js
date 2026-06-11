@@ -1,17 +1,16 @@
 import _ from 'lodash';
 import { createAction } from 'redux-actions';
-import { batchActions } from 'redux-batched-actions';
 import { filterTypePredicates, filterTypes, sortDirections } from 'Helpers/Props';
 import { createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import dateFilterPredicate from 'Utilities/Date/dateFilterPredicate';
 import { set, updateItem } from './baseActions';
-import { fetchIssues } from './issueActions';
 import createFetchHandler from './Creators/createFetchHandler';
 import createHandleActions from './Creators/createHandleActions';
 import createRemoveItemHandler from './Creators/createRemoveItemHandler';
 import createSaveProviderHandler from './Creators/createSaveProviderHandler';
 import createSetSettingValueReducer from './Creators/Reducers/createSetSettingValueReducer';
+import { fetchIssues } from './issueActions';
 
 //
 // Variables

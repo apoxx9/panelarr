@@ -2,11 +2,11 @@ import _ from 'lodash';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import { createThunk, handleThunks } from 'Store/thunks';
+import createAjaxRequest from 'Utilities/createAjaxRequest';
+import getNewIssue from 'Utilities/Issue/getNewIssue';
 import getNewSeries from 'Utilities/Series/getNewSeries';
 import monitorNewItemsOptions from 'Utilities/Series/monitorNewItemsOptions';
 import monitorOptions from 'Utilities/Series/monitorOptions';
-import getNewIssue from 'Utilities/Issue/getNewIssue';
-import createAjaxRequest from 'Utilities/createAjaxRequest';
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
 import { set, update, updateItem } from './baseActions';
@@ -97,9 +97,9 @@ export const actionHandlers = handleThunks({
 
     abortCurrentRequest = abortRequest;
 
-    request.done((data) => {
+    request.done((responseData) => {
       dispatch(batchActions([
-        update({ section, data }),
+        update({ section, data: responseData }),
 
         set({
           section,

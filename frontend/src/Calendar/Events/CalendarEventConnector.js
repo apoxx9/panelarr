@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createQueueItemSelector from 'Store/Selectors/createQueueItemSelector';
+import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import CalendarEvent from './CalendarEvent';
 

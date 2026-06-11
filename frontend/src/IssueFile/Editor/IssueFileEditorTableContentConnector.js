@@ -6,8 +6,8 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { deleteIssueFile, deleteIssueFiles, setIssueFilesSort, updateIssueFiles } from 'Store/Actions/issueFileActions';
 import { fetchQualityProfileSchema } from 'Store/Actions/settingsActions';
-import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
+import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import getQualities from 'Utilities/Quality/getQualities';
 import IssueFileEditorTableContent from './IssueFileEditorTableContent';
 

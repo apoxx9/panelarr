@@ -5,9 +5,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
+import { executeCommand } from 'Store/Actions/commandActions';
 import { toggleIssuesMonitored } from 'Store/Actions/issueActions';
 import { clearIssueFiles, fetchIssueFiles } from 'Store/Actions/issueFileActions';
-import { executeCommand } from 'Store/Actions/commandActions';
 import { cancelFetchReleases, clearReleases } from 'Store/Actions/releaseActions';
 import createAllSeriesSelector from 'Store/Selectors/createAllSeriesSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
@@ -118,7 +118,6 @@ const mapDispatchToProps = {
   cancelFetchReleases,
   toggleIssuesMonitored
 };
-
 
 class IssueDetailsConnector extends Component {
 

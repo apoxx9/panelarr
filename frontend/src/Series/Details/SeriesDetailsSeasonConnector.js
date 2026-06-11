@@ -4,12 +4,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { setSeriesDetailsId, setSeriesDetailsSort } from 'Store/Actions/seriesDetailsActions';
-import { setIssuesTableOption, toggleIssuesMonitored } from 'Store/Actions/issueActions';
 import { executeCommand } from 'Store/Actions/commandActions';
-import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
+import { setIssuesTableOption, toggleIssuesMonitored } from 'Store/Actions/issueActions';
+import { setSeriesDetailsId, setSeriesDetailsSort } from 'Store/Actions/seriesDetailsActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
+import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import SeriesDetailsSeason from './SeriesDetailsSeason';
 

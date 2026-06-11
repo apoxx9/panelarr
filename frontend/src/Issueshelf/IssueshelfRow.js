@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesNameLink from 'Series/SeriesNameLink';
-import { getSeriesStatusDetails } from 'Series/SeriesStatus';
 import Icon from 'Components/Icon';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
+import SeriesNameLink from 'Series/SeriesNameLink';
+import { getSeriesStatusDetails } from 'Series/SeriesStatus';
 import IssueshelfIssue from './IssueshelfIssue';
 import styles from './IssueshelfRow.css';
 

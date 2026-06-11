@@ -4,14 +4,14 @@ import { Redirect, Route } from 'react-router-dom';
 import BlocklistConnector from 'Activity/Blocklist/BlocklistConnector';
 import HistoryConnector from 'Activity/History/HistoryConnector';
 import QueueConnector from 'Activity/Queue/QueueConnector';
-import SeriesDetailsPageConnector from 'Series/Details/SeriesDetailsPageConnector';
-import SeriesIndexConnector from 'Series/Index/SeriesIndexConnector';
-import IssueDetailsPageConnector from 'Issue/Details/IssueDetailsPageConnector';
-import IssueIndexConnector from 'Issue/Index/IssueIndexConnector';
 import CalendarPageConnector from 'Calendar/CalendarPageConnector';
 import NotFound from 'Components/NotFound';
 import Switch from 'Components/Router/Switch';
+import IssueDetailsPageConnector from 'Issue/Details/IssueDetailsPageConnector';
+import IssueIndexConnector from 'Issue/Index/IssueIndexConnector';
 import AddNewItemConnector from 'Search/AddNewItemConnector';
+import SeriesDetailsPageConnector from 'Series/Details/SeriesDetailsPageConnector';
+import SeriesIndexConnector from 'Series/Index/SeriesIndexConnector';
 import CustomFormatSettingsConnector from 'Settings/CustomFormats/CustomFormatSettingsConnector';
 import DevelopmentSettingsConnector from 'Settings/Development/DevelopmentSettingsConnector';
 import DownloadClientSettingsConnector from 'Settings/DownloadClients/DownloadClientSettingsConnector';
@@ -256,8 +256,6 @@ function AppRoutes(props) {
       {/*
         Setup Wizard
       */}
-
-
 
       {/*
         Not Found

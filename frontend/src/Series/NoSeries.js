@@ -36,9 +36,9 @@ function NoSeries(props) {
   return (
     <div>
       <div className={styles.message}>
-        {hasRootFolders
-          ? 'No series found. Add a new series to get started.'
-          : `No ${itemType} found, to get started you'll want to add a new series or issue or add an existing library location (Root Folder) and update.`
+        {hasRootFolders ?
+          'No series found. Add a new series to get started.' :
+          `No ${itemType} found, to get started you'll want to add a new series or issue or add an existing library location (Root Folder) and update.`
         }
       </div>
 

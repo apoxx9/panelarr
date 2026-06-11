@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import IssueIndexItemConnector from 'Issue/Index/IssueIndexItemConnector';
 import VirtualTable from 'Components/Table/VirtualTable';
 import VirtualTableRow from 'Components/Table/VirtualTableRow';
 import { sortDirections } from 'Helpers/Props';
+import IssueIndexItemConnector from 'Issue/Index/IssueIndexItemConnector';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
 import IssueIndexHeaderConnector from './IssueIndexHeaderConnector';
 import IssueIndexRow from './IssueIndexRow';

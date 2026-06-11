@@ -1,13 +1,13 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import SeriesNameLink from 'Series/SeriesNameLink';
-import issueEntities from 'Issue/issueEntities';
-import IssueSearchCellConnector from 'Issue/IssueSearchCellConnector';
-import IssueTitleLink from 'Issue/IssueTitleLink';
 import RelativeDateCellConnector from 'Components/Table/Cells/RelativeDateCellConnector';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
 import TableRow from 'Components/Table/TableRow';
+import issueEntities from 'Issue/issueEntities';
+import IssueSearchCellConnector from 'Issue/IssueSearchCellConnector';
+import IssueTitleLink from 'Issue/IssueTitleLink';
+import SeriesNameLink from 'Series/SeriesNameLink';
 
 function CutoffUnmetRow(props) {
   const {

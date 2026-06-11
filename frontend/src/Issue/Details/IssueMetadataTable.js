@@ -1,7 +1,7 @@
+import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import moment from 'moment';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import styles from './IssueMetadataTable.css';

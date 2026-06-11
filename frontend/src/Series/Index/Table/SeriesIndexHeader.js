@@ -7,8 +7,8 @@ import VirtualTableHeader from 'Components/Table/VirtualTableHeader';
 import VirtualTableHeaderCell from 'Components/Table/VirtualTableHeaderCell';
 import VirtualTableSelectAllHeaderCell from 'Components/Table/VirtualTableSelectAllHeaderCell';
 import { icons } from 'Helpers/Props';
-import SeriesIndexTableOptionsConnector from './SeriesIndexTableOptionsConnector';
 import hasGrowableColumns from './hasGrowableColumns';
+import SeriesIndexTableOptionsConnector from './SeriesIndexTableOptionsConnector';
 import styles from './SeriesIndexHeader.css';
 
 function SeriesIndexHeader(props) {

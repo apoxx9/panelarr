@@ -2,8 +2,8 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
 import { executeCommand } from 'Store/Actions/commandActions';
-import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
+import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import { isCommandExecuting } from 'Utilities/Command';
 import IssueSearchCell from './IssueSearchCell';
 

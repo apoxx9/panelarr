@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import SeriesPoster from 'Series/SeriesPoster';
 import Label from 'Components/Label';
 import { kinds } from 'Helpers/Props';
+import SeriesPoster from 'Series/SeriesPoster';
 import styles from './SeriesSearchResult.css';
 
 function SeriesSearchResult(props) {

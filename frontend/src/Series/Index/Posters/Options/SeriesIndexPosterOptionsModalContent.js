@@ -137,8 +137,6 @@ class SeriesIndexPosterOptionsModalContent extends Component {
       detailedProgressBar,
       size,
       showTitle,
-      showMonitored,
-      showQualityProfile,
       showSearchAction
     } = this.state;
 

@@ -1,5 +1,5 @@
-import { SeriesStatus } from 'Series/Series';
 import { icons } from 'Helpers/Props';
+import { SeriesStatus } from 'Series/Series';
 import translate from 'Utilities/String/translate';
 
 export function getSeriesStatusDetails(status: SeriesStatus) {

@@ -5,12 +5,12 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
 import withScrollPosition from 'Components/withScrollPosition';
-import { saveSeriesEditor, setSeriesFilter, setSeriesSort, setSeriesTableOption, setSeriesView } from 'Store/Actions/seriesIndexActions';
 import { executeCommand } from 'Store/Actions/commandActions';
+import { saveSeriesEditor, setSeriesFilter, setSeriesSort, setSeriesTableOption, setSeriesView } from 'Store/Actions/seriesIndexActions';
 import scrollPositions from 'Store/scrollPositions';
-import createSeriesClientSideCollectionItemsSelector from 'Store/Selectors/createSeriesClientSideCollectionItemsSelector';
 import createCommandExecutingSelector from 'Store/Selectors/createCommandExecutingSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
+import createSeriesClientSideCollectionItemsSelector from 'Store/Selectors/createSeriesClientSideCollectionItemsSelector';
 import SeriesIndex from './SeriesIndex';
 
 function createMapStateToProps() {

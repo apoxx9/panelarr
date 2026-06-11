@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesIndexItemConnector from 'Series/Index/SeriesIndexItemConnector';
 import VirtualTable from 'Components/Table/VirtualTable';
 import VirtualTableRow from 'Components/Table/VirtualTableRow';
 import { sortDirections } from 'Helpers/Props';
+import SeriesIndexItemConnector from 'Series/Index/SeriesIndexItemConnector';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
 import SeriesIndexHeaderConnector from './SeriesIndexHeaderConnector';
 import SeriesIndexRow from './SeriesIndexRow';

@@ -11,8 +11,8 @@ import PageContentBody from 'Components/Page/PageContentBody';
 import { icons, kinds } from 'Helpers/Props';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
-import AddNewSeriesSearchResultConnector from './Series/AddNewSeriesSearchResultConnector';
 import AddNewIssueSearchResultConnector from './Issue/AddNewIssueSearchResultConnector';
+import AddNewSeriesSearchResultConnector from './Series/AddNewSeriesSearchResultConnector';
 import styles from './AddNewItem.css';
 
 function parseDisambiguation(disambiguation) {
@@ -139,7 +139,8 @@ class AddNewItem extends Component {
         const { publisher: pubA, issueCount: countA } = parseDisambiguation(sa.disambiguation);
         const { publisher: pubB, issueCount: countB } = parseDisambiguation(sb.disambiguation);
 
-        let valA, valB;
+        let valA = null;
+        let valB = null;
 
         switch (sortKey) {
           case 'name':
@@ -184,7 +185,13 @@ class AddNewItem extends Component {
     const { sortKey, sortDir } = this.state;
 
     if (sortKey !== key) {
-      return <Icon name={icons.SORT} size={10} className={styles.sortIcon} />;
+      return (
+        <Icon
+          name={icons.SORT}
+          size={10}
+          className={styles.sortIcon}
+        />
+      );
     }
 
     return (

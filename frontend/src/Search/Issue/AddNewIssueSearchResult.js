@@ -60,8 +60,7 @@ class AddNewIssueSearchResult extends Component {
       series,
       editions,
       isExistingIssue,
-      isExistingSeries,
-      isSmallScreen
+      isExistingSeries
     } = this.props;
 
     const {

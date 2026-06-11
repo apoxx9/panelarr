@@ -16,13 +16,12 @@ import ModalHeader from 'Components/Modal/ModalHeader';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import { align, icons, kinds, scrollDirections } from 'Helpers/Props';
-import SelectSeriesModal from 'InteractiveImport/Series/SelectSeriesModal';
-import SelectIssueModal from 'InteractiveImport/Issue/SelectIssueModal';
 import ConfirmImportModal from 'InteractiveImport/Confirmation/ConfirmImportModal';
-
 import SelectIndexerFlagsModal from 'InteractiveImport/IndexerFlags/SelectIndexerFlagsModal';
+import SelectIssueModal from 'InteractiveImport/Issue/SelectIssueModal';
 import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
 import SelectReleaseGroupModal from 'InteractiveImport/ReleaseGroup/SelectReleaseGroupModal';
+import SelectSeriesModal from 'InteractiveImport/Series/SelectSeriesModal';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
@@ -138,9 +137,6 @@ class InteractiveImportModalContent extends Component {
       issuesImported: [],
       isConfirmImportModalOpen: false
     };
-  }
-
-  componentDidUpdate(prevProps) {
   }
 
   //
@@ -505,7 +501,6 @@ class InteractiveImportModalContent extends Component {
           seriesId={selectedItem && selectedItem.series && selectedItem.series.id}
           onModalClose={this.onSelectModalClose}
         />
-
 
         <SelectReleaseGroupModal
           isOpen={selectModalOpen === RELEASE_GROUP}

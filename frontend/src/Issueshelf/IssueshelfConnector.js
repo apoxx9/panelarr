@@ -3,8 +3,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { saveIssueshelf, setIssueshelfFilter, setIssueshelfSort } from 'Store/Actions/issueshelfActions';
-import createSeriesClientSideCollectionItemsSelector from 'Store/Selectors/createSeriesClientSideCollectionItemsSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
+import createSeriesClientSideCollectionItemsSelector from 'Store/Selectors/createSeriesClientSideCollectionItemsSelector';
 import Issueshelf from './Issueshelf';
 
 function createIssueFetchStateSelector() {

@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import MoveSeriesModal from 'Series/MoveSeries/MoveSeriesModal';
 import MonitorNewItemsSelectInput from 'Components/Form/MonitorNewItemsSelectInput';
 import QualityProfileSelectInputConnector from 'Components/Form/QualityProfileSelectInputConnector';
 import RootFolderSelectInputConnector from 'Components/Form/RootFolderSelectInputConnector';
@@ -9,10 +8,11 @@ import SelectInput from 'Components/Form/SelectInput';
 import SpinnerButton from 'Components/Link/SpinnerButton';
 import PageContentFooter from 'Components/Page/PageContentFooter';
 import { kinds } from 'Helpers/Props';
+import MoveSeriesModal from 'Series/MoveSeries/MoveSeriesModal';
 import { fetchRootFolders } from 'Store/Actions/Settings/rootFolders';
 import translate from 'Utilities/String/translate';
-import SeriesEditorFooterLabel from './SeriesEditorFooterLabel';
 import DeleteSeriesModal from './Delete/DeleteSeriesModal';
+import SeriesEditorFooterLabel from './SeriesEditorFooterLabel';
 import TagsModal from './Tags/TagsModal';
 import styles from './SeriesEditorFooter.css';
 

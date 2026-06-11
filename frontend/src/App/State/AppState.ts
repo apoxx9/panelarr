@@ -1,5 +1,5 @@
-import SeriesAppState from './SeriesAppState';
 import CommandAppState from './CommandAppState';
+import SeriesAppState from './SeriesAppState';
 import SettingsAppState from './SettingsAppState';
 import SystemAppState from './SystemAppState';
 import TagsAppState from './TagsAppState';

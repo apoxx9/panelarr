@@ -2,12 +2,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import getPathWithUrlBase from 'Utilities/getPathWithUrlBase';
-import WelcomeStep from './WelcomeStep';
+import CompleteStep from './CompleteStep';
+import DownloadClientStep from './DownloadClientStep';
+import IndexerStep from './IndexerStep';
 import MetadataProviderStep from './MetadataProviderStep';
 import RootFolderStep from './RootFolderStep';
-import IndexerStep from './IndexerStep';
-import DownloadClientStep from './DownloadClientStep';
-import CompleteStep from './CompleteStep';
+import WelcomeStep from './WelcomeStep';
 import styles from './SetupWizard.css';
 
 const STEP_COUNT = 6;

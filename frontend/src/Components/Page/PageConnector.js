@@ -4,9 +4,9 @@ import { connect } from 'react-redux';
 import { Redirect, withRouter } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import { fetchTranslations, saveDimensions, setIsSidebarVisible } from 'Store/Actions/appActions';
-import { fetchSeries } from 'Store/Actions/seriesActions';
-import { fetchIssues } from 'Store/Actions/issueActions';
 import { fetchCustomFilters } from 'Store/Actions/customFilterActions';
+import { fetchIssues } from 'Store/Actions/issueActions';
+import { fetchSeries } from 'Store/Actions/seriesActions';
 import {
   fetchImportLists,
   fetchIndexerFlags,

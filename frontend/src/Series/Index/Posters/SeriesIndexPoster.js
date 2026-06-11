@@ -1,16 +1,15 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesPoster from 'Series/SeriesPoster';
-import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
-import EditSeriesModalConnector from 'Series/Edit/EditSeriesModalConnector';
-import SeriesIndexProgressBar from 'Series/Index/ProgressBar/SeriesIndexProgressBar';
 import CheckInput from 'Components/Form/CheckInput';
 import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
 import { icons } from 'Helpers/Props';
-import getRelativeDate from 'Utilities/Date/getRelativeDate';
+import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
+import EditSeriesModalConnector from 'Series/Edit/EditSeriesModalConnector';
+import SeriesIndexProgressBar from 'Series/Index/ProgressBar/SeriesIndexProgressBar';
+import SeriesPoster from 'Series/SeriesPoster';
 import translate from 'Utilities/String/translate';
 import SeriesIndexPosterInfo from './SeriesIndexPosterInfo';
 import styles from './SeriesIndexPoster.css';
@@ -232,7 +231,6 @@ class SeriesIndexPoster extends Component {
                 {monitored ? 'Monitored' : 'Unmonitored'}
               </div>
           }
-
 
           {
           }

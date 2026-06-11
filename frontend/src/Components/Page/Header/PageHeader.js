@@ -4,9 +4,9 @@ import keyboardShortcuts, { shortcuts } from 'Components/keyboardShortcuts';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import { icons } from 'Helpers/Props';
-import SeriesSearchInputConnector from './SeriesSearchInputConnector';
 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
 import PageHeaderActionsMenuConnector from './PageHeaderActionsMenuConnector';
+import SeriesSearchInputConnector from './SeriesSearchInputConnector';
 import styles from './PageHeader.css';
 
 class PageHeader extends Component {

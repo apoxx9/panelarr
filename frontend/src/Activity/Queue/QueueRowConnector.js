@@ -4,8 +4,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { grabQueueItem, removeQueueItem } from 'Store/Actions/queueActions';
-import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createIssueSelector from 'Store/Selectors/createIssueSelector';
+import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import QueueRow from './QueueRow';
 

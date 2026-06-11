@@ -3,8 +3,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { createSelector } from 'reselect';
-import { fetchStatus } from 'Store/Actions/systemActions';
 import { fetchTranslations } from 'Store/Actions/appActions';
+import { fetchStatus } from 'Store/Actions/systemActions';
 import createSystemStatusSelector from 'Store/Selectors/createSystemStatusSelector';
 import SetupWizard from './SetupWizard';
 

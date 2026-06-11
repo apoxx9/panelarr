@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
-import EditSeriesModalConnector from 'Series/Edit/EditSeriesModalConnector';
 import IconButton from 'Components/Link/IconButton';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import { icons } from 'Helpers/Props';
+import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
+import EditSeriesModalConnector from 'Series/Edit/EditSeriesModalConnector';
 import translate from 'Utilities/String/translate';
 
 class SeriesIndexActionsCell extends Component {

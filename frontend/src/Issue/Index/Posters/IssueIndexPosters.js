@@ -42,7 +42,6 @@ function calculateRowHeight(posterHeight, sortKey, isSmallScreen, posterOptions)
     showQualityProfile
   } = posterOptions;
 
-
   const heights = [
     posterHeight,
     detailedProgressBar ? detailedProgressBarHeight : progressBarHeight,

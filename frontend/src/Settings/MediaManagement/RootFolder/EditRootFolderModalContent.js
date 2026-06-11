@@ -46,7 +46,7 @@ function EditRootFolderModalContent(props) {
     defaultMetadataProfileId,
     defaultMonitorOption,
     defaultNewItemMonitorOption,
-    defaultTags,
+    defaultTags
   } = item;
 
   return (

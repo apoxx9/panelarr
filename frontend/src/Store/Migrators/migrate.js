@@ -1,7 +1,7 @@
 import migrateAddSeriesDefaults from './migrateAddSeriesDefaults';
-import migrateSeriesSortKey from './migrateSeriesSortKey';
 import migrateBlacklistToBlocklist from './migrateBlacklistToBlocklist';
 import migrateSeriesIndexColumns from './migrateSeriesIndexColumns';
+import migrateSeriesSortKey from './migrateSeriesSortKey';
 
 export default function migrate(persistedState) {
   migrateAddSeriesDefaults(persistedState);

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { seriesHistoryMarkAsFailed, clearSeriesHistory, fetchSeriesHistory } from 'Store/Actions/seriesHistoryActions';
+import { clearSeriesHistory, fetchSeriesHistory, seriesHistoryMarkAsFailed } from 'Store/Actions/seriesHistoryActions';
 
 function createMapStateToProps() {
   return createSelector(

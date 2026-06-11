@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
-import issueEntities from 'Issue/issueEntities';
 import { sortDirections } from 'Helpers/Props';
+import issueEntities from 'Issue/issueEntities';
 import { createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import { removeItem, set, updateItem } from './baseActions';

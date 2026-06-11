@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesNameLink from 'Series/SeriesNameLink';
-import SeriesStatusCell from 'Series/Index/Table/SeriesStatusCell';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
 import TableRow from 'Components/Table/TableRow';
 import TagListConnector from 'Components/TagListConnector';
+import SeriesStatusCell from 'Series/Index/Table/SeriesStatusCell';
+import SeriesNameLink from 'Series/SeriesNameLink';
 import formatBytes from 'Utilities/Number/formatBytes';
 
 class SeriesEditorRow extends Component {

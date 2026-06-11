@@ -2,8 +2,6 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import TextTruncate from 'react-text-truncate';
-import SeriesNameLink from 'Series/SeriesNameLink';
-import IssueCover from 'Issue/IssueCover';
 import HeartRating from 'Components/HeartRating';
 import Icon from 'Components/Icon';
 import Label from 'Components/Label';
@@ -12,6 +10,8 @@ import Measure from 'Components/Measure';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import { icons, kinds, sizes, tooltipPositions } from 'Helpers/Props';
+import IssueCover from 'Issue/IssueCover';
+import SeriesNameLink from 'Series/SeriesNameLink';
 import fonts from 'Styles/Variables/fonts';
 import formatBytes from 'Utilities/Number/formatBytes';
 import stripHtml from 'Utilities/String/stripHtml';
@@ -64,7 +64,6 @@ class IssueDetailsHeader extends Component {
       titleSlug,
       title,
       issueNumber,
-      seriesTitle,
       pageCount,
       overview,
       statistics = {},

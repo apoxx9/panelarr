@@ -1,14 +1,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import SeriesNameLink from 'Series/SeriesNameLink';
-import IssueFormats from 'Issue/IssueFormats';
-import IssueQuality from 'Issue/IssueQuality';
 import IconButton from 'Components/Link/IconButton';
 import RelativeDateCellConnector from 'Components/Table/Cells/RelativeDateCellConnector';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
 import TableRow from 'Components/Table/TableRow';
 import { icons, kinds } from 'Helpers/Props';
+import IssueFormats from 'Issue/IssueFormats';
+import IssueQuality from 'Issue/IssueQuality';
+import SeriesNameLink from 'Series/SeriesNameLink';
 import translate from 'Utilities/String/translate';
 import BlocklistDetailsModal from './BlocklistDetailsModal';
 import styles from './BlocklistRow.css';

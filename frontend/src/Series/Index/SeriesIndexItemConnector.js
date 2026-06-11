@@ -6,9 +6,9 @@ import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
 import { executeCommand } from 'Store/Actions/commandActions';
+import createExecutingCommandsSelector from 'Store/Selectors/createExecutingCommandsSelector';
 import createSeriesQualityProfileSelector from 'Store/Selectors/createSeriesQualityProfileSelector';
 import createSeriesSelector from 'Store/Selectors/createSeriesSelector';
-import createExecutingCommandsSelector from 'Store/Selectors/createExecutingCommandsSelector';
 
 function selectShowSearchAction() {
   return createSelector(
