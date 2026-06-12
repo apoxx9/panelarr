@@ -72,7 +72,22 @@ ComicVine issue id** in the `Web` field
   library `cv:`-sourced; refreshes stay on ComicVine per series. Acceptable —
   note it in docs.
 
-## Phase 1 — exact-id identification (small, ships value alone)
+## Phase 1 — exact-id identification — **SHIPPED** (Session 15 addendum)
+
+Implemented and live-verified: a file with an unparseable name mapped to the
+right issue purely via its [CVDB] tag, byte-identical before/after import.
+Verification also exposed and fixed a critical companion bug: the
+WriteIssueTags setting was never consulted anywhere — ComicFileAdded/Renamed
+event handlers embedded into EVERY added file (scans included), wholesale-
+replacing ComicInfo.xml and destroying tagger provenance. Now: NewFiles
+(default) = only new downloads get tags (via the import pipeline's explicit
+call); AllFiles/Sync = opt-in rewriting of existing files; Sync additionally
+re-embeds on metadata refresh; retag commands always embed (explicit action).
+**Phase 2 note: in-place library import is only safe because of this fix.**
+Also: AddSeries during Phase 2 must pass the EXISTING folder as the series
+path — the default path comes from the naming config and will not match.
+
+### Original plan (implemented as written)
 
 1. `ComicInfoIdentification` gains `Web` and `Notes`; reader surfaces them
    from the existing fields dictionary.
