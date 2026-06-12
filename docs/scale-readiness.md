@@ -11,29 +11,44 @@ being acted on.
 
 ## P1 — correctness at scale (do these first)
 
-### 1. ✓ Scheduled refresh likely never refreshes ComicVine series (latent bug, found tonight)
+### 1. ✓ Scheduled refresh is a no-op for ALL series (real bug, fully verified tonight)
 
-`RefreshSeriesService.Execute` (src/NzbDrone.Core/Issues/Services/RefreshSeriesService.cs:419-431):
-when the task last ran within 14 days — which is always true for a daily
-scheduled task — it asks the provider for a changed-series delta and only
-refreshes series whose ForeignSeriesId is in that set. But
-`CompositeMetadataProvider.GetChangedSeries`
-(src/NzbDrone.Core/MetadataSource/CompositeMetadataProvider.cs:79-82)
-**delegates to Metron only**, even though ComicVineProvider implements
-GetChangedSeries too. A migrated library is entirely `cv:`-sourced (the
-tagged-import spec records this deliberately), so under the delta path
-**no series would ever match and the nightly refresh becomes a no-op for
-the whole library** — new issues of ongoing series silently stop
-appearing. Manual refresh still works (it bypasses the delta) but costs
-one CV call per series: 500 series ≈ 2.5 h against the 200/hr limit.
+Null/empty semantic mismatch between the refresh service and the
+providers:
 
-Morning verification before fixing: confirm what id format Metron's
-GetChangedSeries returns and whether ComicVine's implementation is usable
-(CV has no clean changed-since API — it may be a date-filtered volumes
-query). Likely fix direction: composite delta = union of both providers,
-or per-series routing like GetSeriesInfo does.
+- `RefreshSeriesService.Execute`
+  (src/NzbDrone.Core/Issues/Services/RefreshSeriesService.cs:415-431):
+  when the task last ran within 14 days — always true for a daily task
+  after its first run — it fetches a changed-series delta and then only
+  refreshes series contained in it. Its own comment states the contract:
+  *"Null means 'no delta information — fall back to per-series staleness
+  checks'. An empty (non-null) set would skip every series below."*
+- But **both** providers return exactly that empty non-null list:
+  MetronProvider.GetChangedSeries
+  (src/NzbDrone.Core/MetadataSource/Metron/MetronProvider.cs:71-76,
+  comment: "Return empty; full refresh is used instead") and
+  ComicVineProvider.GetChangedSeries
+  (src/NzbDrone.Core/MetadataSource/ComicVine/ComicVineProvider.cs:67-71,
+  "ComicVine does not expose a 'changed since' endpoint via free tier").
+  The provider authors believed empty meant "use full refresh"; the
+  consumer treats empty as "nothing changed".
 
-### 2. Issues endpoint loads the entire table before paginating
+Net effect: **the nightly RefreshSeriesCommand skips every series, for
+every provider** — new issues of ongoing series never appear unless the
+user manually refreshes (manual trigger bypasses the delta). This is
+provider-independent, not a cv-only problem, and it predates tonight's
+work. It's also why the bug is easy to miss in a small dev library where
+adds/manual refreshes dominate.
+
+Fix direction (one line + a test): providers without delta support return
+`null` (or the composite maps empty→null), restoring the staleness-check
+path. Note the follow-on: once fixed, the staleness path will do real CV
+calls again — at 500 series the per-series staleness window decides the
+daily call volume against the 200/hr limit, so verify
+`ShouldRefresh`'s thresholds at the same time. Manual full refresh of 500
+series remains ≈2.5 h due to the rate limit regardless.
+
+### 2. ✓ Issues endpoint loads the entire table before paginating
 
 `IssueController.GetIssues` (src/Panelarr.Api.V1/Issues/IssueController.cs:60-86):
 with no seriesId filter it calls `GetAllIssues()` — all ~50k rows into
@@ -41,7 +56,7 @@ memory, materializes Series per row, and only then applies Skip/Take.
 Pagination params don't reduce the load; they only shrink the response.
 Direction: push page/pageSize into the repository query (LIMIT/OFFSET).
 
-### 3. N+1 in ComicFileController for issueIds batches
+### 3. ✓ N+1 in ComicFileController for issueIds batches
 
 src/Panelarr.Api.V1/ComicFiles/ComicFileController.cs:95-103: one
 `GetIssue` + one `GetSeries` + one `GetFilesByIssue` **per id** — a
