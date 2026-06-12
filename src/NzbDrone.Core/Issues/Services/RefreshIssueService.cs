@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Instrumentation.Extensions;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Issues.Commands;
@@ -36,6 +37,7 @@ namespace NzbDrone.Core.Issues
         private readonly IProvideIssueInfo _issueInfoProvider;
         private readonly IMediaFileService _mediaFileService;
         private readonly IComicInfoEmbedService _comicInfoEmbedService;
+        private readonly IConfigService _configService;
         private readonly IHistoryService _historyService;
         private readonly IEventAggregator _eventAggregator;
         private readonly ICheckIfIssueShouldBeRefreshed _checkIfIssueShouldBeRefreshed;
@@ -51,6 +53,7 @@ namespace NzbDrone.Core.Issues
                                   IProvideIssueInfo issueInfoProvider,
                                   IMediaFileService mediaFileService,
                                   IComicInfoEmbedService comicInfoEmbedService,
+                                  IConfigService configService,
                                   IHistoryService historyService,
                                   IEventAggregator eventAggregator,
                                   ICheckIfIssueShouldBeRefreshed checkIfIssueShouldBeRefreshed,
@@ -66,6 +69,7 @@ namespace NzbDrone.Core.Issues
             _issueInfoProvider = issueInfoProvider;
             _mediaFileService = mediaFileService;
             _comicInfoEmbedService = comicInfoEmbedService;
+            _configService = configService;
             _historyService = historyService;
             _eventAggregator = eventAggregator;
             _checkIfIssueShouldBeRefreshed = checkIfIssueShouldBeRefreshed;
@@ -329,11 +333,15 @@ namespace NzbDrone.Core.Issues
 
                 RefreshIssueInfo(issue);
 
-                var files = _mediaFileService.GetFilesByIssue(issue.Id);
-
-                foreach (var file in files)
+                // Re-embedding on metadata refresh is the Sync behavior only
+                if (_configService.WriteIssueTags == WriteIssueTagsType.Sync)
                 {
-                    _comicInfoEmbedService.EmbedMetadata(file);
+                    var files = _mediaFileService.GetFilesByIssue(issue.Id);
+
+                    foreach (var file in files)
+                    {
+                        _comicInfoEmbedService.EmbedMetadata(file);
+                    }
                 }
             }
         }

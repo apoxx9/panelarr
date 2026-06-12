@@ -1,6 +1,7 @@
 using System.IO;
 using System.IO.Compression;
 using NLog;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
@@ -24,6 +25,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
         private readonly IMetronInfoGenerator _metronInfoGenerator;
         private readonly IIssueService _issueService;
         private readonly IPublisherService _publisherService;
+        private readonly IConfigService _configService;
         private readonly Logger _logger;
 
         public ComicInfoEmbedService(
@@ -31,23 +33,41 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
             IMetronInfoGenerator metronInfoGenerator,
             IIssueService issueService,
             IPublisherService publisherService,
+            IConfigService configService,
             Logger logger)
         {
             _generator = generator;
             _metronInfoGenerator = metronInfoGenerator;
             _issueService = issueService;
             _publisherService = publisherService;
+            _configService = configService;
             _logger = logger;
         }
 
+        // These events fire for EVERY add/rename (scans included) and carry no
+        // download context. With the default NewFiles setting, new downloads
+        // are embedded by the import pipeline's explicit WriteTags call — the
+        // events only embed when the user opted into rewriting existing files.
+        // Rewriting wholesale destroys tagger provenance (e.g. Mylar's
+        // ComicVine ids), so it must never happen implicitly.
+        private bool EmbedExistingFilesEnabled =>
+            _configService.WriteIssueTags == WriteIssueTagsType.AllFiles ||
+            _configService.WriteIssueTags == WriteIssueTagsType.Sync;
+
         public void Handle(ComicFileAddedEvent message)
         {
-            EmbedComicInfo(message.ComicFile);
+            if (EmbedExistingFilesEnabled)
+            {
+                EmbedComicInfo(message.ComicFile);
+            }
         }
 
         public void Handle(ComicFileRenamedEvent message)
         {
-            EmbedComicInfo(message.ComicFile);
+            if (EmbedExistingFilesEnabled)
+            {
+                EmbedComicInfo(message.ComicFile);
+            }
         }
 
         public void EmbedMetadata(ComicFile comicFile)

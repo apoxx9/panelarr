@@ -23,9 +23,17 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
         public string Series { get; set; }
         public string Title { get; set; }
         public string Number { get; set; }
+
+        // Mylar/ComicTagger write the series START YEAR here — this is a year
+        // hint, never a volume number.
         public string Volume { get; set; }
         public string Year { get; set; }
         public string Publisher { get; set; }
+
+        // Carry the ComicVine issue id: taggers embed it in the Web url
+        // ("…/4000-<id>/") and in Notes ("[CVDB<id>]" / "[Issue ID <id>]").
+        public string Web { get; set; }
+        public string Notes { get; set; }
         public bool HasAny => !string.IsNullOrWhiteSpace(Series)
             || !string.IsNullOrWhiteSpace(Title)
             || !string.IsNullOrWhiteSpace(Number);
@@ -81,7 +89,9 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                 Number = GetField(preferred.Fields, "Number"),
                 Volume = GetField(preferred.Fields, "Volume"),
                 Year = GetField(preferred.Fields, "Year") ?? GetField(preferred.Fields, "Start Year"),
-                Publisher = GetField(preferred.Fields, "Publisher")
+                Publisher = GetField(preferred.Fields, "Publisher"),
+                Web = GetField(preferred.Fields, "Web"),
+                Notes = GetField(preferred.Fields, "Notes")
             };
         }
 

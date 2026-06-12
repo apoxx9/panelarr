@@ -6,6 +6,7 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.IssueImport.Aggregation;
 using NzbDrone.Core.Parser.Model;
 
@@ -22,18 +23,21 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         private readonly IMetadataTagService _metadataTagService;
         private readonly IAugmentingService _augmentingService;
         private readonly ICandidateService _candidateService;
+        private readonly IIssueService _issueService;
         private readonly Logger _logger;
 
         public IdentificationService(ITrackGroupingService trackGroupingService,
                                      IMetadataTagService metadataTagService,
                                      IAugmentingService augmentingService,
                                      ICandidateService candidateService,
+                                     IIssueService issueService,
                                      Logger logger)
         {
             _trackGroupingService = trackGroupingService;
             _metadataTagService = metadataTagService;
             _augmentingService = augmentingService;
             _candidateService = candidateService;
+            _issueService = issueService;
             _logger = logger;
         }
 
@@ -102,6 +106,49 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             return releases;
         }
 
+        private bool TryIdentifyByTaggedId(LocalEdition localIssueRelease, IdentificationOverrides idOverrides)
+        {
+            var taggedId = localIssueRelease.LocalIssues
+                .Select(x => x.FileTagInfo?.ForeignIssueId)
+                .Where(x => x.IsNotNullOrWhiteSpace())
+                .GroupBy(x => x)
+                .OrderByDescending(g => g.Count())
+                .FirstOrDefault()?.Key;
+
+            if (taggedId == null)
+            {
+                return false;
+            }
+
+            var issue = _issueService.FindById(taggedId);
+
+            if (issue == null)
+            {
+                _logger.Debug("Tagged issue id {0} is not in the library, falling back to fuzzy matching", taggedId);
+                return false;
+            }
+
+            if (idOverrides?.Series != null && issue.SeriesMetadataId != idOverrides.Series.SeriesMetadataId)
+            {
+                _logger.Debug("Tagged issue id {0} belongs to a different series than the override, falling back to fuzzy matching", taggedId);
+                return false;
+            }
+
+            _logger.Debug("Exact match via tagged issue id {0}: {1}", taggedId, issue);
+
+            localIssueRelease.Issue = issue;
+            localIssueRelease.Distance = new Distance();
+            localIssueRelease.ExistingTracks = new List<LocalIssue>();
+
+            foreach (var localTrack in localIssueRelease.LocalIssues)
+            {
+                localTrack.Issue = issue;
+                localTrack.Series = idOverrides?.Series ?? issue.Series?.Value;
+            }
+
+            return true;
+        }
+
         private List<LocalIssue> ToLocalTrack(IEnumerable<ComicFile> trackfiles, LocalEdition localRelease)
         {
             var scanned = trackfiles.Join(localRelease.LocalIssues, t => t.Path, l => l.Path, (track, localTrack) => localTrack);
@@ -127,6 +174,16 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
             var usedRemote = false;
+
+            // Exact identification: taggers (Mylar via ComicTagger) embed the
+            // provider issue id in the file. When it resolves to a library issue,
+            // that IS the answer — no fuzzy matching. Explicit user overrides
+            // still win, and a series override only accepts a tag id that
+            // belongs to that series.
+            if (idOverrides?.Issue == null && TryIdentifyByTaggedId(localIssueRelease, idOverrides))
+            {
+                return;
+            }
 
             IEnumerable<CandidateEdition> candidateReleases = _candidateService.GetDbCandidatesFromTags(localIssueRelease, idOverrides, config.IncludeExisting);
 

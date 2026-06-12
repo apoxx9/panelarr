@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO.Abstractions;
 using System.Linq;
 using NLog;
+using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.ComicInfo;
 using NzbDrone.Core.MediaFiles.Commands;
-using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Parser;
@@ -28,6 +28,7 @@ namespace NzbDrone.Core.MediaFiles
         IExecute<RetagSeriesCommand>
     {
         private readonly IComicInfoReaderService _comicInfoReaderService;
+        private readonly IConfigService _configService;
         private readonly IComicInfoGenerator _comicInfoGenerator;
         private readonly IComicInfoEmbedService _comicInfoEmbedService;
         private readonly IMediaFileService _mediaFileService;
@@ -37,6 +38,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly Logger _logger;
 
         public MetadataTagService(IComicInfoReaderService comicInfoReaderService,
+            IConfigService configService,
             IComicInfoGenerator comicInfoGenerator,
             IComicInfoEmbedService comicInfoEmbedService,
             IMediaFileService mediaFileService,
@@ -46,6 +48,7 @@ namespace NzbDrone.Core.MediaFiles
             Logger logger)
         {
             _comicInfoReaderService = comicInfoReaderService;
+            _configService = configService;
             _comicInfoGenerator = comicInfoGenerator;
             _comicInfoEmbedService = comicInfoEmbedService;
             _mediaFileService = mediaFileService;
@@ -101,12 +104,15 @@ namespace NzbDrone.Core.MediaFiles
                     info.Publisher = ident.Publisher;
                 }
 
+                info.ForeignIssueId = ExtractComicVineIssueId(ident.Web, ident.Notes);
+
                 _logger.Debug(
-                    "Read ComicInfo identification from {0}: series='{1}', issue='{2}', number='{3}'",
+                    "Read ComicInfo identification from {0}: series='{1}', issue='{2}', number='{3}', foreignId='{4}'",
                     file.Name,
                     ident.Series,
                     ident.Title,
-                    ident.Number);
+                    ident.Number,
+                    info.ForeignIssueId);
             }
             catch (System.Exception ex)
             {
@@ -116,8 +122,55 @@ namespace NzbDrone.Core.MediaFiles
             return info;
         }
 
+        // Taggers (Mylar via ComicTagger) embed the ComicVine issue id in the
+        // Web url ("…/4000-<id>/") and in Notes ("[CVDB<id>]", no separator,
+        // or "[Issue ID <id>]").
+        private static readonly System.Text.RegularExpressions.Regex WebIssueIdRegex =
+            new (@"comicvine\.gamespot\.com/.*?/4000-(\d+)", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        private static readonly System.Text.RegularExpressions.Regex NotesIssueIdRegex =
+            new (@"\[(?:CVDB|Issue ID)[:\s]*(\d+)\]", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        internal static string ExtractComicVineIssueId(string web, string notes)
+        {
+            if (!string.IsNullOrWhiteSpace(web))
+            {
+                var match = WebIssueIdRegex.Match(web);
+                if (match.Success)
+                {
+                    return "cv:" + match.Groups[1].Value;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(notes))
+            {
+                var match = NotesIssueIdRegex.Match(notes);
+                if (match.Success)
+                {
+                    return "cv:" + match.Groups[1].Value;
+                }
+            }
+
+            return null;
+        }
+
         public void WriteTags(ComicFile comicFile, bool newDownload, bool force = false)
         {
+            // Honor the Write Issue Tags setting: with the default (NewFiles),
+            // importing an existing library in place must NOT rewrite the
+            // files' tags — embedding currently replaces ComicInfo.xml wholesale
+            // and destroys tagger provenance (e.g. Mylar's ComicVine ids).
+            if (!force)
+            {
+                var setting = _configService.WriteIssueTags;
+
+                if (setting == WriteIssueTagsType.NewFiles && !newDownload)
+                {
+                    _logger.Debug("Skipping tag embed for existing file {0} (WriteIssueTags=NewFiles)", comicFile.Path);
+                    return;
+                }
+            }
+
             _comicInfoEmbedService.EmbedMetadata(comicFile);
         }
 
@@ -239,7 +292,8 @@ namespace NzbDrone.Core.MediaFiles
                     var comicFile = _mediaFileService.Get(fileId);
                     if (comicFile.ComicFormat != ComicFormat.Unknown)
                     {
-                        _eventAggregator.PublishEvent(new ComicFileAddedEvent(comicFile));
+                        // explicit user command — embed regardless of the setting
+                        _comicInfoEmbedService.EmbedMetadata(comicFile);
                     }
                 }
                 catch (NzbDrone.Core.Datastore.ModelNotFoundException)
@@ -261,7 +315,8 @@ namespace NzbDrone.Core.MediaFiles
 
                 foreach (var file in comicFiles.Where(x => x.ComicFormat != ComicFormat.Unknown))
                 {
-                    _eventAggregator.PublishEvent(new ComicFileAddedEvent(file));
+                    // explicit user command — embed regardless of the setting
+                    _comicInfoEmbedService.EmbedMetadata(file);
                 }
             }
         }
