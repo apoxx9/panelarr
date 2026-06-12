@@ -107,7 +107,21 @@ path — the default path comes from the naming config and will not match.
    id-not-in-library falls back), end-to-end: scan a tagged file for an
    existing series → maps without distance involvement.
 
-## Phase 2 — "Import existing library" flow
+## Phase 2 — "Import existing library" flow — **SHIPPED** (Session 15 overnight)
+
+Implemented in three increments (proposal service + endpoint, LibraryImport
+command, review modal on the Library Import page). Live-verified end to end:
+the TWD test folder's cvinfo produced one `exact` proposal (31 files, zero
+provider calls), and importing through the actual UI added the series at the
+EXISTING folder with all 31 files mapped and the archives untouched. Unit
+suite 2371/0; smoke (36), UI and modal sweeps green; dedicated UI e2e in
+tests/libraryimport-e2e.js (local, tests/ is gitignored). Deviations from the
+sketch below: grouping is per-folder with precedence cvinfo → majority tagged
+issue id → name search (not per-tag-tuple); the review UI is a modal off the
+Library Import page rather than a wizard; global settings are quality profile
++ monitored (metadata profile parked — see overnight handoff).
+
+### Original sketch (implemented with the deviations above)
 
 **Backend**
 
