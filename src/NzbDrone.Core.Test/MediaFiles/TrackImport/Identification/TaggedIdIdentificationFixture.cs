@@ -37,6 +37,16 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             Mocker.GetMock<IIssueService>()
                   .Setup(s => s.FindById("cv:338482"))
                   .Returns(_libraryIssue);
+
+            // unstubbed mocks return null lists, which the fallback path
+            // would turn into a logged error and fail the teardown check
+            Mocker.GetMock<ICandidateService>()
+                  .Setup(s => s.GetDbCandidatesFromTags(It.IsAny<LocalEdition>(), It.IsAny<IdentificationOverrides>(), It.IsAny<bool>()))
+                  .Returns(new List<CandidateEdition>());
+
+            Mocker.GetMock<ICandidateService>()
+                  .Setup(s => s.GetRemoteCandidates(It.IsAny<LocalEdition>(), It.IsAny<IdentificationOverrides>()))
+                  .Returns(new List<CandidateEdition>());
         }
 
         private List<LocalIssue> GivenTaggedTrack(string foreignIssueId)

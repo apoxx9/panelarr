@@ -18,6 +18,7 @@ import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import selectAll from 'Utilities/Table/selectAll';
 import toggleSelected from 'Utilities/Table/toggleSelected';
+import { LibraryImportModal } from './LibraryImport/LibraryImportModalContent';
 import UnmappedFilesTableHeader from './UnmappedFilesTableHeader';
 import UnmappedFilesTableRow from './UnmappedFilesTableRow';
 
@@ -34,7 +35,8 @@ class UnmappedFilesTable extends Component {
       allSelected: false,
       allUnselected: false,
       lastToggled: null,
-      selectedState: {}
+      selectedState: {},
+      isLibraryImportModalOpen: false
     };
   }
 
@@ -66,6 +68,14 @@ class UnmappedFilesTable extends Component {
       this.onSelectAllChange({ value: false });
     }
   }
+
+  onLibraryImportPress = () => {
+    this.setState({ isLibraryImportModalOpen: true });
+  };
+
+  onLibraryImportModalClose = () => {
+    this.setState({ isLibraryImportModalOpen: false });
+  };
 
   //
   // Control
@@ -258,6 +268,12 @@ class UnmappedFilesTable extends Component {
         <PageToolbar>
           <PageToolbarSection>
             <PageToolbarButton
+              label={translate('ScanForNewSeries')}
+              iconName={icons.SEARCH}
+              isDisabled={!hasUnmappedFiles}
+              onPress={this.onLibraryImportPress}
+            />
+            <PageToolbarButton
               label={translate('AddMissing')}
               iconName={icons.ADD_MISSING_SERIES_LIST}
               isDisabled={!hasUnmappedFiles}
@@ -328,6 +344,10 @@ class UnmappedFilesTable extends Component {
               />
           }
         </PageContentBody>
+        <LibraryImportModal
+          isOpen={this.state.isLibraryImportModalOpen}
+          onModalClose={this.onLibraryImportModalClose}
+        />
       </PageContent>
     );
   }

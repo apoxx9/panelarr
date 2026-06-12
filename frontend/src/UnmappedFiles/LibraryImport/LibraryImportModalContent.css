@@ -1,0 +1,58 @@
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select {
+  padding: 4px 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--borderColor);
+}
+
+.exact {
+  color: var(--successColor);
+  font-weight: bold;
+}
+
+.probable {
+  color: var(--warningColor);
+}
+
+.existingRow {
+  opacity: 0.5;
+}
+
+.folder {
+  font-size: 12px;
+  color: var(--disabledColor);
+  word-break: break-all;
+}
+
+.error {
+  color: var(--dangerColor);
+  margin: 12px 0;
+}
+
+.empty,
+.queuedMessage {
+  margin: 24px 0;
+  text-align: center;
+}
