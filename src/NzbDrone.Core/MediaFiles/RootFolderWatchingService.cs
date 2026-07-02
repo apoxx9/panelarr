@@ -239,7 +239,7 @@ namespace NzbDrone.Core.MediaFiles
 
             if (toScan.Any())
             {
-                _commandQueueManager.Push(new RescanFoldersCommand(toScan.ToList(), FilterFilesType.Known, true, null));
+                _commandQueueManager.Push(new RescanFoldersCommand(toScan.ToList(), FilterFilesType.Known, false, null));
             }
         }
 

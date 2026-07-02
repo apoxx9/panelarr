@@ -195,15 +195,14 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
             _logger.Debug($"Retrieved {allLocalTracks.Count} possible tracks in {watch.ElapsedMilliseconds}ms");
 
-            if (!candidateReleases.Any())
+            // Remote candidates are only useful when new series may be added:
+            // search results are provider-built issues without db ids, so an
+            // AddNewSeries=false flow would filter every one of them out anyway
+            // — after paying rate-limited provider calls per file
+            if (!candidateReleases.Any() && config.AddNewSeries)
             {
                 _logger.Debug("No local candidates found, trying remote");
                 candidateReleases = _candidateService.GetRemoteCandidates(localIssueRelease, idOverrides);
-                if (!config.AddNewSeries)
-                {
-                    candidateReleases = candidateReleases.Where(x => x.Issue.Id > 0 && x.Issue.SeriesId > 0);
-                }
-
                 usedRemote = true;
             }
 
@@ -247,15 +246,10 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
             // If the result isn't great and we haven't tried remote candidates, try looking for remote candidates
             // The metadata provider may have a better edition of a local issue
-            if (localIssueRelease.Distance.NormalizedDistance() > 0.15 && !usedRemote)
+            if (localIssueRelease.Distance.NormalizedDistance() > 0.15 && !usedRemote && config.AddNewSeries)
             {
                 _logger.Debug("Match not good enough, trying remote candidates");
                 candidateReleases = _candidateService.GetRemoteCandidates(localIssueRelease, idOverrides);
-
-                if (!config.AddNewSeries)
-                {
-                    candidateReleases = candidateReleases.Where(x => x.Issue.Id > 0);
-                }
 
                 GetBestRelease(localIssueRelease, candidateReleases, allLocalTracks, out _);
             }

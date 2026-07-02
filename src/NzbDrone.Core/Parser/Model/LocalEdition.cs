@@ -54,7 +54,9 @@ namespace NzbDrone.Core.Parser.Model
                     issue.SeriesMetadata = fullIssue.SeriesMetadata.Value;
                     issue.ComicFiles = fullIssue.ComicFiles;
 
-                    if (fullIssue.SeriesLinks.IsLoaded)
+                    // Issues built from provider search results never populate
+                    // SeriesLinks; only clone it when there is something loaded
+                    if (fullIssue.SeriesLinks != null && fullIssue.SeriesLinks.IsLoaded)
                     {
                         issue.SeriesLinks = fullIssue.SeriesLinks.Value.Select(l => new SeriesGroupLink
                         {

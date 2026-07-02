@@ -7,9 +7,13 @@ namespace NzbDrone.Core.MediaFiles.Commands
     {
         public RescanFoldersCommand()
         {
-            // These are the settings used in the scheduled task
+            // These are the settings used in the scheduled task.
+            // AddNewSeries stays off: a scan cannot import files to series
+            // that are not in the library, so remote identification would
+            // only burn rate-limited provider calls per unmatched file —
+            // unmatched files land as unmapped rows for Library Import.
             Filter = FilterFilesType.Known;
-            AddNewSeries = true;
+            AddNewSeries = false;
         }
 
         public RescanFoldersCommand(List<string> folders, FilterFilesType filter, bool addNewSeries, List<int> seriesIds)
