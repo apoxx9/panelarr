@@ -10,10 +10,12 @@ Morning index. Everything below is **local only — nothing was pushed.**
   at the existing folder, files mapped, archives untouched. Suite 2371/0,
   smoke 36/36, UI/modal sweeps clean, new 15-check UI e2e green.
 - **All four Part 2 research docs are written** (links below).
-- **One real pre-existing bug found and verified during research:** the
-  nightly scheduled refresh silently skips every series — for all
-  providers. Details in scale-readiness #1. Not fixed (out of loop
-  scope); it's a one-line fix + test once you confirm the direction.
+- ~~One real pre-existing bug found~~ **RETRACTED next morning:** the
+  "refresh no-op" finding was a false alarm — the proxy layer already
+  returns the null that triggers the staleness path, so the nightly
+  refresh works as designed. What remains is a dead-code trap in the
+  never-called provider GetChangedSeries stubs. Corrected analysis in
+  scale-readiness #1.
 
 ## Commits awaiting your review (oldest first)
 
@@ -53,7 +55,7 @@ precedes import). Done twice: once via raw API, once through the real UI.
 
 - **docs/scale-readiness.md** — prioritized; items marked ✓ I re-verified
   by hand in the code, the rest are sweep-reported with file:line.
-  Headline: the refresh no-op bug (#1), in-memory pagination on the
+  Headline: the retracted refresh finding (#1, see correction), in-memory pagination on the
   issues endpoint (#2), an N+1 on bulk comicfile lookups (#3).
 - **docs/terminology-ux-audit.md** — headline is good news: zero
   user-visible book/music leftovers. 130 legacy localization *key names*
@@ -69,10 +71,10 @@ precedes import). Done twice: once via raw API, once through the real UI.
 
 ## Parked design questions (decisions deliberately NOT made)
 
-1. **Refresh no-op bug fix shape** (scale doc #1): providers return null
-   vs composite maps empty→null; and what `ShouldRefresh` staleness
-   thresholds should be once the path works again (drives daily CV call
-   volume at library scale).
+1. **Dead delta-stub cleanup shape** (scale doc #1, post-retraction):
+   the never-called provider GetChangedSeries/GetNewReleases stubs —
+   delete the chain, or make them return the contract's `null` and keep
+   them as pull-list groundwork.
 2. **MetadataProfileId is accepted by LibraryImportCommand but unused** —
    imported series get the default metadata profile. Add it to the review
    modal's globals, take the root-folder default, or drop the field?
@@ -113,6 +115,7 @@ precedes import). Done twice: once via raw API, once through the real UI.
 ## Suggested morning order
 
 1. Review the 8 commits (Phase 2 code first), then decide on pushing.
-2. Read scale-readiness #1 (refresh no-op) — likely the next fix.
+2. Read scale-readiness #1 — retracted; the small follow-up is defusing
+   the dead GetChangedSeries/GetNewReleases stubs.
 3. Decide parked questions 2-5 (each is small once decided).
 4. Pick the next feature from the landscape doc when ready.

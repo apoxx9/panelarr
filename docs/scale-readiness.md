@@ -11,42 +11,42 @@ being acted on.
 
 ## P1 — correctness at scale (do these first)
 
-### 1. ✓ Scheduled refresh is a no-op for ALL series (real bug, fully verified tonight)
+### 1. ~~Scheduled refresh is a no-op~~ — RETRACTED (false alarm; dead-code trap remains)
 
-Null/empty semantic mismatch between the refresh service and the
-providers:
+**Correction (morning after):** the original finding here claimed the
+nightly refresh silently skips every series because both providers return
+an empty changed-series list where the consumer expects `null`. That
+analysis stopped one layer too shallow. `RefreshSeriesService` calls
+`IProvideSeriesInfo.GetChangedSeries`, whose **only** implementation is
+`IssueInfoProxy.GetChangedSeries`
+(src/NzbDrone.Core/MetadataSource/IssueInfo/IssueInfoProxy.cs:54-57) —
+and it returns `null` unconditionally, never touching the providers. So
+the refresh takes the per-series staleness path every night and **works
+as designed**:
 
-- `RefreshSeriesService.Execute`
-  (src/NzbDrone.Core/Issues/Services/RefreshSeriesService.cs:415-431):
-  when the task last ran within 14 days — always true for a daily task
-  after its first run — it fetches a changed-series delta and then only
-  refreshes series contained in it. Its own comment states the contract:
-  *"Null means 'no delta information — fall back to per-series staleness
-  checks'. An empty (non-null) set would skip every series below."*
-- But **both** providers return exactly that empty non-null list:
-  MetronProvider.GetChangedSeries
-  (src/NzbDrone.Core/MetadataSource/Metron/MetronProvider.cs:71-76,
-  comment: "Return empty; full refresh is used instead") and
-  ComicVineProvider.GetChangedSeries
-  (src/NzbDrone.Core/MetadataSource/ComicVine/ComicVineProvider.cs:67-71,
-  "ComicVine does not expose a 'changed since' endpoint via free tier").
-  The provider authors believed empty meant "use full refresh"; the
-  consumer treats empty as "nothing changed".
+- unsynced ≥30 days → refresh; continuing series → every 2 days;
+  ended series with an issue in the last 30 days → after 12 h;
+  ended long ago → every 30 days
+  (src/NzbDrone.Core/Issues/Utilities/ShouldRefreshSeries.cs).
 
-Net effect: **the nightly RefreshSeriesCommand skips every series, for
-every provider** — new issues of ongoing series never appear unless the
-user manually refreshes (manual trigger bypasses the delta). This is
-provider-independent, not a cv-only problem, and it predates tonight's
-work. It's also why the bug is easy to miss in a small dev library where
-adds/manual refreshes dominate.
+At 500 series (~50 continuing) that's roughly 40–50 CV calls/day —
+comfortably inside the 200/hr limit. No fix needed.
 
-Fix direction (one line + a test): providers without delta support return
-`null` (or the composite maps empty→null), restoring the staleness-check
-path. Note the follow-on: once fixed, the staleness path will do real CV
-calls again — at 500 series the per-series staleness window decides the
-daily call volume against the 200/hr limit, so verify
-`ShouldRefresh`'s thresholds at the same time. Manual full refresh of 500
-series remains ≈2.5 h due to the rate limit regardless.
+What IS real:
+
+- **A dead-code trap.** `IMetadataProvider.GetChangedSeries` (and its
+  sibling `GetNewReleases`) exist on the interface, the composite, and
+  both providers, but have no callers. The provider stubs return empty
+  lists with comments saying "full refresh is used instead" — if a future
+  change wires the proxy through to them as-is, the empty-vs-null
+  mismatch would create exactly the no-op described above. Either delete
+  the chain or make the stubs return the contract's `null`.
+  (`GetNewReleases` may be intended groundwork for a pull-list feature —
+  see feature-landscape #1 — which argues for fixing the stubs over
+  deleting.)
+- **Manual full refresh cost**: a manual RefreshSeriesCommand bypasses
+  staleness and refreshes everything — ≈2.5 h at 500 series against the
+  200/hr limit. Worth a UI hint someday; not a correctness issue.
 
 ### 2. ✓ Issues endpoint loads the entire table before paginating
 
@@ -135,9 +135,9 @@ control), not a scale issue — listed here for completeness.
 
 ## Suggested sequence
 
-1. #1 delta-refresh bug (correctness; verify then fix) — before the real
-   migration matters.
-2. #3 N+1 batch fix (small, mechanical).
-3. #2 DB-level pagination (unblocks #5 later).
+1. #3 N+1 batch fix (small, mechanical).
+2. #2 DB-level pagination (unblocks #5 later).
+3. #1's leftover: defuse the dead GetChangedSeries/GetNewReleases stubs
+   (tiny; delete or null-return).
 4. #7 small parts (tag-read cache, call cap) opportunistically.
 5. #4/#5 only with post-migration measurements in hand.
