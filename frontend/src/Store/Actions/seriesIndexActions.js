@@ -29,6 +29,7 @@ export const defaultState = {
   secondarySortKey: 'sortNameLastFirst',
   secondarySortDirection: sortDirections.ASCENDING,
   view: 'posters',
+  groupByPublisher: false,
 
   posterOptions: {
     detailedProgressBar: false,
@@ -173,7 +174,7 @@ export const defaultState = {
     ...sortPredicates,
 
     publisher: function(item) {
-      return item.disambiguation || '';
+      return (item.publisherName || '').toLowerCase();
     },
 
     year: function(item) {
@@ -263,6 +264,11 @@ export const defaultState = {
       valueType: filterBuilderValueTypes.SERIES_STATUS
     },
     {
+      name: 'publisherName',
+      label: 'Publisher',
+      type: filterBuilderTypes.EXACT
+    },
+    {
       name: 'qualityProfileId',
       label: 'Quality Profile',
       type: filterBuilderTypes.EXACT,
@@ -346,6 +352,7 @@ export const persistState = [
   'seriesIndex.selectedFilterKey',
   'seriesIndex.customFilters',
   'seriesIndex.view',
+  'seriesIndex.groupByPublisher',
   'seriesIndex.columns',
   'seriesIndex.posterOptions',
   'seriesIndex.bannerOptions',
@@ -359,6 +366,7 @@ export const persistState = [
 export const SET_SERIES_SORT = 'seriesIndex/setSeriesSort';
 export const SET_SERIES_FILTER = 'seriesIndex/setSeriesFilter';
 export const SET_SERIES_VIEW = 'seriesIndex/setSeriesView';
+export const SET_SERIES_GROUP_BY_PUBLISHER = 'seriesIndex/setSeriesGroupByPublisher';
 export const SET_SERIES_TABLE_OPTION = 'seriesIndex/setSeriesTableOption';
 export const SET_SERIES_POSTER_OPTION = 'seriesIndex/setSeriesPosterOption';
 export const SET_SERIES_BANNER_OPTION = 'seriesIndex/setSeriesBannerOption';
@@ -372,6 +380,7 @@ export const BULK_DELETE_SERIES = 'seriesIndex/bulkDeleteSeries';
 export const setSeriesSort = createAction(SET_SERIES_SORT);
 export const setSeriesFilter = createAction(SET_SERIES_FILTER);
 export const setSeriesView = createAction(SET_SERIES_VIEW);
+export const setSeriesGroupByPublisher = createAction(SET_SERIES_GROUP_BY_PUBLISHER);
 export const setSeriesTableOption = createAction(SET_SERIES_TABLE_OPTION);
 export const setSeriesPosterOption = createAction(SET_SERIES_POSTER_OPTION);
 export const setSeriesBannerOption = createAction(SET_SERIES_BANNER_OPTION);
@@ -466,6 +475,10 @@ export const reducers = createHandleActions({
 
   [SET_SERIES_VIEW]: function(state, { payload }) {
     return Object.assign({}, state, { view: payload.view });
+  },
+
+  [SET_SERIES_GROUP_BY_PUBLISHER]: function(state, { payload }) {
+    return Object.assign({}, state, { groupByPublisher: payload.groupByPublisher });
   },
 
   [SET_SERIES_TABLE_OPTION]: createSetTableOptionReducer(section),

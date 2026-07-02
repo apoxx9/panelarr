@@ -10,13 +10,15 @@ function createUnoptimizedSelector(uiSection) {
         const {
           id,
           sortName,
-          sortNameLastFirst
+          sortNameLastFirst,
+          publisherName
         } = s;
 
         return {
           id,
           sortName,
-          sortNameLastFirst
+          sortNameLastFirst,
+          publisherName
         };
       });
 

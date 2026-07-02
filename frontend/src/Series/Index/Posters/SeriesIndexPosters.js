@@ -2,10 +2,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Grid, WindowScroller } from 'react-virtualized';
 import Measure from 'Components/Measure';
+import PublisherGroupHeader from 'Series/Index/PublisherGroupHeader';
 import SeriesIndexItemConnector from 'Series/Index/SeriesIndexItemConnector';
 import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
+import groupSeriesByPublisher from 'Utilities/Series/groupSeriesByPublisher';
 import SeriesIndexPoster from './SeriesIndexPoster';
 import styles from './SeriesIndexPosters.css';
 
@@ -20,6 +22,8 @@ const additionalColumnCount = {
   medium: 2,
   large: 1
 };
+
+const groupHeaderHeight = 40;
 
 function calculateColumnWidth(width, posterSize, isSmallScreen) {
   const maxiumColumnWidth = isSmallScreen ? 172 : 182;
@@ -102,6 +106,11 @@ class SeriesIndexPosters extends Component {
     this._isInitialized = false;
     this._grid = null;
     this._padding = props.isSmallScreen ? columnPaddingSmallScreen : columnPadding;
+
+    // Memoized grouped row model: header rows + chunked poster rows
+    this._groupedRowsSource = null;
+    this._groupedRowsColumnCount = null;
+    this._groupedRows = null;
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -137,6 +146,7 @@ class SeriesIndexPosters extends Component {
             hasDifferentItemsOrOrder(prevProps.items, items)) ||
             prevProps.isEditorActive !== isEditorActive ||
             prevProps.selectedState !== selectedState ||
+            prevProps.groupByPublisher !== this.props.groupByPublisher ||
             prevProps.posterOptions.showTitle !== posterOptions.showTitle) {
       // recomputeGridSize also forces Grid to discard its cache of rendered cells
       this._grid.recomputeGridSize();
@@ -168,6 +178,39 @@ class SeriesIndexPosters extends Component {
     this._grid = ref;
   };
 
+  getGroupedRows() {
+    const {
+      items
+    } = this.props;
+
+    const {
+      columnCount
+    } = this.state;
+
+    if (this._groupedRowsSource !== items || this._groupedRowsColumnCount !== columnCount) {
+      this._groupedRows = groupSeriesByPublisher(items).reduce((acc, group) => {
+        acc.push({ isGroupHeader: true, title: group.title, count: group.items.length });
+
+        for (let i = 0; i < group.items.length; i += columnCount) {
+          acc.push({ items: group.items.slice(i, i + columnCount) });
+        }
+
+        return acc;
+      }, []);
+
+      this._groupedRowsSource = items;
+      this._groupedRowsColumnCount = columnCount;
+    }
+
+    return this._groupedRows;
+  }
+
+  getRowHeight = ({ index }) => {
+    const rows = this.getGroupedRows();
+
+    return rows[index] && rows[index].isGroupHeader ? groupHeaderHeight : this.state.rowHeight;
+  };
+
   calculateGrid = (width = this.state.width, isSmallScreen) => {
     const {
       sortKey,
@@ -193,6 +236,7 @@ class SeriesIndexPosters extends Component {
   cellRenderer = ({ key, rowIndex, columnIndex, style }) => {
     const {
       items,
+      groupByPublisher,
       sortKey,
       posterOptions,
       showRelativeDates,
@@ -204,6 +248,7 @@ class SeriesIndexPosters extends Component {
     } = this.props;
 
     const {
+      width,
       posterWidth,
       posterHeight,
       columnCount
@@ -216,8 +261,42 @@ class SeriesIndexPosters extends Component {
       showQualityProfile
     } = posterOptions;
 
-    const seriesIdx = rowIndex * columnCount + columnIndex;
-    const series = items[seriesIdx];
+    let series = null;
+
+    if (groupByPublisher) {
+      const row = this.getGroupedRows()[rowIndex];
+
+      if (!row) {
+        return null;
+      }
+
+      if (row.isGroupHeader) {
+        // Grid renders one cell per column; the header renders once, spanning
+        // the full row via an overridden width
+        if (columnIndex !== 0) {
+          return null;
+        }
+
+        return (
+          <div
+            key={key}
+            style={{
+              ...style,
+              width
+            }}
+          >
+            <PublisherGroupHeader
+              title={row.title}
+              count={row.count}
+            />
+          </div>
+        );
+      }
+
+      series = row.items[columnIndex];
+    } else {
+      series = items[rowIndex * columnCount + columnIndex];
+    }
 
     if (!series) {
       return null;
@@ -269,6 +348,7 @@ class SeriesIndexPosters extends Component {
     const {
       scroller,
       items,
+      groupByPublisher,
       isSmallScreen
     } = this.props;
 
@@ -279,7 +359,9 @@ class SeriesIndexPosters extends Component {
       rowHeight
     } = this.state;
 
-    const rowCount = Math.ceil(items.length / columnCount);
+    const rowCount = groupByPublisher ?
+      this.getGroupedRows().length :
+      Math.ceil(items.length / columnCount);
 
     return (
       <Measure
@@ -303,7 +385,7 @@ class SeriesIndexPosters extends Component {
                   columnCount={columnCount}
                   columnWidth={columnWidth}
                   rowCount={rowCount}
-                  rowHeight={rowHeight}
+                  rowHeight={groupByPublisher ? this.getRowHeight : rowHeight}
                   width={width}
                   onScroll={onChildScroll}
                   scrollTop={scrollTop}
@@ -324,6 +406,7 @@ class SeriesIndexPosters extends Component {
 
 SeriesIndexPosters.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
+  groupByPublisher: PropTypes.bool.isRequired,
   sortKey: PropTypes.string,
   posterOptions: PropTypes.object.isRequired,
   jumpToCharacter: PropTypes.string,

@@ -2,10 +2,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Grid, WindowScroller } from 'react-virtualized';
 import Measure from 'Components/Measure';
+import PublisherGroupHeader from 'Series/Index/PublisherGroupHeader';
 import SeriesIndexItemConnector from 'Series/Index/SeriesIndexItemConnector';
 import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
+import groupSeriesByPublisher from 'Utilities/Series/groupSeriesByPublisher';
 import SeriesIndexOverview from './SeriesIndexOverview';
 import styles from './SeriesIndexOverviews.css';
 
@@ -47,6 +49,8 @@ function calculatePosterHeight(posterWidth) {
   return posterWidth;
 }
 
+const groupHeaderHeight = 40;
+
 class SeriesIndexOverviews extends Component {
 
   //
@@ -65,6 +69,10 @@ class SeriesIndexOverviews extends Component {
     };
 
     this._grid = null;
+
+    // Memoized grouped row model (overview rows interleaved with header rows)
+    this._rowsSource = null;
+    this._rows = null;
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -95,6 +103,7 @@ class SeriesIndexOverviews extends Component {
             hasDifferentItemsOrOrder(prevProps.items, items) ||
             prevProps.isEditorActive !== isEditorActive ||
             prevProps.selectedState !== selectedState ||
+            prevProps.groupByPublisher !== this.props.groupByPublisher ||
             prevProps.overviewOptions.showTitle !== overviewOptions.showTitle)) {
       // recomputeGridSize also forces Grid to discard its cache of rendered cells
       this._grid.recomputeGridSize();
@@ -125,6 +134,36 @@ class SeriesIndexOverviews extends Component {
     this._grid = ref;
   };
 
+  getRows() {
+    const {
+      items,
+      groupByPublisher
+    } = this.props;
+
+    if (!groupByPublisher) {
+      return items;
+    }
+
+    if (this._rowsSource !== items) {
+      this._rows = groupSeriesByPublisher(items).reduce((acc, group) => {
+        acc.push({ isGroupHeader: true, title: group.title, count: group.items.length });
+        acc.push(...group.items);
+
+        return acc;
+      }, []);
+
+      this._rowsSource = items;
+    }
+
+    return this._rows;
+  }
+
+  getRowHeight = ({ index }) => {
+    const rows = this.getRows();
+
+    return rows[index] && rows[index].isGroupHeader ? groupHeaderHeight : this.state.rowHeight;
+  };
+
   calculateGrid = (width = this.state.width, isSmallScreen) => {
     const {
       sortKey,
@@ -145,7 +184,6 @@ class SeriesIndexOverviews extends Component {
 
   cellRenderer = ({ key, rowIndex, style }) => {
     const {
-      items,
       sortKey,
       overviewOptions,
       showRelativeDates,
@@ -164,10 +202,24 @@ class SeriesIndexOverviews extends Component {
       rowHeight
     } = this.state;
 
-    const series = items[rowIndex];
+    const series = this.getRows()[rowIndex];
 
     if (!series) {
       return null;
+    }
+
+    if (series.isGroupHeader) {
+      return (
+        <div
+          key={key}
+          style={style}
+        >
+          <PublisherGroupHeader
+            title={series.title}
+            count={series.count}
+          />
+        </div>
+      );
     }
 
     return (
@@ -210,7 +262,6 @@ class SeriesIndexOverviews extends Component {
 
   render() {
     const {
-      items,
       isSmallScreen,
       scroller
     } = this.props;
@@ -241,8 +292,8 @@ class SeriesIndexOverviews extends Component {
                   height={height}
                   columnCount={1}
                   columnWidth={width}
-                  rowCount={items.length}
-                  rowHeight={rowHeight}
+                  rowCount={this.getRows().length}
+                  rowHeight={this.props.groupByPublisher ? this.getRowHeight : rowHeight}
                   width={width}
                   onScroll={onChildScroll}
                   scrollTop={scrollTop}
@@ -264,6 +315,7 @@ class SeriesIndexOverviews extends Component {
 
 SeriesIndexOverviews.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
+  groupByPublisher: PropTypes.bool.isRequired,
   sortKey: PropTypes.string,
   overviewOptions: PropTypes.object.isRequired,
   scrollTop: PropTypes.number.isRequired,

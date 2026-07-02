@@ -6,7 +6,7 @@ import { createSelector } from 'reselect';
 import * as commandNames from 'Commands/commandNames';
 import withScrollPosition from 'Components/withScrollPosition';
 import { executeCommand } from 'Store/Actions/commandActions';
-import { saveSeriesEditor, setSeriesFilter, setSeriesSort, setSeriesTableOption, setSeriesView } from 'Store/Actions/seriesIndexActions';
+import { saveSeriesEditor, setSeriesFilter, setSeriesGroupByPublisher, setSeriesSort, setSeriesTableOption, setSeriesView } from 'Store/Actions/seriesIndexActions';
 import scrollPositions from 'Store/scrollPositions';
 import createCommandExecutingSelector from 'Store/Selectors/createCommandExecutingSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
@@ -59,6 +59,10 @@ function createMapDispatchToProps(dispatch, props) {
       dispatch(setSeriesView({ view }));
     },
 
+    dispatchSetSeriesGroupByPublisher(groupByPublisher) {
+      dispatch(setSeriesGroupByPublisher({ groupByPublisher }));
+    },
+
     dispatchSaveSeriesEditor(payload) {
       dispatch(saveSeriesEditor(payload));
     },
@@ -87,6 +91,10 @@ class SeriesIndexConnector extends Component {
     this.props.dispatchSetSeriesView(view);
   };
 
+  onGroupByPublisherToggle = () => {
+    this.props.dispatchSetSeriesGroupByPublisher(!this.props.groupByPublisher);
+  };
+
   onSaveSelected = (payload) => {
     this.props.dispatchSaveSeriesEditor(payload);
   };
@@ -103,6 +111,7 @@ class SeriesIndexConnector extends Component {
       <SeriesIndex
         {...this.props}
         onViewSelect={this.onViewSelect}
+        onGroupByPublisherToggle={this.onGroupByPublisherToggle}
         onScroll={this.onScroll}
         onSaveSelected={this.onSaveSelected}
       />
@@ -113,7 +122,9 @@ class SeriesIndexConnector extends Component {
 SeriesIndexConnector.propTypes = {
   isSmallScreen: PropTypes.bool.isRequired,
   view: PropTypes.string.isRequired,
+  groupByPublisher: PropTypes.bool.isRequired,
   dispatchSetSeriesView: PropTypes.func.isRequired,
+  dispatchSetSeriesGroupByPublisher: PropTypes.func.isRequired,
   dispatchSaveSeriesEditor: PropTypes.func.isRequired
 };
 

@@ -17,6 +17,7 @@ import SeriesEditorFooter from 'Series/Editor/SeriesEditorFooter';
 import NoSeries from 'Series/NoSeries';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
+import sortSeriesByPublisher from 'Utilities/Series/sortSeriesByPublisher';
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import selectAll from 'Utilities/Table/selectAll';
@@ -67,6 +68,12 @@ class SeriesIndex extends Component {
       lastToggled: null,
       selectedState: {}
     };
+
+    // Memoizes the publisher-primary ordering so views keep a stable items
+    // reference between renders (their grids recompute on identity changes).
+    this._displayItemsSource = null;
+    this._displayItemsGrouped = false;
+    this._displayItems = null;
   }
 
   componentDidMount() {
@@ -83,6 +90,7 @@ class SeriesIndex extends Component {
 
     if (sortKey !== prevProps.sortKey ||
         sortDirection !== prevProps.sortDirection ||
+        this.props.groupByPublisher !== prevProps.groupByPublisher ||
         hasDifferentItemsOrOrder(prevProps.items, items)
     ) {
       this.setJumpBarItems();
@@ -100,6 +108,25 @@ class SeriesIndex extends Component {
   setScrollerRef = (ref) => {
     this.setState({ scroller: ref });
   };
+
+  getDisplayItems() {
+    const {
+      items,
+      groupByPublisher
+    } = this.props;
+
+    if (!groupByPublisher) {
+      return items;
+    }
+
+    if (this._displayItemsSource !== items || !this._displayItemsGrouped) {
+      this._displayItems = sortSeriesByPublisher(items);
+      this._displayItemsSource = items;
+      this._displayItemsGrouped = true;
+    }
+
+    return this._displayItems;
+  }
 
   getSelectedIds = () => {
     if (this.state.allUnselected) {
@@ -147,11 +174,13 @@ class SeriesIndex extends Component {
     const {
       items,
       sortKey,
-      sortDirection
+      sortDirection,
+      groupByPublisher
     } = this.props;
 
-    // Reset if not sorting by sortName
-    if (sortKey !== 'sortName' && sortKey !== 'sortNameLastFirst') {
+    // Reset if not sorting by sortName, or when the publisher grouping
+    // reorders the list and character positions no longer apply
+    if ((sortKey !== 'sortName' && sortKey !== 'sortNameLastFirst') || groupByPublisher) {
       this.setState({ jumpBarItems: { order: [] } });
       return;
     }
@@ -230,8 +259,12 @@ class SeriesIndex extends Component {
   };
 
   onSelectedChange = ({ id, value, shiftKey = false }) => {
+    // Shift-selection ranges must follow the on-screen order, which differs
+    // from the store order when grouped by publisher
+    const displayItems = this.getDisplayItems();
+
     this.setState((state) => {
-      return toggleSelected(state, this.props.items, id, value, shiftKey);
+      return toggleSelected(state, displayItems, id, value, shiftKey);
     });
   };
 
@@ -290,6 +323,8 @@ class SeriesIndex extends Component {
       sortKey,
       sortDirection,
       view,
+      groupByPublisher,
+      onGroupByPublisherToggle,
       isRefreshingSeries,
       isRssSyncExecuting,
       isOrganizingSeries,
@@ -420,6 +455,13 @@ class SeriesIndex extends Component {
 
             <PageToolbarSeparator />
 
+            <PageToolbarButton
+              label={translate('GroupByPublisher')}
+              iconName={groupByPublisher ? icons.UNGROUP : icons.GROUP}
+              isDisabled={hasNoSeries}
+              onPress={onGroupByPublisherToggle}
+            />
+
             <SeriesIndexViewMenu
               view={view}
               isDisabled={hasNoSeries}
@@ -467,7 +509,8 @@ class SeriesIndex extends Component {
                 <div className={styles.contentBodyContainer}>
                   <ViewComponent
                     scroller={scroller}
-                    items={items}
+                    items={this.getDisplayItems()}
+                    groupByPublisher={groupByPublisher}
                     filters={filters}
                     sortKey={sortKey}
                     sortDirection={sortDirection}
@@ -557,6 +600,8 @@ SeriesIndex.propTypes = {
   sortKey: PropTypes.string,
   sortDirection: PropTypes.oneOf(sortDirections.all),
   view: PropTypes.string.isRequired,
+  groupByPublisher: PropTypes.bool.isRequired,
+  onGroupByPublisherToggle: PropTypes.func.isRequired,
   isRefreshingSeries: PropTypes.bool.isRequired,
   isOrganizingSeries: PropTypes.bool.isRequired,
   isRetaggingSeries: PropTypes.bool.isRequired,

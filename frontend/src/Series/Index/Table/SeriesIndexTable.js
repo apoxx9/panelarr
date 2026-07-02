@@ -3,8 +3,10 @@ import React, { Component } from 'react';
 import VirtualTable from 'Components/Table/VirtualTable';
 import VirtualTableRow from 'Components/Table/VirtualTableRow';
 import { sortDirections } from 'Helpers/Props';
+import PublisherGroupHeader from 'Series/Index/PublisherGroupHeader';
 import SeriesIndexItemConnector from 'Series/Index/SeriesIndexItemConnector';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
+import groupSeriesByPublisher from 'Utilities/Series/groupSeriesByPublisher';
 import SeriesIndexHeaderConnector from './SeriesIndexHeaderConnector';
 import SeriesIndexRow from './SeriesIndexRow';
 import styles from './SeriesIndexTable.css';
@@ -20,6 +22,10 @@ class SeriesIndexTable extends Component {
     this.state = {
       scrollIndex: null
     };
+
+    // Memoized grouped row model (series rows interleaved with header rows)
+    this._rowsSource = null;
+    this._rows = null;
   }
 
   componentDidUpdate(prevProps) {
@@ -44,9 +50,32 @@ class SeriesIndexTable extends Component {
   //
   // Control
 
-  rowRenderer = ({ key, rowIndex, style }) => {
+  getRows() {
     const {
       items,
+      groupByPublisher
+    } = this.props;
+
+    if (!groupByPublisher) {
+      return items;
+    }
+
+    if (this._rowsSource !== items) {
+      this._rows = groupSeriesByPublisher(items).reduce((acc, group) => {
+        acc.push({ isGroupHeader: true, title: group.title, count: group.items.length });
+        acc.push(...group.items);
+
+        return acc;
+      }, []);
+
+      this._rowsSource = items;
+    }
+
+    return this._rows;
+  }
+
+  rowRenderer = ({ key, rowIndex, style }) => {
+    const {
       columns,
       selectedState,
       onSelectedChange,
@@ -55,7 +84,21 @@ class SeriesIndexTable extends Component {
       showTitle
     } = this.props;
 
-    const series = items[rowIndex];
+    const series = this.getRows()[rowIndex];
+
+    if (series.isGroupHeader) {
+      return (
+        <VirtualTableRow
+          key={key}
+          style={style}
+        >
+          <PublisherGroupHeader
+            title={series.title}
+            count={series.count}
+          />
+        </VirtualTableRow>
+      );
+    }
 
     return (
       <VirtualTableRow
@@ -84,7 +127,6 @@ class SeriesIndexTable extends Component {
 
   render() {
     const {
-      items,
       columns,
       sortKey,
       sortDirection,
@@ -103,7 +145,7 @@ class SeriesIndexTable extends Component {
     return (
       <VirtualTable
         className={styles.tableContainer}
-        items={items}
+        items={this.getRows()}
         scrollIndex={this.state.scrollIndex}
         scrollTop={scrollTop}
         isSmallScreen={isSmallScreen}
@@ -135,6 +177,7 @@ class SeriesIndexTable extends Component {
 
 SeriesIndexTable.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
+  groupByPublisher: PropTypes.bool.isRequired,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   sortKey: PropTypes.string.isRequired,
   sortDirection: PropTypes.oneOf(sortDirections.all),

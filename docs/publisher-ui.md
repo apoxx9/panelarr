@@ -1,7 +1,13 @@
 # Publisher UI — design draft (Session 15 overnight, for morning review)
 
-Status: **draft for discussion — nothing implemented.** Open choices are
-marked ⚖; recommendation first where I have one.
+Status: **Tier 1 + Tier 2 Option A SHIPPED** (Session 16). Publisher filter
+on the series index (plus fixing the publisher column and sort, which were
+still reading Readarr's dead `disambiguation` field), and a
+"Group by Publisher" toolbar toggle rendering section headers in all three
+index views (posters, table, overview). Grouping is publisher-alphabetical
+with the user's sort preserved within groups; the jump bar hides while
+grouped; the toggle persists. Tier 2 Option B (dedicated /publishers pages)
+and Tier 3 remain unbuilt — open choices below marked ⚖.
 
 ## What exists today
 

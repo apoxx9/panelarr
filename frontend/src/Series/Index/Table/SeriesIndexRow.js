@@ -84,7 +84,7 @@ class SeriesIndexRow extends Component {
       status,
       seriesName,
       seriesNameLastFirst,
-      disambiguation,
+      publisherName,
       year,
       titleSlug,
       qualityProfile,
@@ -167,7 +167,7 @@ class SeriesIndexRow extends Component {
                   key={name}
                   className={styles[name]}
                 >
-                  {disambiguation || ''}
+                  {publisherName || ''}
                 </VirtualTableRowCell>
               );
             }
@@ -437,7 +437,7 @@ SeriesIndexRow.propTypes = {
   status: PropTypes.string.isRequired,
   seriesName: PropTypes.string.isRequired,
   seriesNameLastFirst: PropTypes.string.isRequired,
-  disambiguation: PropTypes.string,
+  publisherName: PropTypes.string,
   year: PropTypes.number,
   titleSlug: PropTypes.string.isRequired,
   qualityProfile: PropTypes.object.isRequired,

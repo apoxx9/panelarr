@@ -1,0 +1,19 @@
+.groupHeader {
+  display: flex;
+  align-items: flex-end;
+  padding: 0 10px 4px;
+  height: 100%;
+  border-bottom: 1px solid var(--borderColor);
+  font-weight: 300;
+  font-size: 18px;
+}
+
+.title {
+  margin-right: 8px;
+}
+
+.count {
+  color: var(--disabledColor);
+  font-size: 14px;
+  line-height: 21px;
+}
