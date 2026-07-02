@@ -48,6 +48,10 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                 .Setup(s => s.GetSeries(It.IsAny<List<int>>()))
                 .Returns(new List<Series>());
 
+            Mocker.GetMock<ISeriesService>()
+                .Setup(s => s.AllSeriesPaths())
+                .Returns(new Dictionary<int, string> { { 1, seriesFolder } });
+
             Mocker.GetMock<IMakeImportDecision>()
                 .Setup(v => v.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()))
                 .Returns(new List<ImportDecision<LocalIssue>>());
@@ -401,6 +405,98 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
                           })
                           .Select(x => new ImportDecision<LocalIssue>(x, new Rejection("Reject")))
                           .ToList());
+        }
+
+        [Test]
+        public void root_scan_should_not_import_fuzzy_matches_outside_series_folders()
+        {
+            GivenSeriesFolder();
+
+            var file = Path.Combine(_rootFolder, "Power Rangers (2020)", "Power Rangers #1 (2020).cbz");
+
+            GivenFiles(new List<string> { file });
+            GivenKnownFiles(new List<string>());
+
+            // An approved fuzzy match to a library issue — plausible but wrong
+            var localTrack = Builder<LocalIssue>.CreateNew()
+                .With(x => x.Path = file)
+                .With(x => x.Issue = Builder<Issue>.CreateNew().Build())
+                .With(x => x.Series = _series)
+                .With(x => x.ExactTagMatch = false)
+                .With(x => x.FileTagInfo = new ParsedFileTagInfo())
+                .Build();
+
+            Mocker.GetMock<IMakeImportDecision>()
+                .Setup(x => x.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()))
+                .Returns(new List<ImportDecision<LocalIssue>> { new ImportDecision<LocalIssue>(localTrack) });
+
+            Subject.Scan(new List<string> { _rootFolder });
+
+            Mocker.GetMock<IImportApprovedIssues>()
+                .Verify(x => x.Import(It.Is<List<ImportDecision<LocalIssue>>>(l => l.Count == 0), false, null, ImportMode.Auto),
+                        Times.Once());
+
+            // the held-back file must still be persisted for Library Import review
+            Mocker.GetMock<IMediaFileService>()
+                .Verify(x => x.AddMany(It.Is<List<ComicFile>>(l => l.Count == 1 && l[0].Path == file && l[0].IssueId == 0)),
+                        Times.Once());
+        }
+
+        [Test]
+        public void root_scan_should_import_exact_tag_matches_anywhere()
+        {
+            GivenSeriesFolder();
+
+            var file = Path.Combine(_rootFolder, "The Walking Dead (2004)", "The Walking Dead Vol. 16.cbz");
+
+            GivenFiles(new List<string> { file });
+            GivenKnownFiles(new List<string>());
+
+            var localTrack = Builder<LocalIssue>.CreateNew()
+                .With(x => x.Path = file)
+                .With(x => x.Issue = Builder<Issue>.CreateNew().Build())
+                .With(x => x.Series = _series)
+                .With(x => x.ExactTagMatch = true)
+                .With(x => x.FileTagInfo = new ParsedFileTagInfo())
+                .Build();
+
+            Mocker.GetMock<IMakeImportDecision>()
+                .Setup(x => x.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()))
+                .Returns(new List<ImportDecision<LocalIssue>> { new ImportDecision<LocalIssue>(localTrack) });
+
+            Subject.Scan(new List<string> { _rootFolder });
+
+            Mocker.GetMock<IImportApprovedIssues>()
+                .Verify(x => x.Import(It.Is<List<ImportDecision<LocalIssue>>>(l => l.Count == 1), false, null, ImportMode.Auto),
+                        Times.Once());
+        }
+
+        [Test]
+        public void should_not_insert_candidate_context_files_from_outside_scanned_folders()
+        {
+            GivenSeriesFolder();
+
+            var scannedFile = Path.Combine(_series.Path, "Volume 1", "file1.cbz");
+            var contextFile = @"C:\Other\Library\The Walking Dead (2004)\twd16.cbz".AsOsAgnostic();
+
+            GivenFiles(new List<string> { scannedFile });
+            GivenKnownFiles(new List<string>());
+
+            // identification folds a candidate's existing files (from another
+            // series' folder) into the decision list as context
+            Mocker.GetMock<IMakeImportDecision>()
+                .Setup(x => x.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()))
+                .Returns(new List<ImportDecision<LocalIssue>>
+                {
+                    new ImportDecision<LocalIssue>(new LocalIssue { Path = scannedFile, FileTagInfo = new ParsedFileTagInfo() }, new Rejection("Reject")),
+                    new ImportDecision<LocalIssue>(new LocalIssue { Path = contextFile, FileTagInfo = new ParsedFileTagInfo() }, new Rejection("Reject"))
+                });
+
+            Subject.Scan(new List<string> { _series.Path });
+
+            Mocker.GetMock<IMediaFileService>()
+                .Verify(x => x.AddMany(It.Is<List<ComicFile>>(l => l.Count == 1 && l[0].Path == scannedFile)),
+                        Times.Once());
         }
 
         [Test]

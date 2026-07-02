@@ -22,6 +22,11 @@ namespace NzbDrone.Core.Parser.Model
         public IndexerFlags IndexerFlags { get; set; }
         public bool ExistingFile { get; set; }
         public bool AdditionalFile { get; set; }
+
+        // True when identified via an embedded provider issue id that resolved
+        // to a library issue — the only match kind scans may auto-import from
+        // folders outside a series path
+        public bool ExactTagMatch { get; set; }
         public bool SceneSource { get; set; }
         public string ReleaseGroup { get; set; }
         public string SceneName { get; set; }

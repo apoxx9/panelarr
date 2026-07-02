@@ -174,7 +174,32 @@ namespace NzbDrone.Core.MediaFiles
             _logger.Debug("Import decisions complete [{0}]", decisionsStopwatch.Elapsed);
 
             var importStopwatch = Stopwatch.StartNew();
-            _importApprovedIssues.Import(decisions, false);
+
+            // A scan without series context can fuzzy-match files of a
+            // name-similar series ("Power Rangers" vs "Power Rangers Prime"),
+            // so only exact tag-id identifications and files inside a series'
+            // own folder are trusted for automatic import. Everything else is
+            // persisted as unmapped below and left for Library Import review.
+            var importableDecisions = decisions;
+
+            if (!seriesIds.Any())
+            {
+                var seriesPaths = _seriesService.AllSeriesPaths().Values.ToList();
+
+                importableDecisions = decisions
+                    .Where(x => x.Item.ExactTagMatch ||
+                                seriesPaths.Any(p => p.IsParentPath(x.Item.Path)))
+                    .ToList();
+
+                var heldBack = decisions.Count - importableDecisions.Count;
+
+                if (heldBack > 0)
+                {
+                    _logger.Debug("Holding back {0} fuzzy-matched files outside series folders for Library Import review", heldBack);
+                }
+            }
+
+            _importApprovedIssues.Import(importableDecisions, false);
 
             // decisions may have been filtered to just new files.  Anything new and approved will have been inserted.
             // Now we need to make sure anything new but not approved gets inserted
@@ -183,6 +208,13 @@ namespace NzbDrone.Core.MediaFiles
             folders.ForEach(x => knownFiles.AddRange(_mediaFileService.GetFilesWithBasePath(x)));
 
             var newFiles = decisions
+
+                // Identification pulls a candidate's existing files (living
+                // under OTHER series' folders) into the decision list as
+                // context; only files this scan actually visited may be
+                // inserted, and only once per path
+                .Where(x => folders.Any(f => f.IsParentPath(x.Item.Path)))
+                .DistinctBy(x => x.Item.Path)
                 .ExceptBy(x => x.Item.Path, knownFiles, x => x.Path, PathEqualityComparer.Instance)
                 .Select(decision => new ComicFile
                 {

@@ -144,6 +144,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             {
                 localTrack.Issue = issue;
                 localTrack.Series = idOverrides?.Series ?? issue.Series?.Value;
+                localTrack.ExactTagMatch = true;
             }
 
             return true;
