@@ -100,6 +100,8 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
             return new ProviderIssue
             {
                 ForeignIssueId = "cv:" + detail.Id,
+                ForeignSeriesId = detail.Volume != null ? "cv:" + detail.Volume.Id : null,
+                SeriesName = detail.Volume?.Name,
                 Title = detail.Name,
                 Overview = StripHtml(detail.Description),
                 IssueNumber = IssueNumberNormalizer.Normalize(detail.IssueNumber),

@@ -120,6 +120,47 @@ namespace NzbDrone.Core.Test.MediaFiles.LibraryImport
         }
 
         [Test]
+        public void unresolved_tagged_id_echo_should_fall_back_to_name_search()
+        {
+            GivenUnmappedFiles(_twdFolder, 5);
+            GivenTags(new ParsedFileTagInfo { SeriesTitle = "The Walking Dead", ForeignIssueId = "cv:692016", Year = 2004 });
+
+            // The proxy echoes the issue id back when the provider payload
+            // carries no parent series — not a real series id
+            Mocker.GetMock<IProvideIssueInfo>()
+                  .Setup(s => s.GetIssueInfo("cv:692016"))
+                  .Returns(Tuple.Create("cv:692016", new Issue(), new List<SeriesMetadata> { new SeriesMetadata { ForeignSeriesId = "cv:692016" } }));
+
+            Mocker.GetMock<ISearchForNewSeries>()
+                  .Setup(s => s.SearchForNewSeries(It.IsAny<string>()))
+                  .Returns(new List<Series>
+                  {
+                      new Series { Metadata = new SeriesMetadata { ForeignSeriesId = "cv:30345", Name = "The Walking Dead", Year = 2004 } }
+                  });
+
+            var proposals = Subject.GetProposals(1);
+
+            proposals.Should().HaveCount(1);
+            proposals[0].ForeignSeriesId.Should().Be("cv:30345");
+            proposals[0].Confidence.Should().Be(ProposalConfidence.Probable);
+        }
+
+        [Test]
+        public void display_year_should_come_from_folder_not_sampled_issue_tags()
+        {
+            GivenUnmappedFiles(_twdFolder, 5);
+
+            // The sampled file carries a later issue's cover year
+            GivenTags(new ParsedFileTagInfo { SeriesTitle = "The Walking Dead", Year = 2015 });
+            GivenCvInfo(_twdFolder, "https://comicvine.gamespot.com/the-walking-dead/4050-30345/");
+
+            var proposals = Subject.GetProposals(1);
+
+            proposals.Should().HaveCount(1);
+            proposals[0].Year.Should().Be(2004);
+        }
+
+        [Test]
         public void name_search_should_yield_probable_proposal()
         {
             GivenUnmappedFiles(_twdFolder, 5);

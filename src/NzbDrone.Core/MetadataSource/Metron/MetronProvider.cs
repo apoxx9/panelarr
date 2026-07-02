@@ -111,6 +111,8 @@ namespace NzbDrone.Core.MetadataSource.Metron
             return new ProviderIssue
             {
                 ForeignIssueId = detail.Id.ToString(),
+                ForeignSeriesId = detail.Series?.Id.ToString(),
+                SeriesName = detail.Series?.Name,
                 Title = detail.CollectionTitle.IsNotNullOrWhiteSpace()
                     ? detail.CollectionTitle
                     : detail.StoryTitles?.FirstOrDefault(),

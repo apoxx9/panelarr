@@ -95,15 +95,19 @@ namespace NzbDrone.Core.MediaFiles.LibraryImport
         private LibraryImportProposal BuildProposal(string folder, List<string> filePaths)
         {
             var tags = ReadSampleTags(filePaths);
+            var parsedFolder = ComicParser.ParseRelease(Path.GetFileName(folder));
+
             var displayName = tags?.SeriesTitle;
-            var displayYear = GuessYear(tags);
 
             if (displayName.IsNullOrWhiteSpace())
             {
-                var parsedFolder = ComicParser.ParseRelease(Path.GetFileName(folder));
                 displayName = parsedFolder?.SeriesTitle;
-                displayYear ??= parsedFolder?.Year;
             }
+
+            // The folder year is the series start year (taggers name folders
+            // "Series (Year)"); a sampled file's tag year is just that issue's
+            // cover year and reads wrong on the review screen ("Saga (2015)")
+            var displayYear = parsedFolder?.Year ?? GuessYear(tags);
 
             // 1. cvinfo: the volume id, straight from the folder
             var cvInfoId = ReadCvInfoVolumeId(folder);
@@ -123,12 +127,23 @@ namespace NzbDrone.Core.MediaFiles.LibraryImport
                     var issueInfo = _issueInfo.GetIssueInfo(taggedIssueId);
                     var seriesForeignId = issueInfo?.Item1;
 
-                    if (seriesForeignId.IsNotNullOrWhiteSpace())
+                    // The proxy echoes the issue id back when it cannot resolve
+                    // the parent series — that is not a series id and must not
+                    // be proposed
+                    if (seriesForeignId.IsNotNullOrWhiteSpace() && seriesForeignId != taggedIssueId)
                     {
                         var metadata = issueInfo.Item3?.FirstOrDefault();
+                        var name = metadata?.Name;
 
-                        return Build(folder, filePaths.Count, seriesForeignId, metadata?.Name ?? displayName ?? Path.GetFileName(folder), metadata?.Year ?? displayYear, ProposalConfidence.Exact, "file tags");
+                        if (name.IsNullOrWhiteSpace())
+                        {
+                            name = displayName;
+                        }
+
+                        return Build(folder, filePaths.Count, seriesForeignId, name ?? Path.GetFileName(folder), metadata?.Year ?? displayYear, ProposalConfidence.Exact, "file tags");
                     }
+
+                    _logger.Debug("Tagged id {0} did not resolve to a series for {1}; falling back to name search", taggedIssueId, folder);
                 }
                 catch (Exception ex)
                 {

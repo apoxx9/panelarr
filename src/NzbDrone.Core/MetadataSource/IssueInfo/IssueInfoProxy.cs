@@ -213,8 +213,14 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
                 }
                 else
                 {
-                    seriesId = foreignIssueId;
-                    seriesMetadata = new SeriesMetadata { ForeignSeriesId = foreignIssueId, Name = issue.Title };
+                    // Prefer the parent series the provider's issue payload names;
+                    // the issue id itself is only a last-resort placeholder
+                    seriesId = providerIssue.ForeignSeriesId ?? foreignIssueId;
+                    seriesMetadata = new SeriesMetadata
+                    {
+                        ForeignSeriesId = seriesId,
+                        Name = providerIssue.SeriesName ?? issue.Title
+                    };
                 }
 
                 issue.SeriesMetadata = seriesMetadata;

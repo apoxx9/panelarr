@@ -26,6 +26,13 @@ namespace NzbDrone.Core.MetadataSource.Provider
     {
         public string ForeignIssueId { get; set; }
 
+        // The parent series/volume, when the provider's issue payload carries
+        // it (CV issue detail: "volume", Metron issue detail: "series"). Lets
+        // an issue id found in file tags resolve to its series without the
+        // series being in the library.
+        public string ForeignSeriesId { get; set; }
+        public string SeriesName { get; set; }
+
         // Kept as a string: comics use fractional and alpha numbers ("0.5", "1a", "1.MU").
         public string IssueNumber { get; set; }
         public string Title { get; set; }
