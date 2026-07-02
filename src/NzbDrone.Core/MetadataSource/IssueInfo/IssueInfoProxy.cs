@@ -53,6 +53,11 @@ namespace NzbDrone.Core.MetadataSource.IssueInfo
 
         public HashSet<string> GetChangedSeries(DateTime startTime)
         {
+            // Null tells RefreshSeriesService "no delta information" so it falls
+            // back to per-series staleness checks (ShouldRefreshSeries). An empty
+            // set would make the scheduled refresh skip every series. The
+            // IMetadataProvider delta stubs are not consulted until a provider
+            // actually supports changed-since queries.
             return null;
         }
 

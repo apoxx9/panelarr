@@ -66,8 +66,10 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
 
         public List<string> GetChangedSeries(long epochSeconds)
         {
-            // ComicVine does not expose a "changed since" endpoint via free tier
-            return new List<string>();
+            // ComicVine does not expose a "changed since" endpoint via free tier.
+            // Null, not empty: empty means "nothing changed" and would make a
+            // delta-based refresh skip every series.
+            return null;
         }
 
         public List<ProviderIssue> GetIssues(string foreignSeriesId)
@@ -131,7 +133,8 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
 
         public List<string> GetNewReleases(long epochSeconds)
         {
-            return new List<string>();
+            // Not supported — null, matching the interface contract.
+            return null;
         }
 
         private static ProviderIssue MapIssue(Resources.ComicVineIssueSummary i)

@@ -72,14 +72,15 @@ namespace NzbDrone.Core.MetadataSource.Metron
         public List<string> GetChangedSeries(long epochSeconds)
         {
             // Metron does not currently expose a "changed since" endpoint.
-            // Return empty; full refresh is used instead.
-            return new List<string>();
+            // Null, not empty: empty means "nothing changed" and would make a
+            // delta-based refresh skip every series.
+            return null;
         }
 
         public List<string> GetNewReleases(long epochSeconds)
         {
             // Metron does not currently expose a "new releases since" endpoint.
-            return new List<string>();
+            return null;
         }
 
         public List<ProviderIssue> GetIssues(string foreignSeriesId)

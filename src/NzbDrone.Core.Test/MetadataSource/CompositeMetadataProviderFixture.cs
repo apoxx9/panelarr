@@ -36,5 +36,20 @@ namespace NzbDrone.Core.Test.MetadataSource
         {
             Assert.Throws<IssueInfoException>(() => Subject.GetPublisher("cv:12345"));
         }
+
+        // Null means "no delta support — use staleness checks". An empty list
+        // would mean "nothing changed" and make a delta-based refresh skip
+        // every series. Neither provider supports deltas today.
+        [Test]
+        public void changed_series_without_delta_support_should_be_null_not_empty()
+        {
+            Assert.That(Subject.GetChangedSeries(0), Is.Null);
+        }
+
+        [Test]
+        public void new_releases_without_provider_support_should_be_null_not_empty()
+        {
+            Assert.That(Subject.GetNewReleases(0), Is.Null);
+        }
     }
 }

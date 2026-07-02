@@ -13,7 +13,9 @@ namespace NzbDrone.Core.MetadataSource.Provider
         /// <summary>Get full series info including issue list by foreign series ID.</summary>
         ProviderSeries GetSeriesInfo(string foreignSeriesId);
 
-        /// <summary>Get series IDs that have changed since the given epoch timestamp.</summary>
+        /// <summary>Get series IDs that have changed since the given epoch timestamp.
+        /// Null means "no delta support — the caller must fall back to per-series
+        /// staleness checks"; an empty list means "delta supported, nothing changed".</summary>
         List<string> GetChangedSeries(long epochSeconds);
 
         /// <summary>Get all issues for a series.</summary>
@@ -25,7 +27,9 @@ namespace NzbDrone.Core.MetadataSource.Provider
         /// <summary>Get publisher details by foreign publisher ID.</summary>
         ProviderPublisher GetPublisher(string foreignPublisherId);
 
-        /// <summary>Get IDs of newly released issues since the given epoch timestamp.</summary>
+        /// <summary>Get IDs of newly released issues since the given epoch timestamp.
+        /// Null means "not supported by this provider"; an empty list means "no new
+        /// releases".</summary>
         List<string> GetNewReleases(long epochSeconds);
     }
 }

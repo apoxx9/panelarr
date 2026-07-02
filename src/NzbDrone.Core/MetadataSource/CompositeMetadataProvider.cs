@@ -78,6 +78,10 @@ namespace NzbDrone.Core.MetadataSource
 
         public List<string> GetChangedSeries(long epochSeconds)
         {
+            // Neither provider supports deltas today (both return null). If one
+            // gains support, a combined delta is only usable when BOTH providers
+            // report — a null from either must make the whole result null, or
+            // the other provider's series would be skipped as "unchanged".
             return _metron.GetChangedSeries(epochSeconds);
         }
 
