@@ -33,7 +33,6 @@ function formatProtocol(protocol) {
 }
 
 const GETCOMICS_IMPLEMENTATION = 'GetComicsDownloadClient';
-const GETCOMICS_DEFAULT_FOLDER = '/downloads/getcomics';
 
 class DownloadClientStep extends Component {
 
@@ -55,7 +54,9 @@ class DownloadClientStep extends Component {
       testStatus: null,
       testMessage: '',
       saveError: null,
-      getComicsFolder: GETCOMICS_DEFAULT_FOLDER,
+      // Deliberately no default: any guessed path is silently wrong for some
+      // deployment (e.g. /downloads may belong to a seedbox sync)
+      getComicsFolder: '',
       isQuickAdding: false
     };
   }
@@ -417,8 +418,11 @@ class DownloadClientStep extends Component {
                 </div>
 
                 <div className={styles.quickAddDescription}>
-                  Downloads comics directly from getcomics.org into the folder
-                  below. The folder is created for you if its parent exists.
+                  Downloads comics directly from getcomics.org. Choose a folder
+                  on persistent storage that no other tool manages (not a
+                  seedbox/torrent sync folder, not /tmp) — ideally on the same
+                  filesystem as your library. It is created for you if its
+                  parent exists.
                 </div>
 
                 <div className={styles.quickAddRow}>
@@ -427,6 +431,7 @@ class DownloadClientStep extends Component {
                     type="text"
                     value={this.state.getComicsFolder}
                     onChange={this.onGetComicsFolderChange}
+                    placeholder="e.g. /data/getcomics"
                   />
 
                   <button
