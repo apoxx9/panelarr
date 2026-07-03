@@ -360,3 +360,32 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.quickAdd {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid #9b6bc4;
+  border-radius: 6px;
+  background-color: rgba(155, 107, 196, 0.08);
+}
+
+.quickAddTitle {
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.quickAddDescription {
+  margin-bottom: 10px;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.quickAddRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.quickAddRow input {
+  flex: 1;
+}

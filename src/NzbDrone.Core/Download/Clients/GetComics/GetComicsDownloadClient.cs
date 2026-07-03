@@ -191,7 +191,40 @@ namespace NzbDrone.Core.Download.Clients.GetComics
 
         protected override void Test(List<ValidationFailure> failures)
         {
+            EnsureDownloadFolder();
             failures.AddIfNotNull(TestFolder(Settings.DownloadFolder, "DownloadFolder"));
+        }
+
+        // A fresh install has no download folder yet; create it when the
+        // parent exists (e.g. a mounted /downloads volume) so setup does not
+        // dead-end on "folder does not exist". A missing parent still fails
+        // validation — silently creating deep paths inside a container's
+        // writable layer would hide data on container recreation.
+        private void EnsureDownloadFolder()
+        {
+            var folder = Settings.DownloadFolder;
+
+            if (folder.IsNullOrWhiteSpace() || _diskProvider.FolderExists(folder))
+            {
+                return;
+            }
+
+            var parent = _diskProvider.GetParentFolder(folder);
+
+            if (parent.IsNullOrWhiteSpace() || !_diskProvider.FolderExists(parent))
+            {
+                return;
+            }
+
+            try
+            {
+                _diskProvider.CreateFolder(folder);
+                _logger.Info("Created GetComics download folder {0}", folder);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "Could not create GetComics download folder {0}", folder);
+            }
         }
 
         /// <summary>

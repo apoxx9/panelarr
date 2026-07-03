@@ -16,6 +16,25 @@ function getInputType(fieldType) {
   }
 }
 
+function formatProtocol(protocol) {
+  if (protocol === 'usenet') {
+    return 'Usenet';
+  }
+
+  if (protocol === 'torrent') {
+    return 'Torrent';
+  }
+
+  if (protocol === 'directDownload') {
+    return 'Direct Download';
+  }
+
+  return protocol;
+}
+
+const GETCOMICS_IMPLEMENTATION = 'GetComicsDownloadClient';
+const GETCOMICS_DEFAULT_FOLDER = '/downloads/getcomics';
+
 class DownloadClientStep extends Component {
 
   //
@@ -35,7 +54,9 @@ class DownloadClientStep extends Component {
       isTesting: false,
       testStatus: null,
       testMessage: '',
-      saveError: null
+      saveError: null,
+      getComicsFolder: GETCOMICS_DEFAULT_FOLDER,
+      isQuickAdding: false
     };
   }
 
@@ -135,6 +156,59 @@ class DownloadClientStep extends Component {
 
   onNameChange = (event) => {
     this.setState({ name: event.target.value });
+  };
+
+  onGetComicsFolderChange = (event) => {
+    this.setState({ getComicsFolder: event.target.value });
+  };
+
+  onQuickAddGetComics = () => {
+    const schema = this.state.schemas.find((s) => s.implementation === GETCOMICS_IMPLEMENTATION);
+
+    if (!schema) {
+      return;
+    }
+
+    this.setState({ isQuickAdding: true, saveError: null });
+
+    const { request } = createAjaxRequest({
+      url: '/downloadclient',
+      method: 'POST',
+      dataType: 'json',
+      data: JSON.stringify({
+        enable: true,
+        name: 'GetComics',
+        implementation: schema.implementation,
+        implementationName: schema.implementationName,
+        configContract: schema.configContract,
+        protocol: schema.protocol || 'unknown',
+        priority: 1,
+        removeCompletedDownloads: true,
+        removeFailedDownloads: true,
+        fields: [{ name: 'downloadFolder', value: this.state.getComicsFolder }]
+      })
+    });
+
+    request.done(() => {
+      this.setState({ isQuickAdding: false });
+      this.fetchExisting();
+    });
+
+    request.fail((xhr) => {
+      let message = 'Failed to add GetComics.';
+
+      try {
+        const response = JSON.parse(xhr.responseText);
+
+        if (response && response.length && response[0].errorMessage) {
+          message = response[0].errorMessage;
+        }
+      } catch (e) {
+        // use default message
+      }
+
+      this.setState({ isQuickAdding: false, saveError: message });
+    });
   };
 
   onFieldChange = (event, fieldName) => {
@@ -314,6 +388,17 @@ class DownloadClientStep extends Component {
 
     const hasSelection = selectedSchemaIndex >= 0;
 
+    // Several clients share a display name across protocols (e.g. Synology
+    // Download Station); disambiguate those in the flat wizard list
+    const nameCounts = schemas.reduce((acc, schema) => {
+      acc[schema.implementationName] = (acc[schema.implementationName] || 0) + 1;
+
+      return acc;
+    }, {});
+
+    const hasGetComicsSchema = schemas.some((s) => s.implementation === GETCOMICS_IMPLEMENTATION);
+    const hasGetComicsClient = existingClients.some((c) => c.implementation === GETCOMICS_IMPLEMENTATION);
+
     return (
       <div>
         <h2 className={styles.stepTitle}>Download Client</h2>
@@ -324,6 +409,37 @@ class DownloadClientStep extends Component {
         </p>
 
         <div className={styles.formContainer}>
+          {
+            hasGetComicsSchema && !hasGetComicsClient &&
+              <div className={styles.quickAdd}>
+                <div className={styles.quickAddTitle}>
+                  GetComics — built in, no external software needed
+                </div>
+
+                <div className={styles.quickAddDescription}>
+                  Downloads comics directly from getcomics.org into the folder
+                  below. The folder is created for you if its parent exists.
+                </div>
+
+                <div className={styles.quickAddRow}>
+                  <input
+                    className={styles.formInput}
+                    type="text"
+                    value={this.state.getComicsFolder}
+                    onChange={this.onGetComicsFolderChange}
+                  />
+
+                  <button
+                    className={styles.buttonPrimary}
+                    onClick={this.onQuickAddGetComics}
+                    disabled={this.state.isQuickAdding || !this.state.getComicsFolder}
+                  >
+                    {this.state.isQuickAdding ? 'Adding...' : 'Add GetComics'}
+                  </button>
+                </div>
+              </div>
+          }
+
           {
             existingClients.length > 0 &&
               <div className={styles.existingFolders}>
@@ -360,12 +476,16 @@ class DownloadClientStep extends Component {
 
                 {
                   schemas.map((schema, index) => {
+                    const label = nameCounts[schema.implementationName] > 1 ?
+                      `${schema.implementationName} (${formatProtocol(schema.protocol)})` :
+                      schema.implementationName;
+
                     return (
                       <option
                         key={schema.implementation}
                         value={index}
                       >
-                        {schema.implementationName}
+                        {label}
                       </option>
                     );
                   })

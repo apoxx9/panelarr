@@ -29,6 +29,10 @@ interface CssExports {
   'progressStep': string;
   'progressStepActive': string;
   'progressStepComplete': string;
+  'quickAdd': string;
+  'quickAddDescription': string;
+  'quickAddRow': string;
+  'quickAddTitle': string;
   'schemaFields': string;
   'schemaSelector': string;
   'spin': string;

@@ -16,6 +16,8 @@ function getInputType(fieldType) {
   }
 }
 
+const GETCOMICS_IMPLEMENTATION = 'GetComicsIndexer';
+
 class IndexerStep extends Component {
 
   //
@@ -35,7 +37,8 @@ class IndexerStep extends Component {
       isTesting: false,
       testStatus: null,
       testMessage: '',
-      saveError: null
+      saveError: null,
+      isQuickAdding: false
     };
   }
 
@@ -136,6 +139,61 @@ class IndexerStep extends Component {
 
   onNameChange = (event) => {
     this.setState({ name: event.target.value });
+  };
+
+  onQuickAddGetComics = () => {
+    const schema = this.state.schemas.find((s) => s.implementation === GETCOMICS_IMPLEMENTATION);
+
+    if (!schema) {
+      return;
+    }
+
+    this.setState({ isQuickAdding: true, saveError: null });
+
+    const { request } = createAjaxRequest({
+      url: '/indexer',
+      method: 'POST',
+      dataType: 'json',
+      data: JSON.stringify({
+        enable: true,
+        name: 'GetComics',
+        implementation: schema.implementation,
+        implementationName: schema.implementationName,
+        configContract: schema.configContract,
+        protocol: schema.protocol || 'unknown',
+        priority: 25,
+        enableRss: true,
+        enableAutomaticSearch: true,
+        enableInteractiveSearch: true,
+
+        // the schema's defaults (website url etc.) are already correct
+        fields: (schema.fields || []).map((field) => ({
+          name: field.name,
+          value: field.value != null ? field.value : ''
+        }))
+      })
+    });
+
+    request.done(() => {
+      this.setState({ isQuickAdding: false });
+      this.fetchExisting();
+    });
+
+    request.fail((xhr) => {
+      let message = 'Failed to add GetComics.';
+
+      try {
+        const response = JSON.parse(xhr.responseText);
+
+        if (response && response.length && response[0].errorMessage) {
+          message = response[0].errorMessage;
+        }
+      } catch (e) {
+        // use default message
+      }
+
+      this.setState({ isQuickAdding: false, saveError: message });
+    });
   };
 
   onFieldChange = (event, fieldName) => {
@@ -315,6 +373,9 @@ class IndexerStep extends Component {
 
     const hasSelection = selectedSchemaIndex >= 0;
 
+    const hasGetComicsSchema = schemas.some((s) => s.implementation === GETCOMICS_IMPLEMENTATION);
+    const hasGetComicsIndexer = existingIndexers.some((i) => i.implementation === GETCOMICS_IMPLEMENTATION);
+
     return (
       <div>
         <h2 className={styles.stepTitle}>Indexer</h2>
@@ -325,6 +386,30 @@ class IndexerStep extends Component {
         </p>
 
         <div className={styles.formContainer}>
+          {
+            hasGetComicsSchema && !hasGetComicsIndexer &&
+              <div className={styles.quickAdd}>
+                <div className={styles.quickAddTitle}>
+                  GetComics — built in, no configuration needed
+                </div>
+
+                <div className={styles.quickAddDescription}>
+                  Searches getcomics.org directly. Pairs with the GetComics
+                  download client on the next step.
+                </div>
+
+                <div className={styles.quickAddRow}>
+                  <button
+                    className={styles.buttonPrimary}
+                    onClick={this.onQuickAddGetComics}
+                    disabled={this.state.isQuickAdding}
+                  >
+                    {this.state.isQuickAdding ? 'Adding...' : 'Add GetComics'}
+                  </button>
+                </div>
+              </div>
+          }
+
           {
             existingIndexers.length > 0 &&
               <div className={styles.existingFolders}>
