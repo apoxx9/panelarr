@@ -23,6 +23,7 @@ namespace NzbDrone.Core.MediaFiles
         List<ComicFile> GetFilesBySeries(int seriesId);
         List<ComicFile> GetFilesBySeriesMetadataId(int seriesMetadataId);
         List<ComicFile> GetFilesByIssue(int issueId);
+        List<ComicFile> GetFilesByIssues(List<int> issueIds);
         List<ComicFile> GetUnmappedFiles();
         List<IFileInfo> FilterUnchangedFiles(List<IFileInfo> files, FilterFilesType filter);
         ComicFile Get(int id);
@@ -188,6 +189,11 @@ namespace NzbDrone.Core.MediaFiles
         public List<ComicFile> GetFilesByIssue(int issueId)
         {
             return _mediaFileRepository.GetFilesByIssue(issueId);
+        }
+
+        public List<ComicFile> GetFilesByIssues(List<int> issueIds)
+        {
+            return _mediaFileRepository.GetFilesByIssues(issueIds);
         }
 
         public List<ComicFile> GetUnmappedFiles()

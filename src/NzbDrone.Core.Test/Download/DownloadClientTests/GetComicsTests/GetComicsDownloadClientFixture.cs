@@ -72,6 +72,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.GetComicsTests
         {
             GivenFolderExists(_downloadFolder, true);
 
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderWritable(_downloadFolder))
+                  .Returns(true);
+
             Subject.Test();
 
             Mocker.GetMock<IDiskProvider>()

@@ -55,7 +55,7 @@ defects** that would have derailed the homelab migration.
 |---|---|
 | 4× MMPR The Return #01–04 **.pdf** | duplicate lower-quality copies of already-mapped CBZs — correctly held back by the quality ladder (PDF is the lowest rung) |
 | 3× MMPR **Annual** #01 (2016/17/18) | the classic annuals-matching problem (see feature-landscape: Mylar's annuals handling is chronically fragile too); manual-map for now |
-| 1× Radiant Black **#025.5** (.cbr) | fractional issue number; needs a look at fractional parsing/matching |
+| 1× Radiant Black **#025.5** (.cbr) | investigated: not a Panelarr bug — ComicVine's volume has no 25.5 (sequence runs 25, 26, 26.5…); the tagger's numbering disagrees with CV. Manual-map it to the issue it actually is. Fractional numbers that DO exist in the volume (26.5–30.5) matched fine |
 
 Plus 31 TWD duplicates staying unmapped because the library's copies are
 equal quality — correct.

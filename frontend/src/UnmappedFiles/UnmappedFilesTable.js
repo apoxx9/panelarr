@@ -264,7 +264,7 @@ class UnmappedFilesTable extends Component {
     const hasUnmappedFiles = isPopulated && !error && !!items.length;
 
     return (
-      <PageContent title={translate('UnmappedFiles')}>
+      <PageContent title={translate('LibraryImport')}>
         <PageToolbar>
           <PageToolbarSection>
             <PageToolbarButton

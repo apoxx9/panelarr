@@ -94,12 +94,24 @@ namespace Panelarr.Api.V1.ComicFiles
 
             if (issueIds.Any())
             {
+                // Three batched queries instead of three queries per issue id
+                var issues = _issueService.GetIssues(issueIds);
+                var seriesByMetadataId = _seriesService.GetAllSeries().ToDictionary(s => s.SeriesMetadataId);
+                var filesByIssueId = _mediaFileService.GetFilesByIssues(issues.Select(i => i.Id).ToList())
+                    .GroupBy(f => f.IssueId)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
                 var result = new List<ComicFileResource>();
-                foreach (var issueId in issueIds)
+
+                foreach (var issue in issues)
                 {
-                    var issue = _issueService.GetIssue(issueId);
-                    var issueSeries = _seriesService.GetSeries(issue.SeriesId);
-                    result.AddRange(_mediaFileService.GetFilesByIssue(issue.Id).ConvertAll(f => f.ToResource(issueSeries, _upgradableSpecification)));
+                    if (!filesByIssueId.TryGetValue(issue.Id, out var files) ||
+                        !seriesByMetadataId.TryGetValue(issue.SeriesMetadataId, out var issueSeries))
+                    {
+                        continue;
+                    }
+
+                    result.AddRange(files.ConvertAll(f => f.ToResource(issueSeries, _upgradableSpecification)));
                 }
 
                 return result;

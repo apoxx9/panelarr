@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using NLog;
 using NzbDrone.Common.Disk;
@@ -116,6 +117,27 @@ namespace NzbDrone.Core.MediaFiles
 
         public void HandleAsync(SeriesDeletedEvent message)
         {
+            if (!message.DeleteFiles)
+            {
+                // The files stay on disk, but their rows would keep pointing at
+                // the deleted series' issues — invisible to the Library Import
+                // page until housekeeping unlinks them. Sever the mapping now so
+                // they immediately reappear as unmapped. Path-based on purpose:
+                // the issues may already be gone when this handler runs.
+                var keptFiles = _mediaFileService.GetFilesWithBasePath(message.Series.Path)
+                    .Where(f => f.IssueId > 0)
+                    .ToList();
+
+                if (keptFiles.Any())
+                {
+                    keptFiles.ForEach(f => f.IssueId = 0);
+                    _mediaFileService.Update(keptFiles);
+                    _logger.Debug("Unlinked {0} kept files for deleted series {1}", keptFiles.Count, message.Series.Name);
+                }
+
+                return;
+            }
+
             if (message.DeleteFiles)
             {
                 var series = message.Series;

@@ -13,6 +13,7 @@ namespace NzbDrone.Core.MediaFiles
         List<ComicFile> GetFilesBySeries(int seriesId);
         List<ComicFile> GetFilesBySeriesMetadataId(int seriesMetadataId);
         List<ComicFile> GetFilesByIssue(int issueId);
+        List<ComicFile> GetFilesByIssues(List<int> issueIds);
         List<ComicFile> GetUnmappedFiles();
         List<ComicFile> GetFilesWithBasePath(string path);
         List<ComicFile> GetFileWithPath(List<string> paths);
@@ -68,6 +69,11 @@ namespace NzbDrone.Core.MediaFiles
         public List<ComicFile> GetFilesByIssue(int issueId)
         {
             return Query(Builder().Where<Issue>(b => b.Id == issueId));
+        }
+
+        public List<ComicFile> GetFilesByIssues(List<int> issueIds)
+        {
+            return Query(Builder().Where<Issue>(b => issueIds.Contains(b.Id)));
         }
 
         public List<ComicFile> GetUnmappedFiles()
