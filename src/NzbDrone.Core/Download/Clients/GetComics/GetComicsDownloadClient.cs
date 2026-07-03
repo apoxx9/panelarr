@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using FluentValidation.Results;
 using NLog;
@@ -23,6 +24,11 @@ namespace NzbDrone.Core.Download.Clients.GetComics
 {
     public class GetComicsDownloadClient : DownloadClientBase<GetComicsDownloadClientSettings>
     {
+        private const string BrowserUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+        // DataNodes enforces a ~5s countdown before op=download2 is honoured.
+        private static readonly TimeSpan DataNodesCountdown = TimeSpan.FromSeconds(6);
+
         private readonly IHttpClient _httpClient;
         private readonly IGetComicsDownloadLinkExtractor _linkExtractor;
         private readonly ICached<GetComicsDownloadItem> _downloadCache;
@@ -62,7 +68,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
                 {
                     AllowAutoRedirect = true
                 };
-                request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                request.Headers.Add("User-Agent", BrowserUserAgent);
 
                 var response = await _httpClient.GetAsync(request);
                 postPageHtml = response.Content;
@@ -82,34 +88,58 @@ namespace NzbDrone.Core.Download.Clients.GetComics
                 throw new ReleaseDownloadException(remoteIssue.Release, "No download links found on GetComics post page");
             }
 
-            // Step 3: Try to download from the best available link
-            var downloadUrl = await ResolveDownloadUrl(downloadLinks);
-
-            if (downloadUrl == null)
-            {
-                var availableHosts = string.Join(", ", downloadLinks.Select(l => l.Host.ToString()));
-                _logger.Warn("GetComics: Could not resolve any downloadable URL. Available hosts: {0}", availableHosts);
-                throw new ReleaseDownloadException(remoteIssue.Release, $"Could not resolve a direct download URL. Available hosts: {availableHosts}");
-            }
-
-            // Transform host-specific URLs to direct download URLs
-            downloadUrl = TransformToDirectDownloadUrl(downloadUrl);
-
-            _logger.Info("GetComics: Downloading from resolved URL: {0}", downloadUrl);
-
-            // Step 4: Download the file
+            // Step 3: Try each mirror in priority order until one yields a real
+            // file. A single dead mirror (host down, HTML error page, captcha
+            // wall) must not fail the grab when the post lists other mirrors.
             var downloadFolder = Settings.DownloadFolder;
-            var fileName = cleanTitle + GetFileExtension(downloadUrl, ".cbz");
-            var filePath = Path.Combine(downloadFolder, fileName);
+            string filePath = null;
+            var attempted = new List<string>();
 
-            try
+            foreach (var link in downloadLinks)
             {
-                await _httpClient.DownloadFileAsync(downloadUrl, filePath);
+                string resolvedUrl;
+                try
+                {
+                    resolvedUrl = await ResolveMirrorUrl(link);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Debug(ex, "GetComics: Failed to resolve {0} mirror, trying next", link.Host);
+                    continue;
+                }
+
+                if (resolvedUrl == null)
+                {
+                    continue;
+                }
+
+                attempted.Add(link.Host.ToString());
+                var candidatePath = Path.Combine(downloadFolder, cleanTitle + GetFileExtension(resolvedUrl, ".cbz"));
+
+                try
+                {
+                    _logger.Info("GetComics: Downloading from {0} mirror: {1}", link.Host, resolvedUrl);
+                    await _httpClient.DownloadFileAsync(resolvedUrl, candidatePath);
+                    filePath = candidatePath;
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "GetComics: Download from {0} mirror failed, trying next mirror", link.Host);
+                    if (_diskProvider.FileExists(candidatePath))
+                    {
+                        _diskProvider.DeleteFile(candidatePath);
+                    }
+                }
             }
-            catch (Exception ex)
+
+            if (filePath == null)
             {
-                _logger.Error(ex, "GetComics: Failed to download file from {0}", downloadUrl);
-                throw new ReleaseDownloadException(remoteIssue.Release, "Failed to download comic file", ex);
+                var hosts = attempted.Any()
+                    ? string.Join(", ", attempted)
+                    : string.Join(", ", downloadLinks.Select(l => l.Host.ToString()));
+                _logger.Warn("GetComics: All mirrors failed for '{0}'. Attempted: {1}", title, hosts);
+                throw new ReleaseDownloadException(remoteIssue.Release, $"All GetComics mirrors failed. Hosts: {hosts}");
             }
 
             _logger.Info("GetComics: Successfully downloaded '{0}' to '{1}'", title, filePath);
@@ -228,47 +258,151 @@ namespace NzbDrone.Core.Download.Clients.GetComics
         }
 
         /// <summary>
-        /// Resolves a final downloadable URL from the list of extracted links.
-        /// Tries each link in priority order. For getcomics.org/dlds/ redirects,
-        /// follows the redirect to get the actual host URL.
+        /// Resolves a single extracted link into a directly-downloadable URL, or
+        /// null if this host cannot be automated (captcha / browser-only). Handles
+        /// the getcomics.org/dlds/ redirect and per-host resolution.
         /// </summary>
-        private async Task<string> ResolveDownloadUrl(List<GetComicsDownloadLink> links)
+        private async Task<string> ResolveMirrorUrl(GetComicsDownloadLink link)
         {
-            foreach (var link in links)
+            var url = link.Url;
+
+            if (link.IsRedirect)
             {
-                try
+                url = await FollowRedirect(url);
+
+                if (url == null)
                 {
-                    var url = link.Url;
-
-                    // For redirect links, resolve to the actual URL
-                    if (link.IsRedirect)
-                    {
-                        url = await FollowRedirect(url);
-
-                        if (url == null)
-                        {
-                            _logger.Debug("GetComics: Redirect resolution failed for {0} ({1})", link.Label, link.Url);
-                            continue;
-                        }
-
-                        _logger.Debug("GetComics: Redirect resolved {0} -> {1}", link.Label, url);
-                    }
-
-                    // Check if the resolved URL is from a directly-downloadable host
-                    if (IsDirectlyDownloadable(url))
-                    {
-                        return url;
-                    }
-
-                    _logger.Debug("GetComics: Host not directly downloadable, skipping: {0} ({1})", link.Label, url);
+                    _logger.Debug("GetComics: Redirect resolution failed for {0} ({1})", link.Label, link.Url);
+                    return null;
                 }
-                catch (Exception ex)
-                {
-                    _logger.Debug(ex, "GetComics: Error resolving link {0}", link.Label);
-                }
+
+                _logger.Debug("GetComics: Redirect resolved {0} -> {1}", link.Label, url);
             }
 
+            // Pixeldrain serves files via a simple API URL transform.
+            if (url.Contains("pixeldrain.com", StringComparison.OrdinalIgnoreCase))
+            {
+                return TransformToDirectDownloadUrl(url);
+            }
+
+            // DataNodes is an XFS host: two-step form POST yields a JSON tunnel URL.
+            if (url.Contains("datanodes.to", StringComparison.OrdinalIgnoreCase))
+            {
+                return await ResolveDataNodesUrl(url);
+            }
+
+            // Everything else (mega, mediafire, google drive, vikingfile, fileq,
+            // rootz, terabox) needs captcha/browser interaction we can't automate.
+            _logger.Debug("GetComics: Host not automatable, skipping: {0}", url);
             return null;
+        }
+
+        /// <summary>
+        /// Resolves a DataNodes file-page URL to a direct download URL by walking
+        /// its XFS two-step flow: GET the page to read the hidden form, POST
+        /// op=download1 to reach the countdown page, wait out the server-side
+        /// countdown, then POST op=download2 which returns JSON {url}. The session
+        /// cookie set on the first response is persisted (StoreResponseCookie) so
+        /// the second POST is recognised.
+        /// </summary>
+        private async Task<string> ResolveDataNodesUrl(string fileUrl)
+        {
+            var uri = new Uri(fileUrl);
+            var postUrl = $"{uri.Scheme}://{uri.Host}/download";
+
+            var pageRequest = new HttpRequest(fileUrl) { AllowAutoRedirect = true };
+            pageRequest.Headers.Add("User-Agent", BrowserUserAgent);
+            pageRequest.StoreResponseCookie = true;
+            var pageResponse = await _httpClient.GetAsync(pageRequest);
+
+            var id = ExtractHiddenFormValue(pageResponse.Content, "id");
+            if (id.IsNullOrWhiteSpace())
+            {
+                _logger.Debug("GetComics: DataNodes page had no download form id: {0}", fileUrl);
+                return null;
+            }
+
+            var fname = ExtractHiddenFormValue(pageResponse.Content, "fname") ?? string.Empty;
+
+            var step1 = BuildDataNodesPost(postUrl, new Dictionary<string, string>
+            {
+                { "op", "download1" },
+                { "usr_login", string.Empty },
+                { "id", id },
+                { "fname", fname },
+                { "referer", string.Empty },
+                { "method_free", "Free Download >>" },
+            });
+            await _httpClient.PostAsync(step1);
+
+            // The countdown is server-enforced; posting download2 early is rejected.
+            await Task.Delay(DataNodesCountdown);
+
+            var step2 = BuildDataNodesPost(postUrl, new Dictionary<string, string>
+            {
+                { "op", "download2" },
+                { "id", id },
+                { "rand", string.Empty },
+                { "referer", string.Empty },
+                { "method_free", "Free Download >>" },
+                { "method_premium", string.Empty },
+                { "g_captch__a", "1" },
+            });
+            step2.Headers.Accept = "application/json";
+            var jsonResponse = await _httpClient.PostAsync(step2);
+
+            var directUrl = ExtractDataNodesJsonUrl(jsonResponse.Content);
+            if (directUrl.IsNullOrWhiteSpace())
+            {
+                _logger.Debug("GetComics: DataNodes download2 returned no url. Body: {0}", jsonResponse.Content);
+                return null;
+            }
+
+            return directUrl;
+        }
+
+        private HttpRequest BuildDataNodesPost(string postUrl, Dictionary<string, string> form)
+        {
+            var builder = new HttpRequestBuilder(postUrl).Post();
+            builder.AllowAutoRedirect = false;
+
+            foreach (var pair in form)
+            {
+                builder.AddFormParameter(pair.Key, pair.Value);
+            }
+
+            var request = builder.Build();
+            request.Headers.Add("User-Agent", BrowserUserAgent);
+            request.StoreRequestCookie = true;
+            request.StoreResponseCookie = true;
+            request.SuppressHttpError = true;
+            return request;
+        }
+
+        internal static string ExtractHiddenFormValue(string html, string name)
+        {
+            if (string.IsNullOrWhiteSpace(html))
+            {
+                return null;
+            }
+
+            var match = Regex.Match(
+                html,
+                $@"name=""{Regex.Escape(name)}""\s+value=""([^""]*)""",
+                RegexOptions.IgnoreCase);
+
+            return match.Success ? WebUtility.HtmlDecode(match.Groups[1].Value) : null;
+        }
+
+        internal static string ExtractDataNodesJsonUrl(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return null;
+            }
+
+            var match = Regex.Match(json, @"""url""\s*:\s*""([^""]+)""", RegexOptions.IgnoreCase);
+            return match.Success ? WebUtility.UrlDecode(match.Groups[1].Value) : null;
         }
 
         /// <summary>
@@ -282,7 +416,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
                 {
                     AllowAutoRedirect = false,
                 };
-                request.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                request.Headers.Add("User-Agent", BrowserUserAgent);
 
                 var response = await _httpClient.GetAsync(request);
 
@@ -307,50 +441,6 @@ namespace NzbDrone.Core.Download.Clients.GetComics
                 _logger.Debug(ex, "GetComics: Failed to follow redirect for {0}", url);
                 return null;
             }
-        }
-
-        /// <summary>
-        /// Determines if a URL points to a host where we can directly download files
-        /// via a simple HTTP GET (following redirects).
-        /// </summary>
-        private static bool IsDirectlyDownloadable(string url)
-        {
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                return false;
-            }
-
-            var uri = url.ToLowerInvariant();
-
-            // These hosts serve files directly via HTTP
-            if (uri.Contains("pixeldrain.com"))
-            {
-                return true;
-            }
-
-            if (uri.Contains("datanodes.to"))
-            {
-                return true;
-            }
-
-            if (uri.Contains("vikingfile.com"))
-            {
-                return true;
-            }
-
-            if (uri.Contains("fileq.net"))
-            {
-                return true;
-            }
-
-            if (uri.Contains("rootz.so"))
-            {
-                return true;
-            }
-
-            // These hosts require special handling / browser interaction -- not directly downloadable
-            // mega.nz, mediafire.com, drive.google.com, terabox.com
-            return false;
         }
 
         /// <summary>

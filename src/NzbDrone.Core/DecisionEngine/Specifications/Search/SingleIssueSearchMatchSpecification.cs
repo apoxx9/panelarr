@@ -1,4 +1,3 @@
-using System.Linq;
 using NLog;
 using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Parser.Model;
@@ -30,7 +29,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.Search
                 return Decision.Accept();
             }
 
-            if (!remoteIssue.ParsedIssueInfo.IssueTitle.Any())
+            if (remoteIssue.ParsedIssueInfo.IsCollection)
             {
                 _logger.Debug("Collection pack result during single issue search, skipping.");
                 return Decision.Reject("Full series pack");
