@@ -19,6 +19,8 @@ RUN yarn install --frozen-lockfile && yarn build
 FROM --platform=${BUILDPLATFORM:-linux/amd64} mcr.microsoft.com/dotnet/sdk:10.0 AS backend
 
 ARG TARGETARCH
+# Four-part assembly version (e.g. 1.1.2.123); empty keeps the 1.0.0.* dev default
+ARG VERSION=""
 
 WORKDIR /app
 
@@ -34,7 +36,8 @@ RUN dotnet restore ./src/Panelarr.sln && \
         --self-contained false \
         -o /build \
         --no-restore \
-        -p:RunAnalyzers=false && \
+        -p:RunAnalyzers=false \
+        ${VERSION:+-p:AssemblyVersion=$VERSION} && \
     dotnet publish ./src/NzbDrone.Mono/Panelarr.Mono.csproj \
         -c Release \
         -f net10.0 \
@@ -42,7 +45,8 @@ RUN dotnet restore ./src/Panelarr.sln && \
         --self-contained false \
         -o /build \
         --no-restore \
-        -p:RunAnalyzers=false
+        -p:RunAnalyzers=false \
+        ${VERSION:+-p:AssemblyVersion=$VERSION}
 
 # ── Runtime image ──────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
