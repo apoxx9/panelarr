@@ -10,6 +10,7 @@ using NzbDrone.Core.MediaFiles.IssueImport;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.RootFolders;
 
 namespace NzbDrone.Core.MediaFiles
 {
@@ -28,6 +29,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IDiskTransferService _diskTransferService;
         private readonly IDiskProvider _diskProvider;
         private readonly IRootFolderWatchingService _rootFolderWatchingService;
+        private readonly IRootFolderService _rootFolderService;
         private readonly IMediaFileAttributeService _mediaFileAttributeService;
         private readonly IEventAggregator _eventAggregator;
         private readonly IConfigService _configService;
@@ -39,6 +41,7 @@ namespace NzbDrone.Core.MediaFiles
                                       IDiskTransferService diskTransferService,
                                       IDiskProvider diskProvider,
                                       IRootFolderWatchingService rootFolderWatchingService,
+                                      IRootFolderService rootFolderService,
                                       IMediaFileAttributeService mediaFileAttributeService,
                                       IEventAggregator eventAggregator,
                                       IConfigService configService,
@@ -50,6 +53,7 @@ namespace NzbDrone.Core.MediaFiles
             _diskTransferService = diskTransferService;
             _diskProvider = diskProvider;
             _rootFolderWatchingService = rootFolderWatchingService;
+            _rootFolderService = rootFolderService;
             _mediaFileAttributeService = mediaFileAttributeService;
             _eventAggregator = eventAggregator;
             _configService = configService;
@@ -147,7 +151,11 @@ namespace NzbDrone.Core.MediaFiles
             var comicFileFolder = Path.GetDirectoryName(filePath);
             var issueFolder = _buildFileNames.BuildIssuePath(series);
             var seriesFolder = series.Path;
-            var rootFolder = new OsPath(seriesFolder).Directory.FullPath;
+
+            // The series folder may sit below intermediate folders (e.g. a publisher
+            // folder) that don't exist yet; only the configured root folder itself
+            // must already be present.
+            var rootFolder = _rootFolderService.GetBestRootFolderPath(seriesFolder);
 
             if (!_diskProvider.FolderExists(rootFolder))
             {

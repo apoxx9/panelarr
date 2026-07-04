@@ -49,6 +49,10 @@ namespace NzbDrone.Core.Test.MediaFiles
             Mocker.GetMock<IRootFolderService>()
                 .Setup(c => c.GetBestRootFolder(It.IsAny<string>()))
                 .Returns(new RootFolder());
+
+            Mocker.GetMock<IRootFolderService>()
+                .Setup(c => c.GetBestRootFolderPath(It.IsAny<string>()))
+                .Returns<string>(c => Path.GetDirectoryName(c));
         }
 
         private void GivenSingleIssueWithSingleComicFile()

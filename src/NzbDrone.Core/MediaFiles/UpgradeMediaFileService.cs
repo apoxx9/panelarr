@@ -45,7 +45,10 @@ namespace NzbDrone.Core.MediaFiles
             var moveFileResult = new ComicFileMoveResult();
             var existingFiles = localIssue.Issue.ComicFiles.Value;
 
-            var rootFolderPath = _diskProvider.GetParentFolder(localIssue.Series.Path);
+            // The series folder may sit below intermediate folders (e.g. a publisher
+            // folder); resolve the configured root folder rather than assuming the
+            // series' parent folder is the root.
+            var rootFolderPath = _rootFolderService.GetBestRootFolderPath(localIssue.Series.Path);
 
             // If there are existing issue files and the root folder is missing, throw, so the old file isn't left behind during the import process.
             if (existingFiles.Any() && !_diskProvider.FolderExists(rootFolderPath))
