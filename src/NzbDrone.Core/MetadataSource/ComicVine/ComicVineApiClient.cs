@@ -33,7 +33,7 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
         {
             _cachedHttpClient = cachedHttpClient;
             _configService = configService;
-            _rateLimiter = new ComicVineRateLimiter();
+            _rateLimiter = new ComicVineRateLimiter(logger);
             _logger = logger;
         }
 
