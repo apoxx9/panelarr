@@ -1,100 +1,95 @@
-# Last Handoff — 2026-07-03 (End of Session 17)
+# Last Handoff — 2026-07-04 (End of Session 18)
 
-Session 17 was the real Mylar migration on the homelab plus the GetComics
-download-path fixes. The library is now live (60 series, 465 files) and
-the GetComics single-issue grab path — flagged least-confident last
-session — was found broken and fixed, shipped as v1.1.3.
+Session 18 shipped two releases (v1.1.4, v1.1.5), verified CI version
+stamping end to end, and proved BOTH download protocols live on the
+homelab: GetComics direct download and Prowlarr → seedbox rTorrent.
+Suite: **2411 passed / 0 failed** at HEAD.
 
-## Where things stand
+## Shipped
 
-- **Homelab (Docker, auth enabled; address/API key — ask the user)** was
-  on v1.1.2 (`1.0.0.20604`) at session end and **still needs to pull
-  `1.1.3`**. It has the full migrated library: **60 series, 465 mapped
-  files, all under /comics/, files untouched** (verified against a
-  472-path pre-import snapshot — see below). GetComics indexer + client
-  configured; health clean.
-- **The migration is DONE and verified.** All 60 cvinfo proposals
-  imported exact, unmonitored. Verification script (in the session
-  scratchpad) confirmed per-series file counts match statistics, every
-  path under /comics/, and mapped+unmapped = the exact 472-path
-  snapshot (proves nothing moved/renamed). **7 files intentionally
-  unmapped:** 4 redundant PDFs in "MMPR: The Return" (each issue also
-  present as .cbz, which won the slot) and 3 "MMPR (2016)" Annuals
-  (ComicVine models annuals as separate volumes, not issues of the
-  parent — the chronic Mylar annuals-merge problem; a real handling
-  decision for later).
-- **Releases:** v1.1.2 (the two Session 16 commits) and **v1.1.3** (CI
-  version-stamping fix + GetComics grab fixes) are both built, pushed,
-  and published to GHCR. Nothing is unpushed; working tree clean.
-- **CI version stamping is FIXED** (commit d19121e): the docker workflow
-  now derives `<tag>.<run#>` and feeds it via a VERSION build arg to
-  both dotnet publish calls. v1.1.2 and earlier still self-report
-  `1.0.0.x` (built before the fix); **v1.1.3 should be the first image
-  to report `1.1.3.x`** — verify this on the homelab after the pull.
-- Suite: **2404 passed / 0 failed** at HEAD (3e8e58b). 12 new tests this
-  session.
+- **v1.1.4** — (a) ComicVine rate limiter reworked: tokens drip
+  continuously (one per ~18s, capped at 200) instead of one hourly
+  burst, plus a throttled Warn when blocking starts (the silent
+  55-min migration stall is structurally gone; 5 new tests).
+  (b) Docker `:latest` now follows release tags (`v*`); main pushes
+  get `:main` instead. The homelab can stay on `latest`.
+- **v1.1.5** — import failed for the FIRST series of any new
+  publisher: ComicFileMovingService/UpgradeMediaFileService assumed
+  the series folder's parent is the root folder, but Panelarr's layout
+  inserts a publisher folder. Now resolves the configured root via
+  RootFolderService (missing-root safety check preserved; 2 new
+  regression tests). Found live: the whole migrated library is Boom
+  Studios, so the first Dynamite series ever imported tripped it.
+- **Version stamping VERIFIED**: homelab reports `1.1.5.79` (was
+  stuck at `1.0.0.x` because `:latest` used to be the unstamped main
+  branch build — root-caused, not a stamping failure).
 
-## Next actions (in order)
+## E2E verifications (both on the live homelab)
 
-1. **Pull `1.1.3` on the homelab + restart.** Then verify two things via
-   API (assistant can drive both): (a) `/system/status` now reports
-   `1.1.3.x`, not `1.0.0.x`; (b) run the **GetComics e2e** — grab →
-   download → import. Good targets (missing, with a working datanodes
-   mirror): SIKTC #47 (issueId 451) or Minor Arcana #16 (issueId 261,
-   series is monitored from last session). Watch the download step: the
-   datanodes handler is new and was verified via curl but not yet
-   through Panelarr's own HTTP stack.
-2. **Rate-limiter UX fixes (proposed v1.1.4) — awaiting user decision.**
-   `ComicVineRateLimiter` is 200/hr refilled in a single hourly burst,
-   with no logging and no progress hook — it silently stalled the
-   migration for ~55 min mid-import and looked hung. Two small
-   independent fixes proposed: (a) log a warning when it starts blocking
-   ("rate limit reached, resuming at HH:MM"); (b) drip tokens
-   continuously (1 per ~18s) instead of an hourly burst, so bulk imports
-   crawl visibly instead of freezing. Metron's limiter already uses a
-   per-minute window and is fine. User to decide: both / just the log /
-   hold.
-3. **ruTorrent/rTorrent download testing (user request).** Panelarr has
-   an rTorrent client (ruTorrent is its web UI). Untested in the fork;
-   needs a live rTorrent instance configured on the homelab. Separate
-   protocol from GetComics DirectDownload.
-4. Backlog: annuals handling decision (item 1 above); delete the 4
-   redundant PDFs in MMPR: The Return; issues-endpoint DB-level
-   pagination (last scale-readiness P1); Publisher UI Tier 2B; staging-
-   folder import (docs/staging-folder-import.md, new this session — a
-   user idea: import+transfer from a staging folder into /comics);
-   calendar → weekly pull list track (feature-landscape #1).
+- **GetComics direct download**: SIKTC #47 (issueId 451) — search →
+  grab → datanodes mirror (two-step form POST → tunnel URL, through
+  Panelarr's real HTTP stack) → import, ~7s total. The new datanodes
+  handler is production-verified.
+- **Torrent via Prowlarr + seedbox rTorrent**: Ben 10 (2026) #1
+  (seriesId 61, issueId 470) — Torznab search → grab → seedbox
+  download into `downloads/Panelarr/` → visible through the homelab's
+  seedbox mount → remote path mapping translation → import with
+  publisher folder auto-created.
 
-## What shipped in v1.1.3 (the GetComics fix)
+## Homelab topology (secrets NOT here — ask the user for address/API key)
 
-Two defects made every real single-issue grab fail:
-- `SingleIssueSearchMatchSpecification` called `IssueTitle.Any()` to
-  detect full-series packs; comics issues are named by number so
-  IssueTitle is routinely null → ArgumentNullException rejected every
-  result. Now uses the parser's `IsCollection` flag.
-- The download client listed datanodes/vikingfile/fileq/rootz as
-  directly-downloadable, but only pixeldrain had a working resolver; the
-  rest return HTML to a plain GET → "Site responded with html content".
-  Added a real **datanodes** handler (XFS two-step form POST → JSON
-  tunnel url, reverse-engineered and verified end-to-end against the
-  live site), and dropped the three fake hosts. **vikingfile is
-  Cloudflare-Turnstile gated and cannot be automated server-side.**
-  fileq (jQuery-XFS) and rootz (Next.js SPA) would each need their own
-  handler. Downloads now try each extracted mirror in priority order,
-  falling back to the next on failure instead of giving up on the first.
+Unraid host. Panelarr container mounts: `/comics` = remote library
+share; `/downloads` = a subfolder of the SMB/remote seedbox mount
+(container `/downloads` **is** the seedbox's `downloads/Panelarr/`
+directory). Prowlarr runs on the same host (port 9696); indexers:
+GetComics (direct) + a private tracker via Torznab (categories fixed
+to **7030 Comics only** — 7020/8010 caused EPUB/MOBI novel noise).
+rTorrent download client = a remote seedbox (XML-RPC over SSL);
+client Directory is set to the seedbox's `downloads/Panelarr` so
+grabs land inside the mounted folder; remote path mapping translates
+seedbox paths → `/downloads/`. GetComics client downloads to
+`/downloads/getcomics` (its own subfolder, intended).
+
+## Quirks discovered (candidate fixes, not yet done)
+
+1. **Ignored-download cache short-circuit** (potential small fix):
+   removing a queue item without removing from the client marks the
+   tracked download Ignored in the in-memory cache;
+   `TrackedDownloadService.TrackDownload` then returns the cached item
+   without re-reading download history, so re-grabbing the same
+   torrent (same infohash — note: cross-seeded torrents on different
+   trackers can share ONE infohash) never resurrects it until a
+   restart rebuilds the cache. Bit us live; restart was the fix.
+2. **Quality "Unknown" in the Activity manual-import modal** — seen
+   once by the user, unreproducible afterwards: every backend path
+   (folder scan, single-file, with/without client context) returns
+   Archive for the file, stored data is clean, and AggregateQuality
+   is unchanged since v1.0.1. Likely a frontend placeholder row during
+   one of the day's broken states. If it reappears: screenshot, keep
+   the modal open, hit `/api/v1/manualimport?downloadId=` live.
+
+## Next actions (suggested order)
+
+1. Quality-Unknown repro watch (item 2 above) — passive.
+2. Consider the ignored-download cache fix (item 1 above) for v1.1.6.
+3. Annuals handling decision (3 unmapped "MMPR (2016)" annuals):
+   separate CV volumes as separate series vs Mylar-style merge toggle.
+4. Delete the 4 redundant PDFs in "MMPR: The Return" (each issue also
+   present as .cbz).
+5. Backlog: issues-endpoint DB pagination (last scale P1), Publisher
+   UI Tier 2B, staging-folder import (docs/staging-folder-import.md),
+   calendar → weekly pull list, terminology key-debt (130 keys; add
+   the RTorrentSettings `MusicCategory`/`MusicDirectory` naming
+   fossils to it).
 
 ## Parked decisions still open
 
 - MetadataProfileId accepted but unused by LibraryImportCommand.
-- Annuals: map to their CV annual volumes as separate series, or add a
-  Mylar-style merge-into-parent toggle?
-- "Pull List" label on the Issueshelf feature vs. the real pull-list
-  feature name collision (terminology audit §2.2).
-- Terminology key-debt cleanup (130 legacy localization key names).
+- Annuals (see above). — "Pull List" naming collision (terminology
+  audit §2.2). — Terminology key-debt cleanup.
 
-## Reading list for context
+## Reading list
 
-docs/staging-folder-import.md (new backlog idea), docs/migration-
-rehearsal.md, docs/tagged-library-import.md (shipped), docs/scale-
-readiness.md (P1s remaining), docs/publisher-ui.md (Tier 2B),
-docs/feature-landscape.md (roadmap).
+docs/staging-folder-import.md, docs/scale-readiness.md,
+docs/publisher-ui.md, docs/feature-landscape.md,
+docs/tagged-library-import.md (shipped; context for import flows).

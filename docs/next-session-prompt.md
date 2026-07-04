@@ -1,22 +1,46 @@
 # Panelarr — Next Session Prompt
 
-Copy this into the first message of a new Claude session:
+Copy this into the first message of a new Claude session (fill in the
+API key):
 
 ---
 
-We are continuing work on Panelarr, a comic book management app (fork of Readarr adapted for comics). Start by reading `docs/last-handoff.md` and `docs/AUDIT.md` — these contain the full context from our last session where we completed the entire feature audit with zero open items.
+We're continuing work on Panelarr (~/Projects/panelarr). Read
+`docs/last-handoff.md` first — it has full Session 18 state. Short
+version: v1.1.4 (rate-limiter drip + `:latest` follows release tags)
+and v1.1.5 (publisher-folder import fix) are shipped and verified on
+the homelab; BOTH download protocols are proven live end-to-end
+(GetComics direct download incl. the datanodes handler, and Prowlarr →
+seedbox rTorrent → mount → path mapping → import). Suite is 2411/0.
 
-**Session 12 results:** All 31 audit items PASS, all 3,023 tests pass, zero failures. Features implemented: retag/ComicInfo.xml writer, comic parser for torrent releases, metadata override UI, qBittorrent v5 fix, cutoff unmet fix, search relevance sorting, SeriesGroup cleanup, all pre-existing test failures fixed.
+Homelab: <paste address here>, API key: <paste key here>. It runs
+`ghcr.io/apoxx9/panelarr:latest`, which now tracks releases — currently
+1.1.5.79.
 
-**The audit is complete.** There are no open FIX, IMPROVE, or REVIEW items. The project is in a clean state for new feature work.
+Today's agenda, in order:
 
-**Potential directions for this session** (pick based on priorities):
+1. **Ignored-download cache fix (proposed v1.1.6).** Removing a queue
+   item without removing it from the client leaves the tracked download
+   cached as Ignored; `TrackedDownloadService.TrackDownload` returns the
+   cached item without re-reading download history, so re-grabbing the
+   same infohash stays invisible until a restart. Bit us live in
+   Session 18 (cross-seeded torrents share one infohash across
+   trackers). Discuss the fix shape first, then implement + test.
+2. **Annuals handling decision** (3 unmapped "MMPR (2016)" annuals):
+   map their CV annual volumes as separate series vs a Mylar-style
+   merge-into-parent toggle. Discuss, decide, maybe implement.
+3. **Delete the 4 redundant PDFs** in "MMPR: The Return" (each issue
+   also present as .cbz which won the file slot).
+4. If time, pick from backlog: issues-endpoint DB pagination (last
+   scale P1), staging-folder import (docs/staging-folder-import.md),
+   Publisher UI Tier 2B, calendar → weekly pull list, terminology
+   key-debt (130 keys + the RTorrentSettings Music* naming fossils).
 
-1. **UI polish for metadata overrides** — Add per-field "Clear Override" buttons, visual indicators for overridden fields in the detail views (not just edit modal)
-2. **Comic parser edge cases** — Expand torrent release title parsing for GetComics, scene group conventions, and other indexer formats beyond MAM
-3. **Publisher management UI** — Currently API-only CRUD. Add a dedicated settings page for browsing/editing publishers
-4. **Filename parser `#` handling** — Comic filenames with `#` in issue numbers (e.g. "Batman #45") don't parse correctly without series-override context
-5. **Auto-migrate existing quality profiles** — Enable `UpgradeAllowed` on existing installations (currently only fixed for new installs)
-6. **New features** — What's the next big thing you want Panelarr to do?
+Standing watch: if quality "Unknown" ever reappears in the Activity
+manual-import modal, screenshot it and keep the modal open — then query
+`/api/v1/manualimport?downloadId=` live to pin frontend vs backend
+(Session 18 could not reproduce it; all backend paths return Archive).
 
-The codebase is at `github.com/apoxx9/panelarr`. Docker image: `ghcr.io/apoxx9/panelarr:latest`. Local dev: `dotnet run --project src/NzbDrone.Console --framework net10.0`. App runs at http://localhost:8787.
+Standing rules as always: test before presenting, discuss designs
+before implementing, scan before any push, no AI attribution in
+commits, ask before pushing.
