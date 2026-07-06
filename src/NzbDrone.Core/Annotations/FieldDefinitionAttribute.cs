@@ -82,7 +82,6 @@ namespace NzbDrone.Core.Annotations
         Captcha,
         OAuth,
         Device,
-        Issueshelf,
         TagSelect
     }
 

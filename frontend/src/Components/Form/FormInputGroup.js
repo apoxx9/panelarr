@@ -14,7 +14,6 @@ import EnhancedSelectInputConnector from './EnhancedSelectInputConnector';
 import FormInputHelpText from './FormInputHelpText';
 import IndexerFlagsSelectInput from './IndexerFlagsSelectInput';
 import IndexerSelectInputConnector from './IndexerSelectInputConnector';
-import IssueshelfInputConnector from './IssueshelfInputConnector';
 import KeyValueListInput from './KeyValueListInput';
 import MetadataProfileSelectInputConnector from './MetadataProfileSelectInputConnector';
 import MonitorIssuesSelectInput from './MonitorIssuesSelectInput';
@@ -46,9 +45,6 @@ function getComponent(type) {
 
     case inputTypes.DEVICE:
       return DeviceInputConnector;
-
-    case inputTypes.ISSUES_LISTHELF:
-      return IssueshelfInputConnector;
 
     case inputTypes.KEY_VALUE_LIST:
       return KeyValueListInput;

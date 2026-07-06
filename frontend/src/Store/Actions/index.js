@@ -10,7 +10,6 @@ import * as issues from './issueActions';
 import * as issueFiles from './issueFileActions';
 import * as issueHistory from './issueHistoryActions';
 import * as issueIndex from './issueIndexActions';
-import * as issueStudio from './issueshelfActions';
 import * as oAuth from './oAuthActions';
 import * as organizePreview from './organizePreviewActions';
 import * as paths from './pathActions';
@@ -39,7 +38,6 @@ export default [
   issueHistory,
   issueIndex,
   issues,
-  issueStudio,
   calendar,
   captcha,
   commands,

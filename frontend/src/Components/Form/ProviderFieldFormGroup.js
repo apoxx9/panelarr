@@ -14,8 +14,6 @@ function getType({ type, selectOptionsProviderAction }) {
       return inputTypes.CHECK;
     case 'device':
       return inputTypes.DEVICE;
-    case 'issueshelf':
-      return inputTypes.ISSUES_LISTHELF;
     case 'password':
       return inputTypes.PASSWORD;
     case 'number':

@@ -2,7 +2,6 @@ export const AUTO_COMPLETE = 'autoComplete';
 export const CAPTCHA = 'captcha';
 export const CHECK = 'check';
 export const DEVICE = 'device';
-export const ISSUES_LISTHELF = 'issueshelf';
 export const KEY_VALUE_LIST = 'keyValueList';
 export const MONITOR_ISSUES_LIST_SELECT = 'monitorIssuesSelect';
 export const MONITOR_NEW_ITEMS_SELECT = 'monitorNewItemsSelect';
@@ -31,7 +30,6 @@ export const all = [
   CAPTCHA,
   CHECK,
   DEVICE,
-  ISSUES_LISTHELF,
   KEY_VALUE_LIST,
   MONITOR_ISSUES_LIST_SELECT,
   MONITOR_NEW_ITEMS_SELECT,
