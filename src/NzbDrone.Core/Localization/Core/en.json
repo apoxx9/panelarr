@@ -651,7 +651,7 @@
   "MetadataProfileIdHelpText": "Metadata Profile list items should be added with",
   "MetadataProfiles": "Metadata Profiles",
   "MetadataProviderHealthCheckMessage": "No metadata providers configured. Add a ComicVine API key or Metron credentials in Settings > Metadata to enable series search and metadata fetching",
-  "MetadataProviderSource": "Metadata Provider Source",
+  "MetadataProviderSource": "Metadata Provider",
   "MetadataSettings": "Metadata Settings",
   "MetadataSettingsSummary": "Create metadata files when issues are imported or series are refreshed",
   "MetadataSource": "Metadata Source",

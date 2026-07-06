@@ -30,6 +30,14 @@ namespace NzbDrone.Common.Test.Http
     public class HttpClientFixture<TDispatcher> : TestBase<HttpClient>
         where TDispatcher : IHttpDispatcher
     {
+        // Stable external content for redirect/download tests: raw files from
+        // this project's own repo, pinned to a commit so bytes never change.
+        // (The Sonarr-lineage tests pointed at the project homepage, but
+        // panelarr.com does not exist — they failed on any machine.)
+        private const string PinnedRawBase = "https://raw.githubusercontent.com/apoxx9/panelarr/d1e7f9298cebbaf208ec2ea0880c072a6f39ab50";
+        private const string PinnedLogoUrl = PinnedRawBase + "/Logo/256.png";
+        private const long PinnedLogoSize = 53035;
+
         private static string[] _httpBinHosts = new[] { "eu.httpbin.org", "httpbin.org" };
         private int _httpBinSleep;
         private static int _httpBinRandom;
@@ -318,7 +326,7 @@ namespace NzbDrone.Common.Test.Http
         public async Task should_follow_redirects_to_https()
         {
             var request = new HttpRequestBuilder($"https://{_httpBinHost}/redirect-to")
-                .AddQueryParam("url", $"https://panelarr.com/")
+                .AddQueryParam("url", $"{PinnedRawBase}/README.md")
                 .Build();
             request.AllowAutoRedirect = true;
 
@@ -371,13 +379,11 @@ namespace NzbDrone.Common.Test.Http
         {
             var file = GetTempFilePath();
 
-            var url = "https://panelarr.com/img/slider/artistdetails.png";
-
-            await Subject.DownloadFileAsync(url, file);
+            await Subject.DownloadFileAsync(PinnedLogoUrl, file);
 
             var fileInfo = new FileInfo(file);
             fileInfo.Exists.Should().BeTrue();
-            fileInfo.Length.Should().Be(192367);
+            fileInfo.Length.Should().Be(PinnedLogoSize);
         }
 
         [Test]
@@ -386,7 +392,7 @@ namespace NzbDrone.Common.Test.Http
             var file = GetTempFilePath();
 
             var request = new HttpRequestBuilder($"https://{_httpBinHost}/redirect-to")
-                .AddQueryParam("url", $"https://panelarr.com/img/slider/artistdetails.png")
+                .AddQueryParam("url", PinnedLogoUrl)
                 .Build();
 
             await Subject.DownloadFileAsync(request.Url.FullUri, file);
@@ -395,7 +401,7 @@ namespace NzbDrone.Common.Test.Http
 
             var fileInfo = new FileInfo(file);
             fileInfo.Exists.Should().BeTrue();
-            fileInfo.Length.Should().Be(192367);
+            fileInfo.Length.Should().Be(PinnedLogoSize);
         }
 
         [Test]
