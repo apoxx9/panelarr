@@ -34,6 +34,7 @@ namespace Panelarr.Api.V1.ReadingLists
         public int? SeriesId { get; set; }
         public string SeriesTitleSlug { get; set; }
         public string ForeignIssueId { get; set; }
+        public string ForeignSeriesId { get; set; }
         public string SeriesName { get; set; }
         public string IssueNumber { get; set; }
         public string Volume { get; set; }
@@ -247,6 +248,7 @@ namespace Panelarr.Api.V1.ReadingLists
                     Position = slot.Position,
                     IssueId = slot.IssueId,
                     ForeignIssueId = slot.ForeignIssueId,
+                    ForeignSeriesId = slot.ForeignSeriesId,
                     SeriesName = slot.SeriesName,
                     IssueNumber = slot.IssueNumber,
                     Volume = slot.Volume,

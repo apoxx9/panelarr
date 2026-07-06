@@ -111,6 +111,7 @@ namespace NzbDrone.Core.ReadingLists
                 ReadingListId = list.Id,
                 Position = index + 1,
                 ForeignIssueId = $"cv:{issue.Id}",
+                ForeignSeriesId = issue.Volume != null ? $"cv:{issue.Volume.Id}" : null,
                 SeriesName = issue.Volume?.Name,
                 IssueNumber = issue.IssueNumber,
                 Year = ParseYear(issue.CoverDate)
@@ -151,6 +152,7 @@ namespace NzbDrone.Core.ReadingLists
                 ReadingListId = list.Id,
                 Position = index + 1,
                 ForeignIssueId = book.CvIssueId.HasValue ? $"cv:{book.CvIssueId.Value}" : null,
+                ForeignSeriesId = book.CvVolumeId.HasValue ? $"cv:{book.CvVolumeId.Value}" : null,
                 SeriesName = book.Series,
                 IssueNumber = book.Number,
                 Volume = book.Volume,
@@ -190,7 +192,8 @@ namespace NzbDrone.Core.ReadingLists
                     Number = slot.IssueNumber,
                     Volume = slot.Volume,
                     Year = slot.Year,
-                    CvIssueId = ParseForeignId(slot.ForeignIssueId)
+                    CvIssueId = ParseForeignId(slot.ForeignIssueId),
+                    CvVolumeId = ParseForeignId(slot.ForeignSeriesId)
                 };
 
                 if (slot.IssueId.HasValue && libraryIssues.TryGetValue(slot.IssueId.Value, out var issue))

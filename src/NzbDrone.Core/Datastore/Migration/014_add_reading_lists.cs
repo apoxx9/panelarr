@@ -25,6 +25,7 @@ namespace NzbDrone.Core.Datastore.Migration
                 .WithColumn("Position").AsInt32().NotNullable()
                 .WithColumn("IssueId").AsInt32().Nullable().Indexed()
                 .WithColumn("ForeignIssueId").AsString().Nullable().Indexed()
+                .WithColumn("ForeignSeriesId").AsString().Nullable()
                 .WithColumn("SeriesName").AsString().Nullable()
                 .WithColumn("IssueNumber").AsString().Nullable()
                 .WithColumn("Volume").AsString().Nullable()

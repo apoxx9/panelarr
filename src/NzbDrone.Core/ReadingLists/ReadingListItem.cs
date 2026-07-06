@@ -16,8 +16,12 @@ namespace NzbDrone.Core.ReadingLists
         // series) is not in the library.
         public int? IssueId { get; set; }
 
-        // cv:<issue id> when known (provider imports and id-carrying CBLs).
+        // cv:<issue id> / cv:<volume id> when known (provider imports and
+        // id-carrying CBLs). The series id is what the explicit "add missing
+        // series" affordance adds from, and what keeps CBL round-trips
+        // lossless for unresolved slots.
         public string ForeignIssueId { get; set; }
+        public string ForeignSeriesId { get; set; }
 
         // Display + fallback-matching fields, CBL Book attributes:
         // Volume is the series start year by community convention.

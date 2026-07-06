@@ -144,6 +144,7 @@ namespace NzbDrone.Core.Test.ReadingListTests
 
             arc.Name.Should().Be("Test List");
             _storedSlots.Should().HaveCount(2);
+            _storedSlots[0].ForeignSeriesId.Should().Be("cv:796");
             _storedSlots[0].IssueId.Should().Be(900);
             _storedSlots[1].IssueId.Should().BeNull();
             unresolved.Should().HaveCount(1);
@@ -187,6 +188,33 @@ namespace NzbDrone.Core.Test.ReadingListTests
 
             Mocker.GetMock<IReadingListItemRepository>()
                   .Verify(r => r.UpdateMany(It.Is<IList<ReadingListItem>>(l => l.Single().IssueId == null)), Times.Once);
+        }
+
+        [Test]
+        public void should_export_unresolved_slots_with_stored_ids()
+        {
+            _storedSlots.Add(new ReadingListItem
+            {
+                Id = 1,
+                ReadingListId = 1,
+                Position = 1,
+                ForeignIssueId = "cv:107898",
+                ForeignSeriesId = "cv:9223",
+                SeriesName = "Batman: Sword of Azrael",
+                IssueNumber = "1",
+                Volume = "1992",
+                Year = "1992"
+            });
+
+            Mocker.GetMock<IReadingListRepository>()
+                  .Setup(r => r.Get(1))
+                  .Returns(new ReadingList { Id = 1, Name = "Knightfall" });
+
+            var xml = Subject.ExportCbl(1);
+
+            xml.Should().Contain(@"Issue=""107898""");
+            xml.Should().Contain(@"Series=""9223""");
+            xml.Should().Contain(@"Volume=""1992""");
         }
 
         [Test]
