@@ -1,7 +1,11 @@
-# Staging-folder import (designed 2026-07-06, not yet implemented)
+# Staging-folder import (Phase A shipped 2026-07-06, Phase B pending)
 
-Proposed 2026-07-03 during the homelab migration. Design settled in the
-2026-07-06 session; decisions below. Implementation pending.
+Proposed 2026-07-03 during the homelab migration. Design settled and
+Phase A (backend) implemented in the 2026-07-06 session (f3dd568 +
+f65eb45, verified live end-to-end on the local dev instance: staged
+tagged cbz → proposal via cvinfo → StagingImport command → file moved
+and renamed under the existing publisher folder). Phase B (frontend)
+pending.
 
 ## The ask
 
