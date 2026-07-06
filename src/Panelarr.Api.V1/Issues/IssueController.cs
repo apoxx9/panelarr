@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Datastore.Events;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Download;
@@ -68,19 +69,27 @@ namespace Panelarr.Api.V1.Issues
             if (!seriesId.HasValue && !issueIds.Any() && titleSlug.IsNullOrWhiteSpace())
             {
                 var metadataTask = Task.Run(() => _seriesService.GetAllSeries());
-                var issues = _issueService.GetAllIssues();
+
+                List<Issue> issues;
+
+                if (page.HasValue && pageSize.HasValue)
+                {
+                    issues = _issueService.GetAllIssuesPaged(new PagingSpec<Issue>
+                    {
+                        Page = page.Value,
+                        PageSize = pageSize.Value
+                    }).Records;
+                }
+                else
+                {
+                    issues = _issueService.GetAllIssues();
+                }
 
                 var seriesDict = metadataTask.GetAwaiter().GetResult().ToDictionary(x => x.SeriesMetadataId);
 
                 foreach (var issue in issues)
                 {
                     issue.Series = seriesDict[issue.SeriesMetadataId];
-                }
-
-                if (page.HasValue && pageSize.HasValue)
-                {
-                    var skip = (page.Value - 1) * pageSize.Value;
-                    issues = issues.Skip(skip).Take(pageSize.Value).ToList();
                 }
 
                 return MapToResource(issues, false);

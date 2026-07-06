@@ -28,6 +28,7 @@ namespace NzbDrone.Core.Issues
         List<Issue> GetCandidates(int seriesMetadataId, string title);
         void DeleteIssue(int issueId, bool deleteFiles, bool addImportListExclusion = false);
         List<Issue> GetAllIssues();
+        PagingSpec<Issue> GetAllIssuesPaged(PagingSpec<Issue> pagingSpec);
         Issue UpdateIssue(Issue issue);
         void SetIssueMonitored(int issueId, bool monitored);
         void SetMonitored(IEnumerable<int> ids, bool monitored);
@@ -165,6 +166,11 @@ namespace NzbDrone.Core.Issues
         public List<Issue> GetAllIssues()
         {
             return _issueRepository.All().ToList();
+        }
+
+        public PagingSpec<Issue> GetAllIssuesPaged(PagingSpec<Issue> pagingSpec)
+        {
+            return _issueRepository.GetPaged(pagingSpec);
         }
 
         public Issue GetIssue(int issueId)

@@ -48,13 +48,16 @@ What IS real:
   staleness and refreshes everything — ≈2.5 h at 500 series against the
   200/hr limit. Worth a UI hint someday; not a correctness issue.
 
-### 2. ✓ Issues endpoint loads the entire table before paginating
+### 2. ✓ Issues endpoint loads the entire table before paginating — FIXED 2026-07-06
 
-`IssueController.GetIssues` (src/Panelarr.Api.V1/Issues/IssueController.cs:60-86):
-with no seriesId filter it calls `GetAllIssues()` — all ~50k rows into
-memory, materializes Series per row, and only then applies Skip/Take.
-Pagination params don't reduce the load; they only shrink the response.
-Direction: push page/pageSize into the repository query (LIMIT/OFFSET).
+`IssueController.GetIssues`: with no seriesId filter it called
+`GetAllIssues()` — all ~50k rows into memory, materializes Series per
+row, and only then applied Skip/Take. Now, when page/pageSize are
+passed, the query goes through `IssueService.GetAllIssuesPaged` →
+`BasicRepository.GetPaged` (ORDER BY Id LIMIT/OFFSET in SQL, so paging
+is also deterministic now). Response shape unchanged (plain array); the
+no-params full-list behavior is unchanged. The PagingResource envelope
+was deliberately deferred until #5 (virtualized tables) needs it.
 
 ### 3. ✓ N+1 in ComicFileController for issueIds batches
 
