@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper;
 using NzbDrone.Common.Reflection;
+using NzbDrone.Core.Arcs;
 using NzbDrone.Core.Authentication;
 using NzbDrone.Core.Blocklisting;
 using NzbDrone.Core.Configuration;
@@ -210,6 +211,9 @@ namespace NzbDrone.Core.Datastore
             Mapper.Entity<Publisher>("Publishers").RegisterModel();
 
             Mapper.Entity<SeriesRelation>("SeriesRelations").RegisterModel();
+
+            Mapper.Entity<Arc>("Arcs").RegisterModel();
+            Mapper.Entity<ArcIssue>("ArcIssues").RegisterModel();
         }
 
         private static void RegisterMappers()

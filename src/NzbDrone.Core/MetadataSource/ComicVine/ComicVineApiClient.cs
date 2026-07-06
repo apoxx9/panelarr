@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NLog;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Configuration;
@@ -16,6 +17,9 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
         List<ComicVineIssueSummary> GetIssues(int volumeId);
         ComicVineIssueDetail GetIssue(int id);
         ComicVinePublisherDetail GetPublisher(int id);
+        List<ComicVineStoryArcSummary> SearchStoryArcs(string query);
+        ComicVineStoryArcSummary GetStoryArc(int id);
+        List<ComicVineArcIssue> GetStoryArcIssues(int storyArcId);
     }
 
     public class ComicVineApiClient : IComicVineApiClient
@@ -126,6 +130,66 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
 
                 offset += limit;
                 _logger.Debug("Fetching next page of issues for volume {0} (offset: {1}, total: {2})", volumeId, offset, total);
+            }
+
+            return allIssues;
+        }
+
+        public List<ComicVineStoryArcSummary> SearchStoryArcs(string query)
+        {
+            _rateLimiter.WaitForToken();
+
+            var request = BuildRequest("story_arcs");
+            request.Url = request.Url
+                .AddQueryParam("filter", $"name:{query}")
+                .AddQueryParam("field_list", "id,name,deck,publisher,count_of_issue_appearances")
+                .AddQueryParam("limit", "25");
+
+            var response = _cachedHttpClient.Get<ComicVineResponse<List<ComicVineStoryArcSummary>>>(request, false, TimeSpan.FromHours(1));
+
+            return response.Resource?.Results ?? new List<ComicVineStoryArcSummary>();
+        }
+
+        public ComicVineStoryArcSummary GetStoryArc(int id)
+        {
+            _rateLimiter.WaitForToken();
+
+            var request = BuildRequest($"story_arc/4045-{id}");
+            request.Url = request.Url
+                .AddQueryParam("field_list", "id,name,deck,publisher,count_of_issue_appearances,issues");
+
+            var response = _cachedHttpClient.Get<ComicVineResponse<ComicVineStoryArcSummary>>(request, true, TimeSpan.FromHours(24));
+
+            return response.Resource?.Results;
+        }
+
+        public List<ComicVineArcIssue> GetStoryArcIssues(int storyArcId)
+        {
+            // /issues does NOT support a story_arc filter (it silently ignores
+            // unknown filter fields and returns everything — found the hard
+            // way). The arc detail's issues array is the membership source;
+            // it only carries {id, name}, so hydrate numbers/dates/volumes in
+            // id-batches of 100 via filter=id:a|b|c.
+            var arc = GetStoryArc(storyArcId);
+            var issueIds = arc?.Issues?.Select(i => i.Id).ToList() ?? new List<int>();
+
+            var allIssues = new List<ComicVineArcIssue>();
+
+            foreach (var batch in issueIds.Chunk(100))
+            {
+                _rateLimiter.WaitForToken();
+
+                var request = BuildRequest("issues");
+                request.Url = request.Url
+                    .AddQueryParam("filter", $"id:{string.Join("|", batch)}")
+                    .AddQueryParam("field_list", "id,name,issue_number,cover_date,volume")
+                    .AddQueryParam("limit", "100");
+
+                var response = _cachedHttpClient.Get<ComicVineResponse<List<ComicVineArcIssue>>>(request, true, TimeSpan.FromHours(12));
+
+                allIssues.AddRange(response.Resource?.Results ?? new List<ComicVineArcIssue>());
+
+                _logger.Debug("Hydrated {0}/{1} arc issues for story arc {2}", allIssues.Count, issueIds.Count, storyArcId);
             }
 
             return allIssues;

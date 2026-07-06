@@ -113,6 +113,52 @@ namespace NzbDrone.Core.MetadataSource.ComicVine.Resources
         public ComicVineImage Image { get; set; }
     }
 
+    // --- Story arcs ---
+    public class ComicVineStoryArcSummary
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("deck")]
+        public string Deck { get; set; }
+
+        [JsonProperty("publisher")]
+        public ComicVineIdName Publisher { get; set; }
+
+        [JsonProperty("count_of_issue_appearances")]
+        public int CountOfIssueAppearances { get; set; }
+
+        // Detail-only: unordered {id, name} pairs — the ids are hydrated via
+        // /issues?filter=id:... because CV stores no order, numbers or dates
+        // on arc membership (docs/story-arcs.md).
+        [JsonProperty("issues")]
+        public List<ComicVineIdName> Issues { get; set; }
+    }
+
+    // Row of /issues?filter=story_arc:{id} — the only CV surface that gives
+    // an arc's issues WITH numbers and dates (the story_arc detail's own
+    // issues array is unordered {id, name} pairs; see docs/story-arcs.md).
+    public class ComicVineArcIssue
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("issue_number")]
+        public string IssueNumber { get; set; }
+
+        [JsonProperty("cover_date")]
+        public string CoverDate { get; set; }
+
+        [JsonProperty("volume")]
+        public ComicVineIdName Volume { get; set; }
+    }
+
     // --- Shared helpers ---
     public class ComicVineIdName
     {
