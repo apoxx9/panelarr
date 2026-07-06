@@ -1,11 +1,40 @@
-# Staging-folder import (Phase A shipped 2026-07-06, Phase B pending)
+# Staging-folder import (Phase A + B shipped 2026-07-06 — feature complete)
 
 Proposed 2026-07-03 during the homelab migration. Design settled and
 Phase A (backend) implemented in the 2026-07-06 session (f3dd568 +
 f65eb45, verified live end-to-end on the local dev instance: staged
 tagged cbz → proposal via cvinfo → StagingImport command → file moved
-and renamed under the existing publisher folder). Phase B (frontend)
-pending.
+and renamed under the existing publisher folder). Phase B (frontend +
+per-file report) shipped later the same day, verified with a puppeteer
+e2e on the local dev instance (settings field → auto-scan → import →
+report showing 1 imported + 1 rejected-with-reason left in staging).
+
+## Phase B notes (2026-07-06)
+
+- **Per-file report**: `StagingImportService` records every file's
+  outcome (imported / rejected / failed, with reasons) into an
+  in-memory `StagingImportReportService` keyed by command id;
+  `GET /libraryimport/stagingreport?commandId=` serves it. The modal
+  polls the command and shows the report table when it finishes — this
+  is how "why did this file stay in staging" is surfaced (the Phase A
+  UX gap with untagged files failing the 80% fuzzy match).
+- **Equal-quality duplicates are rejected in the service, not the
+  engine.** Live testing showed the shared `UpgradeSpecification`
+  *accepts* equal quality (download-pipeline re-grab semantics), so a
+  staged duplicate silently replaced the library file — violating
+  settled decision 3. `StagingImportService.RejectEqualQualityDuplicates`
+  now converts those decisions to rejections ("Issue already has a file
+  at equal quality") before import; a strictly higher quality still
+  upgrades. The download pipeline is deliberately unchanged.
+- **Existing series are importable targets** in the staging modal
+  (unlike the in-place library import, where existing rows are
+  disabled) — filing new issues into a tracked series is a primary
+  use case.
+- UI: Staging Folder setting lives in Media Management → Importing
+  (the fieldset is no longer advanced-only); the Library Import page
+  gained an "Import from Staging" toolbar action with folder picker
+  (defaulting to the setting), target root folder, quality profile,
+  monitored + keep-source-files controls.
 
 ## The ask
 

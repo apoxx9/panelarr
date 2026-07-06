@@ -127,106 +127,117 @@ class MediaManagement extends Component {
                     </FieldSet>
                 }
 
-                {
-                  advancedSettings &&
-                    <FieldSet
-                      legend={translate('Importing')}
-                    >
-                      {
-                        !isWindows &&
-                          <FormGroup
-                            advancedSettings={advancedSettings}
-                            isAdvanced={true}
-                            size={sizes.MEDIUM}
-                          >
-                            <FormLabel>
-                              {translate('SkipFreeSpaceCheck')}
-                            </FormLabel>
+                <FieldSet
+                  legend={translate('Importing')}
+                >
+                  <FormGroup>
+                    <FormLabel>
+                      {translate('StagingFolder')}
+                    </FormLabel>
 
-                            <FormInputGroup
-                              type={inputTypes.CHECK}
-                              name="skipFreeSpaceCheckWhenImporting"
-                              helpText={translate('SkipFreeSpaceCheckWhenImportingHelpText')}
-                              onChange={onInputChange}
-                              {...settings.skipFreeSpaceCheckWhenImporting}
-                            />
-                          </FormGroup>
-                      }
+                    <FormInputGroup
+                      type={inputTypes.PATH}
+                      name="stagingFolder"
+                      helpText={translate('StagingFolderHelpText')}
+                      onChange={onInputChange}
+                      {...settings.stagingFolder}
+                    />
+                  </FormGroup>
 
+                  {
+                    !isWindows &&
                       <FormGroup
                         advancedSettings={advancedSettings}
                         isAdvanced={true}
                         size={sizes.MEDIUM}
                       >
                         <FormLabel>
-                          {translate('MinimumFreeSpace')}
+                          {translate('SkipFreeSpaceCheck')}
                         </FormLabel>
 
                         <FormInputGroup
-                          type={inputTypes.NUMBER}
-                          unit='MB'
-                          name="minimumFreeSpaceWhenImporting"
-                          helpText={translate('MinimumFreeSpaceWhenImportingHelpText')}
+                          type={inputTypes.CHECK}
+                          name="skipFreeSpaceCheckWhenImporting"
+                          helpText={translate('SkipFreeSpaceCheckWhenImportingHelpText')}
                           onChange={onInputChange}
-                          {...settings.minimumFreeSpaceWhenImporting}
+                          {...settings.skipFreeSpaceCheckWhenImporting}
                         />
                       </FormGroup>
+                  }
 
+                  <FormGroup
+                    advancedSettings={advancedSettings}
+                    isAdvanced={true}
+                    size={sizes.MEDIUM}
+                  >
+                    <FormLabel>
+                      {translate('MinimumFreeSpace')}
+                    </FormLabel>
+
+                    <FormInputGroup
+                      type={inputTypes.NUMBER}
+                      unit='MB'
+                      name="minimumFreeSpaceWhenImporting"
+                      helpText={translate('MinimumFreeSpaceWhenImportingHelpText')}
+                      onChange={onInputChange}
+                      {...settings.minimumFreeSpaceWhenImporting}
+                    />
+                  </FormGroup>
+
+                  <FormGroup
+                    advancedSettings={advancedSettings}
+                    isAdvanced={true}
+                    size={sizes.MEDIUM}
+                  >
+                    <FormLabel>
+                      {translate('UseHardlinksInsteadOfCopy')}
+                    </FormLabel>
+
+                    <FormInputGroup
+                      type={inputTypes.CHECK}
+                      name="copyUsingHardlinks"
+                      helpText={translate('CopyUsingHardlinksHelpText')}
+                      helpTextWarning={translate('CopyUsingHardlinksHelpTextWarning')}
+                      onChange={onInputChange}
+                      {...settings.copyUsingHardlinks}
+                    />
+                  </FormGroup>
+
+                  <FormGroup size={sizes.MEDIUM}>
+                    <FormLabel>
+                      {translate('ImportExtraFiles')}
+                    </FormLabel>
+
+                    <FormInputGroup
+                      type={inputTypes.CHECK}
+                      name="importExtraFiles"
+                      helpText={translate('ImportExtraFilesHelpText')}
+                      onChange={onInputChange}
+                      {...settings.importExtraFiles}
+                    />
+                  </FormGroup>
+
+                  {
+                    settings.importExtraFiles.value ?
                       <FormGroup
                         advancedSettings={advancedSettings}
                         isAdvanced={true}
-                        size={sizes.MEDIUM}
                       >
-                        <FormLabel>
-                          {translate('UseHardlinksInsteadOfCopy')}
-                        </FormLabel>
+                        <FormLabel>{translate('ImportExtraFiles')}</FormLabel>
 
                         <FormInputGroup
-                          type={inputTypes.CHECK}
-                          name="copyUsingHardlinks"
-                          helpText={translate('CopyUsingHardlinksHelpText')}
-                          helpTextWarning={translate('CopyUsingHardlinksHelpTextWarning')}
+                          type={inputTypes.TEXT}
+                          name="extraFileExtensions"
+                          helpTexts={[
+                            translate('ExtraFileExtensionsHelpText'),
+                            translate('ExtraFileExtensionsHelpTextsExamples')
+                          ]}
                           onChange={onInputChange}
-                          {...settings.copyUsingHardlinks}
+                          {...settings.extraFileExtensions}
                         />
-                      </FormGroup>
-
-                      <FormGroup size={sizes.MEDIUM}>
-                        <FormLabel>
-                          {translate('ImportExtraFiles')}
-                        </FormLabel>
-
-                        <FormInputGroup
-                          type={inputTypes.CHECK}
-                          name="importExtraFiles"
-                          helpText={translate('ImportExtraFilesHelpText')}
-                          onChange={onInputChange}
-                          {...settings.importExtraFiles}
-                        />
-                      </FormGroup>
-
-                      {
-                        settings.importExtraFiles.value ?
-                          <FormGroup
-                            advancedSettings={advancedSettings}
-                            isAdvanced={true}
-                          >
-                            <FormLabel>{translate('ImportExtraFiles')}</FormLabel>
-
-                            <FormInputGroup
-                              type={inputTypes.TEXT}
-                              name="extraFileExtensions"
-                              helpTexts={[
-                                translate('ExtraFileExtensionsHelpText'),
-                                translate('ExtraFileExtensionsHelpTextsExamples')
-                              ]}
-                              onChange={onInputChange}
-                              {...settings.extraFileExtensions}
-                            />
-                          </FormGroup> : null
-                      }
-                    </FieldSet>
-                }
+                      </FormGroup> : null
+                  }
+                </FieldSet>
 
                 <FieldSet
                   legend={translate('FileManagement')}

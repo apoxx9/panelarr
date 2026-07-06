@@ -21,17 +21,34 @@ namespace Panelarr.Api.V1.LibraryImport
         public int? ExistingSeriesId { get; set; }
     }
 
+    public class StagingImportFileReportResource
+    {
+        public string Path { get; set; }
+        public string Series { get; set; }
+        public string Outcome { get; set; }
+        public List<string> Reasons { get; set; }
+    }
+
+    public class StagingImportReportResource : RestResource
+    {
+        public List<StagingImportFileReportResource> Files { get; set; }
+        public List<string> Errors { get; set; }
+    }
+
     [V1ApiController("libraryimport")]
     public class LibraryImportController : Controller
     {
         private readonly ILibraryImportProposalService _proposalService;
         private readonly IRootFolderService _rootFolderService;
+        private readonly IStagingImportReportService _stagingImportReportService;
 
         public LibraryImportController(ILibraryImportProposalService proposalService,
-                                       IRootFolderService rootFolderService)
+                                       IRootFolderService rootFolderService,
+                                       IStagingImportReportService stagingImportReportService)
         {
             _proposalService = proposalService;
             _rootFolderService = rootFolderService;
+            _stagingImportReportService = stagingImportReportService;
         }
 
         [HttpGet("proposal")]
@@ -74,6 +91,32 @@ namespace Panelarr.Api.V1.LibraryImport
                     ExistingSeriesId = p.ExistingSeriesId
                 })
                 .ToList();
+        }
+
+        [HttpGet("stagingreport")]
+        public StagingImportReportResource GetStagingReport(int commandId)
+        {
+            var report = _stagingImportReportService.Find(commandId);
+
+            if (report == null)
+            {
+                throw new NotFoundException($"No staging import report for command {commandId}");
+            }
+
+            return new StagingImportReportResource
+            {
+                Id = report.CommandId,
+                Files = report.Files
+                    .Select(f => new StagingImportFileReportResource
+                    {
+                        Path = f.Path,
+                        Series = f.Series,
+                        Outcome = f.Outcome.ToString().ToLowerInvariant(),
+                        Reasons = f.Reasons
+                    })
+                    .ToList(),
+                Errors = report.Errors
+            };
         }
     }
 }

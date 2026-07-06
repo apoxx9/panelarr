@@ -19,6 +19,7 @@ import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import selectAll from 'Utilities/Table/selectAll';
 import toggleSelected from 'Utilities/Table/toggleSelected';
 import { LibraryImportModal } from './LibraryImport/LibraryImportModalContent';
+import { StagingImportModal } from './StagingImport/StagingImportModalContent';
 import UnmappedFilesTableHeader from './UnmappedFilesTableHeader';
 import UnmappedFilesTableRow from './UnmappedFilesTableRow';
 
@@ -36,7 +37,8 @@ class UnmappedFilesTable extends Component {
       allUnselected: false,
       lastToggled: null,
       selectedState: {},
-      isLibraryImportModalOpen: false
+      isLibraryImportModalOpen: false,
+      isStagingImportModalOpen: false
     };
   }
 
@@ -75,6 +77,14 @@ class UnmappedFilesTable extends Component {
 
   onLibraryImportModalClose = () => {
     this.setState({ isLibraryImportModalOpen: false });
+  };
+
+  onStagingImportPress = () => {
+    this.setState({ isStagingImportModalOpen: true });
+  };
+
+  onStagingImportModalClose = () => {
+    this.setState({ isStagingImportModalOpen: false });
   };
 
   //
@@ -274,6 +284,11 @@ class UnmappedFilesTable extends Component {
               onPress={this.onLibraryImportPress}
             />
             <PageToolbarButton
+              label={translate('ImportFromStaging')}
+              iconName={icons.FILEIMPORT}
+              onPress={this.onStagingImportPress}
+            />
+            <PageToolbarButton
               label={translate('AddMissing')}
               iconName={icons.ADD_MISSING_SERIES_LIST}
               isDisabled={!hasUnmappedFiles}
@@ -347,6 +362,10 @@ class UnmappedFilesTable extends Component {
         <LibraryImportModal
           isOpen={this.state.isLibraryImportModalOpen}
           onModalClose={this.onLibraryImportModalClose}
+        />
+        <StagingImportModal
+          isOpen={this.state.isStagingImportModalOpen}
+          onModalClose={this.onStagingImportModalClose}
         />
       </PageContent>
     );
