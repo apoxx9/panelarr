@@ -1,4 +1,4 @@
-# Last Handoff — 2026-07-06 (End of Session 20, updated post-deploy)
+# Last Handoff — 2026-07-06 (Session 20 — marathon; see final addendum)
 
 Session 20 shipped **staging-folder import Phase B** (feature complete),
 **released v1.1.7** (CI green, image on ghcr — homelab deploy NOT done,
@@ -163,6 +163,41 @@ annuals decision. Verified live both directions + migration on dev DB.
 4. Standing watch: quality "Unknown" in the Activity manual-import modal
    (unreproduced since Session 18); queue-removal/import race (Session
    19 quirk #1, benign).
+
+## Final addendum — Reading Lists feature (branch: feature/story-arcs)
+
+After the fossil cleanup, the session continued into the READING LISTS
+feature (nee story arcs). State at handoff:
+
+- **Design settled + researched** (docs/story-arcs.md — leads with the
+  settled summary; research record below it). Key calls: CBL file is the
+  interoperability contract (Kavita target), named "Reading Lists" with
+  arc as a TYPE, track-only, no auto-add, explicit add-missing-series,
+  lossless CBL round-trip as acceptance criterion.
+- **Phase A (backend) BUILT on the branch**: migration 14 (ReadingLists
+  + ReadingListItems slots incl. ForeignSeriesId), CV story-arc
+  search/fetch (membership from arc detail's issues array hydrated in
+  id-batches — /issues does NOT support a story_arc filter, it silently
+  returns everything; first version crawled to offset 20000 and got
+  velocity-blocked), ReadingListService (cover-date ordering, TPB
+  filter, id-first + name-fallback resolve, lazy unresolve), CBL
+  parse/write with <Database Name=cv> ids, /api/v1/readinglist
+  (list/detail/search/add/import/export/addseries/delete). 14 tests.
+- **Phase B (frontend) BUILT**: /readinglists index (CV search panel,
+  CBL upload, coverage) + /readinglists/:id detail (ordered slots,
+  live statuses, search missing, add-missing-series panel, export CBL,
+  delete), sidebar Library → Reading Lists. Puppeteer e2e written
+  (CBL path, no CV needed).
+- **Phase C SCOPED**: Kavita/Komga push is small — both exist as
+  notification connections, Kavita proxy already does the JWT dance;
+  needs ImportCbl per proxy + push endpoint + button.
+- **Verification state**: unit suite green (2461+ incl. reading lists);
+  live CV add (Shattered Grid) + the Phase B UI e2e were pending at
+  handoff time — check the session end summary/chat for results before
+  merging. DO NOT merge feature/story-arcs to main until both pass.
+- Dev-DB note: migration 14 was applied/reset during the rename; if the
+  dev DB acts odd around ReadingLists tables, drop them + delete
+  VersionInfo row 14 and restart.
 
 ## Reading list
 
