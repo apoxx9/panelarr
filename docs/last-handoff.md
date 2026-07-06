@@ -122,9 +122,37 @@ annuals decision. Verified live both directions + migration on dev DB.
   Own session item, not a sweep. The 130 unused translation keys also
   remain (safe bulk deletion, needs a usage scan).
 
+## Late-session addendum (arcs settled + fossil cleanup)
+
+- **Story-arcs design SETTLED** (docs/story-arcs.md leads with the
+  summary): CBL is the interoperability contract (Kavita/Komga is the
+  governing requirement), slots model, ids-first matching, CBL export in
+  core v1, track-only, CV-only provider v1. Build isolated on a feature
+  branch; lossless CBL round-trip is an acceptance criterion. Research
+  record (CV/Metron APIs, Mylar, CBL format, Radarr Collections) is in
+  the same doc.
+- **Pull list opens on This Week** (de693a1) — field finding from the
+  first real homelab use; last week collapses behind a link.
+- **Issueshelf deleted** (474b32f): unrouted page, unused input type,
+  redux slice, FieldType enum member. POST /issueshelf endpoint KEPT —
+  it's the live backend of the monitoring-options modal.
+- **205 dead translation keys swept** (83d59ab) + 2844 locale orphans;
+  scan = quoted literals + dynamic prefixes (PullListStatus_,
+  SeriesRelationType_). en.json now 1087 keys.
+- **Music*/Tv* download-client settings renamed** (b28462f) to
+  Comic*/Issue* across 11 clients, with **migration 13** rewriting the
+  stored settings JSON keys. Verified live on the dev DB (configured
+  rTorrent kept its category value). NOTE: the homelab needs a release
+  tag containing migration 13 before its next pull-from-tag.
+- v1.1.9 verified on the homelab earlier (pull list live with real
+  data: Minor Arcana #16 missing this week).
+
 ## Next actions (suggested order)
 
-1. Release decision: pull list is user-visible — consider v1.1.9 (or
+1. **Story arcs Phase A** on a feature branch — the settled doc is the
+   spec. Next release tag (v1.1.10) should ship the fossil-cleanup batch
+   (incl. migration 13) independently of arcs.
+2. Release decision: pull list is user-visible — consider v1.1.9 (or
    fold into the next feature release).
 2. On the homelab: set a real StagingFolder + mount the staging source
    into the container, then use Import from Staging for real.
