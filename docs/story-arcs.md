@@ -217,8 +217,15 @@ Built on a **feature branch**, merged only after A+B verify end-to-end.
 - **Phase B (frontend)**: Arcs index (coverage), arc detail (ordered slots,
   live have/missing/not-in-library/unresolved, search missing), CBL
   upload + download.
-- **Phase C (follow-ups)**: Kavita/Komga API push, Metron enrichment
-  (cv_id mapping), reordering UI, per-slot add-series affordance.
+- **Phase C (follow-ups)**: Kavita/Komga API push — SCOPED (2026-07-06):
+  both readers already exist as notification connections and the Kavita
+  proxy already implements GetToken (API-key -> JWT), which is the hard
+  part of its auth. Remaining work: an ImportCbl proxy method per reader
+  (Kavita POST /api/ReadingList/import-cbl multipart; Komga readlist
+  import), POST /readinglist/{id}/push fanning out to enabled reader
+  connections, and a Push button on the detail page. Then Metron
+  enrichment (cv_id mapping) and reordering UI. (Per-slot add-series
+  moved INTO Phase B as the explicit add-missing-series affordance.)
 
 ## Sources
 
