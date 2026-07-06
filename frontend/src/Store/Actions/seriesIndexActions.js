@@ -1,6 +1,6 @@
 import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
-import { filterBuilderTypes, filterBuilderValueTypes, filterTypePredicates, sortDirections } from 'Helpers/Props';
+import { filterBuilderTypes, filterBuilderValueTypes, filterTypePredicates, filterTypes, sortDirections } from 'Helpers/Props';
 import { createThunk, handleThunks } from 'Store/thunks';
 import sortByName from 'Utilities/Array/sortByName';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
@@ -365,6 +365,7 @@ export const persistState = [
 
 export const SET_SERIES_SORT = 'seriesIndex/setSeriesSort';
 export const SET_SERIES_FILTER = 'seriesIndex/setSeriesFilter';
+export const SET_SERIES_PUBLISHER_FILTER = 'seriesIndex/setSeriesPublisherFilter';
 export const SET_SERIES_VIEW = 'seriesIndex/setSeriesView';
 export const SET_SERIES_GROUP_BY_PUBLISHER = 'seriesIndex/setSeriesGroupByPublisher';
 export const SET_SERIES_TABLE_OPTION = 'seriesIndex/setSeriesTableOption';
@@ -379,6 +380,7 @@ export const BULK_DELETE_SERIES = 'seriesIndex/bulkDeleteSeries';
 
 export const setSeriesSort = createAction(SET_SERIES_SORT);
 export const setSeriesFilter = createAction(SET_SERIES_FILTER);
+export const setSeriesPublisherFilter = createAction(SET_SERIES_PUBLISHER_FILTER);
 export const setSeriesView = createAction(SET_SERIES_VIEW);
 export const setSeriesGroupByPublisher = createAction(SET_SERIES_GROUP_BY_PUBLISHER);
 export const setSeriesTableOption = createAction(SET_SERIES_TABLE_OPTION);
@@ -472,6 +474,29 @@ export const reducers = createHandleActions({
 
   [SET_SERIES_SORT]: createSetClientSideCollectionSortReducer(section),
   [SET_SERIES_FILTER]: createSetClientSideCollectionFilterReducer(section),
+
+  // Transient filter used by the publisher index cards: replaces any previous
+  // publisher entry and selects it. Not persisted with the built-in filters,
+  // so after a reload a stale 'publisher' key falls back to showing all.
+  [SET_SERIES_PUBLISHER_FILTER]: function(state, { payload }) {
+    const publisherName = payload.publisherName;
+
+    const newFilters = state.filters.filter((f) => f.key !== 'publisher');
+
+    newFilters.push({
+      key: 'publisher',
+      label: `Publisher: ${publisherName}`,
+      filters: [
+        {
+          key: 'publisherName',
+          value: publisherName,
+          type: filterTypes.EQUAL
+        }
+      ]
+    });
+
+    return Object.assign({}, state, { filters: newFilters, selectedFilterKey: 'publisher' });
+  },
 
   [SET_SERIES_VIEW]: function(state, { payload }) {
     return Object.assign({}, state, { view: payload.view });

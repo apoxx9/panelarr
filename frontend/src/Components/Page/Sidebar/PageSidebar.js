@@ -30,6 +30,10 @@ const links = [
         to: '/add/search'
       },
       {
+        title: () => translate('Publishers'),
+        to: '/publishers'
+      },
+      {
         title: () => translate('LibraryImport'),
         to: '/unmapped'
       }

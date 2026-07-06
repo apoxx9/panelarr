@@ -9,6 +9,7 @@ import NotFound from 'Components/NotFound';
 import Switch from 'Components/Router/Switch';
 import IssueDetailsPageConnector from 'Issue/Details/IssueDetailsPageConnector';
 import IssueIndexConnector from 'Issue/Index/IssueIndexConnector';
+import PublisherIndexConnector from 'Publisher/Index/PublisherIndexConnector';
 import AddNewItemConnector from 'Search/AddNewItemConnector';
 import SeriesDetailsPageConnector from 'Series/Details/SeriesDetailsPageConnector';
 import SeriesIndexConnector from 'Series/Index/SeriesIndexConnector';
@@ -90,6 +91,11 @@ function AppRoutes(props) {
       <Route
         path="/unmapped"
         component={UnmappedFilesTableConnector}
+      />
+
+      <Route
+        path="/publishers"
+        component={PublisherIndexConnector}
       />
 
       <Route
