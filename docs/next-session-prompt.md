@@ -6,40 +6,48 @@ API key):
 ---
 
 We're continuing work on Panelarr (~/Projects/panelarr). Read
-`docs/last-handoff.md` first — it has full Session 18 state. Short
-version: v1.1.4 (rate-limiter drip + `:latest` follows release tags)
-and v1.1.5 (publisher-folder import fix) are shipped and verified on
-the homelab; BOTH download protocols are proven live end-to-end
-(GetComics direct download incl. the datanodes handler, and Prowlarr →
-seedbox rTorrent → mount → path mapping → import). Suite is 2411/0.
+`docs/last-handoff.md` first — it has full Session 19 state. Short
+version: **v1.1.6 is shipped and live-verified on the homelab**
+(ignored-download cache eviction on re-grab, issues-endpoint DB
+pagination, rate-limiter test fix); the whole homelab maintenance
+agenda is done (3 MMPR annuals mapped as separate series per the
+settled annuals decision, redundant PDFs deleted); and **staging-folder
+import Phase A (backend) is implemented and live-verified** — proposal
+scan over an arbitrary folder, StagingImport command with
+move/keep-source semantics, StagingFolder setting, and publisher-folder
+normalization (fixes the `Boom! Studios` vs `Boom Studios` split).
+Suite is 2433/0 (Core.Test — that's the metric; Common/Integration
+failures are environmental), smoke 24/24.
 
 Homelab: <paste address here>, API key: <paste key here>. It runs
-`ghcr.io/apoxx9/panelarr:latest`, which now tracks releases — currently
-1.1.5.79.
+`ghcr.io/apoxx9/panelarr:latest` — currently 1.1.6.82.
 
 Today's agenda, in order:
 
-1. **Ignored-download cache fix (proposed v1.1.6).** Removing a queue
-   item without removing it from the client leaves the tracked download
-   cached as Ignored; `TrackedDownloadService.TrackDownload` returns the
-   cached item without re-reading download history, so re-grabbing the
-   same infohash stays invisible until a restart. Bit us live in
-   Session 18 (cross-seeded torrents share one infohash across
-   trackers). Discuss the fix shape first, then implement + test.
-2. **Annuals handling decision** (3 unmapped "MMPR (2016)" annuals):
-   map their CV annual volumes as separate series vs a Mylar-style
-   merge-into-parent toggle. Discuss, decide, maybe implement.
-3. **Delete the 4 redundant PDFs** in "MMPR: The Return" (each issue
-   also present as .cbz which won the file slot).
-4. If time, pick from backlog: issues-endpoint DB pagination (last
-   scale P1), staging-folder import (docs/staging-folder-import.md),
-   Publisher UI Tier 2B, calendar → weekly pull list, terminology
-   key-debt (130 keys + the RTorrentSettings Music* naming fossils).
+1. **Staging import Phase B (frontend).** Design is settled
+   (docs/staging-folder-import.md): Media Management settings field for
+   StagingFolder; Library Import page gains an "Import from staging"
+   action — folder picker defaulting to the setting, same proposal
+   review table plus target root folder + "keep source files" checkbox;
+   command progress/report surface. UX note from Phase A testing:
+   untagged files can fail the 80% fuzzy match and stay in staging —
+   surface per-file rejection reasons. Puppeteer is NOT installed on
+   the dev machine (`npm i -g puppeteer`) — install it first so browser
+   tests can run; backend e2e can be re-run against the local dev
+   instance (see Phase A live-test recipe in the handoff).
+2. **Release decision**: tag v1.1.7 when Phase B lands (Phase A+B
+   together make the feature user-visible).
+3. If time, pick from backlog: Publisher UI Tier 2B, related-series
+   link (feature-landscape #11, display-only grouping for the annuals),
+   calendar → weekly pull list, terminology key-debt (130 keys +
+   RTorrentSettings Music* fossils + the `panelarr.com` test-domain
+   fossil that fails 3 Common.Test HTTP tests offline).
 
-Standing watch: if quality "Unknown" ever reappears in the Activity
-manual-import modal, screenshot it and keep the modal open — then query
-`/api/v1/manualimport?downloadId=` live to pin frontend vs backend
-(Session 18 could not reproduce it; all backend paths return Archive).
+Standing watch: quality "Unknown" in the Activity manual-import modal
+(unreproduced since Session 18) — if it appears: screenshot, keep the
+modal open, query `/api/v1/manualimport?downloadId=` live. Also noted
+in Session 19: removing a completed queue item does not cancel an
+already-dispatched import (benign race, see handoff quirk #1).
 
 Standing rules as always: test before presenting, discuss designs
 before implementing, scan before any push, no AI attribution in

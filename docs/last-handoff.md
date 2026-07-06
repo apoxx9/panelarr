@@ -1,95 +1,115 @@
-# Last Handoff — 2026-07-04 (End of Session 18)
+# Last Handoff — 2026-07-06 (End of Session 19)
 
-Session 18 shipped two releases (v1.1.4, v1.1.5), verified CI version
-stamping end to end, and proved BOTH download protocols live on the
-homelab: GetComics direct download and Prowlarr → seedbox rTorrent.
-Suite: **2411 passed / 0 failed** at HEAD.
+Session 19 shipped **v1.1.6** (verified live on the homelab), closed the
+whole homelab maintenance agenda (annuals mapped, redundant PDFs
+deleted), settled the annuals + staging-import designs, and implemented
+**staging-folder import Phase A** (backend, live-verified locally).
+Suite: **2433 passed / 0 failed** at HEAD. Smoke: 24/24.
 
-## Shipped
+## Shipped — v1.1.6 (tagged, homelab verified on 1.1.6.82)
 
-- **v1.1.4** — (a) ComicVine rate limiter reworked: tokens drip
-  continuously (one per ~18s, capped at 200) instead of one hourly
-  burst, plus a throttled Warn when blocking starts (the silent
-  55-min migration stall is structurally gone; 5 new tests).
-  (b) Docker `:latest` now follows release tags (`v*`); main pushes
-  get `:main` instead. The homelab can stay on `latest`.
-- **v1.1.5** — import failed for the FIRST series of any new
-  publisher: ComicFileMovingService/UpgradeMediaFileService assumed
-  the series folder's parent is the root folder, but Panelarr's layout
-  inserts a publisher folder. Now resolves the configured root via
-  RootFolderService (missing-root safety check preserved; 2 new
-  regression tests). Found live: the whole migrated library is Boom
-  Studios, so the first Dynamite series ever imported tripped it.
-- **Version stamping VERIFIED**: homelab reports `1.1.5.79` (was
-  stuck at `1.0.0.x` because `:latest` used to be the unstamped main
-  branch build — root-caused, not a stamping failure).
+- **Ignored-download cache fix**: `TrackedDownloadService` handles
+  `IssueGrabbedEvent` and evicts a cached tracked download in a terminal
+  state (Ignored/Imported/Failed); the refresh already triggered by the
+  grab rebuilds it from download history. Re-grabbing a removed
+  torrent's infohash (cross-seed case from Session 18) resurfaces
+  immediately, no restart. Verified live: grab SIKTC #48 → remove from
+  queue keep-in-client → re-grab same DownloadId → item reappeared.
+  (Upstream Sonarr has the identical bug, unfixed — checked.)
+- **Issues-endpoint DB pagination** (last scale P1): page/pageSize on
+  the unfiltered `GET /api/v1/issue` now run ORDER BY Id LIMIT/OFFSET
+  in SQL via the existing PagingSpec infra instead of loading the whole
+  table. Plain-array response shape unchanged; PagingResource envelope
+  deliberately deferred to scale item #5. Live-verified byte-identical
+  resources.
+- **Rate-limiter test fix**: the two v1.1.4 throttle tests deliberately
+  trigger the throttle Warn; the framework fails unexpected warns —
+  but only in Debug builds (LoggingTest gates on BuildInfo.IsDebug),
+  which is why Release/earlier runs were green. Fixed with
+  `IgnoreWarns()` (ExceptionVerification's static capture count is
+  unreliable — 0/1/2 copies of one warn observed — so ExpectedWarns(1)
+  would itself flake).
 
-## E2E verifications (both on the live homelab)
+## Homelab maintenance (all done, live)
 
-- **GetComics direct download**: SIKTC #47 (issueId 451) — search →
-  grab → datanodes mirror (two-step form POST → tunnel URL, through
-  Panelarr's real HTTP stack) → import, ~7s total. The new datanodes
-  handler is production-verified.
-- **Torrent via Prowlarr + seedbox rTorrent**: Ben 10 (2026) #1
-  (seriesId 61, issueId 470) — Torznab search → grab → seedbox
-  download into `downloads/Panelarr/` → visible through the homelab's
-  seedbox mount → remote path mapping translation → import with
-  publisher folder auto-created.
+- **Annuals decision + execution**: separate series per CV annual
+  volume (merge toggle rejected: number-only matching would make
+  Annual #1 vs Standard #1 ambiguous; see feature-landscape.md, which
+  also gained backlog item #11 "related-series link" for UI grouping).
+  Mapped cv:93388 / cv:101784 / cv:110105 (MMPR 2016/2017/2018
+  Annuals), imported the 3 files from the parent MMPR (2016) folder,
+  relocated into their own folders, quality Archive, all 1/1.
+- **4 redundant PDFs deleted** from "MMPR: The Return" (~495 MB) via
+  the local /Volumes/data mount; each had its tracked .cbz. 4/4 clean.
+- **SIKTC #48 imported** as a byproduct of the cache-fix verification
+  (wanted missing 3 → 2).
 
-## Homelab topology (secrets NOT here — ask the user for address/API key)
+## Staging-folder import — design settled, Phase A shipped
 
-Unraid host. Panelarr container mounts: `/comics` = remote library
-share; `/downloads` = a subfolder of the SMB/remote seedbox mount
-(container `/downloads` **is** the seedbox's `downloads/Panelarr/`
-directory). Prowlarr runs on the same host (port 9696); indexers:
-GetComics (direct) + a private tracker via Torznab (categories fixed
-to **7030 Comics only** — 7020/8010 caused EPUB/MOBI novel noise).
-rTorrent download client = a remote seedbox (XML-RPC over SSL);
-client Directory is set to the seedbox's `downloads/Panelarr` so
-grabs land inside the mounted folder; remote path mapping translates
-seedbox paths → `/downloads/`. GetComics client downloads to
-`/downloads/getcomics` (its own subfolder, intended).
+Design decisions recorded in docs/staging-folder-import.md (move
+default + keep-source-copy option; rename per naming settings like the
+download pipeline; per-file decision-engine collision handling; both a
+StagingFolder setting AND ad-hoc picker; publisher-folder normalization
+included). Phase A (f3dd568 + f65eb45):
 
-## Quirks discovered (candidate fixes, not yet done)
+- **Publisher-folder normalization**: SeriesPathBuilder adopts an
+  existing parent folder matching case/punctuation-insensitively
+  (fixes the `Boom! Studios` vs `Boom Studios` split seen live when
+  adding the annuals; the series-leaf component is never rewritten).
+  AddSeriesService now delegates to SeriesPathBuilder (duplication
+  removed) — adds, moves, bulk edits all normalized.
+- **`GET /libraryimport/proposal?folder=`** scans an arbitrary staging
+  folder from disk (same cvinfo/tags/name-search identification);
+  folders inside a root folder → 400.
+- **`StagingImport` command**: ensure series (create under target root
+  + synchronous refresh via new `RefreshSeriesService.RefreshSeries`),
+  regular import-decision engine, Move (or Copy w/ KeepSourceFiles),
+  rejected files stay in staging, per-series ProgressInfo report.
+- **StagingFolder setting** in media-management config (validated like
+  RecycleBin). Live e2e verified: staged tagged cbz → exact proposal →
+  import → file moved+renamed under existing "Boom Studios".
 
-1. **Ignored-download cache short-circuit** (potential small fix):
-   removing a queue item without removing from the client marks the
-   tracked download Ignored in the in-memory cache;
-   `TrackedDownloadService.TrackDownload` then returns the cached item
-   without re-reading download history, so re-grabbing the same
-   torrent (same infohash — note: cross-seeded torrents on different
-   trackers can share ONE infohash) never resurrects it until a
-   restart rebuilds the cache. Bit us live; restart was the fix.
-2. **Quality "Unknown" in the Activity manual-import modal** — seen
-   once by the user, unreproducible afterwards: every backend path
-   (folder scan, single-file, with/without client context) returns
-   Archive for the file, stored data is clean, and AggregateQuality
-   is unchanged since v1.0.1. Likely a frontend placeholder row during
-   one of the day's broken states. If it reappears: screenshot, keep
-   the modal open, hit `/api/v1/manualimport?downloadId=` live.
+**Phase B (frontend) is NOT started**: settings field, Library Import
+page "Import from staging" action (proposal review + target root +
+keep-source checkbox), report surface. Also note for Phase B UX: an
+untagged file with a bare filename can fail the 80% fuzzy-match
+threshold (long CV issue titles) and stays in staging — the UI should
+surface per-file rejection reasons.
+
+## Quirks discovered (not fixed, candidate items)
+
+1. **Queue-removal/import race**: removing a completed queue item
+   (DownloadIgnored written) does not cancel an already-dispatched
+   import — observed live: ignore at 10:34:58, import still completed
+   at 10:35:01. Benign for wanted issues; surprising otherwise.
+2. **Common.Test HTTP tests** hit `panelarr.com` (Sonarr fork-rename
+   fossil, doesn't resolve) — 3 tests fail on any dev machine; add to
+   terminology/fossil debt. Note: the session's "suite green" metric is
+   **Core.Test only**; Integration/Automation need a live instance.
+3. GetComics `DownloadId` is deterministic (hash of download file
+   path) — useful for future test harnesses.
 
 ## Next actions (suggested order)
 
-1. Quality-Unknown repro watch (item 2 above) — passive.
-2. Consider the ignored-download cache fix (item 1 above) for v1.1.6.
-3. Annuals handling decision (3 unmapped "MMPR (2016)" annuals):
-   separate CV volumes as separate series vs Mylar-style merge toggle.
-4. Delete the 4 redundant PDFs in "MMPR: The Return" (each issue also
-   present as .cbz).
-5. Backlog: issues-endpoint DB pagination (last scale P1), Publisher
-   UI Tier 2B, staging-folder import (docs/staging-folder-import.md),
-   calendar → weekly pull list, terminology key-debt (130 keys; add
-   the RTorrentSettings `MusicCategory`/`MusicDirectory` naming
-   fossils to it).
+1. **Staging import Phase B** (frontend) — design is settled, backend
+   verified; docs/staging-folder-import.md has the sketch.
+2. Consider whether Phase A alone warrants a v1.1.7 or wait for B.
+3. Backlog: Publisher UI Tier 2B, related-series link (landscape #11),
+   calendar → weekly pull list, terminology key-debt (130 keys +
+   RTorrentSettings Music* fossils + panelarr.com test-domain fossil).
+4. Standing watch: quality "Unknown" in the manual-import modal
+   (unreproduced since Session 18) — screenshot + keep modal open +
+   `/api/v1/manualimport?downloadId=` live.
 
 ## Parked decisions still open
 
 - MetadataProfileId accepted but unused by LibraryImportCommand.
-- Annuals (see above). — "Pull List" naming collision (terminology
-  audit §2.2). — Terminology key-debt cleanup.
+- "Pull List" naming collision (terminology audit §2.2).
+- Terminology key-debt cleanup scope.
 
 ## Reading list
 
-docs/staging-folder-import.md, docs/scale-readiness.md,
-docs/publisher-ui.md, docs/feature-landscape.md,
-docs/tagged-library-import.md (shipped; context for import flows).
+docs/staging-folder-import.md (design + Phase A state),
+docs/scale-readiness.md (#2 and #3 now marked fixed),
+docs/feature-landscape.md (annuals decision + item #11),
+docs/publisher-ui.md, docs/feature-landscape.md.
