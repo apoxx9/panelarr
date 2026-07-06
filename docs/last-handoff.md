@@ -100,15 +100,39 @@ annuals decision. Verified live both directions + migration on dev DB.
   copy/backup). ~500 MB reclaimable there; user's call.
 - Homelab pulls are manual (no watchtower auto-update observed).
 
+## Continued-session addendum (pull list + terminology)
+
+- **Weekly pull list SHIPPED** (f46a9e1, feature-landscape #1): sidebar
+  Calendar → Pull List (/pulllist), Wednesday-anchored (NCBD) week
+  sections from one week back to four ahead, per-issue status
+  (have/grabbed/missing/unreleased/unmonitored), per-issue search +
+  week-level 'Search N missing' (IssueSearch), unmonitored toolbar
+  toggle. Frontend-only on the existing /calendar endpoint. Puppeteer
+  verified on dev (statuses, toggle, command queue, week nav). This
+  claims the 'Pull List' name — audit §2.2 collision resolved; the
+  Issueshelf still needs a different label.
+- **panelarr.com test fossils fixed** (e6fb3ba): the 3 HttpClientFixture
+  tests now use repo raw files pinned to a commit SHA. Common.Test
+  no longer has known always-fail tests (httpbin reachability aside).
+- **'Metadata Provider Source' → 'Metadata Provider'** (audit item 4).
+  Audit item 1 (Library Import page title) was already fixed earlier.
+- **Music* settings rename SCOPED OUT deliberately**: MusicCategory /
+  MusicDirectory etc. span six download clients AND are serialized in
+  users' provider-settings JSON — renaming needs a settings migration.
+  Own session item, not a sweep. The 130 unused translation keys also
+  remain (safe bulk deletion, needs a usage scan).
+
 ## Next actions (suggested order)
 
-1. On the homelab: set a real StagingFolder + mount the staging source
+1. Release decision: pull list is user-visible — consider v1.1.9 (or
+   fold into the next feature release).
+2. On the homelab: set a real StagingFolder + mount the staging source
    into the container, then use Import from Staging for real.
-2. Backlog: weekly pull list (feature-landscape #1, the big Mylar-parity
-   item — needs design discussion), terminology key-debt (130 keys +
-   RTorrentSettings Music* fossils + panelarr.com test-domain fossil
-   failing 3 Common.Test HTTP tests offline).
-3. Standing watch: quality "Unknown" in the Activity manual-import modal
+3. Backlog: story arcs / CBL import (feature-landscape #2+#3 — design
+   discussion first), Music* provider-settings rename (needs a
+   settings-JSON migration), 130 unused translation keys (usage scan),
+   Issueshelf rename (decide what the feature is first).
+4. Standing watch: quality "Unknown" in the Activity manual-import modal
    (unreproduced since Session 18); queue-removal/import race (Session
    19 quirk #1, benign).
 

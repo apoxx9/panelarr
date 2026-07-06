@@ -57,10 +57,12 @@ comes after the migration tooling.
 
 ## Top gaps for Panelarr, ranked for a Mylar migrator
 
-1. **Weekly pull list** (M) — the #1 thing a Mylar user will miss. Comics
-   are a weekly medium; the pull list is the unit of consumption. We
-   already consume Metron release dates; build it as a comic-native view
-   on the inherited *arr calendar (ship plain calendar first — S).
+1. **Weekly pull list** (M) — SHIPPED Session 20 (continued): Calendar →
+   Pull List page, Wednesday-anchored week sections (−1..+4 weeks) on the
+   existing /calendar endpoint, per-issue status + search, week-level
+   'search all missing', unmonitored toggle. Frontend-only.
+   Originally: the #1 thing a Mylar user will miss; comics are a weekly
+   medium and the pull list is the unit of consumption.
 2. **Story arcs / events** (M–L) — first-class arc entity (Metron/CV both
    provide arc records): membership across series, "search missing in
    arc". Radarr's Collections is the family pattern to copy. Without it,
