@@ -93,11 +93,25 @@ comes after the migration tooling.
    tags, and match ComicTagger field semantics exactly. Audit-sized task.
 10. **Publisher browsing** (S) — see docs/publisher-ui.md; backend exists,
     cheap UI win.
+11. **Related-series link** (S–M) — lightweight association between series
+    (e.g. "MMPR Annual (2016)" ↔ "MMPR (2016)") so the UI can group
+    annuals/spin-offs with their parent. Display-only: no effect on
+    matching, refresh, or file management, which is what keeps it cheap
+    where Mylar-style merging is fragile. Kavita's series relationships
+    are prior art. Decided 2026-07-06 as the follow-up to the annuals
+    decision below.
 
 Evaluated and deprioritized: annuals-merging à la Mylar (their
 implementation is chronically buggy; our separate-type model may simply be
 better — revisit only on user demand), duplicate-page detection and OPDS
 serving (reader territory; Komga/Kavita do it better — keep integrating).
+
+Annuals decision (2026-07-06): annual CV volumes are mapped as separate
+Panelarr series, full stop. A merge-into-parent toggle was rejected
+because the matching layer resolves issues by number alone (ambiguous
+against Annual #1 vs Standard #1) and a Series is 1:1 with one ComicVine
+volume; grouping in the UI is handled by the related-series link (item 11)
+instead.
 
 ## Sources
 
