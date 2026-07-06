@@ -59,12 +59,13 @@ is also deterministic now). Response shape unchanged (plain array); the
 no-params full-list behavior is unchanged. The PagingResource envelope
 was deliberately deferred until #5 (virtualized tables) needs it.
 
-### 3. ✓ N+1 in ComicFileController for issueIds batches
+### 3. ✓ N+1 in ComicFileController for issueIds batches — FIXED 2026-07-03
 
-src/Panelarr.Api.V1/ComicFiles/ComicFileController.cs:95-103: one
-`GetIssue` + one `GetSeries` + one `GetFilesByIssue` **per id** — a
-100-issue bulk operation issues ~300 queries. Low-effort fix: batch all
-three lookups and join in memory.
+Was: one `GetIssue` + one `GetSeries` + one `GetFilesByIssue` **per id**
+— a 100-issue bulk operation issued ~300 queries. Fixed in 43d16e4
+("Batch comicfile lookups"): three batched queries
+(`GetIssues(issueIds)`, `GetAllSeries`, `GetFilesByIssues`) joined in
+memory.
 
 ## P2 — degraded experience during/after migration
 
