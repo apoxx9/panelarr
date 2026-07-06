@@ -1,4 +1,4 @@
-# Last Handoff — 2026-07-06 (End of Session 20)
+# Last Handoff — 2026-07-06 (End of Session 20, updated post-deploy)
 
 Session 20 shipped **staging-folder import Phase B** (feature complete),
 **released v1.1.7** (CI green, image on ghcr — homelab deploy NOT done,
@@ -78,19 +78,37 @@ annuals decision. Verified live both directions + migration on dev DB.
 4. CV publisher names differ from folders: `Boom! Studios` (metadata) vs
    `Boom Studios` (folder) — expected, cards use metadata names.
 
+## Post-deploy addendum (same day, later in Session 20)
+
+- **v1.1.8 tagged and deployed** (homelab on 1.1.8.87): the docker
+  workflow only updates `:latest` on version tags (main pushes only tag
+  `:main`), so publisher browsing + related-series needed a tag to
+  reach the homelab. No code changes — v1.1.8 = b7f5b17.
+- **v1.1.7 staging surface verified on the homelab** (scan works,
+  inside-root-folder guard 400s, report 404s for unknown ids,
+  stagingFolder setting present). Full move mechanics were dev-verified;
+  real homelab staging use needs the staging source (e.g. seedbox
+  mount) added as a container volume — only /comics and a local
+  /downloads are mounted today.
+- **MMPR annuals linked** on the homelab via the new relations API:
+  series 20 (MMPR 2016) → 63/64/65 (2016/2017/2018 Annuals), type
+  annual; symmetric lookup verified. Feature-landscape #11 is closed
+  end-to-end.
+- **MMPR Return PDFs "reappeared" — resolved**: the container library
+  is clean (cbz only). The 4 PDFs exist only on the /Volumes/data share
+  copy, which turns out NOT to be the container's live storage (old
+  copy/backup). ~500 MB reclaimable there; user's call.
+- Homelab pulls are manual (no watchtower auto-update observed).
+
 ## Next actions (suggested order)
 
-1. **Deploy v1.1.7 to the homelab and live-verify staging import there**
-   (needs homelab API key / user's deploy flow). Set a real staging
-   folder on the homelab (design intent: seedbox mount dropoff).
-2. **Release decision**: publisher browsing + related-series are
-   user-visible and sit after the v1.1.7 tag — consider tagging v1.1.8
-   once homelab-verified.
-3. Backlog: weekly pull list (feature-landscape #1, the big Mylar-parity
+1. On the homelab: set a real StagingFolder + mount the staging source
+   into the container, then use Import from Staging for real.
+2. Backlog: weekly pull list (feature-landscape #1, the big Mylar-parity
    item — needs design discussion), terminology key-debt (130 keys +
    RTorrentSettings Music* fossils + panelarr.com test-domain fossil
    failing 3 Common.Test HTTP tests offline).
-4. Standing watch: quality "Unknown" in the Activity manual-import modal
+3. Standing watch: quality "Unknown" in the Activity manual-import modal
    (unreproduced since Session 18); queue-removal/import race (Session
    19 quirk #1, benign).
 

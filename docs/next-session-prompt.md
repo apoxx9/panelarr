@@ -7,32 +7,25 @@ API key):
 
 We're continuing work on Panelarr (~/Projects/panelarr). Read
 `docs/last-handoff.md` first — it has full Session 20 state. Short
-version: **v1.1.7 is tagged and on ghcr but NOT yet verified on the
-homelab** (staging-folder import feature-complete: settings field,
-Import from Staging modal, per-file report, equal-quality-duplicate
-guard). After the tag, two more user-visible features landed on main:
-**Publisher browsing** (Library → Publishers card grid → filtered
-index) and **related-series links** (typed directional SeriesRelations,
-migration 12, chip strip on series details). Suite is 2447/0
-(Core.Test — that's the metric; Common/Integration failures are
-environmental), all pushed.
+version: **v1.1.8 is released, deployed, and verified on the homelab**
+(staging-folder import feature-complete with per-file report +
+equal-quality-duplicate guard; publisher browsing; related-series
+links with migration 12). The 3 MMPR annuals are linked to MMPR (2016)
+as type annual on the homelab. Suite is 2447/0 (Core.Test — that's the
+metric; Common/Integration failures are environmental), all pushed.
+Note: the docker workflow only updates `:latest` on v* tags; homelab
+pulls are manual.
 
 Homelab: <paste address here>, API key: <paste key here>. It runs
-`ghcr.io/apoxx9/panelarr:latest` — last confirmed 1.1.6.82; v1.1.7
-may already be live if watchtower pulled it.
+`ghcr.io/apoxx9/panelarr:latest` — last confirmed 1.1.8.87.
 
 Today's agenda, in order:
 
-1. **Verify v1.1.7 on the homelab** (or deploy it first): staging
-   import end-to-end with a real staging folder (seedbox mount
-   dropoff was the design intent), publisher normalization, and that
-   migration 12 applied cleanly.
-2. **Release decision**: tag v1.1.8 for publisher browsing +
-   related-series once homelab-verified.
-3. On the homelab, link the 3 MMPR annuals to MMPR (2016) with the new
-   related-series feature (type: annual) — that was the point of
-   feature-landscape #11.
-4. If time, pick from backlog: **weekly pull list** (feature-landscape
+1. **Real staging-import setup on the homelab**: the container only
+   mounts /comics and a local /downloads — add the actual staging
+   source (seedbox mount) as a volume, set the StagingFolder setting,
+   and run a real Import from Staging.
+2. Pick from backlog: **weekly pull list** (feature-landscape
    #1, the big Mylar-parity item — discuss design first), terminology
    key-debt (130 keys + RTorrentSettings Music* fossils + the
    panelarr.com test-domain fossil that fails 3 Common.Test HTTP tests
