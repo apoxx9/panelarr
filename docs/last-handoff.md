@@ -1,115 +1,101 @@
-# Last Handoff — 2026-07-06 (End of Session 19)
+# Last Handoff — 2026-07-06 (End of Session 20)
 
-Session 19 shipped **v1.1.6** (verified live on the homelab), closed the
-whole homelab maintenance agenda (annuals mapped, redundant PDFs
-deleted), settled the annuals + staging-import designs, and implemented
-**staging-folder import Phase A** (backend, live-verified locally).
-Suite: **2433 passed / 0 failed** at HEAD. Smoke: 24/24.
+Session 20 shipped **staging-folder import Phase B** (feature complete),
+**released v1.1.7** (CI green, image on ghcr — homelab deploy NOT done,
+see below), then cleared two backlog items: **Publisher UI Tier 2B** and
+the **related-series link** (feature-landscape #11). Suite: **2447
+passed / 0 failed** at HEAD. All work committed on main; d1e7f92 is
+tagged v1.1.7, the publisher + relations commits (1169805, 6af0006) are
+after the tag.
 
-## Shipped — v1.1.6 (tagged, homelab verified on 1.1.6.82)
+## Shipped — staging import Phase B (in v1.1.7, d1e7f92)
 
-- **Ignored-download cache fix**: `TrackedDownloadService` handles
-  `IssueGrabbedEvent` and evicts a cached tracked download in a terminal
-  state (Ignored/Imported/Failed); the refresh already triggered by the
-  grab rebuilds it from download history. Re-grabbing a removed
-  torrent's infohash (cross-seed case from Session 18) resurfaces
-  immediately, no restart. Verified live: grab SIKTC #48 → remove from
-  queue keep-in-client → re-grab same DownloadId → item reappeared.
-  (Upstream Sonarr has the identical bug, unfixed — checked.)
-- **Issues-endpoint DB pagination** (last scale P1): page/pageSize on
-  the unfiltered `GET /api/v1/issue` now run ORDER BY Id LIMIT/OFFSET
-  in SQL via the existing PagingSpec infra instead of loading the whole
-  table. Plain-array response shape unchanged; PagingResource envelope
-  deliberately deferred to scale item #5. Live-verified byte-identical
-  resources.
-- **Rate-limiter test fix**: the two v1.1.4 throttle tests deliberately
-  trigger the throttle Warn; the framework fails unexpected warns —
-  but only in Debug builds (LoggingTest gates on BuildInfo.IsDebug),
-  which is why Release/earlier runs were green. Fixed with
-  `IgnoreWarns()` (ExceptionVerification's static capture count is
-  unreliable — 0/1/2 copies of one warn observed — so ExpectedWarns(1)
-  would itself flake).
+- **UI**: Staging Folder setting in Media Management → Importing (the
+  Importing fieldset is no longer advanced-only — deliberate change);
+  Library Import page gained "Import from Staging": folder picker
+  defaulting to the setting (PathInput with browser), auto-scan,
+  proposal review table, target root folder + quality profile +
+  monitored + keep-source-files. Existing series ARE selectable targets
+  (unlike in-place import) — filing new issues into a tracked series is
+  the main use case.
+- **Per-file report**: StagingImportService records every file's
+  outcome (imported/rejected/failed + reasons) into an in-memory
+  StagingImportReportService keyed by command id;
+  `GET /libraryimport/stagingreport?commandId=`. The modal polls the
+  command (1.5s) and renders the report table when it finishes — files
+  left in staging say why.
+- **Equal-quality duplicate fix (important)**: live e2e exposed that the
+  shared UpgradeSpecification *accepts* equal quality (download re-grab
+  semantics), so a staged duplicate silently REPLACED the library file
+  (and the old file was permanently deleted — no recycle bin on dev).
+  Violates settled design decision 3. Fixed as a staging-only guard
+  (`RejectEqualQualityDuplicates`): equal quality → rejected ("Issue
+  already has a file at equal quality"), higher quality still upgrades,
+  download pipeline untouched. The dev library file was restored from
+  the homelab mount; dev library and settings returned to pre-test
+  state exactly.
+- Verified with puppeteer e2e: 1 file imported (missing issue), 1
+  equal-quality duplicate rejected with reason shown, left in staging.
 
-## Homelab maintenance (all done, live)
+## Released — v1.1.7
 
-- **Annuals decision + execution**: separate series per CV annual
-  volume (merge toggle rejected: number-only matching would make
-  Annual #1 vs Standard #1 ambiguous; see feature-landscape.md, which
-  also gained backlog item #11 "related-series link" for UI grouping).
-  Mapped cv:93388 / cv:101784 / cv:110105 (MMPR 2016/2017/2018
-  Annuals), imported the 3 files from the parent MMPR (2016) folder,
-  relocated into their own folders, quality Archive, all 1/1.
-- **4 redundant PDFs deleted** from "MMPR: The Return" (~495 MB) via
-  the local /Volumes/data mount; each had its tracked .cbz. 4/4 clean.
-- **SIKTC #48 imported** as a byproduct of the cache-fix verification
-  (wanted missing 3 → 2).
+Tagged on d1e7f92, both Docker workflows (main + tag) green, image on
+ghcr. **Homelab deploy/verification did NOT happen**: no SSH key auth to
+the homelab from this machine and its API key wasn't provided this
+session (the next-session prompt placeholder). The homelab still runs
+1.1.6.82 unless watchtower pulled :latest.
 
-## Staging-folder import — design settled, Phase A shipped
+## Shipped — Publisher UI Tier 2B (1169805)
 
-Design decisions recorded in docs/staging-folder-import.md (move
-default + keep-source-copy option; rename per naming settings like the
-download pipeline; per-file decision-engine collision handling; both a
-StagingFolder setting AND ad-hoc picker; publisher-folder normalization
-included). Phase A (f3dd568 + f65eb45):
+Library → Publishers sidebar entry: card grid derived client-side from
+the loaded series list (initials tile — publisher logo art is empty from
+the provider; series/monitored counts). Clicking a card dispatches a
+transient 'publisher' filter into seriesIndex state and navigates to the
+index — no duplicated series rendering, no new store slice. Known edge:
+the transient filter isn't persisted, so a reload with the stale
+selected key degrades to "all" (documented in the reducer).
 
-- **Publisher-folder normalization**: SeriesPathBuilder adopts an
-  existing parent folder matching case/punctuation-insensitively
-  (fixes the `Boom! Studios` vs `Boom Studios` split seen live when
-  adding the annuals; the series-leaf component is never rewritten).
-  AddSeriesService now delegates to SeriesPathBuilder (duplication
-  removed) — adds, moves, bulk edits all normalized.
-- **`GET /libraryimport/proposal?folder=`** scans an arbitrary staging
-  folder from disk (same cvinfo/tags/name-search identification);
-  folders inside a root folder → 400.
-- **`StagingImport` command**: ensure series (create under target root
-  + synchronous refresh via new `RefreshSeriesService.RefreshSeries`),
-  regular import-decision engine, Move (or Copy w/ KeepSourceFiles),
-  rejected files stay in staging, per-series ProgressInfo report.
-- **StagingFolder setting** in media-management config (validated like
-  RecycleBin). Live e2e verified: staged tagged cbz → exact proposal →
-  import → file moved+renamed under existing "Boom Studios".
+## Shipped — related-series links (6af0006)
 
-**Phase B (frontend) is NOT started**: settings field, Library Import
-page "Import from staging" action (proposal review + target root +
-keep-source checkbox), report surface. Also note for Phase B UX: an
-untagged file with a bare filename can fail the 80% fuzzy-match
-threshold (long CV issue titles) and stays in staging — the UI should
-surface per-file rejection reasons.
+Settled as "most future-proof robust": **typed + directional storage,
+symmetric rendering**. Migration 12 creates SeriesRelations (SeriesId,
+RelatedSeriesId, RelationType: related/annual/spinOff). Service enforces
+self-link/missing-series/duplicate-in-either-direction (400s at the
+API); cascade-deletes on SeriesDeletedEvent. API /api/v1/seriesrelation.
+UI: chip strip above the tabs on series details with inline link form
+(series picker + type select), remove per chip. Display-only per the
+annuals decision. Verified live both directions + migration on dev DB.
 
-## Quirks discovered (not fixed, candidate items)
+## Quirks / notes
 
-1. **Queue-removal/import race**: removing a completed queue item
-   (DownloadIgnored written) does not cancel an already-dispatched
-   import — observed live: ignore at 10:34:58, import still completed
-   at 10:35:01. Benign for wanted issues; surprising otherwise.
-2. **Common.Test HTTP tests** hit `panelarr.com` (Sonarr fork-rename
-   fossil, doesn't resolve) — 3 tests fail on any dev machine; add to
-   terminology/fossil debt. Note: the session's "suite green" metric is
-   **Core.Test only**; Integration/Automation need a live instance.
-3. GetComics `DownloadId` is deterministic (hash of download file
-   path) — useful for future test harnesses.
+1. Dev instance data dir is `~/Library/Application Support/Panelarr`
+   (NOT `~/.config/Panelarr` — that one is a stale April copy with a
+   wrong API key). Port 8787.
+2. The dev DB carries live indexers/download clients (RSS sync runs and
+   can process releases when the dev instance is up) — stop the instance
+   after testing.
+3. Series API resource uses `seriesName`, not `title`.
+4. CV publisher names differ from folders: `Boom! Studios` (metadata) vs
+   `Boom Studios` (folder) — expected, cards use metadata names.
 
 ## Next actions (suggested order)
 
-1. **Staging import Phase B** (frontend) — design is settled, backend
-   verified; docs/staging-folder-import.md has the sketch.
-2. Consider whether Phase A alone warrants a v1.1.7 or wait for B.
-3. Backlog: Publisher UI Tier 2B, related-series link (landscape #11),
-   calendar → weekly pull list, terminology key-debt (130 keys +
-   RTorrentSettings Music* fossils + panelarr.com test-domain fossil).
-4. Standing watch: quality "Unknown" in the manual-import modal
-   (unreproduced since Session 18) — screenshot + keep modal open +
-   `/api/v1/manualimport?downloadId=` live.
-
-## Parked decisions still open
-
-- MetadataProfileId accepted but unused by LibraryImportCommand.
-- "Pull List" naming collision (terminology audit §2.2).
-- Terminology key-debt cleanup scope.
+1. **Deploy v1.1.7 to the homelab and live-verify staging import there**
+   (needs homelab API key / user's deploy flow). Set a real staging
+   folder on the homelab (design intent: seedbox mount dropoff).
+2. **Release decision**: publisher browsing + related-series are
+   user-visible and sit after the v1.1.7 tag — consider tagging v1.1.8
+   once homelab-verified.
+3. Backlog: weekly pull list (feature-landscape #1, the big Mylar-parity
+   item — needs design discussion), terminology key-debt (130 keys +
+   RTorrentSettings Music* fossils + panelarr.com test-domain fossil
+   failing 3 Common.Test HTTP tests offline).
+4. Standing watch: quality "Unknown" in the Activity manual-import modal
+   (unreproduced since Session 18); queue-removal/import race (Session
+   19 quirk #1, benign).
 
 ## Reading list
 
-docs/staging-folder-import.md (design + Phase A state),
-docs/scale-readiness.md (#2 and #3 now marked fixed),
-docs/feature-landscape.md (annuals decision + item #11),
-docs/publisher-ui.md, docs/feature-landscape.md.
+docs/staging-folder-import.md (now feature-complete state),
+docs/publisher-ui.md (2B shipped), docs/feature-landscape.md (#10 #11
+shipped).
