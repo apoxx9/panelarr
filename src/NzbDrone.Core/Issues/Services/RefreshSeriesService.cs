@@ -23,6 +23,7 @@ namespace NzbDrone.Core.Issues
 {
     public interface IRefreshSeriesService
     {
+        void RefreshSeries(List<int> seriesIds, bool areNewSeries, CommandTrigger trigger);
     }
 
     public class RefreshSeriesService : RefreshEntityServiceBase<Series, Issue>,
@@ -369,6 +370,14 @@ namespace NzbDrone.Core.Issues
                     _commandQueueManager.Push(new RescanFoldersCommand(seriesPaths, FilterFilesType.Matched, false, seriesIds));
                 }
             }
+        }
+
+        // Synchronous refresh for callers that need the series' issues in the
+        // database before continuing (e.g. staging import builds import
+        // decisions right after adding the series).
+        public void RefreshSeries(List<int> seriesIds, bool areNewSeries, CommandTrigger trigger)
+        {
+            RefreshSelectedSeries(seriesIds, areNewSeries, trigger);
         }
 
         private void RefreshSelectedSeries(List<int> seriesIds, bool isNew, CommandTrigger trigger)

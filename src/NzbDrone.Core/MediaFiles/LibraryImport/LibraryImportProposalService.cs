@@ -16,6 +16,7 @@ namespace NzbDrone.Core.MediaFiles.LibraryImport
     public interface ILibraryImportProposalService
     {
         List<LibraryImportProposal> GetProposals(int rootFolderId);
+        List<LibraryImportProposal> GetProposalsForFolder(string folder);
     }
 
     // Groups a root folder's unmapped files into proposed series for the
@@ -39,6 +40,7 @@ namespace NzbDrone.Core.MediaFiles.LibraryImport
         private readonly IMetadataTagService _metadataTagService;
         private readonly IProvideIssueInfo _issueInfo;
         private readonly ISearchForNewSeries _searchService;
+        private readonly IDiskScanService _diskScanService;
         private readonly IDiskProvider _diskProvider;
         private readonly Logger _logger;
 
@@ -48,6 +50,7 @@ namespace NzbDrone.Core.MediaFiles.LibraryImport
                                             IMetadataTagService metadataTagService,
                                             IProvideIssueInfo issueInfo,
                                             ISearchForNewSeries searchService,
+                                            IDiskScanService diskScanService,
                                             IDiskProvider diskProvider,
                                             Logger logger)
         {
@@ -57,6 +60,7 @@ namespace NzbDrone.Core.MediaFiles.LibraryImport
             _metadataTagService = metadataTagService;
             _issueInfo = issueInfo;
             _searchService = searchService;
+            _diskScanService = diskScanService;
             _diskProvider = diskProvider;
             _logger = logger;
         }
@@ -77,6 +81,42 @@ namespace NzbDrone.Core.MediaFiles.LibraryImport
                 try
                 {
                     var proposal = BuildProposal(folderGroup.Key, folderGroup.Select(f => f.Path).ToList());
+
+                    if (proposal != null)
+                    {
+                        proposals.Add(proposal);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Failed to build import proposal for folder {0}", folderGroup.Key);
+                }
+            }
+
+            return proposals.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        // Staging import: the folder is outside the library, so its files are
+        // not in the database — walk the disk instead of the unmapped-files
+        // table. Grouping and identification are shared with the in-place scan.
+        public List<LibraryImportProposal> GetProposalsForFolder(string folder)
+        {
+            if (!_diskProvider.FolderExists(folder))
+            {
+                throw new DirectoryNotFoundException($"Folder does not exist: {folder}");
+            }
+
+            var filesByFolder = _diskScanService.GetComicFiles(folder)
+                .GroupBy(f => Path.GetDirectoryName(f.FullName))
+                .Where(g => g.Key.IsNotNullOrWhiteSpace());
+
+            var proposals = new List<LibraryImportProposal>();
+
+            foreach (var folderGroup in filesByFolder)
+            {
+                try
+                {
+                    var proposal = BuildProposal(folderGroup.Key, folderGroup.Select(f => f.FullName).ToList());
 
                     if (proposal != null)
                     {

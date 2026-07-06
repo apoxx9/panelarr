@@ -240,5 +240,55 @@ namespace NzbDrone.Core.Test.MediaFiles.LibraryImport
 
             Subject.GetProposals(1).Should().BeEmpty();
         }
+
+        private void GivenStagingFiles(string stagingRoot, string folder, int count)
+        {
+            var files = Enumerable.Range(1, count)
+                .Select(i =>
+                {
+                    var file = new Mock<System.IO.Abstractions.IFileInfo>();
+                    file.SetupGet(f => f.FullName).Returns(Path.Combine(folder, $"Issue {i:000}.cbz"));
+                    return file.Object;
+                })
+                .ToArray();
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(stagingRoot))
+                  .Returns(true);
+
+            Mocker.GetMock<IDiskScanService>()
+                  .Setup(s => s.GetComicFiles(stagingRoot, true))
+                  .Returns(files);
+        }
+
+        [Test]
+        public void staging_scan_should_propose_from_disk_files_grouped_by_folder()
+        {
+            var stagingRoot = @"C:\staging".AsOsAgnostic();
+            var twdStaging = Path.Combine(stagingRoot, "The Walking Dead (2004)");
+
+            GivenStagingFiles(stagingRoot, twdStaging, 4);
+            GivenCvInfo(twdStaging, "https://comicvine.gamespot.com/the-walking-dead/4050-30345/");
+            GivenTags(new ParsedFileTagInfo { SeriesTitle = "The Walking Dead", Year = 2004 });
+
+            var proposals = Subject.GetProposalsForFolder(stagingRoot);
+
+            proposals.Should().HaveCount(1);
+            proposals[0].Folder.Should().Be(twdStaging);
+            proposals[0].ForeignSeriesId.Should().Be("cv:30345");
+            proposals[0].FileCount.Should().Be(4);
+        }
+
+        [Test]
+        public void staging_scan_should_throw_when_folder_does_not_exist()
+        {
+            var stagingRoot = @"C:\staging".AsOsAgnostic();
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FolderExists(stagingRoot))
+                  .Returns(false);
+
+            Assert.Throws<DirectoryNotFoundException>(() => Subject.GetProposalsForFolder(stagingRoot));
+        }
     }
 }

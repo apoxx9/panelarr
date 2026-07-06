@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Core.MediaFiles.LibraryImport;
+using NzbDrone.Core.RootFolders;
 using Panelarr.Http;
 using Panelarr.Http.REST;
 
@@ -23,16 +25,42 @@ namespace Panelarr.Api.V1.LibraryImport
     public class LibraryImportController : Controller
     {
         private readonly ILibraryImportProposalService _proposalService;
+        private readonly IRootFolderService _rootFolderService;
 
-        public LibraryImportController(ILibraryImportProposalService proposalService)
+        public LibraryImportController(ILibraryImportProposalService proposalService,
+                                       IRootFolderService rootFolderService)
         {
             _proposalService = proposalService;
+            _rootFolderService = rootFolderService;
         }
 
         [HttpGet("proposal")]
-        public List<LibraryImportProposalResource> GetProposals(int rootFolderId)
+        public List<LibraryImportProposalResource> GetProposals(int? rootFolderId, string folder)
         {
-            return _proposalService.GetProposals(rootFolderId)
+            if (rootFolderId.HasValue == folder.IsNotNullOrWhiteSpace())
+            {
+                throw new BadRequestException("Either rootFolderId or folder must be provided, not both");
+            }
+
+            List<LibraryImportProposal> proposals;
+
+            if (rootFolderId.HasValue)
+            {
+                proposals = _proposalService.GetProposals(rootFolderId.Value);
+            }
+            else
+            {
+                // Staging scan: in-place import owns everything inside the
+                // library, so a staging folder must live outside all roots.
+                if (_rootFolderService.All().Any(r => folder.PathEquals(r.Path) || r.Path.IsParentPath(folder)))
+                {
+                    throw new BadRequestException("Folder is inside a root folder; use the library import scan instead");
+                }
+
+                proposals = _proposalService.GetProposalsForFolder(folder);
+            }
+
+            return proposals
                 .Select((p, i) => new LibraryImportProposalResource
                 {
                     Id = i + 1,

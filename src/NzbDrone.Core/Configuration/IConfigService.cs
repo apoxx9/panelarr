@@ -24,6 +24,7 @@ namespace NzbDrone.Core.Configuration
         //Media Management
         bool AutoUnmonitorPreviouslyDownloadedIssues { get; set; }
         string RecycleBin { get; set; }
+        string StagingFolder { get; set; }
         int RecycleBinCleanupDays { get; set; }
         ProperDownloadTypes DownloadPropersAndRepacks { get; set; }
         bool CreateEmptySeriesFolders { get; set; }

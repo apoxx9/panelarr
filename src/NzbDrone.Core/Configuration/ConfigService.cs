@@ -96,6 +96,12 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("RecycleBin", value); }
         }
 
+        public string StagingFolder
+        {
+            get { return GetValue("StagingFolder", string.Empty); }
+            set { SetValue("StagingFolder", value); }
+        }
+
         public int RecycleBinCleanupDays
         {
             get { return GetValueInt("RecycleBinCleanupDays", 7); }

@@ -9,6 +9,7 @@ namespace Panelarr.Api.V1.Config
     {
         public bool AutoUnmonitorPreviouslyDownloadedIssues { get; set; }
         public string RecycleBin { get; set; }
+        public string StagingFolder { get; set; }
         public int RecycleBinCleanupDays { get; set; }
         public ProperDownloadTypes DownloadPropersAndRepacks { get; set; }
         public bool CreateEmptySeriesFolders { get; set; }
@@ -36,6 +37,7 @@ namespace Panelarr.Api.V1.Config
             {
                 AutoUnmonitorPreviouslyDownloadedIssues = model.AutoUnmonitorPreviouslyDownloadedIssues,
                 RecycleBin = model.RecycleBin,
+                StagingFolder = model.StagingFolder,
                 RecycleBinCleanupDays = model.RecycleBinCleanupDays,
                 DownloadPropersAndRepacks = model.DownloadPropersAndRepacks,
                 CreateEmptySeriesFolders = model.CreateEmptySeriesFolders,
