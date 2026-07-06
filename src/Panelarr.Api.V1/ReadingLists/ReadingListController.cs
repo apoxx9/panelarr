@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using NzbDrone.Core.Arcs;
-using NzbDrone.Core.Arcs.Cbl;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MetadataSource.ComicVine;
+using NzbDrone.Core.ReadingLists;
+using NzbDrone.Core.ReadingLists.Cbl;
 using NzbDrone.Http.REST.Attributes;
 using Panelarr.Http;
 using Panelarr.Http.REST;
 
-namespace Panelarr.Api.V1.Arcs
+namespace Panelarr.Api.V1.ReadingLists
 {
-    public class ArcResource : RestResource
+    public class ReadingListResource : RestResource
     {
         public string Name { get; set; }
-        public string ForeignArcId { get; set; }
-        public ArcType Type { get; set; }
+        public string ForeignReadingListId { get; set; }
+        public ReadingListType Type { get; set; }
         public string Publisher { get; set; }
         public string Description { get; set; }
         public DateTime Added { get; set; }
@@ -26,7 +26,7 @@ namespace Panelarr.Api.V1.Arcs
         public int HaveCount { get; set; }
     }
 
-    public class ArcSlotResource
+    public class ReadingListItemResource
     {
         public int Id { get; set; }
         public int Position { get; set; }
@@ -43,12 +43,12 @@ namespace Panelarr.Api.V1.Arcs
         public string Status { get; set; }
     }
 
-    public class ArcDetailResource : ArcResource
+    public class ReadingListDetailResource : ReadingListResource
     {
-        public List<ArcSlotResource> Slots { get; set; }
+        public List<ReadingListItemResource> Slots { get; set; }
     }
 
-    public class ArcSearchResource
+    public class ReadingListSearchResource
     {
         public int CvStoryArcId { get; set; }
         public string Name { get; set; }
@@ -57,19 +57,19 @@ namespace Panelarr.Api.V1.Arcs
         public int IssueCount { get; set; }
     }
 
-    public class ArcAddResource
+    public class ReadingListAddResource
     {
         public int CvStoryArcId { get; set; }
-        public ArcType Type { get; set; } = ArcType.Arc;
+        public ReadingListType Type { get; set; } = ReadingListType.Arc;
     }
 
-    public class ArcImportResource
+    public class ReadingListImportResource
     {
         public string Cbl { get; set; }
-        public ArcType Type { get; set; } = ArcType.ReadingOrder;
+        public ReadingListType Type { get; set; } = ReadingListType.ReadingOrder;
     }
 
-    public class ArcImportReportResource : RestResource
+    public class ReadingListImportReportResource : RestResource
     {
         public string Name { get; set; }
         public int SlotCount { get; set; }
@@ -78,37 +78,37 @@ namespace Panelarr.Api.V1.Arcs
         public int SkippedCollectedEditions { get; set; }
     }
 
-    [V1ApiController("arc")]
-    public class ArcController : Controller
+    [V1ApiController("readinglist")]
+    public class ReadingListController : Controller
     {
-        private readonly IArcService _arcService;
+        private readonly IReadingListService _readingListService;
         private readonly IIssueService _issueService;
         private readonly IComicVineApiClient _comicVine;
 
-        public ArcController(IArcService arcService,
+        public ReadingListController(IReadingListService readingListService,
                              IIssueService issueService,
                              IComicVineApiClient comicVine)
         {
-            _arcService = arcService;
+            _readingListService = readingListService;
             _issueService = issueService;
             _comicVine = comicVine;
         }
 
         [HttpGet]
-        public List<ArcResource> GetArcs()
+        public List<ReadingListResource> GetReadingLists()
         {
-            return _arcService.All()
-                .Select(arc => ToResource(arc, _arcService.GetSlots(arc.Id)))
+            return _readingListService.All()
+                .Select(arc => ToResource(arc, _readingListService.GetSlots(arc.Id)))
                 .ToList();
         }
 
         [HttpGet("{id:int}")]
-        public ArcDetailResource GetArc(int id)
+        public ReadingListDetailResource GetReadingList(int id)
         {
-            var arc = _arcService.Get(id);
-            var slots = _arcService.Resolve(id);
+            var arc = _readingListService.Get(id);
+            var slots = _readingListService.Resolve(id);
 
-            var resource = new ArcDetailResource();
+            var resource = new ReadingListDetailResource();
 
             CopyArcFields(arc, slots, resource);
             resource.Slots = ToSlotResources(slots);
@@ -117,7 +117,7 @@ namespace Panelarr.Api.V1.Arcs
         }
 
         [HttpGet("search")]
-        public List<ArcSearchResource> Search(string query)
+        public List<ReadingListSearchResource> Search(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -125,7 +125,7 @@ namespace Panelarr.Api.V1.Arcs
             }
 
             return _comicVine.SearchStoryArcs(query)
-                .Select(a => new ArcSearchResource
+                .Select(a => new ReadingListSearchResource
                 {
                     CvStoryArcId = a.Id,
                     Name = a.Name,
@@ -137,14 +137,14 @@ namespace Panelarr.Api.V1.Arcs
         }
 
         [HttpPost]
-        public ActionResult<ArcImportReportResource> Add([FromBody] ArcAddResource resource)
+        public ActionResult<ReadingListImportReportResource> Add([FromBody] ReadingListAddResource resource)
         {
             try
             {
-                var arc = _arcService.AddFromProvider(resource.CvStoryArcId, resource.Type, out var skipped);
-                var slots = _arcService.GetSlots(arc.Id);
+                var arc = _readingListService.AddFromProvider(resource.CvStoryArcId, resource.Type, out var skipped);
+                var slots = _readingListService.GetSlots(arc.Id);
 
-                return new ArcImportReportResource
+                return new ReadingListImportReportResource
                 {
                     Id = arc.Id,
                     Name = arc.Name,
@@ -161,7 +161,7 @@ namespace Panelarr.Api.V1.Arcs
         }
 
         [HttpPost("import")]
-        public ActionResult<ArcImportReportResource> ImportCbl([FromBody] ArcImportResource resource)
+        public ActionResult<ReadingListImportReportResource> ImportCbl([FromBody] ReadingListImportResource resource)
         {
             if (string.IsNullOrWhiteSpace(resource?.Cbl))
             {
@@ -170,10 +170,10 @@ namespace Panelarr.Api.V1.Arcs
 
             try
             {
-                var arc = _arcService.ImportCbl(resource.Cbl, resource.Type, out var unresolved);
-                var slots = _arcService.GetSlots(arc.Id);
+                var arc = _readingListService.ImportCbl(resource.Cbl, resource.Type, out var unresolved);
+                var slots = _readingListService.GetSlots(arc.Id);
 
-                return new ArcImportReportResource
+                return new ReadingListImportReportResource
                 {
                     Id = arc.Id,
                     Name = arc.Name,
@@ -191,32 +191,32 @@ namespace Panelarr.Api.V1.Arcs
         [HttpGet("{id:int}/export")]
         public IActionResult ExportCbl(int id)
         {
-            var arc = _arcService.Get(id);
-            var xml = _arcService.ExportCbl(id);
+            var arc = _readingListService.Get(id);
+            var xml = _readingListService.ExportCbl(id);
 
             return File(Encoding.UTF8.GetBytes(xml), "application/xml", $"{arc.Name}.cbl");
         }
 
         [RestDeleteById]
-        public void DeleteArc(int id)
+        public void DeleteReadingList(int id)
         {
-            _arcService.Delete(id);
+            _readingListService.Delete(id);
         }
 
-        private ArcResource ToResource(Arc arc, List<ArcIssue> slots)
+        private ReadingListResource ToResource(ReadingList arc, List<ReadingListItem> slots)
         {
-            var resource = new ArcResource();
+            var resource = new ReadingListResource();
             CopyArcFields(arc, slots, resource);
             return resource;
         }
 
-        private void CopyArcFields(Arc arc, List<ArcIssue> slots, ArcResource resource)
+        private void CopyArcFields(ReadingList arc, List<ReadingListItem> slots, ReadingListResource resource)
         {
             var haveCount = CountHave(slots);
 
             resource.Id = arc.Id;
             resource.Name = arc.Name;
-            resource.ForeignArcId = arc.ForeignArcId;
+            resource.ForeignReadingListId = arc.ForeignReadingListId;
             resource.Type = arc.Type;
             resource.Publisher = arc.Publisher;
             resource.Description = arc.Description;
@@ -226,7 +226,7 @@ namespace Panelarr.Api.V1.Arcs
             resource.HaveCount = haveCount;
         }
 
-        private int CountHave(List<ArcIssue> slots)
+        private int CountHave(List<ReadingListItem> slots)
         {
             var issues = GetIssues(slots);
 
@@ -235,13 +235,13 @@ namespace Panelarr.Api.V1.Arcs
                                     (issue.ComicFiles?.Value?.Any() ?? false));
         }
 
-        private List<ArcSlotResource> ToSlotResources(List<ArcIssue> slots)
+        private List<ReadingListItemResource> ToSlotResources(List<ReadingListItem> slots)
         {
             var issues = GetIssues(slots);
 
             return slots.Select(slot =>
             {
-                var resource = new ArcSlotResource
+                var resource = new ReadingListItemResource
                 {
                     Id = slot.Id,
                     Position = slot.Position,
@@ -268,7 +268,7 @@ namespace Panelarr.Api.V1.Arcs
             }).ToList();
         }
 
-        private Dictionary<int, Issue> GetIssues(List<ArcIssue> slots)
+        private Dictionary<int, Issue> GetIssues(List<ReadingListItem> slots)
         {
             var ids = slots.Where(s => s.IssueId.HasValue).Select(s => s.IssueId.Value).Distinct().ToList();
 

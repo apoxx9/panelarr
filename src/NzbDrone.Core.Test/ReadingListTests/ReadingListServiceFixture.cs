@@ -4,38 +4,38 @@ using System.Linq;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using NzbDrone.Core.Arcs;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MetadataSource.ComicVine;
 using NzbDrone.Core.MetadataSource.ComicVine.Resources;
+using NzbDrone.Core.ReadingLists;
 using NzbDrone.Core.Test.Framework;
 
-namespace NzbDrone.Core.Test.ArcTests
+namespace NzbDrone.Core.Test.ReadingListTests
 {
     [TestFixture]
-    public class ArcServiceFixture : CoreTest<ArcService>
+    public class ReadingListServiceFixture : CoreTest<ReadingListService>
     {
-        private List<ArcIssue> _storedSlots;
+        private List<ReadingListItem> _storedSlots;
 
         [SetUp]
         public void Setup()
         {
-            _storedSlots = new List<ArcIssue>();
+            _storedSlots = new List<ReadingListItem>();
 
-            Mocker.GetMock<IArcRepository>()
-                  .Setup(r => r.Insert(It.IsAny<Arc>()))
-                  .Returns<Arc>(a =>
+            Mocker.GetMock<IReadingListRepository>()
+                  .Setup(r => r.Insert(It.IsAny<ReadingList>()))
+                  .Returns<ReadingList>(a =>
                   {
                       a.Id = 1;
                       return a;
                   });
 
-            Mocker.GetMock<IArcIssueRepository>()
-                  .Setup(r => r.InsertMany(It.IsAny<IList<ArcIssue>>()))
-                  .Callback<IList<ArcIssue>>(slots => _storedSlots.AddRange(slots));
+            Mocker.GetMock<IReadingListItemRepository>()
+                  .Setup(r => r.InsertMany(It.IsAny<IList<ReadingListItem>>()))
+                  .Callback<IList<ReadingListItem>>(slots => _storedSlots.AddRange(slots));
 
-            Mocker.GetMock<IArcIssueRepository>()
-                  .Setup(r => r.FindByArcId(1))
+            Mocker.GetMock<IReadingListItemRepository>()
+                  .Setup(r => r.FindByReadingListId(1))
                   .Returns(() => _storedSlots.OrderBy(s => s.Position).ToList());
 
             Mocker.GetMock<IIssueService>()
@@ -83,7 +83,7 @@ namespace NzbDrone.Core.Test.ArcTests
                 ProviderIssue(1, "Batman: Sword of Azrael", "1", "1992-10-01"),
                 ProviderIssue(2, "Detective Comics", "654", "1992-10-15"));
 
-            Subject.AddFromProvider(42, ArcType.Arc, out _);
+            Subject.AddFromProvider(42, ReadingListType.Arc, out _);
 
             _storedSlots.Select(s => s.ForeignIssueId).Should().ContainInOrder("cv:1", "cv:2", "cv:3");
             _storedSlots.Select(s => s.Position).Should().ContainInOrder(1, 2, 3);
@@ -97,7 +97,7 @@ namespace NzbDrone.Core.Test.ArcTests
                 ProviderIssue(2, "Batman: Knightfall TPB", "1", "1993-01-01"),
                 ProviderIssue(3, "Batman Knightfall Omnibus", "1", "2017-01-01"));
 
-            Subject.AddFromProvider(42, ArcType.Arc, out var skipped);
+            Subject.AddFromProvider(42, ReadingListType.Arc, out var skipped);
 
             skipped.Should().Be(2);
             _storedSlots.Should().HaveCount(1);
@@ -107,11 +107,11 @@ namespace NzbDrone.Core.Test.ArcTests
         [Test]
         public void should_reject_duplicate_provider_arc()
         {
-            Mocker.GetMock<IArcRepository>()
-                  .Setup(r => r.FindByForeignArcId("cv:42"))
-                  .Returns(new Arc { Id = 7, ForeignArcId = "cv:42" });
+            Mocker.GetMock<IReadingListRepository>()
+                  .Setup(r => r.FindByForeignReadingListId("cv:42"))
+                  .Returns(new ReadingList { Id = 7, ForeignReadingListId = "cv:42" });
 
-            Assert.Throws<ArgumentException>(() => Subject.AddFromProvider(42, ArcType.Arc, out _));
+            Assert.Throws<ArgumentException>(() => Subject.AddFromProvider(42, ReadingListType.Arc, out _));
         }
 
         [Test]
@@ -123,7 +123,7 @@ namespace NzbDrone.Core.Test.ArcTests
                   .Setup(s => s.FindById("cv:1"))
                   .Returns(new Issue { Id = 555 });
 
-            Subject.AddFromProvider(42, ArcType.Arc, out _);
+            Subject.AddFromProvider(42, ReadingListType.Arc, out _);
 
             _storedSlots.Single().IssueId.Should().Be(555);
         }
@@ -140,7 +140,7 @@ namespace NzbDrone.Core.Test.ArcTests
                   .Setup(s => s.FindById("cv:36110"))
                   .Returns(new Issue { Id = 900 });
 
-            var arc = Subject.ImportCbl(cbl, ArcType.ReadingOrder, out var unresolved);
+            var arc = Subject.ImportCbl(cbl, ReadingListType.ReadingOrder, out var unresolved);
 
             arc.Name.Should().Be("Test List");
             _storedSlots.Should().HaveCount(2);
@@ -165,7 +165,7 @@ namespace NzbDrone.Core.Test.ArcTests
                   .Setup(s => s.GetIssuesBySeries(3))
                   .Returns(new List<Issue> { new Issue { Id = 77, IssueNumber = "7" } });
 
-            Subject.ImportCbl(cbl, ArcType.ReadingOrder, out var unresolved);
+            Subject.ImportCbl(cbl, ReadingListType.ReadingOrder, out var unresolved);
 
             _storedSlots.Single().IssueId.Should().Be(77);
             unresolved.Should().BeEmpty();
@@ -174,7 +174,7 @@ namespace NzbDrone.Core.Test.ArcTests
         [Test]
         public void should_unresolve_dangling_issue_links_on_resolve()
         {
-            _storedSlots.Add(new ArcIssue { Id = 1, ArcId = 1, Position = 1, IssueId = 999, ForeignIssueId = null, SeriesName = "Gone" });
+            _storedSlots.Add(new ReadingListItem { Id = 1, ReadingListId = 1, Position = 1, IssueId = 999, ForeignIssueId = null, SeriesName = "Gone" });
 
             // issue 999 no longer exists in the library
             Mocker.GetMock<IIssueService>()
@@ -185,8 +185,8 @@ namespace NzbDrone.Core.Test.ArcTests
 
             slots.Single().IssueId.Should().BeNull();
 
-            Mocker.GetMock<IArcIssueRepository>()
-                  .Verify(r => r.UpdateMany(It.Is<IList<ArcIssue>>(l => l.Single().IssueId == null)), Times.Once);
+            Mocker.GetMock<IReadingListItemRepository>()
+                  .Verify(r => r.UpdateMany(It.Is<IList<ReadingListItem>>(l => l.Single().IssueId == null)), Times.Once);
         }
 
         [Test]
@@ -196,10 +196,10 @@ namespace NzbDrone.Core.Test.ArcTests
             var series = new Series { Id = 3, Metadata = metadata };
             var issue = new Issue { Id = 900, IssueNumber = "484", SeriesMetadataId = 5, Series = series };
 
-            _storedSlots.Add(new ArcIssue
+            _storedSlots.Add(new ReadingListItem
             {
                 Id = 1,
-                ArcId = 1,
+                ReadingListId = 1,
                 Position = 1,
                 IssueId = 900,
                 ForeignIssueId = "cv:36110",
@@ -207,9 +207,9 @@ namespace NzbDrone.Core.Test.ArcTests
                 IssueNumber = "484"
             });
 
-            Mocker.GetMock<IArcRepository>()
+            Mocker.GetMock<IReadingListRepository>()
                   .Setup(r => r.Get(1))
-                  .Returns(new Arc { Id = 1, Name = "Knightfall" });
+                  .Returns(new ReadingList { Id = 1, Name = "Knightfall" });
 
             Mocker.GetMock<IIssueService>()
                   .Setup(s => s.GetIssues(It.IsAny<IEnumerable<int>>()))

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapper;
 using NzbDrone.Common.Reflection;
-using NzbDrone.Core.Arcs;
 using NzbDrone.Core.Authentication;
 using NzbDrone.Core.Blocklisting;
 using NzbDrone.Core.Configuration;
@@ -36,6 +35,7 @@ using NzbDrone.Core.Profiles.Metadata;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Profiles.Releases;
 using NzbDrone.Core.Qualities;
+using NzbDrone.Core.ReadingLists;
 using NzbDrone.Core.RemotePathMappings;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Tags;
@@ -212,8 +212,8 @@ namespace NzbDrone.Core.Datastore
 
             Mapper.Entity<SeriesRelation>("SeriesRelations").RegisterModel();
 
-            Mapper.Entity<Arc>("Arcs").RegisterModel();
-            Mapper.Entity<ArcIssue>("ArcIssues").RegisterModel();
+            Mapper.Entity<ReadingList>("ReadingLists").RegisterModel();
+            Mapper.Entity<ReadingListItem>("ReadingListItems").RegisterModel();
         }
 
         private static void RegisterMappers()

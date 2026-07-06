@@ -4,26 +4,26 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Core.Arcs.Cbl;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MetadataSource.ComicVine;
 using NzbDrone.Core.MetadataSource.ComicVine.Resources;
+using NzbDrone.Core.ReadingLists.Cbl;
 
-namespace NzbDrone.Core.Arcs
+namespace NzbDrone.Core.ReadingLists
 {
-    public interface IArcService
+    public interface IReadingListService
     {
-        List<Arc> All();
-        Arc Get(int id);
-        List<ArcIssue> GetSlots(int arcId);
-        Arc AddFromProvider(int cvStoryArcId, ArcType type, out int skippedCollectedEditions);
-        Arc ImportCbl(string xml, ArcType type, out List<string> unresolved);
-        string ExportCbl(int arcId);
-        List<ArcIssue> Resolve(int arcId);
+        List<ReadingList> All();
+        ReadingList Get(int id);
+        List<ReadingListItem> GetSlots(int readingListId);
+        ReadingList AddFromProvider(int cvStoryArcId, ReadingListType type, out int skippedCollectedEditions);
+        ReadingList ImportCbl(string xml, ReadingListType type, out List<string> unresolved);
+        string ExportCbl(int readingListId);
+        List<ReadingListItem> Resolve(int readingListId);
         void Delete(int id);
     }
 
-    public class ArcService : IArcService
+    public class ReadingListService : IReadingListService
     {
         // TPB/HC/Omnibus pollution filter for CV arc imports: CV arcs freely
         // mix collected editions with the single issues (docs/story-arcs.md
@@ -33,21 +33,21 @@ namespace NzbDrone.Core.Arcs
             @"\b(?:TPB|Trade\s*Paperback|HC|Hardcover|Omnibus|Compendium|Collected)\b",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private readonly IArcRepository _arcRepository;
-        private readonly IArcIssueRepository _slotRepository;
+        private readonly IReadingListRepository _listRepository;
+        private readonly IReadingListItemRepository _slotRepository;
         private readonly IComicVineApiClient _comicVine;
         private readonly IIssueService _issueService;
         private readonly ISeriesService _seriesService;
         private readonly Logger _logger;
 
-        public ArcService(IArcRepository arcRepository,
-                          IArcIssueRepository slotRepository,
+        public ReadingListService(IReadingListRepository arcRepository,
+                          IReadingListItemRepository slotRepository,
                           IComicVineApiClient comicVine,
                           IIssueService issueService,
                           ISeriesService seriesService,
                           Logger logger)
         {
-            _arcRepository = arcRepository;
+            _listRepository = arcRepository;
             _slotRepository = slotRepository;
             _comicVine = comicVine;
             _issueService = issueService;
@@ -55,26 +55,26 @@ namespace NzbDrone.Core.Arcs
             _logger = logger;
         }
 
-        public List<Arc> All()
+        public List<ReadingList> All()
         {
-            return _arcRepository.All().ToList();
+            return _listRepository.All().ToList();
         }
 
-        public Arc Get(int id)
+        public ReadingList Get(int id)
         {
-            return _arcRepository.Get(id);
+            return _listRepository.Get(id);
         }
 
-        public List<ArcIssue> GetSlots(int arcId)
+        public List<ReadingListItem> GetSlots(int readingListId)
         {
-            return _slotRepository.FindByArcId(arcId);
+            return _slotRepository.FindByReadingListId(readingListId);
         }
 
-        public Arc AddFromProvider(int cvStoryArcId, ArcType type, out int skippedCollectedEditions)
+        public ReadingList AddFromProvider(int cvStoryArcId, ReadingListType type, out int skippedCollectedEditions)
         {
-            var foreignArcId = $"cv:{cvStoryArcId}";
+            var foreignReadingListId = $"cv:{cvStoryArcId}";
 
-            if (_arcRepository.FindByForeignArcId(foreignArcId) != null)
+            if (_listRepository.FindByForeignReadingListId(foreignReadingListId) != null)
             {
                 throw new ArgumentException("This arc has already been added");
             }
@@ -96,19 +96,19 @@ namespace NzbDrone.Core.Arcs
 
             skippedCollectedEditions = providerIssues.Count - singles.Count;
 
-            var arc = _arcRepository.Insert(new Arc
+            var list = _listRepository.Insert(new ReadingList
             {
                 Name = providerArc.Name,
-                ForeignArcId = foreignArcId,
+                ForeignReadingListId = foreignReadingListId,
                 Type = type,
                 Publisher = providerArc.Publisher?.Name,
                 Description = providerArc.Deck,
                 Added = DateTime.UtcNow
             });
 
-            var slots = singles.Select((issue, index) => new ArcIssue
+            var slots = singles.Select((issue, index) => new ReadingListItem
             {
-                ArcId = arc.Id,
+                ReadingListId = list.Id,
                 Position = index + 1,
                 ForeignIssueId = $"cv:{issue.Id}",
                 SeriesName = issue.Volume?.Name,
@@ -118,37 +118,37 @@ namespace NzbDrone.Core.Arcs
 
             _slotRepository.InsertMany(slots);
 
-            Resolve(arc.Id);
+            Resolve(list.Id);
 
-            _logger.Info("Added arc {0} from ComicVine: {1} issues ({2} collected editions skipped)", arc.Name, slots.Count, skippedCollectedEditions);
+            _logger.Info("Added reading list {0} from ComicVine: {1} issues ({2} collected editions skipped)", list.Name, slots.Count, skippedCollectedEditions);
 
-            return arc;
+            return list;
         }
 
-        public Arc ImportCbl(string xml, ArcType type, out List<string> unresolved)
+        public ReadingList ImportCbl(string xml, ReadingListType type, out List<string> unresolved)
         {
-            var list = CblFormat.Parse(xml);
+            var parsed = CblFormat.Parse(xml);
 
-            if (list.Name.IsNullOrWhiteSpace())
+            if (parsed.Name.IsNullOrWhiteSpace())
             {
                 throw new InvalidCblFileException("Reading list has no <Name>");
             }
 
-            if (list.Books.Empty())
+            if (parsed.Books.Empty())
             {
                 throw new InvalidCblFileException("Reading list has no <Book> entries");
             }
 
-            var arc = _arcRepository.Insert(new Arc
+            var list = _listRepository.Insert(new ReadingList
             {
-                Name = list.Name,
+                Name = parsed.Name,
                 Type = type,
                 Added = DateTime.UtcNow
             });
 
-            var slots = list.Books.Select((book, index) => new ArcIssue
+            var slots = parsed.Books.Select((book, index) => new ReadingListItem
             {
-                ArcId = arc.Id,
+                ReadingListId = list.Id,
                 Position = index + 1,
                 ForeignIssueId = book.CvIssueId.HasValue ? $"cv:{book.CvIssueId.Value}" : null,
                 SeriesName = book.Series,
@@ -159,7 +159,7 @@ namespace NzbDrone.Core.Arcs
 
             _slotRepository.InsertMany(slots);
 
-            var resolvedSlots = Resolve(arc.Id);
+            var resolvedSlots = Resolve(list.Id);
 
             unresolved = resolvedSlots
                 .Where(s => s.IssueId == null)
@@ -168,15 +168,15 @@ namespace NzbDrone.Core.Arcs
                     : $"{s.SeriesName} #{s.IssueNumber}: no ComicVine id and no library match by name")
                 .ToList();
 
-            _logger.Info("Imported CBL {0}: {1} slots, {2} unresolved", arc.Name, slots.Count, unresolved.Count);
+            _logger.Info("Imported CBL {0}: {1} slots, {2} unresolved", list.Name, slots.Count, unresolved.Count);
 
-            return arc;
+            return list;
         }
 
-        public string ExportCbl(int arcId)
+        public string ExportCbl(int readingListId)
         {
-            var arc = _arcRepository.Get(arcId);
-            var slots = _slotRepository.FindByArcId(arcId);
+            var list = _listRepository.Get(readingListId);
+            var slots = _slotRepository.FindByReadingListId(readingListId);
 
             // Resolved slots export with the library's own series naming, so
             // readers fed by Panelarr-managed files match by construction.
@@ -208,13 +208,13 @@ namespace NzbDrone.Core.Arcs
                 return book;
             });
 
-            return CblFormat.Write(arc.Name, books);
+            return CblFormat.Write(list.Name, books);
         }
 
-        public List<ArcIssue> Resolve(int arcId)
+        public List<ReadingListItem> Resolve(int readingListId)
         {
-            var slots = _slotRepository.FindByArcId(arcId);
-            var updated = new List<ArcIssue>();
+            var slots = _slotRepository.FindByReadingListId(readingListId);
+            var updated = new List<ReadingListItem>();
 
             // Bust dangling links first: a slot pointing at an issue that no
             // longer exists silently unresolves (slots survive library churn;
@@ -242,11 +242,11 @@ namespace NzbDrone.Core.Arcs
 
         public void Delete(int id)
         {
-            _slotRepository.DeleteByArcId(id);
-            _arcRepository.Delete(id);
+            _slotRepository.DeleteByReadingListId(id);
+            _listRepository.Delete(id);
         }
 
-        private int? ResolveSlot(ArcIssue slot, Dictionary<int, Issue> linkedIssues)
+        private int? ResolveSlot(ReadingListItem slot, Dictionary<int, Issue> linkedIssues)
         {
             // Keep a still-valid existing link.
             if (slot.IssueId.HasValue && linkedIssues.ContainsKey(slot.IssueId.Value))
@@ -286,7 +286,7 @@ namespace NzbDrone.Core.Arcs
             return issue?.Id;
         }
 
-        private Dictionary<int, Issue> GetLibraryIssues(List<ArcIssue> slots)
+        private Dictionary<int, Issue> GetLibraryIssues(List<ReadingListItem> slots)
         {
             var ids = slots.Where(s => s.IssueId.HasValue).Select(s => s.IssueId.Value).Distinct().ToList();
 

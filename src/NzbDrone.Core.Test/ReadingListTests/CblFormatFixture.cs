@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
-using NzbDrone.Core.Arcs.Cbl;
+using NzbDrone.Core.ReadingLists.Cbl;
 using NzbDrone.Core.Test.Framework;
 
-namespace NzbDrone.Core.Test.ArcTests
+namespace NzbDrone.Core.Test.ReadingListTests
 {
     [TestFixture]
     public class CblFormatFixture : CoreTest

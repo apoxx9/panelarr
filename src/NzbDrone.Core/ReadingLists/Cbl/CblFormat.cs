@@ -4,7 +4,7 @@ using System.Linq;
 using System.Xml.Linq;
 using NzbDrone.Common.Extensions;
 
-namespace NzbDrone.Core.Arcs.Cbl
+namespace NzbDrone.Core.ReadingLists.Cbl
 {
     // ComicRack reading-list XML (.cbl) — the community interchange format
     // consumed by Kavita, Komga and Mylar. Book order IS the reading order.

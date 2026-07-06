@@ -1,4 +1,4 @@
-# Story arcs — design SETTLED 2026-07-06 (Session 20), not yet built
+# Reading Lists (story arcs) — design SETTLED 2026-07-06 (Session 20), Phase A built
 
 Status: **Design settled with the user** after the research below. The
 governing requirement: arcs curated in Panelarr must be consumable by
@@ -8,6 +8,15 @@ not an afterthought. Development happens **isolated on a feature branch**
 only after Phase A+B are verified end-to-end).
 
 ## 0. Settled design summary
+
+0. **The feature is named "Reading Lists"** (settled after Phase A was
+   first built as "Arcs"): the CBL format is literally a ReadingList and
+   Kavita — the consumption target — uses the same name, giving a 1:1
+   mapping across the toolchain. "Arc" is a TYPE of reading list
+   (arc / event / readingOrder / custom). Entity ReadingList, slots
+   ReadingListItem, API /api/v1/readinglist. Import never touches the
+   library; Phase B ships an EXPLICIT "add missing series" affordance
+   (root folder + quality profile picker) on the list detail page.
 
 1. **The model IS the CBL shape, enriched.** An arc is an ordered list of
    slots; each slot carries `Position`, nullable `ForeignIssueId` (cv id),
@@ -31,7 +40,8 @@ only after Phase A+B are verified end-to-end).
    slot→issue join. (Mylar persists Status and it drifts.)
 6. **`Type` field from day one** (arc / event / readingOrder / custom) —
    the CBL hubs are full of creator runs and master reading orders, not
-   just strict arcs. User-facing name stays "Arcs".
+   just strict arcs. (Superseded by point 0: the user-facing name is
+   "Reading Lists"; arc is the default type.)
 7. **Settled ⚖s**: TPB/collected-edition filter ON for CV imports (with a
    "N skipped" note); **track-only in v1** — no monitored/auto-add
    semantics, coverage + explicit "search missing" only (not repeating

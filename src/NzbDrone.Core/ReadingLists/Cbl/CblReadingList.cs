@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace NzbDrone.Core.Arcs.Cbl
+namespace NzbDrone.Core.ReadingLists.Cbl
 {
     public class CblReadingList
     {
