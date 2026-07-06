@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using FluentValidation;
 using FluentValidation.Results;
@@ -9,7 +8,6 @@ using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MetadataSource;
-using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Parser;
 
 namespace NzbDrone.Core.Issues
@@ -25,21 +23,21 @@ namespace NzbDrone.Core.Issues
         private readonly ISeriesService _seriesService;
         private readonly ISeriesMetadataService _seriesMetadataService;
         private readonly IProvideSeriesInfo _seriesInfo;
-        private readonly IBuildFileNames _fileNameBuilder;
+        private readonly IBuildSeriesPaths _seriesPathBuilder;
         private readonly IAddSeriesValidator _addSeriesValidator;
         private readonly Logger _logger;
 
         public AddSeriesService(ISeriesService seriesService,
                                 ISeriesMetadataService seriesMetadataService,
                                 IProvideSeriesInfo seriesInfo,
-                                IBuildFileNames fileNameBuilder,
+                                IBuildSeriesPaths seriesPathBuilder,
                                 IAddSeriesValidator addSeriesValidator,
                                 Logger logger)
         {
             _seriesService = seriesService;
             _seriesMetadataService = seriesMetadataService;
             _seriesInfo = seriesInfo;
-            _fileNameBuilder = fileNameBuilder;
+            _seriesPathBuilder = seriesPathBuilder;
             _addSeriesValidator = addSeriesValidator;
             _logger = logger;
         }
@@ -117,8 +115,7 @@ namespace NzbDrone.Core.Issues
             var path = newSeries.Path;
             if (string.IsNullOrWhiteSpace(path))
             {
-                var folderName = _fileNameBuilder.GetSeriesFolder(newSeries);
-                path = Path.Combine(newSeries.RootFolderPath, folderName);
+                path = _seriesPathBuilder.BuildPath(newSeries, false);
             }
 
             // Disambiguate series path if it exists already
