@@ -47,7 +47,7 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
         {
             var request = BuildRequest("addfile", settings).Post();
 
-            request.AddQueryParam("cat", settings.MusicCategory);
+            request.AddQueryParam("cat", settings.ComicCategory);
             request.AddQueryParam("priority", priority);
 
             request.AddFormUpload("name", filename, nzbData, "application/x-nzb");
@@ -119,9 +119,9 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
             request.AddQueryParam("start", start);
             request.AddQueryParam("limit", limit);
 
-            if (settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                request.AddQueryParam("category", settings.MusicCategory);
+                request.AddQueryParam("category", settings.ComicCategory);
             }
 
             var response = ProcessRequest(request, settings);
@@ -135,9 +135,9 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
             request.AddQueryParam("start", start);
             request.AddQueryParam("limit", limit);
 
-            if (settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                request.AddQueryParam("category", settings.MusicCategory);
+                request.AddQueryParam("category", settings.ComicCategory);
             }
 
             var response = ProcessRequest(request, settings);

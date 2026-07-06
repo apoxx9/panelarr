@@ -11,7 +11,7 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
         {
             RuleFor(c => c.Host).ValidHost();
             RuleFor(c => c.Port).InclusiveBetween(1, 65535);
-            RuleFor(c => c.MusicCategory).NotEmpty()
+            RuleFor(c => c.ComicCategory).NotEmpty()
                                       .WithMessage("A category is recommended")
                                       .AsWarning();
         }
@@ -26,9 +26,9 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
             Host = "localhost";
             Port = 8080;
             UrlBase = "RPC2";
-            MusicCategory = "panelarr";
-            OlderTvPriority = (int)RTorrentPriority.Normal;
-            RecentTvPriority = (int)RTorrentPriority.Normal;
+            ComicCategory = "panelarr";
+            OlderIssuePriority = (int)RTorrentPriority.Normal;
+            RecentIssuePriority = (int)RTorrentPriority.Normal;
         }
 
         [FieldDefinition(0, Label = "Host", Type = FieldType.Textbox)]
@@ -50,19 +50,19 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
         public string Password { get; set; }
 
         [FieldDefinition(6, Label = "Category", Type = FieldType.Textbox, HelpText = "Adding a category specific to Panelarr avoids conflicts with unrelated non-Panelarr downloads. Using a category is optional, but strongly recommended.")]
-        public string MusicCategory { get; set; }
+        public string ComicCategory { get; set; }
 
         [FieldDefinition(7, Label = "Post-Import Category", Type = FieldType.Textbox, Advanced = true, HelpText = "Category for Panelarr to set after it has imported the download. Panelarr will not remove torrents in that category even if seeding finished. Leave blank to keep same category.")]
-        public string MusicImportedCategory { get; set; }
+        public string ComicImportedCategory { get; set; }
 
         [FieldDefinition(8, Label = "Directory", Type = FieldType.Textbox, Advanced = true, HelpText = "Optional location to put downloads in, leave blank to use the default rTorrent location")]
-        public string MusicDirectory { get; set; }
+        public string ComicDirectory { get; set; }
 
         [FieldDefinition(9, Label = "Recent Priority", Type = FieldType.Select, SelectOptions = typeof(RTorrentPriority), HelpText = "Priority to use when grabbing issues released within the last 14 days")]
-        public int RecentTvPriority { get; set; }
+        public int RecentIssuePriority { get; set; }
 
         [FieldDefinition(10, Label = "Older Priority", Type = FieldType.Select, SelectOptions = typeof(RTorrentPriority), HelpText = "Priority to use when grabbing issues released over 14 days ago")]
-        public int OlderTvPriority { get; set; }
+        public int OlderIssuePriority { get; set; }
 
         [FieldDefinition(11, Label = "Add Stopped", Type = FieldType.Checkbox, HelpText = "Enabling will add torrents and magnets to rTorrent in a stopped state. This may break magnet files.")]
         public bool AddStopped { get; set; }

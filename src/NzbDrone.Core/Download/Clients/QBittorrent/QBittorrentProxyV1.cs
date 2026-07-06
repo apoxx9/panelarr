@@ -88,10 +88,10 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
         {
             var request = BuildRequest(settings).Resource("/query/torrents");
 
-            if (settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                request.AddQueryParam("label", settings.MusicCategory);
-                request.AddQueryParam("category", settings.MusicCategory);
+                request.AddQueryParam("label", settings.ComicCategory);
+                request.AddQueryParam("category", settings.ComicCategory);
             }
 
             var response = ProcessRequest<List<QBittorrentTorrent>>(request, settings);
@@ -138,9 +138,9 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                                                 .Post()
                                                 .AddFormParameter("urls", torrentUrl);
 
-            if (settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                request.AddFormParameter("category", settings.MusicCategory);
+                request.AddFormParameter("category", settings.ComicCategory);
             }
 
             // Note: ForceStart is handled by separate api call
@@ -168,9 +168,9 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                                                 .Post()
                                                 .AddFormUpload("torrents", fileName, fileContent);
 
-            if (settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                request.AddFormParameter("category", settings.MusicCategory);
+                request.AddFormParameter("category", settings.ComicCategory);
             }
 
             // Note: ForceStart is handled by separate api call

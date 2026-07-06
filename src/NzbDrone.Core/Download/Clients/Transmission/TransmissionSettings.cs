@@ -16,10 +16,10 @@ namespace NzbDrone.Core.Download.Clients.Transmission
 
             RuleFor(c => c.UrlBase).ValidUrlBase();
 
-            RuleFor(c => c.MusicCategory).Matches(@"^\.?[-a-z]*$", RegexOptions.IgnoreCase).WithMessage("Allowed characters a-z and -");
+            RuleFor(c => c.ComicCategory).Matches(@"^\.?[-a-z]*$", RegexOptions.IgnoreCase).WithMessage("Allowed characters a-z and -");
 
-            RuleFor(c => c.MusicCategory).Empty()
-                .When(c => c.TvDirectory.IsNotNullOrWhiteSpace())
+            RuleFor(c => c.ComicCategory).Empty()
+                .When(c => c.ComicDirectory.IsNotNullOrWhiteSpace())
                 .WithMessage("Cannot use Category and Directory");
         }
     }
@@ -54,16 +54,16 @@ namespace NzbDrone.Core.Download.Clients.Transmission
         public string Password { get; set; }
 
         [FieldDefinition(6, Label = "Category", Type = FieldType.Textbox, HelpText = "Adding a category specific to Panelarr avoids conflicts with unrelated non-Panelarr downloads. Using a category is optional, but strongly recommended.. Creates a [category] subdirectory in the output directory.")]
-        public string MusicCategory { get; set; }
+        public string ComicCategory { get; set; }
 
         [FieldDefinition(7, Label = "Directory", Type = FieldType.Textbox, Advanced = true, HelpText = "Optional location to put downloads in, leave blank to use the default Transmission location")]
-        public string TvDirectory { get; set; }
+        public string ComicDirectory { get; set; }
 
         [FieldDefinition(8, Label = "Recent Priority", Type = FieldType.Select, SelectOptions = typeof(TransmissionPriority), HelpText = "Priority to use when grabbing issues released within the last 14 days")]
-        public int RecentTvPriority { get; set; }
+        public int RecentIssuePriority { get; set; }
 
         [FieldDefinition(9, Label = "Older Priority", Type = FieldType.Select, SelectOptions = typeof(TransmissionPriority), HelpText = "Priority to use when grabbing issues released over 14 days ago")]
-        public int OlderTvPriority { get; set; }
+        public int OlderIssuePriority { get; set; }
 
         [FieldDefinition(10, Label = "Add Paused", Type = FieldType.Checkbox)]
         public bool AddPaused { get; set; }

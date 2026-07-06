@@ -43,9 +43,9 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
                                                        .Post()
                                                        .AddQueryParam("priority", priority.ToString());
 
-            if (settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                requestBuilder.AddQueryParam("groupname", settings.MusicCategory);
+                requestBuilder.AddQueryParam("groupname", settings.ComicCategory);
             }
 
             requestBuilder.AddFormUpload("name", filename, nzbData, "application/x-nzb");
@@ -92,9 +92,9 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
         {
             var requestBuilder = BuildRequest(settings).Resource("nzb");
 
-            if (settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                requestBuilder.AddQueryParam("groupName", settings.MusicCategory);
+                requestBuilder.AddQueryParam("groupName", settings.ComicCategory);
             }
 
             requestBuilder.AddQueryParam("limitDone", doneLimit.ToString());

@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
             RuleFor(c => c.ApiKey).NotEmpty()
                                   .WithMessage("API Key is required");
 
-            RuleFor(c => c.MusicCategory).NotEmpty()
+            RuleFor(c => c.ComicCategory).NotEmpty()
                                       .WithMessage("A category is recommended")
                                       .AsWarning();
         }
@@ -31,9 +31,9 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
         {
             Host = "localhost";
             Port = 4321;
-            MusicCategory = "Panelarr";
-            RecentTvPriority = (int)NzbVortexPriority.Normal;
-            OlderTvPriority = (int)NzbVortexPriority.Normal;
+            ComicCategory = "Panelarr";
+            RecentIssuePriority = (int)NzbVortexPriority.Normal;
+            OlderIssuePriority = (int)NzbVortexPriority.Normal;
         }
 
         [FieldDefinition(0, Label = "Host", Type = FieldType.Textbox)]
@@ -49,13 +49,13 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
         public string ApiKey { get; set; }
 
         [FieldDefinition(4, Label = "Group", Type = FieldType.Textbox, HelpText = "Adding a category specific to Panelarr avoids conflicts with unrelated non-Panelarr downloads. Using a category is optional, but strongly recommended.")]
-        public string MusicCategory { get; set; }
+        public string ComicCategory { get; set; }
 
         [FieldDefinition(5, Label = "Recent Priority", Type = FieldType.Select, SelectOptions = typeof(NzbVortexPriority), HelpText = "Priority to use when grabbing issues released within the last 14 days")]
-        public int RecentTvPriority { get; set; }
+        public int RecentIssuePriority { get; set; }
 
         [FieldDefinition(6, Label = "Older Priority", Type = FieldType.Select, SelectOptions = typeof(NzbVortexPriority), HelpText = "Priority to use when grabbing issues released over 14 days ago")]
-        public int OlderTvPriority { get; set; }
+        public int OlderIssuePriority { get; set; }
 
         public NzbDroneValidationResult Validate()
         {

@@ -17,7 +17,7 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
             RuleFor(c => c.Username).NotEmpty().When(c => !string.IsNullOrWhiteSpace(c.Password));
             RuleFor(c => c.Password).NotEmpty().When(c => !string.IsNullOrWhiteSpace(c.Username));
 
-            RuleFor(c => c.MusicCategory).NotEmpty().WithMessage("A category is recommended").AsWarning();
+            RuleFor(c => c.ComicCategory).NotEmpty().WithMessage("A category is recommended").AsWarning();
         }
     }
 
@@ -29,11 +29,11 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
         {
             Host = "localhost";
             Port = 6789;
-            MusicCategory = "Panelarr";
+            ComicCategory = "Panelarr";
             Username = "nzbget";
             Password = "tegbzn6789";
-            RecentTvPriority = (int)NzbgetPriority.Normal;
-            OlderTvPriority = (int)NzbgetPriority.Normal;
+            RecentIssuePriority = (int)NzbgetPriority.Normal;
+            OlderIssuePriority = (int)NzbgetPriority.Normal;
         }
 
         [FieldDefinition(0, Label = "Host", Type = FieldType.Textbox)]
@@ -55,13 +55,13 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
         public string Password { get; set; }
 
         [FieldDefinition(6, Label = "Category", Type = FieldType.Textbox, HelpText = "Adding a category specific to Panelarr avoids conflicts with unrelated non-Panelarr downloads. Using a category is optional, but strongly recommended.")]
-        public string MusicCategory { get; set; }
+        public string ComicCategory { get; set; }
 
         [FieldDefinition(7, Label = "Recent Priority", Type = FieldType.Select, SelectOptions = typeof(NzbgetPriority), HelpText = "Priority to use when grabbing issues released within the last 14 days")]
-        public int RecentTvPriority { get; set; }
+        public int RecentIssuePriority { get; set; }
 
         [FieldDefinition(8, Label = "Older Priority", Type = FieldType.Select, SelectOptions = typeof(NzbgetPriority), HelpText = "Priority to use when grabbing issues released over 14 days ago")]
-        public int OlderTvPriority { get; set; }
+        public int OlderIssuePriority { get; set; }
 
         [FieldDefinition(9, Label = "Add Paused", Type = FieldType.Checkbox, HelpText = "This option requires at least NzbGet version 16.0")]
         public bool AddPaused { get; set; }

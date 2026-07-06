@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.UTorrentTests
                 Port = 2222,
                 Username = "admin",
                 Password = "pass",
-                MusicCategory = "panelarr"
+                ComicCategory = "panelarr"
             };
 
             _queued = new UTorrentTorrent

@@ -32,7 +32,7 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
 
         protected override string AddFromNzbFile(RemoteIssue remoteIssue, string filename, byte[] fileContent)
         {
-            var priority = remoteIssue.IsRecentIssue() ? Settings.RecentTvPriority : Settings.OlderTvPriority;
+            var priority = remoteIssue.IsRecentIssue() ? Settings.RecentIssuePriority : Settings.OlderIssuePriority;
 
             var response = _proxy.DownloadNzb(fileContent, filename, priority, Settings);
 
@@ -208,13 +208,13 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
 
         private ValidationFailure TestCategory()
         {
-            var group = GetGroups().FirstOrDefault(c => c.GroupName == Settings.MusicCategory);
+            var group = GetGroups().FirstOrDefault(c => c.GroupName == Settings.ComicCategory);
 
             if (group == null)
             {
-                if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+                if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
                 {
-                    return new NzbDroneValidationFailure("MusicCategory", "Group does not exist")
+                    return new NzbDroneValidationFailure("ComicCategory", "Group does not exist")
                     {
                         DetailedDescription = "The Group you entered doesn't exist in NzbVortex. Go to NzbVortex to create it."
                     };

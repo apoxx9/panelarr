@@ -12,8 +12,8 @@ namespace NzbDrone.Core.Download.Clients.Deluge
             RuleFor(c => c.Host).ValidHost();
             RuleFor(c => c.Port).InclusiveBetween(1, 65535);
 
-            RuleFor(c => c.MusicCategory).Matches("^[-a-z0-9]*$").WithMessage("Allowed characters a-z, 0-9 and -");
-            RuleFor(c => c.MusicImportedCategory).Matches("^[-a-z0-9]*$").WithMessage("Allowed characters a-z, 0-9 and -");
+            RuleFor(c => c.ComicCategory).Matches("^[-a-z0-9]*$").WithMessage("Allowed characters a-z, 0-9 and -");
+            RuleFor(c => c.ComicImportedCategory).Matches("^[-a-z0-9]*$").WithMessage("Allowed characters a-z, 0-9 and -");
         }
     }
 
@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
             Host = "localhost";
             Port = 8112;
             Password = "deluge";
-            MusicCategory = "panelarr";
+            ComicCategory = "panelarr";
         }
 
         [FieldDefinition(0, Label = "Host", Type = FieldType.Textbox)]
@@ -45,16 +45,16 @@ namespace NzbDrone.Core.Download.Clients.Deluge
         public string Password { get; set; }
 
         [FieldDefinition(5, Label = "Category", Type = FieldType.Textbox, HelpText = "Adding a category specific to Panelarr avoids conflicts with unrelated non-Panelarr downloads. Using a category is optional, but strongly recommended.")]
-        public string MusicCategory { get; set; }
+        public string ComicCategory { get; set; }
 
         [FieldDefinition(6, Label = "Post-Import Category", Type = FieldType.Textbox, Advanced = true, HelpText = "Category for Panelarr to set after it has imported the download. Panelarr will not remove torrents in that category even if seeding finished. Leave blank to keep same category.")]
-        public string MusicImportedCategory { get; set; }
+        public string ComicImportedCategory { get; set; }
 
         [FieldDefinition(7, Label = "Recent Priority", Type = FieldType.Select, SelectOptions = typeof(DelugePriority), HelpText = "Priority to use when grabbing issues that were released within the last 14 days")]
-        public int RecentTvPriority { get; set; }
+        public int RecentIssuePriority { get; set; }
 
         [FieldDefinition(8, Label = "Older Priority", Type = FieldType.Select, SelectOptions = typeof(DelugePriority), HelpText = "Priority to use when grabbing issues that were released over 14 days ago")]
-        public int OlderTvPriority { get; set; }
+        public int OlderIssuePriority { get; set; }
 
         [FieldDefinition(9, Label = "Add Paused", Type = FieldType.Checkbox)]
         public bool AddPaused { get; set; }

@@ -36,8 +36,8 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
 
         protected override string AddFromNzbFile(RemoteIssue remoteIssue, string filename, byte[] fileContent)
         {
-            var category = Settings.MusicCategory;
-            var priority = remoteIssue.IsRecentIssue() ? Settings.RecentTvPriority : Settings.OlderTvPriority;
+            var category = Settings.ComicCategory;
+            var priority = remoteIssue.IsRecentIssue() ? Settings.RecentIssuePriority : Settings.OlderIssuePriority;
 
             var addpaused = Settings.AddPaused;
             var response = _proxy.DownloadNzb(fileContent, filename, category, priority, addpaused, Settings);
@@ -189,7 +189,7 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
 
         public override IEnumerable<DownloadClientItem> GetItems()
         {
-            return GetQueue().Concat(GetHistory()).Where(downloadClientItem => downloadClientItem.Category == Settings.MusicCategory);
+            return GetQueue().Concat(GetHistory()).Where(downloadClientItem => downloadClientItem.Category == Settings.ComicCategory);
         }
 
         public override void RemoveItem(DownloadClientItem item, bool deleteData)
@@ -206,7 +206,7 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
         {
             var config = _proxy.GetConfig(Settings);
 
-            var category = GetCategories(config).FirstOrDefault(v => v.Name == Settings.MusicCategory);
+            var category = GetCategories(config).FirstOrDefault(v => v.Name == Settings.ComicCategory);
 
             var status = new DownloadClientInfo
             {
@@ -293,9 +293,9 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
             var config = _proxy.GetConfig(Settings);
             var categories = GetCategories(config);
 
-            if (!Settings.MusicCategory.IsNullOrWhiteSpace() && !categories.Any(v => v.Name == Settings.MusicCategory))
+            if (!Settings.ComicCategory.IsNullOrWhiteSpace() && !categories.Any(v => v.Name == Settings.ComicCategory))
             {
-                return new NzbDroneValidationFailure("MusicCategory", "Category does not exist")
+                return new NzbDroneValidationFailure("ComicCategory", "Category does not exist")
                 {
                     InfoLink = _proxy.GetBaseUrl(Settings),
                     DetailedDescription = "The Category your entered doesn't exist in NzbGet. Go to NzbGet to create it."

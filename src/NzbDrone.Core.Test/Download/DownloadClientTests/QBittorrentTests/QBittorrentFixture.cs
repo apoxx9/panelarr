@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
                 Port = 2222,
                 Username = "admin",
                 Password = "pass",
-                MusicCategory = "comics"
+                ComicCategory = "comics"
             };
 
             Mocker.GetMock<ITorrentFileInfoReader>()
@@ -104,8 +104,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.QBittorrentTests
 
         protected void GivenHighPriority()
         {
-            Subject.Definition.Settings.As<QBittorrentSettings>().OlderTvPriority = (int)QBittorrentPriority.First;
-            Subject.Definition.Settings.As<QBittorrentSettings>().RecentTvPriority = (int)QBittorrentPriority.First;
+            Subject.Definition.Settings.As<QBittorrentSettings>().OlderIssuePriority = (int)QBittorrentPriority.First;
+            Subject.Definition.Settings.As<QBittorrentSettings>().RecentIssuePriority = (int)QBittorrentPriority.First;
         }
 
         protected void GivenGlobalSeedLimits(float maxRatio, int maxSeedingTime = -1, int maxInactiveSeedingTime = -1, QBittorrentMaxRatioAction maxRatioAction = QBittorrentMaxRatioAction.Pause)

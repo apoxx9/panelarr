@@ -41,15 +41,15 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
         public override void MarkItemAsImported(DownloadClientItem downloadClientItem)
         {
             // set post-import category
-            if (Settings.MusicImportedCategory.IsNotNullOrWhiteSpace() &&
-                Settings.MusicImportedCategory != Settings.MusicCategory)
+            if (Settings.ComicImportedCategory.IsNotNullOrWhiteSpace() &&
+                Settings.ComicImportedCategory != Settings.ComicCategory)
             {
-                _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.MusicImportedCategory, Settings);
+                _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.ComicImportedCategory, Settings);
 
                 // old label must be explicitly removed
-                if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+                if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
                 {
-                    _proxy.RemoveTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.MusicCategory, Settings);
+                    _proxy.RemoveTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.ComicCategory, Settings);
                 }
             }
         }
@@ -59,15 +59,15 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
             _proxy.AddTorrentFromUrl(magnetLink, Settings);
             _proxy.SetTorrentSeedingConfiguration(hash, remoteIssue.SeedConfiguration, Settings);
 
-            if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                _proxy.SetTorrentLabel(hash, Settings.MusicCategory, Settings);
+                _proxy.SetTorrentLabel(hash, Settings.ComicCategory, Settings);
             }
 
             var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentIssue && Settings.RecentTvPriority == (int)UTorrentPriority.First) ||
-                (!isRecentIssue && Settings.OlderTvPriority == (int)UTorrentPriority.First))
+            if ((isRecentIssue && Settings.RecentIssuePriority == (int)UTorrentPriority.First) ||
+                (!isRecentIssue && Settings.OlderIssuePriority == (int)UTorrentPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -82,15 +82,15 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
             _proxy.AddTorrentFromFile(filename, fileContent, Settings);
             _proxy.SetTorrentSeedingConfiguration(hash, remoteIssue.SeedConfiguration, Settings);
 
-            if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                _proxy.SetTorrentLabel(hash, Settings.MusicCategory, Settings);
+                _proxy.SetTorrentLabel(hash, Settings.ComicCategory, Settings);
             }
 
             var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentIssue && Settings.RecentTvPriority == (int)UTorrentPriority.First) ||
-                (!isRecentIssue && Settings.OlderTvPriority == (int)UTorrentPriority.First))
+            if ((isRecentIssue && Settings.RecentIssuePriority == (int)UTorrentPriority.First) ||
+                (!isRecentIssue && Settings.OlderIssuePriority == (int)UTorrentPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -110,7 +110,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
 
             foreach (var torrent in torrents)
             {
-                if (torrent.Label != Settings.MusicCategory)
+                if (torrent.Label != Settings.ComicCategory)
                 {
                     continue;
                 }
@@ -120,7 +120,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
                 item.Title = torrent.Name;
                 item.TotalSize = torrent.Size;
                 item.Category = torrent.Label;
-                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.MusicImportedCategory.IsNotNullOrWhiteSpace());
+                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.ComicImportedCategory.IsNotNullOrWhiteSpace());
                 item.RemainingSize = torrent.Remaining;
                 item.SeedRatio = torrent.Ratio;
 
@@ -178,7 +178,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
         {
             List<UTorrentTorrent> torrents;
 
-            var cacheKey = string.Format("{0}:{1}:{2}", Settings.Host, Settings.Port, Settings.MusicCategory);
+            var cacheKey = string.Format("{0}:{1}:{2}", Settings.Host, Settings.Port, Settings.ComicCategory);
             var cache = _torrentCache.Find(cacheKey);
 
             var response = _proxy.GetTorrents(cache == null ? null : cache.CacheID, Settings);
@@ -230,7 +230,7 @@ namespace NzbDrone.Core.Download.Clients.UTorrent
 
                 if (config.GetValueOrDefault("dir_add_label") == "true")
                 {
-                    destDir = destDir + Settings.MusicCategory;
+                    destDir = destDir + Settings.ComicCategory;
                 }
             }
 

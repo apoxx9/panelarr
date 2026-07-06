@@ -43,17 +43,17 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             {
                 var outputPath = new OsPath(torrent.DownloadDir);
 
-                if (Settings.TvDirectory.IsNotNullOrWhiteSpace())
+                if (Settings.ComicDirectory.IsNotNullOrWhiteSpace())
                 {
-                    if (!new OsPath(Settings.TvDirectory).Contains(outputPath))
+                    if (!new OsPath(Settings.ComicDirectory).Contains(outputPath))
                     {
                         continue;
                     }
                 }
-                else if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+                else if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
                 {
                     var directories = outputPath.FullPath.Split('\\', '/');
-                    if (!directories.Contains(Settings.MusicCategory))
+                    if (!directories.Contains(Settings.ComicCategory))
                     {
                         continue;
                     }
@@ -63,7 +63,7 @@ namespace NzbDrone.Core.Download.Clients.Transmission
 
                 var item = new DownloadClientItem();
                 item.DownloadId = torrent.HashString.ToUpper();
-                item.Category = Settings.MusicCategory;
+                item.Category = Settings.ComicCategory;
                 item.Title = torrent.Name;
 
                 item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, false);
@@ -174,9 +174,9 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             var config = _proxy.GetConfig(Settings);
             var destDir = config.DownloadDir;
 
-            if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                destDir = string.Format("{0}/{1}", destDir, Settings.MusicCategory);
+                destDir = string.Format("{0}/{1}", destDir, Settings.ComicCategory);
             }
 
             return new DownloadClientInfo
@@ -193,8 +193,8 @@ namespace NzbDrone.Core.Download.Clients.Transmission
 
             var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentIssue && Settings.RecentTvPriority == (int)TransmissionPriority.First) ||
-                (!isRecentIssue && Settings.OlderTvPriority == (int)TransmissionPriority.First))
+            if ((isRecentIssue && Settings.RecentIssuePriority == (int)TransmissionPriority.First) ||
+                (!isRecentIssue && Settings.OlderIssuePriority == (int)TransmissionPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -209,8 +209,8 @@ namespace NzbDrone.Core.Download.Clients.Transmission
 
             var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentIssue && Settings.RecentTvPriority == (int)TransmissionPriority.First) ||
-                (!isRecentIssue && Settings.OlderTvPriority == (int)TransmissionPriority.First))
+            if ((isRecentIssue && Settings.RecentIssuePriority == (int)TransmissionPriority.First) ||
+                (!isRecentIssue && Settings.OlderIssuePriority == (int)TransmissionPriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(hash, Settings);
             }
@@ -236,12 +236,12 @@ namespace NzbDrone.Core.Download.Clients.Transmission
 
         protected string GetDownloadDirectory()
         {
-            if (Settings.TvDirectory.IsNotNullOrWhiteSpace())
+            if (Settings.ComicDirectory.IsNotNullOrWhiteSpace())
             {
-                return Settings.TvDirectory;
+                return Settings.ComicDirectory;
             }
 
-            if (!Settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (!Settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
                 return null;
             }
@@ -249,7 +249,7 @@ namespace NzbDrone.Core.Download.Clients.Transmission
             var config = _proxy.GetConfig(Settings);
             var destDir = config.DownloadDir;
 
-            return $"{destDir.TrimEnd('/')}/{Settings.MusicCategory}";
+            return $"{destDir.TrimEnd('/')}/{Settings.ComicCategory}";
         }
 
         protected ValidationFailure TestConnection()

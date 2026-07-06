@@ -71,9 +71,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         }
 
         [Test]
-        public async Task Download_with_TvDirectory_should_force_directory()
+        public async Task Download_with_ComicDirectory_should_force_directory()
         {
-            GivenTvDirectory();
+            GivenComicDirectory();
             GivenSuccessfulDownload();
 
             var remoteIssue = CreateRemoteIssue();
@@ -89,7 +89,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         [Test]
         public async Task Download_with_category_should_force_directory()
         {
-            GivenMusicCategory();
+            GivenComicCategory();
             GivenSuccessfulDownload();
 
             var remoteIssue = CreateRemoteIssue();
@@ -105,7 +105,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         [Test]
         public async Task Download_with_category_should_not_have_double_slashes()
         {
-            GivenMusicCategory();
+            GivenComicCategory();
             GivenSuccessfulDownload();
 
             _transmissionConfigItems["download-dir"] += "/";
@@ -121,7 +121,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         }
 
         [Test]
-        public async Task Download_without_TvDirectory_and_Category_should_use_default()
+        public async Task Download_without_ComicDirectory_and_Category_should_use_default()
         {
             GivenSuccessfulDownload();
 
@@ -212,7 +212,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         [Test]
         public void should_exclude_items_not_in_category()
         {
-            GivenMusicCategory();
+            GivenComicCategory();
 
             _downloading.DownloadDir = @"C:/Downloads/Finished/transmission/Panelarr";
 
@@ -229,9 +229,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         }
 
         [Test]
-        public void should_exclude_items_not_in_TvDirectory()
+        public void should_exclude_items_not_in_ComicDirectory()
         {
-            GivenTvDirectory();
+            GivenComicDirectory();
 
             _downloading.DownloadDir = @"C:/Downloads/Finished/Panelarr/subdir";
 

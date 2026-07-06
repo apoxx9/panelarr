@@ -36,17 +36,17 @@ namespace NzbDrone.Core.Download.Clients.Deluge
         public override void MarkItemAsImported(DownloadClientItem downloadClientItem)
         {
             // set post-import category
-            if (Settings.MusicImportedCategory.IsNotNullOrWhiteSpace() &&
-                Settings.MusicImportedCategory != Settings.MusicCategory)
+            if (Settings.ComicImportedCategory.IsNotNullOrWhiteSpace() &&
+                Settings.ComicImportedCategory != Settings.ComicCategory)
             {
                 try
                 {
-                    _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.MusicImportedCategory, Settings);
+                    _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.ComicImportedCategory, Settings);
                 }
                 catch (DownloadClientUnavailableException)
                 {
                     _logger.Warn("Failed to set torrent post-import label \"{0}\" for {1} in Deluge. Does the label exist?",
-                        Settings.MusicImportedCategory,
+                        Settings.ComicImportedCategory,
                         downloadClientItem.Title);
                 }
             }
@@ -63,15 +63,15 @@ namespace NzbDrone.Core.Download.Clients.Deluge
 
             _proxy.SetTorrentSeedingConfiguration(actualHash, remoteIssue.SeedConfiguration, Settings);
 
-            if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                _proxy.SetTorrentLabel(actualHash, Settings.MusicCategory, Settings);
+                _proxy.SetTorrentLabel(actualHash, Settings.ComicCategory, Settings);
             }
 
             var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentIssue && Settings.RecentTvPriority == (int)DelugePriority.First) ||
-                (!isRecentIssue && Settings.OlderTvPriority == (int)DelugePriority.First))
+            if ((isRecentIssue && Settings.RecentIssuePriority == (int)DelugePriority.First) ||
+                (!isRecentIssue && Settings.OlderIssuePriority == (int)DelugePriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(actualHash, Settings);
             }
@@ -90,15 +90,15 @@ namespace NzbDrone.Core.Download.Clients.Deluge
 
             _proxy.SetTorrentSeedingConfiguration(actualHash, remoteIssue.SeedConfiguration, Settings);
 
-            if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                _proxy.SetTorrentLabel(actualHash, Settings.MusicCategory, Settings);
+                _proxy.SetTorrentLabel(actualHash, Settings.ComicCategory, Settings);
             }
 
             var isRecentIssue = remoteIssue.IsRecentIssue();
 
-            if ((isRecentIssue && Settings.RecentTvPriority == (int)DelugePriority.First) ||
-                (!isRecentIssue && Settings.OlderTvPriority == (int)DelugePriority.First))
+            if ((isRecentIssue && Settings.RecentIssuePriority == (int)DelugePriority.First) ||
+                (!isRecentIssue && Settings.OlderIssuePriority == (int)DelugePriority.First))
             {
                 _proxy.MoveTorrentToTopInQueue(actualHash, Settings);
             }
@@ -112,9 +112,9 @@ namespace NzbDrone.Core.Download.Clients.Deluge
         {
             IEnumerable<DelugeTorrent> torrents;
 
-            if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                torrents = _proxy.GetTorrentsByLabel(Settings.MusicCategory, Settings);
+                torrents = _proxy.GetTorrentsByLabel(Settings.ComicCategory, Settings);
             }
             else
             {
@@ -142,9 +142,9 @@ namespace NzbDrone.Core.Download.Clients.Deluge
                 var item = new DownloadClientItem();
                 item.DownloadId = torrent.Hash.ToUpper();
                 item.Title = torrent.Name;
-                item.Category = Settings.MusicCategory;
+                item.Category = Settings.ComicCategory;
 
-                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.MusicImportedCategory.IsNotNullOrWhiteSpace());
+                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.ComicImportedCategory.IsNotNullOrWhiteSpace());
 
                 var outputPath = _remotePathMappingService.RemapRemoteToLocal(Settings.Host, new OsPath(torrent.DownloadPath));
                 item.OutputPath = outputPath + torrent.Name;
@@ -313,7 +313,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
 
         private ValidationFailure TestCategory()
         {
-            if (Settings.MusicCategory.IsNullOrWhiteSpace() && Settings.MusicImportedCategory.IsNullOrWhiteSpace())
+            if (Settings.ComicCategory.IsNullOrWhiteSpace() && Settings.ComicImportedCategory.IsNullOrWhiteSpace())
             {
                 return null;
             }
@@ -322,7 +322,7 @@ namespace NzbDrone.Core.Download.Clients.Deluge
 
             if (!enabledPlugins.Contains("Label"))
             {
-                return new NzbDroneValidationFailure("MusicCategory", "Label plugin not activated")
+                return new NzbDroneValidationFailure("ComicCategory", "Label plugin not activated")
                 {
                     DetailedDescription = "You must have the Label plugin enabled in Deluge to use categories."
                 };
@@ -330,28 +330,28 @@ namespace NzbDrone.Core.Download.Clients.Deluge
 
             var labels = _proxy.GetAvailableLabels(Settings);
 
-            if (Settings.MusicCategory.IsNotNullOrWhiteSpace() && !labels.Contains(Settings.MusicCategory))
+            if (Settings.ComicCategory.IsNotNullOrWhiteSpace() && !labels.Contains(Settings.ComicCategory))
             {
-                _proxy.AddLabel(Settings.MusicCategory, Settings);
+                _proxy.AddLabel(Settings.ComicCategory, Settings);
                 labels = _proxy.GetAvailableLabels(Settings);
 
-                if (!labels.Contains(Settings.MusicCategory))
+                if (!labels.Contains(Settings.ComicCategory))
                 {
-                    return new NzbDroneValidationFailure("MusicCategory", "Configuration of label failed")
+                    return new NzbDroneValidationFailure("ComicCategory", "Configuration of label failed")
                     {
                         DetailedDescription = "Panelarr was unable to add the label to Deluge."
                     };
                 }
             }
 
-            if (Settings.MusicImportedCategory.IsNotNullOrWhiteSpace() && !labels.Contains(Settings.MusicImportedCategory))
+            if (Settings.ComicImportedCategory.IsNotNullOrWhiteSpace() && !labels.Contains(Settings.ComicImportedCategory))
             {
-                _proxy.AddLabel(Settings.MusicImportedCategory, Settings);
+                _proxy.AddLabel(Settings.ComicImportedCategory, Settings);
                 labels = _proxy.GetAvailableLabels(Settings);
 
-                if (!labels.Contains(Settings.MusicImportedCategory))
+                if (!labels.Contains(Settings.ComicImportedCategory))
                 {
-                    return new NzbDroneValidationFailure("MusicImportedCategory", "Configuration of label failed")
+                    return new NzbDroneValidationFailure("ComicImportedCategory", "Configuration of label failed")
                     {
                         DetailedDescription = "Panelarr was unable to add the label to Deluge."
                     };

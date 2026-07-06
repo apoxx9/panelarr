@@ -320,14 +320,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
                 .Returns(_serialNumber);
         }
 
-        protected void GivenMusicCategory()
+        protected void GivenComicCategory()
         {
-            _settings.MusicCategory = _category;
+            _settings.ComicCategory = _category;
         }
 
-        protected void GivenTvDirectory()
+        protected void GivenComicDirectory()
         {
-            _settings.TvDirectory = _musicDirectory;
+            _settings.ComicDirectory = _musicDirectory;
         }
 
         protected virtual void GivenTasks(List<DownloadStationTask> torrents)
@@ -386,10 +386,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         }
 
         [Test]
-        public async Task Download_with_TvDirectory_should_force_directory()
+        public async Task Download_with_ComicDirectory_should_force_directory()
         {
             GivenSerialNumber();
-            GivenTvDirectory();
+            GivenComicDirectory();
             GivenSuccessfulDownload();
 
             var remoteIssue = CreateRemoteIssue();
@@ -406,7 +406,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         public async Task Download_with_category_should_force_directory()
         {
             GivenSerialNumber();
-            GivenMusicCategory();
+            GivenComicCategory();
             GivenSuccessfulDownload();
 
             var remoteIssue = CreateRemoteIssue();
@@ -420,7 +420,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         }
 
         [Test]
-        public async Task Download_without_TvDirectory_and_Category_should_use_default()
+        public async Task Download_without_ComicDirectory_and_Category_should_use_default()
         {
             GivenSerialNumber();
             GivenSuccessfulDownload();
@@ -460,7 +460,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         [Test]
         public void GetItems_should_ignore_downloads_in_wrong_folder()
         {
-            _settings.TvDirectory = @"/shared/folder/sub";
+            _settings.ComicDirectory = @"/shared/folder/sub";
 
             GivenSerialNumber();
             GivenSharedFolder();
@@ -527,7 +527,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         public void GetStatus_should_map_outputpath_when_using_destination()
         {
             GivenSerialNumber();
-            GivenTvDirectory();
+            GivenComicDirectory();
             GivenSharedFolder($"/{_musicDirectory}");
 
             var status = Subject.GetStatus();
@@ -539,7 +539,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         public void GetStatus_should_map_outputpath_when_using_category()
         {
             GivenSerialNumber();
-            GivenMusicCategory();
+            GivenComicCategory();
             GivenSharedFolder($"/somepath/{_category}");
 
             var status = Subject.GetStatus();

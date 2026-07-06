@@ -47,18 +47,18 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
         public override void MarkItemAsImported(DownloadClientItem downloadClientItem)
         {
             // Set post-import label
-            if (Settings.MusicImportedCategory.IsNotNullOrWhiteSpace() &&
-                Settings.MusicImportedCategory != Settings.MusicCategory)
+            if (Settings.ComicImportedCategory.IsNotNullOrWhiteSpace() &&
+                Settings.ComicImportedCategory != Settings.ComicCategory)
             {
                 try
                 {
-                    _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.MusicImportedCategory, Settings);
+                    _proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.ComicImportedCategory, Settings);
                 }
                 catch (Exception ex)
                 {
                     _logger.Warn(ex,
                         "Failed to set torrent post-import label \"{0}\" for {1} in rTorrent. Does the label exist?",
-                        Settings.MusicImportedCategory,
+                        Settings.ComicImportedCategory,
                         downloadClientItem.Title);
                 }
             }
@@ -79,9 +79,9 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
 
         protected override string AddFromMagnetLink(RemoteIssue remoteIssue, string hash, string magnetLink)
         {
-            var priority = (RTorrentPriority)(remoteIssue.IsRecentIssue() ? Settings.RecentTvPriority : Settings.OlderTvPriority);
+            var priority = (RTorrentPriority)(remoteIssue.IsRecentIssue() ? Settings.RecentIssuePriority : Settings.OlderIssuePriority);
 
-            _proxy.AddTorrentFromUrl(magnetLink, Settings.MusicCategory, priority, Settings.MusicDirectory, Settings);
+            _proxy.AddTorrentFromUrl(magnetLink, Settings.ComicCategory, priority, Settings.ComicDirectory, Settings);
 
             var tries = 10;
             var retryDelay = 500;
@@ -99,9 +99,9 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
 
         protected override string AddFromTorrentFile(RemoteIssue remoteIssue, string hash, string filename, byte[] fileContent)
         {
-            var priority = (RTorrentPriority)(remoteIssue.IsRecentIssue() ? Settings.RecentTvPriority : Settings.OlderTvPriority);
+            var priority = (RTorrentPriority)(remoteIssue.IsRecentIssue() ? Settings.RecentIssuePriority : Settings.OlderIssuePriority);
 
-            _proxy.AddTorrentFromFile(filename, fileContent, Settings.MusicCategory, priority, Settings.MusicDirectory, Settings);
+            _proxy.AddTorrentFromFile(filename, fileContent, Settings.ComicCategory, priority, Settings.ComicDirectory, Settings);
 
             var tries = 10;
             var retryDelay = 500;
@@ -129,7 +129,7 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
             foreach (var torrent in torrents)
             {
                 // Don't concern ourselves with categories other than specified
-                if (Settings.MusicCategory.IsNotNullOrWhiteSpace() && torrent.Category != Settings.MusicCategory)
+                if (Settings.ComicCategory.IsNotNullOrWhiteSpace() && torrent.Category != Settings.ComicCategory)
                 {
                     continue;
                 }
@@ -148,7 +148,7 @@ namespace NzbDrone.Core.Download.Clients.RTorrent
                 }
 
                 var item = new DownloadClientItem();
-                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.MusicImportedCategory.IsNotNullOrWhiteSpace());
+                item.DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.ComicImportedCategory.IsNotNullOrWhiteSpace());
                 item.Title = torrent.Name;
                 item.DownloadId = torrent.Hash;
                 item.OutputPath = _remotePathMappingService.RemapRemoteToLocal(Settings.Host, new OsPath(torrent.Path));

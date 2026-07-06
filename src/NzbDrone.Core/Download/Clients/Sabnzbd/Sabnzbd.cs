@@ -37,8 +37,8 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
 
         protected override string AddFromNzbFile(RemoteIssue remoteIssue, string filename, byte[] fileContent)
         {
-            var category = Settings.MusicCategory;
-            var priority = remoteIssue.IsRecentIssue() ? Settings.RecentTvPriority : Settings.OlderTvPriority;
+            var category = Settings.ComicCategory;
+            var priority = remoteIssue.IsRecentIssue() ? Settings.RecentIssuePriority : Settings.OlderIssuePriority;
 
             var response = _proxy.DownloadNzb(fileContent, filename, category, priority, Settings);
 
@@ -185,7 +185,7 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
         {
             foreach (var downloadClientItem in GetQueue().Concat(GetHistory()))
             {
-                if (downloadClientItem.Category == Settings.MusicCategory || (downloadClientItem.Category == "*" && Settings.MusicCategory.IsNullOrWhiteSpace()))
+                if (downloadClientItem.Category == Settings.ComicCategory || (downloadClientItem.Category == "*" && Settings.ComicCategory.IsNullOrWhiteSpace()))
                 {
                     yield return downloadClientItem;
                 }
@@ -246,7 +246,7 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
             var config = _proxy.GetConfig(Settings);
             var categories = GetCategories(config).ToArray();
 
-            var category = categories.FirstOrDefault(v => v.Name == Settings.MusicCategory);
+            var category = categories.FirstOrDefault(v => v.Name == Settings.ComicCategory);
 
             if (category == null)
             {
@@ -435,13 +435,13 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
         private ValidationFailure TestCategory()
         {
             var config = _proxy.GetConfig(Settings);
-            var category = GetCategories(config).FirstOrDefault((SabnzbdCategory v) => v.Name == Settings.MusicCategory);
+            var category = GetCategories(config).FirstOrDefault((SabnzbdCategory v) => v.Name == Settings.ComicCategory);
 
             if (category != null)
             {
                 if (category.Dir.EndsWith("*"))
                 {
-                    return new NzbDroneValidationFailure("MusicCategory", "Enable Job folders")
+                    return new NzbDroneValidationFailure("ComicCategory", "Enable Job folders")
                     {
                         InfoLink = _proxy.GetBaseUrl(Settings, "config/categories/"),
                         DetailedDescription = "Panelarr prefers each download to have a separate folder. With * appended to the Folder/Path Sabnzbd will not create these job folders. Go to Sabnzbd to fix it."
@@ -450,9 +450,9 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
             }
             else
             {
-                if (!Settings.MusicCategory.IsNullOrWhiteSpace())
+                if (!Settings.ComicCategory.IsNullOrWhiteSpace())
                 {
-                    return new NzbDroneValidationFailure("MusicCategory", "Category does not exist")
+                    return new NzbDroneValidationFailure("ComicCategory", "Category does not exist")
                     {
                         InfoLink = _proxy.GetBaseUrl(Settings, "config/categories/"),
                         DetailedDescription = "The Category your entered doesn't exist in Sabnzbd. Go to Sabnzbd to create it."
@@ -460,27 +460,27 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
                 }
             }
 
-            if (config.Misc.enable_tv_sorting && ContainsCategory(config.Misc.tv_categories, Settings.MusicCategory))
+            if (config.Misc.enable_tv_sorting && ContainsCategory(config.Misc.tv_categories, Settings.ComicCategory))
             {
-                return new NzbDroneValidationFailure("MusicCategory", "Disable TV Sorting")
+                return new NzbDroneValidationFailure("ComicCategory", "Disable TV Sorting")
                 {
                     InfoLink = _proxy.GetBaseUrl(Settings, "config/sorting/"),
                     DetailedDescription = "You must disable Sabnzbd TV Sorting for the category Panelarr uses to prevent import issues. Go to Sabnzbd to fix it."
                 };
             }
 
-            if (config.Misc.enable_movie_sorting && ContainsCategory(config.Misc.movie_categories, Settings.MusicCategory))
+            if (config.Misc.enable_movie_sorting && ContainsCategory(config.Misc.movie_categories, Settings.ComicCategory))
             {
-                return new NzbDroneValidationFailure("MusicCategory", "Disable Movie Sorting")
+                return new NzbDroneValidationFailure("ComicCategory", "Disable Movie Sorting")
                 {
                     InfoLink = _proxy.GetBaseUrl(Settings, "config/sorting/"),
                     DetailedDescription = "You must disable Sabnzbd Movie Sorting for the category Panelarr uses to prevent import issues. Go to Sabnzbd to fix it."
                 };
             }
 
-            if (config.Misc.enable_date_sorting && ContainsCategory(config.Misc.date_categories, Settings.MusicCategory))
+            if (config.Misc.enable_date_sorting && ContainsCategory(config.Misc.date_categories, Settings.ComicCategory))
             {
-                return new NzbDroneValidationFailure("MusicCategory", "Disable Date Sorting")
+                return new NzbDroneValidationFailure("ComicCategory", "Disable Date Sorting")
                 {
                     InfoLink = _proxy.GetBaseUrl(Settings, "config/sorting/"),
                     DetailedDescription = "You must disable Sabnzbd Date Sorting for the category Panelarr uses to prevent import issues. Go to Sabnzbd to fix it."

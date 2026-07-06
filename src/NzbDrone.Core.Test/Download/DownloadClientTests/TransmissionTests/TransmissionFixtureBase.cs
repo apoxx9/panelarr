@@ -112,14 +112,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
                   .Returns(() => Json.Deserialize<TransmissionConfig>(_transmissionConfigItems.ToJson()));
         }
 
-        protected void GivenMusicCategory()
+        protected void GivenComicCategory()
         {
-            _settings.MusicCategory = "Panelarr";
+            _settings.ComicCategory = "Panelarr";
         }
 
-        protected void GivenTvDirectory()
+        protected void GivenComicDirectory()
         {
-            _settings.TvDirectory = @"C:/Downloads/Finished/Panelarr";
+            _settings.ComicDirectory = @"C:/Downloads/Finished/Panelarr";
         }
 
         protected void GivenFailedDownload()

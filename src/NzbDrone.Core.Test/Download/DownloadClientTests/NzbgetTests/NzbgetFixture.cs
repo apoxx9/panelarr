@@ -34,8 +34,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.NzbgetTests
                 Port = 2222,
                 Username = "admin",
                 Password = "pass",
-                MusicCategory = "comics",
-                RecentTvPriority = (int)NzbgetPriority.High
+                ComicCategory = "comics",
+                RecentIssuePriority = (int)NzbgetPriority.High
             };
 
             _queued = new NzbgetQueueItem

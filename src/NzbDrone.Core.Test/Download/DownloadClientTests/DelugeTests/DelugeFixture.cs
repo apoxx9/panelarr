@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DelugeTests
             Subject.Definition = new DownloadClientDefinition();
             Subject.Definition.Settings = new DelugeSettings()
             {
-                MusicCategory = null
+                ComicCategory = null
             };
 
             _queued = new DelugeTorrent

@@ -70,17 +70,17 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
             {
                 var outputPath = new OsPath($"/{torrent.Additional.Detail["destination"]}");
 
-                if (Settings.TvDirectory.IsNotNullOrWhiteSpace())
+                if (Settings.ComicDirectory.IsNotNullOrWhiteSpace())
                 {
-                    if (!new OsPath($"/{Settings.TvDirectory}").Contains(outputPath))
+                    if (!new OsPath($"/{Settings.ComicDirectory}").Contains(outputPath))
                     {
                         continue;
                     }
                 }
-                else if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+                else if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
                 {
                     var directories = outputPath.FullPath.Split('\\', '/');
-                    if (!directories.Contains(Settings.MusicCategory))
+                    if (!directories.Contains(Settings.ComicCategory))
                     {
                         continue;
                     }
@@ -88,7 +88,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
 
                 var item = new DownloadClientItem()
                 {
-                    Category = Settings.MusicCategory,
+                    Category = Settings.ComicCategory,
                     DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, false),
                     DownloadId = CreateDownloadId(torrent.Id, serialNumber),
                     Title = torrent.Title,
@@ -307,7 +307,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
 
                 if (downloadDir == null)
                 {
-                    return new NzbDroneValidationFailure(nameof(Settings.TvDirectory), "No default destination")
+                    return new NzbDroneValidationFailure(nameof(Settings.ComicDirectory), "No default destination")
                     {
                         DetailedDescription = $"You must login into your Diskstation as {Settings.Username} and manually set it up into DownloadStation settings under BT/HTTP/FTP/NZB -> Location."
                     };
@@ -318,7 +318,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
                 if (downloadDir != null)
                 {
                     var sharedFolder = downloadDir.Split('\\', '/')[0];
-                    var fieldName = Settings.TvDirectory.IsNotNullOrWhiteSpace() ? nameof(Settings.TvDirectory) : nameof(Settings.MusicCategory);
+                    var fieldName = Settings.ComicDirectory.IsNotNullOrWhiteSpace() ? nameof(Settings.ComicDirectory) : nameof(Settings.ComicCategory);
 
                     var folderInfo = _fileStationProxy.GetInfoFileOrDirectory($"/{downloadDir}", Settings);
 
@@ -441,16 +441,16 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
 
         protected string GetDownloadDirectory()
         {
-            if (Settings.TvDirectory.IsNotNullOrWhiteSpace())
+            if (Settings.ComicDirectory.IsNotNullOrWhiteSpace())
             {
-                return Settings.TvDirectory.TrimStart('/');
+                return Settings.ComicDirectory.TrimStart('/');
             }
 
             var destDir = GetDefaultDir();
 
-            if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                return $"{destDir.TrimEnd('/')}/{Settings.MusicCategory}";
+                return $"{destDir.TrimEnd('/')}/{Settings.ComicCategory}";
             }
 
             return destDir.TrimEnd('/');

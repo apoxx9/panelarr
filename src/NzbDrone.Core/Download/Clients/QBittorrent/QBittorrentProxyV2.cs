@@ -96,9 +96,9 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
         public List<QBittorrentTorrent> GetTorrents(QBittorrentSettings settings)
         {
             var request = BuildRequest(settings).Resource("/api/v2/torrents/info");
-            if (settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                request.AddQueryParam("category", settings.MusicCategory);
+                request.AddQueryParam("category", settings.ComicCategory);
             }
 
             var response = ProcessRequest<List<QBittorrentTorrent>>(request, settings);
@@ -241,9 +241,9 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         private void AddTorrentDownloadFormParameters(HttpRequestBuilder request, QBittorrentSettings settings)
         {
-            if (settings.MusicCategory.IsNotNullOrWhiteSpace())
+            if (settings.ComicCategory.IsNotNullOrWhiteSpace())
             {
-                request.AddFormParameter("category", settings.MusicCategory);
+                request.AddFormParameter("category", settings.ComicCategory);
             }
 
             // Avoid extraneous API version check if initial state is ForceStart

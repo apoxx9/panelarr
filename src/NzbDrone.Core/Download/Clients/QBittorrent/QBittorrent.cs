@@ -50,17 +50,17 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
         public override void MarkItemAsImported(DownloadClientItem downloadClientItem)
         {
             // set post-import category
-            if (Settings.MusicImportedCategory.IsNotNullOrWhiteSpace() &&
-                Settings.MusicImportedCategory != Settings.MusicCategory)
+            if (Settings.ComicImportedCategory.IsNotNullOrWhiteSpace() &&
+                Settings.ComicImportedCategory != Settings.ComicCategory)
             {
                 try
                 {
-                    Proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.MusicImportedCategory, Settings);
+                    Proxy.SetTorrentLabel(downloadClientItem.DownloadId.ToLower(), Settings.ComicImportedCategory, Settings);
                 }
                 catch (DownloadClientException)
                 {
                     _logger.Warn("Failed to set post-import torrent label \"{0}\" for {1} in qBittorrent. Does the label exist?",
-                        Settings.MusicImportedCategory,
+                        Settings.ComicImportedCategory,
                         downloadClientItem.Title);
                 }
             }
@@ -76,7 +76,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             var setShareLimits = remoteIssue.SeedConfiguration != null && (remoteIssue.SeedConfiguration.Ratio.HasValue || remoteIssue.SeedConfiguration.SeedTime.HasValue);
             var addHasSetShareLimits = setShareLimits && ProxyApiVersion >= new Version(2, 8, 1);
             var isRecentIssue = remoteIssue.IsRecentIssue();
-            var moveToTop = (isRecentIssue && Settings.RecentTvPriority == (int)QBittorrentPriority.First) || (!isRecentIssue && Settings.OlderTvPriority == (int)QBittorrentPriority.First);
+            var moveToTop = (isRecentIssue && Settings.RecentIssuePriority == (int)QBittorrentPriority.First) || (!isRecentIssue && Settings.OlderIssuePriority == (int)QBittorrentPriority.First);
             var forceStart = (QBittorrentState)Settings.InitialState == QBittorrentState.ForceStart;
 
             Proxy.AddTorrentFromUrl(magnetLink, addHasSetShareLimits && setShareLimits ? remoteIssue.SeedConfiguration : null, Settings);
@@ -135,7 +135,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             var setShareLimits = remoteIssue.SeedConfiguration != null && (remoteIssue.SeedConfiguration.Ratio.HasValue || remoteIssue.SeedConfiguration.SeedTime.HasValue);
             var addHasSetShareLimits = setShareLimits && ProxyApiVersion >= new Version(2, 8, 1);
             var isRecentIssue = remoteIssue.IsRecentIssue();
-            var moveToTop = (isRecentIssue && Settings.RecentTvPriority == (int)QBittorrentPriority.First) || (!isRecentIssue && Settings.OlderTvPriority == (int)QBittorrentPriority.First);
+            var moveToTop = (isRecentIssue && Settings.RecentIssuePriority == (int)QBittorrentPriority.First) || (!isRecentIssue && Settings.OlderIssuePriority == (int)QBittorrentPriority.First);
             var forceStart = (QBittorrentState)Settings.InitialState == QBittorrentState.ForceStart;
 
             Proxy.AddTorrentFromFile(filename, fileContent, addHasSetShareLimits ? remoteIssue.SeedConfiguration : null, Settings);
@@ -231,7 +231,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                     Category = torrent.Category.IsNotNullOrWhiteSpace() ? torrent.Category : torrent.Label,
                     Title = torrent.Name,
                     TotalSize = torrent.Size,
-                    DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.MusicImportedCategory.IsNotNullOrWhiteSpace()),
+                    DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, Settings.ComicImportedCategory.IsNotNullOrWhiteSpace()),
                     RemainingSize = (long)(torrent.Size * (1.0 - torrent.Progress)),
                     RemainingTime = GetRemainingTime(torrent),
                     SeedRatio = torrent.Ratio
@@ -373,15 +373,15 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
             var destDir = new OsPath(config.SavePath);
 
-            if (Settings.MusicCategory.IsNotNullOrWhiteSpace() && version >= Version.Parse("2.0"))
+            if (Settings.ComicCategory.IsNotNullOrWhiteSpace() && version >= Version.Parse("2.0"))
             {
-                if (Proxy.GetLabels(Settings).TryGetValue(Settings.MusicCategory, out var label) && label.SavePath.IsNotNullOrWhiteSpace())
+                if (Proxy.GetLabels(Settings).TryGetValue(Settings.ComicCategory, out var label) && label.SavePath.IsNotNullOrWhiteSpace())
                 {
                     var savePath = label.SavePath;
 
                     if (savePath.StartsWith("//"))
                     {
-                        _logger.Trace("Replacing double forward slashes in path '{0}'. If this is not meant to be a Windows UNC path fix the 'Save Path' in qBittorrent's {1} category", savePath, Settings.MusicCategory);
+                        _logger.Trace("Replacing double forward slashes in path '{0}'. If this is not meant to be a Windows UNC path fix the 'Save Path' in qBittorrent's {1} category", savePath, Settings.ComicCategory);
                         savePath = savePath.Replace('/', '\\');
                     }
 
@@ -441,7 +441,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 else if (version < Version.Parse("1.6"))
                 {
                     // API version 6 introduced support for labels
-                    if (Settings.MusicCategory.IsNotNullOrWhiteSpace())
+                    if (Settings.ComicCategory.IsNotNullOrWhiteSpace())
                     {
                         return new NzbDroneValidationFailure("Category", "Category is not supported")
                         {
@@ -449,10 +449,10 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                         };
                     }
                 }
-                else if (Settings.MusicCategory.IsNullOrWhiteSpace())
+                else if (Settings.ComicCategory.IsNullOrWhiteSpace())
                 {
                     // warn if labels are supported, but category is not provided
-                    return new NzbDroneValidationFailure("MusicCategory", "Category is recommended")
+                    return new NzbDroneValidationFailure("ComicCategory", "Category is recommended")
                     {
                         IsWarning = true,
                         DetailedDescription = "Panelarr will not attempt to import completed downloads without a category."
@@ -505,7 +505,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         private ValidationFailure TestCategory()
         {
-            if (Settings.MusicCategory.IsNullOrWhiteSpace() && Settings.MusicImportedCategory.IsNullOrWhiteSpace())
+            if (Settings.ComicCategory.IsNullOrWhiteSpace() && Settings.ComicImportedCategory.IsNullOrWhiteSpace())
             {
                 return null;
             }
@@ -519,28 +519,28 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
             var labels = Proxy.GetLabels(Settings);
 
-            if (Settings.MusicCategory.IsNotNullOrWhiteSpace() && !labels.ContainsKey(Settings.MusicCategory))
+            if (Settings.ComicCategory.IsNotNullOrWhiteSpace() && !labels.ContainsKey(Settings.ComicCategory))
             {
-                Proxy.AddLabel(Settings.MusicCategory, Settings);
+                Proxy.AddLabel(Settings.ComicCategory, Settings);
                 labels = Proxy.GetLabels(Settings);
 
-                if (!labels.ContainsKey(Settings.MusicCategory))
+                if (!labels.ContainsKey(Settings.ComicCategory))
                 {
-                    return new NzbDroneValidationFailure("MusicCategory", "Configuration of label failed")
+                    return new NzbDroneValidationFailure("ComicCategory", "Configuration of label failed")
                     {
                         DetailedDescription = "Panelarr was unable to add the label to qBittorrent."
                     };
                 }
             }
 
-            if (Settings.MusicImportedCategory.IsNotNullOrWhiteSpace() && !labels.ContainsKey(Settings.MusicImportedCategory))
+            if (Settings.ComicImportedCategory.IsNotNullOrWhiteSpace() && !labels.ContainsKey(Settings.ComicImportedCategory))
             {
-                Proxy.AddLabel(Settings.MusicImportedCategory, Settings);
+                Proxy.AddLabel(Settings.ComicImportedCategory, Settings);
                 labels = Proxy.GetLabels(Settings);
 
-                if (!labels.ContainsKey(Settings.MusicImportedCategory))
+                if (!labels.ContainsKey(Settings.ComicImportedCategory))
                 {
-                    return new NzbDroneValidationFailure("MusicImportedCategory", "Configuration of label failed")
+                    return new NzbDroneValidationFailure("ComicImportedCategory", "Configuration of label failed")
                     {
                         DetailedDescription = "Panelarr was unable to add the label to qBittorrent."
                     };
@@ -552,8 +552,8 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         private ValidationFailure TestPrioritySupport()
         {
-            var recentPriorityDefault = Settings.RecentTvPriority == (int)QBittorrentPriority.Last;
-            var olderPriorityDefault = Settings.OlderTvPriority == (int)QBittorrentPriority.Last;
+            var recentPriorityDefault = Settings.RecentIssuePriority == (int)QBittorrentPriority.Last;
+            var olderPriorityDefault = Settings.OlderIssuePriority == (int)QBittorrentPriority.Last;
 
             if (olderPriorityDefault && recentPriorityDefault)
             {
@@ -568,11 +568,11 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
                 {
                     if (!recentPriorityDefault)
                     {
-                        return new NzbDroneValidationFailure(nameof(Settings.RecentTvPriority), "Queueing not enabled") { DetailedDescription = "Torrent Queueing is not enabled in your qBittorrent settings. Enable it in qBittorrent or select 'Last' as priority." };
+                        return new NzbDroneValidationFailure(nameof(Settings.RecentIssuePriority), "Queueing not enabled") { DetailedDescription = "Torrent Queueing is not enabled in your qBittorrent settings. Enable it in qBittorrent or select 'Last' as priority." };
                     }
                     else if (!olderPriorityDefault)
                     {
-                        return new NzbDroneValidationFailure(nameof(Settings.OlderTvPriority), "Queueing not enabled") { DetailedDescription = "Torrent Queueing is not enabled in your qBittorrent settings. Enable it in qBittorrent or select 'Last' as priority." };
+                        return new NzbDroneValidationFailure(nameof(Settings.OlderIssuePriority), "Queueing not enabled") { DetailedDescription = "Torrent Queueing is not enabled in your qBittorrent settings. Enable it in qBittorrent or select 'Last' as priority." };
                     }
                 }
             }
