@@ -10,6 +10,7 @@ import Switch from 'Components/Router/Switch';
 import IssueDetailsPageConnector from 'Issue/Details/IssueDetailsPageConnector';
 import IssueIndexConnector from 'Issue/Index/IssueIndexConnector';
 import PublisherIndexConnector from 'Publisher/Index/PublisherIndexConnector';
+import PullListPage from 'PullList/PullListPage';
 import AddNewItemConnector from 'Search/AddNewItemConnector';
 import SeriesDetailsPageConnector from 'Series/Details/SeriesDetailsPageConnector';
 import SeriesIndexConnector from 'Series/Index/SeriesIndexConnector';
@@ -115,6 +116,11 @@ function AppRoutes(props) {
       <Route
         path="/calendar"
         component={CalendarPageConnector}
+      />
+
+      <Route
+        path="/pulllist"
+        component={PullListPage}
       />
 
       {/*

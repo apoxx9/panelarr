@@ -43,7 +43,13 @@ const links = [
   {
     iconName: icons.CALENDAR,
     title: () => translate('Calendar'),
-    to: '/calendar'
+    to: '/calendar',
+    children: [
+      {
+        title: () => translate('PullList'),
+        to: '/pulllist'
+      }
+    ]
   },
 
   {

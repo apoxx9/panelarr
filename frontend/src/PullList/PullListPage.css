@@ -1,0 +1,84 @@
+.week {
+  margin-bottom: 24px;
+}
+
+.weekHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--borderColor);
+}
+
+.weekTitle {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.thisWeek {
+  color: var(--successColor);
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.searchWeek {
+  margin-left: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table td {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--borderColor);
+}
+
+.seriesCell {
+  width: 30%;
+}
+
+.titleCell {
+  color: var(--disabledColor);
+}
+
+.actionsCell {
+  width: 40px;
+  text-align: right;
+}
+
+.have {
+  color: var(--successColor);
+  font-weight: bold;
+}
+
+.grabbed {
+  color: var(--queueColor, #7a43b6);
+  font-weight: bold;
+}
+
+.missing {
+  color: var(--dangerColor);
+  font-weight: bold;
+}
+
+.unreleased {
+  color: var(--disabledColor);
+}
+
+.unmonitored {
+  color: var(--disabledColor);
+  font-style: italic;
+}
+
+.emptyWeek {
+  margin: 8px 0 0 10px;
+  color: var(--disabledColor);
+}
+
+.error {
+  color: var(--dangerColor);
+  margin: 12px 0;
+}
