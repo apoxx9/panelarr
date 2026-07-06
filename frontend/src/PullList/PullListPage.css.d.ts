@@ -9,6 +9,7 @@ interface CssExports {
   'missing': string;
   'searchWeek': string;
   'seriesCell': string;
+  'showPreviousWeek': string;
   'table': string;
   'thisWeek': string;
   'titleCell': string;

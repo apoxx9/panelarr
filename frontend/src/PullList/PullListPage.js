@@ -57,6 +57,8 @@ class PullListPage extends Component {
       error: null,
       issues: [],
       showUnmonitored: false,
+      // the page opens ON the current week; history is one click away
+      showPreviousWeek: false,
       searchQueued: {}
     };
   }
@@ -95,6 +97,10 @@ class PullListPage extends Component {
 
   onToggleUnmonitored = () => {
     this.setState((prev) => ({ showUnmonitored: !prev.showUnmonitored }));
+  };
+
+  onShowPreviousWeekPress = () => {
+    this.setState({ showPreviousWeek: true });
   };
 
   onSearchPress = (issueIds, key) => {
@@ -205,11 +211,13 @@ class PullListPage extends Component {
   }
 
   render() {
-    const { anchor, isFetching, error, issues, showUnmonitored } = this.state;
+    const { anchor, isFetching, error, issues, showUnmonitored, showPreviousWeek } = this.state;
 
     const weeks = [];
 
-    for (let offset = -WEEKS_BACK; offset <= WEEKS_AHEAD; offset++) {
+    const firstOffset = showPreviousWeek ? -WEEKS_BACK : 0;
+
+    for (let offset = firstOffset; offset <= WEEKS_AHEAD; offset++) {
       const weekStart = moment(anchor).add(offset * 7, 'days');
       const weekEnd = moment(weekStart).add(7, 'days');
 
@@ -258,6 +266,17 @@ class PullListPage extends Component {
           {
             error &&
               <div className={styles.error}>{error}</div>
+          }
+
+          {
+            !isFetching && !error && !showPreviousWeek &&
+              <Link
+                className={styles.showPreviousWeek}
+                component="div"
+                onPress={this.onShowPreviousWeekPress}
+              >
+                {translate('ShowPreviousWeek')}
+              </Link>
           }
 
           {

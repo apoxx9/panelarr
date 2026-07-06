@@ -82,3 +82,15 @@
   color: var(--dangerColor);
   margin: 12px 0;
 }
+
+.showPreviousWeek {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--disabledColor);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.showPreviousWeek:hover {
+  text-decoration: underline;
+}
