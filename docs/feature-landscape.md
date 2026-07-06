@@ -91,9 +91,12 @@ comes after the migration tooling.
 9. **ComicTagger round-trip fidelity** (S–M) — largely done (Phase 1 +
    embed gating); remaining: preserve unmanaged fields when we do rewrite
    tags, and match ComicTagger field semantics exactly. Audit-sized task.
-10. **Publisher browsing** (S) — see docs/publisher-ui.md; backend exists,
-    cheap UI win.
-11. **Related-series link** (S–M) — lightweight association between series
+10. **Publisher browsing** (S) — SHIPPED through Tier 2B (Session 20); see
+    docs/publisher-ui.md.
+11. **Related-series link** (S–M) — SHIPPED Session 20: typed directional
+    SeriesRelations table (related/annual/spin-off), symmetric display,
+    /api/v1/seriesrelation, chip strip + inline link form on series
+    details. Originally: lightweight association between series
     (e.g. "MMPR Annual (2016)" ↔ "MMPR (2016)") so the UI can group
     annuals/spin-offs with their parent. Display-only: no effect on
     matching, refresh, or file management, which is what keeps it cheap

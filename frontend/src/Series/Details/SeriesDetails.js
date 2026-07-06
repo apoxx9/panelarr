@@ -28,6 +28,7 @@ import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import selectAll from 'Utilities/Table/selectAll';
 import toggleSelected from 'Utilities/Table/toggleSelected';
 import InteractiveImportModal from '../../InteractiveImport/InteractiveImportModal';
+import SeriesDetailsRelationsConnector from './Relations/SeriesDetailsRelationsConnector';
 import SeriesDetailsHeaderConnector from './SeriesDetailsHeaderConnector';
 import SeriesDetailsSeasonConnector from './SeriesDetailsSeasonConnector';
 import styles from './SeriesDetails.css';
@@ -415,6 +416,10 @@ class SeriesDetails extends Component {
           </SwipeHeaderConnector>
 
           <div className={styles.contentContainer}>
+            <SeriesDetailsRelationsConnector
+              seriesId={id}
+            />
+
             {
               !isPopulated && !issuesError && !issueFilesError ?
                 <LoadingIndicator /> :

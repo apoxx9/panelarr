@@ -22,6 +22,7 @@ using NzbDrone.Core.ImportLists.Exclusions;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Instrumentation;
 using NzbDrone.Core.Issues;
+using NzbDrone.Core.Issues.Relations;
 using NzbDrone.Core.Jobs;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Messaging.Commands;
@@ -207,6 +208,8 @@ namespace NzbDrone.Core.Datastore
             Mapper.Entity<UpdateHistory>("UpdateHistory").RegisterModel();
 
             Mapper.Entity<Publisher>("Publishers").RegisterModel();
+
+            Mapper.Entity<SeriesRelation>("SeriesRelations").RegisterModel();
         }
 
         private static void RegisterMappers()

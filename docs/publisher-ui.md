@@ -1,6 +1,10 @@
 # Publisher UI — design draft (Session 15 overnight, for morning review)
 
-Status: **Tier 1 + Tier 2 Option A SHIPPED** (Session 16). Publisher filter
+Status: **Tier 1 + Tier 2 Option A SHIPPED** (Session 16); **Tier 2 Option B
+SHIPPED** (Session 20: Library -> Publishers card grid with initials tiles
+and client-side counts; clicking a card applies a transient publisher
+filter to the series index — no duplicated series-list rendering, no new
+store slice). Publisher filter
 on the series index (plus fixing the publisher column and sort, which were
 still reading Readarr's dead `disambiguation` field), and a
 "Group by Publisher" toolbar toggle rendering section headers in all three
