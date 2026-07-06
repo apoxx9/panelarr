@@ -43,6 +43,9 @@ namespace NzbDrone.Core.Test.MetadataSource.ComicVine
             // Should wait ~500ms for the next dripped token, not the full 2s refill period.
             sw.Elapsed.Should().BeGreaterThan(TimeSpan.FromMilliseconds(300));
             sw.Elapsed.Should().BeLessThan(TimeSpan.FromMilliseconds(1500));
+
+            // Blocking on an empty bucket logs the throttle warning by design.
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -85,6 +88,9 @@ namespace NzbDrone.Core.Test.MetadataSource.ComicVine
 
             // Third call must block for a drip; if the bucket over-filled it would return instantly.
             sw.Elapsed.Should().BeGreaterThan(TimeSpan.FromMilliseconds(100));
+
+            // Blocking on an empty bucket logs the throttle warning by design.
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
