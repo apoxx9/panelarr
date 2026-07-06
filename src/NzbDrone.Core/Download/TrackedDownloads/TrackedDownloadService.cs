@@ -27,6 +27,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
     }
 
     public class TrackedDownloadService : ITrackedDownloadService,
+                                          IHandle<IssueGrabbedEvent>,
                                           IHandle<IssueInfoRefreshedEvent>,
                                           IHandle<SeriesDeletedEvent>
     {
@@ -280,6 +281,27 @@ namespace NzbDrone.Core.Download.TrackedDownloads
                 default:
                     return TrackedDownloadState.Downloading;
             }
+        }
+
+        public void Handle(IssueGrabbedEvent message)
+        {
+            if (message.DownloadId.IsNullOrWhiteSpace())
+            {
+                return;
+            }
+
+            var existingItem = _cache.Find(message.DownloadId);
+
+            if (existingItem == null || existingItem.State == TrackedDownloadState.Downloading)
+            {
+                return;
+            }
+
+            // A cached item in a terminal state (Ignored/Imported/Failed) would short-circuit
+            // TrackDownload and hide the new grab until a restart. Evict it so the refresh
+            // triggered by this grab rebuilds it from download history.
+            _logger.Debug("Download '{0}' was re-grabbed while cached as {1}, removing from cache to allow re-tracking", existingItem.DownloadItem.Title, existingItem.State);
+            _cache.Remove(message.DownloadId);
         }
 
         public void Handle(IssueInfoRefreshedEvent message)

@@ -4,6 +4,7 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Download.History;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Indexers;
@@ -79,6 +80,123 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             trackedDownload.RemoteIssue.Series.Should().NotBeNull();
             trackedDownload.RemoteIssue.Series.Id.Should().Be(5);
             trackedDownload.RemoteIssue.Issues.First().Id.Should().Be(4);
+        }
+
+        [Test]
+        public void should_evict_ignored_download_from_cache_when_regrabbed()
+        {
+            GivenDownloadHistory();
+
+            var remoteIssue = new RemoteIssue
+            {
+                Series = new Series() { Id = 5 },
+                Issues = new List<Issue> { new Issue { Id = 4 } },
+                ParsedIssueInfo = new ParsedIssueInfo()
+                {
+                    IssueTitle = "The Brand New World",
+                    SeriesName = "Saga"
+                }
+            };
+
+            Mocker.GetMock<IParsingService>()
+                  .Setup(s => s.Map(It.Is<ParsedIssueInfo>(i => i.IssueTitle == "The Brand New World" && i.SeriesName == "Saga"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
+                  .Returns(remoteIssue);
+
+            Mocker.GetMock<IDownloadHistoryService>()
+                  .Setup(s => s.GetLatestDownloadHistoryItem("35238"))
+                  .Returns(new DownloadHistory { EventType = DownloadHistoryEventType.DownloadIgnored });
+
+            var client = new DownloadClientDefinition()
+            {
+                Id = 1,
+                Protocol = DownloadProtocol.Torrent
+            };
+
+            var item = new DownloadClientItem()
+            {
+                Title = "Saga - The Brand New World [2018 - CBZ]",
+                DownloadId = "35238",
+                DownloadClientInfo = new DownloadClientItemClientInfo
+                {
+                    Protocol = client.Protocol,
+                    Id = client.Id,
+                    Name = client.Name
+                }
+            };
+
+            // The client still has the torrent, so it gets tracked in the Ignored state
+            var trackedDownload = Subject.TrackDownload(client, item);
+            trackedDownload.State.Should().Be(TrackedDownloadState.Ignored);
+
+            // Re-grabbing the same download id (e.g. a cross-seeded torrent) must evict the cached item
+            Subject.Handle(new IssueGrabbedEvent(remoteIssue) { DownloadId = "35238" });
+            Subject.Find("35238").Should().BeNull();
+
+            // The refresh that follows the grab rebuilds from history, which now reports the new grab
+            Mocker.GetMock<IDownloadHistoryService>()
+                  .Setup(s => s.GetLatestDownloadHistoryItem("35238"))
+                  .Returns(new DownloadHistory { EventType = DownloadHistoryEventType.DownloadGrabbed });
+
+            var regrabbed = Subject.TrackDownload(client, item);
+            regrabbed.State.Should().Be(TrackedDownloadState.Downloading);
+        }
+
+        [Test]
+        public void should_not_evict_downloading_item_from_cache_when_regrabbed()
+        {
+            GivenDownloadHistory();
+
+            var remoteIssue = new RemoteIssue
+            {
+                Series = new Series() { Id = 5 },
+                Issues = new List<Issue> { new Issue { Id = 4 } },
+                ParsedIssueInfo = new ParsedIssueInfo()
+                {
+                    IssueTitle = "The Brand New World",
+                    SeriesName = "Saga"
+                }
+            };
+
+            Mocker.GetMock<IParsingService>()
+                  .Setup(s => s.Map(It.Is<ParsedIssueInfo>(i => i.IssueTitle == "The Brand New World" && i.SeriesName == "Saga"), It.IsAny<int>(), It.IsAny<IEnumerable<int>>()))
+                  .Returns(remoteIssue);
+
+            var client = new DownloadClientDefinition()
+            {
+                Id = 1,
+                Protocol = DownloadProtocol.Torrent
+            };
+
+            var item = new DownloadClientItem()
+            {
+                Title = "Saga - The Brand New World [2018 - CBZ]",
+                DownloadId = "35238",
+                DownloadClientInfo = new DownloadClientItemClientInfo
+                {
+                    Protocol = client.Protocol,
+                    Id = client.Id,
+                    Name = client.Name
+                }
+            };
+
+            var trackedDownload = Subject.TrackDownload(client, item);
+            trackedDownload.State.Should().Be(TrackedDownloadState.Downloading);
+
+            Subject.Handle(new IssueGrabbedEvent(remoteIssue) { DownloadId = "35238" });
+
+            Subject.Find("35238").Should().NotBeNull();
+        }
+
+        [Test]
+        public void should_not_throw_when_grab_event_has_no_download_id()
+        {
+            var remoteIssue = new RemoteIssue
+            {
+                Series = new Series() { Id = 5 },
+                Issues = new List<Issue> { new Issue { Id = 4 } }
+            };
+
+            Assert.DoesNotThrow(() => Subject.Handle(new IssueGrabbedEvent(remoteIssue)));
         }
 
         [Test]
