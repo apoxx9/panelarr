@@ -1,4 +1,4 @@
-# Reading Lists (story arcs) — design SETTLED 2026-07-06 (Session 20), Phase A built
+# Reading Lists (story arcs) — SHIPPED in v1.1.10 (Phases A+B+C)
 
 Status: **Design settled with the user** after the research below. The
 governing requirement: arcs curated in Panelarr must be consumable by
@@ -217,15 +217,20 @@ Built on a **feature branch**, merged only after A+B verify end-to-end.
 - **Phase B (frontend)**: Arcs index (coverage), arc detail (ordered slots,
   live have/missing/not-in-library/unresolved, search missing), CBL
   upload + download.
-- **Phase C (follow-ups)**: Kavita/Komga API push — SCOPED (2026-07-06):
-  both readers already exist as notification connections and the Kavita
-  proxy already implements GetToken (API-key -> JWT), which is the hard
-  part of its auth. Remaining work: an ImportCbl proxy method per reader
-  (Kavita POST /api/ReadingList/import-cbl multipart; Komga readlist
-  import), POST /readinglist/{id}/push fanning out to enabled reader
-  connections, and a Push button on the detail page. Then Metron
-  enrichment (cv_id mapping) and reordering UI. (Per-slot add-series
-  moved INTO Phase B as the explicit add-missing-series affordance.)
+- **Phase C — SHIPPED (2026-07-07, Session 21)**: Kavita/Komga push.
+  Per-connection opt-in ('Send Reading Lists' checkbox, default off) on
+  both reader connections; POST /readinglist/{id}/push exports the CBL
+  and fans out, returning per-connection created/updated + matched +
+  unmatched-with-reason. Kavita: v0.9 changed the API — the old
+  /api/cbl/import one-shot is GONE in 0.9; the shipped flow is
+  file-import → re-validate → finalize-import (empty decisions imports
+  all auto-matches; same-name list updates in place), with a 404
+  fallback to the v0.8 one-shot. Komga: match/comicrack → accept only
+  unambiguous matches → upsert by name (duplicate names 400). Verified
+  live against Kavita 0.9.0.2 (create, then update-in-place).
+  Still-open follow-ups: Metron enrichment (cv_id mapping), reordering
+  UI. (Per-slot add-series moved INTO Phase B as the explicit
+  add-missing-series affordance.)
 
 ## Sources
 

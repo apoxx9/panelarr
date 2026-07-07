@@ -63,15 +63,18 @@ comes after the migration tooling.
    'search all missing', unmonitored toggle. Frontend-only.
    Originally: the #1 thing a Mylar user will miss; comics are a weekly
    medium and the pull list is the unit of consumption.
-2. **Story arcs / events** (M–L) — first-class arc entity (Metron/CV both
-   provide arc records): membership across series, "search missing in
-   arc". Radarr's Collections is the family pattern to copy. Without it,
-   "do I have all of Secret Wars?" is unanswerable.
-3. **CBL import/export** (S–M, piggybacks on #2) — .cbl is the lingua
-   franca: Mylar builds arcs from it, Komga/Kavita import it as reading
-   lists. Import to create arcs; export arcs; optionally push lists to
-   Komga/Kavita through their APIs (turns our scan-trigger integration
-   into real curation).
+2. **Story arcs / events** (M–L) — SHIPPED v1.1.10 as **Reading Lists**
+   (Sessions 20–21, design in docs/story-arcs.md): ReadingList/slots
+   entity, CV arc import (TPB-filtered), live have/missing statuses,
+   search-missing, explicit add-missing-series. Arc is a TYPE of
+   reading list. Originally: first-class arc entity; membership across
+   series; "do I have all of Secret Wars?".
+3. **CBL import/export** (S–M, piggybacks on #2) — SHIPPED v1.1.10
+   with #2: lossless CBL round-trip (cv-id Database extension), CBL
+   upload on the index page, export on detail, and Phase C push to
+   Kavita/Komga through their APIs (per-connection opt-in; verified
+   live against Kavita 0.9). Remaining follow-ups: Metron enrichment,
+   reordering UI.
 4. **Want list / one-off grab** (M) — fetch one issue/TPB without adding
    the series. Known Mylar-vs-*arr friction; needs an unparented-item
    concept in the domain model.
