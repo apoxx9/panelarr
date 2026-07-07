@@ -191,13 +191,22 @@ feature (nee story arcs). State at handoff:
 - **Phase C SCOPED**: Kavita/Komga push is small — both exist as
   notification connections, Kavita proxy already does the JWT dance;
   needs ImportCbl per proxy + push endpoint + button.
-- **Verification state**: unit suite green (2461+ incl. reading lists);
-  live CV add (Shattered Grid) + the Phase B UI e2e were pending at
-  handoff time — check the session end summary/chat for results before
-  merging. DO NOT merge feature/story-arcs to main until both pass.
+- **Verification state**: BOTH PASSED. Unit suite green (2461 incl.
+  reading lists). Live CV add of 'Power Rangers Shattered Grid' against
+  the dev library: 15 issues, 13 resolved, the 2018 Annual correctly
+  not-in-library, CBL export well-formed. Puppeteer e2e of the full CBL
+  path (import → coverage → detail statuses → search-missing → delete)
+  passed. Phase B committed (2950f6a). Branch is CLEAN and ready to
+  merge to main + tag once you decide.
+- **NEXT SESSION starts here**: (1) decide merge feature/story-arcs →
+  main and tag (v1.1.11?) — everything verified; (2) optionally Phase C
+  (Kavita/Komga push — scoped in docs/story-arcs.md, ~small); (3)
+  homelab still on v1.1.9, hasn't pulled v1.1.10 yet (migration 13
+  carries rTorrent settings over when it does).
 - Dev-DB note: migration 14 was applied/reset during the rename; if the
   dev DB acts odd around ReadingLists tables, drop them + delete
-  VersionInfo row 14 and restart.
+  VersionInfo row 14 and restart. Branch NOT pushed (feature branch,
+  local only) — push it before merging so CI builds it.
 
 ## Reading list
 
