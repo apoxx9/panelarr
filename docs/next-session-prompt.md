@@ -7,28 +7,29 @@ keys):
 
 We're continuing work on Panelarr (~/Projects/panelarr). Read
 `docs/last-handoff.md` first — it has full Session 21 state. Short
-version: **v1.1.13 is tagged** (fossil cleanup + migration 13
-download-client settings rename + migration 14 + Reading Lists A+B+C
-incl. push-to-Kavita). The homelab is still on 1.1.9 and needs a
-manual pull. Kavita (v0.9.0.2; address: <paste here>) got its
-'Comics' library created in Session 21; its initial scan was still
-running at session end.
+version: **v1.1.13 is released AND verified on the homelab**
+(1.1.13.101, migrations 13+14 applied). Reading Lists are fully live
+end-to-end: the CBL-imported 'Boom Studios - Power Rangers Saga' list
+self-healed to 171/171 after the v1.1.12 resolve fix, Kavita is
+connected (scan-on-import + Send Reading Lists), and a real push
+landed the list in Kavita with 171/171 matched. README + GitHub wiki
+(Home, Reading Lists, Pull List, Library Import, Reader Integration)
+are updated. The localization surface is guard-tested (literal,
+backend, dynamic-prefix keys).
 
-Homelab Panelarr: <paste address here>, API key: <paste key here>.
-Kavita API key (if reader work planned): <paste key here>.
+Homelab Panelarr API key: <paste key here>. Kavita API key (only if
+reader work planned): <paste key here>.
 
-Today's agenda, in order:
+Today's agenda — pick from the backlog:
 
-1. **Homelab pull v1.1.13** and verify: migrations 13+14 apply,
-   reading lists live, rTorrent download client still configured
-   (migration 13 rewrites its settings JSON).
-2. **Real-world reading list**: add Kavita as a connection on homelab
-   Panelarr ('Send Reading Lists' on), import/push a real arc, check
-   it in Kavita.
-3. Pick from backlog: staging source mount for the homelab container
-   (real Import from Staging), Metron enrichment (cv_id mapping),
-   reading-list reordering UI, 130 unused translation keys (usage
-   scan), Issueshelf rename.
+1. **Real staging import on the homelab**: the container only mounts
+   /comics and a local /downloads — add the seedbox/staging source as
+   a volume, set StagingFolder, run a real Import from Staging.
+2. **Metron enrichment** for reading lists (arc records carry cv_id —
+   free cross-provider mapping; docs/story-arcs.md follow-ups).
+3. **Reading-list reordering UI** (positions are ours already).
+4. **Issueshelf rename** (decide what the feature is first) or other
+   feature-landscape items (#4 want-list/one-offs, #5 custom formats).
 
 Dev notes: local dev instance data dir is
 `~/Library/Application Support/Panelarr` (port 8787; the
@@ -40,5 +41,6 @@ Standing watch: quality "Unknown" in the Activity manual-import modal
 (unreproduced since Session 18).
 
 Standing rules as always: test before presenting, discuss designs
-before implementing, scan before any push, no AI attribution in
-commits, ask before pushing.
+before implementing, scan before any push (from a file, as separate
+checked steps — not && chains), no AI attribution in commits, ask
+before pushing.
