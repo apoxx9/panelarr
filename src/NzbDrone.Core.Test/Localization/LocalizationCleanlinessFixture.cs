@@ -100,6 +100,60 @@ namespace NzbDrone.Core.Test.Localization
             missing.Should().BeEmpty("every translate('Key') literal needs an en.json entry, otherwise the UI shows the raw key name");
         }
 
+        [Test]
+        public void backend_localized_string_keys_should_exist_in_english()
+        {
+            var repoRoot = FindRepoRoot();
+
+            if (repoRoot == null)
+            {
+                Assert.Ignore("backend sources not available next to the test directory");
+            }
+
+            var localizedCall = new Regex(@"GetLocalizedString\(\s*""(?<key>[A-Za-z0-9_]+)""", RegexOptions.Compiled);
+            var enKeys = ReadLocale(Path.Combine(LocalizationFolder, "en.json")).Keys.ToHashSet(StringComparer.Ordinal);
+            var sourceRoot = Path.Combine(repoRoot, "src");
+
+            var missing = Directory.EnumerateFiles(sourceRoot, "*.cs", SearchOption.AllDirectories)
+                .Where(f => !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}") &&
+                            !f.Contains(".Test"))
+                .SelectMany(file => localizedCall.Matches(File.ReadAllText(file))
+                    .Select(m => m.Groups["key"].Value)
+                    .Where(key => !enKeys.Contains(key))
+                    .Select(key => $"{Path.GetRelativePath(sourceRoot, file)}: {key}"))
+                .Distinct()
+                .OrderBy(x => x)
+                .ToList();
+
+            missing.Should().BeEmpty("every GetLocalizedString(\"Key\") needs an en.json entry, otherwise the UI shows the raw key name");
+        }
+
+        [Test]
+        public void dynamic_prefix_translate_keys_should_be_complete()
+        {
+            // The frontend builds these keys at runtime (translate(`Prefix_${value}`)),
+            // which the literal scan can't see. Enum-backed sets come from the
+            // enums; the status sets are frontend literals kept in sync here
+            // (PullListPage.js, ReadingListController ToSlotResources).
+            var enKeys = ReadLocale(Path.Combine(LocalizationFolder, "en.json")).Keys.ToHashSet(StringComparer.Ordinal);
+
+            var expected = new List<string>();
+
+            expected.AddRange(Enum.GetNames(typeof(NzbDrone.Core.ReadingLists.ReadingListType))
+                .Select(n => $"ReadingListType_{CamelCase(n)}"));
+            expected.AddRange(Enum.GetNames(typeof(NzbDrone.Core.Issues.Relations.SeriesRelationType))
+                .Select(n => $"SeriesRelationType_{CamelCase(n)}"));
+            expected.AddRange(new[] { "have", "missing", "notInLibrary" }.Select(s => $"ReadingListStatus_{s}"));
+            expected.AddRange(new[] { "have", "grabbed", "missing", "unreleased", "unmonitored" }.Select(s => $"PullListStatus_{s}"));
+
+            expected.Where(k => !enKeys.Contains(k)).Should().BeEmpty();
+        }
+
+        private static string CamelCase(string name)
+        {
+            return char.ToLowerInvariant(name[0]) + name.Substring(1);
+        }
+
         private static string FindRepoRoot()
         {
             var dir = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
