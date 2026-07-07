@@ -34,6 +34,10 @@ const links = [
         to: '/publishers'
       },
       {
+        title: () => translate('ReadingLists'),
+        to: '/readinglists'
+      },
+      {
         title: () => translate('LibraryImport'),
         to: '/unmapped'
       }

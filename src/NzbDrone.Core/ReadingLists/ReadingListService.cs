@@ -20,6 +20,7 @@ namespace NzbDrone.Core.ReadingLists
         ReadingList ImportCbl(string xml, ReadingListType type, out List<string> unresolved);
         string ExportCbl(int readingListId);
         List<ReadingListItem> Resolve(int readingListId);
+        Series AddMissingSeries(int readingListId, string foreignSeriesId, string rootFolderPath, int qualityProfileId, bool monitored);
         void Delete(int id);
     }
 
@@ -38,6 +39,8 @@ namespace NzbDrone.Core.ReadingLists
         private readonly IComicVineApiClient _comicVine;
         private readonly IIssueService _issueService;
         private readonly ISeriesService _seriesService;
+        private readonly IAddSeriesService _addSeriesService;
+        private readonly IRefreshSeriesService _refreshSeriesService;
         private readonly Logger _logger;
 
         public ReadingListService(IReadingListRepository arcRepository,
@@ -45,6 +48,8 @@ namespace NzbDrone.Core.ReadingLists
                           IComicVineApiClient comicVine,
                           IIssueService issueService,
                           ISeriesService seriesService,
+                          IAddSeriesService addSeriesService,
+                          IRefreshSeriesService refreshSeriesService,
                           Logger logger)
         {
             _listRepository = arcRepository;
@@ -52,6 +57,8 @@ namespace NzbDrone.Core.ReadingLists
             _comicVine = comicVine;
             _issueService = issueService;
             _seriesService = seriesService;
+            _addSeriesService = addSeriesService;
+            _refreshSeriesService = refreshSeriesService;
             _logger = logger;
         }
 
@@ -241,6 +248,38 @@ namespace NzbDrone.Core.ReadingLists
             }
 
             return slots;
+        }
+
+        public Series AddMissingSeries(int readingListId, string foreignSeriesId, string rootFolderPath, int qualityProfileId, bool monitored)
+        {
+            // Explicit, user-initiated only — imports never touch the library
+            // (docs/story-arcs.md). Mirrors the proven staging-import path:
+            // add without refresh, then refresh synchronously so the slots
+            // can resolve against the new series' issues immediately.
+            var series = _seriesService.FindById(foreignSeriesId);
+
+            if (series == null)
+            {
+                series = _addSeriesService.AddSeries(new Series
+                {
+                    Metadata = new SeriesMetadata { ForeignSeriesId = foreignSeriesId },
+                    RootFolderPath = rootFolderPath,
+                    QualityProfileId = qualityProfileId,
+                    Monitored = monitored,
+                    MonitorNewItems = monitored ? NewItemMonitorTypes.All : NewItemMonitorTypes.None,
+                    AddOptions = new AddSeriesOptions
+                    {
+                        SearchForMissingIssues = false,
+                        Monitor = monitored ? MonitorTypes.All : MonitorTypes.None
+                    }
+                }, doRefresh: false);
+
+                _refreshSeriesService.RefreshSeries(new List<int> { series.Id }, true, Messaging.Commands.CommandTrigger.Manual);
+            }
+
+            Resolve(readingListId);
+
+            return series;
         }
 
         public void Delete(int id)

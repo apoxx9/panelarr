@@ -1,0 +1,91 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.typeBadge {
+  padding: 2px 8px;
+  border: 1px solid var(--borderColor);
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.publisher {
+  color: var(--disabledColor);
+}
+
+.coverage {
+  font-weight: bold;
+}
+
+.description {
+  margin-bottom: 12px;
+  color: var(--disabledColor);
+}
+
+.addSeriesPanel {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--borderColor);
+  border-radius: 4px;
+}
+
+.controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 8px;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select {
+  padding: 4px 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 5px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--borderColor);
+}
+
+.positionCell {
+  width: 40px;
+  color: var(--disabledColor);
+}
+
+.actionsCell {
+  width: 60px;
+  text-align: right;
+}
+
+.have {
+  color: var(--successColor);
+  font-weight: bold;
+}
+
+.missing {
+  color: var(--dangerColor);
+  font-weight: bold;
+}
+
+.notInLibrary {
+  color: var(--disabledColor);
+  font-style: italic;
+}
+
+.error {
+  color: var(--dangerColor);
+  margin: 12px 0;
+}

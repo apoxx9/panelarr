@@ -11,6 +11,8 @@ import IssueDetailsPageConnector from 'Issue/Details/IssueDetailsPageConnector';
 import IssueIndexConnector from 'Issue/Index/IssueIndexConnector';
 import PublisherIndexConnector from 'Publisher/Index/PublisherIndexConnector';
 import PullListPage from 'PullList/PullListPage';
+import ReadingListDetailPage from 'ReadingList/ReadingListDetailPage';
+import ReadingListIndexPage from 'ReadingList/ReadingListIndexPage';
 import AddNewItemConnector from 'Search/AddNewItemConnector';
 import SeriesDetailsPageConnector from 'Series/Details/SeriesDetailsPageConnector';
 import SeriesIndexConnector from 'Series/Index/SeriesIndexConnector';
@@ -97,6 +99,17 @@ function AppRoutes(props) {
       <Route
         path="/publishers"
         component={PublisherIndexConnector}
+      />
+
+      <Route
+        exact={true}
+        path="/readinglists"
+        component={ReadingListIndexPage}
+      />
+
+      <Route
+        path="/readinglists/:id"
+        component={ReadingListDetailPage}
       />
 
       <Route

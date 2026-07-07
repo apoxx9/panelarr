@@ -79,6 +79,14 @@ namespace Panelarr.Api.V1.ReadingLists
         public int SkippedCollectedEditions { get; set; }
     }
 
+    public class ReadingListAddSeriesResource
+    {
+        public string ForeignSeriesId { get; set; }
+        public string RootFolderPath { get; set; }
+        public int QualityProfileId { get; set; }
+        public bool Monitored { get; set; } = true;
+    }
+
     [V1ApiController("readinglist")]
     public class ReadingListController : Controller
     {
@@ -196,6 +204,26 @@ namespace Panelarr.Api.V1.ReadingLists
             var xml = _readingListService.ExportCbl(id);
 
             return File(Encoding.UTF8.GetBytes(xml), "application/xml", $"{arc.Name}.cbl");
+        }
+
+        [HttpPost("{id:int}/addseries")]
+        public IActionResult AddMissingSeries(int id, [FromBody] ReadingListAddSeriesResource resource)
+        {
+            if (string.IsNullOrWhiteSpace(resource?.ForeignSeriesId) || string.IsNullOrWhiteSpace(resource.RootFolderPath))
+            {
+                throw new BadRequestException("foreignSeriesId and rootFolderPath are required");
+            }
+
+            try
+            {
+                _readingListService.AddMissingSeries(id, resource.ForeignSeriesId, resource.RootFolderPath, resource.QualityProfileId, resource.Monitored);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new BadRequestException(ex.Message);
+            }
+
+            return Accepted(new object());
         }
 
         [RestDeleteById]

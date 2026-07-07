@@ -1,0 +1,73 @@
+.searchPanel,
+.report {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--borderColor);
+  border-radius: 4px;
+}
+
+.searchRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.searchInput {
+  flex: 1 1 auto;
+  padding: 6px 10px;
+}
+
+.reportTitle {
+  font-weight: bold;
+}
+
+.unresolvedList {
+  margin: 8px 0 0 20px;
+  color: var(--warningColor);
+  font-size: 12px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--borderColor);
+}
+
+.deck {
+  color: var(--disabledColor);
+  font-size: 12px;
+}
+
+.actionsCell {
+  width: 90px;
+  text-align: right;
+}
+
+.complete {
+  color: var(--successColor);
+  font-weight: bold;
+}
+
+.incomplete {
+  color: var(--warningColor);
+}
+
+.empty {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.error {
+  color: var(--dangerColor);
+  margin: 12px 0;
+}
+
+.hiddenFileInput {
+  display: none;
+}
