@@ -32,7 +32,9 @@ class ReadingListDetailPage extends Component {
       selectedRootFolderId: null,
       qualityProfileId: null,
       addingForeignId: null,
-      searchQueued: false
+      searchQueued: false,
+      isPushing: false,
+      pushResults: null
     };
   }
 
@@ -109,6 +111,19 @@ class ReadingListDetailPage extends Component {
       anchor.click();
       window.URL.revokeObjectURL(url);
     });
+  };
+
+  onPushPress = () => {
+    this.setState({ isPushing: true, pushResults: null });
+
+    const { request } = createAjaxRequest({
+      url: `/readinglist/${this.listId}/push`,
+      method: 'POST',
+      dataType: 'json'
+    });
+
+    request.done((pushResults) => this.setState({ isPushing: false, pushResults }));
+    request.fail(() => this.setState({ isPushing: false, error: translate('ReadingListPushError') }));
   };
 
   onDeletePress = () => {
@@ -236,8 +251,47 @@ class ReadingListDetailPage extends Component {
     );
   }
 
+  renderPushResults(pushResults) {
+    if (!pushResults.length) {
+      return (
+        <div className={styles.pushPanel}>
+          {translate('ReadingListPushNoConnections')}
+        </div>
+      );
+    }
+
+    return (
+      <div className={styles.pushPanel}>
+        {
+          pushResults.map((result) => {
+            return (
+              <div key={`${result.reader}-${result.connectionName}`} className={styles.pushRow}>
+                <span className={result.success ? styles.pushSuccess : styles.pushFailure}>
+                  {result.connectionName} ({result.reader})
+                </span>
+                {' — '}
+                {
+                  result.success ?
+                    translate(result.updated ? 'ReadingListPushUpdated' : 'ReadingListPushCreated', { count: result.matchedCount }) :
+                    translate('ReadingListPushFailed', { message: result.errorMessage })
+                }
+
+                {
+                  result.success && !!result.unmatched.length &&
+                    <ul className={styles.unmatchedList}>
+                      {result.unmatched.map((entry) => <li key={entry}>{entry}</li>)}
+                    </ul>
+                }
+              </div>
+            );
+          })
+        }
+      </div>
+    );
+  }
+
   render() {
-    const { isFetching, error, list, showAddSeries, searchQueued } = this.state;
+    const { isFetching, error, list, showAddSeries, searchQueued, isPushing, pushResults } = this.state;
 
     const missingCount = list ? list.slots.filter((s) => s.status === 'missing').length : 0;
 
@@ -282,6 +336,12 @@ class ReadingListDetailPage extends Component {
               onPress={this.onExportPress}
             />
             <PageToolbarButton
+              label={isPushing ? translate('ReadingListPushing') : translate('PushToReaders')}
+              iconName={icons.UPLOAD}
+              isDisabled={!list || isPushing}
+              onPress={this.onPushPress}
+            />
+            <PageToolbarButton
               label={translate('Delete')}
               iconName={icons.DELETE}
               isDisabled={!list}
@@ -310,6 +370,8 @@ class ReadingListDetailPage extends Component {
                 </div>
 
                 {list.description ? <div className={styles.description}>{list.description}</div> : null}
+
+                {pushResults && this.renderPushResults(pushResults)}
 
                 {showAddSeries && !!missingSeries.length && this.renderAddSeriesPanel(missingSeries)}
 

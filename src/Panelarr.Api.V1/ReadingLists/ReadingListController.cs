@@ -87,18 +87,32 @@ namespace Panelarr.Api.V1.ReadingLists
         public bool Monitored { get; set; } = true;
     }
 
+    public class ReadingListPushResultResource
+    {
+        public string ConnectionName { get; set; }
+        public string Reader { get; set; }
+        public bool Success { get; set; }
+        public bool Updated { get; set; }
+        public int MatchedCount { get; set; }
+        public List<string> Unmatched { get; set; }
+        public string ErrorMessage { get; set; }
+    }
+
     [V1ApiController("readinglist")]
     public class ReadingListController : Controller
     {
         private readonly IReadingListService _readingListService;
+        private readonly IReadingListPushService _pushService;
         private readonly IIssueService _issueService;
         private readonly IComicVineApiClient _comicVine;
 
         public ReadingListController(IReadingListService readingListService,
+                             IReadingListPushService pushService,
                              IIssueService issueService,
                              IComicVineApiClient comicVine)
         {
             _readingListService = readingListService;
+            _pushService = pushService;
             _issueService = issueService;
             _comicVine = comicVine;
         }
@@ -224,6 +238,26 @@ namespace Panelarr.Api.V1.ReadingLists
             }
 
             return Accepted(new object());
+        }
+
+        [HttpPost("{id:int}/push")]
+        public List<ReadingListPushResultResource> Push(int id)
+        {
+            // Ensures a 404 for unknown ids before any reader is contacted.
+            _readingListService.Get(id);
+
+            return _pushService.PushToReaders(id)
+                .Select(r => new ReadingListPushResultResource
+                {
+                    ConnectionName = r.ConnectionName,
+                    Reader = r.Reader,
+                    Success = r.Success,
+                    Updated = r.Updated,
+                    MatchedCount = r.MatchedCount,
+                    Unmatched = r.Unmatched,
+                    ErrorMessage = r.ErrorMessage
+                })
+                .ToList();
         }
 
         [RestDeleteById]

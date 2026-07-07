@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using NLog;
@@ -13,6 +16,7 @@ public interface IKavitaServiceProxy
     string GetBaseUrl(KavitaSettings settings, string relativePath = null);
     void Notify(KavitaSettings settings, string message);
     string GetToken(KavitaSettings settings);
+    ReaderPushResult PushCbl(KavitaSettings settings, string fileName, byte[] cblData);
 }
 
 public class KavitaServiceProxy : IKavitaServiceProxy
@@ -66,6 +70,123 @@ public class KavitaServiceProxy : IKavitaServiceProxy
         }
 
         return authResult.Token;
+    }
+
+    public ReaderPushResult PushCbl(KavitaSettings settings, string fileName, byte[] cblData)
+    {
+        var token = GetToken(settings);
+
+        KavitaCblSavedFile savedFile;
+
+        try
+        {
+            var request = GetAuthenticatedRequest("cbl/file-import", settings, token);
+            request.AddFormUpload("cblFile", fileName, cblData, "application/xml");
+
+            savedFile = Deserialize<KavitaCblSavedFile>(_httpClient.Execute(request.Build()));
+        }
+        catch (HttpException ex) when (ex.Response.StatusCode == HttpStatusCode.NotFound)
+        {
+            // Kavita < 0.9 has no cbl/file-import; it does the whole import
+            // in one shot.
+            return PushCblLegacy(settings, token, fileName, cblData);
+        }
+
+        // v0.9+ flow: re-validate reports matching, then finalize-import (with
+        // no manual decisions) imports every auto-matched item and updates a
+        // same-name list in place.
+        var validateRequest = GetAuthenticatedRequest("cbl/re-validate", settings, token);
+        validateRequest.Headers.ContentType = "application/json";
+        var validatePost = validateRequest.Build();
+        validatePost.SetContent(new { FileName = savedFile.FileName }.ToJson());
+
+        var validation = Deserialize<KavitaCblImportSummary>(_httpClient.Execute(validatePost));
+
+        if (validation.Success == KavitaCblImportSummary.ResultFail)
+        {
+            throw new KavitaException($"Kavita rejected the reading list: {DescribeFailures(validation)}");
+        }
+
+        var finalizeRequest = GetAuthenticatedRequest("cbl/finalize-import", settings, token);
+        finalizeRequest.Headers.ContentType = "application/json";
+        var finalizePost = finalizeRequest.Build();
+        finalizePost.SetContent(new
+        {
+            FileName = savedFile.FileName,
+            Decisions = new { ItemResolutions = new { }, SaveAsRemapRules = false },
+            Provider = savedFile.Provider,
+            Promote = false
+        }.ToJson());
+
+        var summary = Deserialize<KavitaCblImportSummary>(_httpClient.Execute(finalizePost));
+
+        if (summary.Success == KavitaCblImportSummary.ResultFail)
+        {
+            throw new KavitaException($"Kavita rejected the reading list: {DescribeFailures(summary)}");
+        }
+
+        return ToPushResult(summary);
+    }
+
+    private ReaderPushResult PushCblLegacy(KavitaSettings settings, string token, string fileName, byte[] cblData)
+    {
+        var request = GetAuthenticatedRequest("cbl/import", settings, token);
+        request.AddQueryParam("dryRun", "false");
+        request.AddQueryParam("useComicVineMatching", "true");
+        request.AddFormUpload("cbl", fileName, cblData, "application/xml");
+
+        var summary = Deserialize<KavitaCblImportSummary>(_httpClient.Execute(request.Build()));
+
+        if (summary.Success == KavitaCblImportSummary.ResultFail)
+        {
+            throw new KavitaException($"Kavita rejected the reading list: {DescribeFailures(summary)}");
+        }
+
+        return ToPushResult(summary);
+    }
+
+    private static ReaderPushResult ToPushResult(KavitaCblImportSummary summary)
+    {
+        return new ReaderPushResult
+        {
+            Updated = summary.IsUpdate,
+            MatchedCount = summary.SuccessfulInserts?.Count ?? 0,
+            Unmatched = summary.Results?
+                .Where(r => r.Reason != KavitaCblBookResult.ReasonSuccess)
+                .Select(r => r.Describe())
+                .ToList() ?? new List<string>()
+        };
+    }
+
+    private static string DescribeFailures(KavitaCblImportSummary summary)
+    {
+        var failures = summary.Results?
+            .Where(r => r.Reason != KavitaCblBookResult.ReasonSuccess)
+            .Select(r => r.Describe())
+            .Take(3)
+            .ToList();
+
+        return failures?.Any() == true ? string.Join("; ", failures) : "no reason given";
+    }
+
+    private static T Deserialize<T>(HttpResponse response)
+    {
+        var result = JsonSerializer.Deserialize<T>(response.Content);
+
+        if (result == null)
+        {
+            throw new KavitaException("Kavita returned an empty response");
+        }
+
+        return result;
+    }
+
+    private HttpRequestBuilder GetAuthenticatedRequest(string resource, KavitaSettings settings, string token)
+    {
+        var request = GetKavitaServerRequest(resource, HttpMethod.Post, settings);
+        request.Headers["Authorization"] = $"Bearer {token}";
+
+        return request;
     }
 
     private HttpRequestBuilder GetKavitaServerRequest(string resource, HttpMethod method, KavitaSettings settings)

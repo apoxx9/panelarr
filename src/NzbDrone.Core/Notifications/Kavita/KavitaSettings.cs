@@ -39,6 +39,9 @@ public class KavitaSettings : IProviderConfig
     [FieldDefinition(4, Label = "Update Library", Type = FieldType.Checkbox)]
     public bool Notify { get; set; }
 
+    [FieldDefinition(5, Label = "Send Reading Lists", Type = FieldType.Checkbox, HelpText = "Allow pushing reading lists to this server from the reading list details page")]
+    public bool EnableReadingListPush { get; set; }
+
     public NzbDroneValidationResult Validate()
     {
         return new NzbDroneValidationResult(Validator.Validate(this));

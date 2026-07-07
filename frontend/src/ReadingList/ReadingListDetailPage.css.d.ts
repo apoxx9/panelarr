@@ -14,9 +14,14 @@ interface CssExports {
   'notInLibrary': string;
   'positionCell': string;
   'publisher': string;
+  'pushFailure': string;
+  'pushPanel': string;
+  'pushRow': string;
+  'pushSuccess': string;
   'select': string;
   'table': string;
   'typeBadge': string;
+  'unmatchedList': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

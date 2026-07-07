@@ -36,6 +36,9 @@ namespace NzbDrone.Core.Notifications.Komga
         [FieldDefinition(3, Label = "Update Library", Type = FieldType.Checkbox, HelpText = "Trigger a Komga library scan on import")]
         public bool Notify { get; set; }
 
+        [FieldDefinition(4, Label = "Send Reading Lists", Type = FieldType.Checkbox, HelpText = "Allow pushing reading lists to this server from the reading list details page")]
+        public bool EnableReadingListPush { get; set; }
+
         public NzbDroneValidationResult Validate()
         {
             return new NzbDroneValidationResult(Validator.Validate(this));

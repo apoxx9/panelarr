@@ -89,3 +89,29 @@
   color: var(--dangerColor);
   margin: 12px 0;
 }
+
+.pushPanel {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--borderColor);
+  border-radius: 4px;
+}
+
+.pushRow {
+  margin-bottom: 4px;
+}
+
+.pushSuccess {
+  color: var(--successColor);
+  font-weight: bold;
+}
+
+.pushFailure {
+  color: var(--dangerColor);
+  font-weight: bold;
+}
+
+.unmatchedList {
+  margin: 4px 0 8px 20px;
+  color: var(--disabledColor);
+}
