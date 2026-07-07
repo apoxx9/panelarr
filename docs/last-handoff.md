@@ -120,14 +120,22 @@ at the id miss → owned book showed 'not in library'.
 
 ## Next actions
 
-1. **Homelab pull v1.1.11** and verify: migrations 13+14 apply clean,
-   reading lists page live, rTorrent connection still works.
-2. Add the homelab Kavita as a connection in homelab Panelarr (enable
-   'Send Reading Lists') and push a real arc once its scan finishes.
-3. Backlog: staging-folder source mount on the homelab container (real
+1. ~~Homelab pull + verify~~ DONE end of session: homelab on
+   1.1.13.101, migration 14 applied, Seedhost category survived
+   migration 13, the imported list self-healed to 171/171 (Shattered
+   Grid slot = have).
+2. ~~Kavita connection + real push~~ DONE: 'Kavita' connection created
+   on homelab Panelarr (Update Library + Send Reading Lists on);
+   pushed 'Boom Studios - Power Rangers Saga' → created in Kavita,
+   **171/171 matched, 0 unmatched**.
+3. **Wiki**: content drafted in docs/wiki/ (Home, Reading Lists, Pull
+   List, Library Import, Reader Integration) — waiting on the user
+   creating the wiki's first page in the GitHub UI, then push the
+   pages to panelarr.wiki.git.
+4. Backlog: staging-folder source mount on the homelab container (real
    Import from Staging); Metron enrichment; reading-list reordering UI;
-   130 unused translation keys (usage scan); Issueshelf rename.
-4. Standing watch: quality 'Unknown' in Activity manual-import modal
+   Issueshelf rename.
+5. Standing watch: quality 'Unknown' in Activity manual-import modal
    (unreproduced since Session 18).
 
 ## Reading list
