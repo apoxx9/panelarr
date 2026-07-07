@@ -4,7 +4,37 @@ Session 21 shipped **Reading Lists Phase C** (push to Kavita/Komga),
 then **merged feature/story-arcs to main** (fast-forward, 0ee36f7) and
 tagged **v1.1.11** — the release that finally carries the whole batch:
 fossil cleanup + **migration 13** (Music*/Tv* download-client settings
-rename) + **migration 14** + Reading Lists A+B+C. Suite: **2473 / 0**.
+rename) + **migration 14** + Reading Lists A+B+C. Later the same
+session: a field bug from the user's first real CBL import led to
+**v1.1.12** (tiered resolve + manual relink + repairing export — see
+below). Suite: **2480 / 0**.
+
+## Shipped — CBL resolve resilience + relink (c428637, v1.1.12)
+
+Field finding (user's homelab import): the DieselTech 'Simplified
+Power Rangers 1a' CBL points its Shattered Grid entry at CV volume
+120566 / issue 715246 — the 2019 TPB record (the CV issue is literally
+named 'TPB') — while the library carries the 2018 one-shot
+(113084/682536) under the IDENTICAL series name. CV has duplicate
+same-named volumes; community CBLs carry wrong ids. Resolver stopped
+at the id miss → owned book showed 'not in library'.
+
+- **Tiered resolve**: id miss now falls through to exact name+number
+  (Kavita-style tiering); multiple same-named series disambiguate via
+  the slot's Volume/Year hint vs series year; still-ambiguous stays
+  unresolved (never guess). New FindAllByName on series repo/service.
+- **Manual relink**: PUT /readinglist/{id}/slots/{slotId} {issueId} +
+  wrench action per slot row (series+issue pickers). Rewrites the
+  slot's stored identity from the chosen issue — user's fix wins,
+  durable. Deliberately NO unlink: lazy resolve would re-match on the
+  next view, so unlink can never stick; wrong link → relink.
+- **Repairing export**: ExportCbl writes the RESOLVED issue's cv id,
+  so a list resolved past a bad community id exports corrected (could
+  be contributed back to DieselTech).
+- Verified live with the real community CBL on dev: slot self-healed
+  on view, export carries 113084/682536, relink editor round-trips
+  (puppeteer). The user's homelab list self-heals on first view after
+  pulling v1.1.12.
 
 ## Shipped — Reading Lists Phase C (0ee36f7)
 
