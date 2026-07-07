@@ -20,6 +20,7 @@ namespace NzbDrone.Core.ReadingLists
         ReadingList ImportCbl(string xml, ReadingListType type, out List<string> unresolved);
         string ExportCbl(int readingListId);
         List<ReadingListItem> Resolve(int readingListId);
+        ReadingListItem RemapSlot(int readingListId, int slotId, int issueId);
         Series AddMissingSeries(int readingListId, string foreignSeriesId, string rootFolderPath, int qualityProfileId, bool monitored);
         void Delete(int id);
     }
@@ -205,6 +206,11 @@ namespace NzbDrone.Core.ReadingLists
 
                 if (slot.IssueId.HasValue && libraryIssues.TryGetValue(slot.IssueId.Value, out var issue))
                 {
+                    // The library's identity wins for resolved slots — including
+                    // the issue id, so a list resolved past a bad community id
+                    // exports as a REPAIRED file.
+                    book.CvIssueId = ParseForeignId(issue.ForeignIssueId) ?? book.CvIssueId;
+
                     var series = issue.Series?.Value;
 
                     if (series != null)
@@ -248,6 +254,48 @@ namespace NzbDrone.Core.ReadingLists
             }
 
             return slots;
+        }
+
+        public ReadingListItem RemapSlot(int readingListId, int slotId, int issueId)
+        {
+            // There is deliberately no unlink: resolve is lazy and would just
+            // re-match the slot on the next view. A wrong link is fixed by
+            // remapping to the right issue.
+            var slot = _slotRepository.Get(slotId);
+
+            if (slot.ReadingListId != readingListId)
+            {
+                throw new ArgumentException("Slot does not belong to this reading list");
+            }
+
+            var issue = _issueService.GetIssue(issueId);
+            var series = issue.Series?.Value;
+
+            // A manual remap is an explicit correction: the slot's stored
+            // identity is rewritten from the library issue, so the fix is
+            // durable and CBL export carries the corrected ids (the user's
+            // fix wins over the file's claim).
+            slot.IssueId = issue.Id;
+            slot.ForeignIssueId = issue.ForeignIssueId;
+            slot.IssueNumber = issue.IssueNumber;
+
+            if (series != null)
+            {
+                slot.ForeignSeriesId = series.ForeignSeriesId;
+                slot.SeriesName = series.Name;
+                slot.Volume = series.Metadata.Value.Year?.ToString() ?? slot.Volume;
+            }
+
+            if (issue.ReleaseDate.HasValue)
+            {
+                slot.Year = issue.ReleaseDate.Value.Year.ToString();
+            }
+
+            _slotRepository.Update(slot);
+
+            _logger.Info("Remapped reading list slot {0} to issue {1} ({2} #{3})", slot.Position, issue.Id, slot.SeriesName, slot.IssueNumber);
+
+            return slot;
         }
 
         public Series AddMissingSeries(int readingListId, string foreignSeriesId, string rootFolderPath, int qualityProfileId, bool monitored)
@@ -296,7 +344,10 @@ namespace NzbDrone.Core.ReadingLists
                 return slot.IssueId;
             }
 
-            // Tier 1: exact foreign id.
+            // Tier 1: exact foreign id. A miss FALLS THROUGH to name matching:
+            // community CBLs carry wrong/stale ids (TPB records, duplicate CV
+            // volumes for the same book), and a dangling id shouldn't beat an
+            // exact name+number match — Kavita tiers the same way.
             if (slot.ForeignIssueId.IsNotNullOrWhiteSpace())
             {
                 var byId = _issueService.FindById(slot.ForeignIssueId);
@@ -305,17 +356,15 @@ namespace NzbDrone.Core.ReadingLists
                 {
                     return byId.Id;
                 }
-
-                return null;
             }
 
-            // Tier 2 (id-less CBLs): exact series name + issue number.
+            // Tier 2: exact series name + issue number, year-disambiguated.
             if (slot.SeriesName.IsNullOrWhiteSpace() || slot.IssueNumber.IsNullOrWhiteSpace())
             {
                 return null;
             }
 
-            var series = _seriesService.FindByName(slot.SeriesName);
+            var series = PickSeriesByName(slot);
 
             if (series == null)
             {
@@ -326,6 +375,34 @@ namespace NzbDrone.Core.ReadingLists
                 .FirstOrDefault(i => string.Equals(i.IssueNumber, slot.IssueNumber, StringComparison.OrdinalIgnoreCase));
 
             return issue?.Id;
+        }
+
+        private Series PickSeriesByName(ReadingListItem slot)
+        {
+            var candidates = _seriesService.FindAllByName(slot.SeriesName);
+
+            if (candidates.Count == 1)
+            {
+                return candidates[0];
+            }
+
+            // Multiple same-named series (e.g. Power Rangers 2016 vs 2020):
+            // only a year hint may disambiguate — never guess. CBL convention
+            // puts the series start year in Volume; Year is the book's year.
+            foreach (var hint in new[] { slot.Volume, slot.Year })
+            {
+                if (int.TryParse(hint, out var year))
+                {
+                    var byYear = candidates.Where(c => c.Metadata.Value.Year == year).ToList();
+
+                    if (byYear.Count == 1)
+                    {
+                        return byYear[0];
+                    }
+                }
+            }
+
+            return null;
         }
 
         private Dictionary<int, Issue> GetLibraryIssues(List<ReadingListItem> slots)

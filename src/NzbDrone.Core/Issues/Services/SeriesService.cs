@@ -19,6 +19,7 @@ namespace NzbDrone.Core.Issues
         List<Series> AddSeries(List<Series> newSeriesList, bool doRefresh);
         Series FindById(string foreignSeriesId);
         Series FindByName(string title);
+        List<Series> FindAllByName(string title);
         Series FindByNameInexact(string title);
         List<Series> GetCandidates(string title);
         List<Series> GetReportCandidates(string reportTitle);
@@ -93,6 +94,11 @@ namespace NzbDrone.Core.Issues
         public Series FindByName(string title)
         {
             return _seriesRepository.FindByName(title.CleanSeriesName());
+        }
+
+        public List<Series> FindAllByName(string title)
+        {
+            return _seriesRepository.FindAllByName(title.CleanSeriesName());
         }
 
         public List<Tuple<Func<Series, string, double>, string>> SeriesScoringFunctions(string title, string cleanTitle)

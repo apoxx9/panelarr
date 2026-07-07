@@ -115,3 +115,7 @@
   margin: 4px 0 8px 20px;
   color: var(--disabledColor);
 }
+
+.slotEditorRow td {
+  background: rgb(255 255 255 / 3%);
+}

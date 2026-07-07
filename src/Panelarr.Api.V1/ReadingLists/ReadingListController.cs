@@ -87,6 +87,13 @@ namespace Panelarr.Api.V1.ReadingLists
         public bool Monitored { get; set; } = true;
     }
 
+    public class ReadingListRemapSlotResource
+    {
+        // Links the slot to this library issue and rewrites the slot's
+        // stored identity from it.
+        public int? IssueId { get; set; }
+    }
+
     public class ReadingListPushResultResource
     {
         public string ConnectionName { get; set; }
@@ -238,6 +245,26 @@ namespace Panelarr.Api.V1.ReadingLists
             }
 
             return Accepted(new object());
+        }
+
+        [HttpPut("{id:int}/slots/{slotId:int}")]
+        public ReadingListItemResource RemapSlot(int id, int slotId, [FromBody] ReadingListRemapSlotResource resource)
+        {
+            if (resource?.IssueId == null)
+            {
+                throw new BadRequestException("issueId is required");
+            }
+
+            try
+            {
+                var slot = _readingListService.RemapSlot(id, slotId, resource.IssueId.Value);
+
+                return ToSlotResources(new List<ReadingListItem> { slot }).Single();
+            }
+            catch (ArgumentException ex)
+            {
+                throw new BadRequestException(ex.Message);
+            }
         }
 
         [HttpPost("{id:int}/push")]

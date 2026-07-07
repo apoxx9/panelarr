@@ -743,6 +743,8 @@
   "ReadingListPushNoConnections": "No reader connections have 'Send Reading Lists' enabled. Enable it on a Kavita or Komga connection under Settings → Connect.",
   "ReadingListPushUpdated": "list updated, {count} issues matched",
   "ReadingListPushing": "Pushing...",
+  "ReadingListRelink": "Link to a library issue",
+  "ReadingListRelinkError": "Failed to relink the slot.",
   "ReadingListSearchError": "ComicVine arc search failed.",
   "ReadingListStatus_have": "have",
   "ReadingListStatus_missing": "missing",

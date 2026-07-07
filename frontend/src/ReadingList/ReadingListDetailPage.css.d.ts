@@ -19,6 +19,7 @@ interface CssExports {
   'pushRow': string;
   'pushSuccess': string;
   'select': string;
+  'slotEditorRow': string;
   'table': string;
   'typeBadge': string;
   'unmatchedList': string;

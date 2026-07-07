@@ -45,6 +45,10 @@ namespace NzbDrone.Core.Test.ReadingListTests
             Mocker.GetMock<IIssueService>()
                   .Setup(s => s.FindById(It.IsAny<string>()))
                   .Returns((Issue)null);
+
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.FindAllByName(It.IsAny<string>()))
+                  .Returns(new List<Series>());
         }
 
         private void GivenProviderArc(params ComicVineArcIssue[] issues)
@@ -159,8 +163,8 @@ namespace NzbDrone.Core.Test.ReadingListTests
 </Books></ReadingList>";
 
             Mocker.GetMock<ISeriesService>()
-                  .Setup(s => s.FindByName("Saga"))
-                  .Returns(new Series { Id = 3 });
+                  .Setup(s => s.FindAllByName("Saga"))
+                  .Returns(new List<Series> { new Series { Id = 3 } });
 
             Mocker.GetMock<IIssueService>()
                   .Setup(s => s.GetIssuesBySeries(3))
@@ -170,6 +174,166 @@ namespace NzbDrone.Core.Test.ReadingListTests
 
             _storedSlots.Single().IssueId.Should().Be(77);
             unresolved.Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_fall_back_to_name_match_when_foreign_id_misses()
+        {
+            // The Shattered Grid case: a community CBL pointing at a wrong CV
+            // id (the TPB record) while the same-named book is in the library.
+            var cbl = @"<?xml version=""1.0""?><ReadingList><Name>Simplified</Name><Books>
+<Book Series=""Mighty Morphin Power Rangers: Shattered Grid"" Number=""1"" Volume=""2019"" Year=""2019""><Database Name=""cv"" Series=""120566"" Issue=""715246"" /></Book>
+</Books></ReadingList>";
+
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.FindAllByName("Mighty Morphin Power Rangers: Shattered Grid"))
+                  .Returns(new List<Series> { new Series { Id = 11, Metadata = new SeriesMetadata { Year = 2018 } } });
+
+            Mocker.GetMock<IIssueService>()
+                  .Setup(s => s.GetIssuesBySeries(11))
+                  .Returns(new List<Issue> { new Issue { Id = 300, IssueNumber = "1" } });
+
+            Subject.ImportCbl(cbl, ReadingListType.ReadingOrder, out var unresolved);
+
+            _storedSlots.Single().IssueId.Should().Be(300);
+            unresolved.Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_disambiguate_same_named_series_by_year()
+        {
+            var cbl = @"<?xml version=""1.0""?><ReadingList><Name>PR</Name><Books>
+<Book Series=""Power Rangers"" Number=""1"" Volume=""2020"" Year=""2020"" />
+</Books></ReadingList>";
+
+            var pr2016 = new Series { Id = 1, Metadata = new SeriesMetadata { Year = 2016 } };
+            var pr2020 = new Series { Id = 2, Metadata = new SeriesMetadata { Year = 2020 } };
+
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.FindAllByName("Power Rangers"))
+                  .Returns(new List<Series> { pr2016, pr2020 });
+
+            Mocker.GetMock<IIssueService>()
+                  .Setup(s => s.GetIssuesBySeries(2))
+                  .Returns(new List<Issue> { new Issue { Id = 400, IssueNumber = "1" } });
+
+            Subject.ImportCbl(cbl, ReadingListType.ReadingOrder, out var unresolved);
+
+            _storedSlots.Single().IssueId.Should().Be(400);
+            unresolved.Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_stay_unresolved_when_same_named_series_are_ambiguous()
+        {
+            var cbl = @"<?xml version=""1.0""?><ReadingList><Name>PR</Name><Books>
+<Book Series=""Power Rangers"" Number=""1"" />
+</Books></ReadingList>";
+
+            var pr2016 = new Series { Id = 1, Metadata = new SeriesMetadata { Year = 2016 } };
+            var pr2020 = new Series { Id = 2, Metadata = new SeriesMetadata { Year = 2020 } };
+
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.FindAllByName("Power Rangers"))
+                  .Returns(new List<Series> { pr2016, pr2020 });
+
+            Subject.ImportCbl(cbl, ReadingListType.ReadingOrder, out var unresolved);
+
+            _storedSlots.Single().IssueId.Should().BeNull();
+            unresolved.Should().HaveCount(1);
+        }
+
+        [Test]
+        public void should_remap_slot_and_rewrite_identity()
+        {
+            var metadata = new SeriesMetadata { Id = 5, Name = "Mighty Morphin Power Rangers: Shattered Grid", ForeignSeriesId = "cv:113084", Year = 2018 };
+            var series = new Series { Id = 11, Metadata = metadata };
+            var issue = new Issue
+            {
+                Id = 300,
+                IssueNumber = "1",
+                ForeignIssueId = "cv:682536",
+                ReleaseDate = new DateTime(2018, 8, 29),
+                Series = series
+            };
+
+            var slot = new ReadingListItem
+            {
+                Id = 9,
+                ReadingListId = 1,
+                Position = 46,
+                ForeignIssueId = "cv:715246",
+                ForeignSeriesId = "cv:120566",
+                SeriesName = "Mighty Morphin Power Rangers: Shattered Grid",
+                IssueNumber = "1",
+                Volume = "2019",
+                Year = "2019"
+            };
+
+            Mocker.GetMock<IReadingListItemRepository>()
+                  .Setup(r => r.Get(9))
+                  .Returns(slot);
+
+            Mocker.GetMock<IIssueService>()
+                  .Setup(s => s.GetIssue(300))
+                  .Returns(issue);
+
+            var updated = Subject.RemapSlot(1, 9, 300);
+
+            updated.IssueId.Should().Be(300);
+            updated.ForeignIssueId.Should().Be("cv:682536");
+            updated.ForeignSeriesId.Should().Be("cv:113084");
+            updated.Volume.Should().Be("2018");
+            updated.Year.Should().Be("2018");
+
+            Mocker.GetMock<IReadingListItemRepository>()
+                  .Verify(r => r.Update(It.Is<ReadingListItem>(s => s.ForeignIssueId == "cv:682536")), Times.Once);
+        }
+
+        [Test]
+        public void should_reject_remap_for_a_slot_of_another_list()
+        {
+            Mocker.GetMock<IReadingListItemRepository>()
+                  .Setup(r => r.Get(9))
+                  .Returns(new ReadingListItem { Id = 9, ReadingListId = 2 });
+
+            Assert.Throws<ArgumentException>(() => Subject.RemapSlot(1, 9, 300));
+        }
+
+        [Test]
+        public void should_export_resolved_slots_with_the_library_issue_id()
+        {
+            // A slot resolved past a bad community id exports REPAIRED.
+            var metadata = new SeriesMetadata { Id = 5, Name = "Mighty Morphin Power Rangers: Shattered Grid", ForeignSeriesId = "cv:113084", Year = 2018 };
+            var series = new Series { Id = 11, Metadata = metadata };
+            var issue = new Issue { Id = 300, IssueNumber = "1", ForeignIssueId = "cv:682536", SeriesMetadataId = 5, Series = series };
+
+            _storedSlots.Add(new ReadingListItem
+            {
+                Id = 1,
+                ReadingListId = 1,
+                Position = 1,
+                IssueId = 300,
+                ForeignIssueId = "cv:715246",
+                SeriesName = "Mighty Morphin Power Rangers: Shattered Grid",
+                IssueNumber = "1",
+                Volume = "2019",
+                Year = "2019"
+            });
+
+            Mocker.GetMock<IReadingListRepository>()
+                  .Setup(r => r.Get(1))
+                  .Returns(new ReadingList { Id = 1, Name = "Simplified" });
+
+            Mocker.GetMock<IIssueService>()
+                  .Setup(s => s.GetIssues(It.IsAny<IEnumerable<int>>()))
+                  .Returns(new List<Issue> { issue });
+
+            var xml = Subject.ExportCbl(1);
+
+            xml.Should().Contain(@"Issue=""682536""");
+            xml.Should().Contain(@"Series=""113084""");
+            xml.Should().NotContain("715246");
         }
 
         [Test]

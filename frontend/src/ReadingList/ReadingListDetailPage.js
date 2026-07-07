@@ -34,7 +34,13 @@ class ReadingListDetailPage extends Component {
       addingForeignId: null,
       searchQueued: false,
       isPushing: false,
-      pushResults: null
+      pushResults: null,
+      editingSlotId: null,
+      allSeries: null,
+      editorSeriesId: null,
+      editorIssues: [],
+      editorIssueId: null,
+      isRemapping: false
     };
   }
 
@@ -111,6 +117,78 @@ class ReadingListDetailPage extends Component {
       anchor.click();
       window.URL.revokeObjectURL(url);
     });
+  };
+
+  onEditSlotPress = (slot) => {
+    if (this.state.editingSlotId === slot.id) {
+      this.setState({ editingSlotId: null });
+      return;
+    }
+
+    this.setState({
+      editingSlotId: slot.id,
+      editorSeriesId: slot.seriesId || null,
+      editorIssues: [],
+      editorIssueId: null
+    });
+
+    if (!this.state.allSeries) {
+      const { request } = createAjaxRequest({ url: '/series', dataType: 'json' });
+
+      request.done((allSeries) => {
+        allSeries.sort((a, b) => a.seriesName.localeCompare(b.seriesName));
+        this.setState({ allSeries });
+      });
+    }
+
+    if (slot.seriesId) {
+      this.fetchEditorIssues(slot.seriesId);
+    }
+  };
+
+  fetchEditorIssues = (seriesId) => {
+    const { request } = createAjaxRequest({ url: `/issue?seriesId=${seriesId}`, dataType: 'json' });
+
+    request.done((editorIssues) => {
+      editorIssues.sort((a, b) => a.issueNumber.localeCompare(b.issueNumber, undefined, { numeric: true }));
+      this.setState({ editorIssues });
+    });
+  };
+
+  onEditorSeriesChange = (event) => {
+    const editorSeriesId = parseInt(event.target.value);
+
+    this.setState({ editorSeriesId, editorIssues: [], editorIssueId: null });
+    this.fetchEditorIssues(editorSeriesId);
+  };
+
+  onEditorIssueChange = (event) => {
+    this.setState({ editorIssueId: parseInt(event.target.value) });
+  };
+
+  onRemapSavePress = () => {
+    const { editingSlotId, editorIssueId } = this.state;
+
+    if (!editorIssueId) {
+      return;
+    }
+
+    this.setState({ isRemapping: true });
+
+    const { request } = createAjaxRequest({
+      url: `/readinglist/${this.listId}/slots/${editingSlotId}`,
+      method: 'PUT',
+      contentType: 'application/json',
+      dataType: 'json',
+      data: JSON.stringify({ issueId: editorIssueId })
+    });
+
+    request.done(() => {
+      this.setState({ isRemapping: false, editingSlotId: null });
+      this.fetchList();
+    });
+
+    request.fail(() => this.setState({ isRemapping: false, error: translate('ReadingListRelinkError') }));
   };
 
   onPushPress = () => {
@@ -248,6 +326,51 @@ class ReadingListDetailPage extends Component {
           </tbody>
         </table>
       </div>
+    );
+  }
+
+  renderSlotEditor() {
+    const { allSeries, editorSeriesId, editorIssues, editorIssueId, isRemapping } = this.state;
+
+    return (
+      <tr className={styles.slotEditorRow}>
+        <td />
+        <td colSpan={4}>
+          <div className={styles.controls}>
+            <label className={styles.control}>
+              {translate('Series')}
+              <select
+                className={styles.select}
+                value={editorSeriesId || ''}
+                onChange={this.onEditorSeriesChange}
+              >
+                <option value="" disabled={true}>...</option>
+                {(allSeries || []).map((s) => <option key={s.id} value={s.id}>{s.seriesName}</option>)}
+              </select>
+            </label>
+
+            <label className={styles.control}>
+              {translate('Issue')}
+              <select
+                className={styles.select}
+                value={editorIssueId || ''}
+                onChange={this.onEditorIssueChange}
+              >
+                <option value="" disabled={true}>...</option>
+                {editorIssues.map((i) => <option key={i.id} value={i.id}>{`#${i.issueNumber}${i.title ? ` — ${i.title}` : ''}`}</option>)}
+              </select>
+            </label>
+
+            <Button
+              isDisabled={!editorIssueId || isRemapping}
+              onPress={this.onRemapSavePress}
+            >
+              {translate('Save')}
+            </Button>
+          </div>
+        </td>
+        <td />
+      </tr>
     );
   }
 
@@ -390,41 +513,49 @@ class ReadingListDetailPage extends Component {
                     {
                       list.slots.map((slot) => {
                         return (
-                          <tr key={slot.id}>
-                            <td className={styles.positionCell}>{slot.position}</td>
-                            <td>
-                              {
-                                slot.seriesTitleSlug ?
-                                  <Link to={`/series/${slot.seriesTitleSlug}`}>{slot.seriesName}</Link> :
-                                  slot.seriesName
-                              }
-                            </td>
-                            <td>#{slot.issueNumber || '?'}</td>
-                            <td>{slot.year || '-'}</td>
-                            <td>
-                              <span className={styles[slot.status] || styles.notInLibrary}>
-                                {translate(`ReadingListStatus_${slot.status}`)}
-                              </span>
-                            </td>
-                            <td className={styles.actionsCell}>
-                              {
-                                slot.status === 'missing' &&
-                                  <IconButton
-                                    name={icons.SEARCH}
-                                    title={translate('Search')}
-                                    onPress={() => {
-                                      createAjaxRequest({
-                                        url: '/command',
-                                        method: 'POST',
-                                        contentType: 'application/json',
-                                        dataType: 'json',
-                                        data: JSON.stringify({ name: 'IssueSearch', issueIds: [slot.issueId] })
-                                      });
-                                    }}
-                                  />
-                              }
-                            </td>
-                          </tr>
+                          <React.Fragment key={slot.id}>
+                            <tr>
+                              <td className={styles.positionCell}>{slot.position}</td>
+                              <td>
+                                {
+                                  slot.seriesTitleSlug ?
+                                    <Link to={`/series/${slot.seriesTitleSlug}`}>{slot.seriesName}</Link> :
+                                    slot.seriesName
+                                }
+                              </td>
+                              <td>#{slot.issueNumber || '?'}</td>
+                              <td>{slot.year || '-'}</td>
+                              <td>
+                                <span className={styles[slot.status] || styles.notInLibrary}>
+                                  {translate(`ReadingListStatus_${slot.status}`)}
+                                </span>
+                              </td>
+                              <td className={styles.actionsCell}>
+                                {
+                                  slot.status === 'missing' &&
+                                    <IconButton
+                                      name={icons.SEARCH}
+                                      title={translate('Search')}
+                                      onPress={() => {
+                                        createAjaxRequest({
+                                          url: '/command',
+                                          method: 'POST',
+                                          contentType: 'application/json',
+                                          dataType: 'json',
+                                          data: JSON.stringify({ name: 'IssueSearch', issueIds: [slot.issueId] })
+                                        });
+                                      }}
+                                    />
+                                }
+                                <IconButton
+                                  name={icons.EDIT}
+                                  title={translate('ReadingListRelink')}
+                                  onPress={() => this.onEditSlotPress(slot)}
+                                />
+                              </td>
+                            </tr>
+                            {this.state.editingSlotId === slot.id && this.renderSlotEditor()}
+                          </React.Fragment>
                         );
                       })
                     }

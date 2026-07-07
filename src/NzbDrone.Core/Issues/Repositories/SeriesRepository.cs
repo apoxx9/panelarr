@@ -11,6 +11,7 @@ namespace NzbDrone.Core.Issues
     {
         bool SeriesPathExists(string path);
         Series FindByName(string cleanName);
+        List<Series> FindAllByName(string cleanName);
         Series FindById(string foreignSeriesId);
         Dictionary<int, string> AllSeriesPaths();
         Dictionary<int, List<int>> AllSeriesTags();
@@ -55,6 +56,13 @@ namespace NzbDrone.Core.Issues
             cleanName = cleanName.ToLowerInvariant();
 
             return Query(s => s.CleanName == cleanName).ExclusiveOrDefault();
+        }
+
+        public List<Series> FindAllByName(string cleanName)
+        {
+            cleanName = cleanName.ToLowerInvariant();
+
+            return Query(s => s.CleanName == cleanName);
         }
 
         public Dictionary<int, string> AllSeriesPaths()
