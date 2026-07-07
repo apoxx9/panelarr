@@ -19,11 +19,15 @@ Forked from [Readarr](https://github.com/Readarr/Readarr) (GPL v3) with a fully 
 - **Full *arr integration** — works with Prowlarr, SABnzbd, NZBGet, qBittorrent, Deluge, Transmission, and other download clients
 - **Comic-aware data model** — Publisher > Series > Issue > ComicFile (no shoehorning comics into book/audiobook models)
 - **Metadata providers** — Metron (primary) and ComicVine (fallback) for series, issue, and publisher metadata
+- **Weekly pull list** — new-comic-book-day view of upcoming and released issues across your library, with per-issue status and search
+- **Reading lists & story arcs** — import arcs from ComicVine or community CBL files, track coverage across series, search missing issues, export corrected CBLs, and push lists straight to Kavita/Komga
+- **Library import** — bring an existing collection in from its folders, or file new issues from a staging folder into tracked series with a per-file import report
 - **Smart file handling** — supports CBZ, CBR, CB7, PDF, and EPUB formats with automatic quality scoring
 - **ComicInfo.xml & MetronInfo.xml** — embeds metadata into CBZ files for seamless integration with Kavita, Komga, and other readers
 - **Per-type naming** — separate naming templates for standard issues, annuals, and TPBs
 - **Quality profiles** — automatic upgrades when better quality releases are found
-- **Reader integration** — triggers library scans in Kavita and Komga on import
+- **Publisher browsing & related series** — browse the library by publisher and link annuals or spin-offs to their parent series
+- **Reader integration** — triggers library scans and pushes reading lists to Kavita and Komga
 - **Beautiful UI** — React-based web interface following *arr conventions
 
 ## Quick Start (Docker)
