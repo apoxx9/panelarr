@@ -70,6 +70,49 @@ namespace NzbDrone.Core.Test.Localization
         }
 
         [Test]
+        public void frontend_translate_keys_should_exist_in_english()
+        {
+            // Guard for the Session 21 field bug: a dead-key sweep removed
+            // keys still referenced from .ts files, so the UI rendered raw
+            // key names (StatusEndedContinuing). Every translate('Key')
+            // literal in the frontend must have an en.json entry.
+            var repoRoot = FindRepoRoot();
+
+            if (repoRoot == null)
+            {
+                Assert.Ignore("frontend sources not available next to the test directory");
+            }
+
+            var translateCall = new Regex(@"translate\(\s*'(?<key>[A-Za-z0-9_]+)'", RegexOptions.Compiled);
+            var enKeys = ReadLocale(Path.Combine(LocalizationFolder, "en.json")).Keys.ToHashSet(StringComparer.Ordinal);
+            var frontendSrc = Path.Combine(repoRoot, "frontend", "src");
+
+            var missing = Directory.EnumerateFiles(frontendSrc, "*.*", SearchOption.AllDirectories)
+                .Where(f => f.EndsWith(".js") || f.EndsWith(".ts") || f.EndsWith(".tsx"))
+                .SelectMany(file => translateCall.Matches(File.ReadAllText(file))
+                    .Select(m => m.Groups["key"].Value)
+                    .Where(key => !enKeys.Contains(key))
+                    .Select(key => $"{Path.GetRelativePath(frontendSrc, file)}: {key}"))
+                .Distinct()
+                .OrderBy(x => x)
+                .ToList();
+
+            missing.Should().BeEmpty("every translate('Key') literal needs an en.json entry, otherwise the UI shows the raw key name");
+        }
+
+        private static string FindRepoRoot()
+        {
+            var dir = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
+
+            while (dir != null && !Directory.Exists(Path.Combine(dir.FullName, "frontend", "src")))
+            {
+                dir = dir.Parent;
+            }
+
+            return dir?.FullName;
+        }
+
+        [Test]
         public void locales_should_not_contain_keys_missing_from_english()
         {
             var enKeys = ReadLocale(Path.Combine(LocalizationFolder, "en.json")).Keys.ToHashSet(StringComparer.Ordinal);
