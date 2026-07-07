@@ -7,7 +7,25 @@ fossil cleanup + **migration 13** (Music*/Tv* download-client settings
 rename) + **migration 14** + Reading Lists A+B+C. Later the same
 session: a field bug from the user's first real CBL import led to
 **v1.1.12** (tiered resolve + manual relink + repairing export — see
-below). Suite: **2480 / 0**.
+below), and a second field bug (raw 'StatusEndedContinuing' label on
+every series page) led to **v1.1.13**. Suite: **2482 / 0**.
+
+## Shipped — translation-key fix + guard (87c0167..cb9cbbe, v1.1.13)
+
+The Session 20 dead-key sweep's usage scan only covered .js files and
+deleted 4 keys still referenced from SeriesStatus.ts — series pages
+rendered the raw key as the status badge since v1.1.10. Restored those
+plus 2 keys that were never defined (DateAdded, Type). The FULL
+translation surface was then audited and cemented as tests in
+LocalizationCleanlinessFixture: (1) every frontend translate('Key')
+literal exists in en.json (.js/.ts/.tsx), (2) every backend
+GetLocalizedString key exists, (3) the dynamic-prefix families
+(ReadingListType_/SeriesRelationType_ enum-driven, ReadingListStatus_/
+PullListStatus_ literal sets) are complete. No variable-keyed
+translate() calls exist. README feature list updated for v1.1.12.
+Wiki content drafted in docs/wiki/ (5 pages, local-only) — BLOCKED on
+the user creating the wiki's first page in the GitHub UI, then push
+the pages to the wiki git repo.
 
 ## Shipped — CBL resolve resilience + relink (c428637, v1.1.12)
 

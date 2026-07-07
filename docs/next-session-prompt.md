@@ -7,7 +7,7 @@ keys):
 
 We're continuing work on Panelarr (~/Projects/panelarr). Read
 `docs/last-handoff.md` first — it has full Session 21 state. Short
-version: **v1.1.12 is tagged** (fossil cleanup + migration 13
+version: **v1.1.13 is tagged** (fossil cleanup + migration 13
 download-client settings rename + migration 14 + Reading Lists A+B+C
 incl. push-to-Kavita). The homelab is still on 1.1.9 and needs a
 manual pull. Kavita (v0.9.0.2; address: <paste here>) got its
@@ -19,7 +19,7 @@ Kavita API key (if reader work planned): <paste key here>.
 
 Today's agenda, in order:
 
-1. **Homelab pull v1.1.12** and verify: migrations 13+14 apply,
+1. **Homelab pull v1.1.13** and verify: migrations 13+14 apply,
    reading lists live, rTorrent download client still configured
    (migration 13 rewrites its settings JSON).
 2. **Real-world reading list**: add Kavita as a connection on homelab
