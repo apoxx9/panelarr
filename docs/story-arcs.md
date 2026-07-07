@@ -1,4 +1,4 @@
-# Reading Lists (story arcs) — SHIPPED in v1.1.10 (Phases A+B+C)
+# Reading Lists (story arcs) — SHIPPED in v1.1.11 (Phases A+B+C)
 
 Status: **Design settled with the user** after the research below. The
 governing requirement: arcs curated in Panelarr must be consumable by

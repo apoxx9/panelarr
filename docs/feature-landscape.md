@@ -63,13 +63,13 @@ comes after the migration tooling.
    'search all missing', unmonitored toggle. Frontend-only.
    Originally: the #1 thing a Mylar user will miss; comics are a weekly
    medium and the pull list is the unit of consumption.
-2. **Story arcs / events** (M–L) — SHIPPED v1.1.10 as **Reading Lists**
+2. **Story arcs / events** (M–L) — SHIPPED v1.1.11 as **Reading Lists**
    (Sessions 20–21, design in docs/story-arcs.md): ReadingList/slots
    entity, CV arc import (TPB-filtered), live have/missing statuses,
    search-missing, explicit add-missing-series. Arc is a TYPE of
    reading list. Originally: first-class arc entity; membership across
    series; "do I have all of Secret Wars?".
-3. **CBL import/export** (S–M, piggybacks on #2) — SHIPPED v1.1.10
+3. **CBL import/export** (S–M, piggybacks on #2) — SHIPPED v1.1.11
    with #2: lossless CBL round-trip (cv-id Database extension), CBL
    upload on the index page, export on detail, and Phase C push to
    Kavita/Komga through their APIs (per-connection opt-in; verified

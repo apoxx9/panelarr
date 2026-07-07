@@ -2,7 +2,7 @@
 
 Session 21 shipped **Reading Lists Phase C** (push to Kavita/Komga),
 then **merged feature/story-arcs to main** (fast-forward, 0ee36f7) and
-tagged **v1.1.10** — the release that finally carries the whole batch:
+tagged **v1.1.11** — the release that finally carries the whole batch:
 fossil cleanup + **migration 13** (Music*/Tv* download-client settings
 rename) + **migration 14** + Reading Lists A+B+C. Suite: **2473 / 0**.
 
@@ -62,7 +62,7 @@ rename) + **migration 14** + Reading Lists A+B+C. Suite: **2473 / 0**.
    creation does NOT auto-scan reliably — POST /api/library/scan was
    needed; lastScanned stays epoch until the full scan completes.
 2. Kavita API key is per-session-paste (user's user-level key, admin).
-3. **v1.1.10 tagged** on 0ee36f7 → docker workflow updates :latest.
+3. **v1.1.11 tagged** on 0ee36f7 → docker workflow updates :latest.
    The homelab (still on 1.1.9) gets migration 13 + 14 + reading lists
    + pull list on its next manual pull. Migration 13 rewrites stored
    download-client settings JSON — rTorrent category carries over
@@ -72,7 +72,7 @@ rename) + **migration 14** + Reading Lists A+B+C. Suite: **2473 / 0**.
 
 ## Next actions
 
-1. **Homelab pull v1.1.10** and verify: migrations 13+14 apply clean,
+1. **Homelab pull v1.1.11** and verify: migrations 13+14 apply clean,
    reading lists page live, rTorrent connection still works.
 2. Add the homelab Kavita as a connection in homelab Panelarr (enable
    'Send Reading Lists') and push a real arc once its scan finishes.
