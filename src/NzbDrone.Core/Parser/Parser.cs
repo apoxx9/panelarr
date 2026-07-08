@@ -340,6 +340,11 @@ namespace NzbDrone.Core.Parser
                         IssueTitle = $"#{comicMatch.Groups["issue"].Value}"
                     };
 
+                    if (comicMatch.Groups["year"].Success)
+                    {
+                        comicResult.SeriesTitleInfo.Year = int.Parse(comicMatch.Groups["year"].Value);
+                    }
+
                     comicResult.Quality = QualityParser.ParseQuality(title);
 
                     // A title that parses as a comic but carries no source tag is an
@@ -476,6 +481,11 @@ namespace NzbDrone.Core.Parser
                         SeriesTitleInfo = GetSeriesTitleInfo(seriesName),
                         IssueTitle = $"#{comicMatch.Groups["issue"].Value}"
                     };
+
+                    if (comicMatch.Groups["year"].Success)
+                    {
+                        result.SeriesTitleInfo.Year = int.Parse(comicMatch.Groups["year"].Value);
+                    }
 
                     result.Quality = QualityParser.ParseQuality(title);
 

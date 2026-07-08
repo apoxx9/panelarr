@@ -169,6 +169,16 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.IsCollection.Should().Be(isCollection);
         }
 
+        [TestCase("Green Lantern Corps #18 (2026)", "Green Lantern Corps", 2026)]
+        [TestCase("Batman #100 (2016)", "Batman", 2016)]
+        [TestCase("Batman #100", "Batman", 0)]
+        public void should_capture_year_from_simple_comic_title(string postTitle, string name, int year)
+        {
+            var parseResult = Parser.Parser.ParseIssueTitle(postTitle);
+            parseResult.SeriesName.Should().Be(name);
+            parseResult.SeriesTitleInfo.Year.Should().Be(year);
+        }
+
         [TestCase("Walking Dead - Walking Dead Digital")]
         [TestCase("Walking Dead Walking Dead Digital")]
         [TestCase("WaLkInG DeAd Walking DeAd Digital")]

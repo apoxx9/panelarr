@@ -328,6 +328,11 @@ namespace NzbDrone.Core.Parser
                 ParsedIssueInfo = new ParsedIssueInfo
                 {
                     SeriesName = parsedComicInfo?.SeriesTitle,
+                    SeriesTitleInfo = new SeriesTitleInfo
+                    {
+                        Title = parsedComicInfo?.SeriesTitle,
+                        Year = parsedComicInfo?.Year ?? 0
+                    },
                     ReleaseGroup = parsedComicInfo?.ReleaseGroup,
                     Quality = parsedComicInfo?.Quality ?? new NzbDrone.Core.Qualities.QualityModel()
                 }
