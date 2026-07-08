@@ -6,38 +6,49 @@ keys):
 ---
 
 We're continuing work on Panelarr (~/Projects/panelarr). Read
-`docs/last-handoff.md` first — it has full Session 21 state. Short
-version: **v1.1.13 is released AND verified on the homelab**
-(1.1.13.101, migrations 13+14 applied). Reading Lists are fully live
-end-to-end: the CBL-imported 'Boom Studios - Power Rangers Saga' list
-self-healed to 171/171 after the v1.1.12 resolve fix, Kavita is
-connected (scan-on-import + Send Reading Lists), and a real push
-landed the list in Kavita with 171/171 matched. README + GitHub wiki
-(Home, Reading Lists, Pull List, Library Import, Reader Integration)
-are updated. The localization surface is guard-tested (literal,
-backend, dynamic-prefix keys).
+`docs/last-handoff.md` first — it has full Session 22 state. Short
+version: **the bulk Mylar-library import is in flight on the homelab**
+(1,201 proposals, all-but-3 exact via cvinfo). Small pubs + Image +
+Marvel + DC part 1 (460) ran overnight 07-07→08; DC part 2 (484,
+command 13482) was queued behind them. The per-series file-mapping
+rescans only run after each LibraryImport batch releases the
+disk-access mutex — a low mapped-file count while a batch runs is
+EXPECTED. Also this session: main-branch protection + v* tag ruleset
+on GitHub, quality cutoff lowered to Archive (no RSS re-grab storms),
+RSS chain verified, the 90-min scan hang investigated exhaustively
+(unattributed one-time event — trace-toggle playbook in the handoff).
 
 Homelab Panelarr API key: <paste key here>. Kavita API key (only if
 reader work planned): <paste key here>.
 
-Today's agenda — pick from the backlog:
+Today's agenda:
 
-1. **Real staging import on the homelab**: the container only mounts
-   /comics and a local /downloads — add the seedbox/staging source as
-   a volume, set StagingFolder, run a real Import from Staging.
-2. **Metron enrichment** for reading lists (arc records carry cv_id —
-   free cross-provider mapping; docs/story-arcs.md follow-ups).
-3. **Reading-list reordering UI** (positions are ours already).
-4. **Issueshelf rename** (decide what the feature is first) or other
-   feature-landscape items (#4 want-list/one-offs, #5 custom formats).
+1. **Verify the import finished**: series ≈ 1,265, mapped files ≈
+   12,300, unmapped ≈ a handful; spot-check a few series; check 0
+   failed commands.
+2. **The 3 probable Epic Collections** (ASM/FF/Iron Man): name-search
+   matched single-TPB volumes for 11–16-file folders — verify the
+   right CV volume (review modal alternatives / CV search) then
+   import.
+3. **Post-import health**: nightly refresh volume at ~1,265 series,
+   Library Import / issue-index page performance with the real
+   library (scale-readiness #4/#5 measurements).
+4. Backlog: Metron enrichment for reading lists; reading-list
+   reordering UI; Issueshelf rename / landscape #4 (want-list) / #5
+   (custom formats).
 
 Dev notes: local dev instance data dir is
 `~/Library/Application Support/Panelarr` (port 8787; the
-`~/.config/Panelarr` copy is stale — wrong API key). The dev DB has
-live indexers configured, so stop the instance when done testing.
-Puppeteer is installed globally (NODE_PATH=$(npm root -g)).
+`~/.config/Panelarr` copy is stale — wrong API key). Dev binary is
+built to `_output/net10.0/` (net6.0 is stale — rebuild with
+`dotnet msbuild -restore src/Panelarr.sln -p:Configuration=Debug
+-p:Platform=Posix -t:Build`). The dev DB has live indexers
+configured, so stop the instance when done testing. Puppeteer is
+installed globally (NODE_PATH=$(npm root -g)).
 
-Standing watch: quality "Unknown" in the Activity manual-import modal
+Standing watch: scan-hang recurrence (if a command freezes silently:
+set config/host logLevel=trace LIVE, capture the last trace line,
+restore info); quality "Unknown" in the Activity manual-import modal
 (unreproduced since Session 18).
 
 Standing rules as always: test before presenting, discuss designs
