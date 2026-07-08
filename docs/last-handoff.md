@@ -86,6 +86,20 @@ just Suske en Wiske's 377 large archives — benign.
 - Staging-import backlog item retired: /downloads on the container IS
   the seedbox mount, so StagingFolder can point there any time.
 
+## Bug found (Session 22, follow-up): queued commands lost on restart
+
+A manual server restart mid-import (16:29, graceful SIGTERM) orphaned
+the RUNNING LibraryImport correctly, but the ~500 QUEUED RescanFolders
+commands vanished — the queue came back empty and their file mapping
+never happened. CommandQueueManager.Requeue() (ApplicationStartedEvent)
+is supposed to requeue _repo.Queued(); either those rows were never
+persisted as queued or the requeue path drops them. Recovery used:
+re-queue the LibraryImport (idempotent skip) + one root RescanFolders
+with filter:"matched" to re-map everything. Fix candidate for next
+code session; also shipped this session: YearMatchSpecification
+(0e771a8) — grab-side year check born from the Green Lantern Corps
+wrong-grab (2026 release grabbed for the 2011 series' 2013 issue).
+
 ## Next actions
 
 1. Verify DC part 1 + rescan burst completed (mapped files should be
