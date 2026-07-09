@@ -123,9 +123,13 @@ namespace NzbDrone.Core.MediaFiles
 
                 if (!folderExists)
                 {
-                    _logger.Debug("Specified scan folder ({0}) doesn't exist.", folder);
-
-                    CleanMediaFiles(folder, new List<string>());
+                    // Vanished-mount guard: a folder that suddenly stops
+                    // existing is far more likely a broken mount than a
+                    // deliberate deletion — purging its rows here destroyed
+                    // ~2,490 of them during the 2026-07-08 NFS race. Keep the
+                    // rows; an existing-but-empty folder is skipped below for
+                    // the same reason.
+                    _logger.Warn("Series folder {0} doesn't exist - skipping DB cleanup for its files (vanished-mount guard)", folder);
                     continue;
                 }
 

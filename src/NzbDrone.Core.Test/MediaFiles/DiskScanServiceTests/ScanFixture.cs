@@ -172,8 +172,10 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         }
 
         [Test]
-        public void should_clean_if_folder_does_not_exist()
+        public void should_not_clean_if_folder_does_not_exist()
         {
+            // Vanished-mount guard: a missing series folder is treated as a
+            // broken mount, not a deletion — its DB rows must survive
             GivenRootFolder(_otherSeriesFolder);
 
             Subject.Scan(new List<string> { _series.Path });
@@ -181,7 +183,9 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             DiskProvider.FolderExists(_series.Path).Should().BeFalse();
 
             Mocker.GetMock<IMediaFileTableCleanupService>()
-                  .Verify(v => v.Clean(It.IsAny<string>(), It.IsAny<List<string>>()), Times.Once());
+                  .Verify(v => v.Clean(It.IsAny<string>(), It.IsAny<List<string>>()), Times.Never());
+
+            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]

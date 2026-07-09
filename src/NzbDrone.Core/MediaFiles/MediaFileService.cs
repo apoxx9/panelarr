@@ -136,10 +136,13 @@ namespace NzbDrone.Core.MediaFiles
             }
             else if (filter == FilterFilesType.Matched)
             {
+                // A matched-scan exists to (re)identify unmapped rows, so only
+                // files that already belong to an issue may be skipped. The
+                // IssueId column is authoritative — lazy-load state is not.
                 unwanted = combined
                     .Where(x => x.DiskFile.Length == x.DbFile.Size &&
                            Math.Abs((x.DiskFile.LastWriteTimeUtc - x.DbFile.Modified.ToUniversalTime()).TotalSeconds) <= 1 &&
-                           (x.DbFile.Issue == null || (x.DbFile.Issue.IsLoaded && x.DbFile.Issue.Value != null)))
+                           x.DbFile.IssueId > 0)
                     .Select(x => x.DiskFile)
                     .ToList();
                 _logger.Trace($"{unwanted.Count} unchanged and matched files");

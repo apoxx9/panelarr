@@ -8,6 +8,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch;
+using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.IssueImport.Manual;
 using NzbDrone.Core.Messaging.Commands;
@@ -49,6 +50,27 @@ namespace NzbDrone.Core.Test.Messaging.Commands
             var command2 = new IssueSearchCommand { IssueIds = new List<int> { 2 } };
 
             CommandEqualityComparer.Instance.Equals(command1, command2).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_return_false_when_a_shared_null_property_precedes_a_differing_one()
+        {
+            // A property that is null on both commands must not short-circuit
+            // the comparison — per-series rescans (Folders null, SeriesIds
+            // differing) were deduplicated into a single command
+            var command1 = new RescanFoldersCommand(null, FilterFilesType.None, false, new List<int> { 1 });
+            var command2 = new RescanFoldersCommand(null, FilterFilesType.None, false, new List<int> { 2 });
+
+            CommandEqualityComparer.Instance.Equals(command1, command2).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_return_true_when_shared_null_property_and_remaining_match()
+        {
+            var command1 = new RescanFoldersCommand(null, FilterFilesType.None, false, new List<int> { 1 });
+            var command2 = new RescanFoldersCommand(null, FilterFilesType.None, false, new List<int> { 1 });
+
+            CommandEqualityComparer.Instance.Equals(command1, command2).Should().BeTrue();
         }
 
         [Test]

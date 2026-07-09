@@ -64,7 +64,8 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                 .Returns(files.Select(f => new ComicFile
                 {
                     Path = f.FullName,
-                    Modified = _lastWrite
+                    Modified = _lastWrite,
+                    IssueId = 1
                 }).ToList());
 
             Subject.FilterUnchangedFiles(files, filter).Should().BeEmpty();
@@ -88,7 +89,8 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                     new ComicFile
                     {
                         Path = "C:\\file2.cbz".AsOsAgnostic(),
-                        Modified = _lastWrite
+                        Modified = _lastWrite,
+                        IssueId = 1
                     }
                 });
 
@@ -187,7 +189,8 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                     {
                         Path = "C:\\file2.cbz".AsOsAgnostic(),
                         Size = 10,
-                        Modified = _lastWrite
+                        Modified = _lastWrite,
+                        IssueId = 1
                     }
                 });
 
@@ -239,6 +242,7 @@ namespace NzbDrone.Core.Test.MediaFiles.MediaFileServiceTests
                         Path = "C:\\file2.cbz".AsOsAgnostic(),
                         Size = 10,
                         Modified = _lastWrite,
+                        IssueId = 1,
                         Issue = Builder<Issue>.CreateNew().Build()
                     }
                 });
