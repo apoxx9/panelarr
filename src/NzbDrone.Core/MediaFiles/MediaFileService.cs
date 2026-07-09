@@ -25,6 +25,7 @@ namespace NzbDrone.Core.MediaFiles
         List<ComicFile> GetFilesByIssue(int issueId);
         List<ComicFile> GetFilesByIssues(List<int> issueIds);
         List<ComicFile> GetUnmappedFiles();
+        List<ComicFile> GetFilesPendingInspection();
         List<IFileInfo> FilterUnchangedFiles(List<IFileInfo> files, FilterFilesType filter);
         ComicFile Get(int id);
         List<ComicFile> Get(IEnumerable<int> ids);
@@ -194,6 +195,11 @@ namespace NzbDrone.Core.MediaFiles
         public List<ComicFile> GetFilesByIssues(List<int> issueIds)
         {
             return _mediaFileRepository.GetFilesByIssues(issueIds);
+        }
+
+        public List<ComicFile> GetFilesPendingInspection()
+        {
+            return _mediaFileRepository.GetFilesPendingInspection();
         }
 
         public List<ComicFile> GetUnmappedFiles()

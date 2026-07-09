@@ -17,6 +17,10 @@ namespace NzbDrone.Core.MediaFiles
         public int PageCount { get; set; }
         public int ImageCount { get; set; }
         public float ImageQualityScore { get; set; }
+
+        // Raw ComicInfo.xml captured during the same archive pass, so credit
+        // extraction never pays a second archive open (they live on NFS)
+        public string ComicInfoXml { get; set; }
         public string Error { get; set; }
     }
 
@@ -100,10 +104,14 @@ namespace NzbDrone.Core.MediaFiles
 
         private ArchiveInspectionResult InspectEntries(IEnumerable<IArchiveEntry> entries)
         {
-            var imageEntries = entries
+            var allEntries = entries.ToList();
+
+            var imageEntries = allEntries
                 .Where(e => ImageExtensions.Contains(Path.GetExtension(e.Key)))
                 .OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase)
                 .ToList();
+
+            var comicInfoXml = ReadComicInfoXml(allEntries);
 
             var imageCount = imageEntries.Count;
             if (imageCount == 0)
@@ -112,7 +120,8 @@ namespace NzbDrone.Core.MediaFiles
                 {
                     PageCount = 0,
                     ImageCount = 0,
-                    ImageQualityScore = 0.0f
+                    ImageQualityScore = 0.0f,
+                    ComicInfoXml = comicInfoXml
                 };
             }
 
@@ -155,8 +164,34 @@ namespace NzbDrone.Core.MediaFiles
             {
                 PageCount = imageCount,
                 ImageCount = imageCount,
-                ImageQualityScore = avgQuality
+                ImageQualityScore = avgQuality,
+                ComicInfoXml = comicInfoXml
             };
+        }
+
+        private string ReadComicInfoXml(IEnumerable<IArchiveEntry> entries)
+        {
+            var comicInfoEntry = entries.FirstOrDefault(e =>
+                string.Equals(Path.GetFileName(e.Key), "ComicInfo.xml", StringComparison.OrdinalIgnoreCase));
+
+            if (comicInfoEntry == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                using (var stream = comicInfoEntry.OpenEntryStream())
+                using (var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Debug(ex, "Could not read ComicInfo.xml entry");
+                return null;
+            }
         }
 
         private ArchiveInspectionResult InspectPdf(string filePath)

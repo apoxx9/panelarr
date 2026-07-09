@@ -15,6 +15,7 @@ namespace NzbDrone.Core.MediaFiles
         List<ComicFile> GetFilesByIssue(int issueId);
         List<ComicFile> GetFilesByIssues(List<int> issueIds);
         List<ComicFile> GetUnmappedFiles();
+        List<ComicFile> GetFilesPendingInspection();
         List<ComicFile> GetFilesWithBasePath(string path);
         List<ComicFile> GetFileWithPath(List<string> paths);
         ComicFile GetFileWithPath(string path);
@@ -80,6 +81,15 @@ namespace NzbDrone.Core.MediaFiles
         {
             return _database.Query<ComicFile>(new SqlBuilder(_database.DatabaseType).Select(typeof(ComicFile))
                                               .Where<ComicFile>(t => t.IssueId == 0)).ToList();
+        }
+
+        // Mapped files that archive inspection hasn't processed yet. Files
+        // whose inspection legitimately yields zero images (corrupt archives,
+        // EPUB) reappear here and are re-attempted once per command run.
+        public List<ComicFile> GetFilesPendingInspection()
+        {
+            return _database.Query<ComicFile>(new SqlBuilder(_database.DatabaseType).Select(typeof(ComicFile))
+                                              .Where<ComicFile>(t => t.IssueId > 0 && t.ImageCount == 0)).ToList();
         }
 
         public void DeleteFilesByIssue(int issueId)
