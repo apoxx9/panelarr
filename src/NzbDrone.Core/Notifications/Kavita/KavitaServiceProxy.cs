@@ -46,7 +46,7 @@ public class KavitaServiceProxy : IKavitaServiceProxy
         postRequest.SetContent(new
         {
             ApiKey = settings.ApiKey,
-            FolderPath = folderPath.Replace("/", "//")
+            FolderPath = folderPath
         }.ToJson());
 
         var response = _httpClient.Post(postRequest);

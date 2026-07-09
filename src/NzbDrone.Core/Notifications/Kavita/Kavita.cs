@@ -24,25 +24,23 @@ public class Kavita : NotificationBase<KavitaSettings>
     public override void OnReleaseImport(IssueDownloadMessage message)
     {
         var allPaths = message.ComicFiles.Select(v => v.Path).Distinct();
-        var path = Directory.GetParent(allPaths.First())?.FullName;
-        Notify(Settings, ISSUE_DOWNLOADED_TITLE_BRANDED, path);
+        NotifyScan(Directory.GetParent(allPaths.First())?.FullName);
     }
 
     public override void OnIssueDelete(IssueDeleteMessage deleteMessage)
     {
         var allPaths = deleteMessage.Issue.ComicFiles.Value.Select(v => v.Path).Distinct();
-        var path = Directory.GetParent(allPaths.First())?.FullName;
-        Notify(Settings, ISSUE_FILE_DELETED_TITLE_BRANDED, path);
+        NotifyScan(Directory.GetParent(allPaths.First())?.FullName);
     }
 
     public override void OnComicFileDelete(ComicFileDeleteMessage message)
     {
-        Notify(Settings, ISSUE_FILE_DELETED_TITLE_BRANDED, Directory.GetParent(message.ComicFile.Path)?.FullName);
+        NotifyScan(Directory.GetParent(message.ComicFile.Path)?.FullName);
     }
 
     public override void OnIssueRetag(IssueRetagMessage message)
     {
-        Notify(Settings, ISSUE_RETAGGED_TITLE_BRANDED, Directory.GetParent(message.ComicFile.Path)?.FullName);
+        NotifyScan(Directory.GetParent(message.ComicFile.Path)?.FullName);
     }
 
     public override string Name => "Kavita";
@@ -56,19 +54,22 @@ public class Kavita : NotificationBase<KavitaSettings>
         return new ValidationResult(failures);
     }
 
-    private void Notify(KavitaSettings settings, string header, string message)
+    // Kavita's scan-folder endpoint takes a bare library folder path — never
+    // prefix it with a notification title (Kavita 500s on unmatchable paths)
+    private void NotifyScan(string folderPath)
     {
+        if (folderPath == null || !Settings.Notify)
+        {
+            return;
+        }
+
         try
         {
-            if (Settings.Notify)
-            {
-                _kavitaService.Notify(Settings, $"{header} - {message}");
-            }
+            _kavitaService.Notify(Settings, folderPath);
         }
         catch (SocketException ex)
         {
-            var logMessage = $"Unable to connect to Subsonic Host: {Settings.Host}:{Settings.Port}";
-            _logger.Debug(ex, logMessage);
+            _logger.Debug(ex, "Unable to connect to Kavita Host: {0}:{1}", Settings.Host, Settings.Port);
         }
     }
 }
