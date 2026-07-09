@@ -1,4 +1,4 @@
-# Last Handoff — 2026-07-08 (Session 22)
+# Last Handoff — 2026-07-09 (Session 22, final)
 
 Session 22 = **the bulk library import**. The homelab's full Mylar
 library (~12.8k files, 1,201 series proposals) is being imported into
@@ -31,7 +31,47 @@ session — it was ops, forensics, and one config change.
 - Everything is idempotent: re-queuing a LibraryImport skips series
   already in the library (FindById check, per-item failure isolation).
 
-## The scan-hang investigation (unresolved, standing watch)
+## IMPORT COMPLETE (2026-07-09 00:00)
+
+Final state: **1,261 series (1,253 with files), 12,178 files mapped,
+619 unmapped leftovers, 0 failed commands.** The leftovers are almost
+entirely CORRECT holds: (a) ~516 DC Annuals + cross-volume strays —
+files living in a folder whose cvinfo points at a different CV volume
+(e.g. "Aquaman Annual #01" in the Rebirth folder; annuals are their
+own CV volumes) — resolve via Library Import → Scan for New Series,
+which will propose the annual volumes from the files' own tags;
+(b) 63 Epic Collections (the 3 probables + granularity); (c) 5 Suske
+en Wiske mislabeled archives (.cbr that are actually zip — "Rar
+signature not found"); (d) ~35 misc across other publishers. The
+restart-era damage was fully repaired by one filter:"none" root
+rescan once the NFS mount was fixed.
+
+## The scan-hang MYSTERY — SOLVED (caught live 2026-07-08 21:23)
+
+**It was never a hang.** After a large import/insert, EVERY new
+ComicFile row's ComicFileAddedEvent runs SYNCHRONOUS handlers that
+OPEN AND READ THE ARCHIVE: CreditPopulationService (credit extraction)
+and ArchiveInspectionService (zip walk). No progress message, all
+logging at Debug/Trace. At NFS speeds that is hours of silent grinding
+behind a frozen command message. Caught red-handed via the live trace
+toggle during the final 6,122-file import: constant stream of
+"Extracted N credits from…" / "Inspecting archive for…" while the
+command message sat frozen at "Importing 6122 files" for 2h40m
+(21:11→23:52, ~0.6 files/s over NFS).
+
+Yesterday's "90-minute hang" was minute 90 of the same pass over
+12,326 fresh rows on a cold NFS cache (projected ~5-8 h); the restart
+interrupted it harmlessly (inserts commit before the event storm).
+The trace rerun "completed in 12 min" only because nothing new was
+inserted — no rows, no events, no grind. All observations reconcile.
+
+**Follow-up fix (next code session, priority):** move archive
+inspection + credit extraction OFF the synchronous import path into a
+queued background command with ProgressInfo ("Inspecting archives
+N/M"), or at minimum batch + progress-report them. Related:
+scale-readiness #4 (per-file events).
+
+## The scan-hang investigation (methodology log, superseded by above)
 
 The initial RescanFolders (registering the 12k unmapped files) froze
 silently for ~90 min at "Importing 4 files" and needed a container
@@ -100,16 +140,44 @@ code session; also shipped this session: YearMatchSpecification
 (0e771a8) — grab-side year check born from the Green Lantern Corps
 wrong-grab (2026 release grabbed for the 2011 series' 2013 issue).
 
+## Also: NFS-mount incident (2026-07-08 evening)
+
+The user's server restart brought the container up BEFORE the NFS
+mount: /comics showed 1 near-empty dir instead of 11 publishers.
+Consequences: per-series rescans against the broken mount DELETED
+~2,490 unmapped rows via MediaFileTableCleanupService's
+folder-doesn't-exist path (DB rows only; disk untouched; all
+re-registered after the fix). The root-scan empty-folder guard
+("Scan folder empty" → skip) prevented worse. Fixed by remounting +
+container restart.
+
+- **Infra prevention (user)**: /comics/.zzz_check/ sentinel exists —
+  wire it into a docker healthcheck (test -d /comics/.zzz_check) or a
+  systemd mount dependency.
+- **Code prevention (follow-up)**: vanished-mount guard — refuse
+  cleanup when a folder that owns DB rows enumerates empty/missing.
+
+## Code follow-up list (Session 22 harvest)
+
+1. Async/queued archive-inspection + credit-extraction with progress
+   (the "hang" fix — biggest UX win).
+2. Queued commands lost on restart (Requeue() doesn't restore them).
+3. FilterFilesType.Matched excludes unmapped rows at root scope
+   (Issue==null arm treats null lazy as matched) — made the intended
+   repair rescan a no-op; filter:"none" was the workaround.
+4. Vanished-mount cleanup guard (above).
+5. Shipped already: YearMatchSpecification (0e771a8).
+
 ## Next actions
 
-1. Verify DC part 1 + rescan burst completed (mapped files should be
-   ~7,200 after part 1, ~12,300 after part 2); spot-check mappings.
-2. DC part 2 (13482) runs ~10 h after that.
-3. Resolve the 3 probable Epic Collections (review modal / CV check).
-4. After full import: nightly refresh load check at ~1,265 series
-   (scale-readiness said fine), Library Import page perf
-   (#4/#5 measurements now possible with a real 12k library).
-5. Wiki push still blocked on user creating the first page in the
+1. **Leftovers pass**: Library Import → Scan for New Series to
+   propose the DC Annual volumes + fix the 3 Epic Collections'
+   matches (~50-80 new series, small CV cost); Suske mislabels need
+   the RAR→CBZ normalizer or manual conversion.
+2. Code follow-ups above (async inspection first).
+3. Nightly refresh load check at 1,261 series; Library Import page
+   perf (#4/#5 now measurable).
+4. Wiki push still blocked on user creating the first page in the
    GitHub UI (drafts in docs/wiki/).
-6. Standing watch: scan-hang recurrence (trace toggle ready);
-   quality "Unknown" in Activity manual-import modal.
+5. Standing watch (only one left): quality "Unknown" in Activity
+   manual-import modal.
