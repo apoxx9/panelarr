@@ -334,7 +334,8 @@ namespace NzbDrone.Core.Parser
                         Year = parsedComicInfo?.Year ?? 0
                     },
                     ReleaseGroup = parsedComicInfo?.ReleaseGroup,
-                    Quality = parsedComicInfo?.Quality ?? new NzbDrone.Core.Qualities.QualityModel()
+                    Quality = parsedComicInfo?.Quality ?? new NzbDrone.Core.Qualities.QualityModel(),
+                    IsMultiIssue = parsedComicInfo?.IsMultiIssue ?? false
                 }
             };
 

@@ -16,6 +16,7 @@ namespace NzbDrone.Core.Parser.Model
         public QualityModel Quality { get; set; }
         public string ReleaseTitle { get; set; }
         public string Source { get; set; }
+        public bool IsMultiIssue { get; set; }
 
         public override string ToString()
         {

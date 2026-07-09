@@ -335,6 +335,75 @@ namespace NzbDrone.Core.Test.MediaFiles
             DiskProvider.FolderExists(_subFolders[0]).Should().BeTrue();
         }
 
+        [Test]
+        public void should_drop_series_override_when_folder_contains_multiple_series()
+        {
+            var packFiles = new[]
+            {
+                "c:\\drop\\pack\\Batman 001 (2025) (Digital) (Zone-Empire).cbz".AsOsAgnostic(),
+                "c:\\drop\\pack\\Saga 066 (2025) (Digital) (Son of Ultron-Empire).cbz".AsOsAgnostic(),
+                "c:\\drop\\pack\\X-Men 004 (2025) (Digital) (Empire).cbz".AsOsAgnostic(),
+                "c:\\drop\\pack\\Monstress 055 (2025) (Digital).cbz".AsOsAgnostic()
+            };
+
+            GivenAudioFiles(packFiles, 10);
+
+            Mocker.GetMock<IDiskScanService>().Setup(c => c.GetComicFiles(It.IsAny<string>(), It.IsAny<bool>()))
+                .Returns(packFiles.Select(x => DiskProvider.GetFileInfo(x)).ToArray());
+
+            var captured = CaptureIdentificationOverrides();
+
+            Subject.ProcessPath(_droneFactory, ImportMode.Copy, _trackedDownload.RemoteIssue.Series, _trackedDownload.DownloadItem);
+
+            captured.Value.Should().NotBeNull();
+            captured.Value.Series.Should().BeNull();
+        }
+
+        [Test]
+        public void should_keep_series_override_when_folder_contains_single_series()
+        {
+            var singleSeriesFiles = new[]
+            {
+                "c:\\drop\\pack\\Batman 001 (2025) (Digital) (Zone-Empire).cbz".AsOsAgnostic(),
+                "c:\\drop\\pack\\Batman 002 (2025) (Digital) (Zone-Empire).cbz".AsOsAgnostic(),
+                "c:\\drop\\pack\\Batman 003 (2025) (Digital) (Zone-Empire).cbz".AsOsAgnostic()
+            };
+
+            GivenAudioFiles(singleSeriesFiles, 10);
+
+            Mocker.GetMock<IDiskScanService>().Setup(c => c.GetComicFiles(It.IsAny<string>(), It.IsAny<bool>()))
+                .Returns(singleSeriesFiles.Select(x => DiskProvider.GetFileInfo(x)).ToArray());
+
+            var captured = CaptureIdentificationOverrides();
+
+            Subject.ProcessPath(_droneFactory, ImportMode.Copy, _trackedDownload.RemoteIssue.Series, _trackedDownload.DownloadItem);
+
+            captured.Value.Should().NotBeNull();
+            captured.Value.Series.Should().BeSameAs(_trackedDownload.RemoteIssue.Series);
+        }
+
+        private class CapturedOverrides
+        {
+            public IdentificationOverrides Value { get; set; }
+        }
+
+        private CapturedOverrides CaptureIdentificationOverrides()
+        {
+            var captured = new CapturedOverrides();
+            var imported = new List<ImportDecision<LocalIssue>> { new ImportDecision<LocalIssue>(new LocalIssue()) };
+
+            Mocker.GetMock<IMakeImportDecision>()
+                  .Setup(v => v.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()))
+                  .Callback<List<IFileInfo>, IdentificationOverrides, ImportDecisionMakerInfo, ImportDecisionMakerConfig>((files, overrides, info, config) => captured.Value = overrides)
+                  .Returns(imported);
+
+            Mocker.GetMock<IImportApprovedIssues>()
+                  .Setup(s => s.Import(It.IsAny<List<ImportDecision<LocalIssue>>>(), It.IsAny<bool>(), It.IsAny<DownloadClientItem>(), It.IsAny<ImportMode>()))
+                  .Returns(imported.Select(i => new ImportResult(i)).ToList());
+
+            return captured;
+        }
+
         private void VerifyNoImport()
         {
             Mocker.GetMock<IImportApprovedIssues>().Verify(c => c.Import(It.IsAny<List<ImportDecision<LocalIssue>>>(), true, null, ImportMode.Auto),

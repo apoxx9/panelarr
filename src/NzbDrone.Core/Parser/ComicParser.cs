@@ -91,6 +91,24 @@ namespace NzbDrone.Core.Parser
             @"(?:\bIssues?\s+|#)\d+\s*[-–]\s*\d+",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+        // Multi-issue pack keywords: weekly 0-day bundles and explicit pack phrases.
+        // Compound phrases only — a series legitimately titled "Pack" must not match.
+        private static readonly Regex PackKeywordRegex = new Regex(
+            @"\b(?:0[\s.-]?day|(?:weekly|comics?)\s+pack)\b",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // Numeric issue range: "001-016", "1-25", "v01-v05" — digits on both sides
+        // of the dash so hyphenated titles ("X-23") and "Series - 66" never match
+        private static readonly Regex SceneRangeRegex = new Regex(
+            @"(?<![\d.])(\d{1,3})\s*[-–]\s*v?(\d{1,3})(?![\d.])",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        // Calendar dates ("2025-10-22", "2025 10.22") — stripped before range
+        // detection so date-stamped titles don't read as issue ranges
+        private static readonly Regex FullDateRegex = new Regex(
+            @"\b\d{4}[-–. ]\d{1,2}[-–. ]\d{1,2}\b",
+            RegexOptions.Compiled);
+
         // Known publisher prefixes that should be stripped from series titles
         private static readonly Regex PublisherPrefixRegex = new Regex(
             @"^(?:DC\s*Comics|Marvel(?:\s*Comics)?|Image(?:\s*Comics)?|Dark\s*Horse(?:\s*Comics)?|IDW(?:\s*Publishing)?|Boom!?\s*Studios|Dynamite(?:\s*Entertainment)?|Valiant(?:\s*Comics)?|Oni\s*Press|Vertigo|Aftershock|Titan\s*Comics|Archie\s*Comics)\s*[-–]\s*",
@@ -164,6 +182,8 @@ namespace NzbDrone.Core.Parser
 
             // Normalize whitespace after stripping
             name = Regex.Replace(name, @"\s{2,}", " ").Trim();
+
+            result.IsMultiIssue = IsMultiIssueName(name);
 
             // Extract year(s)
             var yearMatches = YearRegex.Matches(name);
@@ -279,12 +299,15 @@ namespace NzbDrone.Core.Parser
             }
 
             // Bail out if no comic-specific signals were found — this avoids false positives
-            // on music/audiobook release titles that would be handled by the generic parser
+            // on music/audiobook release titles that would be handled by the generic parser.
+            // A multi-issue pack marker (weekly 0-day bundle, issue range) counts as a signal:
+            // those titles carry no year/issue/format but must reach the decision engine flagged.
             if (result.Format == ComicFormat.Unknown &&
                 !result.Year.HasValue &&
                 !result.IssueNumber.HasValue &&
                 !result.VolumeNumber.HasValue &&
-                result.Source == null)
+                result.Source == null &&
+                !result.IsMultiIssue)
             {
                 return null;
             }
@@ -452,6 +475,37 @@ namespace NzbDrone.Core.Parser
             stripped = stripped.TrimEnd('-', '_', ' ');
 
             return stripped.IsNullOrWhiteSpace() ? name : stripped;
+        }
+
+        // A release that bundles multiple issues: weekly 0-day packs, issue
+        // ranges, volume ranges. Detection is advisory — the decision engine
+        // uses it to keep packs out of automatic grabs; import never trusts
+        // it and identifies files by their own content.
+        private static bool IsMultiIssueName(string name)
+        {
+            if (PackKeywordRegex.IsMatch(name))
+            {
+                return true;
+            }
+
+            if (IssueRangeRegex.IsMatch(name))
+            {
+                return true;
+            }
+
+            var undated = FullDateRegex.Replace(name, " ");
+
+            foreach (Match match in SceneRangeRegex.Matches(undated))
+            {
+                if (int.TryParse(match.Groups[1].Value, out var start) &&
+                    int.TryParse(match.Groups[2].Value, out var end) &&
+                    start < end)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

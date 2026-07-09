@@ -18,6 +18,7 @@ namespace NzbDrone.Core.Parser.Model
         public string ReleaseHash { get; set; }
         public string ReleaseVersion { get; set; }
         public string ReleaseTitle { get; set; }
+        public bool IsMultiIssue { get; set; }
 
         [JsonIgnore]
         public Dictionary<string, object> ExtraInfo { get; set; } = new Dictionary<string, object>();

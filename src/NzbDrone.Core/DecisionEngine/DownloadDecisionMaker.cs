@@ -145,6 +145,13 @@ namespace NzbDrone.Core.DecisionEngine
                             remoteIssue.ParsedIssueInfo.Quality = QualityParser.ParseQuality(report.Title, null, report.Categories);
                         }
 
+                        // Pack detection comes from the comic parser regardless of
+                        // which parse path produced the mapping
+                        if (parsedComicInfo?.IsMultiIssue == true)
+                        {
+                            remoteIssue.ParsedIssueInfo.IsMultiIssue = true;
+                        }
+
                         if (remoteIssue.Series == null)
                         {
                             decision = new DownloadDecision(remoteIssue, new Rejection("Unknown Series"));

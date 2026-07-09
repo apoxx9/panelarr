@@ -6,6 +6,7 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Issues;
@@ -207,6 +208,18 @@ namespace NzbDrone.Core.MediaFiles
                 }
             }
 
+            // A grabbed download can be a multi-issue pack spanning many series
+            // (weekly 0-day bundles). The grab's series override would pin every
+            // file to one series, so wanted issues from other series could never
+            // import. When the filenames clearly disagree with any single series,
+            // drop the override and identify each file against the whole library.
+            if (series != null && HasMultipleDistinctSeries(comicFiles))
+            {
+                _logger.Info("'{0}' contains files from multiple series - identifying each file against the library", directoryInfo.Name);
+                series = null;
+                folderInfo = null;
+            }
+
             var idOverrides = new IdentificationOverrides
             {
                 Series = series
@@ -312,6 +325,34 @@ namespace NzbDrone.Core.MediaFiles
             var decisions = _importDecisionMaker.GetImportDecisions(new List<IFileInfo>() { fileInfo }, idOverrides, idInfo, idConfig);
 
             return _importApprovedIssues.Import(decisions, true, downloadClientItem, importMode);
+        }
+
+        // Filename-only pre-scan (no archive reads). Conservative on purpose:
+        // engages only when most files parse and at least three distinct series
+        // appear with no dominant majority — variant covers or sloppy names in a
+        // single-series download keep the normal override path.
+        private static bool HasMultipleDistinctSeries(List<IFileInfo> comicFiles)
+        {
+            if (comicFiles.Count < 3)
+            {
+                return false;
+            }
+
+            var seriesTitles = comicFiles
+                .Select(x => ComicParser.ParseRelease(x.Name)?.SeriesTitle)
+                .Where(x => x.IsNotNullOrWhiteSpace())
+                .Select(x => x.CleanSeriesName())
+                .Where(x => x.IsNotNullOrWhiteSpace())
+                .ToList();
+
+            if (seriesTitles.Count < Math.Max(3, comicFiles.Count / 2))
+            {
+                return false;
+            }
+
+            var groups = seriesTitles.GroupBy(x => x).OrderByDescending(g => g.Count()).ToList();
+
+            return groups.Count >= 3 && groups[0].Count() < seriesTitles.Count * 0.7;
         }
 
         private string GetCleanedUpFolderName(string folder)

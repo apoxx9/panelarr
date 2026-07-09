@@ -361,5 +361,43 @@ namespace NzbDrone.Core.Test.ParserTests
                 result.Year.Should().Be(expectedYear.Value);
             }
         }
+
+        // -------------------------------------------------------------------
+        // Multi-issue pack detection (weekly 0-day bundles, issue ranges)
+        // -------------------------------------------------------------------
+        [TestCase("0-Day Week of 2025.10.22 by Dark Horse Comics, Image Comics, Marvel Comics, Oni Press, DC Comics [ENG / CBR CBZ] [VIP]")]
+        [TestCase("0 Day Week of 2019.06.05 by Dark Horse Comics, Valiant Entertainment [ENG / CBR CBZ]")]
+        [TestCase("Marvel Weekly Pack 2024.01.17")]
+        [TestCase("DC Comics Pack - 2023 week 42")]
+        [TestCase("Amazing Spider-Man Issues 1-50 (2018-2020)")]
+        [TestCase("Saga #1-25 (Digital)")]
+        [TestCase("Batman 001-016 (2016) (Digital) (Zone-Empire)")]
+        [TestCase("Monstress v01-v05 (2016-2020) (Digital)")]
+        public void should_flag_multi_issue_release(string releaseTitle)
+        {
+            var result = ComicParser.ParseRelease(releaseTitle);
+
+            result.Should().NotBeNull();
+            result.IsMultiIssue.Should().BeTrue();
+        }
+
+        [TestCase("Batman 2016 001 (2016) (Digital) (Zone-Empire).cbz")]
+        [TestCase("Amazing Spider-Man v5 015 (2022) (Digital) (Shan-Empire).cbr")]
+        [TestCase("Spider-Man 2099 003 (2020).cbz")]
+        [TestCase("100 Bullets 050 (2004).cbz")]
+        [TestCase("Batman - The Court of Owls (2011-2012) (TPB).cbz")]
+        [TestCase("Batman (2016-) 045 (2020) (Digital).cbz")]
+        [TestCase("Batman #1.5.cbz")]
+        [TestCase("X-23 012 (2019) (Digital).cbz")]
+        [TestCase("MMPR Shattered Grid 01 (of 05) (2018).cbz")]
+        [TestCase("The Pack 003 (1990).cbz")]
+        [TestCase("Daily Bugle 2025-10-22 (2025).cbz")]
+        public void should_not_flag_single_issue_release(string releaseTitle)
+        {
+            var result = ComicParser.ParseRelease(releaseTitle);
+
+            result.Should().NotBeNull();
+            result.IsMultiIssue.Should().BeFalse();
+        }
     }
 }
