@@ -118,8 +118,9 @@ just Suske en Wiske's 377 large archives — benign.
   true: Scan/C2C→Archive upgrades and new-issue grabs still work.
 - **RSS chain verified end-to-end** (auto grab+import of Minor
   Arcana #16 on 07-07).
-- **Homelab UI "outage" solved**: user's browser was pointed at
-  192.168.1.84:8787 (the Prowlarr host) instead of 192.168.1.33:8787.
+- **Homelab UI "outage" solved**: user's browser was pointed at the
+  Prowlarr host's IP with Panelarr's port instead of the Panelarr
+  host (hosts/IPs in session memory, not here — public repo).
   Server was healthy throughout. Frontend note: the Library Import
   page renders all 12k unmapped rows client-side (scale-readiness #5)
   — sluggish until the import drains the table.

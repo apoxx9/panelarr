@@ -6,52 +6,51 @@ keys):
 ---
 
 We're continuing work on Panelarr (~/Projects/panelarr). Read
-`docs/last-handoff.md` first — it has full Session 22 state. Short
-version: **the bulk Mylar-library import is in flight on the homelab**
-(1,201 proposals, all-but-3 exact via cvinfo). Small pubs + Image +
-Marvel + DC part 1 (460) ran overnight 07-07→08; DC part 2 (484,
-command 13482) was queued behind them. The per-series file-mapping
-rescans only run after each LibraryImport batch releases the
-disk-access mutex — a low mapped-file count while a batch runs is
-EXPECTED. Also this session: main-branch protection + v* tag ruleset
-on GitHub, quality cutoff lowered to Archive (no RSS re-grab storms),
-RSS chain verified, the 90-min scan hang investigated exhaustively
-(unattributed one-time event — trace-toggle playbook in the handoff).
+`docs/last-handoff.md` first — full Session 22 state. Short version:
+**the bulk Mylar-library import is DONE**: 1,261 series, 12,178 files
+mapped, 0 failures, 619 correct-hold leftovers. The two-day scan-hang
+mystery is SOLVED (synchronous per-file archive inspection + credit
+extraction after imports — hours of silent grinding, not a hang).
+Shipped: YearMatchSpecification (grab-side year check) + 'Write Tags'
+toolbar label fix. Suite 2495/0.
 
-Homelab Panelarr API key: <paste key here>. Kavita API key (only if
-reader work planned): <paste key here>.
+Homelab Panelarr API key: <paste key here>.
 
-Today's agenda:
+Today's agenda (in recommended order):
 
-1. **Verify the import finished**: series ≈ 1,265, mapped files ≈
-   12,300, unmapped ≈ a handful; spot-check a few series; check 0
-   failed commands.
-2. **The 3 probable Epic Collections** (ASM/FF/Iron Man): name-search
-   matched single-TPB volumes for 11–16-file folders — verify the
-   right CV volume (review modal alternatives / CV search) then
-   import.
-3. **Post-import health**: nightly refresh volume at ~1,265 series,
-   Library Import / issue-index page performance with the real
-   library (scale-readiness #4/#5 measurements).
-4. Backlog: Metron enrichment for reading lists; reading-list
-   reordering UI; Issueshelf rename / landscape #4 (want-list) / #5
-   (custom formats).
+1. **Leftovers pass (~30 min)**: Library Import → Scan for New Series
+   on the 619 unmapped — proposes the ~516 DC Annual/cross-volume
+   series from file tags; fix the 3 Epic Collections' matches in the
+   review modal; the 5 Suske en Wiske .cbr files are zip-mislabeled
+   (RAR→CBZ normalizer or manual rename).
+2. **Async archive-inspection fix** (design first, then build): move
+   CreditPopulationService + ArchiveInspectionService off the
+   synchronous import event path into a queued background command
+   with ProgressInfo ("Inspecting archives N/M"). This is the
+   scan-hang fix proper.
+3. Small bug batch: queued commands lost on restart (Requeue),
+   FilterFilesType.Matched excludes unmapped rows (Issue==null arm),
+   vanished-mount cleanup guard.
+4. Post-import health: nightly refresh volume at 1,261 series;
+   Library Import / issue-index page perf (scale-readiness #4/#5).
+
+User-side homework (remind gently): docker healthcheck on the
+/comics sentinel dir so the NFS-mount race can't recur; create the
+GitHub wiki's first page so the drafted docs/wiki/ pages can push.
 
 Dev notes: local dev instance data dir is
-`~/Library/Application Support/Panelarr` (port 8787; the
-`~/.config/Panelarr` copy is stale — wrong API key). Dev binary is
-built to `_output/net10.0/` (net6.0 is stale — rebuild with
+`~/Library/Application Support/Panelarr` (port 8787). Dev binary
+builds to `_output/net10.0/` (net6.0 is stale) via
 `dotnet msbuild -restore src/Panelarr.sln -p:Configuration=Debug
--p:Platform=Posix -t:Build`). The dev DB has live indexers
-configured, so stop the instance when done testing. Puppeteer is
-installed globally (NODE_PATH=$(npm root -g)).
+-p:Platform=Posix -t:Build`. The dev DB has live indexers — stop the
+instance when done testing. Puppeteer is global
+(NODE_PATH=$(npm root -g)); series pages need the titleSlug
+(cv-XXXXX), not the numeric id.
 
-Standing watch: scan-hang recurrence (if a command freezes silently:
-set config/host logLevel=trace LIVE, capture the last trace line,
-restore info); quality "Unknown" in the Activity manual-import modal
-(unreproduced since Session 18).
+Standing watch (one item): quality "Unknown" in the Activity
+manual-import modal (unreproduced since Session 18).
 
 Standing rules as always: test before presenting, discuss designs
 before implementing, scan before any push (from a file, as separate
 checked steps — not && chains), no AI attribution in commits, ask
-before pushing.
+before pushing, homelab host/IP details stay OUT of public repo docs.
