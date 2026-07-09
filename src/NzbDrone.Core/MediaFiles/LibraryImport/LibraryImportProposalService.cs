@@ -80,7 +80,12 @@ namespace NzbDrone.Core.MediaFiles.LibraryImport
             {
                 try
                 {
-                    var proposal = BuildProposal(folderGroup.Key, folderGroup.Select(f => f.Path).ToList());
+                    // These files already failed to map against whatever series
+                    // owns their folder, so a cvinfo that resolves to a library
+                    // series is the wrong answer by definition (annuals and
+                    // cross-volume strays live in the parent's folder) — prefer
+                    // the files' own tags instead.
+                    var proposal = BuildProposal(folderGroup.Key, folderGroup.Select(f => f.Path).ToList(), skipCvInfoForLibrarySeries: true);
 
                     if (proposal != null)
                     {
@@ -116,7 +121,10 @@ namespace NzbDrone.Core.MediaFiles.LibraryImport
             {
                 try
                 {
-                    var proposal = BuildProposal(folderGroup.Key, folderGroup.Select(f => f.FullName).ToList());
+                    // Staging keeps cvinfo-first even for library series: files
+                    // are imported INTO the existing series, so proposing it is
+                    // exactly right.
+                    var proposal = BuildProposal(folderGroup.Key, folderGroup.Select(f => f.FullName).ToList(), skipCvInfoForLibrarySeries: false);
 
                     if (proposal != null)
                     {
@@ -132,7 +140,7 @@ namespace NzbDrone.Core.MediaFiles.LibraryImport
             return proposals.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase).ToList();
         }
 
-        private LibraryImportProposal BuildProposal(string folder, List<string> filePaths)
+        private LibraryImportProposal BuildProposal(string folder, List<string> filePaths, bool skipCvInfoForLibrarySeries)
         {
             var tags = ReadSampleTags(filePaths);
             var parsedFolder = ComicParser.ParseRelease(Path.GetFileName(folder));
@@ -154,7 +162,14 @@ namespace NzbDrone.Core.MediaFiles.LibraryImport
 
             if (cvInfoId != null)
             {
-                return Build(folder, filePaths.Count, cvInfoId, displayName ?? Path.GetFileName(folder), displayYear, ProposalConfidence.Exact, "cvinfo");
+                if (skipCvInfoForLibrarySeries && _seriesService.FindById(cvInfoId) != null)
+                {
+                    _logger.Debug("cvinfo volume {0} for {1} is already in the library; resolving the unmapped files from their own tags instead", cvInfoId, folder);
+                }
+                else
+                {
+                    return Build(folder, filePaths.Count, cvInfoId, displayName ?? Path.GetFileName(folder), displayYear, ProposalConfidence.Exact, "cvinfo");
+                }
             }
 
             // 2. tagged issue ids: resolve one representative to its series

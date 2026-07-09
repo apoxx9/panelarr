@@ -215,15 +215,86 @@ namespace NzbDrone.Core.Test.MediaFiles.LibraryImport
         [Test]
         public void existing_series_should_be_flagged()
         {
+            // file-tags path resolving to a series already in the library
             GivenUnmappedFiles(_twdFolder, 3);
-            GivenCvInfo(_twdFolder, "https://comicvine.gamespot.com/the-walking-dead/4050-30345/");
-            GivenTags(new ParsedFileTagInfo { SeriesTitle = "The Walking Dead" });
+            GivenTags(new ParsedFileTagInfo { SeriesTitle = "The Walking Dead", ForeignIssueId = "cv:338482" });
+
+            Mocker.GetMock<IProvideIssueInfo>()
+                  .Setup(s => s.GetIssueInfo("cv:338482"))
+                  .Returns(Tuple.Create("cv:30345", new Issue(), new List<SeriesMetadata> { new SeriesMetadata { Name = "The Walking Dead", Year = 2004 } }));
 
             Mocker.GetMock<ISeriesService>()
                   .Setup(s => s.FindById("cv:30345"))
                   .Returns(new Series { Id = 6 });
 
             Subject.GetProposals(1).Single().ExistingSeriesId.Should().Be(6);
+        }
+
+        [Test]
+        public void unmapped_scan_should_prefer_file_tags_when_cvinfo_series_is_already_imported()
+        {
+            // Annuals case: files sit in the parent series' folder, whose cvinfo
+            // points at the already-imported parent — the files' own tags name
+            // the annual volume that actually owns them
+            GivenUnmappedFiles(_twdFolder, 4);
+            GivenCvInfo(_twdFolder, "https://comicvine.gamespot.com/the-walking-dead/4050-30345/");
+            GivenTags(new ParsedFileTagInfo { SeriesTitle = "The Walking Dead Annual", ForeignIssueId = "cv:400001" });
+
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.FindById("cv:30345"))
+                  .Returns(new Series { Id = 6 });
+
+            Mocker.GetMock<IProvideIssueInfo>()
+                  .Setup(s => s.GetIssueInfo("cv:400001"))
+                  .Returns(Tuple.Create("cv:55555", new Issue(), new List<SeriesMetadata> { new SeriesMetadata { Name = "The Walking Dead Annual", Year = 2012 } }));
+
+            var proposals = Subject.GetProposals(1);
+
+            proposals.Should().HaveCount(1);
+            proposals[0].ForeignSeriesId.Should().Be("cv:55555");
+            proposals[0].IdSource.Should().Be("file tags");
+            proposals[0].Confidence.Should().Be(ProposalConfidence.Exact);
+        }
+
+        [Test]
+        public void unmapped_scan_should_keep_cvinfo_proposal_when_its_series_is_not_imported()
+        {
+            GivenUnmappedFiles(_twdFolder, 4);
+            GivenCvInfo(_twdFolder, "https://comicvine.gamespot.com/the-walking-dead/4050-30345/");
+            GivenTags(new ParsedFileTagInfo { SeriesTitle = "The Walking Dead", ForeignIssueId = "cv:400001" });
+
+            var proposals = Subject.GetProposals(1);
+
+            proposals.Should().HaveCount(1);
+            proposals[0].ForeignSeriesId.Should().Be("cv:30345");
+            proposals[0].IdSource.Should().Be("cvinfo");
+
+            Mocker.GetMock<IProvideIssueInfo>()
+                  .Verify(s => s.GetIssueInfo(It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
+        public void staging_scan_should_keep_cvinfo_proposal_for_existing_series()
+        {
+            // Staging imports files INTO an existing series, so re-proposing it
+            // is correct there — the unmapped-scan fall-through must not apply
+            var stagingRoot = @"C:\staging".AsOsAgnostic();
+            var twdStaging = Path.Combine(stagingRoot, "The Walking Dead (2004)");
+
+            GivenStagingFiles(stagingRoot, twdStaging, 4);
+            GivenCvInfo(twdStaging, "https://comicvine.gamespot.com/the-walking-dead/4050-30345/");
+            GivenTags(new ParsedFileTagInfo { SeriesTitle = "The Walking Dead", Year = 2004 });
+
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.FindById("cv:30345"))
+                  .Returns(new Series { Id = 6 });
+
+            var proposals = Subject.GetProposalsForFolder(stagingRoot);
+
+            proposals.Should().HaveCount(1);
+            proposals[0].ForeignSeriesId.Should().Be("cv:30345");
+            proposals[0].IdSource.Should().Be("cvinfo");
+            proposals[0].ExistingSeriesId.Should().Be(6);
         }
 
         [Test]
