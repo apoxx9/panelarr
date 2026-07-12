@@ -155,15 +155,27 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 }
             }
 
-            // If title matching found nothing, try matching by issue number
+            // If title matching found nothing, try matching by issue number.
+            // Parse with the comic parser first — a bare first-number regex
+            // reads "Angel & Faith Season 10 #025" as issue 10, not 25.
             if (!candidateReleases.Any())
             {
-                var issueNumberStr = System.Text.RegularExpressions.Regex.Match(issueTag, @"#?(\d+\.?\d*)").Groups[1].Value;
-                if (float.TryParse(issueNumberStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var issueNumber))
+                var issueNumber = Parser.ComicParser.ParseRelease(issueTag)?.IssueNumber;
+
+                if (!issueNumber.HasValue)
+                {
+                    var issueNumberStr = System.Text.RegularExpressions.Regex.Match(issueTag, @"#?(\d+\.?\d*)").Groups[1].Value;
+                    if (float.TryParse(issueNumberStr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var crudeNumber))
+                    {
+                        issueNumber = crudeNumber;
+                    }
+                }
+
+                if (issueNumber.HasValue)
                 {
                     _logger.Debug("Title match failed for series {0}, trying issue number {1}", series.SeriesMetadataId, issueNumber);
                     var allIssues = _issueService.GetIssuesBySeriesMetadataId(series.SeriesMetadataId);
-                    var matchByNumber = allIssues.Where(x => x.IssueNumber == issueNumber.ToString("0.##")).ToList();
+                    var matchByNumber = allIssues.Where(x => x.IssueNumber == issueNumber.Value.ToString("0.##")).ToList();
                     foreach (var issue in matchByNumber)
                     {
                         candidateReleases.AddRange(GetDbCandidatesByIssue(issue, includeExisting));

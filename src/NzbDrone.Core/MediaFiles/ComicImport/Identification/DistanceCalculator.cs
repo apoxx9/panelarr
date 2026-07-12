@@ -40,11 +40,16 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             dist.AddString("series", allSeries, issue.SeriesMetadata.Value.Name);
             Logger.Trace("series: '{0}' vs '{1}'; {2}", allSeries.ConcatToString("' or '"), issue.SeriesMetadata.Value.Name, dist.NormalizedDistance());
 
-            // Only compare issue title if the database has one — an empty title
-            // (e.g. unreleased issue) should not penalize the match
-            if (issue.Title.IsNotNullOrWhiteSpace())
+            // Only compare issue titles when BOTH sides have a real one. An
+            // empty local title surfaces as "" or a "#18"-style filename
+            // placeholder — string-matching that against the provider's arc
+            // title is a guaranteed max penalty that sank correct matches
+            // just below the import threshold.
+            var localTitle = localTracks.MostCommon(x => x.FileTagInfo.IssueTitle) ?? "";
+
+            if (issue.Title.IsNotNullOrWhiteSpace() && HasComparableTitle(localTitle))
             {
-                var title = localTracks.MostCommon(x => x.FileTagInfo.IssueTitle) ?? "";
+                var title = localTitle;
                 var titleOptions = new List<string> { issue.Title };
                 if (titleOptions[0].Contains("#"))
                 {
@@ -89,12 +94,22 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             }
 
             // Publisher — compare against the actual publisher name (never the
-            // series name), and only when both sides have one.
+            // series name), and only when both sides have one. Taggers and the
+            // provider disagree on alias forms ("DC" vs "DC Comics", "IDW" vs
+            // "IDW Publishing"); containment means the same house.
             var localPublisher = localTracks.MostCommon(x => x.FileTagInfo.Publisher) ?? "";
             var dbPublisher = issue.SeriesMetadata?.Value?.Publisher?.Value?.Name;
             if (localPublisher.IsNotNullOrWhiteSpace() && dbPublisher.IsNotNullOrWhiteSpace())
             {
-                dist.AddString("publisher", localPublisher, dbPublisher);
+                if (PublishersMatch(localPublisher, dbPublisher))
+                {
+                    dist.Add("publisher", 0.0);
+                }
+                else
+                {
+                    dist.AddString("publisher", localPublisher, dbPublisher);
+                }
+
                 Logger.Trace("publisher: '{0}' vs '{1}'; {2}", localPublisher, dbPublisher, dist.NormalizedDistance());
             }
 
@@ -124,6 +139,28 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         private static string NormalizeIssueNumber(string number)
         {
             return IssueNumberNormalizer.Normalize(number) ?? string.Empty;
+        }
+
+        // A title made only of digits, '#', whitespace and punctuation is a
+        // filename-derived placeholder, not a real issue title
+        private static bool HasComparableTitle(string title)
+        {
+            return title.IsNotNullOrWhiteSpace() &&
+                   title.Any(c => char.IsLetter(c));
+        }
+
+        private static bool PublishersMatch(string a, string b)
+        {
+            var na = NormalizePublisher(a);
+            var nb = NormalizePublisher(b);
+
+            return na.Length > 0 && nb.Length > 0 &&
+                   (na.Contains(nb) || nb.Contains(na));
+        }
+
+        private static string NormalizePublisher(string publisher)
+        {
+            return new string(publisher.ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray());
         }
 
         public static List<string> GetSeriesVariants(List<string> fileSeries)

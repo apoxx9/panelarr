@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -75,6 +76,56 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
                 IncludeExisting = false,
                 AddNewSeries = false
             };
+        }
+
+        [Test]
+        public void tag_id_duplicated_across_many_files_should_be_distrusted()
+        {
+            // Tagger accident: one issue's ComicInfo stamped into a whole
+            // folder (observed live: 18 files all tagged as issue #2). The
+            // shared id must not exact-match every file onto the same issue.
+            var tracks = new List<LocalIssue>();
+            for (var i = 1; i <= 3; i++)
+            {
+                tracks.Add(new LocalIssue
+                {
+                    Path = $@"C:\comics\Saga (2012)\Saga #00{i} (2012).cbz".AsOsAgnostic(),
+                    FileTagInfo = new ParsedFileTagInfo
+                    {
+                        SeriesTitle = "Saga",
+                        Series = new List<string> { "Saga" },
+                        SeriesIndex = "2",
+                        IssueTitle = "The Same Wrong Title",
+                        ForeignIssueId = "cv:338482"
+                    }
+                });
+            }
+
+            Subject.Identify(tracks, new IdentificationOverrides(), GivenConfig());
+
+            tracks.Should().OnlyContain(t => t.FileTagInfo.ForeignIssueId == null);
+            tracks.Should().OnlyContain(t => t.FileTagInfo.IssueTitle == null);
+            tracks.Select(t => t.FileTagInfo.SeriesIndex).Should().BeEquivalentTo(new[] { "1", "2", "3" });
+
+            Mocker.GetMock<IIssueService>()
+                  .Verify(s => s.FindById(It.IsAny<string>()), Times.Never());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void tag_id_shared_by_two_files_should_stay_trusted()
+        {
+            // A pair is a legitimate duplicate copy (e.g. .cbr + .cbz)
+            var tracks = new List<LocalIssue>
+            {
+                GivenTaggedTrack("cv:338482")[0],
+                GivenTaggedTrack("cv:338482")[0]
+            };
+
+            Subject.Identify(tracks, new IdentificationOverrides(), GivenConfig());
+
+            tracks.Should().OnlyContain(t => t.FileTagInfo.ForeignIssueId == "cv:338482");
         }
 
         [Test]

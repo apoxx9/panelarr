@@ -79,6 +79,50 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
             dist.NormalizedDistance().Should().BeGreaterThan(0.0);
         }
 
+        [TestCase("DC", "DC Comics")]
+        [TestCase("DC Comics", "DC")]
+        [TestCase("IDW", "IDW Publishing")]
+        [TestCase("Marvel", "Marvel Comics")]
+        [TestCase("BOOM! Studios", "Boom Studios")]
+        public void publisher_alias_forms_should_not_add_distance(string filePublisher, string dbPublisher)
+        {
+            var dist = DistanceCalculator.IssueDistance(GivenLocalTracks("3", filePublisher), GivenDbIssue("3", dbPublisher));
+
+            dist.NormalizedDistance().Should().Be(0.0);
+        }
+
+        [TestCase("")]
+        [TestCase("#18")]
+        [TestCase("018")]
+        public void placeholder_local_title_should_not_be_compared_against_db_title(string localTitle)
+        {
+            // "#18" vs "The God Game Conclusion" is a guaranteed max penalty
+            // that sank correct matches below the import threshold
+            var tracks = GivenLocalTracks("18");
+            tracks[0].FileTagInfo.IssueTitle = localTitle;
+
+            var issue = GivenDbIssue("18");
+            issue.Title = "The God Game Conclusion";
+
+            var dist = DistanceCalculator.IssueDistance(tracks, issue);
+
+            dist.NormalizedDistance().Should().Be(0.0);
+        }
+
+        [Test]
+        public void real_local_title_should_still_be_compared()
+        {
+            var tracks = GivenLocalTracks("18");
+            tracks[0].FileTagInfo.IssueTitle = "A Completely Different Story";
+
+            var issue = GivenDbIssue("18");
+            issue.Title = "The God Game Conclusion";
+
+            var dist = DistanceCalculator.IssueDistance(tracks, issue);
+
+            dist.NormalizedDistance().Should().BeGreaterThan(0.0);
+        }
+
         [Test]
         public void should_reverse_single_reversed_author()
         {

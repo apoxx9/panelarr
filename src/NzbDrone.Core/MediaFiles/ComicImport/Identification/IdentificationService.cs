@@ -80,6 +80,8 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
             _logger.Debug("Starting issue identification");
 
+            DistrustDuplicatedTagIds(localTracks);
+
             var releases = GetLocalIssueReleases(localTracks, config.SingleRelease);
 
             var i = 0;
@@ -104,6 +106,35 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             _logger.Debug($"Track identification for {localTracks.Count} tracks took {watch.ElapsedMilliseconds}ms");
 
             return releases;
+        }
+
+        // A tagger accident can stamp one issue's ComicInfo into every file of
+        // a folder (observed: 18 files all tagged as issue #2). Distinct files
+        // legitimately share a tag id only as duplicate copies (a pair), so an
+        // id on three or more files marks those tags untrustworthy — rebuild
+        // the identification fields from each filename instead.
+        private void DistrustDuplicatedTagIds(List<LocalIssue> localTracks)
+        {
+            var duplicated = localTracks
+                .Where(x => x.FileTagInfo?.ForeignIssueId?.IsNotNullOrWhiteSpace() == true)
+                .GroupBy(x => x.FileTagInfo.ForeignIssueId)
+                .Where(g => g.Count() >= 3);
+
+            foreach (var group in duplicated)
+            {
+                _logger.Warn("Tagged issue id {0} is embedded in {1} different files - ignoring these tags and identifying by filename", group.Key, group.Count());
+
+                foreach (var track in group)
+                {
+                    var parsed = Parser.ComicParser.ParseRelease(System.IO.Path.GetFileName(track.Path));
+                    var tags = track.FileTagInfo;
+
+                    tags.ForeignIssueId = null;
+                    tags.IssueTitle = null;
+                    tags.Title = null;
+                    tags.SeriesIndex = parsed?.IssueNumber?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+                }
+            }
         }
 
         private bool TryIdentifyByTaggedId(LocalEdition localIssueRelease, IdentificationOverrides idOverrides)
