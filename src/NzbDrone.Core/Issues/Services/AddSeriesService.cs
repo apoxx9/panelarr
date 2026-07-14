@@ -4,6 +4,7 @@ using System.Linq;
 using FluentValidation;
 using FluentValidation.Results;
 using NLog;
+using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Exceptions;
@@ -25,6 +26,7 @@ namespace NzbDrone.Core.Issues
         private readonly IProvideSeriesInfo _seriesInfo;
         private readonly IBuildSeriesPaths _seriesPathBuilder;
         private readonly IAddSeriesValidator _addSeriesValidator;
+        private readonly IDiskProvider _diskProvider;
         private readonly Logger _logger;
 
         public AddSeriesService(ISeriesService seriesService,
@@ -32,6 +34,7 @@ namespace NzbDrone.Core.Issues
                                 IProvideSeriesInfo seriesInfo,
                                 IBuildSeriesPaths seriesPathBuilder,
                                 IAddSeriesValidator addSeriesValidator,
+                                IDiskProvider diskProvider,
                                 Logger logger)
         {
             _seriesService = seriesService;
@@ -39,6 +42,7 @@ namespace NzbDrone.Core.Issues
             _seriesInfo = seriesInfo;
             _seriesPathBuilder = seriesPathBuilder;
             _addSeriesValidator = addSeriesValidator;
+            _diskProvider = diskProvider;
             _logger = logger;
         }
 
@@ -113,13 +117,22 @@ namespace NzbDrone.Core.Issues
         private Series SetPropertiesAndValidate(Series newSeries)
         {
             var path = newSeries.Path;
-            if (string.IsNullOrWhiteSpace(path))
+            var explicitPath = !string.IsNullOrWhiteSpace(path);
+            if (!explicitPath)
             {
                 path = _seriesPathBuilder.BuildPath(newSeries, false);
             }
 
-            // Disambiguate series path if it exists already
-            if (_seriesService.SeriesPathExists(path))
+            // An explicitly provided path that exists on disk is the caller
+            // saying "this folder holds this series' files" (library import
+            // into a Mylar-style layout, where annuals and collection lines
+            // share a folder with their parent series). Respect it — the old
+            // disambiguation quietly rebound such series to folders that do
+            // not exist, so their files could never map.
+            var shareExistingFolder = explicitPath && _diskProvider.FolderExists(path);
+
+            // Disambiguate generated or not-yet-existing paths if already taken
+            if (!shareExistingFolder && _seriesService.SeriesPathExists(path))
             {
                 if (newSeries.Metadata.Value.Disambiguation.IsNotNullOrWhiteSpace())
                 {

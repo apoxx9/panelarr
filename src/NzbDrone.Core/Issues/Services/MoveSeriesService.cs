@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
@@ -59,6 +60,21 @@ namespace NzbDrone.Core.Issues
             if (sourcePath.PathEquals(destinationPath))
             {
                 _logger.ProgressInfo("{0} is already in the specified location '{1}'.", series, destinationPath);
+                return;
+            }
+
+            // A shared folder (Mylar-style layout: annuals and collection
+            // lines beside their parent series) must never be moved wholesale
+            // - it would drag other series' files along.
+            var sharedWith = _seriesService.AllSeriesPaths()
+                .Where(s => s.Key != series.Id && s.Value.PathEquals(sourcePath))
+                .Select(s => s.Key)
+                .ToList();
+
+            if (sharedWith.Any())
+            {
+                _logger.Error("Not moving '{0}': the folder is shared with {1} other series. Move the files manually if intended.", sourcePath, sharedWith.Count);
+                RevertPath(series.Id, sourcePath);
                 return;
             }
 
