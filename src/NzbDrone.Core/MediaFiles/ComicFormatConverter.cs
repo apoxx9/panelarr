@@ -9,6 +9,13 @@ using SharpCompress.Archives.SevenZip;
 
 namespace NzbDrone.Core.MediaFiles
 {
+    public class ComicFormatConversionResult
+    {
+        public string FinalPath { get; set; }
+        public bool Changed { get; set; }
+        public string Error { get; set; }
+    }
+
     public interface IComicFormatConverter
     {
         /// <summary>
@@ -16,6 +23,14 @@ namespace NzbDrone.Core.MediaFiles
         /// and converts it to a real ZIP-based CBZ. Returns the (possibly new) file path.
         /// </summary>
         string NormalizeToCbz(string filePath);
+
+        /// <summary>
+        /// Converts any comic archive to a real ZIP-based .cbz: RAR/7z content is
+        /// repacked (verified before the original is replaced), zip content with a
+        /// wrong extension is renamed. The Mylar convert-before-tag convention -
+        /// nothing can write metadata into a RAR.
+        /// </summary>
+        ComicFormatConversionResult ConvertToRealCbz(string filePath);
     }
 
     public class ComicFormatConverter : IComicFormatConverter
@@ -25,6 +40,67 @@ namespace NzbDrone.Core.MediaFiles
         public ComicFormatConverter(Logger logger)
         {
             _logger = logger;
+        }
+
+        public ComicFormatConversionResult ConvertToRealCbz(string filePath)
+        {
+            var result = new ComicFormatConversionResult { FinalPath = filePath };
+
+            if (!File.Exists(filePath))
+            {
+                result.Error = "file does not exist";
+                return result;
+            }
+
+            var format = DetectArchiveFormat(filePath);
+            var isCbzExtension = filePath.EndsWith(".cbz", StringComparison.OrdinalIgnoreCase);
+            var targetPath = Path.ChangeExtension(filePath, ".cbz");
+
+            if (format == ArchiveType.Zip)
+            {
+                if (isCbzExtension)
+                {
+                    return result;
+                }
+
+                // Zip content wearing a .cbr/.cb7 extension - a rename is the
+                // whole conversion
+                if (File.Exists(targetPath))
+                {
+                    result.Error = $"target already exists: {targetPath}";
+                    return result;
+                }
+
+                File.Move(filePath, targetPath);
+                _logger.Info("ComicFormatConverter: Renamed zip-content {0} to {1}", filePath, targetPath);
+                result.FinalPath = targetPath;
+                result.Changed = true;
+                return result;
+            }
+
+            if (format == ArchiveType.Rar || format == ArchiveType.SevenZip)
+            {
+                if (!targetPath.Equals(filePath, StringComparison.OrdinalIgnoreCase) && File.Exists(targetPath))
+                {
+                    result.Error = $"target already exists: {targetPath}";
+                    return result;
+                }
+
+                var converted = RepackToCbz(filePath, targetPath, format, out var error);
+
+                if (error != null)
+                {
+                    result.Error = error;
+                    return result;
+                }
+
+                result.FinalPath = converted;
+                result.Changed = true;
+                return result;
+            }
+
+            result.Error = $"unknown archive format";
+            return result;
         }
 
         public string NormalizeToCbz(string filePath)
@@ -50,7 +126,8 @@ namespace NzbDrone.Core.MediaFiles
             if (format == ArchiveType.Rar || format == ArchiveType.SevenZip)
             {
                 _logger.Info("ComicFormatConverter: Detected {0} archive mislabeled as .cbz, converting: {1}", format, filePath);
-                return ConvertToCbz(filePath, format);
+                var repacked = RepackToCbz(filePath, filePath, format, out var error);
+                return error == null ? repacked : filePath;
             }
 
             _logger.Warn("ComicFormatConverter: Unknown archive format for {0}, leaving as-is", filePath);
@@ -97,12 +174,16 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        private string ConvertToCbz(string sourcePath, ArchiveType sourceFormat)
+        private string RepackToCbz(string sourcePath, string targetPath, ArchiveType sourceFormat, out string error)
         {
-            var tempPath = sourcePath + ".converting.cbz";
+            // .partial~ keeps the temp file invisible to library scans
+            var tempPath = targetPath + ".partial~";
+            error = null;
 
             try
             {
+                int sourceEntryCount;
+
                 using (var zipStream = new FileStream(tempPath, FileMode.Create))
                 using (var zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create))
                 {
@@ -120,6 +201,8 @@ namespace NzbDrone.Core.MediaFiles
                             .OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase)
                             .ToList();
 
+                        sourceEntryCount = entries.Count;
+
                         _logger.Info("ComicFormatConverter: Repacking {0} entries from {1} to CBZ", entries.Count, sourceFormat);
 
                         foreach (var entry in entries)
@@ -132,18 +215,29 @@ namespace NzbDrone.Core.MediaFiles
                     }
                 }
 
-                // Replace original with converted file
-                File.Delete(sourcePath);
-                File.Move(tempPath, sourcePath);
+                // The original is only deleted after the repack proves readable
+                // and complete - a truncated NFS write must never eat a file
+                using (var verify = ZipFile.OpenRead(tempPath))
+                {
+                    var repackedCount = verify.Entries.Count(e => !e.FullName.EndsWith("/", StringComparison.Ordinal));
 
-                _logger.Info("ComicFormatConverter: Successfully converted {0} → CBZ: {1}", sourceFormat, sourcePath);
-                return sourcePath;
+                    if (repackedCount != sourceEntryCount)
+                    {
+                        throw new InvalidOperationException($"verification failed: {repackedCount} entries repacked, {sourceEntryCount} in source");
+                    }
+                }
+
+                File.Delete(sourcePath);
+                File.Move(tempPath, targetPath);
+
+                _logger.Info("ComicFormatConverter: Successfully converted {0} -> CBZ: {1}", sourceFormat, targetPath);
+                return targetPath;
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "ComicFormatConverter: Failed to convert {0}", sourcePath);
+                error = ex.Message;
 
-                // Clean up temp file on failure
                 if (File.Exists(tempPath))
                 {
                     try
