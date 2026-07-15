@@ -88,6 +88,29 @@ namespace NzbDrone.App.Test
         }
 
         [Test]
+        public void should_resolve_every_command_executor()
+        {
+            // Resolves each IExecute<> handler with its full dependency chain.
+            // A handler whose dependency is missing from the container fails
+            // only when its command first runs in production (observed live:
+            // ConvertComicFilesCommand v1.1.18, unregistered IFileSystem).
+            var executorInterfaces = typeof(CommandExecutor).Assembly.GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract)
+                .SelectMany(t => t.GetInterfaces())
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IExecute<>))
+                .Distinct()
+                .ToList();
+
+            executorInterfaces.Should().NotBeEmpty();
+
+            foreach (var executorInterface in executorInterfaces)
+            {
+                _container.GetRequiredService(executorInterface)
+                    .Should().NotBeNull("executor for {0} must resolve", executorInterface.GenericTypeArguments[0].Name);
+            }
+        }
+
+        [Test]
         public void should_return_same_instance_via_resolve_and_resolveall()
         {
             var first = (DownloadMonitoringService)_container.GetRequiredService<IHandle<TrackedDownloadsRemovedEvent>>();

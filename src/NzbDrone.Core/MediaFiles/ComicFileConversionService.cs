@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using System.IO.Abstractions;
 using System.Linq;
 using NLog;
+using NzbDrone.Common.Disk;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.ComicInfo;
@@ -21,21 +21,21 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IMediaFileService _mediaFileService;
         private readonly IComicFormatConverter _converter;
         private readonly IComicInfoEmbedService _embedService;
-        private readonly IFileSystem _fileSystem;
+        private readonly IDiskProvider _diskProvider;
         private readonly Logger _logger;
 
         public ComicFileConversionService(ISeriesService seriesService,
                                           IMediaFileService mediaFileService,
                                           IComicFormatConverter converter,
                                           IComicInfoEmbedService embedService,
-                                          IFileSystem fileSystem,
+                                          IDiskProvider diskProvider,
                                           Logger logger)
         {
             _seriesService = seriesService;
             _mediaFileService = mediaFileService;
             _converter = converter;
             _embedService = embedService;
-            _fileSystem = fileSystem;
+            _diskProvider = diskProvider;
             _logger = logger;
         }
 
@@ -91,9 +91,8 @@ namespace NzbDrone.Core.MediaFiles
                     file.Path = result.FinalPath;
                     file.ComicFormat = ComicFormat.CBZ;
 
-                    var info = _fileSystem.FileInfo.FromFileName(result.FinalPath);
-                    file.Size = info.Length;
-                    file.Modified = info.LastWriteTimeUtc;
+                    file.Size = _diskProvider.GetFileSize(result.FinalPath);
+                    file.Modified = _diskProvider.FileGetLastWrite(result.FinalPath);
 
                     _mediaFileService.Update(file);
                     converted++;
