@@ -26,6 +26,7 @@ namespace Panelarr.Api.V1.Config
         public int MinimumFreeSpaceWhenImporting { get; set; }
         public bool CopyUsingHardlinks { get; set; }
         public bool ImportExtraFiles { get; set; }
+        public bool ConvertToCbz { get; set; }
         public string ExtraFileExtensions { get; set; }
     }
 
@@ -54,6 +55,7 @@ namespace Panelarr.Api.V1.Config
                 MinimumFreeSpaceWhenImporting = model.MinimumFreeSpaceWhenImporting,
                 CopyUsingHardlinks = model.CopyUsingHardlinks,
                 ImportExtraFiles = model.ImportExtraFiles,
+                ConvertToCbz = model.ConvertToCbz,
                 ExtraFileExtensions = model.ExtraFileExtensions,
             };
         }

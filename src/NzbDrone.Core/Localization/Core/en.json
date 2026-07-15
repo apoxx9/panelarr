@@ -154,6 +154,8 @@
   "ContinuingAllIssuesDownloaded": "Continuing (All issues downloaded)",
   "ContinuingMoreIssuesAreExpected": "More issues are expected",
   "ContinuingNoAdditionalIssuesAreExpected": "No additional issues are expected",
+  "ConvertToCbz": "Convert to CBZ",
+  "ConvertToCbzHelpText": "Convert imported archives (CBR/CB7) to real CBZ files so metadata tags can be embedded. The converted file replaces the imported copy; seeding torrent files are not touched",
   "CopyToClipboard": "Copy to clipboard",
   "CopyUsingHardlinksHelpText": "Hardlinks allow Panelarr to import seeding torrents to the the series folder without taking extra disk space or copying the entire contents of the file. Hardlinks will only work if the source and destination are on the same volume",
   "CopyUsingHardlinksHelpTextWarning": "Occasionally, file locks may prevent renaming files that are being seeded. You may temporarily disable seeding and use Panelarr's rename function as a work around.",

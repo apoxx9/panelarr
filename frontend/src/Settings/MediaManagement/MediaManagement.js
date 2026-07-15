@@ -205,6 +205,20 @@ class MediaManagement extends Component {
 
                   <FormGroup size={sizes.MEDIUM}>
                     <FormLabel>
+                      {translate('ConvertToCbz')}
+                    </FormLabel>
+
+                    <FormInputGroup
+                      type={inputTypes.CHECK}
+                      name="convertToCbz"
+                      helpText={translate('ConvertToCbzHelpText')}
+                      onChange={onInputChange}
+                      {...settings.convertToCbz}
+                    />
+                  </FormGroup>
+
+                  <FormGroup size={sizes.MEDIUM}>
+                    <FormLabel>
                       {translate('ImportExtraFiles')}
                     </FormLabel>
 

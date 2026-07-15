@@ -2,6 +2,8 @@ using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.IssueImport;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.RootFolders;
@@ -19,6 +21,8 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IMediaFileService _mediaFileService;
         private readonly IMetadataTagService _metadataTagService;
         private readonly IMoveComicFiles _comicFileMover;
+        private readonly IComicFormatConverter _formatConverter;
+        private readonly IConfigService _configService;
         private readonly IDiskProvider _diskProvider;
         private readonly IRootFolderService _rootFolderService;
         private readonly Logger _logger;
@@ -27,6 +31,8 @@ namespace NzbDrone.Core.MediaFiles
                                        IMediaFileService mediaFileService,
                                        IMetadataTagService metadataTagService,
                                        IMoveComicFiles comicFileMover,
+                                       IComicFormatConverter formatConverter,
+                                       IConfigService configService,
                                        IDiskProvider diskProvider,
                                        IRootFolderService rootFolderService,
                                        Logger logger)
@@ -35,6 +41,8 @@ namespace NzbDrone.Core.MediaFiles
             _mediaFileService = mediaFileService;
             _metadataTagService = metadataTagService;
             _comicFileMover = comicFileMover;
+            _formatConverter = formatConverter;
+            _configService = configService;
             _diskProvider = diskProvider;
             _rootFolderService = rootFolderService;
             _logger = logger;
@@ -80,9 +88,38 @@ namespace NzbDrone.Core.MediaFiles
                 moveFileResult.ComicFile = _comicFileMover.MoveComicFile(comicFile, localIssue);
             }
 
+            // Convert the library copy (never the download client's file, which
+            // may still be seeding) before tags are written, so the embed lands
+            // in a real CBZ. A failed conversion must never fail the import.
+            if (_configService.ConvertToCbz)
+            {
+                ConvertToCbz(comicFile);
+            }
+
             _metadataTagService.WriteTags(comicFile, true);
 
             return moveFileResult;
+        }
+
+        private void ConvertToCbz(ComicFile comicFile)
+        {
+            var result = _formatConverter.ConvertToRealCbz(comicFile.Path);
+
+            if (result.Error != null)
+            {
+                _logger.Warn("Could not convert {0} to CBZ: {1}", comicFile.Path, result.Error);
+                return;
+            }
+
+            if (!result.Changed)
+            {
+                return;
+            }
+
+            comicFile.Path = result.FinalPath;
+            comicFile.ComicFormat = ComicFormat.CBZ;
+            comicFile.Size = _diskProvider.GetFileSize(result.FinalPath);
+            comicFile.Modified = _diskProvider.FileGetLastWrite(result.FinalPath);
         }
     }
 }

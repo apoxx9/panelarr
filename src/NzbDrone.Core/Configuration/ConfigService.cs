@@ -219,6 +219,13 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("ImportExtraFiles", value); }
         }
 
+        public bool ConvertToCbz
+        {
+            get { return GetValueBoolean("ConvertToCbz", false); }
+
+            set { SetValue("ConvertToCbz", value); }
+        }
+
         public string ExtraFileExtensions
         {
             get { return GetValue("ExtraFileExtensions", "srt"); }

@@ -138,5 +138,97 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             // Mocker.GetMock<IMediaFileService>().Verify(v => v.Delete(_localTrack.Issue.ComicFiles.Value, It.IsAny<DeleteMediaFileReason>()), Times.Never());
         }
+
+        [Test]
+        public void should_not_convert_when_convert_to_cbz_is_disabled()
+        {
+            GivenSingleIssueWithSingleComicFile();
+
+            Subject.UpgradeComicFile(_trackFile, _localTrack);
+
+            Mocker.GetMock<IComicFormatConverter>().Verify(v => v.ConvertToRealCbz(It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
+        public void should_convert_before_writing_tags_when_convert_to_cbz_is_enabled()
+        {
+            GivenSingleIssueWithSingleComicFile();
+            GivenConvertToCbz();
+
+            var importedPath = Path.Combine(_rootPath, "Saga 002 (2012).cbr").AsOsAgnostic();
+            var convertedPath = Path.Combine(_rootPath, "Saga 002 (2012).cbz").AsOsAgnostic();
+            _trackFile.Path = importedPath;
+            _trackFile.ComicFormat = ComicFormat.CBR;
+
+            Mocker.GetMock<IComicFormatConverter>()
+                .Setup(c => c.ConvertToRealCbz(importedPath))
+                .Returns(new ComicFormatConversionResult { FinalPath = convertedPath, Changed = true });
+
+            Mocker.GetMock<IDiskProvider>()
+                .Setup(c => c.GetFileSize(convertedPath))
+                .Returns(1234);
+
+            string pathAtTagTime = null;
+            Mocker.GetMock<IMetadataTagService>()
+                .Setup(c => c.WriteTags(It.IsAny<ComicFile>(), true, false))
+                .Callback<ComicFile, bool, bool>((f, n, force) => pathAtTagTime = f.Path);
+
+            Subject.UpgradeComicFile(_trackFile, _localTrack);
+
+            _trackFile.Path.Should().Be(convertedPath);
+            _trackFile.ComicFormat.Should().Be(ComicFormat.CBZ);
+            _trackFile.Size.Should().Be(1234);
+            pathAtTagTime.Should().Be(convertedPath);
+        }
+
+        [Test]
+        public void should_not_fail_import_when_conversion_fails()
+        {
+            GivenSingleIssueWithSingleComicFile();
+            GivenConvertToCbz();
+
+            var importedPath = Path.Combine(_rootPath, "Saga 002 (2012).cbr").AsOsAgnostic();
+            _trackFile.Path = importedPath;
+            _trackFile.ComicFormat = ComicFormat.CBR;
+
+            Mocker.GetMock<IComicFormatConverter>()
+                .Setup(c => c.ConvertToRealCbz(importedPath))
+                .Returns(new ComicFormatConversionResult { FinalPath = importedPath, Error = "verification failed" });
+
+            Subject.UpgradeComicFile(_trackFile, _localTrack);
+
+            _trackFile.Path.Should().Be(importedPath);
+            _trackFile.ComicFormat.Should().Be(ComicFormat.CBR);
+            Mocker.GetMock<IMetadataTagService>().Verify(v => v.WriteTags(_trackFile, true, false), Times.Once());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_not_touch_file_details_when_conversion_changed_nothing()
+        {
+            GivenSingleIssueWithSingleComicFile();
+            GivenConvertToCbz();
+
+            var importedPath = Path.Combine(_rootPath, "Saga 002 (2012).cbz").AsOsAgnostic();
+            _trackFile.Path = importedPath;
+            _trackFile.ComicFormat = ComicFormat.CBZ;
+
+            Mocker.GetMock<IComicFormatConverter>()
+                .Setup(c => c.ConvertToRealCbz(importedPath))
+                .Returns(new ComicFormatConversionResult { FinalPath = importedPath, Changed = false });
+
+            Subject.UpgradeComicFile(_trackFile, _localTrack);
+
+            _trackFile.Path.Should().Be(importedPath);
+            Mocker.GetMock<IDiskProvider>().Verify(v => v.GetFileSize(It.IsAny<string>()), Times.Never());
+        }
+
+        private void GivenConvertToCbz()
+        {
+            Mocker.GetMock<NzbDrone.Core.Configuration.IConfigService>()
+                .Setup(c => c.ConvertToCbz)
+                .Returns(true);
+        }
     }
 }
