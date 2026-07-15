@@ -6,49 +6,41 @@ keys):
 ---
 
 We're continuing work on Panelarr (~/Projects/panelarr). Read
-`docs/last-handoff.md` first — full Session 22 state. Short version:
-**the bulk Mylar-library import is DONE**: 1,261 series, 12,178 files
-mapped, 0 failures, 619 correct-hold leftovers. The two-day scan-hang
-mystery is SOLVED (synchronous per-file archive inspection + credit
-extraction after imports — hours of silent grinding, not a hang).
-Shipped: YearMatchSpecification (grab-side year check) + 'Write Tags'
-toolbar label fix. Suite 2495/0.
+`docs/last-handoff.md` first — full Session 23 state. Short version:
+five releases shipped (v1.1.14 → v1.1.18): comic packs, async archive
+inspection, the Session 22 bug batch, identification threshold fixes,
+shared folders first-class, and ConvertComicFilesCommand. Unmapped went
+619 → 143; Epics are modeled as 47 tagged one-shots with three
+volume-ordered reading lists (ASM pushed to Kavita).
 
 Homelab Panelarr API key: <paste key here>.
 
 Today's agenda (in recommended order):
 
-1. **Leftovers pass (~30 min)**: Library Import → Scan for New Series
-   on the 619 unmapped — proposes the ~516 DC Annual/cross-volume
-   series from file tags; fix the 3 Epic Collections' matches in the
-   review modal; the 5 Suske en Wiske .cbr files are zip-mislabeled
-   (RAR→CBZ normalizer or manual rename).
-2. **Async archive-inspection fix** (design first, then build): move
-   CreditPopulationService + ArchiveInspectionService off the
-   synchronous import event path into a queued background command
-   with ProgressInfo ("Inspecting archives N/M"). This is the
-   scan-hang fix proper.
-3. Small bug batch: queued commands lost on restart (Requeue),
-   FilterFilesType.Matched excludes unmapped rows (Issue==null arm),
-   vanished-mount cleanup guard.
-4. Post-import health: nightly refresh volume at 1,261 series;
-   Library Import / issue-index page perf (scale-readiness #4/#5).
+1. **Finish the staged conversion** (~15 min): confirm the container is
+   on v1.1.18, POST command `ConvertComicFiles` for the FF Epic +
+   Iron Man Epic + Suske en Wiske series ids, then push reading lists
+   5 and 6 to Kavita and run a matched rescan so Suske's renamed files
+   map. Details in the handoff.
+2. **Auto-convert-on-import setting**: Media Management toggle running
+   ConvertToRealCbz before WriteTags on import — prevents future .cbr
+   grabs from recreating the Kavita drift. Design is one paragraph in
+   the handoff; discuss placement, then build.
+3. **Review-modal triage** of the remaining ~143 unmapped (genuine
+   per-file oddities now — nothing systemic left).
+4. Standing watch: quality "Unknown" modal (unreproduced), Backup task
+   lastDuration cosmetic bug.
 
-User-side homework (remind gently): docker healthcheck on the
-/comics sentinel dir so the NFS-mount race can't recur; create the
-GitHub wiki's first page so the drafted docs/wiki/ pages can push.
+User-side homework (remind gently): docker healthcheck on the /comics
+sentinel dir; create the GitHub wiki's first page so docs/wiki/ can
+push.
 
 Dev notes: local dev instance data dir is
-`~/Library/Application Support/Panelarr` (port 8787). Dev binary
-builds to `_output/net10.0/` (net6.0 is stale) via
-`dotnet msbuild -restore src/Panelarr.sln -p:Configuration=Debug
--p:Platform=Posix -t:Build`. The dev DB has live indexers — stop the
-instance when done testing. Puppeteer is global
-(NODE_PATH=$(npm root -g)); series pages need the titleSlug
-(cv-XXXXX), not the numeric id.
-
-Standing watch (one item): quality "Unknown" in the Activity
-manual-import modal (unreproduced since Session 18).
+`~/Library/Application Support/Panelarr` (port 8787); binary builds to
+`_output/net10.0/` via `dotnet msbuild -restore src/Panelarr.sln
+-p:Configuration=Debug -p:Platform=Posix -t:Build`. Dev DB indexers and
+download clients are DISABLED on purpose — re-enable deliberately for a
+test, re-disable after. Puppeteer is global (NODE_PATH=$(npm root -g)).
 
 Standing rules as always: test before presenting, discuss designs
 before implementing, scan before any push (from a file, as separate

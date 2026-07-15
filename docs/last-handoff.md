@@ -1,184 +1,100 @@
-# Last Handoff — 2026-07-09 (Session 22, final)
+# Last Handoff — 2026-07-15 (Session 23, final)
 
-Session 22 = **the bulk library import**. The homelab's full Mylar
-library (~12.8k files, 1,201 series proposals) is being imported into
-Panelarr via the Library Import pipeline. No code changes shipped this
-session — it was ops, forensics, and one config change.
+Session 23 spanned 07-09 → 07-15 and shipped FIVE releases
+(v1.1.14 … v1.1.18). The Session 22 leftovers pass is essentially
+complete: **unmapped went 619 → 143**, the Epic Collections are fully
+modeled, and the library's data model now tells the truth about shared
+folders. One staged action remains (see NEXT ACTIONS).
 
-## Bulk import status (live at handoff time)
+## Releases shipped
 
-- Proposal dry run over /comics: **1,201 proposals — 1,197 exact via
-  cvinfo, 1 exact via file tags, 3 probable (name search), 0
-  unidentified** covering all 12,326 unmapped files. Proposal scan:
-  4m26s, zero CV calls for cvinfo folders.
-- **Pilot: IDW (11 series) — 78/78 files mapped, 0 failures, ~90 s.**
-- Batches queued and processed sequentially (rate-limited by
-  ComicVine 200/hr; each series ≈ add + refresh + rescan):
-  1. small publishers (25) — DONE
-  2. Image (49) — DONE
-  3. Marvel (169) — DONE (23:31)
-  4. DC part 1 (460, alphabetical) — was 338/460 on the morning of
-     07-08; its 577 per-series RescanFolders commands wait on the
-     disk-access mutex until the LibraryImport completes, THEN map
-     files in a burst. Mapped-file count stays ~548 until then —
-     that's expected, not a failure.
-  5. DC part 2 (484) — queued as command 13482.
-- **Deferred: the 3 probable Epic Collections** (Amazing Spider-Man /
-  Fantastic Four / Iron Man). Their name-search matches each point at
-  a single Epic Collection TPB volume while the folders hold 11–16
-  files — verify granularity via the review modal (alternatives
-  picker) or CV search before importing.
-- Everything is idempotent: re-queuing a LibraryImport skips series
-  already in the library (FindById check, per-item failure isolation).
+- **v1.1.14** — Comic-pack support (parser `IsMultiIssue`, decision-engine
+  gate: packs rejected for RSS/auto, allowed interactive; multi-series
+  download folders drop the series override and import per-file).
+  Kavita notify fix (title was prefixed onto the scan-folder path —
+  every notification 500'd; reproduced live, now bare path). Broken
+  Donations section removed. **Async archive inspection**: page-count/
+  quality + credit extraction moved off the import event path into
+  queued InspectComicFilesCommand (query-driven: mapped files with
+  ImageCount 0; one archive open per file; ComicInfo captured in the
+  same pass — the Session 22 "scan hang" fix proper).
+- **v1.1.15** — Session 22 bug batch: CommandEqualityComparer null
+  short-circuit (distinct commands deduped away — root cause of the
+  "vanished on restart" myth: Requeue() was proven fine by seeded-DB
+  test; the rescans requeued but ran as no-ops due to…) +
+  FilterFilesType.Matched fix (unmapped rows were treated as matched —
+  now IssueId>0 is authoritative) + vanished-mount guard (missing
+  series folder skips DB cleanup instead of purging rows).
+- **v1.1.16** — Identification threshold fixes (traced live: correct
+  matches scored 79.2% vs 80% cliff): placeholder titles ("#18") no
+  longer compared against provider arc titles; publisher alias
+  containment (DC vs DC Comics) = match; candidate number fallback uses
+  ComicParser (the "Season 10 #025 → issue 10" trap); tag ids embedded
+  in ≥3 files are distrusted and those files identify by filename
+  (observed: 18 files all tagged as issue #2 by a Mylar accident).
+- **v1.1.17** — **Shared folders first-class**: explicit import paths
+  that exist on disk are respected (AddSeries no longer rebinds to
+  disambiguated phantom paths — 92 series were silently broken that
+  way); SeriesPathValidator accepts shared paths for existing folders;
+  MoveSeries refuses shared sources (delete-files guard already
+  existed). Scan pipeline audited: already shared-path-safe.
+- **v1.1.18** — **ConvertComicFilesCommand** (Mylar's convert-before-tag
+  with verification): RAR/7z repacked to real CBZ via .partial~ temp +
+  entry-count verification before the original is deleted; zip content
+  with wrong extension renamed; DB rows updated; mapped files get
+  ComicInfo/MetronInfo embedded. Sweeps every file under the target
+  series' folders (covers unmapped mislabeled rows).
 
-## IMPORT COMPLETE (2026-07-09 00:00)
+## Homelab state at handoff
 
-Final state: **1,261 series (1,253 with files), 12,178 files mapped,
-619 unmapped leftovers, 0 failed commands.** The leftovers are almost
-entirely CORRECT holds: (a) ~516 DC Annuals + cross-volume strays —
-files living in a folder whose cvinfo points at a different CV volume
-(e.g. "Aquaman Annual #01" in the Rebirth folder; annuals are their
-own CV volumes) — resolve via Library Import → Scan for New Series,
-which will propose the annual volumes from the files' own tags;
-(b) 63 Epic Collections (the 3 probables + granularity); (c) 5 Suske
-en Wiske mislabeled archives (.cbr that are actually zip — "Rar
-signature not found"); (d) ~35 misc across other publishers. The
-restart-era damage was fully repaired by one filter:"none" root
-rescan once the NFS mount was fixed.
+- Library: **1,353 series, 143 unmapped**, health clean, all paths true.
+- 45 DC annual volumes + 47 Epic Collection one-shots imported and
+  mapped (annuals via fixed proposal scan; Epics: 22 by tag-id rescan +
+  25 by deterministic manual import). All Epic-named series carry the
+  **epic-collection tag (tag id 1)** for filtering.
+- **Reading lists** (volume-ordered, all slots CV-id-resolved):
+  id 4 = ASM Epic Collections (22, PUSHED to Kavita 22/22),
+  id 5 = FF (14), id 6 = Iron Man (11) — pushes REJECTED by Kavita
+  ("series missing"): those files are untagged .cbr, so Kavita groups
+  them by filename into one series per line. Fix = the staged
+  conversion below. ASM v27 ordering for the 5 books without vNN
+  filenames came from line knowledge — verify/drag-reorder if needed.
+- The ASM Epic v2 duplicate folder was deleted by the user (its 16 rows
+  cleaned via rescan).
+- Container was on v1.1.18-pending at session end — the v1.1.18 image
+  is built on GHCR; user pulls it next session if not already done.
 
-## The scan-hang MYSTERY — SOLVED (caught live 2026-07-08 21:23)
+## NEXT ACTIONS (in order)
 
-**It was never a hang.** After a large import/insert, EVERY new
-ComicFile row's ComicFileAddedEvent runs SYNCHRONOUS handlers that
-OPEN AND READ THE ARCHIVE: CreditPopulationService (credit extraction)
-and ArchiveInspectionService (zip walk). No progress message, all
-logging at Debug/Trace. At NFS speeds that is hours of silent grinding
-behind a frozen command message. Caught red-handed via the live trace
-toggle during the final 6,122-file import: constant stream of
-"Extracted N credits from…" / "Inspecting archive for…" while the
-command message sat frozen at "Importing 6122 files" for 2h40m
-(21:11→23:52, ~0.6 files/s over NFS).
+1. **Verify container is on v1.1.18**, then run the staged conversion:
+   POST command `ConvertComicFiles` with the series ids of all
+   Fantastic Four Epic + Iron Man Epic series **plus Suske en Wiske**
+   (query /api/v1/series by name). Expect ~25 repacks + 5 renames +
+   embedding. Then: Kavita rescans (auto via retag notifications; give
+   it a scan cycle), POST /readinglist/5/push and /6/push, and a
+   `RescanFolders {filter: matched}` so the renamed Suske files map.
+2. **Auto-convert-on-import setting** (top backlog): Media Management
+   toggle that runs ConvertToRealCbz on freshly imported files before
+   the WriteTags call — otherwise every future .cbr grab recreates the
+   untagged-in-Kavita drift. Off by default.
+3. **Review-modal triage** of the remaining ~143 unmapped (long tail:
+   per-file oddities — missing CV issues, one-shot volumes not in
+   library, .pdf issues, fractional numbers).
+4. Standing watch: quality "Unknown" in Activity manual-import modal;
+   Backup task lastDuration renders garbage (cosmetic).
+5. User homework unchanged: docker healthcheck on the /comics sentinel;
+   create the wiki's first page so docs/wiki/ can push.
 
-Yesterday's "90-minute hang" was minute 90 of the same pass over
-12,326 fresh rows on a cold NFS cache (projected ~5-8 h); the restart
-interrupted it harmlessly (inserts commit before the event storm).
-The trace rerun "completed in 12 min" only because nothing new was
-inserted — no rows, no events, no grind. All observations reconcile.
+## Notes for the next session
 
-**Follow-up fix (next code session, priority):** move archive
-inspection + credit extraction OFF the synchronous import path into a
-queued background command with ProgressInfo ("Inspecting archives
-N/M"), or at minimum batch + progress-report them. Related:
-scale-readiness #4 (per-file events).
-
-## The scan-hang investigation (methodology log, superseded by above)
-
-The initial RescanFolders (registering the 12k unmapped files) froze
-silently for ~90 min at "Importing 4 files" and needed a container
-restart. Full forensics:
-
-- All the scan's real work HAD committed: the 4 files (MMPR Annuals /
-  Shattered Grid / SIKTC #48, whose rows a scan-start cleanup had
-  deleted — see oddity below) imported correctly, and all 12,326
-  unmapped rows were inserted. The command thread never returned
-  (in-memory status flips before the repo write in Complete(), so
-  status=started proves Execute() never returned).
-- Cleared with evidence: mount I/O (proposal scan reads every folder
-  fine), WriteTags (newFiles setting no-ops), CV rate limiter (no
-  calls in that path), DB locks (parallel writes kept succeeding),
-  SignalR (broadcasts are fire-and-forget), notifications/Kavita
-  (scan imports early-return on !NewDownload), HTTP timeouts (100 s
-  dispatcher default exists), memory ceiling (container is
-  unlimited, 321 MiB used of 15.6 GiB).
-- Five dev reproductions all negative (plain import, missing-issue
-  path, 13k-file scale, frozen SignalR client, black-hole Kavita).
-- A trace-level UNFILTERED rescan on the homelab (filter:"none" —
-  re-walks everything, writes nothing) completed clean in 11m51s;
-  the entire post-import tail measured 0.2 s.
-- Verdict: one-time unattributed event. If it recurs: set
-  config/host logLevel=trace live (no restart), the last trace line
-  names the statement. Restore to info afterwards.
-
-Related oddities parked: (1) the scan-start cleanup deleted 7 mapped
-rows whose files exist on disk (MediaFileTableCleanupService — why?);
-(2) exactly one of the 12,331 read files ended up with no DB row
-(Ben 10 — series shows 0 files); (3) reading-phase tail crawl is
-just Suske en Wiske's 377 large archives — benign.
-
-## Also this session
-
-- **GitHub hardening**: main branch protection (no force push, no
-  deletion, direct pushes still allowed) + tag ruleset
-  protect-release-tags (v* tags: no delete/update/non-FF). No bypass
-  actors — disable the ruleset temporarily if a release tag ever
-  needs re-pointing.
-- **Quality profile 'Comic': cutoff lowered Digital→Archive** (user
-  choice) so the imported Archive-quality library doesn't get
-  re-grabbed as upgrades via RSS (MAM ratio). upgradeAllowed stays
-  true: Scan/C2C→Archive upgrades and new-issue grabs still work.
-- **RSS chain verified end-to-end** (auto grab+import of Minor
-  Arcana #16 on 07-07).
-- **Homelab UI "outage" solved**: user's browser was pointed at the
-  Prowlarr host's IP with Panelarr's port instead of the Panelarr
-  host (hosts/IPs in session memory, not here — public repo).
-  Server was healthy throughout. Frontend note: the Library Import
-  page renders all 12k unmapped rows client-side (scale-readiness #5)
-  — sluggish until the import drains the table.
-- Staging-import backlog item retired: /downloads on the container IS
-  the seedbox mount, so StagingFolder can point there any time.
-
-## Bug found (Session 22, follow-up): queued commands lost on restart
-
-A manual server restart mid-import (16:29, graceful SIGTERM) orphaned
-the RUNNING LibraryImport correctly, but the ~500 QUEUED RescanFolders
-commands vanished — the queue came back empty and their file mapping
-never happened. CommandQueueManager.Requeue() (ApplicationStartedEvent)
-is supposed to requeue _repo.Queued(); either those rows were never
-persisted as queued or the requeue path drops them. Recovery used:
-re-queue the LibraryImport (idempotent skip) + one root RescanFolders
-with filter:"matched" to re-map everything. Fix candidate for next
-code session; also shipped this session: YearMatchSpecification
-(0e771a8) — grab-side year check born from the Green Lantern Corps
-wrong-grab (2026 release grabbed for the 2011 series' 2013 issue).
-
-## Also: NFS-mount incident (2026-07-08 evening)
-
-The user's server restart brought the container up BEFORE the NFS
-mount: /comics showed 1 near-empty dir instead of 11 publishers.
-Consequences: per-series rescans against the broken mount DELETED
-~2,490 unmapped rows via MediaFileTableCleanupService's
-folder-doesn't-exist path (DB rows only; disk untouched; all
-re-registered after the fix). The root-scan empty-folder guard
-("Scan folder empty" → skip) prevented worse. Fixed by remounting +
-container restart.
-
-- **Infra prevention (user)**: /comics/.zzz_check/ sentinel exists —
-  wire it into a docker healthcheck (test -d /comics/.zzz_check) or a
-  systemd mount dependency.
-- **Code prevention (follow-up)**: vanished-mount guard — refuse
-  cleanup when a folder that owns DB rows enumerates empty/missing.
-
-## Code follow-up list (Session 22 harvest)
-
-1. Async/queued archive-inspection + credit-extraction with progress
-   (the "hang" fix — biggest UX win).
-2. Queued commands lost on restart (Requeue() doesn't restore them).
-3. FilterFilesType.Matched excludes unmapped rows at root scope
-   (Issue==null arm treats null lazy as matched) — made the intended
-   repair rescan a no-op; filter:"none" was the workaround.
-4. Vanished-mount cleanup guard (above).
-5. Shipped already: YearMatchSpecification (0e771a8).
-
-## Next actions
-
-1. **Leftovers pass**: Library Import → Scan for New Series to
-   propose the DC Annual volumes + fix the 3 Epic Collections'
-   matches (~50-80 new series, small CV cost); Suske mislabels need
-   the RAR→CBZ normalizer or manual conversion.
-2. Code follow-ups above (async inspection first).
-3. Nightly refresh load check at 1,261 series; Library Import page
-   perf (#4/#5 now measurable).
-4. Wiki push still blocked on user creating the first page in the
-   GitHub UI (drafts in docs/wiki/).
-5. Standing watch (only one left): quality "Unknown" in Activity
-   manual-import modal.
+- Homelab API key: user pastes per session, as always.
+- Dev instance: **indexers + download clients are DISABLED in the dev
+  DB** (live-infra footgun removed 07-14); re-enable deliberately if a
+  test needs one, then re-disable.
+- git identity is repo-local `apoxx9 <noreply>` — pre-push scans are
+  fully clean now.
+- Suite: 2,560 green (Core.Test only, as always).
+- The manual-import API (`GET /api/v1/manualimport?folder=…`) plus the
+  live trace toggle (config/host logLevel, restore after!) was the
+  killer diagnosis combo this session — start there for any future
+  "files won't map" mystery.
