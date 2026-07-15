@@ -114,6 +114,91 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         }
 
         [Test]
+        public void duplicated_title_and_number_without_ids_should_be_distrusted()
+        {
+            // The same tagger accident can stamp title + number but no id
+            // (observed live: 6 files all tagged "Part Two"/#2, only the real
+            // #2 carrying the ComicVine id). The id heuristic can't see it -
+            // the title + number duplication must.
+            var tracks = new List<LocalIssue>();
+            for (var i = 1; i <= 4; i++)
+            {
+                tracks.Add(new LocalIssue
+                {
+                    Path = $@"C:\comics\Angel & Faith Season 10 (2014)\Angel & Faith Season 10 #00{i} (2014).cbz".AsOsAgnostic(),
+                    FileTagInfo = new ParsedFileTagInfo
+                    {
+                        SeriesTitle = "Angel & Faith Season 10",
+                        Series = new List<string> { "Angel & Faith Season 10" },
+                        SeriesIndex = "2",
+                        IssueTitle = "The Same Wrong Title",
+                        ForeignIssueId = i == 2 ? "cv:338482" : null
+                    }
+                });
+            }
+
+            Subject.Identify(tracks, new IdentificationOverrides(), GivenConfig());
+
+            tracks.Should().OnlyContain(t => t.FileTagInfo.ForeignIssueId == null);
+            tracks.Should().OnlyContain(t => t.FileTagInfo.IssueTitle == null);
+            tracks.Select(t => t.FileTagInfo.SeriesIndex).Should().BeEquivalentTo(new[] { "1", "2", "3", "4" });
+
+            Mocker.GetMock<IIssueService>()
+                  .Verify(s => s.FindById(It.IsAny<string>()), Times.Never());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void distinct_titles_and_numbers_should_stay_trusted()
+        {
+            var tracks = new List<LocalIssue>();
+            for (var i = 1; i <= 4; i++)
+            {
+                tracks.Add(new LocalIssue
+                {
+                    Path = $@"C:\comics\Saga (2012)\Saga #00{i} (2012).cbz".AsOsAgnostic(),
+                    FileTagInfo = new ParsedFileTagInfo
+                    {
+                        SeriesTitle = "Saga",
+                        Series = new List<string> { "Saga" },
+                        SeriesIndex = i.ToString(),
+                        IssueTitle = $"Chapter {i}"
+                    }
+                });
+            }
+
+            Subject.Identify(tracks, new IdentificationOverrides(), GivenConfig());
+
+            tracks.Select(t => t.FileTagInfo.IssueTitle).Should().BeEquivalentTo(new[] { "Chapter 1", "Chapter 2", "Chapter 3", "Chapter 4" });
+        }
+
+        [Test]
+        public void title_and_number_shared_by_two_files_should_stay_trusted()
+        {
+            // A pair is a legitimate duplicate copy (e.g. .cbr + .cbz)
+            var tracks = new List<LocalIssue>();
+            for (var i = 0; i < 2; i++)
+            {
+                tracks.Add(new LocalIssue
+                {
+                    Path = $@"C:\comics\Saga (2012)\Saga #016 copy{i}.cbz".AsOsAgnostic(),
+                    FileTagInfo = new ParsedFileTagInfo
+                    {
+                        SeriesTitle = "Saga",
+                        Series = new List<string> { "Saga" },
+                        SeriesIndex = "16",
+                        IssueTitle = "A Larger World"
+                    }
+                });
+            }
+
+            Subject.Identify(tracks, new IdentificationOverrides(), GivenConfig());
+
+            tracks.Should().OnlyContain(t => t.FileTagInfo.IssueTitle == "A Larger World");
+        }
+
+        [Test]
         public void tag_id_shared_by_two_files_should_stay_trusted()
         {
             // A pair is a legitimate duplicate copy (e.g. .cbr + .cbz)

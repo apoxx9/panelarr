@@ -112,28 +112,48 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
         // a folder (observed: 18 files all tagged as issue #2). Distinct files
         // legitimately share a tag id only as duplicate copies (a pair), so an
         // id on three or more files marks those tags untrustworthy — rebuild
-        // the identification fields from each filename instead.
+        // the identification fields from each filename instead. The same
+        // accident can stamp title + number without ids (observed: 6 files all
+        // tagged "Part Two"/#2, only the real #2 carrying the id), so issue
+        // title + number duplicated across three or more files is distrusted
+        // the same way.
         private void DistrustDuplicatedTagIds(List<LocalIssue> localTracks)
         {
-            var duplicated = localTracks
+            var duplicatedIds = localTracks
                 .Where(x => x.FileTagInfo?.ForeignIssueId?.IsNotNullOrWhiteSpace() == true)
                 .GroupBy(x => x.FileTagInfo.ForeignIssueId)
                 .Where(g => g.Count() >= 3);
 
-            foreach (var group in duplicated)
+            foreach (var group in duplicatedIds)
             {
                 _logger.Warn("Tagged issue id {0} is embedded in {1} different files - ignoring these tags and identifying by filename", group.Key, group.Count());
+                RebuildTagsFromFilenames(group);
+            }
 
-                foreach (var track in group)
-                {
-                    var parsed = Parser.ComicParser.ParseRelease(System.IO.Path.GetFileName(track.Path));
-                    var tags = track.FileTagInfo;
+            var duplicatedTitles = localTracks
+                .Where(x => x.FileTagInfo?.IssueTitle?.IsNotNullOrWhiteSpace() == true &&
+                            x.FileTagInfo.SeriesIndex.IsNotNullOrWhiteSpace())
+                .GroupBy(x => new { x.FileTagInfo.SeriesTitle, x.FileTagInfo.IssueTitle, x.FileTagInfo.SeriesIndex })
+                .Where(g => g.Count() >= 3);
 
-                    tags.ForeignIssueId = null;
-                    tags.IssueTitle = null;
-                    tags.Title = null;
-                    tags.SeriesIndex = parsed?.IssueNumber?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
-                }
+            foreach (var group in duplicatedTitles)
+            {
+                _logger.Warn("Tagged issue title '{0}' (#{1}) is embedded in {2} different files - ignoring these tags and identifying by filename", group.Key.IssueTitle, group.Key.SeriesIndex, group.Count());
+                RebuildTagsFromFilenames(group);
+            }
+        }
+
+        private void RebuildTagsFromFilenames(IEnumerable<LocalIssue> tracks)
+        {
+            foreach (var track in tracks)
+            {
+                var parsed = Parser.ComicParser.ParseRelease(System.IO.Path.GetFileName(track.Path));
+                var tags = track.FileTagInfo;
+
+                tags.ForeignIssueId = null;
+                tags.IssueTitle = null;
+                tags.Title = null;
+                tags.SeriesIndex = parsed?.IssueNumber?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
             }
         }
 
