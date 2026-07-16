@@ -14,17 +14,20 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
     {
         public string Generate(Issue issue, SeriesMetadata seriesMetadata, Publisher publisher)
         {
-            var sb = new StringBuilder();
+            // A StringBuilder-backed XmlWriter ignores settings.Encoding and
+            // declares utf-16, but the embed writes UTF-8 bytes — strict
+            // parsers reject the mismatch. Write real UTF-8 instead.
+            using var stream = new System.IO.MemoryStream();
 
             var settings = new XmlWriterSettings
             {
                 Indent = true,
                 IndentChars = "  ",
-                Encoding = Encoding.UTF8,
+                Encoding = new UTF8Encoding(false),
                 OmitXmlDeclaration = false
             };
 
-            using (var writer = XmlWriter.Create(sb, settings))
+            using (var writer = XmlWriter.Create(stream, settings))
             {
                 writer.WriteStartDocument();
                 writer.WriteStartElement("MetronInfo");
@@ -109,7 +112,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                 writer.WriteEndDocument();
             }
 
-            return sb.ToString();
+            return Encoding.UTF8.GetString(stream.ToArray());
         }
 
         private static void WriteElement(XmlWriter writer, string name, string value)

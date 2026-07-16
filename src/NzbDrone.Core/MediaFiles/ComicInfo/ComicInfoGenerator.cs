@@ -14,17 +14,20 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
     {
         public string Generate(Issue issue, SeriesMetadata seriesMetadata, Publisher publisher)
         {
-            var sb = new StringBuilder();
+            // A StringBuilder-backed XmlWriter ignores settings.Encoding and
+            // declares utf-16, but the embed writes UTF-8 bytes — strict
+            // parsers (Kavita) reject the mismatch. Write real UTF-8 instead.
+            using var stream = new System.IO.MemoryStream();
 
             var settings = new XmlWriterSettings
             {
                 Indent = true,
                 IndentChars = "  ",
-                Encoding = Encoding.UTF8,
+                Encoding = new UTF8Encoding(false),
                 OmitXmlDeclaration = false
             };
 
-            using (var writer = XmlWriter.Create(sb, settings))
+            using (var writer = XmlWriter.Create(stream, settings))
             {
                 writer.WriteStartDocument();
                 writer.WriteStartElement("ComicInfo");
@@ -32,6 +35,10 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
 
                 WriteElement(writer, "Series", seriesMetadata?.Name);
                 WriteElement(writer, "Number", issue?.IssueNumber);
+
+                // Volume carries the series year by ComicVine/Mylar convention;
+                // Kavita's ComicVine library type groups series by it
+                WriteElement(writer, "Volume", seriesMetadata?.Year?.ToString());
                 WriteElement(writer, "Year", seriesMetadata?.Year?.ToString());
                 WriteElement(writer, "Publisher", publisher?.Name);
                 WriteElement(writer, "PageCount", issue?.PageCount > 0 ? issue.PageCount.ToString() : null);
@@ -63,7 +70,7 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                 writer.WriteEndDocument();
             }
 
-            return sb.ToString();
+            return Encoding.UTF8.GetString(stream.ToArray());
         }
 
         private static void WriteElement(XmlWriter writer, string name, string value)
