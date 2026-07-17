@@ -1,100 +1,105 @@
-# Last Handoff — 2026-07-15 (Session 23, final)
+# Last Handoff — 2026-07-17 (Session 24, final)
 
-Session 23 spanned 07-09 → 07-15 and shipped FIVE releases
-(v1.1.14 … v1.1.18). The Session 22 leftovers pass is essentially
-complete: **unmapped went 619 → 143**, the Epic Collections are fully
-modeled, and the library's data model now tells the truth about shared
-folders. One staged action remains (see NEXT ACTIONS).
+Session 24 spanned 07-15 → 07-17 and shipped THREE releases
+(v1.1.19 … v1.1.21). The Epic Collections arc is **COMPLETE**: all
+three curated reading lists (ASM 22/22, FF 14/14, Iron Man 11/11) are
+pushed and live in Kavita with per-volume series. **Unmapped went
+143 → 67.** A three-bug pileup on the tag-embed path was found and
+fixed, one bug per release, each unmasked by the previous fix.
 
 ## Releases shipped
 
-- **v1.1.14** — Comic-pack support (parser `IsMultiIssue`, decision-engine
-  gate: packs rejected for RSS/auto, allowed interactive; multi-series
-  download folders drop the series override and import per-file).
-  Kavita notify fix (title was prefixed onto the scan-folder path —
-  every notification 500'd; reproduced live, now bare path). Broken
-  Donations section removed. **Async archive inspection**: page-count/
-  quality + credit extraction moved off the import event path into
-  queued InspectComicFilesCommand (query-driven: mapped files with
-  ImageCount 0; one archive open per file; ComicInfo captured in the
-  same pass — the Session 22 "scan hang" fix proper).
-- **v1.1.15** — Session 22 bug batch: CommandEqualityComparer null
-  short-circuit (distinct commands deduped away — root cause of the
-  "vanished on restart" myth: Requeue() was proven fine by seeded-DB
-  test; the rescans requeued but ran as no-ops due to…) +
-  FilterFilesType.Matched fix (unmapped rows were treated as matched —
-  now IssueId>0 is authoritative) + vanished-mount guard (missing
-  series folder skips DB cleanup instead of purging rows).
-- **v1.1.16** — Identification threshold fixes (traced live: correct
-  matches scored 79.2% vs 80% cliff): placeholder titles ("#18") no
-  longer compared against provider arc titles; publisher alias
-  containment (DC vs DC Comics) = match; candidate number fallback uses
-  ComicParser (the "Season 10 #025 → issue 10" trap); tag ids embedded
-  in ≥3 files are distrusted and those files identify by filename
-  (observed: 18 files all tagged as issue #2 by a Mylar accident).
-- **v1.1.17** — **Shared folders first-class**: explicit import paths
-  that exist on disk are respected (AddSeries no longer rebinds to
-  disambiguated phantom paths — 92 series were silently broken that
-  way); SeriesPathValidator accepts shared paths for existing folders;
-  MoveSeries refuses shared sources (delete-files guard already
-  existed). Scan pipeline audited: already shared-path-safe.
-- **v1.1.18** — **ConvertComicFilesCommand** (Mylar's convert-before-tag
-  with verification): RAR/7z repacked to real CBZ via .partial~ temp +
-  entry-count verification before the original is deleted; zip content
-  with wrong extension renamed; DB rows updated; mapped files get
-  ComicInfo/MetronInfo embedded. Sweeps every file under the target
-  series' folders (covers unmapped mislabeled rows).
+- **v1.1.19** — Auto-convert-on-import (Media Management toggle, off by
+  default: converts the library copy post-move/pre-WriteTags, so
+  seeding sources are never touched and embeds land in real CBZ).
+  Identification: distrust issue title + number duplicated across ≥3
+  files (tag accidents without embedded ids — observed live: 6 files
+  all tagged "Part Two"/#2, only the real #2 carrying the CV id).
+  ConvertComicFiles DI fix: the command crashed in production because
+  IFileSystem was never registered (AutoAddServices skips System.*
+  interfaces; DiskProvider self-constructs). Swapped to IDiskProvider
+  and added a ContainerFixture test that resolves EVERY IExecute<>
+  with its full dependency chain — run it before shipping any new
+  command.
+- **v1.1.20** — Embedded ComicInfo/MetronInfo declared utf-16 over
+  UTF-8 bytes (XmlWriter over StringBuilder ignores settings.Encoding)
+  — strict parsers (Kavita) silently rejected every tag Panelarr ever
+  embedded; Panelarr's own string-based reader never noticed. Both
+  generators now emit true UTF-8. ComicInfo also gains Volume (series
+  year, CV/Mylar convention — Kavita's ComicVine library type groups
+  series by Series + Volume).
+- **v1.1.21** — ComicInfo Web now carries the ComicVine issue page URL
+  (4000-id form) instead of the cover-art uploads URL. Kavita's
+  WeblinkParser.GetComicVineId throws IndexOutOfRange on uploads URLs
+  and **drops the file from its library entirely** — this was the last
+  blocker for the FF/IM reading-list pushes.
 
 ## Homelab state at handoff
 
-- Library: **1,353 series, 143 unmapped**, health clean, all paths true.
-- 45 DC annual volumes + 47 Epic Collection one-shots imported and
-  mapped (annuals via fixed proposal scan; Epics: 22 by tag-id rescan +
-  25 by deterministic manual import). All Epic-named series carry the
-  **epic-collection tag (tag id 1)** for filtering.
-- **Reading lists** (volume-ordered, all slots CV-id-resolved):
-  id 4 = ASM Epic Collections (22, PUSHED to Kavita 22/22),
-  id 5 = FF (14), id 6 = Iron Man (11) — pushes REJECTED by Kavita
-  ("series missing"): those files are untagged .cbr, so Kavita groups
-  them by filename into one series per line. Fix = the staged
-  conversion below. ASM v27 ordering for the 5 books without vNN
-  filenames came from line knowledge — verify/drag-reorder if needed.
-- The ASM Epic v2 duplicate folder was deleted by the user (its 16 rows
-  cleaned via rescan).
-- Container was on v1.1.18-pending at session end — the v1.1.18 image
-  is built on GHCR; user pulls it next session if not already done.
+- Library: 1,353 series, **67 unmapped**, health clean.
+- 76 unmapped fixed this session: stale-metadata refreshes (Get Joker
+  had zero issues in DB; Detective 2016 lacked #1027; WW 2011 lacked
+  #4; Wolverine 2014 lacked #1) + deterministic ManualImport under a
+  strict safety criterion (matched series must own the file's folder
+  AND filename number must equal the matched issue number — this
+  criterion excluded two would-be wrong imports that fuzzy matching
+  rated clean). Angel & Faith Season 10 fully repaired, including
+  #024 which had been silently mapped to issue #2 for months.
+- Epic Collection files: all real CBZ, tagged with valid UTF-8
+  ComicInfo (Series/Number/Volume/Year/Web=CV issue page) after the
+  final v1.1.21 retag (401 tagged, 0 failed).
+- **83 Wikipedia-derived reading lists** (515 slots, 61 resolved)
+  imported via CBL from the Marvel Epic Collection Wikipedia page —
+  every line incl. Modern Era as separate lists, wiki volume order,
+  unowned volumes as unresolved "missing" slots (collecting
+  checklists). Naming: "<Line> Epic Collections". The pre-existing
+  owned-only lists 4/5/6 were replaced (Kavita's pushed copies
+  untouched).
 
-## NEXT ACTIONS (in order)
+## Kavita ops knowledge (hard-won this session)
 
-1. **Verify container is on v1.1.18**, then run the staged conversion:
-   POST command `ConvertComicFiles` with the series ids of all
-   Fantastic Four Epic + Iron Man Epic series **plus Suske en Wiske**
-   (query /api/v1/series by name). Expect ~25 repacks + 5 renames +
-   embedding. Then: Kavita rescans (auto via retag notifications; give
-   it a scan cycle), POST /readinglist/5/push and /6/push, and a
-   `RescanFolders {filter: matched}` so the renamed Suske files map.
-2. **Auto-convert-on-import setting** (top backlog): Media Management
-   toggle that runs ConvertToRealCbz on freshly imported files before
-   the WriteTags call — otherwise every future .cbr grab recreates the
-   untagged-in-Kavita drift. Off by default.
-3. **Review-modal triage** of the remaining ~143 unmapped (long tail:
-   per-file oddities — missing CV issues, one-shot volumes not in
-   library, .pdf issues, fractional numbers).
-4. Standing watch: quality "Unknown" in Activity manual-import modal;
-   Backup task lastDuration renders garbage (cosmetic).
-5. User homework unchanged: docker healthcheck on the /comics sentinel;
-   create the wiki's first page so docs/wiki/ can push.
+- The scanner SKIPS folders whose mtime is unchanged; renames preserve
+  file mtimes. Deleted series on unchanged folders are NOT recreated
+  by normal scans. force=true on /api/library/scan bypasses all of it.
+- scan-folder API calls get debounced/deferred — don't trust a 200.
+- Parse exceptions silently DROP files. **The server log zip
+  (/api/server/logs) is the ground-truth diagnostic — go there FIRST,
+  not after a day of scan roulette.**
+- Reading-list push rejection messages truncate to the first 3
+  entries — "3 series missing" can mean "all missing".
+- ComicVine-type libraries group by folder parse, overridden by
+  ComicInfo Series (Volume).
+
+## Backlog (agreed, in priority order)
+
+1. **Push resolved-slots-only** for reading-list push (Kavita rejects
+   lists wholesale when any series is missing — blocks pushing the
+   Wikipedia checklists and future partial lines).
+2. **CBL matcher leniency**: ignore leading "The" when resolving slots
+   (7 CV volumes are titled "The Amazing Spider-Man Epic Collection"
+   and only matched after data-side name correction).
+3. **Export-all reading lists**: zip of per-list CBLs (endpoint +
+   button on the index page). Per-list export already exists.
+4. **Wire ComicFileRetaggedEvent**: published by NOTHING today, so
+   Kavita's OnIssueRetag notify is dead code — discuss trigger UX
+   (avoid double-notify on import, which already notifies).
+5. Review-modal triage leftovers (user decisions): 47 annual files need
+   their CV annual volumes added; 6 Red Hood Outlaw #41-49 belong to
+   Red Hood and the Outlaws (2016) — folder/series decision; ~11
+   redundant duplicates ("not an upgrade"); oddities without CV
+   issues: Suske #00, Radiant Black #25.5, USM #00.5.
+6. Standing watch: quality "Unknown" modal (unreproduced), Backup task
+   lastDuration cosmetic bug.
 
 ## Notes for the next session
 
-- Homelab API key: user pastes per session, as always.
-- Dev instance: **indexers + download clients are DISABLED in the dev
-  DB** (live-infra footgun removed 07-14); re-enable deliberately if a
-  test needs one, then re-disable.
-- git identity is repo-local `apoxx9 <noreply>` — pre-push scans are
-  fully clean now.
-- Suite: 2,560 green (Core.Test only, as always).
-- The manual-import API (`GET /api/v1/manualimport?folder=…`) plus the
-  live trace toggle (config/host logLevel, restore after!) was the
-  killer diagnosis combo this session — start there for any future
-  "files won't map" mystery.
+- Homelab API keys (Panelarr AND Kavita): user pastes per session.
+- ManualImport command payload: **issueId singular** per file
+  ("issueIds" fails as "Issue with ID 0 does not exist").
+- Homelab Kavita connection: onRename notify is currently disabled.
+- renameComics is false on the homelab by user preference; it was
+  enabled briefly (with permission) to rename the 25 Epic files.
+- Suite: 2,573 green (Core.Test only) + ContainerFixture 8 green.
+- Wikipedia extraction + CBL import scripts and the lists 4/5/6 CBL
+  backups live in the session scratchpad (ephemeral) — the imported
+  lists themselves are in the homelab DB and covered by its backups.
