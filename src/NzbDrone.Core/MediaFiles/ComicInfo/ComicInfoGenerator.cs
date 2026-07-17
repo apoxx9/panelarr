@@ -47,7 +47,12 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
                     ? string.Join(", ", seriesMetadata.Genres)
                     : null);
                 WriteElement(writer, "Summary", !string.IsNullOrWhiteSpace(issue?.Overview) ? issue.Overview : seriesMetadata?.Overview);
-                WriteElement(writer, "Web", issue?.CoverArtUrl);
+
+                // Web must be the issue's site page, never an image URL:
+                // readers extract provider ids from it, and Kavita's ComicVine
+                // weblink parser crashes outright on a CV uploads URL —
+                // dropping the whole file from its library
+                WriteElement(writer, "Web", GetIssueWebUrl(issue));
 
                 // Credits — ComicInfo.xml uses one element per role with comma-separated names
                 if (issue?.Credits != null && issue.Credits.Any())
@@ -71,6 +76,19 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
             }
 
             return Encoding.UTF8.GetString(stream.ToArray());
+        }
+
+        private static string GetIssueWebUrl(Issue issue)
+        {
+            var foreignId = issue?.ForeignIssueId;
+
+            if (string.IsNullOrWhiteSpace(foreignId) || !foreignId.StartsWith("cv:"))
+            {
+                return null;
+            }
+
+            // ComicVine issue pages use the 4000- resource prefix
+            return $"https://comicvine.gamespot.com/issue/4000-{foreignId.Substring(3)}/";
         }
 
         private static void WriteElement(XmlWriter writer, string name, string value)

@@ -59,6 +59,34 @@ namespace NzbDrone.Core.Test.MediaFiles.ComicInfo
         }
 
         [Test]
+        public void should_write_web_as_comicvine_issue_page_not_cover_art()
+        {
+            // Kavita's ComicVine weblink parser throws on CV uploads (image)
+            // URLs and drops the file from its library entirely
+            _issue.ForeignIssueId = "cv:1123951";
+            _issue.CoverArtUrl = "https://comicvine.gamespot.com/a/uploads/original/11/110017/9528005-wwww.jpg";
+
+            var xml = Subject.Generate(_issue, _seriesMetadata, _publisher);
+
+            var doc = new XmlDocument();
+            doc.LoadXml(xml);
+            doc.SelectSingleNode("//Web").InnerText.Should().Be("https://comicvine.gamespot.com/issue/4000-1123951/");
+        }
+
+        [Test]
+        public void should_omit_web_without_a_comicvine_issue_id()
+        {
+            _issue.ForeignIssueId = "metron:1234";
+            _issue.CoverArtUrl = "https://comicvine.gamespot.com/a/uploads/original/11/110017/9528005-wwww.jpg";
+
+            var xml = Subject.Generate(_issue, _seriesMetadata, _publisher);
+
+            var doc = new XmlDocument();
+            doc.LoadXml(xml);
+            doc.SelectSingleNode("//Web").Should().BeNull();
+        }
+
+        [Test]
         public void should_write_volume_as_series_year()
         {
             // ComicVine/Mylar convention; Kavita's ComicVine library type
