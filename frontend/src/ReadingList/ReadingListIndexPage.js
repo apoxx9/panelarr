@@ -113,6 +113,22 @@ class ReadingListIndexPage extends Component {
     this._fileInputRef.current.click();
   };
 
+  onExportAllPress = () => {
+    fetch(`${window.Panelarr.apiRoot}/readinglist/export`, {
+      headers: { 'X-Api-Key': window.Panelarr.apiKey }
+    })
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+
+        anchor.href = url;
+        anchor.download = 'reading-lists.zip';
+        anchor.click();
+        window.URL.revokeObjectURL(url);
+      });
+  };
+
   onFileSelected = (event) => {
     const file = event.target.files[0];
 
@@ -177,6 +193,11 @@ class ReadingListIndexPage extends Component {
               label={translate('ImportCbl')}
               iconName={icons.FILEIMPORT}
               onPress={this.onImportPress}
+            />
+            <PageToolbarButton
+              label={translate('ExportAllCbl')}
+              iconName={icons.EXPORT}
+              onPress={this.onExportAllPress}
             />
           </PageToolbarSection>
         </PageToolbar>

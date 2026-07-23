@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using NLog;
 using NzbDrone.Core.Notifications;
@@ -49,10 +50,42 @@ namespace NzbDrone.Core.ReadingLists
         public List<ReadingListPushConnectionResult> PushToReaders(int readingListId)
         {
             var list = _readingListService.Get(readingListId);
-            var cblData = Encoding.UTF8.GetBytes(_readingListService.ExportCbl(readingListId));
+
+            // Push only what the reader can match: unresolved slots make
+            // Kavita reject the entire list ("series missing").
+            var resolvedCount = _readingListService.GetSlots(readingListId).Count(s => s.IssueId.HasValue);
+            var cblData = Encoding.UTF8.GetBytes(_readingListService.ExportCbl(readingListId, resolvedOnly: true));
             var fileName = SanitizeFileName(list.Name) + ".cbl";
 
             var results = new List<ReadingListPushConnectionResult>();
+
+            if (resolvedCount == 0)
+            {
+                _logger.Info("Reading list {0} has no resolved slots - nothing to push", list.Name);
+
+                foreach (var definition in _notificationFactory.All())
+                {
+                    var skipped = definition.Settings switch
+                    {
+                        KavitaSettings k when k.EnableReadingListPush => "Kavita",
+                        KomgaSettings k when k.EnableReadingListPush => "Komga",
+                        _ => null
+                    };
+
+                    if (skipped != null)
+                    {
+                        results.Add(new ReadingListPushConnectionResult
+                        {
+                            ConnectionName = definition.Name,
+                            Reader = skipped,
+                            Success = false,
+                            ErrorMessage = "List has no resolved slots - nothing to push"
+                        });
+                    }
+                }
+
+                return results;
+            }
 
             // Push is an explicit opt-in per connection (Send Reading Lists),
             // independent of the notification event toggles.

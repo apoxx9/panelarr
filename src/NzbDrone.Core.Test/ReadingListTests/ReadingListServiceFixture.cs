@@ -200,6 +200,70 @@ namespace NzbDrone.Core.Test.ReadingListTests
         }
 
         [Test]
+        public void should_retry_name_match_with_leading_the_toggled()
+        {
+            // Providers are inconsistent about a leading "The" across volumes
+            // of one line (observed: 7 of 22 ASM Epic Collections are "The
+            // Amazing..." on CV while the community lists say "Amazing...").
+            var cbl = @"<?xml version=""1.0""?><ReadingList><Name>Epics</Name><Books>
+<Book Series=""Amazing Spider-Man Epic Collection: Great Power"" Number=""1"" />
+<Book Series=""The Walking Dead"" Number=""1"" />
+</Books></ReadingList>";
+
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.FindAllByName("The Amazing Spider-Man Epic Collection: Great Power"))
+                  .Returns(new List<Series> { new Series { Id = 21 } });
+
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.FindAllByName("Walking Dead"))
+                  .Returns(new List<Series> { new Series { Id = 22 } });
+
+            Mocker.GetMock<IIssueService>()
+                  .Setup(s => s.GetIssuesBySeries(21))
+                  .Returns(new List<Issue> { new Issue { Id = 501, IssueNumber = "1" } });
+
+            Mocker.GetMock<IIssueService>()
+                  .Setup(s => s.GetIssuesBySeries(22))
+                  .Returns(new List<Issue> { new Issue { Id = 502, IssueNumber = "1" } });
+
+            Subject.ImportCbl(cbl, ReadingListType.ReadingOrder, out var unresolved);
+
+            _storedSlots[0].IssueId.Should().Be(501);
+            _storedSlots[1].IssueId.Should().Be(502);
+            unresolved.Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_export_only_resolved_slots_when_requested()
+        {
+            var cbl = @"<?xml version=""1.0""?><ReadingList><Name>Checklist</Name><Books>
+<Book Series=""Saga"" Number=""7"" />
+<Book Series=""Unknown Series"" Number=""1"" />
+</Books></ReadingList>";
+
+            Mocker.GetMock<ISeriesService>()
+                  .Setup(s => s.FindAllByName("Saga"))
+                  .Returns(new List<Series> { new Series { Id = 3 } });
+
+            Mocker.GetMock<IIssueService>()
+                  .Setup(s => s.GetIssuesBySeries(3))
+                  .Returns(new List<Issue> { new Issue { Id = 77, IssueNumber = "7" } });
+
+            Subject.ImportCbl(cbl, ReadingListType.ReadingOrder, out _);
+
+            Mocker.GetMock<IReadingListRepository>()
+                  .Setup(r => r.Get(1))
+                  .Returns(new ReadingList { Id = 1, Name = "Checklist" });
+
+            var full = Subject.ExportCbl(1);
+            var resolved = Subject.ExportCbl(1, resolvedOnly: true);
+
+            System.Text.RegularExpressions.Regex.Matches(full, "<Book ").Count.Should().Be(2);
+            System.Text.RegularExpressions.Regex.Matches(resolved, "<Book ").Count.Should().Be(1);
+            resolved.Should().Contain("Saga").And.NotContain("Unknown Series");
+        }
+
+        [Test]
         public void should_disambiguate_same_named_series_by_year()
         {
             var cbl = @"<?xml version=""1.0""?><ReadingList><Name>PR</Name><Books>

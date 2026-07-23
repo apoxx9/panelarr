@@ -18,7 +18,7 @@ namespace NzbDrone.Core.ReadingLists
         List<ReadingListItem> GetSlots(int readingListId);
         ReadingList AddFromProvider(int cvStoryArcId, ReadingListType type, out int skippedCollectedEditions);
         ReadingList ImportCbl(string xml, ReadingListType type, out List<string> unresolved);
-        string ExportCbl(int readingListId);
+        string ExportCbl(int readingListId, bool resolvedOnly = false);
         List<ReadingListItem> Resolve(int readingListId);
         ReadingListItem RemapSlot(int readingListId, int slotId, int issueId);
         Series AddMissingSeries(int readingListId, string foreignSeriesId, string rootFolderPath, int qualityProfileId, bool monitored);
@@ -183,10 +183,18 @@ namespace NzbDrone.Core.ReadingLists
             return list;
         }
 
-        public string ExportCbl(int readingListId)
+        public string ExportCbl(int readingListId, bool resolvedOnly = false)
         {
             var list = _listRepository.Get(readingListId);
             var slots = _slotRepository.FindByReadingListId(readingListId);
+
+            // Readers can only match owned books; unresolved slots make e.g.
+            // Kavita reject the whole list ("series missing"), so pushes
+            // export the resolved subset.
+            if (resolvedOnly)
+            {
+                slots = slots.Where(s => s.IssueId.HasValue).ToList();
+            }
 
             // Resolved slots export with the library's own series naming, so
             // readers fed by Panelarr-managed files match by construction.
@@ -380,6 +388,20 @@ namespace NzbDrone.Core.ReadingLists
         private Series PickSeriesByName(ReadingListItem slot)
         {
             var candidates = _seriesService.FindAllByName(slot.SeriesName);
+
+            // Name normalization deliberately keeps a LEADING "The" ("The
+            // Walking Dead"), but providers are inconsistent about it across
+            // volumes of one line (observed: 7 of 22 ASM Epic Collections
+            // titled "The Amazing..."). On an exact miss, retry the single
+            // The-toggled variant.
+            if (candidates.Count == 0)
+            {
+                var variant = slot.SeriesName.StartsWith("The ", StringComparison.OrdinalIgnoreCase)
+                    ? slot.SeriesName.Substring(4)
+                    : $"The {slot.SeriesName}";
+
+                candidates = _seriesService.FindAllByName(variant);
+            }
 
             if (candidates.Count == 1)
             {

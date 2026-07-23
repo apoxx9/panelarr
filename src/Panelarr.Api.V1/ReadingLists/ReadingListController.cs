@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
@@ -225,6 +227,49 @@ namespace Panelarr.Api.V1.ReadingLists
             var xml = _readingListService.ExportCbl(id);
 
             return File(Encoding.UTF8.GetBytes(xml), "application/xml", $"{arc.Name}.cbl");
+        }
+
+        [HttpGet("export")]
+        public IActionResult ExportAllCbl()
+        {
+            var lists = _readingListService.All();
+
+            using var stream = new MemoryStream();
+
+            using (var zip = new ZipArchive(stream, ZipArchiveMode.Create, true))
+            {
+                var usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var list in lists)
+                {
+                    var xml = _readingListService.ExportCbl(list.Id);
+                    var baseName = SanitizeFileName(list.Name);
+                    var entryName = usedNames.Add(baseName) ? baseName : $"{baseName} ({list.Id})";
+                    usedNames.Add(entryName);
+
+                    var entry = zip.CreateEntry($"{entryName}.cbl");
+                    using var entryStream = entry.Open();
+                    var bytes = Encoding.UTF8.GetBytes(xml);
+                    entryStream.Write(bytes, 0, bytes.Length);
+                }
+            }
+
+            return File(stream.ToArray(), "application/zip", $"reading-lists-{DateTime.UtcNow:yyyyMMdd}.zip");
+        }
+
+        private static string SanitizeFileName(string name)
+        {
+            var invalid = Path.GetInvalidFileNameChars();
+            var builder = new StringBuilder(name.Length);
+
+            foreach (var c in name)
+            {
+                builder.Append(Array.IndexOf(invalid, c) >= 0 ? '_' : c);
+            }
+
+            var sanitized = builder.ToString().Trim();
+
+            return sanitized.Length > 0 ? sanitized : "reading-list";
         }
 
         [HttpPost("{id:int}/addseries")]

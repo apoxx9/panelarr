@@ -23,7 +23,15 @@ namespace NzbDrone.Core.Test.ReadingListTests
                   .Returns(new ReadingList { Id = 5, Name = "Knightfall" });
 
             Mocker.GetMock<IReadingListService>()
-                  .Setup(s => s.ExportCbl(5))
+                  .Setup(s => s.GetSlots(5))
+                  .Returns(new System.Collections.Generic.List<ReadingListItem>
+                  {
+                      new ReadingListItem { IssueId = 11 },
+                      new ReadingListItem { IssueId = null }
+                  });
+
+            Mocker.GetMock<IReadingListService>()
+                  .Setup(s => s.ExportCbl(5, true))
                   .Returns("<ReadingList/>");
 
             Mocker.GetMock<IKavitaServiceProxy>()
@@ -89,6 +97,43 @@ namespace NzbDrone.Core.Test.ReadingListTests
             results.Should().Contain(r => r.Reader == "Komga" && r.Success);
 
             ExceptionVerification.ExpectedErrors(1);
+        }
+
+        [Test]
+        public void should_export_resolved_slots_only()
+        {
+            GivenConnections(Definition("Kavita", new KavitaSettings { EnableReadingListPush = true }));
+
+            Subject.PushToReaders(5);
+
+            Mocker.GetMock<IReadingListService>()
+                  .Verify(s => s.ExportCbl(5, true), Times.Once);
+        }
+
+        [Test]
+        public void should_not_push_a_list_with_no_resolved_slots()
+        {
+            Mocker.GetMock<IReadingListService>()
+                  .Setup(s => s.GetSlots(5))
+                  .Returns(new System.Collections.Generic.List<ReadingListItem>
+                  {
+                      new ReadingListItem { IssueId = null },
+                      new ReadingListItem { IssueId = null }
+                  });
+
+            GivenConnections(
+                Definition("Kavita", new KavitaSettings { EnableReadingListPush = true }),
+                Definition("Komga", new KomgaSettings { EnableReadingListPush = true }));
+
+            var results = Subject.PushToReaders(5);
+
+            results.Should().HaveCount(2);
+            results.Should().OnlyContain(r => !r.Success && r.ErrorMessage.Contains("no resolved slots"));
+
+            Mocker.GetMock<IKavitaServiceProxy>()
+                  .Verify(p => p.PushCbl(It.IsAny<KavitaSettings>(), It.IsAny<string>(), It.IsAny<byte[]>()), Times.Never);
+            Mocker.GetMock<IKomgaProxy>()
+                  .Verify(p => p.PushCbl(It.IsAny<KomgaSettings>(), It.IsAny<string>(), It.IsAny<byte[]>()), Times.Never);
         }
 
         [Test]
