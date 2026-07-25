@@ -94,6 +94,10 @@ namespace Panelarr.Api.V1.ReadingLists
         // Links the slot to this library issue and rewrites the slot's
         // stored identity from it.
         public int? IssueId { get; set; }
+
+        // Alternatively: backfills the slot's provider series id (manual
+        // pick for an ambiguous provider-resolve candidate).
+        public string ForeignSeriesId { get; set; }
     }
 
     public class ReadingListPushResultResource
@@ -295,14 +299,16 @@ namespace Panelarr.Api.V1.ReadingLists
         [HttpPut("{id:int}/slots/{slotId:int}")]
         public ReadingListItemResource RemapSlot(int id, int slotId, [FromBody] ReadingListRemapSlotResource resource)
         {
-            if (resource?.IssueId == null)
+            if (resource?.IssueId == null && string.IsNullOrWhiteSpace(resource?.ForeignSeriesId))
             {
-                throw new BadRequestException("issueId is required");
+                throw new BadRequestException("issueId or foreignSeriesId is required");
             }
 
             try
             {
-                var slot = _readingListService.RemapSlot(id, slotId, resource.IssueId.Value);
+                var slot = resource.IssueId != null
+                    ? _readingListService.RemapSlot(id, slotId, resource.IssueId.Value)
+                    : _readingListService.LinkSlotSeries(id, slotId, resource.ForeignSeriesId);
 
                 return ToSlotResources(new List<ReadingListItem> { slot }).Single();
             }
@@ -310,6 +316,12 @@ namespace Panelarr.Api.V1.ReadingLists
             {
                 throw new BadRequestException(ex.Message);
             }
+        }
+
+        [HttpPost("{id:int}/resolveprovider")]
+        public ProviderResolveReport ResolveProvider(int id)
+        {
+            return _readingListService.ResolveMissingProviderIds(id);
         }
 
         [HttpPost("{id:int}/push")]

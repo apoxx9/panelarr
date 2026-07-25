@@ -40,7 +40,12 @@ class ReadingListDetailPage extends Component {
       editorSeriesId: null,
       editorIssues: [],
       editorIssueId: null,
-      isRemapping: false
+      isRemapping: false,
+      isResolving: false,
+      resolveReport: null,
+      ambiguousChoices: {},
+      linkingName: null,
+      addMonitored: false
     };
   }
 
@@ -231,7 +236,7 @@ class ReadingListDetailPage extends Component {
   };
 
   onAddSeriesPress = (foreignSeriesId) => {
-    const { rootFolders, selectedRootFolderId, qualityProfileId } = this.state;
+    const { rootFolders, selectedRootFolderId, qualityProfileId, addMonitored } = this.state;
     const rootFolder = rootFolders.find((r) => r.id === selectedRootFolderId);
 
     if (!rootFolder) {
@@ -249,7 +254,7 @@ class ReadingListDetailPage extends Component {
         foreignSeriesId,
         rootFolderPath: rootFolder.path,
         qualityProfileId,
-        monitored: true
+        monitored: addMonitored
       })
     });
 
@@ -265,8 +270,142 @@ class ReadingListDetailPage extends Component {
     });
   };
 
+  onResolveProviderPress = () => {
+    this.setState({ isResolving: true, resolveReport: null });
+
+    const { request } = createAjaxRequest({
+      url: `/readinglist/${this.listId}/resolveprovider`,
+      method: 'POST',
+      contentType: 'application/json',
+      dataType: 'json',
+      data: '{}'
+    });
+
+    request.done((report) => {
+      const ambiguousChoices = {};
+
+      report.ambiguous.forEach((a) => {
+        if (a.candidates.length) {
+          ambiguousChoices[a.seriesName] = a.candidates[0].foreignSeriesId;
+        }
+      });
+
+      this.setState({ isResolving: false, resolveReport: report, ambiguousChoices });
+      this.fetchList();
+    });
+
+    request.fail(() => this.setState({ isResolving: false, error: translate('ProviderResolveError') }));
+  };
+
+  onAmbiguousChoiceChange = (seriesName, foreignSeriesId) => {
+    this.setState((s) => ({ ambiguousChoices: { ...s.ambiguousChoices, [seriesName]: foreignSeriesId } }));
+  };
+
+  onLinkAmbiguousPress = (ambiguity) => {
+    const foreignSeriesId = this.state.ambiguousChoices[ambiguity.seriesName];
+
+    if (!foreignSeriesId) {
+      return;
+    }
+
+    this.setState({ linkingName: ambiguity.seriesName });
+
+    const puts = ambiguity.slotIds.map((slotId) => {
+      return createAjaxRequest({
+        url: `/readinglist/${this.listId}/slots/${slotId}`,
+        method: 'PUT',
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify({ foreignSeriesId })
+      }).request;
+    });
+
+    Promise.all(puts).then(() => {
+      this.setState((s) => ({
+        linkingName: null,
+        resolveReport: s.resolveReport && {
+          ...s.resolveReport,
+          linked: s.resolveReport.linked + ambiguity.slotIds.length,
+          ambiguous: s.resolveReport.ambiguous.filter((a) => a.seriesName !== ambiguity.seriesName)
+        }
+      }));
+      this.fetchList();
+    }).catch(() => {
+      this.setState({ linkingName: null, error: translate('ProviderResolveError') });
+    });
+  };
+
   //
   // Render
+
+  renderResolvePanel() {
+    const { resolveReport, ambiguousChoices, linkingName } = this.state;
+
+    if (!resolveReport) {
+      return null;
+    }
+
+    return (
+      <div className={styles.addSeriesPanel}>
+        <div>
+          {
+            translate('ProviderResolveSummary', {
+              linked: resolveReport.linked,
+              considered: resolveReport.slotsConsidered,
+              notFound: resolveReport.notFound.length
+            })
+          }
+        </div>
+
+        {
+          resolveReport.ambiguous.length > 0 &&
+            <table className={styles.table}>
+              <tbody>
+                {
+                  resolveReport.ambiguous.map((a) => {
+                    return (
+                      <tr key={a.seriesName}>
+                        <td>{a.seriesName}</td>
+                        <td>
+                          <select
+                            className={styles.select}
+                            value={ambiguousChoices[a.seriesName] || ''}
+                            onChange={(e) => this.onAmbiguousChoiceChange(a.seriesName, e.target.value)}
+                          >
+                            {
+                              a.candidates.map((c) => {
+                                return (
+                                  <option key={c.foreignSeriesId} value={c.foreignSeriesId}>
+                                    {c.name} ({c.year}{c.publisher ? `, ${c.publisher}` : ''})
+                                  </option>
+                                );
+                              })
+                            }
+                          </select>
+                        </td>
+                        <td className={styles.actionsCell}>
+                          <Button
+                            isDisabled={linkingName === a.seriesName}
+                            onPress={() => this.onLinkAmbiguousPress(a)}
+                          >
+                            {linkingName === a.seriesName ? translate('Linking') : translate('LinkSeries')}
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                }
+              </tbody>
+            </table>
+        }
+
+        {
+          resolveReport.notFound.length > 0 &&
+            <div>{translate('ProviderResolveNotFound', { names: resolveReport.notFound.join(', ') })}</div>
+        }
+      </div>
+    );
+  }
 
   renderAddSeriesPanel(missingSeries) {
     const {
@@ -300,6 +439,15 @@ class ReadingListDetailPage extends Component {
             >
               {qualityProfiles.map((q) => <option key={q.id} value={q.id}>{q.name}</option>)}
             </select>
+          </label>
+
+          <label className={styles.control}>
+            {translate('Monitored')}
+            <input
+              type="checkbox"
+              checked={this.state.addMonitored}
+              onChange={(e) => this.setState({ addMonitored: e.target.checked })}
+            />
           </label>
         </div>
 
@@ -453,6 +601,12 @@ class ReadingListDetailPage extends Component {
               onPress={this.onToggleAddSeriesPress}
             />
             <PageToolbarButton
+              label={this.state.isResolving ? translate('Resolving') : translate('FindOnComicVine')}
+              iconName={icons.EXTERNAL_LINK}
+              isDisabled={!list || this.state.isResolving || !list.slots.some((s) => !s.issueId && !s.foreignSeriesId)}
+              onPress={this.onResolveProviderPress}
+            />
+            <PageToolbarButton
               label={translate('ExportCbl')}
               iconName={icons.EXPORT}
               isDisabled={!list}
@@ -496,6 +650,7 @@ class ReadingListDetailPage extends Component {
 
                 {pushResults && this.renderPushResults(pushResults)}
 
+                {this.renderResolvePanel()}
                 {showAddSeries && !!missingSeries.length && this.renderAddSeriesPanel(missingSeries)}
 
                 <table className={styles.table}>

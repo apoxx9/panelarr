@@ -7,6 +7,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MetadataSource.ComicVine;
 using NzbDrone.Core.MetadataSource.ComicVine.Resources;
+using NzbDrone.Core.Parser;
 using NzbDrone.Core.ReadingLists.Cbl;
 
 namespace NzbDrone.Core.ReadingLists
@@ -21,6 +22,8 @@ namespace NzbDrone.Core.ReadingLists
         string ExportCbl(int readingListId, bool resolvedOnly = false);
         List<ReadingListItem> Resolve(int readingListId);
         ReadingListItem RemapSlot(int readingListId, int slotId, int issueId);
+        ReadingListItem LinkSlotSeries(int readingListId, int slotId, string foreignSeriesId);
+        ProviderResolveReport ResolveMissingProviderIds(int readingListId);
         Series AddMissingSeries(int readingListId, string foreignSeriesId, string rootFolderPath, int qualityProfileId, bool monitored);
         void Delete(int id);
     }
@@ -383,6 +386,113 @@ namespace NzbDrone.Core.ReadingLists
                 .FirstOrDefault(i => string.Equals(i.IssueNumber, slot.IssueNumber, StringComparison.OrdinalIgnoreCase));
 
             return issue?.Id;
+        }
+
+        public ReadingListItem LinkSlotSeries(int readingListId, int slotId, string foreignSeriesId)
+        {
+            var slot = _slotRepository.FindByReadingListId(readingListId).FirstOrDefault(s => s.Id == slotId);
+
+            if (slot == null)
+            {
+                throw new ArgumentException($"Slot {slotId} not found in reading list {readingListId}");
+            }
+
+            slot.ForeignSeriesId = foreignSeriesId;
+            _slotRepository.UpdateMany(new List<ReadingListItem> { slot });
+
+            return slot;
+        }
+
+        public ProviderResolveReport ResolveMissingProviderIds(int readingListId)
+        {
+            var slots = _slotRepository.FindByReadingListId(readingListId);
+            var targets = slots
+                .Where(s => s.IssueId == null &&
+                            s.ForeignSeriesId.IsNullOrWhiteSpace() &&
+                            s.SeriesName.IsNotNullOrWhiteSpace())
+                .ToList();
+
+            var report = new ProviderResolveReport { SlotsConsidered = targets.Count };
+            var toUpdate = new List<ReadingListItem>();
+
+            // One provider search per distinct name; the CV client throttles
+            // itself, so per-list scope keeps this inside the rate budget.
+            foreach (var group in targets.GroupBy(s => s.SeriesName))
+            {
+                List<ComicVineVolumeSummary> results;
+
+                try
+                {
+                    results = _comicVine.SearchVolumes(group.Key) ?? new List<ComicVineVolumeSummary>();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Provider search failed for {0}", group.Key);
+                    report.NotFound.Add($"{group.Key} (search failed)");
+                    continue;
+                }
+
+                var exact = results.Where(r => ProviderNamesMatch(r.Name, group.Key)).ToList();
+
+                if (exact.Count == 1)
+                {
+                    foreach (var slot in group)
+                    {
+                        slot.ForeignSeriesId = $"cv:{exact[0].Id}";
+                        toUpdate.Add(slot);
+                    }
+
+                    report.Linked += group.Count();
+                }
+                else if (results.Count == 0)
+                {
+                    report.NotFound.Add(group.Key);
+                }
+                else
+                {
+                    // Multiple exact matches, or fuzzy-only results: never
+                    // guess a provider id — surface candidates for the user
+                    var pool = exact.Count > 0 ? exact : results;
+
+                    report.Ambiguous.Add(new ProviderResolveAmbiguity
+                    {
+                        SeriesName = group.Key,
+                        SlotIds = group.Select(s => s.Id).ToList(),
+                        Candidates = pool.Take(5).Select(r => new ProviderResolveCandidate
+                        {
+                            ForeignSeriesId = $"cv:{r.Id}",
+                            Name = r.Name,
+                            Year = r.StartYear,
+                            Publisher = r.Publisher?.Name
+                        }).ToList()
+                    });
+                }
+            }
+
+            if (toUpdate.Any())
+            {
+                _slotRepository.UpdateMany(toUpdate);
+            }
+
+            _logger.Info("Provider resolve for list {0}: {1} slots linked, {2} ambiguous, {3} not found of {4} considered", readingListId, report.Linked, report.Ambiguous.Count, report.NotFound.Count, report.SlotsConsidered);
+
+            return report;
+        }
+
+        private static bool ProviderNamesMatch(string providerName, string slotName)
+        {
+            var a = providerName.CleanSeriesName();
+            var b = slotName.CleanSeriesName();
+
+            if (a == b)
+            {
+                return true;
+            }
+
+            // Same leading-The tolerance as library-side slot resolution
+            static string StripThe(string s) => s.StartsWith("the", StringComparison.Ordinal) ? s.Substring(3) : s;
+
+            return StripThe(a) == StripThe(b);
         }
 
         private Series PickSeriesByName(ReadingListItem slot)

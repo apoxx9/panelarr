@@ -264,6 +264,105 @@ namespace NzbDrone.Core.Test.ReadingListTests
         }
 
         [Test]
+        public void should_backfill_provider_ids_for_unambiguous_matches_only()
+        {
+            var cbl = @"<?xml version=""1.0""?><ReadingList><Name>Checklist</Name><Books>
+<Book Series=""Aliens Epic Collection: The Original Years"" Number=""1"" />
+<Book Series=""Power Rangers"" Number=""1"" />
+<Book Series=""Totally Obscure Series"" Number=""1"" />
+</Books></ReadingList>";
+
+            Subject.ImportCbl(cbl, ReadingListType.ReadingOrder, out _);
+
+            Mocker.GetMock<IComicVineApiClient>()
+                  .Setup(c => c.SearchVolumes("Aliens Epic Collection: The Original Years", null))
+                  .Returns(new List<ComicVineVolumeSummary>
+                  {
+                      new ComicVineVolumeSummary { Id = 111, Name = "Aliens Epic Collection: The Original Years", StartYear = "2023" }
+                  });
+
+            Mocker.GetMock<IComicVineApiClient>()
+                  .Setup(c => c.SearchVolumes("Power Rangers", null))
+                  .Returns(new List<ComicVineVolumeSummary>
+                  {
+                      new ComicVineVolumeSummary { Id = 222, Name = "Power Rangers", StartYear = "2016" },
+                      new ComicVineVolumeSummary { Id = 333, Name = "Power Rangers", StartYear = "2020" }
+                  });
+
+            Mocker.GetMock<IComicVineApiClient>()
+                  .Setup(c => c.SearchVolumes("Totally Obscure Series", null))
+                  .Returns(new List<ComicVineVolumeSummary>());
+
+            var report = Subject.ResolveMissingProviderIds(1);
+
+            report.SlotsConsidered.Should().Be(3);
+            report.Linked.Should().Be(1);
+            _storedSlots[0].ForeignSeriesId.Should().Be("cv:111");
+
+            // two same-named CV volumes: never guess — surface candidates
+            report.Ambiguous.Should().HaveCount(1);
+            report.Ambiguous.Single().SeriesName.Should().Be("Power Rangers");
+            report.Ambiguous.Single().Candidates.Should().HaveCount(2);
+            _storedSlots[1].ForeignSeriesId.Should().BeNull();
+
+            report.NotFound.Should().ContainSingle(n => n == "Totally Obscure Series");
+        }
+
+        [Test]
+        public void should_tolerate_leading_the_in_provider_match()
+        {
+            var cbl = @"<?xml version=""1.0""?><ReadingList><Name>Epics</Name><Books>
+<Book Series=""Amazing Spider-Man Epic Collection: Great Power"" Number=""1"" />
+</Books></ReadingList>";
+
+            Subject.ImportCbl(cbl, ReadingListType.ReadingOrder, out _);
+
+            Mocker.GetMock<IComicVineApiClient>()
+                  .Setup(c => c.SearchVolumes("Amazing Spider-Man Epic Collection: Great Power", null))
+                  .Returns(new List<ComicVineVolumeSummary>
+                  {
+                      new ComicVineVolumeSummary { Id = 444, Name = "The Amazing Spider-Man Epic Collection: Great Power", StartYear = "2014" }
+                  });
+
+            var report = Subject.ResolveMissingProviderIds(1);
+
+            report.Linked.Should().Be(1);
+            _storedSlots.Single().ForeignSeriesId.Should().Be("cv:444");
+        }
+
+        [Test]
+        public void should_skip_slots_that_already_have_provider_ids_or_are_resolved()
+        {
+            var cbl = @"<?xml version=""1.0""?><ReadingList><Name>Mixed</Name><Books>
+<Book Series=""Batman"" Number=""484""><Database Name=""cv"" Series=""796"" Issue=""36110"" /></Book>
+</Books></ReadingList>";
+
+            Subject.ImportCbl(cbl, ReadingListType.ReadingOrder, out _);
+
+            var report = Subject.ResolveMissingProviderIds(1);
+
+            report.SlotsConsidered.Should().Be(0);
+            Mocker.GetMock<IComicVineApiClient>()
+                  .Verify(c => c.SearchVolumes(It.IsAny<string>(), It.IsAny<int?>()), Times.Never);
+        }
+
+        [Test]
+        public void should_link_slot_series_manually()
+        {
+            var cbl = @"<?xml version=""1.0""?><ReadingList><Name>Pick</Name><Books>
+<Book Series=""Power Rangers"" Number=""1"" />
+</Books></ReadingList>";
+
+            Subject.ImportCbl(cbl, ReadingListType.ReadingOrder, out _);
+            _storedSlots.Single().Id = 77;
+
+            var slot = Subject.LinkSlotSeries(1, 77, "cv:333");
+
+            slot.ForeignSeriesId.Should().Be("cv:333");
+            _storedSlots.Single().ForeignSeriesId.Should().Be("cv:333");
+        }
+
+        [Test]
         public void should_disambiguate_same_named_series_by_year()
         {
             var cbl = @"<?xml version=""1.0""?><ReadingList><Name>PR</Name><Books>
