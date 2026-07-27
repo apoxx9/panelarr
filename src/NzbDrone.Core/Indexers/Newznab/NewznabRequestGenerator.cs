@@ -57,37 +57,61 @@ namespace NzbDrone.Core.Indexers.Newznab
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
+            // Empty for single-issue series (books search by series name
+            // alone) and never concatenated as a dangling term below.
+            var issueQuery = searchCriteria.IssueQuery;
+            var hasIssueQuery = !string.IsNullOrWhiteSpace(issueQuery);
+
             if (SupportsComicSearch)
             {
-                AddComicPageableRequests(pageableRequests,
-                    searchCriteria,
-                    $"&series={NewsnabifyTitle(searchCriteria.SeriesQuery)}&title={NewsnabifyTitle(searchCriteria.IssueQuery)}");
+                if (hasIssueQuery)
+                {
+                    AddComicPageableRequests(pageableRequests,
+                        searchCriteria,
+                        $"&series={NewsnabifyTitle(searchCriteria.SeriesQuery)}&title={NewsnabifyTitle(issueQuery)}");
 
-                AddComicPageableRequests(pageableRequests,
-                    searchCriteria,
-                    $"&title={NewsnabifyTitle(searchCriteria.IssueQuery)}");
+                    AddComicPageableRequests(pageableRequests,
+                        searchCriteria,
+                        $"&title={NewsnabifyTitle(issueQuery)}");
+                }
+                else
+                {
+                    AddComicPageableRequests(pageableRequests,
+                        searchCriteria,
+                        $"&series={NewsnabifyTitle(searchCriteria.SeriesQuery)}");
+                }
             }
 
             if (SupportsSearch)
             {
                 pageableRequests.AddTier();
 
-                pageableRequests.Add(GetPagedRequests(MaxPages,
-                    Settings.Categories,
-                    "search",
-                    $"&q={NewsnabifyTitle(searchCriteria.IssueQuery)}+{NewsnabifyTitle(searchCriteria.SeriesQuery)}"));
+                if (hasIssueQuery)
+                {
+                    pageableRequests.Add(GetPagedRequests(MaxPages,
+                        Settings.Categories,
+                        "search",
+                        $"&q={NewsnabifyTitle(issueQuery)}+{NewsnabifyTitle(searchCriteria.SeriesQuery)}"));
 
-                pageableRequests.Add(GetPagedRequests(MaxPages,
-                    Settings.Categories,
-                    "search",
-                    $"&q={NewsnabifyTitle(searchCriteria.SeriesQuery)}+{NewsnabifyTitle(searchCriteria.IssueQuery)}"));
+                    pageableRequests.Add(GetPagedRequests(MaxPages,
+                        Settings.Categories,
+                        "search",
+                        $"&q={NewsnabifyTitle(searchCriteria.SeriesQuery)}+{NewsnabifyTitle(issueQuery)}"));
 
-                pageableRequests.AddTier();
+                    pageableRequests.AddTier();
 
-                pageableRequests.Add(GetPagedRequests(MaxPages,
-                    Settings.Categories,
-                    "search",
-                    $"&q={NewsnabifyTitle(searchCriteria.IssueQuery)}"));
+                    pageableRequests.Add(GetPagedRequests(MaxPages,
+                        Settings.Categories,
+                        "search",
+                        $"&q={NewsnabifyTitle(issueQuery)}"));
+                }
+                else
+                {
+                    pageableRequests.Add(GetPagedRequests(MaxPages,
+                        Settings.Categories,
+                        "search",
+                        $"&q={NewsnabifyTitle(searchCriteria.SeriesQuery)}"));
+                }
             }
 
             return pageableRequests;

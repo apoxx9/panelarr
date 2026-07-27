@@ -45,6 +45,10 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
             Mocker.GetMock<ISeriesService>()
                 .Setup(v => v.GetSeries(_series.Id))
                 .Returns(_series);
+
+            Mocker.GetMock<IIssueService>()
+                .Setup(v => v.GetIssuesBySeries(_series.Id))
+                .Returns(new List<Issue> { _firstIssue });
         }
 
         private List<SearchCriteriaBase> WatchForSearchCriteria()

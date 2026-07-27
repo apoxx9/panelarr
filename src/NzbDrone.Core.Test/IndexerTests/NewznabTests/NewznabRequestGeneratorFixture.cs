@@ -83,6 +83,57 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         }
 
         [Test]
+        public void should_search_by_series_name_alone_for_single_issue_series()
+        {
+            // A one-shot (Epic Collection, TPB, OGN) is a book: the CV issue
+            // title is boilerplate ("Volume 1") and poisons AND-matching
+            // trackers, so the query is the series name and nothing else.
+            _singleIssueSearchCriteria.Series = new Issues.Series { Name = "Iron Fist Epic Collection: The Fury of Iron Fist" };
+            _singleIssueSearchCriteria.IssueTitle = "Volume 1";
+            _singleIssueSearchCriteria.IssueNumber = 1;
+            _singleIssueSearchCriteria.SingleIssueSeries = true;
+
+            var results = Subject.GetSearchRequests(_singleIssueSearchCriteria);
+            var pages = new System.Collections.Generic.List<NzbDrone.Core.Indexers.IndexerRequest>();
+
+            foreach (var tier in results.GetAllTiers())
+            {
+                pages.AddRange(tier);
+            }
+
+            pages.Should().NotBeEmpty();
+
+            foreach (var page in pages)
+            {
+                page.Url.Query.Should().NotContain("Volume");
+                page.Url.Query.Should().NotContain("q=+");
+                page.Url.Query.Should().NotContain("+&");
+            }
+
+            pages.First().Url.Query.Should().Contain("q=Iron%20Fist%20Epic%20Collection%20The%20Fury%20of%20Iron%20Fist");
+        }
+
+        [Test]
+        public void should_fall_back_to_issue_number_for_boilerplate_titles_on_multi_issue_series()
+        {
+            _singleIssueSearchCriteria.Series = new Issues.Series { Name = "Naruto" };
+            _singleIssueSearchCriteria.IssueTitle = "Volume 12";
+            _singleIssueSearchCriteria.IssueNumber = 12;
+            _singleIssueSearchCriteria.SingleIssueSeries = false;
+
+            _singleIssueSearchCriteria.IssueQuery.Should().Be("#12");
+        }
+
+        [Test]
+        public void should_keep_real_issue_titles()
+        {
+            _singleIssueSearchCriteria.IssueTitle = "The Promise";
+            _singleIssueSearchCriteria.SingleIssueSeries = false;
+
+            _singleIssueSearchCriteria.IssueQuery.Should().Contain("Promise");
+        }
+
+        [Test]
         public void should_use_clean_title_and_encode()
         {
             _capabilities.SupportedComicSearchParameters = new[] { "q", "series", "title" };
