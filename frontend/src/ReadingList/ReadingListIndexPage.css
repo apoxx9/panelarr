@@ -71,3 +71,8 @@
 .hiddenFileInput {
   display: none;
 }
+
+.sortableHeader {
+  cursor: pointer;
+  user-select: none;
+}

@@ -13,6 +13,7 @@ interface CssExports {
   'searchInput': string;
   'searchPanel': string;
   'searchRow': string;
+  'sortableHeader': string;
   'table': string;
   'unresolvedList': string;
 }

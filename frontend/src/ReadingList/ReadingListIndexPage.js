@@ -31,7 +31,9 @@ class ReadingListIndexPage extends Component {
       isSearching: false,
       searchResults: null,
       addingId: null,
-      report: null
+      report: null,
+      sortKey: 'name',
+      sortDir: 1
     };
 
     this._fileInputRef = React.createRef();
@@ -112,6 +114,40 @@ class ReadingListIndexPage extends Component {
   onImportPress = () => {
     this._fileInputRef.current.click();
   };
+
+  onSortPress = (key) => {
+    this.setState((s) => ({
+      sortKey: key,
+      sortDir: s.sortKey === key ? -s.sortDir : 1
+    }));
+  };
+
+  sortedLists() {
+    const { lists, sortKey, sortDir } = this.state;
+
+    const value = (list) => {
+      if (sortKey === 'coverage') {
+        return list.slotCount ? list.haveCount / list.slotCount : 0;
+      }
+
+      return (list[sortKey] || '').toString().toLowerCase();
+    };
+
+    return [...lists].sort((a, b) => {
+      const va = value(a);
+      const vb = value(b);
+
+      if (va < vb) {
+        return -sortDir;
+      }
+
+      if (va > vb) {
+        return sortDir;
+      }
+
+      return a.name.localeCompare(b.name);
+    });
+  }
 
   onExportAllPress = () => {
     fetch(`${window.Panelarr.apiRoot}/readinglist/export`, {
@@ -302,15 +338,31 @@ class ReadingListIndexPage extends Component {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>{translate('Name')}</th>
-                    <th>{translate('Type')}</th>
-                    <th>{translate('Publisher')}</th>
-                    <th>{translate('Coverage')}</th>
+                    {
+                      [['name', 'Name'], ['type', 'Type'], ['publisher', 'Publisher'], ['coverage', 'Coverage']].map(([key, label]) => {
+                        const active = this.state.sortKey === key;
+                        let indicator = '';
+
+                        if (active) {
+                          indicator = this.state.sortDir === 1 ? ' ▲' : ' ▼';
+                        }
+
+                        return (
+                          <th
+                            key={key}
+                            className={styles.sortableHeader}
+                            onClick={() => this.onSortPress(key)}
+                          >
+                            {translate(label)}{indicator}
+                          </th>
+                        );
+                      })
+                    }
                   </tr>
                 </thead>
                 <tbody>
                   {
-                    lists.map((list) => {
+                    this.sortedLists().map((list) => {
                       const notInLibrary = list.slotCount - list.resolvedCount;
 
                       return (
