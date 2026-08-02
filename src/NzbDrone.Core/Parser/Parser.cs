@@ -319,6 +319,14 @@ namespace NzbDrone.Core.Parser
             @"^(?<series>.+?)\s*#(?<issue>\d+)\s*(?:\((?<year>\d{4})\))?\s*$",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        // Collected-edition volume marker inside a release title:
+        // "Iron Fist Epic Collection Vol. 01 - The Fury of Iron Fist". The
+        // marker splits the library series name ("<line>: <subtitle>") in
+        // two, so the fuzzy find gets a second chance with it stripped.
+        private static readonly Regex CollectedVolumeInfixRegex = new Regex(
+            @"\b(?:vol(?:ume)?\.?\s*|v)(?<num>\d{1,4})\b[\s\-–—:]*",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         public static ParsedIssueInfo ParseIssueTitleWithSearchCriteria(string title, Series series, List<Issue> issues)
         {
             try
@@ -386,11 +394,30 @@ namespace NzbDrone.Core.Parser
                     foundSeries = GetTitleFuzzy(simpleTitle, seriesName.ToLastFirst(), out remainder);
                 }
 
+                var volMatch = CollectedVolumeInfixRegex.Match(simpleTitle);
+
+                if (foundSeries == null && volMatch.Success)
+                {
+                    var strippedTitle = CollectedVolumeInfixRegex.Replace(simpleTitle, " ");
+
+                    Logger.Trace($"Retrying with volume marker stripped: '{strippedTitle}'");
+                    foundSeries = GetTitleFuzzy(strippedTitle, seriesName, out remainder);
+                }
+
                 var foundIssue = GetTitleFuzzy(remainder, bestIssue.Title, out _);
 
                 if (foundIssue == null)
                 {
                     foundIssue = GetTitleFuzzy(remainder, bestIssue.Title.SplitIssueTitle(seriesName).Item1, out _);
+                }
+
+                // A collected-edition volume number in the release title
+                // ("Vol. 01", "v01") stands in for the issue-title match it
+                // defeats - but only when it agrees with the target issue
+                if (foundIssue == null && foundSeries != null && volMatch.Success &&
+                    volMatch.Groups["num"].Value.TrimStart('0') == (bestIssue.IssueNumber ?? string.Empty).TrimStart('0'))
+                {
+                    foundIssue = bestIssue.Title;
                 }
 
                 Logger.Trace($"Found {foundSeries} - {foundIssue} with fuzzy parser");

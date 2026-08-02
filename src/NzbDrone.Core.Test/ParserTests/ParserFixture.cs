@@ -193,6 +193,34 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.IssueTitle.ToLowerInvariant().Should().Be("walking dead");
         }
 
+        [TestCase("Iron Fist Epic Collection Vol. 01 - The Fury of Iron Fist (2015) by Marvel Comics [ENG / CBR]")]
+        [TestCase("Iron Fist Epic Collection v01 - The Fury of Iron Fist (2015)")]
+        [TestCase("Iron Fist Epic Collection Volume 1 - The Fury of Iron Fist")]
+        public void should_match_collected_edition_with_volume_infix_by_search_criteria(string releaseTitle)
+        {
+            // Release convention is "<line> Vol. NN - <subtitle>" while the
+            // library series is "<line>: <subtitle>" - the volume marker
+            // splits the series name and must not defeat the match
+            GivenSearchCriteria("Iron Fist Epic Collection: The Fury of Iron Fist", "Volume 1");
+            _books[0].IssueNumber = "1";
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().NotBeNull();
+            parseResult.SeriesName.ToLowerInvariant().Should().Contain("iron fist epic collection");
+        }
+
+        [TestCase("Iron Fist Epic Collection Vol. 03 - Something Else (2015)")]
+        public void should_not_match_collected_edition_when_volume_number_disagrees(string releaseTitle)
+        {
+            GivenSearchCriteria("Iron Fist Epic Collection: The Fury of Iron Fist", "Volume 1");
+            _books[0].IssueNumber = "1";
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().BeNull();
+        }
+
         [TestCase("Walking Dead - Complete Series 2003-2019 (168 issues)(digital)", 2003, 2019)]
         [TestCase("(Superhero) Spawn - Compendium(46 vols) [1992 - 2024]", 1992, 2024)]
         [TestCase("Invincible - Complete Compendium 2003-2018 (144 issues)(digital)", 2003, 2018)]
