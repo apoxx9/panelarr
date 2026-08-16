@@ -156,6 +156,52 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.GetComicsTests
         }
 
         [Test]
+        public void datanodes_download2_echoes_the_rand_token_from_the_countdown_page()
+        {
+            GetComicsDownloadClient.DataNodesCountdown = TimeSpan.Zero;
+
+            GivenExtractedLinks(new GetComicsDownloadLink
+            {
+                Url = "https://datanodes.to/abc123/file.cbz",
+                Host = GetComicsDownloadHost.DataNodes,
+                Label = "DATANODES",
+            });
+
+            var filePageHtml = @"<form><input type=""hidden"" name=""id"" value=""abc123""><input type=""hidden"" name=""fname"" value=""file.cbz""></form>";
+
+            Mocker.GetMock<IHttpClient>()
+                  .Setup(s => s.GetAsync(It.IsAny<HttpRequest>()))
+                  .Returns<HttpRequest>(r => Task.FromResult(new HttpResponse(r, new HttpHeader(), filePageHtml)));
+
+            var posts = new List<string>();
+            Mocker.GetMock<IHttpClient>()
+                  .Setup(s => s.PostAsync(It.IsAny<HttpRequest>()))
+                  .Returns<HttpRequest>(r =>
+                  {
+                      var body = r.ContentData != null ? System.Text.Encoding.UTF8.GetString(r.ContentData) : string.Empty;
+                      posts.Add(body);
+
+                      // download1 -> countdown page carrying the one-time token
+                      var countdownHtml = @"<form><input type=""hidden"" name=""rand"" value=""r4ndT0ken""></form>";
+                      var downloadJson = @"{""url"":""https%3A%2F%2Ftunnel.dlproxy.uk%2Fdl%2Fzzz""}";
+                      var content = body.Contains("op=download1") ? countdownHtml : downloadJson;
+
+                      return Task.FromResult(new HttpResponse(r, new HttpHeader(), content));
+                  });
+
+            Mocker.GetMock<IHttpClient>()
+                  .Setup(s => s.DownloadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                  .Returns(Task.CompletedTask);
+
+            var id = Subject.Download(CreateRemoteIssue(), CreateIndexer()).GetAwaiter().GetResult();
+
+            id.Should().NotBeNull();
+            posts.Should().HaveCount(2);
+            posts[1].Should().Contain("op=download2");
+            posts[1].Should().Contain("rand=r4ndT0ken");
+        }
+
+        [Test]
         public void download_falls_back_to_next_mirror_when_first_download_fails()
         {
             GivenExtractedLinks(PixeldrainLink("aaa"), PixeldrainLink("bbb"));

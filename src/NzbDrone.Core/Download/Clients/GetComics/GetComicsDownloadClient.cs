@@ -27,7 +27,8 @@ namespace NzbDrone.Core.Download.Clients.GetComics
         private const string BrowserUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
         // DataNodes enforces a ~5s countdown before op=download2 is honoured.
-        private static readonly TimeSpan DataNodesCountdown = TimeSpan.FromSeconds(6);
+        // internal-settable so tests don't wait out the real countdown
+        internal static TimeSpan DataNodesCountdown = TimeSpan.FromSeconds(6);
 
         private readonly IHttpClient _httpClient;
         private readonly IGetComicsDownloadLinkExtractor _linkExtractor;
@@ -333,7 +334,17 @@ namespace NzbDrone.Core.Download.Clients.GetComics
                 { "referer", string.Empty },
                 { "method_free", "Free Download >>" },
             });
-            await _httpClient.PostAsync(step1);
+            var step1Response = await _httpClient.PostAsync(step1);
+
+            // The countdown page's form carries a one-time rand token that
+            // download2 must echo back - without it the server returns the
+            // plain file page instead of the download JSON.
+            var rand = ExtractHiddenFormValue(step1Response.Content, "rand") ?? string.Empty;
+
+            if (rand.IsNullOrWhiteSpace())
+            {
+                _logger.Debug("GetComics: DataNodes countdown page had no rand token for {0}", fileUrl);
+            }
 
             // The countdown is server-enforced; posting download2 early is rejected.
             await Task.Delay(DataNodesCountdown);
@@ -342,7 +353,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
             {
                 { "op", "download2" },
                 { "id", id },
-                { "rand", string.Empty },
+                { "rand", rand },
                 { "referer", string.Empty },
                 { "method_free", "Free Download >>" },
                 { "method_premium", string.Empty },
