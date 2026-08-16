@@ -92,12 +92,16 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_reject_against_series_year_when_issues_have_no_release_date()
+        public void should_accept_when_issues_have_no_release_date_even_if_series_year_differs()
         {
+            // A brand-new issue of a long-running series has no CV date yet
+            // and its release year never equals the series start year -
+            // undated issues are absence of evidence, not a mismatch
+            // (observed live: The Walking Dead Deluxe #141 (2026) vs 2020).
             GivenParsedYear(2026);
             _remoteIssue.Issues.Add(new Issue { ReleaseDate = null });
 
-            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().BeTrue();
         }
 
         [Test]

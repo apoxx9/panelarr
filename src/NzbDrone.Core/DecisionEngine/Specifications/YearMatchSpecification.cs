@@ -52,16 +52,18 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 return Decision.Accept();
             }
 
-            // Reject only on positive evidence of a mismatch: with no issue
-            // dates and no series year there is nothing to compare against.
-            if (!issueYears.Any() && seriesYear == 0)
+            // Reject only on positive evidence of a mismatch. Undated issues
+            // are ABSENCE of evidence, not evidence: a brand-new issue of a
+            // long-running series has no CV date yet, and its release year
+            // will never equal the series' start year — rejecting there made
+            // every current issue of an ongoing series ungrabbable until CV
+            // caught up (observed live: The Walking Dead Deluxe #141).
+            if (!issueYears.Any())
             {
                 return Decision.Accept();
             }
 
-            var known = issueYears.Any()
-                ? string.Join("/", issueYears.OrderBy(y => y))
-                : seriesYear.ToString();
+            var known = string.Join("/", issueYears.OrderBy(y => y));
 
             _logger.Debug("[{0}] Release year {1} does not match issue year(s) {2} or series year {3}",
                           subject.Release.Title,
