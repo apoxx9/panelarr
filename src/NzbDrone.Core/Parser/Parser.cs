@@ -327,6 +327,48 @@ namespace NzbDrone.Core.Parser
             @"\b(?:vol(?:ume)?\.?\s*|v)(?<num>\d{1,4})\b[\s\-–—:]*",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+        /// <summary>
+        /// Series-name variants for a collected-edition name whose volume marker
+        /// splits the library series name ("&lt;line&gt;: &lt;subtitle&gt;"):
+        /// the raw name plus the marker-stripped form. Empty when the name has
+        /// no volume marker; volumeNumber gets the marker's number with leading
+        /// zeros trimmed so it compares equal to a stored issue number.
+        /// </summary>
+        public static List<string> GetCollectedEditionVariants(string name, out string volumeNumber)
+        {
+            volumeNumber = null;
+
+            if (name.IsNullOrWhiteSpace())
+            {
+                return new List<string>();
+            }
+
+            name = name.Trim();
+            var match = CollectedVolumeInfixRegex.Match(name);
+
+            if (!match.Success)
+            {
+                return new List<string>();
+            }
+
+            volumeNumber = match.Groups["num"].Value.TrimStart('0');
+
+            if (volumeNumber.Length == 0)
+            {
+                volumeNumber = "0";
+            }
+
+            var variants = new List<string> { name };
+            var stripped = Regex.Replace(CollectedVolumeInfixRegex.Replace(name, " "), @"\s+", " ").Trim();
+
+            if (stripped.IsNotNullOrWhiteSpace() && !stripped.Equals(name, StringComparison.OrdinalIgnoreCase))
+            {
+                variants.Add(stripped);
+            }
+
+            return variants;
+        }
+
         public static ParsedIssueInfo ParseIssueTitleWithSearchCriteria(string title, Series series, List<Issue> issues)
         {
             try
