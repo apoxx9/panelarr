@@ -261,7 +261,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
         /// <summary>
         /// Resolves a single extracted link into a directly-downloadable URL, or
         /// null if this host cannot be automated (captcha / browser-only). Handles
-        /// the getcomics.org/dlds/ redirect and per-host resolution.
+        /// the getcomics.org/dls/ redirect and per-host resolution.
         /// </summary>
         private async Task<string> ResolveMirrorUrl(GetComicsDownloadLink link)
         {
@@ -278,6 +278,21 @@ namespace NzbDrone.Core.Download.Clients.GetComics
                 }
 
                 _logger.Debug("GetComics: Redirect resolved {0} -> {1}", link.Label, url);
+            }
+
+            // The main-server DOWNLOAD NOW redirect lands on the file itself
+            // (GetComics' own file host) - no resolution flow needed. Other
+            // hosts embed the filename in their page URLs, so the extension
+            // check must not run for them.
+            if (link.Host == GetComicsDownloadHost.MainServer)
+            {
+                if (GetFileExtension(url, null) != null)
+                {
+                    return url;
+                }
+
+                _logger.Debug("GetComics: Main server redirect did not land on a file: {0}", url);
+                return null;
             }
 
             // Pixeldrain serves files via a simple API URL transform.
@@ -417,7 +432,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
         }
 
         /// <summary>
-        /// Follows a redirect URL (e.g., getcomics.org/dlds/...) and returns the final destination URL.
+        /// Follows a redirect URL (e.g., getcomics.org/dls/...) and returns the final destination URL.
         /// </summary>
         private async Task<string> FollowRedirect(string url)
         {

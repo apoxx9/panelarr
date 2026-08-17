@@ -7,7 +7,8 @@ namespace NzbDrone.Core.Indexers.GetComics
         public string Label { get; set; }
 
         /// <summary>
-        /// Whether this link goes through getcomics.org/dlds/ redirect (needs HTTP follow).
+        /// Whether this link goes through a getcomics.org/dls/ (or legacy /dlds/)
+        /// redirect (needs HTTP follow).
         /// </summary>
         public bool IsRedirect { get; set; }
     }
@@ -24,5 +25,6 @@ namespace NzbDrone.Core.Indexers.GetComics
         Mega = 10,
         MediaFire = 11,
         GoogleDrive = 12,
+        MainServer = 20,
     }
 }

@@ -34,9 +34,10 @@ namespace NzbDrone.Core.Indexers.GetComics
             (new Regex(@"drive\.google\.com", RegexOptions.Compiled | RegexOptions.IgnoreCase), GetComicsDownloadHost.GoogleDrive),
         };
 
-        // Label-based host detection for getcomics.org/dlds/ redirect links
+        // Label-based host detection for getcomics.org/dls/ redirect links
         private static readonly (Regex Pattern, GetComicsDownloadHost Host)[] LabelHostPatterns =
         {
+            (new Regex(@"\bDOWNLOAD\s+NOW\b|\bMAIN\s+SERVER\b", RegexOptions.Compiled | RegexOptions.IgnoreCase), GetComicsDownloadHost.MainServer),
             (new Regex(@"\bDATANODES?\b", RegexOptions.Compiled | RegexOptions.IgnoreCase), GetComicsDownloadHost.DataNodes),
             (new Regex(@"\bPIXELDRAIN\b", RegexOptions.Compiled | RegexOptions.IgnoreCase), GetComicsDownloadHost.Pixeldrain),
             (new Regex(@"\bVIKINGFILE\b", RegexOptions.Compiled | RegexOptions.IgnoreCase), GetComicsDownloadHost.Vikingfile),
@@ -52,11 +53,12 @@ namespace NzbDrone.Core.Indexers.GetComics
         private static readonly Dictionary<GetComicsDownloadHost, int> HostPriority = new Dictionary<GetComicsDownloadHost, int>
         {
             { GetComicsDownloadHost.Pixeldrain, 1 },
-            { GetComicsDownloadHost.DataNodes, 2 },
+            { GetComicsDownloadHost.MainServer, 2 },
             { GetComicsDownloadHost.Vikingfile, 3 },
             { GetComicsDownloadHost.Fileq, 4 },
             { GetComicsDownloadHost.Rootz, 5 },
             { GetComicsDownloadHost.TeraBox, 6 },
+            { GetComicsDownloadHost.DataNodes, 7 },
             { GetComicsDownloadHost.Mega, 50 },
             { GetComicsDownloadHost.MediaFire, 51 },
             { GetComicsDownloadHost.GoogleDrive, 52 },
@@ -84,7 +86,8 @@ namespace NzbDrone.Core.Indexers.GetComics
                     continue;
                 }
 
-                var isRedirect = href.Contains("getcomics.org/dlds/", StringComparison.OrdinalIgnoreCase);
+                var isRedirect = href.Contains("getcomics.org/dls/", StringComparison.OrdinalIgnoreCase) ||
+                                 href.Contains("getcomics.org/dlds/", StringComparison.OrdinalIgnoreCase);
                 var isDirectDownloadLink = IsDownloadHostUrl(href);
 
                 if (!isRedirect && !isDirectDownloadLink)
@@ -137,7 +140,7 @@ namespace NzbDrone.Core.Indexers.GetComics
                 }
             }
 
-            // For redirect links (getcomics.org/dlds/...), detect from the anchor label
+            // For redirect links (getcomics.org/dls/...), detect from the anchor label
             foreach (var (pattern, host) in LabelHostPatterns)
             {
                 if (pattern.IsMatch(label))

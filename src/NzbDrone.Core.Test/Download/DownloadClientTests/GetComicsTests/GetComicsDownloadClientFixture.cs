@@ -202,6 +202,45 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.GetComicsTests
         }
 
         [Test]
+        public void main_server_redirect_resolves_to_the_file_it_lands_on()
+        {
+            GivenExtractedLinks(new GetComicsDownloadLink
+            {
+                Url = "https://getcomics.org/dls/6iIrVrWM6P3qV2O7nes/abc==",
+                Host = GetComicsDownloadHost.MainServer,
+                Label = "DOWNLOAD NOW",
+                IsRedirect = true,
+            });
+
+            var fileUrl = "https://fs3.comicfiles.ru/2026.08.12/The%20Walking%20Dead%20Deluxe%20139%20(2026).cbz";
+
+            Mocker.GetMock<IHttpClient>()
+                  .Setup(s => s.GetAsync(It.Is<HttpRequest>(r => r.Url.ToString().Contains("/dls/"))))
+                  .Returns<HttpRequest>(r =>
+                  {
+                      var headers = new HttpHeader { { "Location", fileUrl } };
+                      return Task.FromResult(new HttpResponse(r, headers, string.Empty, System.Net.HttpStatusCode.Found));
+                  });
+
+            string downloadedUrl = null;
+            string downloadedPath = null;
+            Mocker.GetMock<IHttpClient>()
+                  .Setup(s => s.DownloadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                  .Returns<string, string, string>((url, file, ua) =>
+                  {
+                      downloadedUrl = url;
+                      downloadedPath = file;
+                      return Task.CompletedTask;
+                  });
+
+            var id = Subject.Download(CreateRemoteIssue(), CreateIndexer()).GetAwaiter().GetResult();
+
+            id.Should().NotBeNull();
+            downloadedUrl.Should().Be(fileUrl);
+            downloadedPath.Should().EndWith(".cbz");
+        }
+
+        [Test]
         public void download_falls_back_to_next_mirror_when_first_download_fails()
         {
             GivenExtractedLinks(PixeldrainLink("aaa"), PixeldrainLink("bbb"));
