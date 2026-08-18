@@ -401,7 +401,18 @@ class ReadingListDetailPage extends Component {
 
         {
           resolveReport.notFound.length > 0 &&
-            <div>{translate('ProviderResolveNotFound', { names: resolveReport.notFound.join(', ') })}</div>
+            <div>
+              {translate('ProviderResolveNotFound')}
+              <ul className={styles.notFoundList}>
+                {
+                  resolveReport.notFound.map((name) => {
+                    return (
+                      <li key={name}>{name}</li>
+                    );
+                  })
+                }
+              </ul>
+            </div>
         }
       </div>
     );

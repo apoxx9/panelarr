@@ -11,6 +11,7 @@ interface CssExports {
   'have': string;
   'header': string;
   'missing': string;
+  'notFoundList': string;
   'notInLibrary': string;
   'positionCell': string;
   'publisher': string;

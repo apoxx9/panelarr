@@ -726,7 +726,7 @@
   "PullListStatus_missing": "missing",
   "PullListStatus_unmonitored": "unmonitored",
   "ProviderResolveError": "ComicVine lookup failed",
-  "ProviderResolveNotFound": "Not found on ComicVine: {names}",
+  "ProviderResolveNotFound": "Not found on ComicVine:",
   "ProviderResolveSummary": "Linked {linked} of {considered} missing entries; {notFound} not found",
   "PullListStatus_unreleased": "unreleased",
   "PullListWeekOf": "Week of {date}",
