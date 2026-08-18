@@ -50,6 +50,15 @@ namespace NzbDrone.Common.Http
         public bool StoreRequestCookie { get; set; }
         public bool StoreResponseCookie { get; set; }
         public TimeSpan RequestTimeout { get; set; }
+
+        /// <summary>
+        /// When set together with ResponseStream, each successful read re-arms
+        /// the timeout: a slow but moving download may take as long as it
+        /// needs, while a stalled connection still dies after this long
+        /// without data. RequestTimeout then only covers the pre-body phase.
+        /// </summary>
+        public TimeSpan IdleReadTimeout { get; set; }
+
         public TimeSpan RateLimit { get; set; }
         public string RateLimitKey { get; set; }
         public Stream ResponseStream { get; set; }

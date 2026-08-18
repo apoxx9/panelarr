@@ -284,7 +284,12 @@ namespace NzbDrone.Common.Http
                     var request = new HttpRequest(url);
                     request.AllowAutoRedirect = true;
                     request.ResponseStream = fileStream;
+
+                    // 300s covers connect + headers; once the body streams,
+                    // only stalling for IdleReadTimeout aborts - a fixed total
+                    // cap killed multi-GB comic downloads on throttled hosts.
                     request.RequestTimeout = TimeSpan.FromSeconds(300);
+                    request.IdleReadTimeout = TimeSpan.FromSeconds(120);
                     var response = await GetAsync(request);
 
                     if (response.Headers.ContentType != null && response.Headers.ContentType.Contains("text/html"))

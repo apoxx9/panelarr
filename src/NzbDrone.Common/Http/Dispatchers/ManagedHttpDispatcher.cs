@@ -121,7 +121,27 @@ namespace NzbDrone.Common.Http.Dispatchers
                     {
                         if (request.ResponseStream != null && responseMessage.StatusCode == HttpStatusCode.OK)
                         {
-                            await responseMessage.Content.CopyToAsync(request.ResponseStream, null, cts.Token);
+                            if (request.IdleReadTimeout != TimeSpan.Zero)
+                            {
+                                // Progress re-arms the timer - a multi-GB file
+                                // on a throttled host outlives any fixed total
+                                // timeout, but a stalled connection still dies.
+                                await using var contentStream = await responseMessage.Content.ReadAsStreamAsync(cts.Token);
+                                var buffer = new byte[81920];
+                                int read;
+
+                                cts.CancelAfter(request.IdleReadTimeout);
+
+                                while ((read = await contentStream.ReadAsync(buffer.AsMemory(), cts.Token)) > 0)
+                                {
+                                    await request.ResponseStream.WriteAsync(buffer.AsMemory(0, read), cts.Token);
+                                    cts.CancelAfter(request.IdleReadTimeout);
+                                }
+                            }
+                            else
+                            {
+                                await responseMessage.Content.CopyToAsync(request.ResponseStream, null, cts.Token);
+                            }
                         }
                         else
                         {
