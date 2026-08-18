@@ -516,6 +516,15 @@ namespace NzbDrone.Core.Parser
                 try
                 {
                     result.Quality = QualityParser.ParseQuality(title);
+
+                    // Same rule as the simple-comic branch: a matched release
+                    // with no source tag is an archive of unknown source -
+                    // never Unknown, which no profile wants.
+                    if (result.Quality?.Quality == Qualities.Quality.Unknown)
+                    {
+                        result.Quality.Quality = Qualities.Quality.Archive;
+                    }
+
                     Logger.Debug("Quality parsed: {0}", result.Quality);
 
                     result.ReleaseGroup = ParseReleaseGroup(releaseTitle);

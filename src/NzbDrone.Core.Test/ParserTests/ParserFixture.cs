@@ -240,6 +240,18 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.SeriesName.ToLowerInvariant().Should().NotContain("vol");
         }
 
+        [TestCase("Amazing Spider-Man Epic Collection Vol. 11 – Nine Lives Has The Black Cat (2025)")]
+        public void fuzzy_matched_release_without_source_tag_should_be_archive_not_unknown(string releaseTitle)
+        {
+            GivenSearchCriteria("Amazing Spider-Man Epic Collection: Nine Lives Has the Black Cat", "Volume 11");
+            _books[0].IssueNumber = "1";
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().NotBeNull();
+            parseResult.Quality.Quality.Should().Be(NzbDrone.Core.Qualities.Quality.Archive);
+        }
+
         [TestCase("Amazing Spider-Man Epic Collection Vol. 11 - Nine Lives Has The Black Cat (2025)")]
         public void should_match_collected_edition_by_subtitle_alone_for_a_single_target_issue(string releaseTitle)
         {
