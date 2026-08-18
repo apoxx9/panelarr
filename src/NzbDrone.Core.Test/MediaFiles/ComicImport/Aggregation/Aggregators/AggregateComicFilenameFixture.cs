@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.MediaFiles.ComicImport.Aggregation.Aggregators
         }
 
         [Test]
-        public void embedded_tags_are_left_alone()
+        public void embedded_series_and_index_are_not_overwritten()
         {
             var local = new LocalIssue
             {
@@ -71,7 +71,32 @@ namespace NzbDrone.Core.Test.MediaFiles.ComicImport.Aggregation.Aggregators
             var result = Subject.Aggregate(local, false);
 
             result.FileTagInfo.SeriesTitle.Should().Be("Iron Fist Epic Collection: The Fury of Iron Fist");
-            result.FileTagInfo.Series.Should().BeEmpty();
+            result.FileTagInfo.IssueTitle.Should().Be("Volume 1");
+            result.FileTagInfo.SeriesIndex.Should().Be("1");
+        }
+
+        [Test]
+        public void embedded_line_name_tags_still_get_collected_edition_variants()
+        {
+            // Zone-Empire style rips tag the bare line name as the series and
+            // "vNN - Subtitle" as the title with no number or id - the
+            // augmentation must run despite embedded tags being present.
+            var local = new LocalIssue
+            {
+                Path = @"C:\downloads\Captain America Epic Collection v01 - Captain America Lives Again (2014) (Digital-Empire).cbr".AsOsAgnostic(),
+                FileTagInfo = new ParsedFileTagInfo
+                {
+                    SeriesTitle = "Captain America Epic Collection",
+                    Series = new System.Collections.Generic.List<string> { "Captain America Epic Collection" },
+                    IssueTitle = "v01 - Captain America Lives Again"
+                }
+            };
+
+            var result = Subject.Aggregate(local, false);
+
+            result.FileTagInfo.IsCollectedEdition.Should().BeTrue();
+            result.FileTagInfo.Series.Should().Contain("Captain America Epic Collection Captain America Lives Again");
+            result.FileTagInfo.SeriesIndex.Should().Be("1");
         }
     }
 }

@@ -78,6 +78,30 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
                 var fileTitles = new[] { title, CleanTitleCruft.Replace(title) }.Distinct().ToList();
 
+                // Collected editions title their sole issue "Volume N" while
+                // rips title the file "vNN - Subtitle" - compare the
+                // marker-stripped local title against the series subtitle too,
+                // so the subtitle match the series was identified by is not
+                // punished a second time at the title layer.
+                if (localTracks.Any(x => x.FileTagInfo.IsCollectedEdition))
+                {
+                    fileTitles.AddRange(Parser.Parser.GetCollectedEditionVariants(title, out _)
+                        .Where(v => !fileTitles.Contains(v)));
+
+                    var seriesName = issue.SeriesMetadata.Value.Name ?? string.Empty;
+                    var subtitleIndex = seriesName.IndexOf(':');
+
+                    if (subtitleIndex > 0 && subtitleIndex < seriesName.Length - 1)
+                    {
+                        var subtitle = seriesName.Substring(subtitleIndex + 1).Trim();
+
+                        if (subtitle.IsNotNullOrWhiteSpace() && !titleOptions.Contains(subtitle))
+                        {
+                            titleOptions.Add(subtitle);
+                        }
+                    }
+                }
+
                 dist.AddString("issue", fileTitles, titleOptions);
                 Logger.Trace("issue: '{0}' vs '{1}'; {2}", fileTitles.ConcatToString("' or '"), titleOptions.ConcatToString("' or '"), dist.NormalizedDistance());
             }

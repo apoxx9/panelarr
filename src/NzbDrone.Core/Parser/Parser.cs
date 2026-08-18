@@ -453,10 +453,44 @@ namespace NzbDrone.Core.Parser
                     foundIssue = GetTitleFuzzy(remainder, bestIssue.Title.SplitIssueTitle(seriesName).Item1, out _);
                 }
 
+                // The volume stand-ins below trust the series-name match to
+                // have identified the volume. GetTitleFuzzy's lenient
+                // threshold is not proof of that - one Epic line's subtitle
+                // can drift onto another's release ("The Captain" aligned
+                // onto "...Captain America Lives Again" and grabbed the wrong
+                // book, whose "Vol. 1" then agreed with the issue number
+                // every per-volume series carries). When the criteria series
+                // has a subtitle, the release's post-marker segment must
+                // match it AS A WHOLE - fuzzy containment cannot tell "The
+                // Captain" from the front of "Captain America Lives Again".
+                var strongSeriesMatch = false;
+
+                if (foundSeries != null && volMatch.Success)
+                {
+                    var subtitleIndex = seriesName.IndexOf(':');
+
+                    if (subtitleIndex > 0 && subtitleIndex < seriesName.Length - 1)
+                    {
+                        var afterMarker = simpleTitle.Substring(volMatch.Index + volMatch.Length);
+                        afterMarker = Regex.Split(afterMarker, @"[\(\[]|\s+by\s+", RegexOptions.IgnoreCase)[0]
+                            .Trim(' ', '-', '–', '—', ':');
+                        var criteriaSubtitle = seriesName.Substring(subtitleIndex + 1).Trim();
+
+                        strongSeriesMatch = afterMarker.IsNotNullOrWhiteSpace() &&
+                                            afterMarker.ToLowerInvariant().FuzzyMatch(criteriaSubtitle.ToLowerInvariant()) >= 0.75;
+                    }
+                    else
+                    {
+                        var strippedForCheck = CollectedVolumeInfixRegex.Replace(simpleTitle, " ");
+                        strongSeriesMatch = strippedForCheck.ToLowerInvariant()
+                            .FuzzyMatch(seriesName.ToLowerInvariant(), 0.85, WordDelimiters).Item1 != -1;
+                    }
+                }
+
                 // A collected-edition volume number in the release title
                 // ("Vol. 01", "v01") stands in for the issue-title match it
                 // defeats - but only when it agrees with the target issue
-                if (foundIssue == null && foundSeries != null && volMatch.Success &&
+                if (foundIssue == null && strongSeriesMatch &&
                     volMatch.Groups["num"].Value.TrimStart('0') == (bestIssue.IssueNumber ?? string.Empty).TrimStart('0'))
                 {
                     foundIssue = bestIssue.Title;
@@ -466,7 +500,7 @@ namespace NzbDrone.Core.Parser
                 // release carries the line's volume ("Vol. 11") - the marker
                 // still stands in when it agrees with the issue TITLE
                 // ("Volume 11") instead of the issue number
-                if (foundIssue == null && foundSeries != null && volMatch.Success)
+                if (foundIssue == null && strongSeriesMatch)
                 {
                     var titleVolMatch = CollectedVolumeInfixRegex.Match(bestIssue.Title ?? string.Empty);
 
@@ -483,7 +517,7 @@ namespace NzbDrone.Core.Parser
                 // with a single target issue nothing else can be meant. A
                 // marker after a plain series name stays in the remainder, so
                 // an ongoing's trade cannot pose as its issue 1.
-                if (foundIssue == null && foundSeries != null && volMatch.Success &&
+                if (foundIssue == null && strongSeriesMatch &&
                     issues.Count == 1 &&
                     !CollectedVolumeInfixRegex.IsMatch(remainder ?? string.Empty))
                 {

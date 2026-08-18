@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NLog;
@@ -26,15 +27,32 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
         {
             var fileTrackInfo = localTrack.FileTagInfo;
 
-            // Only augment when embedded tags are missing
-            if (fileTrackInfo == null ||
-                (fileTrackInfo.SeriesTitle.IsNotNullOrWhiteSpace() &&
-                 fileTrackInfo.IssueTitle.IsNotNullOrWhiteSpace()))
+            if (fileTrackInfo == null)
             {
                 return localTrack;
             }
 
             var filename = Path.GetFileName(localTrack.Path);
+
+            // Fill gaps from the filename only when embedded tags are missing
+            if (fileTrackInfo.SeriesTitle.IsNullOrWhiteSpace() ||
+                fileTrackInfo.IssueTitle.IsNullOrWhiteSpace())
+            {
+                ParseFilenameGaps(localTrack, filename);
+            }
+
+            // The collected-edition augmentation runs regardless: embedded
+            // tags in these rips carry the bare line name as the series and
+            // "vNN - Subtitle" as the title, which sinks identification just
+            // as hard as an untagged filename does.
+            AugmentCollectedEdition(fileTrackInfo, filename);
+
+            return localTrack;
+        }
+
+        private void ParseFilenameGaps(LocalIssue localTrack, string filename)
+        {
+            var fileTrackInfo = localTrack.FileTagInfo;
             var parsed = ComicParser.ParseRelease(filename);
 
             if (parsed != null)
@@ -67,20 +85,18 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
                     }
                 }
             }
-
-            AugmentCollectedEdition(fileTrackInfo, filename);
-
-            return localTrack;
         }
 
         /// <summary>
-        /// A collected-edition filename ("Iron Fist Epic Collection Vol. 01 -
+        /// A collected-edition name ("Iron Fist Epic Collection Vol. 01 -
         /// The Fury of Iron Fist (2015)...") defeats series matching twice
         /// over: the volume marker splits the library series name
         /// ("&lt;line&gt;: &lt;subtitle&gt;") and ComicParser truncates at the
         /// dash, losing the subtitle. Feed identification the full pre-year
         /// name and its marker-stripped form, with the volume number standing
-        /// in for the issue number.
+        /// in for the issue number. The name comes from the filename AND from
+        /// embedded tags - these rips tag the bare line name as the series
+        /// with "vNN - Subtitle" as the title.
         /// </summary>
         private void AugmentCollectedEdition(ParsedFileTagInfo fileTrackInfo, string filename)
         {
@@ -94,31 +110,49 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
 
             baseName = baseName.TrimEnd(' ', '-', '–', '—');
 
-            var variants = NzbDrone.Core.Parser.Parser.GetCollectedEditionVariants(baseName, out var volumeNumber);
+            var names = new List<string> { baseName };
 
-            if (!variants.Any())
+            if (fileTrackInfo.SeriesTitle.IsNotNullOrWhiteSpace() && fileTrackInfo.IssueTitle.IsNotNullOrWhiteSpace())
             {
-                return;
+                names.Add(fileTrackInfo.SeriesTitle + " " + fileTrackInfo.IssueTitle);
             }
 
-            _logger.Debug(
-                "Collected-edition filename: adding series variants [{0}], volume {1}",
-                string.Join("; ", variants),
-                volumeNumber);
+            var applied = false;
 
-            foreach (var variant in variants)
+            foreach (var name in names)
             {
-                if (!fileTrackInfo.Series.Contains(variant, System.StringComparer.OrdinalIgnoreCase))
+                var variants = NzbDrone.Core.Parser.Parser.GetCollectedEditionVariants(name, out var volumeNumber);
+
+                if (!variants.Any())
                 {
-                    fileTrackInfo.Series.Add(variant);
+                    continue;
+                }
+
+                _logger.Debug(
+                    "Collected-edition name '{0}': adding series variants [{1}], volume {2}",
+                    name,
+                    string.Join("; ", variants),
+                    volumeNumber);
+
+                foreach (var variant in variants)
+                {
+                    if (!fileTrackInfo.Series.Contains(variant, System.StringComparer.OrdinalIgnoreCase))
+                    {
+                        fileTrackInfo.Series.Add(variant);
+                    }
+                }
+
+                applied = true;
+
+                if (fileTrackInfo.SeriesIndex.IsNullOrWhiteSpace() && volumeNumber.IsNotNullOrWhiteSpace())
+                {
+                    fileTrackInfo.SeriesIndex = volumeNumber;
                 }
             }
 
-            fileTrackInfo.IsCollectedEdition = true;
-
-            if (fileTrackInfo.SeriesIndex.IsNullOrWhiteSpace() && volumeNumber.IsNotNullOrWhiteSpace())
+            if (applied)
             {
-                fileTrackInfo.SeriesIndex = volumeNumber;
+                fileTrackInfo.IsCollectedEdition = true;
             }
         }
     }

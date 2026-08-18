@@ -265,6 +265,32 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.Should().NotBeNull();
         }
 
+        [TestCase("Captain America Epic Collection Vol. 1: Captain America Lives Again by Marvel Comics [ENG / CBR]")]
+        public void should_not_match_another_volumes_release_when_the_subtitle_disagrees(string releaseTitle)
+        {
+            // Observed cross-grab: searching "The Captain" accepted the
+            // Lives Again release because lenient fuzzy matching drifted the
+            // subtitle onto "...Captain America...". The stand-ins demand the
+            // full series name at high confidence.
+            GivenSearchCriteria("Captain America Epic Collection: The Captain", "Volume 14");
+            _books[0].IssueNumber = "1";
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().BeNull();
+        }
+
+        [TestCase("Captain America Epic Collection Vol. 1: Captain America Lives Again by Marvel Comics [ENG / CBR]")]
+        public void should_match_the_release_whose_subtitle_agrees(string releaseTitle)
+        {
+            GivenSearchCriteria("Captain America Epic Collection: Captain America Lives Again", "Volume 14");
+            _books[0].IssueNumber = "1";
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().NotBeNull();
+        }
+
         [TestCase("Saga Vol. 03 (2015) (Digital)")]
         public void should_not_match_an_ongoings_trade_as_its_first_issue(string releaseTitle)
         {

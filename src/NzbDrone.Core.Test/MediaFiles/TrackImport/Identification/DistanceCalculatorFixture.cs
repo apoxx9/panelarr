@@ -74,6 +74,44 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         }
 
         [Test]
+        public void collected_edition_title_compares_against_the_series_subtitle()
+        {
+            // Local title "v13 - Justice is Served" vs DB issue title
+            // "Volume 1" sank a correct match at 50% - the marker-stripped
+            // local title must be allowed to match the series subtitle.
+            var tracks = new List<LocalIssue>
+            {
+                new LocalIssue
+                {
+                    FileTagInfo = new ParsedFileTagInfo
+                    {
+                        Series = new List<string>
+                        {
+                            "Captain America Epic Collection",
+                            "Captain America Epic Collection Justice is Served"
+                        },
+                        IssueTitle = "v13 - Justice is Served",
+                        IsCollectedEdition = true
+                    }
+                }
+            };
+
+            var issue = new Issue
+            {
+                IssueNumber = "1",
+                Title = "Volume 1",
+                SeriesMetadata = new SeriesMetadata
+                {
+                    Name = "Captain America Epic Collection: Justice Is Served"
+                }
+            };
+
+            var dist = DistanceCalculator.IssueDistance(tracks, issue, ignoreIssueNumber: true);
+
+            dist.NormalizedDistance().Should().BeLessThan(0.2);
+        }
+
+        [Test]
         public void publisher_should_compare_against_publisher_name_not_series_name()
         {
             // "Image" vs series name "Saga" used to incur a guaranteed penalty
