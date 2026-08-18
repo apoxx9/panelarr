@@ -17,5 +17,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
         public Issue Issue { get; set; }
         public List<ComicFile> ExistingFiles { get; set; }
+
+        /// <summary>
+        /// This candidate is the series' only issue, offered because nothing
+        /// matched by title or number - a collected edition's line volume
+        /// number is not an issue index, so distance scoring must not compare
+        /// them.
+        /// </summary>
+        public bool SoleIssueFallback { get; set; }
     }
 }

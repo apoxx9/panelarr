@@ -114,6 +114,8 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Aggregation.Aggregators
                 }
             }
 
+            fileTrackInfo.IsCollectedEdition = true;
+
             if (fileTrackInfo.SeriesIndex.IsNullOrWhiteSpace() && volumeNumber.IsNotNullOrWhiteSpace())
             {
                 fileTrackInfo.SeriesIndex = volumeNumber;

@@ -335,7 +335,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 var extraTracks = extraTracksOnDisk.Where(x => extraTrackPaths.Contains(x.Path)).ToList();
                 var allLocalTracks = localIssueRelease.LocalIssues.Concat(extraTracks).DistinctBy(x => x.Path).ToList();
 
-                var distance = DistanceCalculator.IssueDistance(allLocalTracks, release);
+                var distance = DistanceCalculator.IssueDistance(allLocalTracks, release, candidateRelease.SoleIssueFallback);
                 var currDistance = distance.NormalizedDistance();
 
                 rwatch.Stop();

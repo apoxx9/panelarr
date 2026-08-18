@@ -55,6 +55,25 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         }
 
         [Test]
+        public void sole_issue_fallback_ignores_the_line_volume_number()
+        {
+            // "ASM Epic Collection Vol. 21 - ..." carries line volume 21, but
+            // the per-volume series holds one issue numbered 1. The fallback
+            // candidate must not be penalized for that mismatch.
+            var dist = DistanceCalculator.IssueDistance(GivenLocalTracks("21"), GivenDbIssue("1"), ignoreIssueNumber: true);
+
+            dist.NormalizedDistance().Should().Be(0.0);
+        }
+
+        [Test]
+        public void mismatched_issue_number_still_penalized_when_not_a_fallback()
+        {
+            var dist = DistanceCalculator.IssueDistance(GivenLocalTracks("21"), GivenDbIssue("1"));
+
+            dist.NormalizedDistance().Should().BeGreaterThan(0.2);
+        }
+
+        [Test]
         public void publisher_should_compare_against_publisher_name_not_series_name()
         {
             // "Image" vs series name "Saga" used to incur a guaranteed penalty

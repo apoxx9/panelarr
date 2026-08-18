@@ -24,7 +24,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
 
         private static readonly List<string> AudiobookFormats = new List<string> { "Audiobook", "Audio CD", "Audio Cassette", "Audible Audio", "CD-ROM", "MP3 CD" };
 
-        public static Distance IssueDistance(List<LocalIssue> localTracks, Issue issue)
+        public static Distance IssueDistance(List<LocalIssue> localTracks, Issue issue, bool ignoreIssueNumber = false)
         {
             var dist = new Distance();
 
@@ -85,8 +85,10 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             // Issue number — the most reliable matching signal for comics.
             // Normalize both sides so padded ("003") and trailing-zero ("1.50")
             // forms compare equal, matching the candidate-lookup normalization.
+            // Skipped for a sole-issue fallback candidate: the local number is
+            // then a collected edition's line volume, not an issue index.
             var localIssueNumber = localTracks.MostCommon(x => x.FileTagInfo.SeriesIndex) ?? "";
-            if (localIssueNumber.IsNotNullOrWhiteSpace())
+            if (!ignoreIssueNumber && localIssueNumber.IsNotNullOrWhiteSpace())
             {
                 var dbIssueNumber = issue.IssueNumber ?? "";
                 dist.AddString("issue_number", NormalizeIssueNumber(localIssueNumber), NormalizeIssueNumber(dbIssueNumber));

@@ -23,6 +23,12 @@ namespace NzbDrone.Core.Parser.Model
         public string ReleaseGroup { get; set; }
         public string ReleaseHash { get; set; }
 
+        /// <summary>
+        /// The filename carries a collected-edition volume marker ("Vol. 21 -"),
+        /// so SeriesIndex holds a line volume number, not an issue index.
+        /// </summary>
+        public bool IsCollectedEdition { get; set; }
+
         public ParsedFileTagInfo()
         {
             Series = new List<string>();

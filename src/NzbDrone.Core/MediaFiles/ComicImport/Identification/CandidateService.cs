@@ -183,6 +183,29 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 }
             }
 
+            // A collected edition is released with the line's volume number
+            // ("ASM Epic Collection Vol. 21 - ...") but a per-volume series
+            // holds one issue, usually numbered 1 - when nothing matched and
+            // the series has exactly one issue, that issue is the only thing
+            // this series can mean. Scoring must then ignore the volume
+            // number, so the candidate is flagged.
+            if (!candidateReleases.Any() &&
+                localEdition.LocalIssues.Any(x => x.FileTagInfo?.IsCollectedEdition == true))
+            {
+                var seriesIssues = _issueService.GetIssuesBySeriesMetadataId(series.SeriesMetadataId);
+
+                if (seriesIssues.Count == 1)
+                {
+                    _logger.Debug("No title/number match for series {0}; offering its sole issue for a collected edition", series.SeriesMetadataId);
+
+                    foreach (var candidate in GetDbCandidatesByIssue(seriesIssues[0], includeExisting))
+                    {
+                        candidate.SoleIssueFallback = true;
+                        candidateReleases.Add(candidate);
+                    }
+                }
+            }
+
             return candidateReleases;
         }
 
