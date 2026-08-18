@@ -252,6 +252,16 @@ export const defaultState = {
 
   filterBuilderProps: [
     {
+      name: 'seriesName',
+      label: 'Name',
+      type: filterBuilderTypes.STRING
+    },
+    {
+      name: 'year',
+      label: 'Year',
+      type: filterBuilderTypes.NUMBER
+    },
+    {
       name: 'monitored',
       label: 'Monitored',
       type: filterBuilderTypes.EXACT,
