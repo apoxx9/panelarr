@@ -271,9 +271,9 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.GetComicsTests
         {
             GivenExtractedLinks(new GetComicsDownloadLink
             {
-                Url = "https://mega.nz/file/abc",
-                Host = GetComicsDownloadHost.Mega,
-                Label = "MEGA",
+                Url = "https://www.mediafire.com/file/abc",
+                Host = GetComicsDownloadHost.MediaFire,
+                Label = "MEDIAFIRE",
             });
 
             Assert.ThrowsAsync<ReleaseDownloadException>(
@@ -281,6 +281,55 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.GetComicsTests
 
             Mocker.GetMock<IHttpClient>()
                   .Verify(s => s.DownloadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void mega_link_downloads_via_the_dedicated_downloader()
+        {
+            GivenExtractedLinks(new GetComicsDownloadLink
+            {
+                Url = "https://mega.nz/file/abc#key",
+                Host = GetComicsDownloadHost.Mega,
+                Label = "MEGA",
+            });
+
+            Mocker.GetMock<IMegaDownloader>()
+                  .Setup(s => s.DownloadFileAsync("https://mega.nz/file/abc#key", It.IsAny<string>(), It.IsAny<string>()))
+                  .ReturnsAsync(@"c:\downloads\getcomics\file.cbz".AsOsAgnostic());
+
+            var id = Subject.Download(CreateRemoteIssue(), CreateIndexer()).GetAwaiter().GetResult();
+
+            id.Should().NotBeNull();
+            Mocker.GetMock<IHttpClient>()
+                  .Verify(s => s.DownloadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
+        public void mega_failure_falls_back_to_the_next_mirror()
+        {
+            GivenExtractedLinks(
+                new GetComicsDownloadLink
+                {
+                    Url = "https://mega.nz/file/abc#key",
+                    Host = GetComicsDownloadHost.Mega,
+                    Label = "MEGA",
+                },
+                PixeldrainLink("bbb"));
+
+            Mocker.GetMock<IMegaDownloader>()
+                  .Setup(s => s.DownloadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                  .ThrowsAsync(new Exception("Mega bandwidth quota exceeded"));
+
+            Mocker.GetMock<IHttpClient>()
+                  .Setup(s => s.DownloadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                  .Returns(Task.CompletedTask);
+
+            var id = Subject.Download(CreateRemoteIssue(), CreateIndexer()).GetAwaiter().GetResult();
+
+            id.Should().NotBeNull();
+            Mocker.GetMock<IHttpClient>()
+                  .Verify(s => s.DownloadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once());
             ExceptionVerification.ExpectedWarns(1);
         }
     }

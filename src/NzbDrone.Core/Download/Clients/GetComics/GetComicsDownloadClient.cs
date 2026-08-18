@@ -32,6 +32,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
 
         private readonly IHttpClient _httpClient;
         private readonly IGetComicsDownloadLinkExtractor _linkExtractor;
+        private readonly IMegaDownloader _megaDownloader;
         private readonly ICached<GetComicsDownloadItem> _downloadCache;
 
         public override string Name => "GetComics Direct Download";
@@ -41,6 +42,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
         public GetComicsDownloadClient(
             IHttpClient httpClient,
             IGetComicsDownloadLinkExtractor linkExtractor,
+            IMegaDownloader megaDownloader,
             ICacheManager cacheManager,
             IConfigService configService,
             IDiskProvider diskProvider,
@@ -50,6 +52,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
         {
             _httpClient = httpClient;
             _linkExtractor = linkExtractor;
+            _megaDownloader = megaDownloader;
             _downloadCache = cacheManager.GetCache<GetComicsDownloadItem>(GetType());
         }
 
@@ -98,6 +101,23 @@ namespace NzbDrone.Core.Download.Clients.GetComics
 
             foreach (var link in downloadLinks)
             {
+                // Mega streams decrypt while downloading, so the host cannot
+                // resolve to a plain URL - a dedicated downloader writes the
+                // file directly and the loop's fallback semantics still hold.
+                if (link.Host == GetComicsDownloadHost.Mega)
+                {
+                    attempted.Add(link.Host.ToString());
+                    var megaPath = await TryDownloadMega(link, downloadFolder, cleanTitle);
+
+                    if (megaPath != null)
+                    {
+                        filePath = megaPath;
+                        break;
+                    }
+
+                    continue;
+                }
+
                 string resolvedUrl;
                 try
                 {
@@ -307,10 +327,46 @@ namespace NzbDrone.Core.Download.Clients.GetComics
                 return await ResolveDataNodesUrl(url);
             }
 
-            // Everything else (mega, mediafire, google drive, vikingfile, fileq,
-            // rootz, terabox) needs captcha/browser interaction we can't automate.
+            // Everything else (mediafire, google drive, vikingfile, fileq,
+            // rootz, terabox) needs captcha/browser interaction we can't
+            // automate. Mega never reaches here - it has its own downloader.
             _logger.Debug("GetComics: Host not automatable, skipping: {0}", url);
             return null;
+        }
+
+        /// <summary>
+        /// Downloads a Mega mirror (resolving the getcomics.org/dls/ redirect
+        /// first when needed) via the dedicated decrypting downloader. Returns
+        /// the written file path, or null so the loop tries the next mirror.
+        /// </summary>
+        private async Task<string> TryDownloadMega(GetComicsDownloadLink link, string downloadFolder, string cleanTitle)
+        {
+            try
+            {
+                var url = link.Url;
+
+                // The dls redirect can hop through a canonicalization 301
+                // (trailing slash) before the 302 to mega.nz - follow a few.
+                for (var hop = 0; hop < 3 && url != null && link.IsRedirect &&
+                     !url.Contains("mega.nz", StringComparison.OrdinalIgnoreCase); hop++)
+                {
+                    url = await FollowRedirect(url);
+                }
+
+                if (url == null || !url.Contains("mega.nz", StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger.Debug("GetComics: Mega redirect did not land on mega.nz: {0}", url ?? link.Url);
+                    return null;
+                }
+
+                _logger.Info("GetComics: Downloading from Mega mirror: {0}", url);
+                return await _megaDownloader.DownloadFileAsync(url, downloadFolder, cleanTitle);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "GetComics: Download from Mega mirror failed, trying next mirror");
+                return null;
+            }
         }
 
         /// <summary>
