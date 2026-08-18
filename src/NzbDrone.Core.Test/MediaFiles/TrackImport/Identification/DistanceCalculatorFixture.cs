@@ -112,6 +112,45 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         }
 
         [Test]
+        public void collected_edition_title_with_release_junk_compares_against_the_subtitle()
+        {
+            // A tagger convention observed live: the embedded title carries no
+            // volume marker but keeps the year/quality junk - "Justice is
+            // Served (2017) (Digital) (Zone-Empire)" scored 0.25 vs the 0.20
+            // threshold until the parenthetical tail was stripped.
+            var tracks = new List<LocalIssue>
+            {
+                new LocalIssue
+                {
+                    FileTagInfo = new ParsedFileTagInfo
+                    {
+                        Series = new List<string>
+                        {
+                            "Captain America Epic Collection",
+                            "Captain America Epic Collection Justice is Served"
+                        },
+                        IssueTitle = "Justice is Served (2017) (Digital) (Zone-Empire)",
+                        IsCollectedEdition = true
+                    }
+                }
+            };
+
+            var issue = new Issue
+            {
+                IssueNumber = "1",
+                Title = "Volume 13",
+                SeriesMetadata = new SeriesMetadata
+                {
+                    Name = "Captain America Epic Collection: Justice Is Served"
+                }
+            };
+
+            var dist = DistanceCalculator.IssueDistance(tracks, issue, ignoreIssueNumber: true);
+
+            dist.NormalizedDistance().Should().BeLessThan(0.1);
+        }
+
+        [Test]
         public void publisher_should_compare_against_publisher_name_not_series_name()
         {
             // "Image" vs series name "Saga" used to incur a guaranteed penalty
