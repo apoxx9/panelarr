@@ -221,6 +221,47 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.Should().BeNull();
         }
 
+        [TestCase("Amazing Spider-Man Epic Collection Vol. 11 – Nine Lives Has The Black Cat (2025) (Digital) (Asgard-Empire)")]
+        [TestCase("Amazing Spider-Man Epic Collection Vol 11: Nine Lives Has the Black Cat by Marvel Comics [ENG / CBR CBZ]")]
+        public void should_match_collected_edition_when_line_volume_agrees_with_issue_title(string releaseTitle)
+        {
+            // Per-volume series number their sole issue 1 while the release
+            // carries the line volume - the issue TITLE holds that volume
+            GivenSearchCriteria("Amazing Spider-Man Epic Collection: Nine Lives Has the Black Cat", "Volume 11");
+            _books[0].IssueNumber = "1";
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().NotBeNull();
+            parseResult.SeriesName.ToLowerInvariant().Should().Contain("amazing spider-man epic collection");
+        }
+
+        [TestCase("Amazing Spider-Man Epic Collection Vol. 11 - Nine Lives Has The Black Cat (2025)")]
+        public void should_match_collected_edition_by_subtitle_alone_for_a_single_target_issue(string releaseTitle)
+        {
+            // Issue title carries no volume number at all - the subtitle split
+            // by the marker still uniquely identifies the sole target issue
+            GivenSearchCriteria("Amazing Spider-Man Epic Collection: Nine Lives Has the Black Cat", "Nine Lives Has the Black Cat");
+            _books[0].IssueNumber = "1";
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().NotBeNull();
+        }
+
+        [TestCase("Saga Vol. 03 (2015) (Digital)")]
+        public void should_not_match_an_ongoings_trade_as_its_first_issue(string releaseTitle)
+        {
+            // "Saga" matches without stripping the marker, so the
+            // subtitle-identifies-the-volume fallback must not fire
+            GivenSearchCriteria("Saga", "#1");
+            _books[0].IssueNumber = "1";
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().BeNull();
+        }
+
         [TestCase("Walking Dead - Complete Series 2003-2019 (168 issues)(digital)", 2003, 2019)]
         [TestCase("(Superhero) Spawn - Compendium(46 vols) [1992 - 2024]", 1992, 2024)]
         [TestCase("Invincible - Complete Compendium 2003-2018 (144 issues)(digital)", 2003, 2018)]

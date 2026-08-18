@@ -462,6 +462,34 @@ namespace NzbDrone.Core.Parser
                     foundIssue = bestIssue.Title;
                 }
 
+                // Per-volume series usually number their sole issue 1 while the
+                // release carries the line's volume ("Vol. 11") - the marker
+                // still stands in when it agrees with the issue TITLE
+                // ("Volume 11") instead of the issue number
+                if (foundIssue == null && foundSeries != null && volMatch.Success)
+                {
+                    var titleVolMatch = CollectedVolumeInfixRegex.Match(bestIssue.Title ?? string.Empty);
+
+                    if (titleVolMatch.Success &&
+                        titleVolMatch.Groups["num"].Value.TrimStart('0') == volMatch.Groups["num"].Value.TrimStart('0'))
+                    {
+                        foundIssue = bestIssue.Title;
+                    }
+                }
+
+                // When the volume marker sits INSIDE the matched series name
+                // (the remainder no longer carries it), the marker split the
+                // series name and the subtitle alone identified the volume -
+                // with a single target issue nothing else can be meant. A
+                // marker after a plain series name stays in the remainder, so
+                // an ongoing's trade cannot pose as its issue 1.
+                if (foundIssue == null && foundSeries != null && volMatch.Success &&
+                    issues.Count == 1 &&
+                    !CollectedVolumeInfixRegex.IsMatch(remainder ?? string.Empty))
+                {
+                    foundIssue = bestIssue.Title;
+                }
+
                 Logger.Trace($"Found {foundSeries} - {foundIssue} with fuzzy parser");
 
                 if (foundSeries == null || foundIssue == null)
