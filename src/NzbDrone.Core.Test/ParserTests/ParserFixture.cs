@@ -234,6 +234,10 @@ namespace NzbDrone.Core.Test.ParserTests
 
             parseResult.Should().NotBeNull();
             parseResult.SeriesName.ToLowerInvariant().Should().Contain("amazing spider-man epic collection");
+
+            // the volume marker must not leak into the series name - the
+            // library lookup cleans it to a name no series has
+            parseResult.SeriesName.ToLowerInvariant().Should().NotContain("vol");
         }
 
         [TestCase("Amazing Spider-Man Epic Collection Vol. 11 - Nine Lives Has The Black Cat (2025)")]

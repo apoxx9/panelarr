@@ -490,6 +490,15 @@ namespace NzbDrone.Core.Parser
                     foundIssue = bestIssue.Title;
                 }
 
+                // A volume marker absorbed inside the matched span would poison
+                // the series lookup ("... Vol 11 - Nine Lives ..." cleans to a
+                // name no library series has) - return the name the library
+                // knows, with the marker stripped.
+                if (foundSeries != null && volMatch.Success && CollectedVolumeInfixRegex.IsMatch(foundSeries))
+                {
+                    foundSeries = Regex.Replace(CollectedVolumeInfixRegex.Replace(foundSeries, " "), @"\s+", " ").Trim();
+                }
+
                 Logger.Trace($"Found {foundSeries} - {foundIssue} with fuzzy parser");
 
                 if (foundSeries == null || foundIssue == null)
