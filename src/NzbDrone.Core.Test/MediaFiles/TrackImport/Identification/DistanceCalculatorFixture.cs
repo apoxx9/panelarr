@@ -112,6 +112,47 @@ namespace NzbDrone.Core.Test.MediaFiles.IssueImport.Identification
         }
 
         [Test]
+        public void agreeing_issue_number_must_not_rescue_a_wrong_collected_edition_pairing()
+        {
+            // Observed live: "v01 - Captain America Lives Again" tracked to
+            // "The Captain" imported anyway - both carry issue number 1, and
+            // the weight-10 agreement dragged a 55% series+title mismatch
+            // under the threshold. Volume numbers carry no signal for
+            // collected editions, so the comparison must not run at all.
+            var tracks = new List<LocalIssue>
+            {
+                new LocalIssue
+                {
+                    FileTagInfo = new ParsedFileTagInfo
+                    {
+                        Series = new List<string>
+                        {
+                            "Captain America Epic Collection",
+                            "Captain America Epic Collection Captain America Lives Again"
+                        },
+                        SeriesIndex = "1",
+                        IssueTitle = "v01 - Captain America Lives Again",
+                        IsCollectedEdition = true
+                    }
+                }
+            };
+
+            var issue = new Issue
+            {
+                IssueNumber = "1",
+                Title = "Volume 14",
+                SeriesMetadata = new SeriesMetadata
+                {
+                    Name = "Captain America Epic Collection: The Captain"
+                }
+            };
+
+            var dist = DistanceCalculator.IssueDistance(tracks, issue);
+
+            dist.NormalizedDistance().Should().BeGreaterThan(0.2);
+        }
+
+        [Test]
         public void collected_edition_title_with_release_junk_compares_against_the_subtitle()
         {
             // A tagger convention observed live: the embedded title carries no

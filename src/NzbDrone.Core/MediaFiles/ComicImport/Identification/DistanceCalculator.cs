@@ -40,6 +40,8 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             dist.AddString("series", allSeries, issue.SeriesMetadata.Value.Name);
             Logger.Trace("series: '{0}' vs '{1}'; {2}", allSeries.ConcatToString("' or '"), issue.SeriesMetadata.Value.Name, dist.NormalizedDistance());
 
+            var isCollectedEdition = localTracks.Any(x => x.FileTagInfo.IsCollectedEdition);
+
             // Only compare issue titles when BOTH sides have a real one. An
             // empty local title surfaces as "" or a "#18"-style filename
             // placeholder — string-matching that against the provider's arc
@@ -85,7 +87,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
                 // subtitle too, so the subtitle match the series was
                 // identified by is not punished a second time at the title
                 // layer.
-                if (localTracks.Any(x => x.FileTagInfo.IsCollectedEdition))
+                if (isCollectedEdition)
                 {
                     var parenIndex = title.IndexOf('(');
                     var preParen = parenIndex > 0 ? title.Substring(0, parenIndex).TrimEnd(' ', '-', '–', '—') : title;
@@ -119,10 +121,13 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             // Issue number — the most reliable matching signal for comics.
             // Normalize both sides so padded ("003") and trailing-zero ("1.50")
             // forms compare equal, matching the candidate-lookup normalization.
-            // Skipped for a sole-issue fallback candidate: the local number is
-            // then a collected edition's line volume, not an issue index.
+            // Skipped entirely for collected editions: release volume numbers
+            // mix line and publication order, and every per-volume series
+            // numbers its sole issue 1 — a "v01" agreeing with the WRONG
+            // series' issue 1 dragged a 55% mismatch under the threshold on
+            // this comparison's weight alone. The subtitle carries the signal.
             var localIssueNumber = localTracks.MostCommon(x => x.FileTagInfo.SeriesIndex) ?? "";
-            if (!ignoreIssueNumber && localIssueNumber.IsNotNullOrWhiteSpace())
+            if (!ignoreIssueNumber && !isCollectedEdition && localIssueNumber.IsNotNullOrWhiteSpace())
             {
                 var dbIssueNumber = issue.IssueNumber ?? "";
                 dist.AddString("issue_number", NormalizeIssueNumber(localIssueNumber), NormalizeIssueNumber(dbIssueNumber));
