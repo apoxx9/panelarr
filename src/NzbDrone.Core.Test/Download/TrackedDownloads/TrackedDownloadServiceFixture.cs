@@ -14,7 +14,6 @@ using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
-using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.Download.TrackedDownloads
 {
@@ -84,12 +83,6 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
             trackedDownload.RemoteIssue.Should().NotBeNull();
             trackedDownload.RemoteIssue.Series.Id.Should().Be(150);
             trackedDownload.RemoteIssue.Issues.Should().ContainSingle(i => i.Id == 1917);
-
-            // the static title parser logs (and swallows) an error on this
-            // title shape under the test harness - unrelated to the mapping
-            // under test, which must succeed regardless of what the title
-            // parse yields
-            ExceptionVerification.IgnoreErrors();
         }
 
         [Test]

@@ -316,6 +316,28 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.SeriesName.Should().Be("Amazing Spider-Man Modern Era Epic Collection: Sins Past");
         }
 
+        [Test]
+        public void should_return_null_not_throw_when_criteria_series_is_missing()
+        {
+            // The tracked-download service hands over a history row's series
+            // and issue - either can be null when the series was deleted after
+            // the grab. This used to throw NullReferenceException (swallowed
+            // and logged as an error on every tracker sync).
+            var result = Parser.Parser.ParseIssueTitleWithSearchCriteria(
+                "Aliens Epic Collection Vol. 3 (2025)", null, new List<Issue> { new Issue { Title = "Volume 3" } });
+
+            result.Should().BeNull();
+        }
+
+        [Test]
+        public void should_return_null_not_throw_when_criteria_issues_are_null_entries()
+        {
+            var result = Parser.Parser.ParseIssueTitleWithSearchCriteria(
+                "Aliens Epic Collection Vol. 3 (2025)", new Series { Name = "Aliens Epic Collection" }, new List<Issue> { null });
+
+            result.Should().BeNull();
+        }
+
         [TestCase("Saga Vol. 03 (2015) (Digital)")]
         public void should_not_match_an_ongoings_trade_as_its_first_issue(string releaseTitle)
         {

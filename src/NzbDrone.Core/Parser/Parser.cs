@@ -409,6 +409,23 @@ namespace NzbDrone.Core.Parser
                     return comicResult;
                 }
 
+                // Callers hand over whatever they have - a history row whose
+                // series was deleted, or a null issue - and this must not
+                // crash-and-swallow: no criteria means nothing to match against.
+                if (series?.Name == null)
+                {
+                    Logger.Debug("No criteria series for '{0}', cannot parse with search criteria", title);
+                    return null;
+                }
+
+                issues = issues?.Where(i => i != null).ToList() ?? new List<Issue>();
+
+                if (!issues.Any())
+                {
+                    Logger.Debug("No criteria issues for '{0}', cannot parse with search criteria", title);
+                    return null;
+                }
+
                 var seriesName = series.Name == "Various Series" ? "VA" : series.Name.RemoveAccent();
 
                 Logger.Debug("Parsing string '{0}' using search criteria series: '{1}' issues: '{2}'",
