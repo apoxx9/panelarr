@@ -524,16 +524,19 @@ namespace NzbDrone.Core.Parser
                     foundIssue = bestIssue.Title;
                 }
 
-                // A volume marker absorbed inside the matched span would poison
-                // the series lookup ("... Vol 11 - Nine Lives ..." cleans to a
-                // name no library series has) - return the name the library
-                // knows, with the marker stripped.
-                if (foundSeries != null && volMatch.Success && CollectedVolumeInfixRegex.IsMatch(foundSeries))
+                Logger.Trace($"Found {foundSeries} - {foundIssue} with fuzzy parser");
+
+                if (foundSeries == null || foundIssue == null)
                 {
-                    foundSeries = Regex.Replace(CollectedVolumeInfixRegex.Replace(foundSeries, " "), @"\s+", " ").Trim();
+                    return null;
                 }
 
-                Logger.Trace($"Found {foundSeries} - {foundIssue} with fuzzy parser");
+                // The match was made AGAINST the criteria series' name, so
+                // that name is the answer - not the matched span, which can
+                // drop a leading "The", absorb a volume marker, or stop short
+                // of the subtitle, all of which clean to names no library
+                // series has and reject the release Unknown Series.
+                foundSeries = series.Name == "Various Series" ? foundSeries : series.Name;
 
                 if (foundSeries == null || foundIssue == null)
                 {

@@ -291,6 +291,31 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.Should().NotBeNull();
         }
 
+        [TestCase("Amazing Spider-Man Modern Era Epic Collection Vol. 14 – Big Time (2025) (Digital) (Asgard-Empire)")]
+        [TestCase("Amazing Spider-Man Modern Era Epic Collection Vol. 14: Big Time by Marvel Comics [ENG / CBR]")]
+        public void should_return_the_criteria_series_name_when_the_release_drops_a_leading_the(string releaseTitle)
+        {
+            GivenSearchCriteria("The Amazing Spider-Man Modern Era Epic Collection: Big Time", "Volume 14");
+            _books[0].IssueNumber = "1";
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().NotBeNull();
+            parseResult.SeriesName.Should().Be("The Amazing Spider-Man Modern Era Epic Collection: Big Time");
+        }
+
+        [TestCase("Amazing Spider-Man Modern Era Epic Collection Vol. 10 – Sins Past (2026) (Digital) (Asgard-Empire)")]
+        public void should_return_the_criteria_series_name_when_the_match_stops_short_of_the_subtitle(string releaseTitle)
+        {
+            GivenSearchCriteria("Amazing Spider-Man Modern Era Epic Collection: Sins Past", "Volume 10");
+            _books[0].IssueNumber = "1";
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().NotBeNull();
+            parseResult.SeriesName.Should().Be("Amazing Spider-Man Modern Era Epic Collection: Sins Past");
+        }
+
         [TestCase("Saga Vol. 03 (2015) (Digital)")]
         public void should_not_match_an_ongoings_trade_as_its_first_issue(string releaseTitle)
         {
@@ -331,7 +356,7 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.Should().BeNull();
         }
 
-        [TestCase("George R.R. Martin", "The Hero", "The Hero George R R Martin", "George R R Martin", "The Hero")]
+        [TestCase("George R.R. Martin", "The Hero", "The Hero George R R Martin", "George R.R. Martin", "The Hero")]
         [TestCase("James Herbert", "48", "James Hertbert Collection/'48 - James Herbert (epub)", "James Herbert", "48")]
         public void should_parse_with_search_criteria(string searchSeries, string searchIssue, string report, string expectedSeries, string expectedIssue)
         {
@@ -372,7 +397,10 @@ namespace NzbDrone.Core.Test.ParserTests
         {
             GivenSearchCriteria(series, issue);
             var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
-            parseResult.SeriesName.Should().Be("Rene Goscinny");
+
+            // the criteria series name is returned as-is - the mapper cleans
+            // accents on both sides, so the round-trip to the library holds
+            parseResult.SeriesName.Should().Be("Ren\u00E9 Goscinny");
             parseResult.IssueTitle.Should().Be("Rene Goscinny");
         }
 
@@ -386,7 +414,7 @@ namespace NzbDrone.Core.Test.ParserTests
             GivenSearchCriteria("Ren\u00E9 Goscinny", "Asterix in Britain");
             var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(
                 "Rene Goscinny Asterix and Cleopatra (Deluxe Special Edition) Digital CBZ 2024 UNDERTONE iNT", _series, _books);
-            parseResult.SeriesName.Should().Be("Rene Goscinny");
+            parseResult.SeriesName.Should().Be("Ren\u00E9 Goscinny");
             parseResult.IssueTitle.Should().Be("Asterix and Cleopatra");
         }
 
