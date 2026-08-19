@@ -95,6 +95,10 @@ namespace NzbDrone.Core.Issues
         {
             Series series;
 
+            // Adding a series is interactive - its volume and issue fetches
+            // must not queue behind a scheduled refresh.
+            using var scope = NzbDrone.Core.MetadataSource.ComicVine.ComicVineRequestScope.Interactive();
+
             try
             {
                 series = _seriesInfo.GetSeriesInfo(newSeries.Metadata.Value.ForeignSeriesId, false);

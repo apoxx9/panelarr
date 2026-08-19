@@ -29,6 +29,10 @@ namespace Panelarr.Api.V1.Series
         [HttpGet]
         public object Search([FromQuery] string term, [FromQuery] int? year)
         {
+            // A person is waiting on this lookup - take the ComicVine fast
+            // lane past any scheduled refresh that has drained the bucket.
+            using var scope = NzbDrone.Core.MetadataSource.ComicVine.ComicVineRequestScope.Interactive();
+
             var criteria = new NzbDrone.Core.MetadataSource.MetadataSearchCriteria(term, year);
             var searchResults = _searchProxy.SearchForNewSeries(criteria);
             return MapToResource(searchResults).ToList();

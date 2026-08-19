@@ -36,6 +36,8 @@ namespace Panelarr.Api.V1.Search
                 return new List<SearchResource>();
             }
 
+            using var scope = NzbDrone.Core.MetadataSource.ComicVine.ComicVineRequestScope.Interactive();
+
             var criteria = new NzbDrone.Core.MetadataSource.MetadataSearchCriteria(term, year);
             var searchResults = _searchProxy.SearchForNewEntity(criteria);
             return MapToResource(searchResults).ToList();

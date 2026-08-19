@@ -385,6 +385,13 @@ namespace NzbDrone.Core.Issues
             var updated = false;
             var allSeries = _seriesService.GetSeries(seriesIds);
 
+            // A targeted refresh (a person pressed Refresh, or a new series
+            // was just added) is interactive; only the scheduled all-series
+            // pass is bulk.
+            using var scope = trigger == CommandTrigger.Manual || isNew
+                ? MetadataSource.ComicVine.ComicVineRequestScope.Interactive()
+                : null;
+
             foreach (var series in allSeries)
             {
                 try

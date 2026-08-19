@@ -100,5 +100,85 @@ namespace NzbDrone.Core.Test.MetadataSource.ComicVine
 
             limiter.BucketSize.Should().Be(200);
         }
+
+        [Test]
+        public void interactive_caller_takes_the_next_token_ahead_of_a_waiting_bulk_caller()
+        {
+            // 2 tokens per 2s => one drips every second. Drain the bucket,
+            // park a BULK caller waiting, then arrive INTERACTIVE a beat
+            // later: the next token must go to the interactive caller first.
+            var limiter = new ComicVineRateLimiter(TestLogger, 2, TimeSpan.FromSeconds(2));
+            limiter.WaitForToken(ComicVineRequestPriority.Bulk);
+            limiter.WaitForToken(ComicVineRequestPriority.Bulk);
+
+            var order = new System.Collections.Concurrent.ConcurrentQueue<string>();
+
+            var bulk = new System.Threading.Thread(() =>
+            {
+                limiter.WaitForToken(ComicVineRequestPriority.Bulk);
+                order.Enqueue("bulk");
+            });
+            bulk.Start();
+            System.Threading.Thread.Sleep(150);
+
+            var interactive = new System.Threading.Thread(() =>
+            {
+                limiter.WaitForToken(ComicVineRequestPriority.Interactive);
+                order.Enqueue("interactive");
+            });
+            interactive.Start();
+
+            interactive.Join(TimeSpan.FromSeconds(5)).Should().BeTrue();
+            bulk.Join(TimeSpan.FromSeconds(5)).Should().BeTrue();
+
+            order.ToArray().Should().Equal("interactive", "bulk");
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
+        public void bulk_caller_stands_aside_while_an_interactive_caller_is_waiting_even_with_tokens_available()
+        {
+            var limiter = new ComicVineRateLimiter(TestLogger, 2, TimeSpan.FromSeconds(2));
+            limiter.WaitForToken(ComicVineRequestPriority.Bulk);
+            limiter.WaitForToken(ComicVineRequestPriority.Bulk);
+
+            // interactive arrives first and waits for the drip
+            var order = new System.Collections.Concurrent.ConcurrentQueue<string>();
+            var interactive = new System.Threading.Thread(() =>
+            {
+                limiter.WaitForToken(ComicVineRequestPriority.Interactive);
+                order.Enqueue("interactive");
+            });
+            interactive.Start();
+            System.Threading.Thread.Sleep(150);
+
+            var bulk = new System.Threading.Thread(() =>
+            {
+                limiter.WaitForToken(ComicVineRequestPriority.Bulk);
+                order.Enqueue("bulk");
+            });
+            bulk.Start();
+
+            interactive.Join(TimeSpan.FromSeconds(5)).Should().BeTrue();
+            bulk.Join(TimeSpan.FromSeconds(5)).Should().BeTrue();
+
+            order.ToArray().Should().Equal("interactive", "bulk");
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
+        public void interactive_scope_sets_the_ambient_priority_and_restores_it()
+        {
+            ComicVineRateLimiter.CurrentPriority.Should().Be(ComicVineRequestPriority.Bulk);
+
+            using (ComicVineRequestScope.Interactive())
+            {
+                ComicVineRateLimiter.CurrentPriority.Should().Be(ComicVineRequestPriority.Interactive);
+            }
+
+            ComicVineRateLimiter.CurrentPriority.Should().Be(ComicVineRequestPriority.Bulk);
+        }
     }
 }

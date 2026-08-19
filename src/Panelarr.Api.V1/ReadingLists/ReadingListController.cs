@@ -321,6 +321,8 @@ namespace Panelarr.Api.V1.ReadingLists
         [HttpPost("{id:int}/resolveprovider")]
         public ProviderResolveReport ResolveProvider(int id)
         {
+            using var scope = NzbDrone.Core.MetadataSource.ComicVine.ComicVineRequestScope.Interactive();
+
             return _readingListService.ResolveMissingProviderIds(id);
         }
 
