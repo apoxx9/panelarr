@@ -71,5 +71,23 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().Be(false);
         }
+
+        [Test]
+        public void should_be_true_if_direct_download_and_direct_download_is_enabled()
+        {
+            GivenProtocol(DownloadProtocol.DirectDownload);
+            _delayProfile.EnableDirectDownload = true;
+
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().Be(true);
+        }
+
+        [Test]
+        public void should_be_false_if_direct_download_and_direct_download_is_disabled()
+        {
+            GivenProtocol(DownloadProtocol.DirectDownload);
+            _delayProfile.EnableDirectDownload = false;
+
+            Subject.IsSatisfiedBy(_remoteIssue, null).Accepted.Should().Be(false);
+        }
     }
 }

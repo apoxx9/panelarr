@@ -5,24 +5,18 @@ import titleCase from 'Utilities/String/titleCase';
 function TagDetailsDelayProfile(props) {
   const {
     preferredProtocol,
-    enableUsenet,
     enableTorrent,
-    usenetDelay,
-    torrentDelay
+    enableDirectDownload,
+    torrentDelay,
+    directDownloadDelay
   } = props;
+
+  const preferred = preferredProtocol === 'directDownload' ? 'Direct Download' : titleCase(preferredProtocol);
 
   return (
     <div>
       <div>
-        Protocol: {titleCase(preferredProtocol)}
-      </div>
-
-      <div>
-        {
-          enableUsenet ?
-            `Usenet Delay: ${usenetDelay}` :
-            'Usenet disabled'
-        }
+        Protocol: {preferred}
       </div>
 
       <div>
@@ -32,16 +26,24 @@ function TagDetailsDelayProfile(props) {
             'Torrents disabled'
         }
       </div>
+
+      <div>
+        {
+          enableDirectDownload ?
+            `Direct Download Delay: ${directDownloadDelay}` :
+            'Direct downloads disabled'
+        }
+      </div>
     </div>
   );
 }
 
 TagDetailsDelayProfile.propTypes = {
   preferredProtocol: PropTypes.string.isRequired,
-  enableUsenet: PropTypes.bool.isRequired,
   enableTorrent: PropTypes.bool.isRequired,
-  usenetDelay: PropTypes.number.isRequired,
-  torrentDelay: PropTypes.number.isRequired
+  enableDirectDownload: PropTypes.bool.isRequired,
+  torrentDelay: PropTypes.number.isRequired,
+  directDownloadDelay: PropTypes.number.isRequired
 };
 
 export default TagDetailsDelayProfile;

@@ -65,20 +65,20 @@ function TagDetailsModalContent(props) {
                   const {
                     id,
                     preferredProtocol,
-                    enableUsenet,
                     enableTorrent,
-                    usenetDelay,
-                    torrentDelay
+                    enableDirectDownload,
+                    torrentDelay,
+                    directDownloadDelay
                   } = item;
 
                   return (
                     <TagDetailsDelayProfile
                       key={id}
                       preferredProtocol={preferredProtocol}
-                      enableUsenet={enableUsenet}
                       enableTorrent={enableTorrent}
-                      usenetDelay={usenetDelay}
+                      enableDirectDownload={enableDirectDownload}
                       torrentDelay={torrentDelay}
+                      directDownloadDelay={directDownloadDelay}
                     />
                   );
                 })

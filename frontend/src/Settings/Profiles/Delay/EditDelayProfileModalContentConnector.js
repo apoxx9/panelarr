@@ -10,20 +10,24 @@ import EditDelayProfileModalContent from './EditDelayProfileModalContent';
 const newDelayProfile = {
   enableUsenet: true,
   enableTorrent: true,
-  preferredProtocol: 'usenet',
+  enableDirectDownload: true,
+  preferredProtocol: 'torrent',
   usenetDelay: 0,
   torrentDelay: 0,
+  directDownloadDelay: 0,
   bypassIfHighestQuality: false,
   bypassIfAboveCustomFormatScore: false,
   minimumCustomFormatScore: 0,
   tags: []
 };
 
+// Comics are sourced from torrent trackers and direct-download sites; usenet
+// stays enabled behind the scenes but is not a choice worth surfacing.
 const protocolOptions = [
-  { key: 'preferUsenet', value: 'Prefer Usenet' },
   { key: 'preferTorrent', value: 'Prefer Torrent' },
-  { key: 'onlyUsenet', value: 'Only Usenet' },
-  { key: 'onlyTorrent', value: 'Only Torrent' }
+  { key: 'preferDirectDownload', value: 'Prefer Direct Download' },
+  { key: 'onlyTorrent', value: 'Only Torrent' },
+  { key: 'onlyDirectDownload', value: 'Only Direct Download' }
 ];
 
 function createDelayProfileSelector() {
@@ -60,23 +64,21 @@ function createMapStateToProps() {
   return createSelector(
     createDelayProfileSelector(),
     (delayProfile) => {
-      const enableUsenet = delayProfile.item.enableUsenet.value;
       const enableTorrent = delayProfile.item.enableTorrent.value;
+      const enableDirectDownload = delayProfile.item.enableDirectDownload.value;
       const preferredProtocol = delayProfile.item.preferredProtocol.value;
-      let protocol = 'preferUsenet';
+      let protocol = 'preferTorrent';
 
-      if (preferredProtocol === 'usenet') {
-        protocol = 'preferUsenet';
-      } else {
-        protocol = 'preferTorrent';
+      if (preferredProtocol === 'directDownload') {
+        protocol = 'preferDirectDownload';
       }
 
-      if (!enableUsenet) {
+      if (!enableDirectDownload) {
         protocol = 'onlyTorrent';
       }
 
       if (!enableTorrent) {
-        protocol = 'onlyUsenet';
+        protocol = 'onlyDirectDownload';
       }
 
       return {
@@ -124,25 +126,25 @@ class EditDelayProfileModalContentConnector extends Component {
 
   onProtocolChange = ({ value }) => {
     switch (value) {
-      case 'preferUsenet':
-        this.props.setDelayProfileValue({ name: 'enableUsenet', value: true });
-        this.props.setDelayProfileValue({ name: 'enableTorrent', value: true });
-        this.props.setDelayProfileValue({ name: 'preferredProtocol', value: 'usenet' });
-        break;
       case 'preferTorrent':
-        this.props.setDelayProfileValue({ name: 'enableUsenet', value: true });
         this.props.setDelayProfileValue({ name: 'enableTorrent', value: true });
+        this.props.setDelayProfileValue({ name: 'enableDirectDownload', value: true });
         this.props.setDelayProfileValue({ name: 'preferredProtocol', value: 'torrent' });
         break;
-      case 'onlyUsenet':
-        this.props.setDelayProfileValue({ name: 'enableUsenet', value: true });
-        this.props.setDelayProfileValue({ name: 'enableTorrent', value: false });
-        this.props.setDelayProfileValue({ name: 'preferredProtocol', value: 'usenet' });
+      case 'preferDirectDownload':
+        this.props.setDelayProfileValue({ name: 'enableTorrent', value: true });
+        this.props.setDelayProfileValue({ name: 'enableDirectDownload', value: true });
+        this.props.setDelayProfileValue({ name: 'preferredProtocol', value: 'directDownload' });
         break;
       case 'onlyTorrent':
-        this.props.setDelayProfileValue({ name: 'enableUsenet', value: false });
         this.props.setDelayProfileValue({ name: 'enableTorrent', value: true });
+        this.props.setDelayProfileValue({ name: 'enableDirectDownload', value: false });
         this.props.setDelayProfileValue({ name: 'preferredProtocol', value: 'torrent' });
+        break;
+      case 'onlyDirectDownload':
+        this.props.setDelayProfileValue({ name: 'enableTorrent', value: false });
+        this.props.setDelayProfileValue({ name: 'enableDirectDownload', value: true });
+        this.props.setDelayProfileValue({ name: 'preferredProtocol', value: 'directDownload' });
         break;
       default:
         throw Error(`Unknown protocol option: ${value}`);

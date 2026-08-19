@@ -74,23 +74,23 @@ class DelayProfile extends Component {
   render() {
     const {
       id,
-      enableUsenet,
       enableTorrent,
+      enableDirectDownload,
       preferredProtocol,
-      usenetDelay,
       torrentDelay,
+      directDownloadDelay,
       tags,
       tagList,
       isDragging,
       connectDragSource
     } = this.props;
 
-    let preferred = titleCase(preferredProtocol);
+    let preferred = preferredProtocol === 'directDownload' ? 'Direct Download' : titleCase(preferredProtocol);
 
-    if (!enableUsenet) {
+    if (!enableDirectDownload) {
       preferred = 'Only Torrent';
     } else if (!enableTorrent) {
-      preferred = 'Only Usenet';
+      preferred = 'Only Direct Download';
     }
 
     return (
@@ -101,8 +101,8 @@ class DelayProfile extends Component {
         )}
       >
         <div className={styles.column}>{preferred}</div>
-        <div className={styles.column}>{getDelay(enableUsenet, usenetDelay)}</div>
         <div className={styles.column}>{getDelay(enableTorrent, torrentDelay)}</div>
+        <div className={styles.column}>{getDelay(enableDirectDownload, directDownloadDelay)}</div>
 
         <TagList
           tags={tags}
@@ -153,11 +153,11 @@ class DelayProfile extends Component {
 
 DelayProfile.propTypes = {
   id: PropTypes.number.isRequired,
-  enableUsenet: PropTypes.bool.isRequired,
   enableTorrent: PropTypes.bool.isRequired,
+  enableDirectDownload: PropTypes.bool.isRequired,
   preferredProtocol: PropTypes.string.isRequired,
-  usenetDelay: PropTypes.number.isRequired,
   torrentDelay: PropTypes.number.isRequired,
+  directDownloadDelay: PropTypes.number.isRequired,
   tags: PropTypes.arrayOf(PropTypes.number).isRequired,
   tagList: PropTypes.arrayOf(PropTypes.object).isRequired,
   isDragging: PropTypes.bool.isRequired,

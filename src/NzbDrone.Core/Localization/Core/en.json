@@ -1045,6 +1045,8 @@
   "Tomorrow": "Tomorrow",
   "TorrentDelay": "Torrent Delay",
   "TorrentDelayHelpText": "Delay in minutes to wait before grabbing a torrent",
+  "DirectDownloadDelay": "Direct Download Delay",
+  "DirectDownloadDelayHelpText": "Delay in minutes to wait before grabbing a direct download (GetComics)",
   "Torrents": "Torrents",
   "TotalFileSize": "Total File Size",
   "TotalIssueCountIssuesTotalIssueFileCountIssuesWithFilesInterp": "{0} issues total, {1} issues with files",

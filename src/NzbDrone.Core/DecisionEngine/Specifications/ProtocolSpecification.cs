@@ -37,6 +37,12 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 return Decision.Reject("Torrent is not enabled for this series");
             }
 
+            if (subject.Release.DownloadProtocol == DownloadProtocol.DirectDownload && !delayProfile.EnableDirectDownload)
+            {
+                _logger.Debug("[{0}] Direct download is not enabled for this series", subject.Release.Title);
+                return Decision.Reject("Direct download is not enabled for this series");
+            }
+
             return Decision.Accept();
         }
     }

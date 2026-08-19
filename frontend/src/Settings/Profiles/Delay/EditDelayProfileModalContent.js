@@ -36,10 +36,10 @@ function EditDelayProfileModalContent(props) {
   } = props;
 
   const {
-    enableUsenet,
     enableTorrent,
-    usenetDelay,
+    enableDirectDownload,
     torrentDelay,
+    directDownloadDelay,
     bypassIfHighestQuality,
     bypassIfAboveCustomFormatScore,
     minimumCustomFormatScore,
@@ -84,25 +84,6 @@ function EditDelayProfileModalContent(props) {
               </FormGroup>
 
               {
-                enableUsenet.value ?
-                  <FormGroup>
-                    <FormLabel>
-                      {translate('UsenetDelay')}
-                    </FormLabel>
-
-                    <FormInputGroup
-                      type={inputTypes.NUMBER}
-                      name="usenetDelay"
-                      unit="minutes"
-                      {...usenetDelay}
-                      helpText={translate('UsenetDelayHelpText')}
-                      onChange={onInputChange}
-                    />
-                  </FormGroup> :
-                  null
-              }
-
-              {
                 enableTorrent.value ?
                   <FormGroup>
                     <FormLabel>
@@ -115,6 +96,25 @@ function EditDelayProfileModalContent(props) {
                       unit="minutes"
                       {...torrentDelay}
                       helpText={translate('TorrentDelayHelpText')}
+                      onChange={onInputChange}
+                    />
+                  </FormGroup> :
+                  null
+              }
+
+              {
+                enableDirectDownload.value ?
+                  <FormGroup>
+                    <FormLabel>
+                      {translate('DirectDownloadDelay')}
+                    </FormLabel>
+
+                    <FormInputGroup
+                      type={inputTypes.NUMBER}
+                      name="directDownloadDelay"
+                      unit="minutes"
+                      {...directDownloadDelay}
+                      helpText={translate('DirectDownloadDelayHelpText')}
                       onChange={onInputChange}
                     />
                   </FormGroup> :
@@ -215,10 +215,10 @@ function EditDelayProfileModalContent(props) {
 }
 
 const delayProfileShape = {
-  enableUsenet: PropTypes.shape(boolSettingShape).isRequired,
   enableTorrent: PropTypes.shape(boolSettingShape).isRequired,
-  usenetDelay: PropTypes.shape(numberSettingShape).isRequired,
+  enableDirectDownload: PropTypes.shape(boolSettingShape).isRequired,
   torrentDelay: PropTypes.shape(numberSettingShape).isRequired,
+  directDownloadDelay: PropTypes.shape(numberSettingShape).isRequired,
   bypassIfHighestQuality: PropTypes.shape(boolSettingShape).isRequired,
   bypassIfAboveCustomFormatScore: PropTypes.shape(boolSettingShape).isRequired,
   minimumCustomFormatScore: PropTypes.shape(numberSettingShape).isRequired,
