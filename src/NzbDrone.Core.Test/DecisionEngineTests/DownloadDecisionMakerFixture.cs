@@ -323,6 +323,42 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
+        public void comic_parsed_release_with_series_but_no_issue_number_still_yields_a_decision_in_search()
+        {
+            // Observed live: "Aliens Epic Collection – The Original Years Vol. 3
+            // (2025)" parsed to the right series with no issue number, and the
+            // release fell out of the loop with NO decision - it vanished from
+            // search results entirely rather than being accepted or rejected.
+            var pass = new Mock<IDecisionEngineSpecification>();
+            pass.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), It.IsAny<SearchCriteriaBase>())).Returns(Decision.Accept);
+            GivenSpecifications(pass);
+
+            var series = new Series { Id = 5, Name = "Aliens Epic Collection: The Original Years", CleanName = "aliensepiccollectiontheoriginalyears" };
+            var issues = new List<Issue> { new Issue { Id = 9, IssueNumber = "3", Title = "Volume 3" } };
+            var criteria = new IssueSearchCriteria { Series = series, Issues = issues };
+            var reports = new List<ReleaseInfo> { new ReleaseInfo { Title = "Aliens Epic Collection – The Original Years Vol. 3 (2025)" } };
+
+            Mocker.GetMock<IParsingService>()
+                  .Setup(c => c.MapComicRelease(It.IsAny<ParsedComicInfo>(), It.IsAny<SearchCriteriaBase>()))
+                  .Returns(new RemoteIssue
+                  {
+                      Series = series,
+                      Issues = new List<Issue>(),
+                      ParsedIssueInfo = new ParsedIssueInfo
+                      {
+                          SeriesName = series.Name,
+                          Quality = new QualityModel(Quality.Digital)
+                      }
+                  });
+
+            var decisions = Subject.GetSearchDecision(reports, criteria);
+
+            decisions.Should().HaveCount(1);
+            decisions[0].RemoteIssue.Issues.Should().BeEquivalentTo(issues);
+            decisions[0].RemoteIssue.DownloadAllowed.Should().BeTrue();
+        }
+
+        [Test]
         public void should_return_a_decision_when_exception_is_caught()
         {
             GivenSpecifications(_pass1);

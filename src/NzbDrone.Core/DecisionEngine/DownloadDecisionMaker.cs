@@ -162,26 +162,35 @@ namespace NzbDrone.Core.DecisionEngine
                                 remoteIssue.Issues = searchCriteria.Issues;
                             }
                         }
-                        else if (remoteIssue.Issues.Empty())
-                        {
-                            if (searchCriteria != null)
-                            {
-                                remoteIssue.Issues = searchCriteria.Issues;
-                            }
-                            else
-                            {
-                                decision = new DownloadDecision(remoteIssue, new Rejection("Unable to parse issues from release name"));
-                            }
-                        }
                         else
                         {
-                            _aggregationService.Augment(remoteIssue);
+                            if (remoteIssue.Issues.Empty())
+                            {
+                                if (searchCriteria == null)
+                                {
+                                    decision = new DownloadDecision(remoteIssue, new Rejection("Unable to parse issues from release name"));
+                                }
+                                else
+                                {
+                                    // The comic parser found the series but no issue number
+                                    // (collected editions carry a volume, not an issue) - a
+                                    // search knows which issue it wants. Previously the
+                                    // release fell out of the loop here with NO decision at
+                                    // all and vanished from results.
+                                    remoteIssue.Issues = searchCriteria.Issues;
+                                }
+                            }
 
-                            remoteIssue.CustomFormats = _formatCalculator.ParseCustomFormat(remoteIssue, remoteIssue.Release.Size);
-                            remoteIssue.CustomFormatScore = remoteIssue?.Series?.QualityProfile?.Value.CalculateCustomFormatScore(remoteIssue.CustomFormats) ?? 0;
+                            if (decision == null)
+                            {
+                                _aggregationService.Augment(remoteIssue);
 
-                            remoteIssue.DownloadAllowed = remoteIssue.Issues.Any();
-                            decision = GetDecisionForReport(remoteIssue, searchCriteria);
+                                remoteIssue.CustomFormats = _formatCalculator.ParseCustomFormat(remoteIssue, remoteIssue.Release.Size);
+                                remoteIssue.CustomFormatScore = remoteIssue?.Series?.QualityProfile?.Value.CalculateCustomFormatScore(remoteIssue.CustomFormats) ?? 0;
+
+                                remoteIssue.DownloadAllowed = remoteIssue.Issues.Any();
+                                decision = GetDecisionForReport(remoteIssue, searchCriteria);
+                            }
                         }
                     }
 
