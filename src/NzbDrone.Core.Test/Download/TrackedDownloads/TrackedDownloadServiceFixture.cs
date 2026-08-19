@@ -8,11 +8,13 @@ using NzbDrone.Core.Download.History;
 using NzbDrone.Core.Download.TrackedDownloads;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Indexers;
+using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.Issues.Events;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.Download.TrackedDownloads
 {
@@ -33,6 +35,61 @@ namespace NzbDrone.Core.Test.Download.TrackedDownloads
                          IssueId = 4,
                     }
                 });
+        }
+
+        [Test]
+        public void should_trust_the_grab_record_when_the_title_maps_to_a_series_without_issues()
+        {
+            // Observed live with "Aliens Epic Collection – The Original Years
+            // Vol. 3 (2025)": the title re-parsed without search criteria
+            // mapped to the right series but NO issue, and the download sat
+            // in the queue as unknown with nothing to import into - while the
+            // grab record knew the exact series and issue all along.
+            Mocker.GetMock<IHistoryService>()
+                .Setup(s => s.FindByDownloadId("GC1"))
+                .Returns(new List<EntityHistory>
+                {
+                    new EntityHistory
+                    {
+                        DownloadId = "GC1",
+                        EventType = EntityHistoryEventType.Grabbed,
+                        SourceTitle = "Aliens Epic Collection Vol. 3 (2025)",
+                        SeriesId = 150,
+                        IssueId = 1917,
+                    }
+                });
+
+            var series = new Series { Id = 150 };
+
+            // the criteria-less title map: series found, no issue
+            Mocker.GetMock<IParsingService>()
+                  .Setup(s => s.Map(It.IsAny<ParsedIssueInfo>(), (SearchCriteriaBase)null))
+                  .Returns(new RemoteIssue { Series = series, Issues = new List<Issue>(), ParsedIssueInfo = new ParsedIssueInfo { SeriesName = "Aliens Epic Collection" } });
+
+            // the grab-record map: series + the grabbed issue
+            Mocker.GetMock<IParsingService>()
+                  .Setup(s => s.Map(It.IsAny<ParsedIssueInfo>(), 150, It.Is<IEnumerable<int>>(ids => ids.Contains(1917))))
+                  .Returns(new RemoteIssue { Series = series, Issues = new List<Issue> { new Issue { Id = 1917 } }, ParsedIssueInfo = new ParsedIssueInfo { SeriesName = "Aliens Epic Collection" } });
+
+            var client = new DownloadClientDefinition { Id = 1, Protocol = DownloadProtocol.DirectDownload };
+            var item = new DownloadClientItem
+            {
+                Title = "Aliens Epic Collection Vol. 3 (2025)",
+                DownloadId = "GC1",
+                DownloadClientInfo = new DownloadClientItemClientInfo { Protocol = client.Protocol, Id = client.Id, Name = client.Name }
+            };
+
+            var trackedDownload = Subject.TrackDownload(client, item);
+
+            trackedDownload.RemoteIssue.Should().NotBeNull();
+            trackedDownload.RemoteIssue.Series.Id.Should().Be(150);
+            trackedDownload.RemoteIssue.Issues.Should().ContainSingle(i => i.Id == 1917);
+
+            // the static title parser logs (and swallows) an error on this
+            // title shape under the test harness - unrelated to the mapping
+            // under test, which must succeed regardless of what the title
+            // parse yields
+            ExceptionVerification.IgnoreErrors();
         }
 
         [Test]

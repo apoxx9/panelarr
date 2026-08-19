@@ -160,6 +160,30 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 
                     trackedDownload.Indexer = grabbedEvent?.Data?.GetValueOrDefault("indexer");
 
+                    // The grab record already names the exact series and issues
+                    // the decision engine chose - that is authoritative. Only
+                    // re-parse the title when the record has nothing: title
+                    // re-parsing a collected-edition name without search
+                    // criteria yields a series with no issue, and the download
+                    // landed in the queue as unknown with nothing to import into.
+                    var grabbedIssueIds = historyItems
+                        .Where(v => v.EventType == EntityHistoryEventType.Grabbed && v.IssueId > 0)
+                        .Select(h => h.IssueId)
+                        .Distinct()
+                        .ToList();
+
+                    if (grabbedEvent != null && grabbedEvent.SeriesId > 0 && grabbedIssueIds.Any() &&
+                        (trackedDownload.RemoteIssue?.Series == null || trackedDownload.RemoteIssue.Issues.Empty()))
+                    {
+                        var info = parsedIssueInfo ?? new ParsedIssueInfo
+                        {
+                            SeriesName = grabbedEvent.SourceTitle,
+                            Quality = QualityParser.ParseQuality(grabbedEvent.SourceTitle)
+                        };
+
+                        trackedDownload.RemoteIssue = _parsingService.Map(info, grabbedEvent.SeriesId, grabbedIssueIds);
+                    }
+
                     if (parsedIssueInfo == null ||
                         trackedDownload.RemoteIssue?.Series == null ||
                         trackedDownload.RemoteIssue.Issues.Empty())
