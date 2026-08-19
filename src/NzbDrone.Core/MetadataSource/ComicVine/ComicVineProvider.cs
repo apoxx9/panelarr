@@ -55,6 +55,7 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
                 ForeignSeriesId = "cv:" + detail.Id,
                 Name = detail.Name,
                 Overview = StripHtml(detail.Description),
+                Status = DeriveStatus(issues),
                 Year = TryParseYear(detail.StartYear),
                 ForeignPublisherId = detail.Publisher != null ? "cv:" + detail.Publisher.Id : null,
                 PublisherName = detail.Publisher?.Name,
@@ -170,6 +171,30 @@ namespace NzbDrone.Core.MetadataSource.ComicVine
         private static int? TryParseYear(string year)
         {
             return int.TryParse(year, out var y) ? y : (int?)null;
+        }
+
+        // ComicVine exposes no ongoing/ended flag, so derive one from the
+        // most recent cover date: a volume silent for longer than this is
+        // treated as ended. The boundary only steers refresh cadence (ended
+        // series refresh weekly instead of daily), and a revival is caught by
+        // the weekly pass or by an RSS release naming an unknown issue.
+        internal static readonly TimeSpan EndedAfter = TimeSpan.FromDays(180);
+
+        internal static string DeriveStatus(IEnumerable<Resources.ComicVineIssueSummary> issues)
+        {
+            var latest = issues
+                .Select(i => TryParseDate(i.CoverDate))
+                .Where(d => d.HasValue)
+                .Select(d => d.Value)
+                .DefaultIfEmpty(DateTime.MinValue)
+                .Max();
+
+            if (latest == DateTime.MinValue)
+            {
+                return "continuing";
+            }
+
+            return latest < DateTime.UtcNow - EndedAfter ? "ended" : "continuing";
         }
 
         private static DateTime? TryParseDate(string date)

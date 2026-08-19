@@ -9,8 +9,21 @@ namespace NzbDrone.Core.Issues
         bool ShouldRefresh(Series series);
     }
 
+    // Tiered refresh cadence, sized for a library of a thousand-plus series
+    // against ComicVine's ~200-requests/hour budget. Each refresh re-fetches
+    // the series AND its issue list, so what matters is how many series the
+    // daily pass lets through: ongoing series refresh daily, ended series
+    // weekly, and only a recent release (the one signal that a "finished"
+    // series is still moving) promotes an ended series to the daily tier.
+    // An ended series that revives is caught by its next weekly pass - or
+    // sooner, when an RSS release for it lands with no known issue.
     public class ShouldRefreshSeries : ICheckIfSeriesShouldBeRefreshed
     {
+        public static readonly TimeSpan MinimumInterval = TimeSpan.FromHours(12);
+        public static readonly TimeSpan ContinuingInterval = TimeSpan.FromDays(1);
+        public static readonly TimeSpan EndedInterval = TimeSpan.FromDays(7);
+        public static readonly TimeSpan RecentReleaseWindow = TimeSpan.FromDays(30);
+
         private readonly IIssueService _issueService;
         private readonly Logger _logger;
 
@@ -22,33 +35,47 @@ namespace NzbDrone.Core.Issues
 
         public bool ShouldRefresh(Series series)
         {
-            if (series.LastInfoSync < DateTime.UtcNow.AddDays(-30))
-            {
-                _logger.Trace("Series {0} last updated more than 30 days ago, should refresh.", series.Name);
-                return true;
-            }
+            var now = DateTime.UtcNow;
+            var sinceSync = now - series.LastInfoSync;
 
-            if (series.LastInfoSync >= DateTime.UtcNow.AddHours(-12))
+            if (sinceSync < MinimumInterval)
             {
                 _logger.Trace("Series {0} last updated less than 12 hours ago, should not be refreshed.", series.Name);
                 return false;
             }
 
-            if (series.Metadata.Value.Status == SeriesStatusType.Continuing && series.LastInfoSync < DateTime.UtcNow.AddDays(-2))
+            var status = series.Metadata.Value.Status;
+            var isActive = status == SeriesStatusType.Continuing || status == SeriesStatusType.Hiatus;
+
+            if (isActive)
             {
-                _logger.Trace("Series {0} is continuing and has not been refreshed in 2 days, should refresh.", series.Name);
+                if (sinceSync >= ContinuingInterval)
+                {
+                    _logger.Trace("Series {0} is continuing and has not been refreshed in a day, should refresh.", series.Name);
+                    return true;
+                }
+
+                _logger.Trace("Series {0} is continuing and was refreshed within a day, should not be refreshed.", series.Name);
+                return false;
+            }
+
+            if (sinceSync >= EndedInterval)
+            {
+                _logger.Trace("Series {0} is ended and has not been refreshed in a week, should refresh.", series.Name);
                 return true;
             }
 
+            // An "ended" series with an issue released in the last month is
+            // either mis-flagged or getting a late entry - treat it as active
             var lastIssue = _issueService.GetIssuesBySeries(series.Id).MaxBy(e => e.ReleaseDate);
 
-            if (lastIssue != null && lastIssue.ReleaseDate > DateTime.UtcNow.AddDays(-30))
+            if (lastIssue != null && lastIssue.ReleaseDate > now - RecentReleaseWindow && sinceSync >= ContinuingInterval)
             {
-                _logger.Trace("Last issue in {0} released less than 30 days ago, should refresh.", series.Name);
+                _logger.Trace("Last issue in ended series {0} released less than 30 days ago, should refresh daily.", series.Name);
                 return true;
             }
 
-            _logger.Trace("Series {0} ended long ago, should not be refreshed.", series.Name);
+            _logger.Trace("Series {0} is ended and was refreshed within a week, should not be refreshed.", series.Name);
             return false;
         }
     }
