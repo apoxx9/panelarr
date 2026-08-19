@@ -6,51 +6,64 @@ keys):
 ---
 
 We're continuing work on Panelarr (~/Projects/panelarr). Read
-`docs/last-handoff.md` first — full Session 24 state. Short version:
-three releases shipped (v1.1.19 → v1.1.21) fixing a three-bug pileup
-on the tag-embed path (DI crash, utf-16-declared XML, Web URL that
-crashed Kavita's parser); the Epic Collections arc is COMPLETE (all
-three lists live in Kavita); unmapped went 143 → 67; and 83
-Wikipedia-derived Epic reading lists (515 slots) now live in Panelarr
-as collecting checklists.
+`docs/last-handoff.md` first — full Session 29 state. Short version:
+SIXTEEN releases shipped (v1.1.27 → v1.1.42). GetComics automation is
+restored (the `/dls/` rename + first-party main-server link were the
+real story, not captchas); the collected-edition search+import chain
+was rebuilt through nine peeled bugs (every Epic test series — Iron
+Fist, Nine Lives, 22× Captain America, 4× Modern Era, Aliens — is
+complete in the library); Mega mirror support; idle-timeout downloads;
+tiered series refresh with derived CV status; torrent-first delay
+profiles with DirectDownload first-class; interactive fast lane in
+the ComicVine rate limiter; Name/Year filters; GitHub releases
+backfilled so the what's-new modal works.
 
 Homelab Panelarr API key: <paste key here>.
 Homelab Kavita API key (only if Kavita work planned): <paste key here>.
 
-Today's agenda (in recommended order):
+Today's agenda (recommended order):
 
-1. **Reading-list feature trio** (agreed backlog, design-discuss each
-   briefly before building):
-   a. Push resolved-slots-only (Kavita rejects lists wholesale when
-      any series is missing — blocks pushing the new checklists).
-   b. CBL matcher leniency: ignore leading "The" when resolving.
-   c. Export-all reading lists (zip of CBLs; per-list export exists).
-2. **Wire ComicFileRetaggedEvent** — nothing publishes it, so Kavita's
-   OnIssueRetag notify is dead code. Discuss trigger UX first (import
-   path already notifies; avoid double-notify).
-3. **Unmapped triage decisions** (user calls, then I execute): 47
-   annuals → add CV annual volumes (most have embedded CV ids); 6 Red
-   Hood Outlaw #41-49 → import into Red Hood and the Outlaws (2016)?;
-   ~11 redundant duplicates → delete or leave; 3 CV-gap oddities.
-4. Standing watch: quality "Unknown" modal, Backup lastDuration
-   cosmetic bug.
+1. **Check the tiered refresh's first scheduled run** (v1.1.40): count
+   "Updating Info" vs "Skipping refresh" lines in the log; expect
+   ~230 refreshes vs 584+ before. Tune the 180-day/7-day constants in
+   `ShouldRefreshSeries` / `ComicVineProvider.EndedAfter` if off.
+2. **Parser NRE** (backlog #2): `Parser.ParseIssueTitle` swallows a
+   NullReferenceException on some titles — root-cause it.
+3. **Session-24 triage decisions** (user calls, then execute): 47
+   annuals via the resolve/add flow; Red Hood Outlaw #41-49; ~11
+   duplicates; 3 CV-gap oddities.
+4. Optional quick wins: library-clutter saved filters; DD delay
+   tuning (30–60 min); editorial pass on backfilled release notes.
 
 Dev notes: local dev instance data dir is
 `~/Library/Application Support/Panelarr` (port 8787); binary builds to
 `_output/net10.0/` via `dotnet msbuild -restore src/Panelarr.sln
 -p:Configuration=Debug -p:Platform=Posix -t:Build`. Dev DB indexers and
 download clients are DISABLED on purpose. Puppeteer is global
-(NODE_PATH=$(npm root -g)). Suite green = Core.Test (2,573) +
-Host.Test ContainerFixture (resolves every command executor — run it
-for any new command/dependency).
+(NODE_PATH=$(npm root -g)). Suite green = Core.Test (2,646) +
+Host.Test ContainerFixture (run it for any new command/dependency).
+Incremental msbuild can skip the API project — `dotnet build
+src/Panelarr.Api.V1/Panelarr.Api.V1.csproj` explicitly if an API field
+doesn't appear.
 
-Hard-won gotchas: Kavita's scanner skips mtime-unchanged folders and
-silently drops files that throw during parse — pull the Kavita server
-log zip FIRST when files don't appear; its push-rejection messages
-truncate to 3 entries. ManualImport takes issueId singular per file.
+Ship ritual: commit (no AI attribution) → `bash
+~/.claude/panelarr-prepush-scan.sh` (must print SCAN CLEAN) → tag
+vX.Y.Z → push main + tag → `gh release create vX.Y.Z --notes-file
+<hand-written ## New / ## Fixed>` → watch the Docker workflow → user
+pulls. The what's-new modal reads those GitHub release bodies.
 
-Standing rules as always: test before presenting, discuss designs
-before implementing, scan before any push (from a file, as separate
-checked steps — not && chains), no AI attribution in commits, ask
-before pushing, homelab host/IP details stay OUT of public repo docs.
+Hard-won gotchas: trace-log diagnosis pattern (set logLevel=trace via
+/config/host, reproduce, pull /api/v1/log/file/panelarr.trace.txt,
+RESTORE); GetComics downloads run synchronously inside the grab
+command; stuck imports → DownloadedIssuesScan {path, downloadClientId}
+or ManualImport {files:[{path, seriesId, issueId, quality}]}; queue
+"unknown series" rows need includeUnknownSeriesItems=true; for
+collected editions the SUBTITLE is the only discriminator — volume
+numbers mix publication and line order and must never be trusted for
+matching.
+
+Standing rules as always: test before presenting (puppeteer + API),
+discuss designs before implementing, scan before any push, no AI
+attribution in commits, ask before pushing, homelab host/IP details
+stay OUT of public repo docs.
 ---
