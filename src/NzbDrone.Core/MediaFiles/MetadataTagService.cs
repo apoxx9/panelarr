@@ -7,6 +7,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.ComicInfo;
 using NzbDrone.Core.MediaFiles.Commands;
+using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Parser;
@@ -228,6 +229,25 @@ namespace NzbDrone.Core.MediaFiles
 
         private RetagComicFilePreview GetRetagPreview(ComicFile comicFile)
         {
+            var changes = ComputeRetagChanges(comicFile);
+
+            if (changes == null || !changes.Changes.Any())
+            {
+                return null;
+            }
+
+            return new RetagComicFilePreview
+            {
+                SeriesId = changes.SeriesId,
+                IssueId = comicFile.IssueId,
+                ComicFileId = comicFile.Id,
+                Path = comicFile.Path,
+                Changes = changes.Changes
+            };
+        }
+
+        private RetagChanges ComputeRetagChanges(ComicFile comicFile)
+        {
             // Read current embedded ComicInfo.xml fields
             var currentResults = _comicInfoReaderService.ReadMetadata(comicFile);
             var currentFields = currentResults
@@ -268,32 +288,37 @@ namespace NzbDrone.Core.MediaFiles
                 }
             }
 
-            if (!changes.Any())
-            {
-                return null;
-            }
-
-            return new RetagComicFilePreview
+            return new RetagChanges
             {
                 SeriesId = issue.SeriesId,
-                IssueId = comicFile.IssueId,
-                ComicFileId = comicFile.Id,
-                Path = comicFile.Path,
-                Changes = changes
+                Changes = changes,
+                HadExistingComicInfo = currentFields.Any(),
+                HasMetronInfo = currentResults.Any(r => r.Source.Equals("MetronInfo.xml", StringComparison.OrdinalIgnoreCase))
             };
+        }
+
+        private class RetagChanges
+        {
+            public int SeriesId { get; set; }
+            public Dictionary<string, Tuple<string, string>> Changes { get; set; }
+            public bool HadExistingComicInfo { get; set; }
+            public bool HasMetronInfo { get; set; }
         }
 
         public void Execute(RetagFilesCommand message)
         {
+            var retagged = new List<ComicFileRetaggedEvent>();
+
             foreach (var fileId in message.Files)
             {
                 try
                 {
                     var comicFile = _mediaFileService.Get(fileId);
-                    if (comicFile.ComicFormat != ComicFormat.Unknown)
+                    var retag = RetagFile(comicFile);
+
+                    if (retag != null)
                     {
-                        // explicit user command — embed regardless of the setting
-                        _comicInfoEmbedService.EmbedMetadata(comicFile);
+                        retagged.Add(retag);
                     }
                 }
                 catch (NzbDrone.Core.Datastore.ModelNotFoundException)
@@ -301,23 +326,80 @@ namespace NzbDrone.Core.MediaFiles
                     _logger.Warn("ComicFile {0} not found, skipping retag", fileId);
                 }
             }
+
+            PublishRetagged(retagged);
         }
 
         public void Execute(RetagSeriesCommand message)
         {
-            var allSeries = message.SeriesIds;
+            var retagged = new List<ComicFileRetaggedEvent>();
 
-            foreach (var seriesId in allSeries)
+            foreach (var seriesId in message.SeriesIds)
             {
                 var comicFiles = _mediaFileService.GetFilesBySeries(seriesId);
 
                 _logger.Info("Re-tagging {0} comic files for series {1}", comicFiles.Count, seriesId);
 
-                foreach (var file in comicFiles.Where(x => x.ComicFormat != ComicFormat.Unknown))
+                foreach (var file in comicFiles)
                 {
-                    // explicit user command — embed regardless of the setting
-                    _comicInfoEmbedService.EmbedMetadata(file);
+                    var retag = RetagFile(file);
+
+                    if (retag != null)
+                    {
+                        retagged.Add(retag);
+                    }
                 }
+            }
+
+            PublishRetagged(retagged);
+        }
+
+        private ComicFileRetaggedEvent RetagFile(ComicFile comicFile)
+        {
+            // Mirrors the embed service's own guards, so a skipped file never
+            // produces a retagged event
+            if (comicFile.IssueId == 0 ||
+                comicFile.ComicFormat != Issues.ComicFormat.CBZ ||
+                !System.IO.File.Exists(comicFile.Path))
+            {
+                return null;
+            }
+
+            RetagChanges changes = null;
+
+            try
+            {
+                changes = ComputeRetagChanges(comicFile);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, "Couldn't read existing tags for {0}, embedding anyway", comicFile.Path);
+            }
+
+            if (changes != null && !changes.Changes.Any() && changes.HasMetronInfo)
+            {
+                _logger.Debug("Tags already current for {0}, skipping retag", comicFile.Path);
+                return null;
+            }
+
+            // explicit user command — embed regardless of the setting
+            _comicInfoEmbedService.EmbedMetadata(comicFile);
+
+            return new ComicFileRetaggedEvent(comicFile.Series.Value,
+                                              comicFile,
+                                              changes?.Changes ?? new Dictionary<string, Tuple<string, string>>(),
+                                              changes?.HadExistingComicInfo ?? false);
+        }
+
+        private void PublishRetagged(List<ComicFileRetaggedEvent> retagged)
+        {
+            // Published only after every embed has finished: Kavita reacts to
+            // each event with a folder scan, and the first scan must not race
+            // files still being rewritten (its own mtime check makes the
+            // remaining scans cheap no-ops)
+            foreach (var retag in retagged)
+            {
+                _eventAggregator.PublishEvent(retag);
             }
         }
     }
