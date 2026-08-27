@@ -351,6 +351,38 @@ namespace NzbDrone.Core.Test.ParserTests
             parseResult.Should().BeNull();
         }
 
+        [TestCase("Aliens Epic Collection – The Original Years Vol. 3 (2025)", "Aliens Epic Collection: The Original Years", "3")]
+        [TestCase("Teenage Mutant Ninja Turtles The IDW Collection Vol. 5", "Teenage Mutant Ninja Turtles: The IDW Collection", "5")]
+        public void should_match_collected_edition_when_the_subtitle_precedes_the_volume_marker(string releaseTitle, string seriesName, string issueNumber)
+        {
+            // Some lines put the subtitle BEFORE the marker, so the series
+            // match consumes it and nothing follows the marker but the year -
+            // the subtitle inside the matched span is the strong match
+            GivenSearchCriteria(seriesName, "Volume " + issueNumber);
+            _books[0].IssueNumber = issueNumber;
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().NotBeNull();
+            parseResult.SeriesName.Should().Be(seriesName);
+            parseResult.IssueTitle.Should().Be("Volume " + issueNumber);
+        }
+
+        [TestCase("Teenage Mutant Ninja Turtles Vol 4 by Peter Laird, Michael Dooney, Jim Lawson, Eric Talbot [ENG / CBR CBZ]")]
+        [TestCase("Teenage Mutant Ninja Turtles Vol. 4 (2001-2010)")]
+        public void should_not_match_an_ongoings_volume_as_a_later_issue(string releaseTitle)
+        {
+            // Observed live: an issue search for TMNT (2024) #21 grabbed the
+            // 2001 Mirage "Vol 4" pack (32 issues) - a volume marker that
+            // disagrees with the wanted issue number stands in for nothing
+            GivenSearchCriteria("Teenage Mutant Ninja Turtles", "The City That Never Dies, Part One");
+            _books[0].IssueNumber = "21";
+
+            var parseResult = Parser.Parser.ParseIssueTitleWithSearchCriteria(releaseTitle, _series, _books);
+
+            parseResult.Should().BeNull();
+        }
+
         [TestCase("Walking Dead - Complete Series 2003-2019 (168 issues)(digital)", 2003, 2019)]
         [TestCase("(Superhero) Spawn - Compendium(46 vols) [1992 - 2024]", 1992, 2024)]
         [TestCase("Invincible - Complete Compendium 2003-2018 (144 issues)(digital)", 2003, 2018)]

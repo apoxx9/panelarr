@@ -359,6 +359,43 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
+        public void comic_parsed_release_with_series_but_no_issue_number_is_rejected_when_it_is_not_the_wanted_issue()
+        {
+            // Observed live: an issue search for TMNT (2024) #21 grabbed
+            // "Teenage Mutant Ninja Turtles Vol 4 by Peter Laird ..." - the 2001
+            // Mirage volume, a 32-issue pack. The comic parser found the series
+            // and no issue number, and the search's issue was assumed.
+            var pass = new Mock<IDecisionEngineSpecification>();
+            pass.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), It.IsAny<SearchCriteriaBase>())).Returns(Decision.Accept);
+            GivenSpecifications(pass);
+
+            var series = new Series { Id = 71, Name = "Teenage Mutant Ninja Turtles", CleanName = "teenagemutantninjaturtles" };
+            var issues = new List<Issue> { new Issue { Id = 21, IssueNumber = "21", Title = "The City That Never Dies, Part One" } };
+            var criteria = new IssueSearchCriteria { Series = series, Issues = issues };
+            var reports = new List<ReleaseInfo> { new ReleaseInfo { Title = "Teenage Mutant Ninja Turtles Vol 4 by Peter Laird, Michael Dooney, Jim Lawson, Eric Talbot [ENG / CBR CBZ]" } };
+
+            Mocker.GetMock<IParsingService>()
+                  .Setup(c => c.MapComicRelease(It.IsAny<ParsedComicInfo>(), It.IsAny<SearchCriteriaBase>()))
+                  .Returns(new RemoteIssue
+                  {
+                      Series = series,
+                      Issues = new List<Issue>(),
+                      ParsedIssueInfo = new ParsedIssueInfo
+                      {
+                          SeriesName = series.Name,
+                          Quality = new QualityModel(Quality.Digital)
+                      }
+                  });
+
+            var decisions = Subject.GetSearchDecision(reports, criteria);
+
+            decisions.Should().HaveCount(1);
+            decisions[0].Approved.Should().BeFalse();
+            decisions[0].Rejections.Should().ContainSingle(r => r.Reason.Contains("wanted issue"));
+            decisions[0].RemoteIssue.Issues.Should().BeEmpty();
+        }
+
+        [Test]
         public void should_return_a_decision_when_exception_is_caught()
         {
             GivenSpecifications(_pass1);

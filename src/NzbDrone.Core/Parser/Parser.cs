@@ -495,6 +495,27 @@ namespace NzbDrone.Core.Parser
 
                         strongSeriesMatch = afterMarker.IsNotNullOrWhiteSpace() &&
                                             afterMarker.ToLowerInvariant().FuzzyMatch(criteriaSubtitle.ToLowerInvariant()) >= 0.75;
+
+                        // Some lines put the subtitle BEFORE the marker ("Aliens
+                        // Epic Collection – The Original Years Vol. 3"), so the
+                        // series match itself consumed it: what the matched span
+                        // carries beyond the base name must then be the subtitle
+                        // as a whole - the same whole-match bar, just applied to
+                        // the other side of the marker
+                        if (!strongSeriesMatch)
+                        {
+                            var baseName = seriesName.Substring(0, subtitleIndex).Trim().ToLowerInvariant();
+                            var span = foundSeries.ToLowerInvariant();
+                            var (baseStart, baseLength, _) = span.FuzzyMatch(baseName, 0.8, WordDelimiters);
+
+                            if (baseStart != -1)
+                            {
+                                var beyondBase = span.Remove(baseStart, baseLength).Trim(' ', '-', '–', '—', ':');
+
+                                strongSeriesMatch = beyondBase.IsNotNullOrWhiteSpace() &&
+                                                    beyondBase.FuzzyMatch(criteriaSubtitle.ToLowerInvariant()) >= 0.75;
+                            }
+                        }
                     }
                     else
                     {

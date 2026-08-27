@@ -174,10 +174,25 @@ namespace NzbDrone.Core.DecisionEngine
                                 {
                                     // The comic parser found the series but no issue number
                                     // (collected editions carry a volume, not an issue) - a
-                                    // search knows which issue it wants. Previously the
-                                    // release fell out of the loop here with NO decision at
-                                    // all and vanished from results.
-                                    remoteIssue.Issues = searchCriteria.Issues;
+                                    // search knows which issue it wants, but the release
+                                    // still has to BE that issue: the criteria parser holds
+                                    // every rule for when a volume marker may stand in, and
+                                    // refuses an ongoing's trade ("TMNT Vol 4" is not TMNT
+                                    // #21 - it was a 32-issue pack). Either way the release
+                                    // gets a decision; before v1.1.38 it fell out of the
+                                    // loop with none and vanished from results.
+                                    var confirmed = Parser.Parser.ParseIssueTitleWithSearchCriteria(report.Title,
+                                                                                                    searchCriteria.Series,
+                                                                                                    searchCriteria.Issues);
+
+                                    if (confirmed != null)
+                                    {
+                                        remoteIssue.Issues = searchCriteria.Issues;
+                                    }
+                                    else
+                                    {
+                                        decision = new DownloadDecision(remoteIssue, new Rejection("Release does not identify the wanted issue"));
+                                    }
                                 }
                             }
 
