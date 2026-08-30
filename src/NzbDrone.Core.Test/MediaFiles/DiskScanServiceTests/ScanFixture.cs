@@ -11,6 +11,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.DecisionEngine;
+using NzbDrone.Core.Download;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.IssueImport;
@@ -500,6 +501,69 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             Mocker.GetMock<IMediaFileService>()
                 .Verify(x => x.AddMany(It.Is<List<ComicFile>>(l => l.Count == 1 && l[0].Path == scannedFile)),
+                        Times.Once());
+        }
+
+        [Test]
+        public void series_scan_of_a_missing_folder_should_not_run_identification_or_import()
+        {
+            // Observed live: rescanning a freshly added series whose folder did
+            // not exist yet ran identification with the series forced and
+            // imported 174 files - two of them another series' issues, re-homed
+            GivenRootFolder(_otherSeriesFolder);
+
+            var stolen = Path.Combine(_otherSeriesFolder, "Batman #1 (2016).cbz");
+            var localTrack = Builder<LocalIssue>.CreateNew()
+                .With(x => x.Path = stolen)
+                .With(x => x.Issue = Builder<Issue>.CreateNew().Build())
+                .With(x => x.Series = _series)
+                .With(x => x.FileTagInfo = new ParsedFileTagInfo())
+                .Build();
+
+            Mocker.GetMock<IMakeImportDecision>()
+                .Setup(x => x.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()))
+                .Returns(new List<ImportDecision<LocalIssue>> { new ImportDecision<LocalIssue>(localTrack) });
+
+            Subject.Scan(new List<string> { _series.Path }, FilterFilesType.None, false, new List<int> { _series.Id });
+
+            Mocker.GetMock<IMakeImportDecision>()
+                .Verify(x => x.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()),
+                        Times.Never());
+
+            Mocker.GetMock<IImportApprovedIssues>()
+                .Verify(x => x.Import(It.IsAny<List<ImportDecision<LocalIssue>>>(), It.IsAny<bool>(), It.IsAny<DownloadClientItem>(), It.IsAny<ImportMode>()),
+                        Times.Never());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void series_scan_should_not_import_decisions_for_files_outside_the_scanned_folder()
+        {
+            GivenSeriesFolder();
+
+            var scannedFile = Path.Combine(_series.Path, "Saga #1 (2012).cbz");
+            var contextFile = Path.Combine(_otherSeriesFolder, "Batman #1 (2016).cbz");
+
+            GivenFiles(new List<string> { scannedFile });
+            GivenKnownFiles(new List<string>());
+
+            ImportDecision<LocalIssue> Approved(string path) => new ImportDecision<LocalIssue>(Builder<LocalIssue>.CreateNew()
+                .With(x => x.Path = path)
+                .With(x => x.Issue = Builder<Issue>.CreateNew().Build())
+                .With(x => x.Series = _series)
+                .With(x => x.ExactTagMatch = true)
+                .With(x => x.FileTagInfo = new ParsedFileTagInfo())
+                .Build());
+
+            Mocker.GetMock<IMakeImportDecision>()
+                .Setup(x => x.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()))
+                .Returns(new List<ImportDecision<LocalIssue>> { Approved(scannedFile), Approved(contextFile) });
+
+            Subject.Scan(new List<string> { _series.Path }, FilterFilesType.None, false, new List<int> { _series.Id });
+
+            Mocker.GetMock<IImportApprovedIssues>()
+                .Verify(x => x.Import(It.Is<List<ImportDecision<LocalIssue>>>(l => l.Count == 1 && l[0].Item.Path == scannedFile), false, null, ImportMode.Auto),
                         Times.Once());
         }
 

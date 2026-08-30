@@ -150,6 +150,17 @@ namespace NzbDrone.Core.MediaFiles
             comicFilesStopwatch.Stop();
             _logger.Trace("Finished getting comic files for:\n{0} [{1}]", folders.ConcatToString("\n"), comicFilesStopwatch.Elapsed);
 
+            // Nothing visited means nothing to decide. Running identification
+            // anyway - with the series forced as an override - handed a
+            // per-series rescan of a not-yet-existing folder the whole
+            // library's unmapped files, and it re-homed two of another
+            // series' issues into the forced series.
+            if (!mediaFileList.Any())
+            {
+                _logger.Debug("No comic files found under {0}, nothing to import", folders.ConcatToString(", "));
+                return;
+            }
+
             var decisionsStopwatch = Stopwatch.StartNew();
 
             var config = new ImportDecisionMakerConfig
@@ -184,13 +195,19 @@ namespace NzbDrone.Core.MediaFiles
             // so only exact tag-id identifications and files inside a series'
             // own folder are trusted for automatic import. Everything else is
             // persisted as unmapped below and left for Library Import review.
-            var importableDecisions = decisions;
+            // A scan may only import what it visited: identification folds a
+            // candidate's existing files (under OTHER series' folders) into
+            // the decision list as context, and importing those re-homes
+            // another series' files
+            var importableDecisions = decisions
+                .Where(x => folders.Any(f => f.IsParentPath(x.Item.Path)))
+                .ToList();
 
             if (!seriesIds.Any())
             {
                 var seriesPaths = _seriesService.AllSeriesPaths().Values.ToList();
 
-                importableDecisions = decisions
+                importableDecisions = importableDecisions
                     .Where(x => x.Item.ExactTagMatch ||
                                 seriesPaths.Any(p => p.IsParentPath(x.Item.Path)))
                     .ToList();
