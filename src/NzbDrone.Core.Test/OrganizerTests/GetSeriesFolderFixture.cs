@@ -35,5 +35,20 @@ namespace NzbDrone.Core.Test.OrganizerTests
 
             Subject.GetSeriesFolder(series).Should().Be(expected);
         }
+
+        [Test]
+        public void should_treat_a_missing_series_name_as_an_empty_token()
+        {
+            // The API validates a posted series resource before its metadata
+            // is loaded - a bare {foreignSeriesId} post has no name, and the
+            // token handler hands back null
+            _namingConfig.SeriesFolderFormat = "{Publisher}/{Series Title} ({Series Year})";
+
+            var series = new Series { Name = null, Metadata = new SeriesMetadata() };
+
+            var act = () => Subject.GetSeriesFolder(series);
+
+            act.Should().NotThrow();
+        }
     }
 }

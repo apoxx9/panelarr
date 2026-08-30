@@ -382,7 +382,9 @@ namespace NzbDrone.Core.Organizer
 
             var tokenHandler = tokenHandlers.GetValueOrDefault(tokenMatch.Token, m => string.Empty);
 
-            var replacementText = tokenHandler(tokenMatch).Trim();
+            // A handler can hand back null (a resource validated before its
+            // metadata is loaded has no name) - that is an empty token, not a crash
+            var replacementText = (tokenHandler(tokenMatch) ?? string.Empty).Trim();
 
             if (tokenMatch.Token.All(t => !char.IsLetter(t) || char.IsLower(t)))
             {
