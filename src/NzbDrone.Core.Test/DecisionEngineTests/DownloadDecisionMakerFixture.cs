@@ -396,6 +396,43 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
+        public void comic_parsed_release_mapped_to_another_series_falls_through_to_the_specifications()
+        {
+            // "Marvel Masterworks: The Fantastic Four Vol.1 - Vol.20" surfaced in
+            // a TMNT #21 search and mapped to the library's Masterworks series -
+            // the wrong-series rejection is the specifications' to make, not
+            // the wanted-issue check's
+            var wrongSeries = new Mock<IDecisionEngineSpecification>();
+            wrongSeries.Setup(c => c.IsSatisfiedBy(It.IsAny<RemoteIssue>(), It.IsAny<SearchCriteriaBase>())).Returns(Decision.Reject("Wrong series"));
+            GivenSpecifications(wrongSeries);
+
+            var searched = new Series { Id = 71, Name = "Teenage Mutant Ninja Turtles", CleanName = "teenagemutantninjaturtles" };
+            var mapped = new Series { Id = 300, Name = "Marvel Masterworks: The Fantastic Four", CleanName = "marvelmasterworksthefantasticfour" };
+            var issues = new List<Issue> { new Issue { Id = 21, IssueNumber = "21", Title = "The City That Never Dies, Part One" } };
+            var criteria = new IssueSearchCriteria { Series = searched, Issues = issues };
+            var reports = new List<ReleaseInfo> { new ReleaseInfo { Title = "Marvel Masterworks: The Fantastic Four Vol.1 - Vol.20 (2012-2018) (Marvel Comics) by Marvel [ENG / CBR]" } };
+
+            Mocker.GetMock<IParsingService>()
+                  .Setup(c => c.MapComicRelease(It.IsAny<ParsedComicInfo>(), It.IsAny<SearchCriteriaBase>()))
+                  .Returns(new RemoteIssue
+                  {
+                      Series = mapped,
+                      Issues = new List<Issue>(),
+                      ParsedIssueInfo = new ParsedIssueInfo
+                      {
+                          SeriesName = mapped.Name,
+                          Quality = new QualityModel(Quality.Digital)
+                      }
+                  });
+
+            var decisions = Subject.GetSearchDecision(reports, criteria);
+
+            decisions.Should().HaveCount(1);
+            decisions[0].Approved.Should().BeFalse();
+            decisions[0].Rejections.Should().ContainSingle(r => r.Reason == "Wrong series");
+        }
+
+        [Test]
         public void should_return_a_decision_when_exception_is_caught()
         {
             GivenSpecifications(_pass1);

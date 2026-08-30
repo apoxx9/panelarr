@@ -170,6 +170,12 @@ namespace NzbDrone.Core.DecisionEngine
                                 {
                                     decision = new DownloadDecision(remoteIssue, new Rejection("Unable to parse issues from release name"));
                                 }
+                                else if (remoteIssue.Series.Id != searchCriteria.Series.Id)
+                                {
+                                    // A different library series entirely - leave it to the
+                                    // search specifications, whose "Wrong series" names the
+                                    // actual problem
+                                }
                                 else
                                 {
                                     // The comic parser found the series but no issue number
