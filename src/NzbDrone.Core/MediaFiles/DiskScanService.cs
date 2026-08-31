@@ -74,14 +74,32 @@ namespace NzbDrone.Core.MediaFiles
 
         public void Scan(List<string> folders = null, FilterFilesType filter = FilterFilesType.Known, bool addNewSeries = false, List<int> seriesIds = null)
         {
-            if (folders == null)
-            {
-                folders = _rootFolderService.All().Select(x => x.Path).ToList();
-            }
-
             if (seriesIds == null)
             {
                 seriesIds = new List<int>();
+            }
+
+            // A scan for specific series walks THEIR folders. Falling back to
+            // the root folders here turned an API rescan of one series into a
+            // library-wide identification pass with that series forced as
+            // the override - and re-homed another series' files into it.
+            if (folders == null && seriesIds.Any())
+            {
+                folders = _seriesService.GetSeries(seriesIds)
+                    .Where(s => s.Path.IsNotNullOrWhiteSpace())
+                    .Select(s => s.Path)
+                    .ToList();
+
+                if (!folders.Any())
+                {
+                    _logger.Warn("None of the series {0} has a folder to scan", seriesIds.ConcatToString(", "));
+                    return;
+                }
+            }
+
+            if (folders == null)
+            {
+                folders = _rootFolderService.All().Select(x => x.Path).ToList();
             }
 
             var mediaFileList = new List<IFileInfo>();

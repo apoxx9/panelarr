@@ -505,6 +505,32 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
         }
 
         [Test]
+        public void series_scan_without_folders_should_walk_the_series_folder_not_the_roots()
+        {
+            // Observed live: RescanFolders {seriesIds:[x]} with no folders fell
+            // back to every root folder - a 12k-file identification pass with
+            // series x forced as the override
+            GivenSeriesFolder();
+            GivenFiles(new List<string> { Path.Combine(_series.Path, "Saga #1 (2012).cbz") });
+            GivenKnownFiles(new List<string>());
+
+            Mocker.GetMock<ISeriesService>()
+                .Setup(s => s.GetSeries(It.Is<List<int>>(l => l.Contains(_series.Id))))
+                .Returns(new List<Series> { _series });
+
+            Subject.Scan(null, FilterFilesType.None, false, new List<int> { _series.Id });
+
+            Mocker.GetMock<IRootFolderService>()
+                .Verify(x => x.All(), Times.Never());
+
+            Mocker.GetMock<IDiskProvider>()
+                .Verify(x => x.GetFileInfos(_series.Path, true), Times.Once());
+
+            Mocker.GetMock<IDiskProvider>()
+                .Verify(x => x.GetFileInfos(_rootFolder, true), Times.Never());
+        }
+
+        [Test]
         public void series_scan_of_a_missing_folder_should_not_run_identification_or_import()
         {
             // Observed live: rescanning a freshly added series whose folder did
