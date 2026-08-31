@@ -8,6 +8,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.MediaFiles.IssueImport.Aggregation;
+using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
@@ -266,7 +267,7 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             if (seenCandidate && localIssueRelease.Issue == null && idOverrides?.Series != null)
             {
                 var candidateList = _candidateService.GetDbCandidatesFromTags(localIssueRelease, idOverrides, config.IncludeExisting);
-                if (candidateList.Count == 1)
+                if (candidateList.Count == 1 && ForcedSeriesIsPlausible(localIssueRelease, idOverrides.Series))
                 {
                     var forcedIssue = candidateList[0].Issue;
                     _logger.Debug("Distance calc failed but single candidate found via series override, force-accepting: {0}", forcedIssue.Title);
@@ -311,6 +312,51 @@ namespace NzbDrone.Core.MediaFiles.IssueImport.Identification
             localIssueRelease.PopulateMatch(config.KeepAllEditions);
 
             _logger.Debug($"IdentifyRelease done in {watch.ElapsedMilliseconds}ms");
+        }
+
+        // The force-accept above fabricates a perfect distance for the lone
+        // candidate the series override filtered down to - by issue NUMBER
+        // alone. Without this check "Convergence JLA 001" became "Supergirl
+        // Annual #1" because both carry a 1. The override series is only
+        // trusted when something besides the number ties the file to it:
+        // it lives in that series' folder, a grab for that series delivered
+        // it, or its own tagged/parsed series title says so.
+        public static bool ForcedSeriesIsPlausible(LocalEdition localIssueRelease, Series series)
+        {
+            if (series == null)
+            {
+                return false;
+            }
+
+            var tracks = localIssueRelease.LocalIssues;
+
+            if (series.Path.IsNotNullOrWhiteSpace() && tracks.Any(t => series.Path.IsParentPath(t.Path)))
+            {
+                return true;
+            }
+
+            if (tracks.Any(t => t.DownloadClientIssueInfo != null))
+            {
+                return true;
+            }
+
+            var seriesName = (series.Name ?? string.Empty).ToLowerInvariant();
+
+            if (seriesName.IsNullOrWhiteSpace())
+            {
+                return false;
+            }
+
+            var titles = tracks
+                .SelectMany(t => new[] { t.FileTagInfo?.SeriesTitle, t.FileTagInfo?.CleanTitle, t.FolderTrackInfo?.SeriesName })
+                .Concat(tracks.SelectMany(t => t.FileTagInfo?.Series ?? new List<string>()))
+                .Where(x => x.IsNotNullOrWhiteSpace())
+                .Select(x => x.ToLowerInvariant())
+                .Distinct()
+                .ToList();
+
+            return titles.Any(t => t.FuzzyMatch(seriesName) >= 0.75 ||
+                                   t.FuzzyMatch(seriesName.CleanSeriesName()) >= 0.75);
         }
 
         private void GetBestRelease(LocalEdition localIssueRelease, IEnumerable<CandidateEdition> candidateReleases, List<LocalIssue> extraTracksOnDisk, out bool seenCandidate)
