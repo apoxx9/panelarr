@@ -1,168 +1,106 @@
-# Last Handoff — 2026-08-19 (Session 29, final)
+# Last Handoff — 2026-08-31 (Session 30, final)
 
-Session 29 spanned 08-17 → 08-19 and shipped **SIXTEEN releases
-(v1.1.27 … v1.1.42)**. Two headline outcomes: **GetComics automation
-is restored** (the Session-28 "zero automatable mirrors" verdict was
-wrong — see below), and **the collected-edition search+import chain
-was rebuilt end-to-end** through adversarial testing on real
-libraries (Iron Fist, ASM Nine Lives, 22× Captain America Epic, 4× ASM
-Modern Era, Aliens 3/3 — all complete in the library). Every failure
-observed became a shipped fix; nine distinct collected-edition bugs
-were peeled, each hidden behind the previous one.
+Session 30 spanned 08-19 → 08-31 and shipped **three releases
+(v1.1.43, v1.1.44, v1.1.45)**, closed the Session-24 library triage
+(unmapped files 67 → 1), and confirmed the tiered refresh from v1.1.40
+settled at ~47 min/run. One data-corruption bug was found the hard
+way (a rescan re-homing another series' files), fixed across two
+releases, and then hardened at its root (unpushed, see backlog).
 
-## Releases shipped (what each one is for)
+## Releases shipped
 
-- **v1.1.27** GetComics: recognize `/dls/` redirects (site renamed
-  `/dlds/` → `/dls/`, silently hiding EVERY redirect mirror incl.
-  Pixeldrain) + the first-party **DOWNLOAD NOW** main-server link
-  (`getcomics.org/dls/` → 302 → `fs*.comicfiles.ru`, captcha-free).
-  DataNodes demoted (Turnstile). Mylar research confirmed: it never
-  used DataNodes; downloads main-server links with a plain GET.
-- **v1.1.28** Import: collected-edition filename variants
-  (`Parser.GetCollectedEditionVariants`, raw + marker-stripped
-  pre-paren name) fed via `AggregateComicFilename`; volume number →
-  `SeriesIndex`. Fixes "Couldn't find similar issue" for
-  `<line> Vol. NN - <subtitle>` files.
-- **v1.1.29** Import: sole-issue fallback in `CandidateService` for
-  collected editions (61/62 Epic series are single-issue "#1" while
-  releases carry LINE volume numbers); `IssueDistance` skips the
-  issue-number comparison for that candidate. Also: Name + Year
-  custom-filter properties on the series index.
-- **v1.1.30–32** Search (`ParseIssueTitleWithSearchCriteria`): volume
-  marker stands in when it agrees with the issue TITLE ("Volume 11")
-  or, for a single target issue, when the marker sits inside the
-  matched series span; marker stripped from the returned name;
-  fuzzy-path Unknown→Archive quality default. Each moved the
-  rejection one stage ("Unknown Series" → "Unknown is not wanted in
-  profile" → grab).
-- **v1.1.33** Import: augmentation runs even with embedded tags
-  (Zone-Empire rips tag bare line name + "vNN - Subtitle" title,
-  no number/id); marker-stripped local title may match the series
-  subtitle. Search: **cross-grab fixed** — all volume stand-ins demand
-  the post-marker subtitle matches the criteria subtitle AS A WHOLE
-  (≥0.75); fuzzy containment let "The Captain" grab "…Captain America
-  Lives Again".
-- **v1.1.34** Import: strip parenthetical release junk from embedded
-  titles before subtitle comparison.
-- **v1.1.35** Import: **issue-number distance SKIPPED for collected
-  editions** — release vNN mixes publication vs CV line order; a
-  weight-10 "1"=="1" agreement with the WRONG series dragged a 55%
-  mismatch under threshold and mis-imported a file. KEY INSIGHT:
-  numbers carry no signal for collected editions; the subtitle is
-  the only discriminator, now honoured at every layer.
-- **v1.1.36** Downloads: **idle read timeout** (`HttpRequest.
-  IdleReadTimeout`, re-arms per read; 120s idle / 300s connect) —
-  the fixed 300s cap killed multi-GB Pixeldrain downloads at exactly
-  5:00. Verified vs local slow-drip server; live: 13–26 min
-  downloads now complete. Also: reading-list "Not found on CV"
-  renders as a list.
-- **v1.1.37** GetComics: **Mega mirror support** via MegaApiClient
-  (anonymous login, decrypting download; `IMegaDownloader`; priority
-  Pixeldrain > MainServer > Mega). Non-0-day/tpb posts have NO
-  main-server button. GOTCHA: MegaApiClient ships a GLOBAL-namespace
-  `BigInteger` that shadows System.Numerics — QBittorrentTorrent.Eta
-  fully qualified.
-- **v1.1.38** Search: comic-parsed release with series but no issue
-  number fell out of the decision loop with NO decision (silently
-  vanished — Aliens Vol. 3 was on GC the whole time).
-- **v1.1.39** Search: fuzzy criteria parser returns the criteria
-  series' canonical name (matched span dropped leading "The" / stopped
-  short of subtitle → Unknown Series). Supersedes v1.1.31's strip.
-- **v1.1.40** Refresh: **tiered cadence** — active daily, ended
-  weekly, recent release promotes to daily; **CV status DERIVED** from
-  latest cover date (>180d silent = ended; CV has no flag and ALL
-  1,381 series were "continuing" by enum default — tiering alone would
-  have refreshed everything daily); **RSS-triggered on-demand
-  refresh** when a release matches a series but names no known issue
-  (revival safety valve, 12h/series throttle). Projected ~230
-  refreshes/day vs 584+ observed (3h19m runs, CV 420 storms).
-- **v1.1.41** Delay profiles: **DirectDownload first-class**
-  (`EnableDirectDownload`, `DirectDownloadDelay`, migration 15);
-  UI offers Prefer Torrent / Prefer DD / Only Torrent / Only DD,
-  usenet column dropped; **default flipped to Prefer Torrent**
-  (agreed: torrents finish in minutes, throttled DDL takes 30 min;
-  DDL stays the fallback + only source for weeklies). Tracked
-  downloads trust the grab record's series/issue over title re-parse
-  (Aliens sat in queue as "unknown" with nothing to import into).
-- **v1.1.42** ComicVine limiter: **two lanes** — interactive
-  (lookup/search/add/manual refresh/resolve, scoped at API
-  controllers via AsyncLocal `ComicVineRequestScope`) takes the next
-  token ahead of bulk; bulk stands aside while interactive waits.
-  Add-series search went 88s/timeout → 1–2s.
+- **v1.1.43** — Parser: `ParseIssueTitleWithSearchCriteria` returns
+  null instead of throwing when a tracked download's series was
+  deleted. **Retag events**: `ComicFileRetaggedEvent` is finally
+  published (explicit retag commands only — never the import path,
+  which already notifies); per-file events with a field-level
+  ComicInfo diff → history rows + Kavita scan; published only AFTER
+  every embed in the batch so Kavita's first scan sees final state;
+  files whose tags are already current (and carry MetronInfo.xml) are
+  skipped — no rewrite, no mtime churn. **Search false-grab fix**: an
+  issue search for TMNT (2024) #21 grabbed the 2001 Mirage "Vol 4" MAM
+  pack — v1.1.38's "series found, no issue → assume the search's
+  issue" branch now consults the criteria parser (which refuses a
+  volume marker that disagrees with the wanted number) and learned
+  the subtitle-before-marker shape ("Aliens Epic Collection – The
+  Original Years Vol. 3") that had forced the assumption.
+- **v1.1.44** — Scan: only import decisions for paths under the
+  walked folders; empty scan decides nothing. Add-series NRE:
+  `FileNameBuilder.ReplaceToken` treats a null token as empty (posting
+  a bare `{foreignSeriesId}` crashed `SeriesFolderAsRootFolderValidator`).
+  Search: a release mapped to a DIFFERENT library series falls
+  through to the specs and reads "Wrong series" again.
+- **v1.1.45** — THE real rescan fix: `RescanFolders {seriesIds}` with
+  no `folders` fell back to every ROOT folder with that series forced
+  as the identification override — a 12k-file pass that re-homed two
+  Convergence: JLA issues into Supergirl Annual (twice; repaired both
+  times). `Scan()` now derives folders from the series ids and never
+  falls back to the roots. Verified live: the same command completes
+  in 3 s and touches nothing.
 
-Also: **31 GitHub Releases backfilled** (v1.1.2–v1.1.32, from
-filtered commit subjects) — the what's-new modal reads GH releases
-and had shown the same stale content since July. **Release creation
-is now part of the ship ritual** (hand-written New/Fixed notes).
+## Library work (Session-24 triage, CLOSED)
 
-## Homelab state at handoff
-
-- v1.1.42 deployed and verified (search 1–2s; queue clean; delay
-  profile = Prefer Torrent, DD enabled, DD delay 0).
-- Library: 1,381 series, 1,018 GB. Epic census: 62 Epic + 22 CA + 4
-  Modern Era + Aliens 3/3 complete. "Epic Collections" saved filter
-  (Name contains) = 62/1,354.
-- GetComics indexer: RSS + auto-search RE-ENABLED (were off since
-  Session 28). Both indexers priority 25.
-- MAM daily API grab limit was hit 08-18 (resets daily); Mega
-  per-IP anonymous rate limit hit once (clears itself); Pixeldrain
-  throttling heavy after ~10 GB/day.
-- Tiered refresh (v1.1.40) has NOT yet had a scheduled run on the
-  homelab — first one is the next 24h cycle. Status derivation
-  converges over that pass.
+- **40 ComicVine annual volumes added** (unmonitored, no searches):
+  DC files every annual as its own volume, and since 2021 as a
+  one-shot "YYYY Annual" volume per year. ADD VIA THE FULL LOOKUP
+  RESOURCE (as the UI does) — a minimal POST NREs on older builds.
+- **8 mis-mapped files re-homed** (annuals squatting on issue #1
+  slots or on the previous year's one-shot volume: Superman/Supergirl,
+  JL 2022, JLD 2021, Bombshells, Injustice 2, Action Comics 2023
+  (CV's name for the 2024 book), World's Finest 2025, Harley Quinn
+  2022). Red Hood: Outlaw (2018) #41-49 imported → 24/24.
+- **Duplicates/orphans deleted**: 10 dupes (~950 MB) + 5 orphans
+  (~390 MB) incl. Resurrection Man's 880 KB cover-only "#1" replaced
+  by the real issue. Remaining unmapped: exactly 1 — `Suske en Wiske
+  #00 (1946).cbz` (kept on purpose; no CV issue).
+- **Annual files moved into their own series folders** (45 files,
+  filenames unchanged): the existing Rename Files flow relocates a
+  file living outside its series folder even with `renameComics`
+  OFF — no feature needed. Kavita's on-rename notify is off on the
+  homelab → Kavita sees the moves on its next scan (read progress on
+  those annuals resets). Kavita grouping follows the ComicInfo
+  `Series` tag more than the folder — if it still lumps annuals under
+  the parent, RETAG the annual series (previews first; user has not
+  asked for this yet).
+- Saved filters: "Complete Runs" (issueCount > 3), "Fragments (1–3
+  issues)". FCBD/specials prune SKIPPED by user (11 series, ~1 GB
+  stay). Library clutter review: user handles manually.
+- Homelab: DirectDownload delay 60 min (Prefer Torrent). TMNT (2024)
+  #21 grabbed from GetComics and imported 08-31 after an IssueSearch.
 
 ## Ops knowledge (hard-won this session)
 
-- Trace diagnosis pattern (worked 4×): `PUT /config/host logLevel=
-  trace` → reproduce → `GET /api/v1/log/file/panelarr.trace.txt` →
-  RESTORE logLevel. `/log/file/...` without `/api/v1/` returns empty.
-- Stuck imports: `DownloadedIssuesScan {path, downloadClientId}` per
-  download re-attempts a tracked import; `ManualImport {files:[{path,
-  seriesId, issueId, quality}]}` bypasses identification (used twice
-  to rescue files). `/manualimport` GET on a 1 GB archive hangs
-  >280s (inspection) — avoid. Untracked-file scans hit an
-  exact-clean-name gate BEFORE identification.
-- Queue "unknown series" items are hidden from default queries
-  (`includeUnknownSeriesItems=true`) and cannot be DELETEd (500).
-- GetComics downloads run SYNCHRONOUSLY inside the grab command
-  ("Processing release N/N" for 30 min = a download in flight);
-  nothing appears in the queue until the file lands.
-- Batch-validate identification offline: `dotnet fsi` against
-  `_output/net10.0/Panelarr.Core.dll` (see scratchpad scripts pattern:
-  GetCollectedEditionVariants + FuzzyMatch ≥0.8 across all 62 Epic
-  names).
-- Incremental `msbuild` can skip the API project — if an API field
-  does not appear, `dotnet build src/Panelarr.Api.V1/...csproj`
-  explicitly.
-- `broken_report_shouldnt_blowup_the_process` is an order-dependent
-  flake (passes in full runs; fails in isolation on pre-change tree).
-- Library composition: 616/1,381 series are 1–2 issue fragments (357
-  DC event one-shots, 121 collected editions, 42 annuals, 41 FCBD/
-  specials) — the "shit series" feeling is presentation, not junk.
-  Objective-junk buckets are near-empty. CV ratings are empty for
-  ALL series (no rating-based filtering possible).
+- **Re-homing a mapped file = `ManualImport {importMode:'move',
+  files:[{path, seriesId, issueId, quality}]}`** — it replaces the old
+  row automatically. NEVER rescan to "clean up"; on builds < v1.1.45 a
+  seriesIds-only rescan is a root scan with the series forced.
+- The import path treats a file already under a library root as
+  existing → ManualImport does NOT physically move it; use Rename
+  Files (works with renameComics off) to relocate.
+- Retag skip rule: a file is skipped when its generated ComicInfo
+  equals the embedded one AND MetronInfo.xml is present.
+- `SeriesFolderAsRootFolderValidator` builds the folder from the
+  POSTED resource — send the full lookup resource when adding series.
+- Homelab UI sits behind forms login (no creds here): puppeteer
+  checks against the homelab are API-only; use the dev instance for UI.
+- Trace-log pattern, stuck-import rescues, synchronous GC downloads,
+  queue unknown-series rows, incremental-msbuild-skips-API,
+  `broken_report_shouldnt_blowup` flake: unchanged from Session 29
+  (see git history of this file at de29e1d).
 
 ## Backlog (agreed / open)
 
-1. **Observe tiered refresh** after its first scheduled homelab run:
-   confirm ~230/day and that 180d/7d constants feel right.
-2. **Parser NRE**: `Parser.ParseIssueTitle` throws a swallowed
-   NullReferenceException on some titles under the test harness
-   (seen writing TrackedDownloadServiceFixture; `ExceptionVerification
-   .IgnoreErrors()` applied in that test). Root-cause ~30 min.
-3. **Session-24 triage** (user calls pending): 47 annuals via
-   resolve/add flow; 6 Red Hood Outlaw #41-49 → RHatO (2016)?; ~11
-   duplicates; 3 CV-gap oddities (Suske #00, Radiant Black #25.5,
-   USM #00.5).
-4. **Library-clutter saved filters** (optional, 2 min): "Complete
-   Runs" = issueCount > 3; per-line Name filters. Or prune the 41
-   FCBD/specials (~5 GB) after a reviewable list.
-5. **DD delay tuning**: set DirectDownloadDelay 30–60 min if DDL
-   should be a true fallback rather than a parallel racer.
-6. **Editorial pass** over the 31 backfilled release bodies (raw
-   commit subjects, heuristic New/Fixed bucketing) — cosmetic.
-7. **`ComicFileRetaggedEvent`** still dead code — discuss
-   double-notify UX first.
-8. FlareSolverr-for-GC-front-door is a KNOWN contingency (Mylar has
-   it); Panelarr has never hit CF's front-door challenge. Not built.
-9. Browser-assisted DDL resolver: SHELVED (unnecessary after v1.1.27).
+1. **UNPUSHED: identification hardening (`82d30b5`)** — the force-accept
+   on a series override now demands the file be in the series folder,
+   or delivered by a grab, or carry a tagged/parsed series title that
+   fuzzy-matches the series (≥0.75). Makes the Convergence theft
+   impossible even under a forced root scan. Ship as v1.1.46 (ask
+   before push).
+2. Kavita: rescan the library after the annual moves; consider
+   retagging the annual series if grouping is wrong (user decides).
+3. Future annual downloads land in their own `… Annual (Year)/`
+   folders — consistent with the moved files now.
+4. Detective Comics 2023 Annual and Nightwing 2023 Annual have no
+   ComicVine volume under any name tried; files deleted by user.
+5. FlareSolverr-for-GC and the browser DDL resolver stay unbuilt /
+   shelved.
