@@ -11,21 +11,19 @@ v1.1.43–45 shipped (retag events, TMNT false-grab fix, and a two-step
 fix for a rescan that re-homed another series' files); the Session-24
 library triage is CLOSED (40 annual volumes added, files re-homed and
 moved into their own folders, unmapped 67 → 1); tiered refresh settled
-at ~47 min/run. One commit is UNPUSHED: identification hardening
-(`82d30b5`, force-accept plausibility) — ship it as v1.1.46 first.
+at ~47 min/run; v1.1.46 (identification hardening) shipped 08-31.
+Nothing is unpushed.
 
 Homelab Panelarr API key: <paste key here>.
 Homelab Kavita API key (only if Kavita work planned): <paste key here>.
 
 Today's agenda (recommended order):
 
-1. **Ship v1.1.46** (`82d30b5`): scan → tag → push → GH release
-   (hand-written notes) → watch the Docker workflow → user pulls.
-2. **Kavita follow-up**: after the user's library scan, check whether
+1. **Kavita follow-up**: after the user's library scan, check whether
    the moved annuals group as their own series; if not, retag the
    annual series (preview diffs first — retag replaces ComicInfo
    wholesale).
-3. Anything the user brings; otherwise quiet — no open bugs.
+2. Anything the user brings; otherwise quiet — no open bugs.
 
 Dev notes: local dev instance data dir is
 `~/Library/Application Support/Panelarr` (port 8787); binary builds to

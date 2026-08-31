@@ -90,12 +90,11 @@ releases, and then hardened at its root (unpushed, see backlog).
 
 ## Backlog (agreed / open)
 
-1. **UNPUSHED: identification hardening (`82d30b5`)** — the force-accept
+1. **Identification hardening (`82d30b5`) — SHIPPED as v1.1.46 (08-31).** The force-accept
    on a series override now demands the file be in the series folder,
    or delivered by a grab, or carry a tagged/parsed series title that
    fuzzy-matches the series (≥0.75). Makes the Convergence theft
-   impossible even under a forced root scan. Ship as v1.1.46 (ask
-   before push).
+   impossible even under a forced root scan.
 2. Kavita: rescan the library after the annual moves; consider
    retagging the annual series if grouping is wrong (user decides).
 3. Future annual downloads land in their own `… Annual (Year)/`
