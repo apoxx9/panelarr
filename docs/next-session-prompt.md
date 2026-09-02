@@ -19,11 +19,13 @@ Homelab Kavita API key (only if Kavita work planned): <paste key here>.
 
 Today's agenda (recommended order):
 
-1. **Kavita follow-up**: after the user's library scan, check whether
-   the moved annuals group as their own series; if not, retag the
-   annual series (preview diffs first — retag replaces ComicInfo
-   wholesale).
-2. Anything the user brings; otherwise quiet — no open bugs.
+1. Anything the user brings; otherwise quiet — no open bugs. (Kavita
+   follow-up is DONE: annuals group as their own series, no retag
+   needed.)
+2. Optional micro-items if idle: re-grab the 3 inspection-failing
+   archives (MMPR SG #01, MMPR/TMNT III #05, FF MW #016); downgrade
+   the zero-file vanished-mount warn to Debug; RAR-as-.cbz sniff
+   before the reader's Error log.
 
 Dev notes: local dev instance data dir is
 `~/Library/Application Support/Panelarr` (port 8787); binary builds to

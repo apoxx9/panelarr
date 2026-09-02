@@ -88,6 +88,16 @@ releases, and then hardened at its root (unpushed, see backlog).
   `broken_report_shouldnt_blowup` flake: unchanged from Session 29
   (see git history of this file at de29e1d).
 
+## Final log check (09-02, 48h of logs)
+
+Clean. The single Error was GetComics delivering TMNT #21 as a RAR
+mislabeled .cbz — the reader errored, the format converter detected
+and repacked it 3s later, import succeeded (the error is cosmetic).
+Warns: the unowned CA Epic checklist volumes (0 files, no folder)
+trip the vanished-mount guard on every refresh rescan (noise); the
+same 3 archives keep failing inspection: MMPR Shattered Grid #01,
+MMPR/TMNT III #05, FF Masterworks #016 (possibly damaged rips).
+
 ## Backlog (agreed / open)
 
 1. **Identification hardening (`82d30b5`) — SHIPPED as v1.1.46 (08-31).** The force-accept
@@ -103,3 +113,7 @@ releases, and then hardened at its root (unpushed, see backlog).
    ComicVine volume under any name tried; files deleted by user.
 5. FlareSolverr-for-GC and the browser DDL resolver stay unbuilt /
    shelved.
+6. Micro-polish (not release-worthy alone): vanished-mount warn →
+   Debug when the series has zero files; ComicInfoReaderService could
+   sniff RAR-as-.cbz before logging an Error. Optional: re-grab the 3
+   inspection-failing archives above.
