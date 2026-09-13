@@ -437,11 +437,23 @@ namespace NzbDrone.Core.Issues
                     updatedSeries = _seriesInfo.GetChangedSeries(message.LastStartTime.Value);
                 }
 
+                var manualTrigger = message.Trigger == CommandTrigger.Manual;
+
+                // Ended-tier series come due in bunches (one shared interval,
+                // one shared stamp date) - budget them to the tier's
+                // steady-state rate so a scheduled run can never become a
+                // storm. Manual and delta-driven runs are not budgeted.
+                HashSet<int> budgetedEnded = null;
+
+                if (updatedSeries == null && !manualTrigger)
+                {
+                    budgetedEnded = ShouldRefreshSeries.BudgetEndedTier(allSeries);
+                }
+
                 foreach (var series in allSeries)
                 {
-                    var manualTrigger = message.Trigger == CommandTrigger.Manual;
-
-                    if ((updatedSeries == null && _checkIfSeriesShouldBeRefreshed.ShouldRefresh(series)) ||
+                    if ((updatedSeries == null && _checkIfSeriesShouldBeRefreshed.ShouldRefresh(series) &&
+                         (budgetedEnded == null || !ShouldRefreshSeries.IsEndedTierDue(series) || budgetedEnded.Contains(series.Id))) ||
                         (updatedSeries != null && updatedSeries.Contains(series.ForeignSeriesId)) ||
                         manualTrigger)
                     {
