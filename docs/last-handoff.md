@@ -1,4 +1,32 @@
-# Last Handoff — 2026-08-31 (Session 30, final)
+# Last Handoff — 2026-09-13 (Session 31)
+
+## Session 31 (09-13): the refresh herd, found and fixed
+
+The first steady-state log check (11 days after Session 30) found the
+tiered refresh's flaw: the ended tier shares ONE interval and ONE
+converged stamp date (the 08-20 status-derivation pass), so all
+~1,300 ended series came due together — an **11h30m run with 135 CV
+throttles every Friday**, between 1-minute daily runs. Zero errors
+otherwise; RSS and the interactive lane were unaffected during it.
+
+**v1.1.47 shipped (09-13):** ended series refresh **monthly** (a
+revival is caught same-day by the RSS unknown-issue valve, then held
+daily by its recent release — the monthly pass only freshens covers
+and blurbs), and the scheduled run budgets the tier to its
+steady-state rate (`ShouldRefreshSeries.BudgetEndedTier` = tier size /
+interval days, oldest due first; ~43/day here). A bunched tier drains
+evenly within one interval; no scheduled run can storm, structurally.
+GOTCHA: **manual refreshes bypass the budget by design** — a manual
+library-wide RefreshSeries is still the full storm; don't use it to
+"test". VERIFY next session: daily runs ~43 series / ~13 min, no
+Friday spike, backlog drained within ~30 days of 09-13.
+
+Also noted: ComicVine delta sync (`GetChangedSeries`) remains a stub —
+a researched future alternative, not a tweak.
+
+---
+
+# Session 30 handoff (2026-08-31, closed)
 
 Session 30 spanned 08-19 → 08-31 and shipped **three releases
 (v1.1.43, v1.1.44, v1.1.45)**, closed the Session-24 library triage

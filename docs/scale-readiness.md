@@ -28,6 +28,9 @@ as designed**:
   ended series with an issue in the last 30 days → after 12 h;
   ended long ago → every 30 days
   (src/NzbDrone.Core/Issues/Utilities/ShouldRefreshSeries.cs).
+  *(Superseded: v1.1.40 replaced these rules with tiered cadence —
+  active daily, ended monthly since v1.1.47, with a per-run budget on
+  the ended tier. See ShouldRefreshSeries for the current policy.)*
 
 At 500 series (~50 continuing) that's roughly 40–50 CV calls/day —
 comfortably inside the 200/hr limit. No fix needed.

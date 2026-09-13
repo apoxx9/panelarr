@@ -11,18 +11,24 @@ v1.1.43–45 shipped (retag events, TMNT false-grab fix, and a two-step
 fix for a rescan that re-homed another series' files); the Session-24
 library triage is CLOSED (40 annual volumes added, files re-homed and
 moved into their own folders, unmapped 67 → 1); tiered refresh settled
-at ~47 min/run; v1.1.46 (identification hardening) shipped 08-31.
-Nothing is unpushed.
+at ~47 min/run; v1.1.46 (identification hardening) shipped 08-31;
+v1.1.47 (09-13) fixed the ended-tier refresh herd — ended series now
+refresh monthly on a per-run budget (~43/day). Nothing is unpushed.
 
 Homelab Panelarr API key: <paste key here>.
 Homelab Kavita API key (only if Kavita work planned): <paste key here>.
 
 Today's agenda (recommended order):
 
-1. Anything the user brings; otherwise quiet — no open bugs. (Kavita
+1. **Verify the refresh dispersal** (v1.1.47): daily RefreshSeries
+   runs should be ~43 series / ~13 min with NO Friday spike; the
+   converged backlog drains fully by mid-October. NOTE: a manual
+   library-wide refresh bypasses the budget by design — never use one
+   to "test" the cadence.
+2. Anything the user brings; otherwise quiet — no open bugs. (Kavita
    follow-up is DONE: annuals group as their own series, no retag
    needed.)
-2. Optional micro-items if idle: re-grab the 3 inspection-failing
+3. Optional micro-items if idle: re-grab the 3 inspection-failing
    archives (MMPR SG #01, MMPR/TMNT III #05, FF MW #016); downgrade
    the zero-file vanished-mount warn to Debug; RAR-as-.cbz sniff
    before the reader's Error log.
