@@ -7,6 +7,12 @@ namespace NzbDrone.Core.Indexers.GetComics
 {
     public class GetComicsRequestGenerator : IIndexerRequestGenerator
     {
+        // The front page holds ~36 posts, and a big new-comic day pushes
+        // more than that between two RSS polls - releases scroll past the
+        // window unseen. Walk three pages; the fetch stops early once it
+        // meets a release it has already seen.
+        private const int RecentPages = 3;
+
         private static readonly Regex SpecialChars = new Regex(@"[&:?/\-]", RegexOptions.Compiled);
 
         public GetComicsSettings Settings { get; set; }
@@ -15,9 +21,21 @@ namespace NzbDrone.Core.Indexers.GetComics
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
-            pageableRequests.Add(GetPagedRequests(null));
+            pageableRequests.Add(GetRecentPageRequests());
 
             return pageableRequests;
+        }
+
+        private IEnumerable<IndexerRequest> GetRecentPageRequests()
+        {
+            var baseUrl = Settings.BaseUrl.TrimEnd('/');
+
+            yield return new IndexerRequest($"{baseUrl}/", HttpAccept.Html);
+
+            for (var page = 2; page <= RecentPages; page++)
+            {
+                yield return new IndexerRequest($"{baseUrl}/page/{page}/", HttpAccept.Html);
+            }
         }
 
         public virtual IndexerPageableRequestChain GetSearchRequests(IssueSearchCriteria searchCriteria)

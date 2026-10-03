@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NLog;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.DecisionEngine;
@@ -13,8 +14,9 @@ using NzbDrone.Core.Queue;
 
 namespace NzbDrone.Core.IndexerSearch
 {
-    internal class IssueSearchService : IExecute<IssueSearchCommand>,
+    public class IssueSearchService : IExecute<IssueSearchCommand>,
                                IExecute<MissingIssueSearchCommand>,
+                               IExecute<RecentMissingIssueSearchCommand>,
                                IExecute<CutoffUnmetIssueSearchCommand>
     {
         private readonly ISearchForReleases _releaseSearchService;
@@ -114,6 +116,42 @@ namespace NzbDrone.Core.IndexerSearch
 
             var queue = _queueService.GetQueue().Where(q => q.Issue != null).Select(q => q.Issue.Id);
             var missing = issues.Where(e => !queue.Contains(e.Id)).ToList();
+
+            SearchForBulkIssues(missing, message.Trigger == CommandTrigger.Manual).GetAwaiter().GetResult();
+        }
+
+        public void Execute(RecentMissingIssueSearchCommand message)
+        {
+            var pagingSpec = new PagingSpec<Issue>
+            {
+                Page = 1,
+                PageSize = 100000,
+                SortDirection = SortDirection.Ascending,
+                SortKey = "Id"
+            };
+
+            pagingSpec.FilterExpressions.Add(v => v.Monitored == true && v.Series.Value.Monitored == true);
+
+            var cutoff = DateTime.UtcNow.AddDays(-RecentMissingIssueSearchCommand.MaxAgeDays);
+            var horizon = DateTime.UtcNow.AddDays(1);
+
+            var recent = _issueService.IssuesWithoutFiles(pagingSpec).Records
+                .Where(e => e.ReleaseDate >= cutoff && e.ReleaseDate <= horizon)
+                .ToList();
+
+            var queue = _queueService.GetQueue().Where(q => q.Issue != null).Select(q => q.Issue.Id).ToHashSet();
+
+            var missing = recent
+                .Where(e => !queue.Contains(e.Id))
+                .OrderByDescending(e => e.ReleaseDate)
+                .Take(RecentMissingIssueSearchCommand.MaxIssues)
+                .ToList();
+
+            if (missing.Empty())
+            {
+                _logger.Debug("No recently released missing issues to search");
+                return;
+            }
 
             SearchForBulkIssues(missing, message.Trigger == CommandTrigger.Manual).GetAwaiter().GetResult();
         }
