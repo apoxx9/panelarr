@@ -20,15 +20,17 @@ Homelab Kavita API key (only if Kavita work planned): <paste key here>.
 
 Today's agenda (recommended order):
 
-1. **Verify the refresh dispersal** (v1.1.47): daily RefreshSeries
-   runs should be ~43 series / ~13 min with NO Friday spike; the
-   converged backlog drains fully by mid-October. NOTE: a manual
-   library-wide refresh bypasses the budget by design — never use one
-   to "test" the cadence.
-2. Anything the user brings; otherwise quiet — no open bugs. (Kavita
+1. **Verify the refresh dispersal** (v1.1.47): after Oct 12 the ended
+   tier comes due — daily runs should be ~46 series / ~15 min with no
+   multi-hour storm. NOTE: a manual library-wide refresh bypasses the
+   budget by design — never use one to "test" the cadence.
+2. **Verify the RSS safety net** (v1.1.48): System → Tasks shows
+   RecentMissingIssueSearch daily; after a big new-comic Wednesday,
+   wanted/missing should hold nothing older than a day.
+3. Anything the user brings; otherwise quiet — no open bugs. (Kavita
    follow-up is DONE: annuals group as their own series, no retag
    needed.)
-3. Optional micro-items if idle: re-grab the 3 inspection-failing
+4. Optional micro-items if idle: re-grab the 3 inspection-failing
    archives (MMPR SG #01, MMPR/TMNT III #05, FF MW #016); downgrade
    the zero-file vanished-mount warn to Debug; RAR-as-.cbz sniff
    before the reader's Error log.
