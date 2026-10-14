@@ -1,3 +1,71 @@
+# Last Handoff — 2026-10-14 (Session 33)
+
+## Session 33 (10-14): both watch items verified, then the noise cleanup
+
+A verification-only health check that closed out v1.1.47 and v1.1.48,
+followed by **v1.1.49** for the log noise those checks exposed.
+
+**The ended-tier dispersal is CONFIRMED.** The tier of 1,388 ended
+series came due on 10-11 and now drains exactly **47/day** — which is
+what `BudgetEndedTier` computes as `ceil(1388 / 30)`. Daily skip counts
+fell 1,388 → ~1,343 in step. Scheduled refresh windows measured from
+the logs: 0:51–1:12 before 10-11 (actives only), 1:47–2:06 after
+(actives + 47 ended). Adding the ended tier costs about **50 seconds**.
+The 11h30m Friday storms are structurally gone, not merely dormant.
+
+**RSS paging is CONFIRMED**: every poll now reports 117–118 releases
+found, up from the 36-post single page. The **safety net** is
+registered and firing daily, but has had zero in-window missing issues
+since 10-05, so it is still unproven under real load.
+
+Coverage: all 15 October issues have files; every straggler from the
+10-04 sweep (Monstress #63, Something Epic #13, Minor Arcana #17,
+Nightwing #139, SIKTC #49, TMNT #20) **recovered itself via RSS** once
+releases appeared — no intervention. 598 monitored-missing are
+back-catalog (596 pre-2024). One current-run gap remains: **TMNT (2024)
+#22** (released 09-18, added 09-17), searched manually on 10-14 with
+zero releases on either indexer. It never got a safety-net attempt
+because it was already 17 days old when v1.1.48 deployed on 10-04.
+
+**v1.1.49 shipped (10-14)** — three noise sources, each of which hid
+whether anything was actually wrong:
+
+- **Archive signatures now beat extensions.** A `.cbr` holding a ZIP
+  died on "Rar signature not found" and a `.cbz` holding RAR on
+  "Failed to locate the Zip Header", leaving three library files
+  permanently uninspected (MMPR Shattered Grid #01, MMPR/TMNT III #05,
+  FF Masterworks #016). `ArchiveSignature.Identify` reads the magic
+  bytes, and both `ArchiveInspector` and `ComicInfoReaderService` retry
+  as the real format — but **only after the declared format throws**,
+  so the happy path pays no extra open on NFS. No recognisable
+  signature means no second guess, so a genuinely corrupt archive stays
+  loud. EPUB is a ZIP container but never sniffs, because its handling
+  cannot fail.
+- **The vanished-mount guard and the empty-folder notice warn only when
+  the folder has rows to lose** (`HasKnownFiles` →
+  `GetFilesWithBasePath`). Twelve checklist volumes holding zero files
+  were warning on every scan, which made the message useless for
+  spotting the broken mount it exists to catch.
+- **The recent-missing search logs at Info even when it searches
+  nothing** — a quiet run was previously indistinguishable from a task
+  that never fired, its only evidence a 61ms duration.
+
+Suite: **2,710 Core.Test** green (+24) and Host.Test ContainerFixture
+green. Verified by boot smoke test: the zero-case Info line appears
+(`No missing issues released in the last 14 days to search`), UI routes
+return 200 with zero console errors.
+
+API GOTCHAS learned here: `/api/v1/series` does **not** expose
+`lastInfoSync`, and `/api/v1/calendar` does **not** populate `hasFile`
+(it leaves `seriesTitle` blank too) — use
+`statistics.issueFileCount`. To measure the scheduled refresh window,
+bracket the first→last `RefreshSeriesService|Skipping refresh of
+series` timestamps per day; bracketing `Updating Info for` gives bogus
+12–17h spans because `RefreshSeriesOnUnknownIssueReleaseService` fires
+single-series refreshes from RSS all day long.
+
+---
+
 # Last Handoff — 2026-09-13 (Session 31)
 
 ## Session 31 (09-13): the refresh herd, found and fixed
