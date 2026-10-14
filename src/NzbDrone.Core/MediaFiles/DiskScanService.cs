@@ -147,7 +147,18 @@ namespace NzbDrone.Core.MediaFiles
                     // ~2,490 of them during the 2026-07-08 NFS race. Keep the
                     // rows; an existing-but-empty folder is skipped below for
                     // the same reason.
-                    _logger.Warn("Series folder {0} doesn't exist - skipping DB cleanup for its files (vanished-mount guard)", folder);
+                    // A folder with no rows to lose has nothing to guard, and
+                    // the checklist volumes that legitimately hold zero files
+                    // logged this on every scan.
+                    if (HasKnownFiles(folder))
+                    {
+                        _logger.Warn("Series folder {0} doesn't exist - skipping DB cleanup for its files (vanished-mount guard)", folder);
+                    }
+                    else
+                    {
+                        _logger.Debug("Series folder {0} doesn't exist and holds no known files - skipping", folder);
+                    }
+
                     continue;
                 }
 
@@ -157,7 +168,15 @@ namespace NzbDrone.Core.MediaFiles
 
                 if (!files.Any())
                 {
-                    _logger.Warn("Scan folder {0} is empty.", folder);
+                    if (HasKnownFiles(folder))
+                    {
+                        _logger.Warn("Scan folder {0} is empty.", folder);
+                    }
+                    else
+                    {
+                        _logger.Debug("Scan folder {0} is empty and holds no known files.", folder);
+                    }
+
                     continue;
                 }
 
@@ -311,6 +330,11 @@ namespace NzbDrone.Core.MediaFiles
 
             importStopwatch.Stop();
             _logger.Debug("Issue import complete for:\n{0} [{1}]", folders.ConcatToString("\n"), importStopwatch.Elapsed);
+        }
+
+        private bool HasKnownFiles(string folder)
+        {
+            return _mediaFileService.GetFilesWithBasePath(folder).Any();
         }
 
         private void CleanMediaFiles(string folder, List<string> mediaFileList)

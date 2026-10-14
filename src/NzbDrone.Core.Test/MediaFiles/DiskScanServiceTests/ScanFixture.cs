@@ -178,6 +178,7 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             // Vanished-mount guard: a missing series folder is treated as a
             // broken mount, not a deletion — its DB rows must survive
             GivenRootFolder(_otherSeriesFolder);
+            GivenKnownFiles(new[] { Path.Combine(_series.Path, "Saga 001 (2012).cbz") });
 
             Subject.Scan(new List<string> { _series.Path });
 
@@ -186,7 +187,48 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IMediaFileTableCleanupService>()
                   .Verify(v => v.Clean(It.IsAny<string>(), It.IsAny<List<string>>()), Times.Never());
 
+            // Rows were at stake, so the guard is worth shouting about
             ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_not_warn_when_a_missing_folder_holds_no_known_files()
+        {
+            // A series folder with no rows to lose has nothing to guard, and
+            // the checklist volumes that legitimately hold zero files were
+            // warning on every scan
+            GivenRootFolder(_otherSeriesFolder);
+
+            Subject.Scan(new List<string> { _series.Path });
+
+            Mocker.GetMock<IMediaFileTableCleanupService>()
+                  .Verify(v => v.Clean(It.IsAny<string>(), It.IsAny<List<string>>()), Times.Never());
+        }
+
+        [Test]
+        public void should_warn_when_a_folder_with_known_files_scans_empty()
+        {
+            // Files that were there yesterday and are gone today is the case
+            // worth surfacing
+            GivenSeriesFolder();
+            GivenFiles(new List<string>());
+            GivenKnownFiles(new[] { Path.Combine(_series.Path, "Saga 001 (2012).cbz") });
+
+            Subject.Scan(new List<string> { _series.Path });
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_not_warn_when_an_empty_folder_holds_no_known_files()
+        {
+            GivenSeriesFolder();
+            GivenFiles(new List<string>());
+
+            Subject.Scan(new List<string> { _series.Path });
+
+            Mocker.GetMock<IMakeImportDecision>()
+                .Verify(v => v.GetImportDecisions(It.IsAny<List<IFileInfo>>(), It.IsAny<IdentificationOverrides>(), It.IsAny<ImportDecisionMakerInfo>(), It.IsAny<ImportDecisionMakerConfig>()), Times.Never());
         }
 
         [Test]
@@ -559,8 +601,6 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
             Mocker.GetMock<IImportApprovedIssues>()
                 .Verify(x => x.Import(It.IsAny<List<ImportDecision<LocalIssue>>>(), It.IsAny<bool>(), It.IsAny<DownloadClientItem>(), It.IsAny<ImportMode>()),
                         Times.Never());
-
-            ExceptionVerification.ExpectedWarns(1);
         }
 
         [Test]

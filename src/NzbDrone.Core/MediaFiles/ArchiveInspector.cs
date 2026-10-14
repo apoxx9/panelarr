@@ -50,31 +50,58 @@ namespace NzbDrone.Core.MediaFiles
         {
             try
             {
-                switch (format)
-                {
-                    case ComicFormat.CBZ:
-                        return InspectZipArchive(filePath);
-                    case ComicFormat.CBR:
-                        return InspectRarArchive(filePath);
-                    case ComicFormat.CB7:
-                        return InspectSevenZipArchive(filePath);
-                    case ComicFormat.PDF:
-                        return InspectPdf(filePath);
-                    case ComicFormat.EPUB:
-                        return new ArchiveInspectionResult
-                        {
-                            PageCount = 0,
-                            ImageCount = 0,
-                            ImageQualityScore = 0.5f
-                        };
-                    default:
-                        return new ArchiveInspectionResult { Error = string.Format("Unsupported format: {0}", format) };
-                }
+                return InspectAs(filePath, format);
             }
             catch (Exception ex)
             {
+                // An extension that lies about its container is common in
+                // scene releases - a .cbr holding a ZIP, a .cbz holding RAR.
+                // The signature is only read once the declared format has
+                // already failed: these archives live on NFS, where an extra
+                // open per inspection is not free.
+                var sniffed = ArchiveSignature.Identify(filePath);
+
+                if (sniffed.HasValue && sniffed.Value != format)
+                {
+                    try
+                    {
+                        var result = InspectAs(filePath, sniffed.Value);
+                        _logger.Debug("{0} is named {1} but holds a {2} archive - inspected as {2}", filePath, format, sniffed.Value);
+                        return result;
+                    }
+                    catch (Exception retryEx)
+                    {
+                        _logger.Warn(retryEx, "Archive inspection failed for {0}, including as {1}", filePath, sniffed.Value);
+                        return new ArchiveInspectionResult { Error = retryEx.Message };
+                    }
+                }
+
                 _logger.Warn(ex, "Archive inspection failed for {0}", filePath);
                 return new ArchiveInspectionResult { Error = ex.Message };
+            }
+        }
+
+        private ArchiveInspectionResult InspectAs(string filePath, ComicFormat format)
+        {
+            switch (format)
+            {
+                case ComicFormat.CBZ:
+                    return InspectZipArchive(filePath);
+                case ComicFormat.CBR:
+                    return InspectRarArchive(filePath);
+                case ComicFormat.CB7:
+                    return InspectSevenZipArchive(filePath);
+                case ComicFormat.PDF:
+                    return InspectPdf(filePath);
+                case ComicFormat.EPUB:
+                    return new ArchiveInspectionResult
+                    {
+                        PageCount = 0,
+                        ImageCount = 0,
+                        ImageQualityScore = 0.5f
+                    };
+                default:
+                    return new ArchiveInspectionResult { Error = string.Format("Unsupported format: {0}", format) };
             }
         }
 

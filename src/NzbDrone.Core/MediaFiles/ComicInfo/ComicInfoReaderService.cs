@@ -125,28 +125,50 @@ namespace NzbDrone.Core.MediaFiles.ComicInfo
 
             try
             {
-                switch (comicFile.ComicFormat)
-                {
-                    case ComicFormat.CBZ:
-                        results = ReadFromZip(comicFile.Path);
-                        break;
-                    case ComicFormat.CBR:
-                        results = ReadFromRar(comicFile.Path);
-                        break;
-                    case ComicFormat.CB7:
-                        results = ReadFrom7z(comicFile.Path);
-                        break;
-                    default:
-                        _logger.Debug("Unsupported format for metadata reading: {0}", comicFile.ComicFormat);
-                        break;
-                }
+                results = ReadAs(comicFile.Path, comicFile.ComicFormat);
             }
             catch (Exception ex)
             {
+                // The extension can disagree with the container. Only pay for
+                // the signature read once the declared format has failed, then
+                // retry as what the file actually is.
+                var sniffed = ArchiveSignature.Identify(comicFile.Path);
+
+                if (sniffed.HasValue && sniffed.Value != comicFile.ComicFormat)
+                {
+                    try
+                    {
+                        results = ReadAs(comicFile.Path, sniffed.Value);
+                        _logger.Debug("{0} is named {1} but holds a {2} archive - read as {2}", comicFile.Path, comicFile.ComicFormat, sniffed.Value);
+                        return results;
+                    }
+                    catch (Exception retryEx)
+                    {
+                        _logger.Error(retryEx, "Failed to read metadata from {0}, including as {1}", comicFile.Path, sniffed.Value);
+                        return results;
+                    }
+                }
+
                 _logger.Error(ex, "Failed to read metadata from {0}", comicFile.Path);
             }
 
             return results;
+        }
+
+        private List<ComicMetadataResult> ReadAs(string path, ComicFormat format)
+        {
+            switch (format)
+            {
+                case ComicFormat.CBZ:
+                    return ReadFromZip(path);
+                case ComicFormat.CBR:
+                    return ReadFromRar(path);
+                case ComicFormat.CB7:
+                    return ReadFrom7z(path);
+                default:
+                    _logger.Debug("Unsupported format for metadata reading: {0}", format);
+                    return new List<ComicMetadataResult>();
+            }
         }
 
         private List<ComicMetadataResult> ReadFromZip(string path)

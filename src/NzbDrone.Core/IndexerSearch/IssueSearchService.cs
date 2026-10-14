@@ -147,11 +147,16 @@ namespace NzbDrone.Core.IndexerSearch
                 .Take(RecentMissingIssueSearchCommand.MaxIssues)
                 .ToList();
 
+            // Logged at Info even when there is nothing to do: a run that
+            // searches nothing is otherwise indistinguishable from a task
+            // that never fired.
             if (missing.Empty())
             {
-                _logger.Debug("No recently released missing issues to search");
+                _logger.Info("No missing issues released in the last {0} days to search", RecentMissingIssueSearchCommand.MaxAgeDays);
                 return;
             }
+
+            _logger.Info("Searching for {0} missing issues released in the last {1} days", missing.Count, RecentMissingIssueSearchCommand.MaxAgeDays);
 
             SearchForBulkIssues(missing, message.Trigger == CommandTrigger.Manual).GetAwaiter().GetResult();
         }
