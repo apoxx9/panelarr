@@ -22,25 +22,18 @@ Homelab Kavita API key (only if Kavita work planned): <paste key here>.
 
 Today's agenda (recommended order):
 
-1. **Confirm v1.1.49 did its job** — the three inspection-failing
-   archives (MMPR Shattered Grid #01, MMPR/TMNT III #05, FF Masterworks
-   #016) should now inspect instead of warning. Run Inspect Comic Files
-   and check the log: a recovered file logs at Debug ("is named X but
-   holds a Y archive"), so the WARN count for those three dropping to
-   zero is the signal. Any that still warn are genuinely corrupt and
-   want a re-grab. The 12 vanished-mount warnings should also be gone
-   from a normal scan.
-2. **The RSS safety net is still unproven under load** — it has had
-   nothing in-window since 10-05. After the next big new-comic
-   Wednesday, confirm it logs "Searching for N missing issues" (not the
-   zero-case line) and that wanted/missing holds nothing older than a
-   day.
-3. **TMNT (2024) #22** (released 09-18) is the one current-run gap: no
-   release exists on either indexer. Nothing to fix — it will arrive via
-   RSS whenever it is posted. Everything else monitored-missing is
-   back-catalog.
-4. Anything the user brings; otherwise quiet. (Kavita follow-up is
-   DONE: annuals group as their own series, no retag needed.)
+1. **Nothing is outstanding.** v1.1.49 was verified live on 10-15 (all
+   noise warnings 39 → 0, the three "corrupt" archives recovered and
+   inspected for real, the safety net logged its first non-zero search).
+   Refresh, RSS, and the archive work are all closed out.
+2. **The safety net has still only handled a trickle** — one in-window
+   issue so far. After a genuinely big new-comic Wednesday, confirm it
+   logs "Searching for N missing issues" with N in the double digits
+   and that wanted/missing holds nothing older than a day.
+3. Anything the user brings; otherwise quiet — no open bugs. (Kavita
+   follow-up is DONE: annuals group as their own series, no retag
+   needed.) Library is current: the only recent monitored-missing issue
+   is whatever released in the last day or two.
 
 Dev notes: local dev instance data dir is
 `~/Library/Application Support/Panelarr` (port 8787); binary builds to

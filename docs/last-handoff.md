@@ -55,6 +55,44 @@ green. Verified by boot smoke test: the zero-case Info line appears
 (`No missing issues released in the last 14 days to search`), UI routes
 return 200 with zero console errors.
 
+### v1.1.49 verified live (10-15)
+
+Deployed 10-15 05:03 (`Bootstrap ... Version 1.1.49.186`). Before/after
+log counts across that boundary:
+
+| signal | before 05:03 | after |
+| --- | --- | --- |
+| ArchiveInspector warns | 39 | **0** |
+| inspection-error warns | 39 | **0** |
+| vanished-mount warns | 24 | **0** |
+| "Scan folder is empty" warns | 2 | **0** |
+| ComicInfoReader errors | 1 | **0** |
+
+**The three "corrupt" archives were never corrupt.** The first v1.1.49
+inspection pass (05:14) processed all three with zero warnings and took
+**2.8s** against v1.1.48's 0.1s instant-fail, and they no longer appear
+in `GetFilesPendingInspection` — whose query is `ImageCount == 0`. That
+is the decisive proof they got real page counts, because a failed
+inspection leaves `ImageCount` at 0 and re-queues the file forever
+(which is exactly why those warnings recurred ~5×/day).
+
+The safety net also hit its non-zero branch for the first time:
+`Searching for 1 missing issues released in the last 14 days` (09:55,
+Radiant Black #44 released 10-14, 0 grabbed — no release exists yet).
+Refresh cadence unchanged post-deploy: 2:01 window, 1,344 skipped.
+
+GOTCHA: `InspectComicFiles` only walks files with `ImageCount == 0`, so
+a fixed file cannot be re-inspected through that command. The API's
+`comicfile` and `series` resources expose **no** inspection fields
+(no `pageCount`, `imageCount`, or `lastInfoSync`) — inspection state has
+to be read from the logs plus the pending count.
+
+**TMNT (2024) #22** — the gap flagged on 10-14 as having no release on
+either indexer — was grabbed by RSS at 10-14 18:21, under an hour after
+the manual search came back empty. #23 followed on 10-15. The newest
+monitored-missing issue is now Radiant Black #44 (released 10-14);
+everything else is pre-March-2026 back-catalog.
+
 API GOTCHAS learned here: `/api/v1/series` does **not** expose
 `lastInfoSync`, and `/api/v1/calendar` does **not** populate `hasFile`
 (it leaves `seriesTitle` blank too) — use
