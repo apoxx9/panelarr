@@ -118,7 +118,18 @@ namespace NzbDrone.Core.Download
             {
                 if (ex.InnerException is TooManyRequestsException http429)
                 {
-                    _indexerStatusService.RecordFailure(remoteIssue.Release.IndexerId, http429.RetryAfter);
+                    // Without a Retry-After the backoff is left to escalation
+                    // level 1 - 60 seconds - which expires long before the next
+                    // RSS sync, and that sync's success decrements the level
+                    // back to zero. The ladder could never climb, so a
+                    // grab-limited release was retried every cycle: 96 attempts
+                    // a day against the tracker. The search path already falls
+                    // back to an hour for the same reason.
+                    var retryTime = http429.RetryAfter != TimeSpan.Zero ? http429.RetryAfter : TimeSpan.FromHours(1);
+
+                    _indexerStatusService.RecordFailure(remoteIssue.Release.IndexerId, retryTime);
+
+                    _logger.Warn("API Grab Limit reached for {0}. Disabled for {1}", remoteIssue.Release.Indexer, retryTime);
                 }
                 else
                 {

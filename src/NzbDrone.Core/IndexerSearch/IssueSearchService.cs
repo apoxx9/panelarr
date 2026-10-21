@@ -133,10 +133,15 @@ namespace NzbDrone.Core.IndexerSearch
             pagingSpec.FilterExpressions.Add(v => v.Monitored == true && v.Series.Value.Monitored == true);
 
             var cutoff = DateTime.UtcNow.AddDays(-RecentMissingIssueSearchCommand.MaxAgeDays);
+            var neverSearchedCutoff = DateTime.UtcNow.AddDays(-RecentMissingIssueSearchCommand.NeverSearchedMaxAgeDays);
             var horizon = DateTime.UtcNow.AddDays(1);
 
+            // The horizon test comes first so an issue with no release date is
+            // excluded by the lifted comparison, as it always has been.
             var recent = _issueService.IssuesWithoutFiles(pagingSpec).Records
-                .Where(e => e.ReleaseDate >= cutoff && e.ReleaseDate <= horizon)
+                .Where(e => e.ReleaseDate <= horizon &&
+                            (e.ReleaseDate >= cutoff ||
+                             (e.LastSearchTime == null && e.ReleaseDate >= neverSearchedCutoff)))
                 .ToList();
 
             var queue = _queueService.GetQueue().Where(q => q.Issue != null).Select(q => q.Issue.Id).ToHashSet();

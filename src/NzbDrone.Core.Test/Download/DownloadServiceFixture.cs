@@ -14,6 +14,7 @@ using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Issues;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Test.Framework;
+using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.Download
 {
@@ -145,6 +146,8 @@ namespace NzbDrone.Core.Test.Download
 
             Mocker.GetMock<IIndexerStatusService>()
                 .Verify(v => v.RecordFailure(It.IsAny<int>(), TimeSpan.FromMinutes(5.0)), Times.Once());
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]
@@ -166,6 +169,34 @@ namespace NzbDrone.Core.Test.Download
             Mocker.GetMock<IIndexerStatusService>()
                 .Verify(v => v.RecordFailure(It.IsAny<int>(),
                     It.IsInRange<TimeSpan>(TimeSpan.FromMinutes(4.9), TimeSpan.FromMinutes(5.1), Moq.Range.Inclusive)), Times.Once());
+
+            ExceptionVerification.IgnoreWarns();
+        }
+
+        [Test]
+        public void Download_report_should_back_off_for_an_hour_on_http429_without_a_retry_after()
+        {
+            // Prowlarr's grab-limit 429 carries no Retry-After. Passing
+            // TimeSpan.Zero through left the indexer blocked for escalation
+            // level 1 - 60 seconds - which expired before the next RSS sync,
+            // whose success then decremented the level back to zero. The
+            // ladder never climbed and one release was retried 96 times a day.
+            var request = new HttpRequest("http://my.indexer.com");
+            var response = new HttpResponse(request, new HttpHeader(), new byte[0], (HttpStatusCode)429);
+
+            var mock = WithUsenetClient();
+            mock.Setup(s => s.Download(It.IsAny<RemoteIssue>(), It.IsAny<IIndexer>()))
+                .Callback<RemoteIssue, IIndexer>((v, indexer) =>
+                {
+                    throw new ReleaseDownloadException(v.Release, "Error", new TooManyRequestsException(request, response));
+                });
+
+            Assert.ThrowsAsync<ReleaseDownloadException>(async () => await Subject.DownloadReport(_parseResult, null));
+
+            Mocker.GetMock<IIndexerStatusService>()
+                .Verify(v => v.RecordFailure(It.IsAny<int>(), TimeSpan.FromHours(1)), Times.Once());
+
+            ExceptionVerification.IgnoreWarns();
         }
 
         [Test]

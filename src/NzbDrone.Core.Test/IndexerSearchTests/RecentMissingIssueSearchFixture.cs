@@ -47,9 +47,17 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
                   .ReturnsAsync(new ProcessedDecisions(new List<DownloadDecision>(), new List<DownloadDecision>(), new List<DownloadDecision>()));
         }
 
-        private static Issue MissingIssue(int id, int daysAgoReleased)
+        // Defaults to already-searched so a test says what it means: only the
+        // never-searched cases should reach past the recent-release window.
+        private static Issue MissingIssue(int id, int daysAgoReleased, bool searched = true)
         {
-            return new Issue { Id = id, ReleaseDate = DateTime.UtcNow.AddDays(-daysAgoReleased), Monitored = true };
+            return new Issue
+            {
+                Id = id,
+                ReleaseDate = DateTime.UtcNow.AddDays(-daysAgoReleased),
+                Monitored = true,
+                LastSearchTime = searched ? DateTime.UtcNow.AddDays(-daysAgoReleased) : null
+            };
         }
 
         [Test]
@@ -63,6 +71,51 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
             Subject.Execute(new RecentMissingIssueSearchCommand());
 
             _searched.Should().BeEquivalentTo(new[] { 1, 2 });
+        }
+
+        [Test]
+        public void should_search_an_older_issue_that_has_never_been_searched()
+        {
+            // ComicVine re-dated Catwoman #90 onto a day already 20 days gone,
+            // so the recent-release window never covered it - and it was
+            // available on an indexer the whole time
+            _missing.Add(MissingIssue(1, 20, searched: false));
+
+            Subject.Execute(new RecentMissingIssueSearchCommand());
+
+            _searched.Should().BeEquivalentTo(new[] { 1 });
+        }
+
+        [Test]
+        public void should_not_search_an_older_issue_that_was_already_searched()
+        {
+            _missing.Add(MissingIssue(1, 20));
+
+            Subject.Execute(new RecentMissingIssueSearchCommand());
+
+            _searched.Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_not_reach_back_catalogue_issues_that_were_never_searched()
+        {
+            // Beyond the horizon a gap is deliberate, not an accident - the
+            // library holds ~600 of these and they must stay untouched
+            _missing.Add(MissingIssue(1, RecentMissingIssueSearchCommand.NeverSearchedMaxAgeDays + 10, searched: false));
+
+            Subject.Execute(new RecentMissingIssueSearchCommand());
+
+            _searched.Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_not_search_a_never_searched_issue_that_is_not_released_yet()
+        {
+            _missing.Add(MissingIssue(1, -30, searched: false));
+
+            Subject.Execute(new RecentMissingIssueSearchCommand());
+
+            _searched.Should().BeEmpty();
         }
 
         [Test]
