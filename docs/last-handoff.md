@@ -54,11 +54,33 @@ no-op today — the newest remaining missing issue is from 2026-03-01.
 **v1.1.50 shipped.** Suite 2,715 Core.Test (+5) and Host.Test
 ContainerFixture green; clean boot smoke test, zero errors.
 
-CAVEAT on the new `DownloadService` warn: its text is NOT asserted. The
-`ExceptionVerification` static target records that warn after an
-in-test `ExpectedWarns` call in this fixture, so all three 429 tests use
-`IgnoreWarns()` and assert the **backoff duration** instead — that is
-the contract; the log text is incidental.
+CAVEAT on the new `DownloadService` warn: its text is NOT asserted, and
+the reason turned out to matter. Warn capture via
+`ExceptionVerification` is **fixture-dependent and silently
+non-functional in some fixtures** — in `DownloadServiceFixture` even a
+direct `TestLogger.Warn("probe")` inside the test captured nothing
+(asserted 2, got 0), and `LogManager.Flush()` did not help, while the
+same assertion works in `ScanFixture`. The subject does receive the
+real `TestLogger` (`TestBase` does `Mocker.SetConstant(TestLogger)`), so
+this is process/config state rather than a wrong logger reference. Note
+too that `LoggingDownBase.AssertNoUnexpectedLogs()` only runs when
+`BuildInfo.IsDebug` **and the test already passed**. All three 429 tests
+therefore use `IgnoreWarns()` and assert the **backoff duration**, which
+is the real contract. Lesson: never treat a log-text assertion as the
+contract here, and do not "fix" the harness casually — it is shared by
+every test in the suite.
+
+TIMEZONE TRAP worth knowing: Panelarr's **log files are local time
+(UTC+2)** while the **API** (`system/status`, `history`, `system/task`)
+is **UTC**. Mixing them made it look like the Monstress retry loop
+continued after the successful import. On one UTC timeline the failures
+stop at 10-20 23:49 and the grab succeeds at 10-21 00:05 — the loop
+ended sixteen minutes *before* the success, so there is no
+post-import-retry bug. Convert before correlating.
+
+One extra detail on the loop's cost: each cycle made **two** requests to
+the indexer's download endpoint — a 500, then the 429 about three
+seconds later — so the traffic was roughly 590 requests, not 295.
 
 ACTION TAKEN: searched and imported Catwoman #90 and Nightwing #141
 (now 90/90 and 141/141). Monitored-missing 599 → 597, and nothing from
