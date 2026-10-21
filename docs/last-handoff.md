@@ -1,3 +1,71 @@
+# Last Handoff — 2026-10-21 (Session 34)
+
+## Session 34 (10-21): v1.1.49 holding, two faults found, v1.1.50
+
+A routine check that turned into two real diagnoses. v1.1.49 is still
+clean across 10-17→21 — all five noise signals at **zero** through
+three full library scans (1,429 + 1,426 + 1,426 series-scans), refresh
+windows 1:42 / 2:00 / 1:48, skipped 1,343/day, ended-tier dispersal
+stable ten days on, RSS 347 polls at 113–117 found. Health 0, queue 0.
+
+Under that calm were **295 errors and 890 warnings**.
+
+### Fault 1: a grab limit retried 96 times a day
+
+One release — Monstress #64 — was grabbed and refused **every RSS cycle
+for three and a half days** (10-17 16:46 → 10-21 01:49, ~92–96/day).
+
+The backoff code existed and *did* fire; it simply could never engage.
+Prowlarr answers a grab past the tracker limit with **HTTP 429 carrying
+no `Retry-After`**, so `TooManyRequestsException.RetryAfter` was
+`TimeSpan.Zero`, and `DownloadService` passed that straight to
+`RecordFailure` as the minimum backoff. Zero means "no minimum", so the
+block fell to escalation **level 1 = 60 seconds**
+(`EscalationBackOff.Periods[1]`) — which expired fourteen minutes before
+the next RSS sync, and that sync's success called `RecordSuccess`,
+decrementing the level back to zero. **The ladder could never climb.**
+
+Fix: a missing `Retry-After` now falls back to **one hour**, exactly
+what `HttpIndexerBase` has always done for the same response on the
+search path. Confirmed `IndexerFactory.RssEnabled()` →
+`FilterBlockedIndexers`, so a real block holds: RSS skips the indexer,
+no `RecordSuccess` fires, and repeats escalate to 3h/6h/12h.
+Self-resolved before the fix when MAM's limit reset.
+
+### Fault 2: the safety net cannot see a re-dated issue
+
+The net's window is anchored to `ReleaseDate`, but **ComicVine revises
+release dates**. A date revised onto a day already outside the window
+makes an issue invisible to the net permanently.
+
+Two live instances: **Catwoman #90** and **Nightwing #141**, both added
+2026-08-19, both absent from the Oct 1–22 calendar on 10-14, both later
+re-dated onto **2026-10-01** — twenty days stale. Both sat missing while
+the net logged its zero case on 10-18/19/20/21. **Catwoman #90 was
+available on an indexer the whole time**: a manual search grabbed it in
+seconds. So the zero-case line is NOT proof of coverage.
+
+Fix: `Issue.LastSearchTime` already exists and is persisted, so no
+schema change. Issues that have **never been searched** are now
+reconsidered out to `NeverSearchedMaxAgeDays = 90`; beyond that a gap is
+deliberate and the ~600 back-catalogue issues stay untouched. Verified a
+no-op today — the newest remaining missing issue is from 2026-03-01.
+
+**v1.1.50 shipped.** Suite 2,715 Core.Test (+5) and Host.Test
+ContainerFixture green; clean boot smoke test, zero errors.
+
+CAVEAT on the new `DownloadService` warn: its text is NOT asserted. The
+`ExceptionVerification` static target records that warn after an
+in-test `ExpectedWarns` call in this fixture, so all three 429 tests use
+`IgnoreWarns()` and assert the **backoff duration** instead — that is
+the contract; the log text is incidental.
+
+ACTION TAKEN: searched and imported Catwoman #90 and Nightwing #141
+(now 90/90 and 141/141). Monitored-missing 599 → 597, and nothing from
+the current run is missing.
+
+---
+
 # Last Handoff — 2026-10-14 (Session 33)
 
 ## Session 33 (10-14): both watch items verified, then the noise cleanup
