@@ -31,6 +31,19 @@ Homelab Kavita API key (only if Kavita work planned): <paste key here>.
 
 Today's agenda (recommended order):
 
+1. **Verify v1.1.51 + v1.1.52 on the homelab.** For the parser: search
+   "Absolute Batman 2025 Annual" (series 1423) / "Absolute Wonder Woman
+   2026 Annual" (1424) — the exact-title GetComics release should now be
+   accepted instead of rejected "Wrong series". NOTE both ISSUES are
+   `monitored: false`, so they must be monitored before any AUTOMATIC
+   search will consider them (monitoring a series does NOT monitor its
+   existing issues). For the CBL: run Find on ComicVine on reading list
+   339 — the two specials should now come back as CANDIDATES rather than
+   "not found" (expect cv:169970 and cv:164509).
+2. Suggest the user configure a **Recycle Bin** — deletions are
+   currently permanent.
+3. Anything the user brings; otherwise quiet.
+
 1. **Verify v1.1.50's two fixes.** For the grab limit: there is nothing
    to see unless a tracker limit is hit again — if one is, the log
    should show "API Grab Limit reached for X. Disabled for 01:00:00"
@@ -56,7 +69,7 @@ Dev notes: local dev instance data dir is
 -p:Configuration=Debug -p:Platform=Posix -t:Build`. Dev DB indexers and
 download clients are DISABLED on purpose. Puppeteer is global
 (NODE_PATH=$(npm root -g)); the HOMELAB UI is behind forms login, so
-UI checks there are API-only. Suite green = Core.Test (2,715) +
+UI checks there are API-only. Suite green = Core.Test (2,731) +
 Host.Test ContainerFixture (run it for any new command/dependency).
 A FRESH dev instance opens on the setup wizard, which blocks every
 route — puppeteer route checks there confirm a clean boot, not page

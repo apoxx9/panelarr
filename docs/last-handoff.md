@@ -1,3 +1,78 @@
+# Last Handoff — 2026-11-02 (Session 35)
+
+## Session 35 (11-02): the CBL that found two real bugs
+
+The user hit two symptoms building a "DC Absolute Universe" checklist —
+some specials could not be searched, some could not be added. They were
+two unrelated bugs. **Both fixed and shipped: v1.1.51 and v1.1.52.**
+
+### v1.1.51 — annual volumes collapsing onto their parent series
+
+GetComics held `Absolute Batman 2025 Annual #1 (2025)`, an exact title
+match, and it was rejected as **"Wrong series"** — permanently, every
+time. `ComicParser.ExtractSeriesTitle` strips the word "Annual" (it is
+usually issue metadata) and strips a bare year matching the release year
+("Batman 2016" is usually just Batman). For ComicVine's annual
+**volumes**, which are genuinely named `<Series> <Year> Annual`, the two
+rules together delete the identity and leave the parent. Proved with a
+throwaway probe:
+
+```
+"Absolute Batman 2025 Annual #1 (2025)"  => series='Absolute Batman'      <- collapsed
+"Absolute Batman 2025 Annual #1 (2026)"  => series='Absolute Batman 2025' <- control, year kept
+"Spider-Man 2099 #1 (2025)"              => series='Spider-Man 2099'      <- existing guard
+```
+
+`ComicParser` is static and cannot consult the library, and the same
+string shape means different things depending on which series exist — so
+it no longer decides. `ParsedComicInfo.SeriesTitleCandidates` now lists
+every reading most-specific-first and
+`ParsingService.GetSeriesForComicRelease` takes the first that resolves.
+`SeriesTitle` keeps its old fully stripped value, so existing callers
+are untouched, and the parent fallback is unchanged.
+
+**32 series** in the 1,420-series library are named this way (16
+monitored); 30 already held their file, so this sat latent until two
+were deleted and could not be re-acquired.
+
+TRAP: `/api/v1/parse` resolves these titles CORRECTLY and is therefore
+misleading — it uses the generic parser, while the download path calls
+`MapComicRelease` (the comic parser) first and that wins.
+
+### v1.1.52 — checklist resolve could not offer candidates
+
+`ResolveMissingProviderIds` searched with `SearchVolumes`, ComicVine's
+`/volumes?filter=name:` — a FILTER, which answers nothing unless the
+name is near-exact. So the slots that most need help came back
+`notFound` with an empty picker, which is why the symptom was "cannot be
+added" rather than "ambiguous". `CompositeSearchService` behind
+`/series/lookup` has always fallen back to the fuzzy `/search` for this
+reason; the checklist resolve now does too. `ProviderNamesMatch` is
+unchanged, so nothing new is auto-linked — fuzzy-only results are
+offered as candidates. The two slots: "Absolute Batman: Ark M Special"
+is **"Absolute Batman: Ark-M"** (cv:169970) and "Free Comic Book Day
+2025: DC All In Special Edition" is **"DC All In 2025 FCBD Special
+Edition"** (cv:164509).
+
+### Also found
+
+- **Monitoring is a second, independent blocker** on those annuals: both
+  ISSUES are `monitored: false`, and every automatic path filters
+  `v.Monitored == true && v.Series.Value.Monitored == true`. Series 1424
+  is monitored TRUE while its issue is still FALSE — **monitoring a
+  series does not retroactively monitor existing issues.**
+- The two annual files were deleted by the USER (`Auth-Success` 10:12:01,
+  deletes at 10:12:30/34), not automatically. **Recycle Bin is NOT
+  configured** — "deleting permanently", so they were unrecoverable.
+  Worth configuring.
+- Safety-net watch item CLOSED: `2026-11-01 17:31 Searching for 9 missing
+  issues released in the last 14 days` → **9 reports downloaded**.
+
+Suite 2,731 Core.Test (+16) + Host ContainerFixture green; clean boot
+smoke test, zero errors.
+
+---
+
 # Last Handoff — 2026-10-21 (Session 34)
 
 ## Session 34 (10-21): v1.1.49 holding, two faults found, v1.1.50
