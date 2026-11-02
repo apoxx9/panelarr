@@ -6,8 +6,14 @@ keys):
 ---
 
 We're continuing work on Panelarr (~/Projects/panelarr). Read
-`docs/last-handoff.md` first — full Session 34 state. Short version:
-v1.1.50 (10-21) fixed two faults found in a week of homelab logs — a
+`docs/last-handoff.md` first — full Session 35 state. Short version:
+v1.1.51 + v1.1.52 (11-02) fixed two bugs found while building a
+"DC Absolute Universe" checklist: annual volumes named `<Series> <Year>
+Annual` were collapsing onto their parent series and being rejected
+"Wrong series" on exact title matches (32 such series in the library),
+and the checklist's ComicVine resolve used a name FILTER so slots whose
+name differs from the provider got "not found" with no candidates to
+pick. Before that, v1.1.50 (10-21) fixed two faults found in a week of homelab logs — a
 tracker grab limit was being retried 96×/day because a 429 without
 `Retry-After` only bought a 60-second block that the next RSS success
 reset (now falls back to an hour, matching the search path), and the
@@ -43,25 +49,6 @@ Today's agenda (recommended order):
 2. Suggest the user configure a **Recycle Bin** — deletions are
    currently permanent.
 3. Anything the user brings; otherwise quiet.
-
-1. **Verify v1.1.50's two fixes.** For the grab limit: there is nothing
-   to see unless a tracker limit is hit again — if one is, the log
-   should show "API Grab Limit reached for X. Disabled for 01:00:00"
-   ONCE, followed by silence from that indexer for an hour, instead of a
-   line every 15 minutes. For the net: watch for it searching an issue
-   whose release date is older than 14 days (that is the never-searched
-   clause firing); it is a verified no-op until a late-dated issue
-   appears.
-2. **Count the noise.** The one-line health check that found both faults
-   was grouping Warn/Error by component across all rotated logs. Do that
-   every time — both faults were invisible in /health, which showed
-   zero entries throughout.
-3. **The safety net has still only handled a trickle** — one in-window
-   issue so far. After a genuinely big new-comic Wednesday, confirm it
-   logs "Searching for N missing issues" with N in double digits.
-4. Anything the user brings; otherwise quiet — no open bugs. Library is
-   current (nothing from the current run missing; newest gap is
-   2026-03-01).
 
 Dev notes: local dev instance data dir is
 `~/Library/Application Support/Panelarr` (port 8787); binary builds to
