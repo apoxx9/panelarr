@@ -423,7 +423,25 @@ namespace NzbDrone.Core.ReadingLists
 
                 try
                 {
+                    // SearchVolumes is ComicVine's name FILTER, so it answers
+                    // nothing at all when a checklist spells a series
+                    // differently from the provider - which is precisely the
+                    // slot that needs candidates offered. Those slots were
+                    // reported "not found" with nothing to pick from:
+                    // "Absolute Batman: Ark M Special" is "Absolute Batman:
+                    // Ark-M", and "Free Comic Book Day 2025: DC All In Special
+                    // Edition" is "DC All In 2025 FCBD Special Edition". Fall
+                    // back to the fuzzy /search the library lookup has always
+                    // used. Nothing here is auto-linked that was not before:
+                    // ProviderNamesMatch still gates that, and a fuzzy-only
+                    // result set goes to the user as candidates.
                     results = _comicVine.SearchVolumes(group.Key) ?? new List<ComicVineVolumeSummary>();
+
+                    if (!results.Any())
+                    {
+                        _logger.Debug("No provider filter results for {0}, falling back to search", group.Key);
+                        results = _comicVine.SearchSeries(group.Key) ?? new List<ComicVineVolumeSummary>();
+                    }
                 }
                 catch (Exception ex)
                 {
