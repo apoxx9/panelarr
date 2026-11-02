@@ -1,10 +1,23 @@
 # Last Handoff — 2026-11-02 (Session 35)
 
-## Session 35 (11-02): the CBL that found two real bugs
+## Session 35 (11-02): one checklist, four bugs, five releases
 
-The user hit two symptoms building a "DC Absolute Universe" checklist —
-some specials could not be searched, some could not be added. They were
-two unrelated bugs. **Both fixed and shipped: v1.1.51 and v1.1.52.**
+The user reported two symptoms while building a "DC Absolute Universe"
+checklist — some specials could not be searched, some could not be
+added. Pulling that thread found **four unrelated bugs stacked in the
+same flow**, all fixed, shipped and verified live, plus a fifth change
+answering the host's mount behaviour.
+
+**Shipped today: v1.1.51, v1.1.52, v1.1.53, v1.1.54, v1.1.55.**
+Suite 2,747 Core.Test + Host ContainerFixture green. Nothing unpushed.
+
+| release | fixes |
+| --- | --- |
+| v1.1.51 | annual volumes collapsing onto their parent series |
+| v1.1.52 | checklist resolve could not offer candidates |
+| v1.1.53 | linked slot never resolved; monitored-by-default; test-harness warn capture |
+| v1.1.54 | a dead-mirror post benched the whole indexer |
+| v1.1.55 | an empty library root is a mount that is not ready yet |
 
 ### v1.1.51 — annual volumes collapsing onto their parent series
 
@@ -70,6 +83,117 @@ Edition"** (cv:164509).
 
 Suite 2,731 Core.Test (+16) + Host ContainerFixture green; clean boot
 smoke test, zero errors.
+
+### v1.1.53 — a linked slot that still would not resolve
+
+Carrying out the add the user asked for exposed a third bug: linking a
+slot to a provider volume AND adding that volume to the library still
+left the slot on `notInLibrary`. `ResolveSlot` never read
+`ForeignSeriesId` at all — it matched a foreign ISSUE id, else the
+checklist's own spelling of the series name. So the manual link wrote a
+field nothing consumed, and no name tier can ever join "Absolute Batman:
+Ark M Special" to "Absolute Batman: Ark-M". A linked series is now
+consulted between the foreign-issue tier and the name tiers.
+
+Also: adding a series from a checklist now defaults to MONITORED
+(`ReadingListDetailPage.js`). The API resource already defaulted true
+and root folders already use `defaultMonitorOption: all`, so the
+checklist panel was the only place defaulting off — and unmonitored is
+why the annuals could not be searched automatically even once their
+releases parsed.
+
+And the suite's warn capture was silently dead in some fixtures, which
+is worse than it sounds: `ExpectedWarns` AND the automatic
+`AssertNoUnexpectedLogs` both PASS when nothing is captured, so those
+assertions were vacuous rather than failing. Two causes, both proven by
+probe: `InitLogging` asked whether the target was REGISTERED, which a
+configuration holding zero rules satisfied (it now re-registers unless a
+rule actually routes Warn to it); and `TestLogger` came from
+`NzbDroneLogger.GetLogger("TestLogger")`, which has no string overload,
+so it bound to `GetLogger(object)` and named the logger after the
+argument's TYPE — every test logged as **"String"**. `WarnCaptureFixture`
+now guards all of it.
+
+### v1.1.54 — one rotted post benched the whole indexer
+
+Found while manually searching the 17 back-catalogue annual gaps. A
+GetComics post with dead mirrors threw a generic
+`ReleaseDownloadException`, which `DownloadService` answers by recording
+an INDEXER failure → escalation rung one (60s) →
+`FilterBlockedIndexers` drops it from every search in that window. A
+17-issue batch hit a dead post five issues in and the remaining **12
+were searched by one indexer instead of two**, reporting nothing found
+for books nobody properly looked for. Re-running did the same at a
+different post.
+
+The indexer was never unhealthy; the release was unavailable, which the
+code already has an exception for and already handles right (a 404
+throws `ReleaseUnavailableException`, caught first, recording nothing).
+Exhausted mirrors, a post with no links, and a deleted post now throw it
+too. A post page failing for any OTHER reason is the site failing us, so
+it stays a plain `ReleaseDownloadException` and still backs the indexer
+off.
+
+VERIFIED: the re-run logged **17 × "2 active indexers"** with three
+dead-mirror failures occurring during it, and recovered **3 of the 17**
+that both earlier passes had called unavailable — Green Lantern Annual
+#4 (2015), Superman Annual #3 (2015), Aquaman Annual #1 (2017).
+
+### v1.1.55 — an empty library root is a mount that is not ready
+
+The user's Unraid agent confirmed the root cause from boot logs, and it
+is not a misconfiguration: **T+0 array starts, T+2s rc.docker, T+9s
+containers, LATER the NFS share mounts.** Every reboot. On 2026-11-02
+all seven media containers came up with empty libraries and the host's
+watchdog repaired them in ~2 minutes.
+
+They deliberately do NOT want the container to hard-depend on the mount
+(it would trade a two-minute outage for a single point of failure), so
+my earlier suggestion of a UD mount-hook gating startup was REJECTED
+with good reason. Panelarr must tolerate a late mount.
+
+So: an empty root now waits for content — 15s, 30s, 60s — before
+abandoning a scan, roughly the host's repair window. A folder with no
+file records under it is never waited on (genuinely empty library,
+Debug). Nothing deletes on this basis, as before. And the warning is now
+**once per episode**: Warn on entry, Debug while it persists, Info on
+recovery, so an incident reads as a start and an end instead of one line
+per series per scan.
+
+### Library work done this session
+
+- All **37** unmonitored annual series monitored (not the 14 I first
+  quoted — 15 in `<Name> <Year> Annual` form plus 22 in plain
+  `<Name> Annual` form), AND all **62** issues inside them, every one of
+  which was unmonitored. The series-level change alone would have done
+  nothing.
+- GOTCHA: series `statistics.issueCount`/`issueFileCount` count only
+  MONITORED issues, so "issues 1 files 1" hid real gaps. Monitoring
+  revealed **17** annual issues with no file.
+- Those 17 were searched three times. Final honest verdict: **3
+  recovered, 14 unavailable** — three have approved releases with dead
+  mirrors, one offers only a 13-annual pack, the rest have no release.
+  All are back-catalogue (2006–2019) so nothing auto-hunts them.
+- The two checklist specials added and monitored: `DC All In 2025 FCBD
+  Special Edition` (1428), `Absolute Batman: Ark-M` (1429). Reading list
+  339 went 133 resolved/131 have → **135/133**.
+
+### Traps worth remembering
+
+- `/api/v1/parse` resolves annual titles CORRECTLY and is therefore
+  misleading — it uses the generic parser, while the download path calls
+  `MapComicRelease` (the comic parser) first and that wins.
+- A batch `IssueSearch` reports **"0 reports downloaded"** even when it
+  grabbed several; the counter is per-sub-search. Confirm batch grabs
+  from `/history`, never from the command message.
+- Check the `N active indexers` count on each search line before
+  trusting a batch result.
+- NUnit's `Assert.ThrowsAsync<T>` demands the EXACT type; use
+  `CatchAsync<T>` for a derived one.
+- `Rescan Folders` running sub-second is PRE-EXISTING and not a
+  regression — the ~1,428 "Completed scanning disk for X" lines come
+  from **Refresh Series**' per-series scans.
+
 
 ---
 
