@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -459,22 +460,52 @@ namespace NzbDrone.Core.Parser
             // Strip publisher prefix if present (e.g. "DC Comics - Batman" → "Batman")
             stripped = PublisherPrefixRegex.Replace(stripped, "");
 
+            var withQualifiers = Tidy(stripped);
+
             // Remove Annual/Special markers (keep them in IssueType, strip from title)
-            stripped = AnnualRegex.Replace(stripped, " ").Trim();
-            stripped = SpecialRegex.Replace(stripped, " ").Trim();
+            var withoutMarkers = SpecialRegex.Replace(AnnualRegex.Replace(stripped, " "), " ");
 
             // Remove bare years from the series title only if they match the extracted year
             // (e.g. "Batman 2016" -> "Batman" when year=2016, but keep "Spider-Man 2099")
-            if (parsed.Year.HasValue)
+            string StripYear(string value) => parsed.Year.HasValue
+                ? Regex.Replace(value, $@"\b{parsed.Year.Value}\b", " ")
+                : value;
+
+            // Most specific first: the full name, then each token dropped on its
+            // own, then both. Resolution walks these in order, so a series that
+            // genuinely carries the year or the word "Annual" wins over the
+            // parent series it would otherwise collapse onto.
+            parsed.SeriesTitleCandidates = new List<string>();
+
+            foreach (var candidate in new[] { withQualifiers, Tidy(StripYear(stripped)), Tidy(withoutMarkers), Tidy(StripYear(withoutMarkers)) })
             {
-                stripped = Regex.Replace(stripped, $@"\b{parsed.Year.Value}\b", " ").Trim();
+                if (candidate.IsNotNullOrWhiteSpace() && !parsed.SeriesTitleCandidates.Contains(candidate))
+                {
+                    parsed.SeriesTitleCandidates.Add(candidate);
+                }
             }
 
-            // Clean up extra spaces and trailing dashes/underscores
-            stripped = Regex.Replace(stripped, @"\s{2,}", " ").Trim();
-            stripped = stripped.TrimEnd('-', '_', ' ');
+            // SeriesTitle stays the fully stripped reading, so every existing
+            // caller keeps the behaviour it had before candidates existed.
+            var title = Tidy(StripYear(withoutMarkers));
 
-            return stripped.IsNullOrWhiteSpace() ? name : stripped;
+            if (title.IsNullOrWhiteSpace())
+            {
+                parsed.SeriesTitleCandidates = new List<string> { name };
+                return name;
+            }
+
+            return title;
+        }
+
+        private static string Tidy(string value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            return Regex.Replace(value, @"\s{2,}", " ").Trim().TrimEnd('-', '_', ' ');
         }
 
         // A release that bundles multiple issues: weekly 0-day packs, issue

@@ -267,24 +267,44 @@ namespace NzbDrone.Core.Parser
                 return null;
             }
 
+            // Most specific first, so an annual volume named for its year wins
+            // over the parent series its title would otherwise collapse onto.
+            var candidates = parsedComicInfo.SeriesTitleCandidates?.Where(x => x.IsNotNullOrWhiteSpace()).ToList();
+
+            if (candidates == null || !candidates.Any())
+            {
+                candidates = new List<string> { parsedComicInfo.SeriesTitle };
+            }
+
             if (searchCriteria != null)
             {
-                var cleanTitle = parsedComicInfo.SeriesTitle.CleanSeriesName();
-                if (searchCriteria.Series.CleanName == cleanTitle)
+                foreach (var candidate in candidates)
                 {
-                    return searchCriteria.Series;
+                    if (searchCriteria.Series.CleanName == candidate.CleanSeriesName())
+                    {
+                        return searchCriteria.Series;
+                    }
                 }
             }
 
-            var series = _seriesService.FindByName(parsedComicInfo.SeriesTitle);
-
-            if (series == null)
+            foreach (var candidate in candidates)
             {
-                _logger.Debug("Trying inexact series match for comic release: {0}", parsedComicInfo.SeriesTitle);
-                series = _seriesService.FindByNameInexact(parsedComicInfo.SeriesTitle);
+                var match = _seriesService.FindByName(candidate);
+
+                if (match != null)
+                {
+                    if (candidate != parsedComicInfo.SeriesTitle)
+                    {
+                        _logger.Debug("Comic release {0} matched series by qualified title {1}", parsedComicInfo.SeriesTitle, candidate);
+                    }
+
+                    return match;
+                }
             }
 
-            return series;
+            _logger.Debug("Trying inexact series match for comic release: {0}", parsedComicInfo.SeriesTitle);
+
+            return _seriesService.FindByNameInexact(parsedComicInfo.SeriesTitle);
         }
 
         public List<Issue> GetIssuesForComicRelease(ParsedComicInfo parsedComicInfo, Series series, SearchCriteriaBase searchCriteria = null)
