@@ -77,8 +77,16 @@ namespace NzbDrone.Core.Download.Clients.GetComics
                 var response = await _httpClient.GetAsync(request);
                 postPageHtml = response.Content;
             }
+            catch (HttpException ex) when (ex.Response?.StatusCode == HttpStatusCode.NotFound)
+            {
+                // The post is gone, which says nothing about the site
+                _logger.Warn("GetComics: Post page no longer exists: {0}", postPageUrl);
+                throw new ReleaseUnavailableException(remoteIssue.Release, "GetComics post page no longer exists", ex);
+            }
             catch (Exception ex)
             {
+                // Anything else here is the site itself failing us, so the
+                // indexer SHOULD take the blame and be backed off
                 _logger.Error(ex, "GetComics: Failed to fetch post page: {0}", postPageUrl);
                 throw new ReleaseDownloadException(remoteIssue.Release, "Failed to fetch GetComics post page", ex);
             }
@@ -89,7 +97,7 @@ namespace NzbDrone.Core.Download.Clients.GetComics
             if (!downloadLinks.Any())
             {
                 _logger.Warn("GetComics: No download links found on post page: {0}", postPageUrl);
-                throw new ReleaseDownloadException(remoteIssue.Release, "No download links found on GetComics post page");
+                throw new ReleaseUnavailableException(remoteIssue.Release, "No download links found on GetComics post page");
             }
 
             // Step 3: Try each mirror in priority order until one yields a real
@@ -159,8 +167,18 @@ namespace NzbDrone.Core.Download.Clients.GetComics
                 var hosts = attempted.Any()
                     ? string.Join(", ", attempted)
                     : string.Join(", ", downloadLinks.Select(l => l.Host.ToString()));
+
+                // One post's mirrors rotting does not make the indexer
+                // unhealthy, and saying so used to cost far more than the
+                // grab: a generic failure here recorded an INDEXER failure,
+                // which benched GetComics for the escalation's first rung -
+                // sixty seconds - and `FilterBlockedIndexers` then dropped it
+                // from every search in that window. A 17-issue batch search
+                // silently finished with one indexer instead of two, twice,
+                // and reported nothing found for issues it never properly
+                // looked for. The release is what is unavailable.
                 _logger.Warn("GetComics: All mirrors failed for '{0}'. Attempted: {1}", title, hosts);
-                throw new ReleaseDownloadException(remoteIssue.Release, $"All GetComics mirrors failed. Hosts: {hosts}");
+                throw new ReleaseUnavailableException(remoteIssue.Release, $"All GetComics mirrors failed. Hosts: {hosts}");
             }
 
             _logger.Info("GetComics: Successfully downloaded '{0}' to '{1}'", title, filePath);

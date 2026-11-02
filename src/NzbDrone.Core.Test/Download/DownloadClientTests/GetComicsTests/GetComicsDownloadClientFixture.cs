@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
@@ -276,12 +277,55 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.GetComicsTests
                 Label = "MEDIAFIRE",
             });
 
-            Assert.ThrowsAsync<ReleaseDownloadException>(
+            // Unavailable, not a failure of the indexer - a generic failure
+            // here benched GetComics and degraded later searches in the batch
+            Assert.ThrowsAsync<ReleaseUnavailableException>(
                 () => Subject.Download(CreateRemoteIssue(), CreateIndexer()));
 
             Mocker.GetMock<IHttpClient>()
                   .Verify(s => s.DownloadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never());
             ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void a_post_with_no_links_should_be_unavailable_not_an_indexer_failure()
+        {
+            GivenExtractedLinks();
+
+            Assert.ThrowsAsync<ReleaseUnavailableException>(
+                () => Subject.Download(CreateRemoteIssue(), CreateIndexer()));
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void a_deleted_post_should_be_unavailable_not_an_indexer_failure()
+        {
+            var request = new HttpRequest("https://getcomics.org/post");
+
+            Mocker.GetMock<IHttpClient>()
+                  .Setup(s => s.GetAsync(It.IsAny<HttpRequest>()))
+                  .Throws(new HttpException(request, new HttpResponse(request, new HttpHeader(), new byte[0], HttpStatusCode.NotFound)));
+
+            Assert.ThrowsAsync<ReleaseUnavailableException>(
+                () => Subject.Download(CreateRemoteIssue(), CreateIndexer()));
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void an_unreachable_site_should_still_blame_the_indexer()
+        {
+            // The site failing us IS the indexer's problem, so this one must
+            // stay a plain ReleaseDownloadException and keep backing it off
+            Mocker.GetMock<IHttpClient>()
+                  .Setup(s => s.GetAsync(It.IsAny<HttpRequest>()))
+                  .Throws(new WebException("connection refused"));
+
+            Assert.ThrowsAsync<ReleaseDownloadException>(
+                () => Subject.Download(CreateRemoteIssue(), CreateIndexer()));
+
+            ExceptionVerification.ExpectedErrors(1);
         }
 
         [Test]
