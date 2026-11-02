@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -7,19 +8,28 @@ using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Common.Extensions;
-using NzbDrone.Common.Instrumentation;
 
 namespace NzbDrone.Test.Common
 {
     public abstract class LoggingTest
     {
-        protected static readonly Logger TestLogger = NzbDroneLogger.GetLogger("TestLogger");
+        // NzbDroneLogger has no string overload, so GetLogger("TestLogger")
+        // bound to GetLogger(object) and named this logger after the argument's
+        // TYPE - every test logged as "String".
+        protected static readonly Logger TestLogger = LogManager.GetLogger("TestLogger");
 
         protected static void InitLogging()
         {
             new StartupContext();
 
-            if (LogManager.Configuration == null || LogManager.Configuration.AllTargets.None(c => c is ExceptionVerification))
+            // Asking whether the target EXISTS is not the same as asking whether
+            // anything still ROUTES to it. A configuration can be replaced by one
+            // that is merely empty - observed in Core.Test with zero targets and
+            // zero rules, where warn capture was silently dead and every
+            // ExpectedWarns/IgnoreWarns assertion in the fixture passed
+            // vacuously. Re-initialise unless a rule actually feeds the target.
+            if (LogManager.Configuration == null ||
+                LogManager.Configuration.LoggingRules.None(r => r.Targets.Any(t => t is ExceptionVerification)))
             {
                 LogManager.Configuration = new LoggingConfiguration();
 

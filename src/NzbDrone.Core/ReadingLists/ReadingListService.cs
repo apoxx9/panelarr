@@ -369,6 +369,29 @@ namespace NzbDrone.Core.ReadingLists
                 }
             }
 
+            // Tier 1b: a series the user linked to this slot by hand. Nothing
+            // read ForeignSeriesId before, so linking a slot to a provider
+            // volume and then adding that volume to the library STILL left the
+            // slot unresolved - resolution only ever matched the checklist's own
+            // spelling, which is precisely what the link exists to correct.
+            // "Absolute Batman: Ark M Special" is "Absolute Batman: Ark-M" in
+            // the library and no name tier will ever join them.
+            if (slot.ForeignSeriesId.IsNotNullOrWhiteSpace() && slot.IssueNumber.IsNotNullOrWhiteSpace())
+            {
+                var linkedSeries = _seriesService.FindById(slot.ForeignSeriesId);
+
+                if (linkedSeries != null)
+                {
+                    var linkedIssue = _issueService.GetIssuesBySeries(linkedSeries.Id)
+                        .FirstOrDefault(i => string.Equals(i.IssueNumber, slot.IssueNumber, StringComparison.OrdinalIgnoreCase));
+
+                    if (linkedIssue != null)
+                    {
+                        return linkedIssue.Id;
+                    }
+                }
+            }
+
             // Tier 2: exact series name + issue number, year-disambiguated.
             if (slot.SeriesName.IsNullOrWhiteSpace() || slot.IssueNumber.IsNullOrWhiteSpace())
             {

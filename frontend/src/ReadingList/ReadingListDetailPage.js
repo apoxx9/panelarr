@@ -45,7 +45,7 @@ class ReadingListDetailPage extends Component {
       resolveReport: null,
       ambiguousChoices: {},
       linkingName: null,
-      addMonitored: false
+      addMonitored: true
     };
   }
 
