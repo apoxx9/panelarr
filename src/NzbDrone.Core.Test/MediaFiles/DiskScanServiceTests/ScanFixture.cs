@@ -160,8 +160,8 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             Subject.Scan(new List<string> { _series.Path });
 
-            ExceptionVerification.ExpectedWarns(1);
-
+            // No file records under it, so an empty root is just an empty
+            // library - it logs at Debug and there is nothing to wait for
             Mocker.GetMock<IDiskProvider>()
                   .Verify(v => v.GetFiles(_series.Path, true), Times.Never());
 

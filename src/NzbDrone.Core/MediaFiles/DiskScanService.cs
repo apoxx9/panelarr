@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using NLog;
 using NzbDrone.Common;
 using NzbDrone.Common.Disk;
@@ -48,6 +49,20 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IRootFolderService _rootFolderService;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
+
+        // Roughly covers the host's own repair window, which restarts a
+        // container about two minutes after boot when it sees a stale mount.
+        private static readonly TimeSpan[] DefaultMountRetryBackOff =
+        {
+            TimeSpan.FromSeconds(15),
+            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(60)
+        };
+
+        private readonly HashSet<string> _foldersReportedEmpty = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // Settable so a test does not have to sit through the real thing.
+        internal IEnumerable<TimeSpan> MountRetryBackOff { get; set; } = DefaultMountRetryBackOff;
 
         public DiskScanService(IConfigService configService,
                                IDiskProvider diskProvider,
@@ -130,9 +145,8 @@ namespace NzbDrone.Core.MediaFiles
                         return;
                     }
 
-                    if (_diskProvider.FolderEmpty(rootFolder.Path))
+                    if (!WaitForRootFolderContent(rootFolder.Path))
                     {
-                        _logger.Warn("Series root folder ({0}) is empty.", rootFolder.Path);
                         var skippedSeries = _seriesService.GetSeries(seriesIds);
                         skippedSeries.ForEach(x => _eventAggregator.PublishEvent(new SeriesScanSkippedEvent(x, SeriesScanSkippedReason.RootFolderIsEmpty)));
                         return;
@@ -165,6 +179,11 @@ namespace NzbDrone.Core.MediaFiles
                 _logger.ProgressInfo("Scanning {0}", folder);
 
                 var files = FilterFiles(folder, GetComicFiles(folder));
+
+                if (!files.Any() && HasKnownFiles(folder) && WaitForRootFolderContent(folder))
+                {
+                    files = FilterFiles(folder, GetComicFiles(folder));
+                }
 
                 if (!files.Any())
                 {
@@ -335,6 +354,79 @@ namespace NzbDrone.Core.MediaFiles
         private bool HasKnownFiles(string folder)
         {
             return _mediaFileService.GetFilesWithBasePath(folder).Any();
+        }
+
+        // The library share is mounted AFTER Docker starts on this kind of
+        // host, so every reboot leaves a window - about two minutes, measured
+        // on 2026-11-02 when seven containers came up this way - where a root
+        // folder exists and is empty. "Empty" there means not mounted yet, not
+        // "the library was deleted": reading it as the latter cost ~2,490 file
+        // records during the 2026-07-08 NFS race. Nothing here deletes, but
+        // giving up until the next scheduled scan left the library unusable
+        // for a day, so wait for the mount instead. Only ever wait when the
+        // records say there SHOULD be content - a genuinely empty library must
+        // not pay this cost.
+        internal bool WaitForRootFolderContent(string folderPath)
+        {
+            if (!_diskProvider.FolderEmpty(folderPath))
+            {
+                NoteFolderPopulated(folderPath);
+                return true;
+            }
+
+            if (!HasKnownFiles(folderPath))
+            {
+                // No records under it, so it is simply an empty library and
+                // there is nothing to wait for or to be alarmed about.
+                _logger.Debug("Folder {0} is empty and holds no known files - nothing to wait for", folderPath);
+                return false;
+            }
+
+            NoteFolderEmpty(folderPath);
+
+            foreach (var delay in MountRetryBackOff)
+            {
+                Thread.Sleep(delay);
+
+                if (!_diskProvider.FolderEmpty(folderPath))
+                {
+                    NoteFolderPopulated(folderPath);
+                    return true;
+                }
+
+                _logger.Debug("Folder {0} is still empty", folderPath);
+            }
+
+            return false;
+        }
+
+        // Once per episode rather than once per scan. This used to warn on
+        // every scan of every series, which buried the single line that
+        // correlates the incident with a host reboot or a remount.
+        private void NoteFolderEmpty(string folderPath)
+        {
+            lock (_foldersReportedEmpty)
+            {
+                if (_foldersReportedEmpty.Add(folderPath))
+                {
+                    _logger.Warn("Folder {0} exists but is empty - waiting for it to be mounted. No file records will be touched.", folderPath);
+                }
+                else
+                {
+                    _logger.Debug("Folder {0} is empty again", folderPath);
+                }
+            }
+        }
+
+        private void NoteFolderPopulated(string folderPath)
+        {
+            lock (_foldersReportedEmpty)
+            {
+                if (_foldersReportedEmpty.Remove(folderPath))
+                {
+                    _logger.Info("Folder {0} has content again", folderPath);
+                }
+            }
         }
 
         private void CleanMediaFiles(string folder, List<string> mediaFileList)
